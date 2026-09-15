@@ -1,0 +1,27 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: codearena
+      POSTGRES_USER: codearena
+      POSTGRES_PASSWORD: codearena
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+  redis:
+    image: redis:7
+  web:
+    build: .
+    env_file: .env
+    ports: ["8000:8000"]
+    volumes: [".:/app"]
+    depends_on: [db, redis]
+  worker:
+    build: .
+    env_file: .env
+    command: python manage.py rqworker default
+    volumes:
+      - ".:/app"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "/var/codearena/work:/var/codearena/work"
+    depends_on: [db, redis]
+volumes:
+  pgdata:

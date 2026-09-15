@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}CodeArena{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+</head>
+<body class="bg-gray-50 text-gray-900" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+<nav class="bg-white border-b">
+  <div class="max-w-5xl mx-auto px-4 py-3 flex gap-6 items-center">
+    <a href="{% url 'problems:list' %}" class="font-bold text-lg">CodeArena</a>
+    <a href="{% url 'problems:list' %}">Masalalar</a>
+    {% if user.is_authenticated %}
+      <a href="{% url 'submissions:mine' %}">Yuborilganlar</a>
+      <span class="ml-auto">{{ user.username }}</span>
+      <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="text-sm text-gray-500">Chiqish</button></form>
+    {% else %}
+      <a class="ml-auto" href="{% url 'login' %}">Kirish</a>
+      <a href="{% url 'register' %}">Ro'yxatdan o'tish</a>
+    {% endif %}
+  </div>
+</nav>
+<main class="max-w-5xl mx-auto px-4 py-6">
+  {% for m in messages %}<div class="mb-4 p-3 rounded bg-blue-50">{{ m }}</div>{% endfor %}
+  {% block content %}{% endblock %}
+</main>
+</body>
+</html>
