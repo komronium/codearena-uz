@@ -14,9 +14,9 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django_rq",
-    "apps.accounts",
-    "apps.problems",
-    "apps.submissions",
+    "apps.accounts.apps.AccountsConfig",
+    "apps.problems.apps.ProblemsConfig",
+    "apps.submissions.apps.SubmissionsConfig",
 ]
 
 MIDDLEWARE = [
