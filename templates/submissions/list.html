@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Yuborilganlar{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-4">Yuborilganlar</h1>
+<table class="w-full bg-white rounded shadow text-sm">
+  <tr class="text-left border-b"><th class="p-2">#</th><th class="p-2">Masala</th><th class="p-2">Til</th><th class="p-2">Verdikt</th><th class="p-2">Vaqt</th></tr>
+  {% for s in subs %}
+  <tr class="border-b"><td class="p-2"><a class="text-blue-600" href="{% url 'submissions:detail' s.pk %}">{{ s.pk }}</a></td>
+    <td class="p-2">{{ s.problem.title }}</td><td class="p-2">{{ s.language.name }}</td>
+    <td class="p-2 font-mono {% if s.verdict == 'AC' %}text-green-600{% endif %}">{{ s.verdict }}</td><td class="p-2">{{ s.created|date:"d.m H:i" }}</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}

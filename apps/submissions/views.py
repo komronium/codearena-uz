@@ -1,0 +1,46 @@
+import django_rq
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseBadRequest
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_POST
+
+from apps.problems.models import Language, Problem
+from judge.runner import run_submission
+
+from .models import Submission
+
+MAX_SOURCE = 64 * 1024
+
+
+@login_required
+@require_POST
+def submit(request, slug):
+    problem = get_object_or_404(Problem, slug=slug, is_public=True)
+    language = get_object_or_404(Language, code=request.POST.get("language"), is_active=True)
+    source = request.POST.get("source", "")
+    if not source.strip() or len(source) > MAX_SOURCE:
+        return HttpResponseBadRequest("source empty or too large")
+    sub = Submission.objects.create(user=request.user, problem=problem, language=language, source=source)
+    django_rq.enqueue(run_submission, sub.pk)
+    return redirect("submissions:detail", sub.pk)
+
+
+def _own(request, pk):
+    return get_object_or_404(Submission.objects.select_related("problem", "language"), pk=pk, user=request.user)
+
+
+@login_required
+def detail(request, pk):
+    return render(request, "submissions/detail.html", {"s": _own(request, pk)})
+
+
+@login_required
+def status(request, pk):
+    s = _own(request, pk)
+    return render(request, "submissions/_status.html", {"s": s, "results": s.results.select_related("testcase")})
+
+
+@login_required
+def mine(request):
+    subs = Submission.objects.filter(user=request.user).select_related("problem", "language")[:100]
+    return render(request, "submissions/list.html", {"subs": subs})

@@ -1,0 +1,160 @@
+from unittest.mock import patch
+
+import pytest
+from django.urls import reverse
+
+from apps.accounts.models import User
+from apps.problems.models import Language, Problem, TestCase
+
+from .models import Submission, UserProblemSolved
+
+
+@pytest.fixture
+def python(db):
+    return Language.objects.create(code="python", name="Python 3", docker_image="codearena-judge-python",
+                                   run_cmd="python3 main.py", tl_multiplier=3.0)
+
+
+@pytest.fixture
+def problem(db):
+    author = User.objects.create_user("teacher", password="x")
+    p = Problem.objects.create(slug="a-plus-b", title="A + B", statement_md="x", author=author, tl_ms=1000,
+                               points=10)
+    TestCase.objects.create(problem=p, input="1 2\n", expected="3\n", is_sample=True, order=0)
+    TestCase.objects.create(problem=p, input="5 7\n", expected="12\n", order=1)
+    return p
+
+
+@pytest.fixture
+def user(db):
+    return User.objects.create_user("ali", password="x")
+
+
+def test_submit_requires_login(client, problem, python):
+    r = client.post(reverse("submissions:submit", args=[problem.slug]), {"language": "python", "source": "x"})
+    assert r.status_code == 302 and r.url.startswith(reverse("login"))
+
+
+@patch("apps.submissions.views.django_rq.enqueue")
+def test_submit_creates_pending_and_enqueues(enqueue, client, problem, python, user):
+    client.force_login(user)
+    r = client.post(reverse("submissions:submit", args=[problem.slug]),
+                    {"language": "python", "source": "print(1)"})
+    s = Submission.objects.get()
+    assert r.status_code == 302 and r.url == reverse("submissions:detail", args=[s.pk])
+    assert s.verdict == "PENDING" and s.user == user and s.total == 0
+    enqueue.assert_called_once()
+    assert enqueue.call_args.args[1] == s.pk
+
+
+def test_submit_rejects_empty_source(client, problem, python, user):
+    client.force_login(user)
+    r = client.post(reverse("submissions:submit", args=[problem.slug]), {"language": "python", "source": "  "})
+    assert r.status_code == 400 and Submission.objects.count() == 0
+
+
+def test_detail_only_owner(client, problem, python, user):
+    s = Submission.objects.create(user=user, problem=problem, language=python, source="x")
+    other = User.objects.create_user("vali", password="x")
+    client.force_login(other)
+    assert client.get(reverse("submissions:detail", args=[s.pk])).status_code == 404
+    client.force_login(user)
+    assert client.get(reverse("submissions:detail", args=[s.pk])).status_code == 200
+
+
+def test_status_partial_polls_until_terminal(client, problem, python, user):
+    s = Submission.objects.create(user=user, problem=problem, language=python, source="x")
+    client.force_login(user)
+    r = client.get(reverse("submissions:status", args=[s.pk]))
+    assert b'hx-trigger="every 1s"' in r.content
+    s.verdict = "AC"
+    s.save()
+    r = client.get(reverse("submissions:status", args=[s.pk]))
+    assert b"hx-trigger" not in r.content and b"AC" in r.content
+
+
+@patch("judge.runner.sandbox.run_test")
+@patch("judge.runner.sandbox.compile", return_value=(True, ""))
+def test_runner_ac(compile_, run_test, problem, python, user):
+    from judge.runner import run_submission
+    run_test.side_effect = [("3\n", "OK", 10), ("12\n", "OK", 12)]
+    s = Submission.objects.create(user=user, problem=problem, language=python, source="x")
+    run_submission(s.pk)
+    s.refresh_from_db()
+    assert s.verdict == "AC" and s.passed == 2 and s.total == 2 and s.exec_ms == 12
+    assert s.results.count() == 2
+
+
+@patch("judge.runner.sandbox.run_test")
+@patch("judge.runner.sandbox.compile", return_value=(True, ""))
+def test_runner_wa_stops_early(compile_, run_test, problem, python, user):
+    from judge.runner import run_submission
+    run_test.side_effect = [("4\n", "OK", 10), ("12\n", "OK", 12)]
+    s = Submission.objects.create(user=user, problem=problem, language=python, source="x")
+    run_submission(s.pk)
+    s.refresh_from_db()
+    assert s.verdict == "WA" and s.passed == 0 and s.total == 2
+    assert run_test.call_count == 1
+    assert s.results.get().verdict == "WA"
+
+
+@patch("judge.runner.sandbox.run_test")
+@patch("judge.runner.sandbox.compile", return_value=(False, "SyntaxError"))
+def test_runner_ce(compile_, run_test, problem, python, user):
+    from judge.runner import run_submission
+    s = Submission.objects.create(user=user, problem=problem, language=python, source="x")
+    run_submission(s.pk)
+    s.refresh_from_db()
+    assert s.verdict == "CE" and s.compile_log == "SyntaxError"
+    run_test.assert_not_called()
+
+
+@patch("judge.runner.sandbox.run_test", return_value=("", "TLE", 3100))
+@patch("judge.runner.sandbox.compile", return_value=(True, ""))
+def test_runner_tle(compile_, run_test, problem, python, user):
+    from judge.runner import run_submission
+    s = Submission.objects.create(user=user, problem=problem, language=python, source="x")
+    run_submission(s.pk)
+    s.refresh_from_db()
+    assert s.verdict == "TLE"
+
+
+# --- practice points: spec §2 step 5 says first AC per (user, problem) awards
+# problem.points once, via a UserProblemSolved row. Not in the original task
+# brief text; added here since judge.runner is exactly where AC is decided.
+
+@patch("judge.runner.sandbox.run_test")
+@patch("judge.runner.sandbox.compile", return_value=(True, ""))
+def test_runner_first_ac_awards_practice_points(compile_, run_test, problem, python, user):
+    from judge.runner import run_submission
+    run_test.side_effect = [("3\n", "OK", 10), ("12\n", "OK", 12)]
+    s = Submission.objects.create(user=user, problem=problem, language=python, source="x")
+    run_submission(s.pk)
+    user.refresh_from_db()
+    assert user.practice_points == problem.points
+    assert UserProblemSolved.objects.filter(user=user, problem=problem, first_ac_submission=s).exists()
+
+
+@patch("judge.runner.sandbox.run_test")
+@patch("judge.runner.sandbox.compile", return_value=(True, ""))
+def test_runner_second_ac_does_not_award_points_again(compile_, run_test, problem, python, user):
+    from judge.runner import run_submission
+    run_test.side_effect = [("3\n", "OK", 10), ("12\n", "OK", 12), ("3\n", "OK", 10), ("12\n", "OK", 12)]
+    s1 = Submission.objects.create(user=user, problem=problem, language=python, source="x")
+    run_submission(s1.pk)
+    s2 = Submission.objects.create(user=user, problem=problem, language=python, source="x")
+    run_submission(s2.pk)
+    user.refresh_from_db()
+    assert user.practice_points == problem.points
+    assert UserProblemSolved.objects.filter(user=user, problem=problem).count() == 1
+
+
+@patch("judge.runner.sandbox.run_test")
+@patch("judge.runner.sandbox.compile", return_value=(True, ""))
+def test_runner_wa_awards_no_points(compile_, run_test, problem, python, user):
+    from judge.runner import run_submission
+    run_test.side_effect = [("4\n", "OK", 10)]
+    s = Submission.objects.create(user=user, problem=problem, language=python, source="x")
+    run_submission(s.pk)
+    user.refresh_from_db()
+    assert user.practice_points == 0

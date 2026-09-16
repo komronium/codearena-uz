@@ -16,7 +16,7 @@
 
 {% if user.is_authenticated %}
 <h2 class="text-xl font-semibold mt-6 mb-2">Yechim yuborish</h2>
-<form method="post" action="/submissions/submit/{{ problem.slug }}/" id="submit-form">{% csrf_token %}
+<form method="post" action="{% url 'submissions:submit' problem.slug %}" id="submit-form">{% csrf_token %}
   <select name="language" class="border p-1 rounded mb-2">
     {% for l in languages %}<option value="{{ l.code }}">{{ l.name }}</option>{% endfor %}
   </select>
