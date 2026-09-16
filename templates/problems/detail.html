@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}{{ problem.title }}{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold">{{ problem.title }}</h1>
+<p class="text-sm text-gray-500 mb-4">TL: {{ problem.tl_ms }} ms · ML: {{ problem.ml_mb }} MB · {{ problem.points }} ball</p>
+<div class="prose max-w-none bg-white p-4 rounded shadow">{{ statement_html|safe }}</div>
+{% if problem.statement_image %}<img class="my-4 rounded" src="{{ problem.statement_image.url }}" alt="">{% endif %}
+
+<h2 class="text-xl font-semibold mt-6 mb-2">Namunalar</h2>
+{% for t in problem.samples %}
+<div class="grid grid-cols-2 gap-4 mb-3">
+  <div><div class="text-sm text-gray-500">Kirish</div><pre class="bg-gray-100 p-2 rounded">{{ t.input }}</pre></div>
+  <div><div class="text-sm text-gray-500">Chiqish</div><pre class="bg-gray-100 p-2 rounded">{{ t.expected }}</pre></div>
+</div>
+{% endfor %}
+
+{% if user.is_authenticated %}
+<h2 class="text-xl font-semibold mt-6 mb-2">Yechim yuborish</h2>
+<form method="post" action="/submissions/submit/{{ problem.slug }}/" id="submit-form">{% csrf_token %}
+  <select name="language" class="border p-1 rounded mb-2">
+    {% for l in languages %}<option value="{{ l.code }}">{{ l.name }}</option>{% endfor %}
+  </select>
+  <div id="editor" class="border rounded bg-white min-h-[300px]"></div>
+  <textarea name="source" id="source" hidden></textarea>
+  <button class="mt-3 px-4 py-2 bg-green-600 text-white rounded">Yuborish</button>
+</form>
+<script type="module">
+  import { EditorView, basicSetup } from "https://esm.sh/codemirror@6.0.1";
+  import { python } from "https://esm.sh/@codemirror/lang-python@6.1.6";
+  const view = new EditorView({ doc: "", extensions: [basicSetup, python()], parent: document.getElementById("editor") });
+  document.getElementById("submit-form").addEventListener("submit", () => {
+    document.getElementById("source").value = view.state.doc.toString();
+  });
+</script>
+{% else %}
+<p class="mt-6"><a class="text-blue-600" href="{% url 'login' %}">Kirish</a> — yechim yuborish uchun.</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Masalalar{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-4">Masalalar</h1>
+<table class="w-full bg-white rounded shadow">
+  <tr class="text-left border-b"><th class="p-2">#</th><th class="p-2">Nomi</th><th class="p-2">Qiyinlik</th><th class="p-2">Ball</th></tr>
+  {% for p in problems %}
+  <tr class="border-b"><td class="p-2">{{ p.id }}</td>
+    <td class="p-2"><a class="text-blue-600" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a></td>
+    <td class="p-2">{{ p.get_difficulty_display }}</td><td class="p-2">{{ p.points }}</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}
