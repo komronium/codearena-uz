@@ -22,7 +22,9 @@ def run_submission(submission_id: int) -> None:
     tests = list(problem.testcases.all())
     os.makedirs(settings.JUDGE_WORK_DIR, exist_ok=True)
     src_dir = tempfile.mkdtemp(prefix=f"sub{sub.pk}-", dir=settings.JUDGE_WORK_DIR)
-    os.chmod(src_dir, 0o755)
+    # 0o777: compiled languages (C++/Java) write their build output into this
+    # dir as container-user `nobody`, who needs write, not just read+exec.
+    os.chmod(src_dir, 0o777)
     try:
         source_path = os.path.join(src_dir, sandbox.SOURCE_FILENAME[lang.code])
         with open(source_path, "w") as f:
