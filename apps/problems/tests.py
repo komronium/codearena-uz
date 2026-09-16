@@ -40,3 +40,11 @@ def test_private_detail_404(client, problem):
     problem.is_public = False
     problem.save()
     assert client.get(reverse("problems:detail", kwargs={"slug": "a-plus-b"})).status_code == 404
+
+
+def test_detail_strips_script_tags_from_statement(client, problem):
+    problem.statement_md = "hi <script>alert(1)</script> there"
+    problem.save()
+    r = client.get(reverse("problems:detail", kwargs={"slug": "a-plus-b"}))
+    assert b"<script>alert(1)</script>" not in r.content
+    assert b"&lt;script&gt;alert(1)&lt;/script&gt;" in r.content

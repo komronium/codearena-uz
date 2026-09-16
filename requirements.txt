@@ -5,3 +5,4 @@ markdown>=3.7
 pytest>=8
 pytest-django>=4.9
 Pillow>=10
+bleach>=6
