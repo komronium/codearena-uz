@@ -4,4 +4,3 @@ django-rq>=3.0
 markdown>=3.7
 pytest>=8
 pytest-django>=4.9
-Pillow>=10
