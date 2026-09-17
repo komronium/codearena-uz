@@ -1,6 +1,9 @@
 import bleach
 import markdown
-from django.shortcuts import get_object_or_404, render
+from django.http import Http404
+from django.shortcuts import render
+
+from apps.contests.services import active_contest_for
 
 from .models import (
     Language,
@@ -35,7 +38,12 @@ def problem_list(request):
 
 
 def problem_detail(request, slug):
-    problem = get_object_or_404(Problem, slug=slug, is_public=True)
+    try:
+        problem = Problem.objects.get(slug=slug)
+    except Problem.DoesNotExist:
+        raise Http404
+    if not problem.is_public and active_contest_for(request.user, problem) is None:
+        raise Http404
     return render(request, "problems/detail.html", {
         "problem": problem,
         "statement_html": _render_statement(problem.statement_md),

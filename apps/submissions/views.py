@@ -1,9 +1,10 @@
 import django_rq
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseBadRequest
+from django.http import Http404, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
+from apps.contests.services import active_contest_for
 from apps.problems.models import Language, Problem
 from judge.runner import run_submission
 
@@ -15,12 +16,19 @@ MAX_SOURCE = 64 * 1024
 @login_required
 @require_POST
 def submit(request, slug):
-    problem = get_object_or_404(Problem, slug=slug, is_public=True)
+    try:
+        problem = Problem.objects.get(slug=slug)
+    except Problem.DoesNotExist:
+        raise Http404
+    contest = active_contest_for(request.user, problem)
+    if not problem.is_public and contest is None:
+        raise Http404
     language = get_object_or_404(Language, code=request.POST.get("language"), is_active=True)
     source = request.POST.get("source", "")
     if not source.strip() or len(source) > MAX_SOURCE:
         return HttpResponseBadRequest("source empty or too large")
-    sub = Submission.objects.create(user=request.user, problem=problem, language=language, source=source)
+    sub = Submission.objects.create(user=request.user, problem=problem, contest=contest,
+                                    language=language, source=source)
     django_rq.enqueue(run_submission, sub.pk)
     return redirect("submissions:detail", sub.pk)
 

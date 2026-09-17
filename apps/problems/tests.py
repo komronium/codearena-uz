@@ -1,7 +1,9 @@
 import pytest
 from django.urls import reverse
+from django.utils import timezone
 
 from apps.accounts.models import User
+from apps.contests.models import Contest, ContestProblem, Participation
 from .models import Problem, TestCase
 
 
@@ -48,3 +50,30 @@ def test_detail_strips_script_tags_from_statement(client, problem):
     r = client.get(reverse("problems:detail", kwargs={"slug": "a-plus-b"}))
     assert b"<script>alert(1)</script>" not in r.content
     assert b"&lt;script&gt;alert(1)&lt;/script&gt;" in r.content
+
+
+@pytest.fixture
+def running_contest(db, problem):
+    contest = Contest.objects.create(
+        title="Sprint", start=timezone.now() - timezone.timedelta(minutes=5),
+        end=timezone.now() + timezone.timedelta(minutes=55))
+    ContestProblem.objects.create(contest=contest, problem=problem, label="A", points=100)
+    return contest
+
+
+def test_private_contest_problem_visible_to_registered_participant(client, problem, running_contest):
+    problem.is_public = False
+    problem.save()
+    user = User.objects.create_user("ali", password="x")
+    Participation.objects.create(user=user, contest=running_contest)
+    client.force_login(user)
+    r = client.get(reverse("problems:detail", kwargs={"slug": "a-plus-b"}))
+    assert r.status_code == 200
+
+
+def test_private_contest_problem_404_for_non_participant(client, problem, running_contest):
+    problem.is_public = False
+    problem.save()
+    user = User.objects.create_user("bob", password="x")
+    client.force_login(user)
+    assert client.get(reverse("problems:detail", kwargs={"slug": "a-plus-b"})).status_code == 404

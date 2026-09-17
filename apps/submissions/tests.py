@@ -2,8 +2,10 @@ from unittest.mock import patch
 
 import pytest
 from django.urls import reverse
+from django.utils import timezone
 
 from apps.accounts.models import User
+from apps.contests.models import Contest, ContestProblem, Participation
 from apps.problems.models import Language, Problem, TestCase
 
 from .models import Submission, UserProblemSolved
@@ -45,6 +47,21 @@ def test_submit_creates_pending_and_enqueues(enqueue, client, problem, python, u
     assert s.verdict == "PENDING" and s.user == user and s.total == 0
     enqueue.assert_called_once()
     assert enqueue.call_args.args[1] == s.pk
+
+
+@patch("apps.submissions.views.django_rq.enqueue")
+def test_submit_during_running_contest_tags_submission_and_skips_points(enqueue, client, problem, python, user):
+    problem.is_public = False
+    problem.save()
+    contest = Contest.objects.create(
+        title="Sprint", start=timezone.now() - timezone.timedelta(minutes=5),
+        end=timezone.now() + timezone.timedelta(minutes=55))
+    ContestProblem.objects.create(contest=contest, problem=problem, label="A", points=100)
+    Participation.objects.create(user=user, contest=contest)
+    client.force_login(user)
+    client.post(reverse("submissions:submit", args=[problem.slug]), {"language": "python", "source": "x"})
+    s = Submission.objects.get()
+    assert s.contest == contest
 
 
 def test_submit_rejects_empty_source(client, problem, python, user):
@@ -158,3 +175,19 @@ def test_runner_wa_awards_no_points(compile_, run_test, problem, python, user):
     run_submission(s.pk)
     user.refresh_from_db()
     assert user.practice_points == 0
+
+
+@patch("judge.runner.sandbox.run_test")
+@patch("judge.runner.sandbox.compile", return_value=(True, ""))
+def test_runner_contest_ac_awards_no_practice_points(compile_, run_test, problem, python, user):
+    """spec §2 step 5: practice points are awarded on AC 'outside contest' only."""
+    from judge.runner import run_submission
+    contest = Contest.objects.create(title="Sprint", start=timezone.now(), end=timezone.now() + timezone.timedelta(hours=1))
+    run_test.side_effect = [("3\n", "OK", 10), ("12\n", "OK", 12)]
+    s = Submission.objects.create(user=user, problem=problem, contest=contest, language=python, source="x")
+    run_submission(s.pk)
+    s.refresh_from_db()
+    user.refresh_from_db()
+    assert s.verdict == "AC"
+    assert user.practice_points == 0
+    assert not UserProblemSolved.objects.filter(user=user, problem=problem).exists()
