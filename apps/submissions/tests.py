@@ -64,6 +64,22 @@ def test_submit_during_running_contest_tags_submission_and_skips_points(enqueue,
     assert s.contest == contest
 
 
+@patch("apps.submissions.views.django_rq.enqueue")
+def test_submit_rejected_when_ip_prefix_no_longer_matches(enqueue, client, problem, python, user):
+    problem.is_public = False
+    problem.save()
+    contest = Contest.objects.create(
+        title="Sprint", start=timezone.now() - timezone.timedelta(minutes=5),
+        end=timezone.now() + timezone.timedelta(minutes=55), allowed_ip_prefix="10.0.")
+    ContestProblem.objects.create(contest=contest, problem=problem, label="A", points=100)
+    Participation.objects.create(user=user, contest=contest)
+    client.force_login(user)
+    r = client.post(reverse("submissions:submit", args=[problem.slug]),
+                    {"language": "python", "source": "x"}, REMOTE_ADDR="192.168.1.1")
+    assert r.status_code == 400
+    assert Submission.objects.count() == 0
+
+
 def test_submit_rejects_empty_source(client, problem, python, user):
     client.force_login(user)
     r = client.post(reverse("submissions:submit", args=[problem.slug]), {"language": "python", "source": "  "})

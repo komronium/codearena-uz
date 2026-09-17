@@ -20,3 +20,13 @@ def active_contest_for(user, problem):
     if not Participation.objects.filter(user=user, contest=cp.contest).exists():
         return None
     return cp.contest
+
+
+def access_allowed(user, contest, remote_addr: str) -> bool:
+    """Supervised-mode gate (spec §3/§4.4): checked on register and on each
+    submit, since group membership or client IP can change mid-contest."""
+    if contest.require_group_id and not contest.require_group.members.filter(pk=user.pk).exists():
+        return False
+    if contest.allowed_ip_prefix and not (remote_addr or "").startswith(contest.allowed_ip_prefix):
+        return False
+    return True

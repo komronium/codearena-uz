@@ -4,7 +4,7 @@ from django.http import Http404, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
-from apps.contests.services import active_contest_for
+from apps.contests.services import access_allowed, active_contest_for
 from apps.problems.models import Language, Problem
 from judge.runner import run_submission
 
@@ -23,6 +23,10 @@ def submit(request, slug):
     contest = active_contest_for(request.user, problem)
     if not problem.is_public and contest is None:
         raise Http404
+    # re-check supervised-mode eligibility on every submit, not just at
+    # registration — group membership or client IP can change mid-contest.
+    if contest is not None and not access_allowed(request.user, contest, request.META.get("REMOTE_ADDR")):
+        return HttpResponseBadRequest("not eligible for this contest")
     language = get_object_or_404(Language, code=request.POST.get("language"), is_active=True)
     source = request.POST.get("source", "")
     if not source.strip() or len(source) > MAX_SOURCE:

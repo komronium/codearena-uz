@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
 from .models import Contest, Participation
+from .services import access_allowed
 from .standings import compute_standings
 
 
@@ -31,6 +32,8 @@ def register(request, pk):
     contest = get_object_or_404(Contest, pk=pk)
     if contest.has_ended:
         return HttpResponseBadRequest("contest has ended")
+    if not access_allowed(request.user, contest, request.META.get("REMOTE_ADDR")):
+        return HttpResponseBadRequest("not eligible for this contest")
     Participation.objects.get_or_create(user=request.user, contest=contest)
     return redirect("contests:detail", pk=pk)
 

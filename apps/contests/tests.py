@@ -111,6 +111,45 @@ def test_register_creates_participation(client):
 
 
 @pytest.mark.django_db
+def test_register_rejected_when_ip_prefix_does_not_match(client):
+    c = Contest.objects.create(title="Sprint", start=timezone.now() - timezone.timedelta(hours=1),
+                               end=timezone.now() + timezone.timedelta(hours=1),
+                               allowed_ip_prefix="10.0.")
+    user = User.objects.create_user("ali", password="x")
+    client.force_login(user)
+    r = client.post(reverse("contests:register", args=[c.pk]), REMOTE_ADDR="192.168.1.1")
+    assert r.status_code == 400
+    assert not Participation.objects.filter(user=user, contest=c).exists()
+
+
+@pytest.mark.django_db
+def test_register_allowed_when_ip_prefix_matches(client):
+    c = Contest.objects.create(title="Sprint", start=timezone.now() - timezone.timedelta(hours=1),
+                               end=timezone.now() + timezone.timedelta(hours=1),
+                               allowed_ip_prefix="10.0.")
+    user = User.objects.create_user("ali", password="x")
+    client.force_login(user)
+    r = client.post(reverse("contests:register", args=[c.pk]), REMOTE_ADDR="10.0.0.5")
+    assert r.status_code == 302
+    assert Participation.objects.filter(user=user, contest=c).exists()
+
+
+@pytest.mark.django_db
+def test_register_rejected_when_not_in_require_group(client):
+    from apps.accounts.models import Group
+
+    teacher = User.objects.create_user("t", password="x")
+    group = Group.objects.create(name="2-kurs", teacher=teacher)
+    c = Contest.objects.create(title="Sprint", start=timezone.now() - timezone.timedelta(hours=1),
+                               end=timezone.now() + timezone.timedelta(hours=1), require_group=group)
+    user = User.objects.create_user("ali", password="x")
+    client.force_login(user)
+    r = client.post(reverse("contests:register", args=[c.pk]))
+    assert r.status_code == 400
+    assert not Participation.objects.filter(user=user, contest=c).exists()
+
+
+@pytest.mark.django_db
 def test_register_after_end_rejected(client):
     c = Contest.objects.create(title="Sprint", start=timezone.now() - timezone.timedelta(hours=2),
                                end=timezone.now() - timezone.timedelta(hours=1))
