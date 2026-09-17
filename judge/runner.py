@@ -53,7 +53,7 @@ def run_submission(submission_id: int) -> None:
         sub.verdict, sub.passed, sub.total, sub.exec_ms = final, passed, len(tests), max_ms
         sub.save(update_fields=["verdict", "passed", "total", "exec_ms"])
 
-        if final == Submission.Verdict.AC:
+        if final == Submission.Verdict.AC and sub.contest_id is None:
             _award_points_if_first_ac(sub)
     finally:
         shutil.rmtree(src_dir, ignore_errors=True)

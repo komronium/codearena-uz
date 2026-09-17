@@ -25,5 +25,5 @@ def top(request):
 
 def profile(request, username):
     profile_user = get_object_or_404(User, username=username)
-    solved = Problem.objects.filter(userproblemsolved__user=profile_user).order_by("title")
+    solved = Problem.objects.filter(userproblemsolved__user=profile_user, is_public=True).order_by("title")
     return render(request, "accounts/profile.html", {"profile_user": profile_user, "solved": solved})

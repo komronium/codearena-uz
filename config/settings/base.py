@@ -16,6 +16,7 @@ INSTALLED_APPS = [
     "django_rq",
     "apps.accounts.apps.AccountsConfig",
     "apps.problems.apps.ProblemsConfig",
+    "apps.contests.apps.ContestsConfig",
     "apps.submissions.apps.SubmissionsConfig",
 ]
 
@@ -60,6 +61,7 @@ LOGOUT_REDIRECT_URL = "problems:list"
 
 REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
 RQ_QUEUES = {"default": {"URL": REDIS_URL, "DEFAULT_TIMEOUT": 600}}
+CACHES = {"default": {"BACKEND": "django.core.cache.backends.redis.RedisCache", "LOCATION": REDIS_URL}}
 
 # Host path shared between worker container and docker daemon; must be identical on both sides.
 JUDGE_WORK_DIR = os.environ.get("JUDGE_WORK_DIR", str(BASE_DIR / "work"))

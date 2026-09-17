@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db import models
 
+from apps.contests.models import Contest
 from apps.problems.models import Language, Problem, TestCase
 
 
@@ -19,6 +20,7 @@ class Submission(models.Model):
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="submissions")
     problem = models.ForeignKey(Problem, on_delete=models.CASCADE, related_name="submissions")
+    contest = models.ForeignKey(Contest, null=True, blank=True, on_delete=models.SET_NULL, related_name="submissions")
     language = models.ForeignKey(Language, on_delete=models.PROTECT)
     source = models.TextField()
     verdict = models.CharField(max_length=8, choices=Verdict.choices, default=Verdict.PENDING)
