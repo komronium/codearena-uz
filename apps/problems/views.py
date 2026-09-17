@@ -42,10 +42,12 @@ def problem_detail(request, slug):
         problem = Problem.objects.get(slug=slug)
     except Problem.DoesNotExist:
         raise Http404
-    if not problem.is_public and active_contest_for(request.user, problem) is None:
+    contest = active_contest_for(request.user, problem)
+    if not problem.is_public and contest is None:
         raise Http404
     return render(request, "problems/detail.html", {
         "problem": problem,
         "statement_html": _render_statement(problem.statement_md),
         "languages": Language.objects.filter(is_active=True),
+        "contest": contest,
     })

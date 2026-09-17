@@ -69,6 +69,7 @@ def test_private_contest_problem_visible_to_registered_participant(client, probl
     client.force_login(user)
     r = client.get(reverse("problems:detail", kwargs={"slug": "a-plus-b"}))
     assert r.status_code == 200
+    assert b"Kontest rejimi" in r.content
 
 
 def test_private_contest_problem_404_for_non_participant(client, problem, running_contest):

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}{{ contest.title }} — Nazorat hisoboti{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-4">{{ contest.title }} — Nazorat hisoboti</h1>
+
+<h2 class="text-xl font-semibold mb-2">Diqqat yo'qotish hodisalari</h2>
+<table class="w-full bg-white rounded shadow mb-6">
+  <tr class="text-left border-b"><th class="p-2">Foydalanuvchi</th><th class="p-2">Blur</th><th class="p-2">Focus</th><th class="p-2">Paste</th><th class="p-2">Copy</th></tr>
+  {% for user, c in counts.items %}
+  <tr class="border-b"><td class="p-2">{{ user.username }}</td><td class="p-2">{{ c.blur }}</td>
+    <td class="p-2">{{ c.focus }}</td><td class="p-2">{{ c.paste }}</td><td class="p-2">{{ c.copy }}</td></tr>
+  {% empty %}
+  <tr><td class="p-2 text-gray-500" colspan="5">Hodisa yo'q.</td></tr>
+  {% endfor %}
+</table>
+
+<h2 class="text-xl font-semibold mb-2">O'xshashlik belgilari</h2>
+<table class="w-full bg-white rounded shadow">
+  <tr class="text-left border-b"><th class="p-2">Masala</th><th class="p-2">A</th><th class="p-2">B</th><th class="p-2">Ball</th><th class="p-2">Ko'rildi</th></tr>
+  {% for f in flags %}
+  <tr class="border-b"><td class="p-2">{{ f.submission_a.problem.title }}</td>
+    <td class="p-2">{{ f.submission_a.user.username }}</td><td class="p-2">{{ f.submission_b.user.username }}</td>
+    <td class="p-2">{{ f.score|floatformat:2 }}</td><td class="p-2">{{ f.reviewed|yesno:"ha,yo'q" }}</td></tr>
+  {% empty %}
+  <tr><td class="p-2 text-gray-500" colspan="5">Belgi yo'q.</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}
