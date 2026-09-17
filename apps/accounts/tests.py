@@ -52,3 +52,13 @@ def test_profile_shows_stats_and_solved_problems(client):
 @pytest.mark.django_db
 def test_profile_404_for_unknown_username(client):
     assert client.get(reverse("profile", args=["nobody"])).status_code == 404
+
+
+@pytest.mark.django_db
+def test_rating_lists_users_by_rating_desc(client):
+    User.objects.create_user("low", password="x", rating=1400)
+    User.objects.create_user("high", password="x", rating=1800)
+    r = client.get(reverse("rating"))
+    assert r.status_code == 200
+    users = list(r.context["users"])
+    assert [u.username for u in users[:2]] == ["high", "low"]

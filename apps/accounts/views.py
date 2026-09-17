@@ -23,6 +23,12 @@ def top(request):
     return render(request, "accounts/top.html", {"users": page})
 
 
+def rating(request):
+    qs = User.objects.order_by("-rating", "username")
+    page = Paginator(qs, 50).get_page(request.GET.get("page"))
+    return render(request, "accounts/rating.html", {"users": page})
+
+
 def profile(request, username):
     profile_user = get_object_or_404(User, username=username)
     solved = Problem.objects.filter(userproblemsolved__user=profile_user, is_public=True).order_by("title")

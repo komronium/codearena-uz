@@ -13,6 +13,7 @@
     <a href="{% url 'problems:list' %}" class="font-bold text-lg">CodeArena</a>
     <a href="{% url 'problems:list' %}">Masalalar</a>
     <a href="{% url 'contests:list' %}">Kontestlar</a>
+    <a href="{% url 'rating' %}">Rating</a>
     <a href="{% url 'top' %}">Top</a>
     {% if user.is_authenticated %}
       <a href="{% url 'submissions:mine' %}">Yuborilganlar</a>

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Rating{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-4">Rating</h1>
+<table class="w-full bg-white rounded shadow">
+  <tr class="text-left border-b"><th class="p-2">#</th><th class="p-2">Foydalanuvchi</th><th class="p-2">Rating</th></tr>
+  {% for u in users %}
+  <tr class="border-b"><td class="p-2">{{ forloop.counter0|add:users.start_index }}</td>
+    <td class="p-2"><a class="text-blue-600" href="{% url 'profile' u.username %}">{{ u.username }}</a></td>
+    <td class="p-2">{{ u.rating }}</td></tr>
+  {% endfor %}
+</table>
+{% if users.has_other_pages %}
+<div class="mt-4 flex gap-4">
+  {% if users.has_previous %}<a class="text-blue-600" href="?page={{ users.previous_page_number }}">Oldingi</a>{% endif %}
+  {% if users.has_next %}<a class="text-blue-600" href="?page={{ users.next_page_number }}">Keyingi</a>{% endif %}
+</div>
+{% endif %}
+{% endblock %}
