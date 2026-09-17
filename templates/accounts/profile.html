@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}{{ profile_user.username }}{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-2">{{ profile_user.username }}</h1>
+<p class="text-gray-600 mb-4">Rating: {{ profile_user.rating }} · Amaliyot ball: {{ profile_user.practice_points }}</p>
+<h2 class="text-xl font-semibold mb-2">Yechilgan masalalar</h2>
+{% if solved %}
+<ul class="list-disc pl-5">
+  {% for p in solved %}<li><a class="text-blue-600" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a></li>{% endfor %}
+</ul>
+{% else %}
+<p class="text-gray-500">Hali yo'q.</p>
+{% endif %}
+{% endblock %}
