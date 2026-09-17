@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}{{ contest.title }}{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-2">{{ contest.title }}</h1>
+<p class="text-sm text-gray-500 mb-4">
+  {{ contest.start|date:"d.m H:i" }} — {{ contest.end|date:"d.m H:i" }} · {{ contest.get_type_display }}
+  {% if contest.is_rated %} · reytingli{% endif %}
+</p>
+
+{% if user.is_authenticated and not registered and not contest.has_ended %}
+<form method="post" action="{% url 'contests:register' contest.pk %}" class="mb-4">{% csrf_token %}
+  <button class="px-4 py-2 bg-green-600 text-white rounded">Ro'yxatdan o'tish</button>
+</form>
+{% elif registered %}
+<p class="mb-4 text-green-700">Siz ro'yxatdan o'tgansiz.</p>
+{% endif %}
+
+<h2 class="text-xl font-semibold mb-2">Masalalar</h2>
+<table class="w-full bg-white rounded shadow mb-4">
+  <tr class="text-left border-b"><th class="p-2">#</th><th class="p-2">Nomi</th><th class="p-2">Ball</th></tr>
+  {% for cp in problems %}
+  <tr class="border-b"><td class="p-2">{{ cp.label }}</td>
+    <td class="p-2">
+      {% if registered or contest.has_ended %}
+        <a class="text-blue-600" href="{% url 'problems:detail' cp.problem.slug %}">{{ cp.problem.title }}</a>
+      {% else %}
+        <span class="text-gray-400">ro'yxatdan o'tgach ko'rinadi</span>
+      {% endif %}
+    </td>
+    <td class="p-2">{{ cp.points }}</td></tr>
+  {% endfor %}
+</table>
+
+<a class="text-blue-600" href="{% url 'contests:standings' contest.pk %}">Turnir jadvali</a>
+{% endblock %}
