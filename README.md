@@ -34,6 +34,28 @@ Languages: Python 3, C++ (g++ -O2), Java, JavaScript (Node 20).
     docker compose exec web python manage.py migrate
     docker compose exec web python manage.py seed
 
+## Contests, rating, integrity
+
+Contests/problems/standings are authored via `/admin` (`Contest` inline
+`ContestProblem`). A contest's problems stay hidden (404) from everyone
+except registered participants until `end`; unregistered visitors see only
+the label + points on `/contests/<id>/`.
+
+Two commands are meant to run via cron shortly after a contest ends:
+
+    python manage.py close_ended_contests      # flips ContestProblem.problem.is_public
+    python manage.py flag_similarity <id>       # AC-pair similarity >= 0.85 -> SimilarityFlag
+    python manage.py recalc_rating <id>         # only for is_rated contests; idempotent
+
+`recalc_rating` requires `Contest.is_rated=True` and `Contest.has_ended`; it's
+a no-op if `rating_applied` is already set. Teacher-only per-contest report
+(focus events + similarity flags) is at `/integrity/contest/<id>/`
+(`is_staff` required).
+
+`Contest.require_group` / `allowed_ip_prefix` restrict who can register and
+submit ("supervised mode") — checked again on every submit, not just at
+registration.
+
 ## Tests
 
     pytest                                             # unit
