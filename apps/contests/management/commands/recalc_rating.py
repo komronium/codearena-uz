@@ -6,10 +6,10 @@ from apps.contests.standings import compute_standings
 
 
 def _expected_seed(idx, ratings):
-    """Elo-style: 1 + sum of pairwise loss probabilities against every other participant."""
+    """Elo-style expected rank: 1 + sum of P(j beats i) for every other participant."""
     r_i = ratings[idx]
     return 1 + sum(
-        1 / (1 + 10 ** ((ratings[j] - r_i) / 400))
+        1 / (1 + 10 ** ((r_i - ratings[j]) / 400))
         for j in range(len(ratings)) if j != idx
     )
 

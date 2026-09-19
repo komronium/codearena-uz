@@ -220,6 +220,52 @@ def test_recalc_rating_rejects_contest_not_ended(python):
         call_command("recalc_rating", c.pk, stdout=StringIO())
 
 
+def test_recalc_rating_favorite_win_has_small_delta(ended_rated_contest, problem_a, python):
+    """Unequal ratings: 1800 favorite finishing 1st vs 1200 underdog 2nd —
+    favorite's gain must be small (performance ≈ seed expectation)."""
+    from apps.contests.management.commands.recalc_rating import _expected_seed
+
+    favorite = User.objects.create_user("fav", password="x", rating=1800)
+    underdog = User.objects.create_user("dog", password="x", rating=1200)
+    Participation.objects.create(user=favorite, contest=ended_rated_contest)
+    Participation.objects.create(user=underdog, contest=ended_rated_contest)
+    _sub(favorite, problem_a, ended_rated_contest, python, "AC", 5)
+
+    # Seed for favorite (higher rating) must be better (lower) than underdog's.
+    ratings = [1800, 1200]
+    assert _expected_seed(0, ratings) < _expected_seed(1, ratings)
+
+    call_command("recalc_rating", ended_rated_contest.pk, stdout=StringIO())
+
+    favorite.refresh_from_db()
+    underdog.refresh_from_db()
+    assert favorite.rating > 1800
+    assert favorite.rating - 1800 < 40
+    assert underdog.rating < 1200
+
+
+def test_active_contest_for_prefers_user_participation(problem_a):
+    """Problem in two overlapping contests: only the one the user joined wins."""
+    from apps.contests.services import active_contest_for
+
+    now = timezone.now()
+    contest_a = Contest.objects.create(
+        title="A", start=now - timezone.timedelta(hours=1), end=now + timezone.timedelta(hours=1))
+    contest_b = Contest.objects.create(
+        title="B", start=now - timezone.timedelta(hours=1), end=now + timezone.timedelta(hours=1))
+    ContestProblem.objects.create(contest=contest_a, problem=problem_a, label="A", order=0)
+    ContestProblem.objects.create(contest=contest_b, problem=problem_a, label="A", order=0)
+    # Ensure A has the lower pk so a naive .first() without participation filter
+    # would pick A — the bug this test guards against.
+    assert contest_a.pk < contest_b.pk
+
+    user = User.objects.create_user("ali", password="x")
+    Participation.objects.create(user=user, contest=contest_b)
+
+    assert active_contest_for(user, problem_a) == contest_b
+
+
+
 def test_close_ended_contests_makes_problems_public(problem_a, problem_b, python):
     ended = Contest.objects.create(title="Past", start=timezone.now() - timezone.timedelta(hours=2),
                                    end=timezone.now() - timezone.timedelta(hours=1))

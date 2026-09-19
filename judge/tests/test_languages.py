@@ -30,10 +30,10 @@ LANGS = {
 
 
 def _src(lang_code: str, code: str) -> str:
-    # 0o777: compiled languages write their output (main / Main.class) into
-    # this dir as container-user `nobody`, who needs write, not just read+exec.
+    # Compiled langs need 0o777 (nobody writes build output); interpreted 0o755.
     d = tempfile.mkdtemp(dir=os.environ.get("JUDGE_WORK_DIR"))
-    os.chmod(d, 0o777)
+    lang = LANGS[lang_code]
+    os.chmod(d, 0o777 if lang.compile_cmd else 0o755)
     path = os.path.join(d, SOURCE_FILENAME[lang_code])
     with open(path, "w") as f:
         f.write(code)

@@ -1,6 +1,6 @@
 from django.utils import timezone
 
-from .models import ContestProblem, Participation
+from .models import ContestProblem
 
 
 def active_contest_for(user, problem):
@@ -11,15 +11,17 @@ def active_contest_for(user, problem):
         return None
     now = timezone.now()
     cp = (
-        ContestProblem.objects.filter(problem=problem, contest__start__lte=now, contest__end__gt=now)
+        ContestProblem.objects.filter(
+            problem=problem,
+            contest__start__lte=now,
+            contest__end__gt=now,
+            contest__participations__user=user,
+        )
         .select_related("contest")
+        .order_by("contest_id")
         .first()
     )
-    if cp is None:
-        return None
-    if not Participation.objects.filter(user=user, contest=cp.contest).exists():
-        return None
-    return cp.contest
+    return cp.contest if cp is not None else None
 
 
 def access_allowed(user, contest, remote_addr: str) -> bool:

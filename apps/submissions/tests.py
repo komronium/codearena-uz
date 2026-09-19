@@ -207,3 +207,29 @@ def test_runner_contest_ac_awards_no_practice_points(compile_, run_test, problem
     assert s.verdict == "AC"
     assert user.practice_points == 0
     assert not UserProblemSolved.objects.filter(user=user, problem=problem).exists()
+
+
+@patch("judge.runner.sandbox.run_test")
+@patch("judge.runner.sandbox.compile", return_value=(True, ""))
+def test_runner_retry_while_running_does_not_duplicate_results(compile_, run_test, problem, python, user):
+    """RQ retry of a RUNNING submission must clear prior TestResults and finish once."""
+    from apps.submissions.models import TestResult
+    from judge.runner import run_submission
+
+    s = Submission.objects.create(
+        user=user, problem=problem, language=python, source="x", verdict="RUNNING")
+    # Simulate a crashed prior attempt that left a partial result row.
+    TestResult.objects.create(
+        submission=s, testcase=problem.testcases.first(), verdict="AC", exec_ms=5)
+    run_test.side_effect = [("3\n", "OK", 10), ("12\n", "OK", 12)]
+
+    run_submission(s.pk)
+    s.refresh_from_db()
+    assert s.verdict == "AC"
+    assert s.results.count() == 2
+
+    # Terminal retry is a no-op (no duplicate rows).
+    run_submission(s.pk)
+    s.refresh_from_db()
+    assert s.verdict == "AC"
+    assert s.results.count() == 2

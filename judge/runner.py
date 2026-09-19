@@ -4,7 +4,9 @@ import tempfile
 
 from django.conf import settings
 from django.db import transaction
+from django.db.models import F
 
+from apps.accounts.models import User
 from apps.submissions.models import Submission, TestResult, UserProblemSolved
 from judge import sandbox
 from judge.compare import outputs_match
@@ -13,7 +15,9 @@ from judge.compare import outputs_match
 def run_submission(submission_id: int) -> None:
     sub = Submission.objects.select_related("problem", "language", "user").get(pk=submission_id)
     if sub.is_terminal:
-        return  # idempotent on RQ retry
+        return  # idempotent on RQ retry of terminal verdicts
+    # Restartable: clear any partial TestResults from a prior RUNNING/PENDING attempt.
+    TestResult.objects.filter(submission=sub).delete()
     sub.verdict = Submission.Verdict.RUNNING
     sub.save(update_fields=["verdict"])
 
@@ -22,9 +26,9 @@ def run_submission(submission_id: int) -> None:
     tests = list(problem.testcases.all())
     os.makedirs(settings.JUDGE_WORK_DIR, exist_ok=True)
     src_dir = tempfile.mkdtemp(prefix=f"sub{sub.pk}-", dir=settings.JUDGE_WORK_DIR)
-    # 0o777: compiled languages (C++/Java) write their build output into this
-    # dir as container-user `nobody`, who needs write, not just read+exec.
-    os.chmod(src_dir, 0o777)
+    # Interpreted langs only need read+exec (0o755). Compiled langs write build
+    # output into this dir as container-user `nobody`, so open write (0o777).
+    os.chmod(src_dir, 0o777 if lang.compile_cmd else 0o755)
     try:
         source_path = os.path.join(src_dir, sandbox.SOURCE_FILENAME[lang.code])
         with open(source_path, "w") as f:
@@ -67,6 +71,6 @@ def _award_points_if_first_ac(submission: Submission) -> None:
             defaults={"first_ac_submission": submission},
         )
         if created:
-            user = submission.user
-            user.practice_points += submission.problem.points
-            user.save(update_fields=["practice_points"])
+            User.objects.filter(pk=submission.user_id).update(
+                practice_points=F("practice_points") + submission.problem.points,
+            )
