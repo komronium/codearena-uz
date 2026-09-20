@@ -30,6 +30,28 @@ def test_list_hides_private_problem(client, problem):
     assert b"A + B" not in r.content
 
 
+def test_list_marks_solved_problem_for_logged_in_user(client, problem):
+    from apps.problems.models import Language
+    from apps.submissions.models import Submission, UserProblemSolved
+
+    user = User.objects.create_user("ali", password="x")
+    python = Language.objects.create(code="python", name="Python 3", docker_image="codearena-judge-python",
+                                      run_cmd="python3 main.py")
+    sub = Submission.objects.create(user=user, problem=problem, language=python, source="x", verdict="AC")
+    UserProblemSolved.objects.create(user=user, problem=problem, first_ac_submission=sub)
+
+    client.force_login(user)
+    r = client.get(reverse("problems:list"))
+    assert b'title="Yechilgan"' in r.content
+
+
+def test_list_does_not_mark_unsolved_problem(client, problem):
+    user = User.objects.create_user("ali", password="x")
+    client.force_login(user)
+    r = client.get(reverse("problems:list"))
+    assert b'title="Yechilgan"' not in r.content
+
+
 def test_detail_renders_markdown_and_samples_only(client, problem):
     r = client.get(reverse("problems:detail", kwargs={"slug": "a-plus-b"}))
     assert r.status_code == 200

@@ -21,7 +21,8 @@ def submit(request, slug):
     except Problem.DoesNotExist:
         raise Http404
     contest = active_contest_for(request.user, problem)
-    if not problem.is_public and contest is None:
+    is_owner_or_staff = request.user.is_staff or problem.author_id == request.user.id
+    if not problem.is_public and contest is None and not is_owner_or_staff:
         raise Http404
     # re-check supervised-mode eligibility on every submit, not just at
     # registration — group membership or client IP can change mid-contest.

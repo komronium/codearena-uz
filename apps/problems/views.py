@@ -4,6 +4,7 @@ from django.http import Http404
 from django.shortcuts import render
 
 from apps.contests.services import active_contest_for
+from apps.submissions.models import UserProblemSolved
 
 from .models import (
     Language,
@@ -34,7 +35,13 @@ def _render_statement(statement_md: str) -> str:
 
 def problem_list(request):
     problems = Problem.objects.filter(is_public=True).order_by("id")
-    return render(request, "problems/list.html", {"problems": problems})
+    solved_ids = set()
+    if request.user.is_authenticated:
+        solved_ids = set(
+            UserProblemSolved.objects.filter(user=request.user, problem__in=problems)
+            .values_list("problem_id", flat=True)
+        )
+    return render(request, "problems/list.html", {"problems": problems, "solved_ids": solved_ids})
 
 
 def problem_detail(request, slug):
@@ -43,7 +50,10 @@ def problem_detail(request, slug):
     except Problem.DoesNotExist:
         raise Http404
     contest = active_contest_for(request.user, problem)
-    if not problem.is_public and contest is None:
+    is_owner_or_staff = request.user.is_authenticated and (
+        request.user.is_staff or problem.author_id == request.user.id
+    )
+    if not problem.is_public and contest is None and not is_owner_or_staff:
         raise Http404
     return render(request, "problems/detail.html", {
         "problem": problem,

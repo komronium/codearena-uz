@@ -1,14 +1,88 @@
 {% extends "base.html" %}
 {% block title %}{{ profile_user.username }}{% endblock %}
 {% block content %}
-<h1 class="text-2xl font-bold mb-2">{{ profile_user.username }}</h1>
-<p class="text-gray-600 mb-4">Rating: {{ profile_user.rating }} · Amaliyot ball: {{ profile_user.practice_points }}</p>
-<h2 class="text-xl font-semibold mb-2">Yechilgan masalalar</h2>
-{% if solved %}
-<ul class="list-disc pl-5">
-  {% for p in solved %}<li><a class="text-blue-600" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a></li>{% endfor %}
-</ul>
-{% else %}
-<p class="text-gray-500">Hali yo'q.</p>
+<div class="mb-8">
+  <h1 class="text-2xl font-semibold tracking-tight" translate="no">{{ profile_user.username }}</h1>
+  <dl class="mt-4 flex flex-wrap gap-6">
+    <div>
+      <dt class="text-xs font-medium text-mute">Rating</dt>
+      <dd class="tabular text-xl font-semibold">{{ profile_user.rating }}</dd>
+    </div>
+    <div>
+      <dt class="text-xs font-medium text-mute">Amaliyot ball</dt>
+      <dd class="tabular text-xl font-semibold">{{ profile_user.practice_points }}</dd>
+    </div>
+    <div>
+      <dt class="text-xs font-medium text-mute">Yechilgan masalalar</dt>
+      <dd class="tabular text-xl font-semibold">{{ solved|length }}</dd>
+    </div>
+  </dl>
+</div>
+
+{% if rating_history %}
+<section class="mb-8">
+  <h2 class="mb-3 text-lg font-semibold">Rating tarixi</h2>
+  <div class="rounded-[var(--ca-radius)] border border-line bg-surface p-4">
+    <svg viewBox="0 0 {{ spark_w }} {{ spark_h }}" class="h-28 w-full text-sky-500" preserveAspectRatio="none">
+      <polyline points="{{ rating_points }}" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke" />
+    </svg>
+  </div>
+  <div class="mt-3 overflow-x-auto">
+  <table class="ca-table">
+    <thead>
+      <tr>
+        <th>Kontest</th>
+        <th class="text-right">O‘rin</th>
+        <th class="text-right">Rating</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for p in rating_history %}
+    <tr>
+      <td><a class="ca-link" href="{% url 'contests:detail' p.contest_id %}">{{ p.contest.title }}</a></td>
+      <td class="tabular text-right text-mute">{{ p.rank }}</td>
+      <td class="tabular text-right font-medium">
+        {{ p.rating_after }}
+        {% if p.delta > 0 %}
+          <span class="text-emerald-500">(+{{ p.delta }})</span>
+        {% elif p.delta < 0 %}
+          <span class="text-rose-500">({{ p.delta }})</span>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</section>
 {% endif %}
+
+<section>
+  <h2 class="mb-3 text-lg font-semibold">Yechilgan masalalar</h2>
+  {% if solved %}
+  <div class="overflow-x-auto">
+  <table class="ca-table">
+    <thead>
+      <tr>
+        <th>Nomi</th>
+        <th>Qiyinlik</th>
+        <th class="text-right">Ball</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for p in solved %}
+    <tr>
+      <td><a class="ca-link" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a></td>
+      <td class="capitalize text-mute">{{ p.get_difficulty_display }}</td>
+      <td class="tabular text-right font-medium">{{ p.points }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}
+  <div class="ca-empty">Hali yo‘q.</div>
+  {% endif %}
+</section>
 {% endblock %}

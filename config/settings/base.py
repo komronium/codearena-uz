@@ -19,6 +19,7 @@ INSTALLED_APPS = [
     "apps.contests.apps.ContestsConfig",
     "apps.submissions.apps.SubmissionsConfig",
     "apps.integrity.apps.IntegrityConfig",
+    "apps.moderation.apps.ModerationConfig",
 ]
 
 MIDDLEWARE = [

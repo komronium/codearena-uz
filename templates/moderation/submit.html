@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}Masala qo'shish{% endblock %}
+{% block content %}
+<div class="mb-6">
+  <h1 class="text-2xl font-semibold tracking-tight">Masala qo'shish</h1>
+  {% if not user.is_staff %}
+  <p class="mt-1 text-sm text-mute">Masalangiz admin tekshiruvidan o'tgach, ro'yxatda paydo bo'ladi.</p>
+  {% endif %}
+</div>
+
+<form method="post" novalidate>
+  {% csrf_token %}
+  <div class="ca-panel mb-4 space-y-4">
+    {% if form.non_field_errors %}<div class="text-sm text-bad">{{ form.non_field_errors }}</div>{% endif %}
+    <div>
+      <label class="ca-label" for="{{ form.title.id_for_label }}">Sarlavha</label>
+      {{ form.title }}
+      {{ form.title.errors }}
+    </div>
+    <div>
+      <label class="ca-label" for="{{ form.statement_md.id_for_label }}">Shart (Markdown)</label>
+      {{ form.statement_md }}
+      {{ form.statement_md.errors }}
+    </div>
+    <div class="grid gap-4 sm:grid-cols-4">
+      <div>
+        <label class="ca-label" for="{{ form.difficulty.id_for_label }}">Qiyinlik</label>
+        {{ form.difficulty }}
+      </div>
+      <div>
+        <label class="ca-label" for="{{ form.tl_ms.id_for_label }}">Time limit (ms)</label>
+        {{ form.tl_ms }}
+      </div>
+      <div>
+        <label class="ca-label" for="{{ form.ml_mb.id_for_label }}">Memory limit (MB)</label>
+        {{ form.ml_mb }}
+      </div>
+      <div>
+        <label class="ca-label" for="{{ form.points.id_for_label }}">Ball</label>
+        {{ form.points }}
+      </div>
+    </div>
+  </div>
+
+  <h2 class="mb-3 text-lg font-semibold">Test caselar</h2>
+  {{ formset.management_form }}
+  {% if formset.non_form_errors %}
+  <div class="ca-panel mb-3 border-bad text-sm text-bad">{{ formset.non_form_errors }}</div>
+  {% endif %}
+
+  <div id="testcase-forms">
+    {% for f in formset %}
+    <div class="testcase-row ca-panel mb-3">
+      {{ f.id }}
+      <div class="grid gap-3 sm:grid-cols-2">
+        <div>
+          <label class="ca-label">Input</label>
+          {{ f.input }}
+        </div>
+        <div>
+          <label class="ca-label">Kutilgan chiqish</label>
+          {{ f.expected }}
+        </div>
+      </div>
+      <div class="mt-2 flex flex-wrap items-center gap-4 text-sm">
+        <label class="flex items-center gap-1.5">{{ f.is_sample }} Sample (barchaga ko'rinadi)</label>
+        <label class="flex items-center gap-1.5">Tartib {{ f.order }}</label>
+        {% if f.instance.pk %}<label class="flex items-center gap-1.5 text-bad">{{ f.DELETE }} O'chirish</label>{% endif %}
+      </div>
+      {{ f.non_field_errors }}
+    </div>
+    {% endfor %}
+  </div>
+
+  <template id="empty-form-template">
+    <div class="testcase-row ca-panel mb-3">
+      {{ formset.empty_form.id }}
+      <div class="grid gap-3 sm:grid-cols-2">
+        <div>
+          <label class="ca-label">Input</label>
+          {{ formset.empty_form.input }}
+        </div>
+        <div>
+          <label class="ca-label">Kutilgan chiqish</label>
+          {{ formset.empty_form.expected }}
+        </div>
+      </div>
+      <div class="mt-2 flex flex-wrap items-center gap-4 text-sm">
+        <label class="flex items-center gap-1.5">{{ formset.empty_form.is_sample }} Sample (barchaga ko'rinadi)</label>
+        <label class="flex items-center gap-1.5">Tartib {{ formset.empty_form.order }}</label>
+      </div>
+    </div>
+  </template>
+
+  <div class="mb-6 mt-2">
+    <button type="button" id="add-testcase" class="ca-btn ca-btn-ghost">+ Yana test case</button>
+  </div>
+
+  <button type="submit" class="ca-btn ca-btn-primary">Yuborish</button>
+</form>
+
+<script>
+(function () {
+  const prefix = "{{ formset.prefix }}";
+  const totalForms = document.getElementById("id_" + prefix + "-TOTAL_FORMS");
+  const container = document.getElementById("testcase-forms");
+  const tpl = document.getElementById("empty-form-template");
+  document.getElementById("add-testcase").addEventListener("click", function () {
+    const idx = parseInt(totalForms.value, 10);
+    const html = tpl.innerHTML.split("__prefix__").join(idx);
+    const wrap = document.createElement("div");
+    wrap.innerHTML = html.trim();
+    container.appendChild(wrap.firstElementChild);
+    totalForms.value = idx + 1;
+  });
+})();
+</script>
+{% endblock %}

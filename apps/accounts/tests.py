@@ -55,6 +55,35 @@ def test_profile_404_for_unknown_username(client):
 
 
 @pytest.mark.django_db
+def test_profile_shows_rating_history_graph(client):
+    from django.utils import timezone
+
+    from apps.contests.models import Contest, Participation
+
+    user = User.objects.create_user("ali", password="x", rating=1550)
+    contest = Contest.objects.create(
+        title="Sprint 1", start=timezone.now() - timezone.timedelta(days=2),
+        end=timezone.now() - timezone.timedelta(days=2, hours=-2), is_rated=True)
+    Participation.objects.create(user=user, contest=contest, rank=1, rating_before=1500, rating_after=1550)
+
+    r = client.get(reverse("profile", args=["ali"]))
+    assert r.status_code == 200
+    assert len(r.context["rating_history"]) == 1
+    assert r.context["rating_points"] != ""
+    assert b"Sprint 1" in r.content
+    assert b"(+50)" in r.content
+
+
+@pytest.mark.django_db
+def test_profile_hides_rating_graph_without_rated_contests(client):
+    User.objects.create_user("ali", password="x")
+    r = client.get(reverse("profile", args=["ali"]))
+    assert r.status_code == 200
+    assert r.context["rating_history"] == []
+    assert b"Rating tarixi" not in r.content
+
+
+@pytest.mark.django_db
 def test_rating_lists_users_by_rating_desc(client):
     User.objects.create_user("low", password="x", rating=1400)
     User.objects.create_user("high", password="x", rating=1800)

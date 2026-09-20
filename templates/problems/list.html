@@ -1,13 +1,39 @@
 {% extends "base.html" %}
 {% block title %}Masalalar{% endblock %}
 {% block content %}
-<h1 class="text-2xl font-bold mb-4">Masalalar</h1>
-<table class="w-full bg-white rounded shadow">
-  <tr class="text-left border-b"><th class="p-2">#</th><th class="p-2">Nomi</th><th class="p-2">Qiyinlik</th><th class="p-2">Ball</th></tr>
+<div class="mb-6 flex flex-wrap items-end justify-between gap-3">
+  <div>
+    <h1 class="text-2xl font-semibold tracking-tight text-pretty">Masalalar</h1>
+    <p class="mt-1 text-sm text-mute">Amaliyot uchun ochiq masalalar</p>
+  </div>
+</div>
+
+{% if problems %}
+<div class="overflow-x-auto">
+<table class="ca-table">
+  <thead>
+    <tr>
+      <th class="w-10"></th>
+      <th class="w-16">#</th>
+      <th>Nomi</th>
+      <th>Qiyinlik</th>
+      <th class="text-right">Ball</th>
+    </tr>
+  </thead>
+  <tbody>
   {% for p in problems %}
-  <tr class="border-b"><td class="p-2">{{ p.id }}</td>
-    <td class="p-2"><a class="text-blue-600" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a></td>
-    <td class="p-2">{{ p.get_difficulty_display }}</td><td class="p-2">{{ p.points }}</td></tr>
+  <tr>
+    <td class="text-center">{% if p.id in solved_ids %}<span class="text-emerald-500" title="Yechilgan">✓</span>{% endif %}</td>
+    <td class="tabular text-mute">{{ p.id }}</td>
+    <td class="min-w-0 max-w-md truncate"><a class="ca-link" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a></td>
+    <td class="capitalize text-mute">{{ p.get_difficulty_display }}</td>
+    <td class="tabular text-right font-medium">{{ p.points }}</td>
+  </tr>
   {% endfor %}
+  </tbody>
 </table>
+</div>
+{% else %}
+<div class="ca-empty">Hali ochiq masala yo‘q.</div>
+{% endif %}
 {% endblock %}

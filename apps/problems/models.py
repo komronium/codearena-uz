@@ -28,6 +28,11 @@ class Problem(models.Model):
         MEDIUM = "medium"
         HARD = "hard"
 
+    class Status(models.TextChoices):
+        PENDING = "pending"    # user-submitted, awaiting staff approval — never public
+        APPROVED = "approved"  # staff-created or approved; is_public controls visibility
+        REJECTED = "rejected"  # reviewed and declined — never public
+
     slug = models.SlugField(unique=True)
     title = models.CharField(max_length=200)
     statement_md = models.TextField()
@@ -37,6 +42,7 @@ class Problem(models.Model):
     ml_mb = models.IntegerField(default=256)
     points = models.IntegerField(default=100)
     is_public = models.BooleanField(default=True)
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.APPROVED)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="authored_problems")
     tags = models.ManyToManyField(Tag, blank=True)
     created = models.DateTimeField(auto_now_add=True)

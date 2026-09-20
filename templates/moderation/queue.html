@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Moderatsiya{% endblock %}
+{% block content %}
+<div class="mb-6">
+  <h1 class="text-2xl font-semibold tracking-tight">Moderatsiya navbati</h1>
+  <p class="mt-1 text-sm text-mute">Foydalanuvchilar yuborgan, tasdiqlanishi kerak bo'lgan masalalar.</p>
+</div>
+
+{% if problems %}
+<div class="overflow-x-auto">
+<table class="ca-table">
+  <thead>
+    <tr>
+      <th>Sarlavha</th>
+      <th>Muallif</th>
+      <th>Qiyinlik</th>
+      <th>Yuborilgan</th>
+      <th class="text-right">Amal</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for p in problems %}
+  <tr>
+    <td><a class="ca-link" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a></td>
+    <td class="text-mute" translate="no">{{ p.author.username }}</td>
+    <td class="capitalize text-mute">{{ p.get_difficulty_display }}</td>
+    <td class="tabular text-mute">{{ p.created|date:"Y-m-d H:i" }}</td>
+    <td class="text-right">
+      <div class="flex justify-end gap-2">
+        <form method="post" action="{% url 'moderation:approve' p.pk %}">{% csrf_token %}
+          <button type="submit" class="ca-btn ca-btn-success text-sm">Tasdiqlash</button>
+        </form>
+        <form method="post" action="{% url 'moderation:reject' p.pk %}">{% csrf_token %}
+          <button type="submit" class="ca-btn ca-btn-ghost text-sm text-bad">Rad etish</button>
+        </form>
+      </div>
+    </td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% else %}
+<div class="ca-empty">Navbat bo'sh.</div>
+{% endif %}
+{% endblock %}

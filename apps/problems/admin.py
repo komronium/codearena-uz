@@ -10,7 +10,8 @@ class TestCaseInline(admin.TabularInline):
 
 @admin.register(Problem)
 class ProblemAdmin(admin.ModelAdmin):
-    list_display = ("title", "slug", "difficulty", "points", "is_public", "author")
+    list_display = ("title", "slug", "difficulty", "points", "is_public", "status", "author")
+    list_filter = ("status", "is_public", "difficulty")
     prepopulated_fields = {"slug": ("title",)}
     inlines = [TestCaseInline]
 
