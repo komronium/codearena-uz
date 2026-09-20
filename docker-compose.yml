@@ -1,19 +1,29 @@
 services:
+
   db:
     image: postgres:16
     environment:
       POSTGRES_DB: codearena
       POSTGRES_USER: codearena
-      POSTGRES_PASSWORD: codearena
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-codearena}
     volumes: ["pgdata:/var/lib/postgresql/data"]
+    networks:
+      - codearena-net
+
   redis:
     image: redis:7
+    networks:
+      - codearena-net
+
   web:
     build: .
     env_file: .env
     ports: ["8000:8000"]
     volumes: [".:/app"]
     depends_on: [db, redis]
+    networks:
+      - codearena-net
+
   worker:
     build: .
     env_file: .env
@@ -23,5 +33,12 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock"
       - "/var/codearena/work:/var/codearena/work"
     depends_on: [db, redis]
+    networks:
+      - codearena-net
+
 volumes:
   pgdata:
+
+networks:
+  codearena-net:
+    driver: bridge

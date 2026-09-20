@@ -25,7 +25,7 @@ with a real `compile_cmd` (C++, Java — both seeded).
 
 Languages: Python 3, C++ (g++ -O2), Java, JavaScript (Node 20).
 
-## Docker compose
+## Docker compose (dev)
 
     cp .env.example .env
     sudo mkdir -p /var/codearena/work && sudo chmod 777 /var/codearena/work
@@ -34,27 +34,50 @@ Languages: Python 3, C++ (g++ -O2), Java, JavaScript (Node 20).
     docker compose exec web python manage.py migrate
     docker compose exec web python manage.py seed
 
+## Deploy (VPS, http://SERVER_IP:2009)
+
+Ubuntu/Debian with Docker Engine + compose plugin installed. Everything runs
+inside compose: gunicorn + whitenoise (`web`), judge worker (`worker`),
+`scheduler` (rating + similarity sweeps every 5 min), Postgres, Redis.
+
+    git clone <repo> /opt/codearena && cd /opt/codearena
+    cp .env.prod.example .env
+    # edit .env: SECRET_KEY (python3 -c "import secrets;print(secrets.token_urlsafe(50))"),
+    #            ALLOWED_HOSTS=SERVER_IP, CSRF_TRUSTED_ORIGINS=http://SERVER_IP:2009, POSTGRES_PASSWORD
+    sudo mkdir -p /var/codearena/work && sudo chmod 777 /var/codearena/work
+    for l in python cpp java node; do docker build -t codearena-judge-$l judge/images/$l; done
+    docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+    docker compose exec web python manage.py seed            # languages + admin (admin/admin)
+    docker compose exec web python manage.py seed_problems --author admin
+    sudo ufw allow 2009/tcp
+
+First thing after start: log in as `admin`, open `/accounts/password_reset/`
+or Boshqaruv → Foydalanuvchilar and change the `admin` password.
+
+Update: `git pull && docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build`
+(migrate + collectstatic run on every `web` start). Logs:
+`docker compose logs -f web worker scheduler`. Backup:
+`docker compose exec db pg_dump -U codearena codearena > backup.sql`.
+
+Behind a domain + HTTPS later: put Caddy/nginx in front of :2009, set
+`USE_HTTPS=1`, `ALLOWED_HOSTS=example.com`, `CSRF_TRUSTED_ORIGINS=https://example.com`.
+
 ## Contests, rating, integrity
 
-Contests/problems/standings are authored via `/admin` (`Contest` inline
-`ContestProblem`). A contest's problems stay hidden (404) from everyone
+Contests/problems are authored in Boshqaruv (`/moderation/`, staff only). A contest's problems stay hidden (404) from everyone
 except registered participants until `end`; unregistered visitors see only
 the label + points on `/contests/<id>/`.
 
-Three commands are meant to run via cron shortly after contests end. All
-three are idempotent and, run with no `<id>`, sweep every ended contest that
-still needs the action — no scheduler process, no per-contest bookkeeping:
+Two idempotent sweeps run from the `scheduler` container (dev: run by hand
+or via cron):
 
-    python manage.py close_ended_contests            # flips ContestProblem.problem.is_public
     python manage.py flag_similarity [contest_id]    # AC-pair similarity >= 0.85 -> SimilarityFlag
     python manage.py recalc_rating [contest_id]       # is_rated contests only; no-op once applied
 
-Example crontab (every 5 minutes is enough — these are cheap, idempotent no-ops
-when nothing changed):
-
-    */5 * * * * cd /path/to/codearena && .venv/bin/python manage.py close_ended_contests >> /var/log/codearena-cron.log 2>&1
-    */5 * * * * cd /path/to/codearena && .venv/bin/python manage.py flag_similarity >> /var/log/codearena-cron.log 2>&1
-    */5 * * * * cd /path/to/codearena && .venv/bin/python manage.py recalc_rating >> /var/log/codearena-cron.log 2>&1
+Publishing contest problems (making them public + awarding practice points)
+is a manual staff action: Boshqaruv → Musobaqalar → Ochish. The old
+`close_ended_contests` command still exists but is intentionally not
+scheduled.
 
 `recalc_rating` requires `Contest.is_rated=True` and `Contest.has_ended`; it's
 a no-op if `rating_applied` is already set. Teacher-only per-contest report
