@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Mavzular — boshqaruv{% endblock %}
+{% block content %}
+<h1 class="ca-page-title mb-4">Boshqaruv</h1>
+{% include "moderation/_nav.html" %}
+
+<div class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:items-start">
+  <div class="ca-panel !p-0 overflow-x-auto">
+    <table class="ca-table">
+      <thead><tr><th>Mavzu</th><th class="text-right">Masalalar</th><th class="text-right">Amal</th></tr></thead>
+      <tbody>
+      {% for t in tags %}
+      <tr>
+        <td><a class="ca-link font-medium" href="{% url 'problems:list' %}?tag={{ t.name|urlencode }}">{{ t.name }}</a></td>
+        <td class="tabular text-right text-mute">{{ t.n }}</td>
+        <td class="text-right">
+          <form method="post" action="{% url 'moderation:tag_delete' t.pk %}" onsubmit="return confirm('«{{ t.name|escapejs }}» mavzusini o‘chirasizmi? Masalalar o‘chmaydi.');">{% csrf_token %}
+            <button class="ca-btn ca-btn-ghost !px-2 !py-1.5 text-xs text-bad" title="O'chirish"><i data-lucide="trash-2" class="lu" aria-hidden="true"></i></button>
+          </form>
+        </td>
+      </tr>
+      {% empty %}<tr><td colspan="3" class="text-center text-mute">Mavzu yo‘q.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <form method="post" class="ca-panel space-y-3">
+    {% csrf_token %}
+    <h2 class="ca-section-title !mb-0">Yangi mavzu</h2>
+    {{ form.name }}{{ form.name.errors }}
+    <button class="ca-btn ca-btn-primary w-full"><i data-lucide="plus" class="lu" aria-hidden="true"></i>Qo'shish</button>
+  </form>
+</div>
+{% endblock %}

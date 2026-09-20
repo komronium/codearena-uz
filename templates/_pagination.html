@@ -1,0 +1,7 @@
+{% if page.has_other_pages %}
+<nav class="mt-4 flex items-center gap-4 text-sm" aria-label="Sahifalar">
+  {% if page.has_previous %}<a class="ca-link" href="?{% if q %}q={{ q|urlencode }}&{% endif %}page={{ page.previous_page_number }}">← Oldingi</a>{% endif %}
+  <span class="tabular text-mute">{{ page.number }} / {{ page.paginator.num_pages }}</span>
+  {% if page.has_next %}<a class="ca-link" href="?{% if q %}q={{ q|urlencode }}&{% endif %}page={{ page.next_page_number }}">Keyingi →</a>{% endif %}
+</nav>
+{% endif %}

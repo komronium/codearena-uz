@@ -1,0 +1,6 @@
+{% load tiers %}
+<a class="ca-user" href="{% url 'profile' u.username %}" translate="no" style="--tier: {{ u.rating|tier_color }}">
+  <span class="ca-avatar h-7 w-7 text-xs">{% if u.avatar %}<img src="{{ u.avatar.url }}" alt="">{% else %}{{ u.username|first }}{% endif %}</span>
+  <span class="ca-user-name">{{ u.username }}</span>
+  {% if tier != False %}<span class="ca-user-tier">{{ u.rating|tier_name }}</span>{% endif %}
+</a>

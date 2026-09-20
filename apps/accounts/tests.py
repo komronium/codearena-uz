@@ -10,13 +10,13 @@ from .models import User
 @pytest.mark.django_db
 def test_register_creates_user_and_logs_in(client):
     r = client.post(reverse("register"), {
-        "username": "ali", "email": "ali@example.com",
+        "username": "ali", "email": "ali@example.com", "first_name": "Ali",
         "password1": "StrongPass123!", "password2": "StrongPass123!",
     })
     assert r.status_code == 302
     u = User.objects.get(username="ali")
-    assert u.rating == 1500 and u.practice_points == 0 and u.role == "student"
-    assert u.email == "ali@example.com"
+    assert u.rating == 1200 and u.practice_points == 0 and u.role == "student"
+    assert u.email == "ali@example.com" and u.first_name == "Ali"
     assert client.session["_auth_user_id"] == str(u.pk)
 
 
@@ -82,9 +82,9 @@ def test_profile_shows_rating_history_graph(client):
     r = client.get(reverse("profile", args=["ali"]))
     assert r.status_code == 200
     assert len(r.context["rating_history"]) == 1
-    assert r.context["rating_points"] != ""
+    assert r.context["rating_chart"]["points"]
     assert b"Sprint 1" in r.content
-    assert b"(+50)" in r.content
+    assert b"+50" in r.content
 
 
 @pytest.mark.django_db

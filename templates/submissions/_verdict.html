@@ -1,0 +1,17 @@
+{% if v == "AC" %}
+<span class="ca-verdict ca-verdict-ac" title="Accepted — to‘g‘ri javob"><i data-lucide="check" class="lu" aria-hidden="true"></i>AC</span>
+{% elif v == "WA" %}
+<span class="ca-verdict ca-verdict-bad" title="Wrong Answer — noto‘g‘ri javob"><i data-lucide="x" class="lu" aria-hidden="true"></i>WA</span>
+{% elif v == "TLE" %}
+<span class="ca-verdict ca-verdict-warn" title="Time Limit — vaqt chegarasi oshdi"><i data-lucide="clock" class="lu" aria-hidden="true"></i>TL</span>
+{% elif v == "MLE" %}
+<span class="ca-verdict ca-verdict-warn" title="Memory Limit — xotira chegarasi oshdi"><i data-lucide="cpu" class="lu" aria-hidden="true"></i>ML</span>
+{% elif v == "RE" %}
+<span class="ca-verdict ca-verdict-bad" title="Runtime Error — dastur xato bilan tugadi"><i data-lucide="triangle-alert" class="lu" aria-hidden="true"></i>RE</span>
+{% elif v == "CE" %}
+<span class="ca-verdict ca-verdict-mute" title="Compile Error — kompilyatsiya xatosi"><i data-lucide="code" class="lu" aria-hidden="true"></i>CE</span>
+{% elif v == "RUNNING" %}
+<span class="ca-verdict ca-verdict-pending" title="Tekshirilmoqda"><i data-lucide="loader-circle" class="lu ca-spin" aria-hidden="true"></i>Tekshirilmoqda</span>
+{% else %}
+<span class="ca-verdict ca-verdict-pending" title="Navbatda"><i data-lucide="hourglass" class="lu" aria-hidden="true"></i>Navbatda</span>
+{% endif %}

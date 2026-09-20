@@ -43,7 +43,7 @@ def test_submit_creates_pending_and_enqueues(enqueue, client, problem, python, u
     r = client.post(reverse("submissions:submit", args=[problem.slug]),
                     {"language": "python", "source": "print(1)"})
     s = Submission.objects.get()
-    assert r.status_code == 302 and r.url == reverse("submissions:detail", args=[s.pk])
+    assert r.status_code == 302 and r.url == reverse("problems:detail", args=[s.problem.slug])
     assert s.verdict == "PENDING" and s.user == user and s.total == 0
     enqueue.assert_called_once()
     assert enqueue.call_args.args[1] == s.pk
@@ -103,7 +103,7 @@ def test_status_partial_polls_until_terminal(client, problem, python, user):
     s.verdict = "AC"
     s.save()
     r = client.get(reverse("submissions:status", args=[s.pk]))
-    assert b"hx-trigger" not in r.content and b"AC" in r.content
+    assert b"hx-trigger" not in r.content and b"ca-verdict-ac" in r.content
 
 
 @patch("judge.runner.sandbox.run_test")

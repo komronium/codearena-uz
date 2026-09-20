@@ -1,0 +1,11 @@
+{% with n=request.resolver_match.url_name %}
+<nav class="ca-tabs mb-6" aria-label="Boshqaruv bo‘limlari">
+  <a href="{% url 'moderation:dashboard' %}" class="ca-tab {% if n == 'dashboard' %}is-active{% endif %}"><i data-lucide="layout-dashboard" class="lu" aria-hidden="true"></i>Umumiy</a>
+  <a href="{% url 'moderation:problems' %}" class="ca-tab {% if n in 'problems,problem_edit,submit' %}is-active{% endif %}"><i data-lucide="list-checks" class="lu" aria-hidden="true"></i>Masalalar</a>
+  <a href="{% url 'moderation:contests' %}" class="ca-tab {% if n in 'contests,contest_new,contest_edit' %}is-active{% endif %}"><i data-lucide="trophy" class="lu" aria-hidden="true"></i>Musobaqalar</a>
+  <a href="{% url 'moderation:users' %}" class="ca-tab {% if n in 'users,user_edit' %}is-active{% endif %}"><i data-lucide="users" class="lu" aria-hidden="true"></i>Foydalanuvchilar</a>
+  <a href="{% url 'moderation:groups' %}" class="ca-tab {% if n in 'groups,group_new,group_edit' %}is-active{% endif %}"><i data-lucide="users-round" class="lu" aria-hidden="true"></i>Guruhlar</a>
+  <a href="{% url 'moderation:tags' %}" class="ca-tab {% if n == 'tags' %}is-active{% endif %}"><i data-lucide="tag" class="lu" aria-hidden="true"></i>Mavzular</a>
+  <a href="{% url 'moderation:queue' %}" class="ca-tab {% if n == 'queue' %}is-active{% endif %}"><i data-lucide="shield-check" class="lu" aria-hidden="true"></i>Navbat</a>
+</nav>
+{% endwith %}

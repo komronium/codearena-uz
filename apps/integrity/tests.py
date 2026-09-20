@@ -147,3 +147,32 @@ def test_flag_similarity_skips_same_user_and_dissimilar(flag_contest, flag_probl
     call_command("flag_similarity", flag_contest.pk, stdout=StringIO())
 
     assert SimilarityFlag.objects.count() == 0
+
+
+def test_report_ranks_by_risk_and_flag_review_toggles(client, contest, user):
+    staff = User.objects.create_user("teacher", password="x", is_staff=True)
+    other = User.objects.create_user("vali", password="x")
+    for u in (user, other):
+        Participation.objects.create(user=u, contest=contest)
+    FocusEvent.objects.create(user=user, contest=contest, kind="blur")
+    for _ in range(2):
+        FocusEvent.objects.create(user=other, contest=contest, kind="paste")
+    problem = Problem.objects.create(slug="p", title="P", statement_md="x", author=staff)
+    lang = Language.objects.create(code="python", name="Python 3", docker_image="x", run_cmd="x")
+    a = Submission.objects.create(user=user, problem=problem, contest=contest, language=lang, source="x", verdict="AC")
+    b = Submission.objects.create(user=other, problem=problem, contest=contest, language=lang, source="x", verdict="AC")
+    flag = SimilarityFlag.objects.create(submission_a=a, submission_b=b, score=0.9)
+
+    client.force_login(staff)
+    html = client.get(reverse("integrity:contest_report", args=[contest.pk])).content.decode()
+    assert html.index("vali") < html.index(">ali<")  # 2 pastes (risk 10) outranks 1 blur (risk 1)
+
+    r = client.post(reverse("integrity:flag_review", args=[flag.pk]), {"note": "bir xil"})
+    assert r.status_code == 302
+    flag.refresh_from_db()
+    assert flag.reviewed is True and flag.note == "bir xil"
+
+
+def test_flag_review_requires_staff(client, contest, user):
+    client.force_login(user)
+    assert client.post(reverse("integrity:flag_run", args=[contest.pk])).status_code in (302, 403)

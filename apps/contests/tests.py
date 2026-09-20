@@ -386,6 +386,71 @@ def test_non_staff_cannot_answer_clarification(client, contest):
 
     client.force_login(asker)
     r = client.post(reverse("contests:answer_clarification", args=[contest.pk, clar.pk]), {"answer": "yes"})
-    assert r.status_code == 302  # staff_member_required redirects to admin login
+    assert r.status_code == 302  # staff_required redirects to login
     clar.refresh_from_db()
     assert clar.answer == ""
+
+
+@pytest.mark.django_db
+def test_disqualified_participant_ranks_last_and_cannot_submit(client):
+    from django.utils import timezone
+
+    from apps.accounts.models import User
+    from apps.contests.standings import compute_standings
+    from apps.problems.models import Language, Problem
+    from apps.submissions.models import Submission
+
+    staff = User.objects.create_user("teacher", password="x", is_staff=True)
+    a = User.objects.create_user("a", password="x")
+    b = User.objects.create_user("b", password="x")
+    p = Problem.objects.create(slug="p", title="P", statement_md="x", author=staff)
+    p.testcases.create(input="1\n", expected="1\n")
+    c = Contest.objects.create(title="C", start=timezone.now() - timezone.timedelta(minutes=10),
+                               end=timezone.now() + timezone.timedelta(hours=1))
+    ContestProblem.objects.create(contest=c, problem=p, label="A")
+    lang = Language.objects.create(code="python", name="Python 3", docker_image="x", run_cmd="x")
+    for u in (a, b):
+        Participation.objects.create(user=u, contest=c)
+    Submission.objects.create(user=a, problem=p, contest=c, language=lang, source="x", verdict="AC")
+
+    assert [r["user"] for r in compute_standings(c)] == [a, b]
+
+    client.force_login(staff)
+    r = client.post(reverse("contests:disqualify", args=[c.pk, a.pk]), {"reason": "paste"})
+    assert r.status_code == 302
+    rows = compute_standings(c)
+    assert [r["user"] for r in rows] == [b, a] and rows[1]["disqualified"] and rows[1]["rank"] == 2
+
+    client.force_login(a)
+    r = client.post(reverse("submissions:submit", args=["p"]), {"language": "python", "source": "print(1)"})
+    assert r.status_code == 400
+
+    client.force_login(staff)
+    client.post(reverse("contests:disqualify", args=[c.pk, a.pk]))
+    assert [r["user"] for r in compute_standings(c)] == [a, b]
+
+
+@pytest.mark.django_db
+def test_disqualify_requires_staff(client):
+    from django.utils import timezone
+
+    from apps.accounts.models import User
+
+    u = User.objects.create_user("u", password="x")
+    c = Contest.objects.create(title="C", start=timezone.now(), end=timezone.now() + timezone.timedelta(hours=1))
+    client.force_login(u)
+    assert client.post(reverse("contests:disqualify", args=[c.pk, u.pk])).status_code == 302
+
+
+def test_rating_delta_classroom_scale():
+    """15 newbies at 1200: winner +101, 8th +1, last -99; Elo part zero-sum, +1 each for taking part."""
+    from apps.contests.management.commands.recalc_rating import _expected_seed, rating_delta
+
+    ratings = [1200] * 15
+    seed = _expected_seed(0, ratings)  # 8.0 for an all-equal field
+    assert rating_delta(seed, 1, 15, 100) == 101
+    assert rating_delta(seed, 8, 15, 100) == 1
+    assert rating_delta(seed, 15, 15, 100) == -99
+    mixed = [1200, 1500, 1050, 1320, 1200]
+    deltas = [rating_delta(_expected_seed(i, mixed), i + 1, 5, 100) for i in range(5)]
+    assert abs(sum(deltas) - 5) <= 2  # zero-sum + n×bonus, up to rounding

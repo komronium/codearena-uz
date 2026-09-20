@@ -1,43 +1,33 @@
 {% extends "base.html" %}
 {% block title %}Ro'yxatdan o'tish{% endblock %}
+{% block sidebar %}{% endblock %}
 {% block content %}
-<div class="mx-auto max-w-sm">
-  <h1 class="mb-1 text-2xl font-semibold tracking-tight">Ro‘yxatdan o‘tish</h1>
-  <p class="mb-6 text-sm text-mute">Yangi hisob yarating</p>
-  <form method="post" class="ca-panel space-y-4">{% csrf_token %}
+<div class="ca-auth">
+  <a href="{% url 'problems:list' %}" class="ca-auth-brand" aria-label="CodeArena bosh sahifa">
+    <span class="ca-brand-mark"><i data-lucide="code-xml" class="lu" aria-hidden="true"></i></span>
+    <span>CodeArena</span>
+  </a>
+  <form method="post" novalidate class="ca-panel ca-auth-card space-y-3">{% csrf_token %}
+    <div>
+      <h1 class="text-xl font-bold">Ro‘yxatdan o‘tish</h1>
+      <p class="mt-1 text-sm text-mute">Bir daqiqa — va masalalar sizniki.</p>
+    </div>
     {% if form.non_field_errors %}
-    <div class="rounded-[var(--ca-radius)] border border-bad/30 bg-bad-soft px-3 py-2 text-sm text-bad" role="alert">
-      {{ form.non_field_errors }}
-    </div>
+    <div class="ca-alert ca-alert-bad" role="alert">{{ form.non_field_errors.0 }}</div>
     {% endif %}
-    <div>
-      <label class="ca-label" for="id_username">Foydalanuvchi nomi</label>
-      <input class="ca-input" type="text" name="username" id="id_username" value="{{ form.username.value|default:'' }}"
-             autocomplete="username" spellcheck="false" required autofocus>
-      {% if form.username.errors %}<p class="mt-1 text-sm text-bad">{{ form.username.errors.0 }}</p>{% endif %}
+    {% include "registration/_auth_field.html" with name="username" label="Foydalanuvchi nomi" type="text" icon="at-sign" autocomplete="username" value=form.username.value errors=form.username.errors autofocus=True %}
+    <div class="grid grid-cols-2 gap-3">
+      {% include "registration/_auth_field.html" with name="first_name" label="Ism" type="text" icon="user" autocomplete="given-name" value=form.first_name.value errors=form.first_name.errors %}
+      {% include "registration/_auth_field.html" with name="last_name" label="Familiya" type="text" icon="user" autocomplete="family-name" value=form.last_name.value errors=form.last_name.errors optional=True %}
     </div>
-    <div>
-      <label class="ca-label" for="id_email">Email</label>
-      <input class="ca-input" type="email" name="email" id="id_email" value="{{ form.email.value|default:'' }}"
-             autocomplete="email" required>
-      {% if form.email.errors %}<p class="mt-1 text-sm text-bad">{{ form.email.errors.0 }}</p>{% endif %}
-    </div>
-    <div>
-      <label class="ca-label" for="id_password1">Parol</label>
-      <input class="ca-input" type="password" name="password1" id="id_password1"
-             autocomplete="new-password" required>
-      {% if form.password1.errors %}<p class="mt-1 text-sm text-bad">{{ form.password1.errors.0 }}</p>{% endif %}
-    </div>
-    <div>
-      <label class="ca-label" for="id_password2">Parolni tasdiqlang</label>
-      <input class="ca-input" type="password" name="password2" id="id_password2"
-             autocomplete="new-password" required>
-      {% if form.password2.errors %}<p class="mt-1 text-sm text-bad">{{ form.password2.errors.0 }}</p>{% endif %}
-    </div>
-    <button type="submit" class="ca-btn ca-btn-primary w-full">Yaratish</button>
+    {% include "registration/_auth_field.html" with name="email" label="Email" type="email" icon="mail" autocomplete="email" value=form.email.value errors=form.email.errors %}
+    {% include "registration/_auth_field.html" with name="password1" label="Parol" type="password" icon="lock" autocomplete="new-password" errors=form.password1.errors hint="Kamida 8 ta belgi." %}
+    {% include "registration/_auth_field.html" with name="password2" label="Parolni takrorlang" type="password" icon="lock-keyhole" autocomplete="new-password" errors=form.password2.errors %}
+    <button type="submit" class="ca-btn ca-btn-primary w-full !py-2.5"><i data-lucide="user-plus" class="lu" aria-hidden="true"></i>Hisob yaratish</button>
   </form>
   <p class="mt-4 text-center text-sm text-mute">
-    Allaqachon hisobingiz bormi? <a class="ca-link" href="{% url 'login' %}">Kirish</a>
+    Allaqachon hisobingiz bormi? <a class="ca-link font-medium" href="{% url 'login' %}">Kirish</a>
   </p>
 </div>
+{% include "registration/_auth_script.html" %}
 {% endblock %}

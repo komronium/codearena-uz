@@ -1,35 +1,55 @@
 {% extends "base.html" %}
 {% block title %}{{ contest.title }} — Nazorat hisoboti{% endblock %}
+{% block sidebar %}{% endblock %}
 {% block content %}
-<div class="mb-6">
-  <h1 class="text-2xl font-semibold tracking-tight text-pretty">Nazorat hisoboti</h1>
-  <p class="mt-1 text-sm text-mute">{{ contest.title }}</p>
+<div class="mb-6 flex flex-wrap items-start justify-between gap-3">
+  <div>
+    <h1 class="ca-page-title">Nazorat hisoboti</h1>
+    <p class="mt-1 text-sm text-mute">#{{ contest.pk|stringformat:"03d" }} · {{ contest.title }} · {{ contest.start|date:"d.m.Y H:i" }}</p>
+  </div>
+  <div class="flex gap-2">
+    <form method="post" action="{% url 'integrity:flag_run' contest.pk %}">{% csrf_token %}
+      <button class="ca-btn ca-btn-primary !py-1.5"><i data-lucide="scan-search" class="lu" aria-hidden="true"></i>O‘xshashlikni tekshirish</button>
+    </form>
+    <a href="{% url 'contests:standings' contest.pk %}" class="ca-btn ca-btn-ghost !py-1.5"><i data-lucide="table" class="lu" aria-hidden="true"></i>Natijalar</a>
+    <a href="{% url 'moderation:contests' %}" class="ca-btn ca-btn-ghost !py-1.5">Orqaga</a>
+  </div>
 </div>
 
 <section class="mb-8">
-  <h2 class="mb-3 text-lg font-semibold">Diqqat yo‘qotish hodisalari</h2>
-  <div class="overflow-x-auto">
+  <div class="mb-3 flex flex-wrap items-end justify-between gap-2">
+    <h2 class="ca-section-title !mb-0">Xatti-harakat hodisalari</h2>
+    <p class="text-xs text-mute">Chiqish — boshqa oyna/varaqqa o‘tish · Paste — muharrirga qo‘yish urinishi · Nusxa — shart matnidan nusxa. Xavf = paste×5 + nusxa×2 + chiqish.</p>
+  </div>
+  <div class="ca-panel !p-0 overflow-x-auto">
   <table class="ca-table">
     <thead>
-      <tr>
-        <th>Foydalanuvchi</th>
-        <th class="text-right">Blur</th>
-        <th class="text-right">Focus</th>
-        <th class="text-right">Paste</th>
-        <th class="text-right">Copy</th>
-      </tr>
+      <tr><th>Ishtirokchi</th><th class="text-right">Chiqish</th><th class="text-right">Paste</th><th class="text-right">Nusxa</th><th class="text-right">Xavf</th><th class="hidden md:table-cell">Oxirgi hodisa</th><th class="text-right">Amal</th></tr>
     </thead>
     <tbody>
-    {% for user, c in counts.items %}
+    {% for user, c in rows %}
     <tr>
-      <td>{{ user.username }}</td>
-      <td class="tabular text-right">{{ c.blur }}</td>
-      <td class="tabular text-right">{{ c.focus }}</td>
-      <td class="tabular text-right">{{ c.paste }}</td>
-      <td class="tabular text-right">{{ c.copy }}</td>
+      <td>{% include "accounts/_user.html" with u=user tier=False %}</td>
+      <td class="tabular text-right {% if c.blur > 5 %}text-warn font-semibold{% endif %}">{{ c.blur }}</td>
+      <td class="tabular text-right {% if c.paste %}text-bad font-semibold{% endif %}">{{ c.paste }}</td>
+      <td class="tabular text-right {% if c.copy %}text-warn{% endif %}">{{ c.copy }}</td>
+      <td class="text-right"><span class="ca-chip {% if c.risk >= 15 %}text-bad{% elif c.risk >= 6 %}text-warn{% else %}text-mute{% endif %} tabular font-semibold">{{ c.risk }}</span></td>
+      <td class="hidden md:table-cell tabular text-xs text-mute">{{ c.last|date:"d.m H:i:s" }}</td>
+      <td class="text-right">
+        {% if c.participation %}
+        <form method="post" action="{% url 'contests:disqualify' contest.pk user.pk %}" {% if not c.participation.disqualified %}onsubmit="const s=prompt('Sabab (ixtiyoriy):',''); if(s===null) return false; this.reason.value=s;"{% endif %}>{% csrf_token %}
+          <input type="hidden" name="back" value="report"><input type="hidden" name="reason" value="">
+          {% if c.participation.disqualified %}
+          <button class="ca-btn ca-btn-ghost !py-1 text-xs"><i data-lucide="undo-2" class="lu" aria-hidden="true"></i>DQ bekor</button>
+          {% else %}
+          <button class="ca-btn ca-btn-ghost !py-1 text-xs text-bad"><i data-lucide="ban" class="lu" aria-hidden="true"></i>Diskvalifikatsiya</button>
+          {% endif %}
+        </form>
+        {% endif %}
+      </td>
     </tr>
     {% empty %}
-    <tr><td class="text-mute" colspan="5">Hodisa yo‘q.</td></tr>
+    <tr><td class="text-mute" colspan="7">Hodisa yo‘q.</td></tr>
     {% endfor %}
     </tbody>
   </table>
@@ -37,29 +57,40 @@
 </section>
 
 <section>
-  <h2 class="mb-3 text-lg font-semibold">O‘xshashlik belgilari</h2>
-  <div class="overflow-x-auto">
+  <div class="mb-3 flex flex-wrap items-end justify-between gap-2">
+    <h2 class="ca-section-title !mb-0">O‘xshash kodlar {% if open_flags %}<span class="ca-chip text-warn ml-1">{{ open_flags }} ko‘rilmagan</span>{% endif %}</h2>
+    <p class="text-xs text-mute">AC urinishlar juftligi, o‘xshashlik 0–1. Ikkala kodni ochib solishtiring, so‘ng «Ko‘rildi» deb belgilang.</p>
+  </div>
+  <div class="ca-panel !p-0 overflow-x-auto">
   <table class="ca-table">
     <thead>
-      <tr>
-        <th>Masala</th>
-        <th>A</th>
-        <th>B</th>
-        <th class="text-right">Ball</th>
-        <th>Ko‘rildi</th>
-      </tr>
+      <tr><th>Masala</th><th>A</th><th>B</th><th class="text-right">O‘xshashlik</th><th>Izoh</th><th class="text-right">Holat</th></tr>
     </thead>
     <tbody>
     {% for f in flags %}
-    <tr>
-      <td class="min-w-0 max-w-xs truncate">{{ f.submission_a.problem.title }}</td>
-      <td>{{ f.submission_a.user.username }}</td>
-      <td>{{ f.submission_b.user.username }}</td>
-      <td class="tabular text-right">{{ f.score|floatformat:2 }}</td>
-      <td>{{ f.reviewed|yesno:"ha,yo‘q" }}</td>
+    <tr class="{% if f.reviewed %}opacity-60{% endif %}">
+      <td class="min-w-0 max-w-[12rem] truncate">{{ f.submission_a.problem.title }}</td>
+      <td class="whitespace-nowrap">{% include "accounts/_user.html" with u=f.submission_a.user tier=False %} <a class="ca-link tabular text-xs" href="{% url 'submissions:detail' f.submission_a.pk %}">#{{ f.submission_a.pk|stringformat:"06d" }}</a></td>
+      <td class="whitespace-nowrap">{% include "accounts/_user.html" with u=f.submission_b.user tier=False %} <a class="ca-link tabular text-xs" href="{% url 'submissions:detail' f.submission_b.pk %}">#{{ f.submission_b.pk|stringformat:"06d" }}</a></td>
+      <td class="text-right">
+        <div class="inline-flex items-center gap-2">
+          <span class="ca-progress w-16"><span class="!bg-bad" style="width: {% widthratio f.score 1 100 %}%"></span></span>
+          <span class="tabular font-semibold text-bad">{{ f.score|floatformat:2 }}</span>
+        </div>
+      </td>
+      <td class="text-right">
+        <form method="post" action="{% url 'integrity:flag_review' f.pk %}" class="flex items-center justify-end gap-2" id="flag-{{ f.pk }}">{% csrf_token %}
+          <input name="note" value="{{ f.note }}" placeholder="izoh…" class="ca-input !py-1 w-40 text-xs" aria-label="Izoh">
+        </form>
+      </td>
+      <td class="text-right whitespace-nowrap">
+        <button form="flag-{{ f.pk }}" class="ca-btn ca-btn-ghost !py-1.5 text-xs">
+          {% if f.reviewed %}<i data-lucide="check" class="lu text-ok" aria-hidden="true"></i>Ko‘rildi{% else %}<i data-lucide="eye" class="lu text-warn" aria-hidden="true"></i>Ko‘rilmagan{% endif %}
+        </button>
+      </td>
     </tr>
     {% empty %}
-    <tr><td class="text-mute" colspan="5">Belgi yo‘q.</td></tr>
+    <tr><td class="text-mute" colspan="6">Belgi yo‘q. Musobaqa tugagach <code>flag_similarity</code> avtomatik ishlaydi.</td></tr>
     {% endfor %}
     </tbody>
   </table>

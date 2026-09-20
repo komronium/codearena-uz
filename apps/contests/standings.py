@@ -17,25 +17,44 @@ def compute_standings(contest):
     for p in participations:
         solved = penalty = score = 0
         last_ac = None
+        cells = []
         for cp in problems:
             subs = subs_by_user_problem.get((p.user_id, cp.id), [])
             ac = next((s for s in subs if s.verdict == "AC"), None)
             if ac is None:
+                wrong = sum(1 for s in subs if s.verdict != "AC")
+                cells.append({"solved": False, "wrong": wrong, "minutes": None, "ac_at": None})
                 continue
+            wrong = sum(1 for s in subs if s.created < ac.created and s.verdict != "AC")
+            seconds = int((ac.created - contest.start).total_seconds())
+            minutes = seconds // 60
+            cells.append({"solved": True, "wrong": wrong, "minutes": minutes, "ac_at": ac.created,
+                          "time": f"{minutes:02d}:{seconds % 60:02d}"})
             solved += 1
             score += cp.points
-            wrong = sum(1 for s in subs if s.created < ac.created and s.verdict != "AC")
-            minutes = int((ac.created - contest.start).total_seconds() // 60)
             penalty += minutes + 20 * wrong
             if last_ac is None or ac.created > last_ac:
                 last_ac = ac.created
+        delta = None
+        if p.rating_after is not None and p.rating_before is not None:
+            delta = p.rating_after - p.rating_before
         rows.append({"participation": p, "user": p.user, "solved": solved, "penalty": penalty,
-                     "score": score, "last_ac": last_ac})
+                     "score": score, "last_ac": last_ac, "cells": cells, "rating_delta": delta,
+                     "disqualified": p.disqualified})
 
+    # Disqualified participants always sort below everyone else: they keep their cells
+    # for the record but take the last ranks, which is what makes their rating drop.
     if contest.type == contest.Type.ICPC:
-        rows.sort(key=lambda r: (-r["solved"], r["penalty"]))
+        rows.sort(key=lambda r: (r["disqualified"], -r["solved"], r["penalty"]))
     else:
-        rows.sort(key=lambda r: (-r["score"], r["last_ac"] or contest.end))
+        rows.sort(key=lambda r: (r["disqualified"], -r["score"], r["last_ac"] or contest.end))
     for i, r in enumerate(rows, start=1):
         r["rank"] = i
+
+    for col in range(len(problems)):
+        times = [r["cells"][col]["ac_at"] for r in rows if r["cells"][col]["solved"] and not r["disqualified"]]
+        first_at = min(times) if times else None
+        for r in rows:
+            r["cells"][col]["first"] = first_at is not None and r["cells"][col]["ac_at"] == first_at
+
     return rows

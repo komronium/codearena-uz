@@ -6,13 +6,27 @@ from apps.contests.models import Contest, Participation
 from apps.contests.standings import compute_standings
 
 
+# Tuned for a classroom pool where everyone starts at 1200: winning a 15-person
+# contest ≈ +100, last place ≈ -100. Sum of expected seeds equals sum of ranks, so
+# the Elo part is zero-sum; PARTICIPATION_BONUS is the only inflation.
+K_NEW, K_ESTABLISHED = 100, 60        # first 10 rated contests vs after
+SCALE = 800                           # wider than classic Elo's 400 so gains don't stall at ~1600
+PARTICIPATION_BONUS = 1               # every finisher gets this on top: mild inflation, pool grows by n per contest
+
+
 def _expected_seed(idx, ratings):
     """Elo-style expected rank: 1 + sum of P(j beats i) for every other participant."""
     r_i = ratings[idx]
     return 1 + sum(
-        1 / (1 + 10 ** ((r_i - ratings[j]) / 400))
+        1 / (1 + 10 ** ((r_i - ratings[j]) / SCALE))
         for j in range(len(ratings)) if j != idx
     )
+
+
+def rating_delta(seed: float, rank: int, n: int, k: int) -> int:
+    """Normalised so that in an all-equal field 1st place gets +k and last gets -k,
+    whatever the contest size."""
+    return round(k * 2 * (seed - rank) / max(n - 1, 1)) + PARTICIPATION_BONUS
 
 
 class Command(BaseCommand):
@@ -58,10 +72,9 @@ class Command(BaseCommand):
         with transaction.atomic():
             for i, (row, user) in enumerate(zip(rows, users)):
                 seed = _expected_seed(i, ratings)
-                # K=40 for a user's first 10 rated contests, else 20 (spec §3).
                 past_rated = Participation.objects.filter(user=user, rating_after__isnull=False).count()
-                k = 40 if past_rated < 10 else 20
-                new_rating = round(user.rating + k * (seed - row["rank"]))
+                k = K_NEW if past_rated < 10 else K_ESTABLISHED
+                new_rating = user.rating + rating_delta(seed, row["rank"], len(rows), k)
 
                 p = row["participation"]
                 p.rank, p.score, p.penalty = row["rank"], row["score"], row["penalty"]

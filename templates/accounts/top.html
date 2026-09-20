@@ -2,34 +2,32 @@
 {% block title %}Top{% endblock %}
 {% block content %}
 <div class="mb-6">
-  <h1 class="text-2xl font-semibold tracking-tight">Top</h1>
-  <p class="mt-1 text-sm text-mute">Amaliyot ballari bo‘yicha</p>
+  <h1 class="ca-page-title">Top</h1>
+  <p class="mt-1 text-sm text-mute">{{ total }} ishtirokchi · amaliyot ballari bo‘yicha (musobaqadan tashqari yechilgan masalalar)</p>
 </div>
 
 {% if users %}
-<div class="overflow-x-auto">
+<div class="ca-panel !p-0 overflow-x-auto">
 <table class="ca-table">
   <thead>
-    <tr><th class="w-16">#</th><th>Foydalanuvchi</th><th class="text-right">Ball</th></tr>
+    <tr><th class="w-14 !text-center">#</th><th>Foydalanuvchi</th><th class="hidden md:table-cell">O‘quv joyi</th><th class="text-right">Yechilgan</th><th class="text-right">Ball</th></tr>
   </thead>
   <tbody>
   {% for u in users %}
-  <tr>
-    <td class="tabular text-mute">{{ forloop.counter0|add:users.start_index }}</td>
-    <td><a class="ca-link" href="{% url 'profile' u.username %}">{{ u.username }}</a></td>
-    <td class="tabular text-right font-medium">{{ u.practice_points }}</td>
+  <tr {% if u == user %}class="ca-row-me"{% endif %}>
+    {% with rank=forloop.counter0|add:users.start_index %}
+    <td class="text-center">{% if rank <= 3 %}<span class="ca-rank ca-rank-{{ rank }}">{{ rank }}</span>{% else %}<span class="ca-rank ca-rank-n">{{ rank }}</span>{% endif %}</td>
+    {% endwith %}
+    <td>{% include "accounts/_user.html" with tier=False %}</td>
+    <td class="hidden md:table-cell text-sm text-mute">{{ u.school|default:"—" }}</td>
+    <td class="tabular text-right text-mute">{{ u.solved_count }}</td>
+    <td class="tabular text-right text-base font-bold">{{ u.practice_points }}</td>
   </tr>
   {% endfor %}
   </tbody>
 </table>
 </div>
-{% if users.has_other_pages %}
-<nav class="mt-4 flex items-center gap-4 text-sm" aria-label="Sahifalar">
-  {% if users.has_previous %}<a class="ca-link" href="?page={{ users.previous_page_number }}">← Oldingi</a>{% endif %}
-  <span class="tabular text-mute">{{ users.number }} / {{ users.paginator.num_pages }}</span>
-  {% if users.has_next %}<a class="ca-link" href="?page={{ users.next_page_number }}">Keyingi →</a>{% endif %}
-</nav>
-{% endif %}
+{% include "accounts/_leaderboard_nav.html" %}
 {% else %}
 <div class="ca-empty">Hali reyting yo‘q.</div>
 {% endif %}

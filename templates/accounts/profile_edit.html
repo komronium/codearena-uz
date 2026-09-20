@@ -1,0 +1,62 @@
+{% extends "base.html" %}{% load tiers %}
+{% block title %}Profilni tahrirlash{% endblock %}
+{% block sidebar %}{% endblock %}
+{% block content %}
+<div class="mx-auto max-w-lg">
+  <a class="ca-link mb-2 inline-block text-sm text-mute" href="{% url 'profile' user.username %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>Profil</a>
+  <h1 class="ca-page-title mb-6">Profilni tahrirlash</h1>
+  <form method="post" enctype="multipart/form-data" class="ca-panel !p-0 overflow-hidden">{% csrf_token %}
+    <div class="flex items-center gap-5 border-b border-line px-6 py-5">
+      <div class="relative shrink-0">
+        {% if user.avatar %}
+        <img id="avatar-preview" src="{{ user.avatar.url }}" alt="" class="h-20 w-20 rounded-full object-cover">
+        {% else %}
+        <div class="ca-avatar h-20 w-20 text-3xl" style="--tier: {{ user.rating|tier_color }}; background: color-mix(in srgb, var(--tier) 14%, transparent); color: var(--tier)"><span id="avatar-letter">{{ user.username|first }}</span><img id="avatar-preview" src="" alt="" class="hidden h-20 w-20 rounded-full object-cover"></div>
+        {% endif %}
+      </div>
+      <div class="min-w-0">
+        <p class="truncate text-lg font-bold" translate="no" style="color: {{ user.rating|tier_color }}">{{ user.username }}</p>
+        <p class="text-sm text-mute">{{ user.rating|tier_name }} · {{ user.rating }}</p>
+        <label class="ca-btn ca-btn-ghost mt-2 cursor-pointer !py-1.5 text-sm" for="id_avatar"><i data-lucide="camera" class="lu" aria-hidden="true"></i>Rasm tanlash</label>
+        <input class="sr-only" type="file" name="avatar" id="id_avatar" accept="image/*">
+        <p class="mt-1 text-xs text-mute">PNG yoki JPG, kvadrat rasm yaxshi ko‘rinadi.</p>
+        {% if form.avatar.errors %}<p class="mt-1 text-sm text-bad">{{ form.avatar.errors.0 }}</p>{% endif %}
+      </div>
+    </div>
+    <div class="space-y-4 px-6 py-5">
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="ca-label" for="id_first_name">Ism</label>
+          <input class="ca-input" type="text" name="first_name" id="id_first_name" value="{{ form.first_name.value|default:'' }}" autocomplete="given-name" maxlength="150">
+          {% if form.first_name.errors %}<p class="mt-1 text-sm text-bad">{{ form.first_name.errors.0 }}</p>{% endif %}
+        </div>
+        <div>
+          <label class="ca-label" for="id_last_name">Familiya</label>
+          <input class="ca-input" type="text" name="last_name" id="id_last_name" value="{{ form.last_name.value|default:'' }}" autocomplete="family-name" maxlength="150">
+        </div>
+      </div>
+      <div>
+        <label class="ca-label" for="id_location">Shahar</label>
+        <input class="ca-input" type="text" name="location" id="id_location" value="{{ form.location.value|default:'' }}" placeholder="Toshkent" autocomplete="address-level2">
+      </div>
+      <div>
+        <label class="ca-label" for="id_school">O‘quv joyi</label>
+        <input class="ca-input" type="text" name="school" id="id_school" value="{{ form.school.value|default:'' }}" placeholder="TATU, 1-kurs" autocomplete="organization">
+      </div>
+    </div>
+    <div class="flex items-center justify-between gap-3 border-t border-line bg-paper/60 px-6 py-4">
+      <a class="ca-link text-sm text-mute" href="{% url 'password_reset' %}"><i data-lucide="key-round" class="lu mr-1" aria-hidden="true"></i>Parolni almashtirish</a>
+      <button type="submit" class="ca-btn ca-btn-primary"><i data-lucide="check" class="lu" aria-hidden="true"></i>Saqlash</button>
+    </div>
+  </form>
+</div>
+<script>
+  document.getElementById("id_avatar").addEventListener("change", (e) => {
+    const f = e.target.files[0]; if (!f) return;
+    const img = document.getElementById("avatar-preview");
+    img.src = URL.createObjectURL(f);
+    img.classList.remove("hidden");
+    const letter = document.getElementById("avatar-letter"); if (letter) letter.hidden = true;
+  });
+</script>
+{% endblock %}

@@ -1,35 +1,42 @@
 {% extends "base.html" %}
-{% block title %}Kontestlar{% endblock %}
+{% block title %}Musobaqalar{% endblock %}
 {% block content %}
-<div class="mb-6">
-  <h1 class="text-2xl font-semibold tracking-tight">Kontestlar</h1>
-  <p class="mt-1 text-sm text-mute">Yaqin va o‘tgan musobaqalar</p>
+<div class="mb-6 flex flex-wrap items-end justify-between gap-3">
+  <div>
+    <h1 class="ca-page-title">Musobaqalar</h1>
+    <p class="mt-1 text-sm text-mute">Yaqin va o‘tgan musobaqalar</p>
+  </div>
+  <p class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-mute">
+    <span>{% include "contests/_type.html" with c=icpc_sample %} ko‘proq masala yechgan yutadi</span>
+    <span>{% include "contests/_type.html" with c=score_sample %} ballar yig‘indisi ko‘p bo‘lgan yutadi</span>
+  </p>
 </div>
 
-{% if contests %}
-<div class="overflow-x-auto">
-<table class="ca-table">
-  <thead>
-    <tr>
-      <th>Nomi</th>
-      <th>Boshlanishi</th>
-      <th>Tugashi</th>
-      <th>Turi</th>
-    </tr>
-  </thead>
-  <tbody>
-  {% for c in contests %}
-  <tr>
-    <td class="min-w-0 max-w-sm truncate"><a class="ca-link" href="{% url 'contests:detail' c.pk %}">{{ c.title }}</a></td>
-    <td class="tabular text-mute">{{ c.start|date:"d.m H:i" }}</td>
-    <td class="tabular text-mute">{{ c.end|date:"d.m H:i" }}</td>
-    <td class="text-mute">{{ c.get_type_display }}</td>
-  </tr>
-  {% endfor %}
-  </tbody>
-</table>
-</div>
-{% else %}
-<div class="ca-empty">Hali kontest yo‘q.</div>
+{% if not running and not upcoming and not ended %}
+<div class="ca-empty">Hali musobaqa yo‘q.</div>
 {% endif %}
+
+{% for section in sections %}{% if section.items %}
+<div class="mb-8">
+  <h2 class="ca-section-title flex items-center gap-2">
+    <span class="inline-block h-2 w-2 rounded-full {{ section.dot }}"></span>
+    {{ section.title }}
+    <span class="ca-rank-n text-xs font-normal">{{ section.items|length }}</span>
+  </h2>
+  <div class="ca-panel !p-0 overflow-x-auto">
+  <table class="ca-table">
+    <thead><tr>
+      <th>Nomi</th>
+      <th class="hidden w-44 md:table-cell">Format</th>
+      <th class="w-36">Boshlanishi</th>
+      <th class="hidden w-28 sm:table-cell">Davomiyligi</th>
+      <th class="w-36 text-right">{{ section.last_col }}</th>
+    </tr></thead>
+    <tbody>
+    {% for c in section.items %}{% include "contests/_row.html" with state=section.key %}{% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% endif %}{% endfor %}
 {% endblock %}

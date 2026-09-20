@@ -1,39 +1,43 @@
 <div {% if not s.is_terminal %}hx-get="{% url 'submissions:status' s.pk %}" hx-trigger="every 1s" hx-swap="outerHTML"{% endif %}
      role="status" aria-live="polite" aria-busy="{% if not s.is_terminal %}true{% else %}false{% endif %}">
   <div class="flex flex-wrap items-center gap-3">
-    {% if s.verdict == 'AC' %}
-      <span class="ca-verdict ca-verdict-ac">AC</span>
-    {% elif s.is_terminal %}
-      <span class="ca-verdict ca-verdict-bad">{{ s.verdict }}</span>
-    {% else %}
-      <span class="ca-verdict ca-verdict-pending is-live">{% if s.verdict == 'RUNNING' %}Tekshirilmoqda…{% else %}Navbatda…{% endif %}</span>
-    {% endif %}
+    {% include "submissions/_verdict.html" with v=s.verdict %}
     {% if s.is_terminal and s.verdict != 'CE' %}
-    <span class="tabular text-sm text-mute">{{ s.passed }}/{{ s.total }} · {{ s.exec_ms }} ms</span>
+    <span class="tabular text-sm text-mute">{{ s.passed }}/{{ s.total }} test · {{ s.exec_ms }} ms</span>
+    {% elif s.verdict == 'RUNNING' %}
+    <span class="tabular text-sm text-mute">{{ progress.done }}/{{ progress.total }} test</span>
     {% endif %}
   </div>
+  {% if s.verdict == 'RUNNING' %}
+  <div class="ca-progress mt-3 w-full max-w-sm" aria-hidden="true"><span style="width: {{ progress.pct }}%"></span></div>
+  {% endif %}
   {% if s.verdict == 'CE' %}
   <pre class="mt-3 overflow-x-auto rounded-[var(--ca-radius)] border border-bad/30 bg-bad-soft p-3 text-sm font-mono text-bad">{{ s.compile_log }}</pre>
   {% endif %}
-  {% if results %}
-  <div class="mt-4 overflow-x-auto">
-  <table class="ca-table text-sm">
-    <thead>
-      <tr><th>Test</th><th>Verdikt</th><th class="text-right">Vaqt</th></tr>
-    </thead>
-    <tbody>
+  {% if results and s.is_terminal %}
+  {# one square per test — 200 tests still fit on a screen; the first failure gets its details below #}
+  <div class="mt-4 flex flex-wrap gap-1" aria-label="Testlar">
     {% for r in results %}
-    <tr>
-      <td class="tabular text-mute">{{ forloop.counter }}</td>
-      <td class="font-mono">
-        {% if r.verdict == 'AC' %}<span class="ca-verdict ca-verdict-ac">AC</span>
-        {% else %}<span class="ca-verdict ca-verdict-bad">{{ r.verdict }}</span>{% endif %}
-      </td>
-      <td class="tabular text-right text-mute">{{ r.exec_ms }} ms</td>
-    </tr>
+    <span class="ca-test ca-test-{{ r.verdict }}" title="Test {{ forloop.counter }}: {{ r.verdict }} · {{ r.exec_ms }} ms">{{ forloop.counter }}</span>
     {% endfor %}
-    </tbody>
-  </table>
   </div>
+  {% if first_fail %}
+  <div class="mt-4 rounded-[var(--ca-radius)] border border-line bg-paper/60 p-3 text-sm">
+    <div class="mb-2 flex items-center gap-2">
+      <span class="font-semibold">Test {{ first_fail.index }}</span>
+      {% include "submissions/_verdict.html" with v=first_fail.verdict %}
+      <span class="tabular text-xs text-mute">{{ first_fail.exec_ms }} ms</span>
+    </div>
+    {% if first_fail.testcase.is_sample %}
+    <div class="grid gap-2 sm:grid-cols-3">
+      <div><p class="mb-1 text-xs font-medium text-mute">Kirish</p><pre class="ca-pre !py-2 text-xs">{{ first_fail.testcase.input }}</pre></div>
+      <div><p class="mb-1 text-xs font-medium text-mute">Kutilgan</p><pre class="ca-pre !py-2 text-xs">{{ first_fail.testcase.expected }}</pre></div>
+      <div><p class="mb-1 text-xs font-medium text-mute">Sizning chiqishingiz</p><pre class="ca-pre !py-2 text-xs">{{ first_fail.stdout_excerpt|default:"—" }}</pre></div>
+    </div>
+    {% else %}
+    <p class="text-xs text-mute">Yashirin test — kirish ma'lumotlari ko‘rsatilmaydi.</p>
+    {% endif %}
+  </div>
+  {% endif %}
   {% endif %}
 </div>

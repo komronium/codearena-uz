@@ -3,22 +3,44 @@
 {% block content %}
 <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
   <div>
-    <h1 class="text-2xl font-semibold tracking-tight text-pretty">Masalalar</h1>
-    <p class="mt-1 text-sm text-mute">Amaliyot uchun ochiq masalalar</p>
+    <h1 class="ca-page-title">Masalalar</h1>
+    <p class="mt-1 text-sm text-mute">{{ problems.paginator.count }} ta ochiq masala — yeching, ball to'plang</p>
   </div>
+  {% if user.is_staff %}
+  <a href="{% url 'moderation:submit' %}" class="ca-btn ca-btn-primary">
+    <i data-lucide="circle-plus" class="lu" aria-hidden="true"></i>
+    Masala qo'shish
+  </a>
+  {% endif %}
 </div>
 
 <form method="get" class="mb-4 flex flex-wrap gap-3">
-  <input type="search" name="q" value="{{ q }}" placeholder="Nomi bo'yicha qidirish…"
-         class="ca-input max-w-xs" aria-label="Qidirish">
+  <div class="relative max-w-xs flex-1">
+    <i data-lucide="search" class="lu pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-mute" aria-hidden="true"></i>
+    <input type="search" name="q" value="{{ q }}" placeholder="Nomi bo'yicha qidirish…"
+           class="ca-input pl-9" aria-label="Qidirish">
+  </div>
   <select name="tag" class="ca-select max-w-[10rem]" aria-label="Teg" onchange="this.form.submit()">
     <option value="">Barcha teglar</option>
     {% for t in all_tags %}
     <option value="{{ t.name }}" {% if t.name == selected_tag %}selected{% endif %}>{{ t.name }}</option>
     {% endfor %}
   </select>
-  <button type="submit" class="ca-btn ca-btn-ghost">Filtrlash</button>
-  {% if q or selected_tag %}<a href="{% url 'problems:list' %}" class="ca-btn ca-btn-ghost">Tozalash</a>{% endif %}
+  <select name="difficulty" class="ca-select max-w-[9rem]" aria-label="Qiyinlik" onchange="this.form.submit()">
+    <option value="">Barcha qiyinlik</option>
+    {% for value, label in difficulties %}
+    <option value="{{ value }}" {% if value == selected_difficulty %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+  {% if user.is_authenticated %}
+  <select name="status" class="ca-select max-w-[10rem]" aria-label="Holat" onchange="this.form.submit()">
+    <option value="">Hammasi</option>
+    <option value="solved" {% if selected_status == "solved" %}selected{% endif %}>Yechilgan</option>
+    <option value="unsolved" {% if selected_status == "unsolved" %}selected{% endif %}>Yechilmagan</option>
+  </select>
+  {% endif %}
+  <button type="submit" class="ca-btn ca-btn-ghost"><i data-lucide="list-filter" class="lu" aria-hidden="true"></i>Filtrlash</button>
+  {% if q or selected_tag or selected_difficulty or selected_status %}<a href="{% url 'problems:list' %}" class="ca-btn ca-btn-ghost"><i data-lucide="x" class="lu" aria-hidden="true"></i>Tozalash</a>{% endif %}
 </form>
 
 {% if problems %}
@@ -27,23 +49,35 @@
   <thead>
     <tr>
       <th class="w-10"></th>
-      <th class="w-16">#</th>
+      <th class="w-20">#</th>
       <th>Nomi</th>
+      <th class="hidden md:table-cell">Mavzu</th>
       <th>Qiyinlik</th>
-      <th class="text-right">Ball</th>
+      <th class="hidden md:table-cell text-right">Urinishlar</th>
+      <th class="text-right">Yechilish</th>
     </tr>
   </thead>
   <tbody>
   {% for p in problems %}
-  <tr>
-    <td class="text-center">{% if p.id in solved_ids %}<span class="text-emerald-500" title="Yechilgan">✓</span>{% endif %}</td>
-    <td class="tabular text-mute">{{ p.id }}</td>
+  <tr{% if p.id in solved_ids %} class="ca-row-solved"{% endif %}>
+    <td class="text-center">{% if p.id in solved_ids %}<span class="inline-grid h-5 w-5 place-items-center rounded-full bg-ok-soft text-ok" title="Yechilgan"><i data-lucide="check" class="lu text-[.7rem]" aria-hidden="true"></i><span class="sr-only">Yechilgan</span></span>{% endif %}</td>
+    <td class="tabular text-xs text-mute">{{ p.id|stringformat:"04d" }}</td>
     <td class="min-w-0 max-w-md">
-      <a class="ca-link" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a>
-      {% for t in p.tags.all %}<span class="ml-1.5 rounded-full bg-accent-soft px-2 py-0.5 text-xs text-accent">{{ t.name }}</span>{% endfor %}
+      <a class="ca-link font-medium" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a>
     </td>
-    <td class="capitalize text-mute">{{ p.get_difficulty_display }}</td>
-    <td class="tabular text-right font-medium">{{ p.points }}</td>
+    <td class="hidden md:table-cell min-w-0 max-w-xs">
+      <div class="flex items-center gap-1 whitespace-nowrap">{% for t in p.tags.all|slice:":2" %}<a class="ca-chip" href="?tag={{ t.name|urlencode }}">{{ t.name }}</a>{% empty %}<span class="text-mute">—</span>{% endfor %}{% if p.tags.all|length > 2 %}<span class="text-xs text-mute" title="{% for t in p.tags.all|slice:"2:" %}{{ t.name }}{% if not forloop.last %}, {% endif %}{% endfor %}">+{{ p.tags.all|length|add:"-2" }}</span>{% endif %}</div>
+    </td>
+    <td>
+      <span class="ca-diff ca-diff-{{ p.difficulty }}">{{ p.get_difficulty_display }}</span>
+    </td>
+    <td class="hidden md:table-cell tabular text-right text-mute">{{ p.attempts }}</td>
+    <td class="text-right">
+      <div class="inline-flex items-center gap-2" title="{{ p.ac_count }} / {{ p.attempts }} urinish muvaffaqiyatli">
+        <span class="ca-progress ca-progress-ok w-14"><span style="width: {{ p.pass_rate }}%"></span></span>
+        <span class="tabular w-9 text-right text-mute">{{ p.pass_rate }}%</span>
+      </div>
+    </td>
   </tr>
   {% endfor %}
   </tbody>
@@ -51,12 +85,17 @@
 </div>
 {% if problems.has_other_pages %}
 <nav class="mt-4 flex items-center gap-4 text-sm" aria-label="Sahifalar">
-  {% if problems.has_previous %}<a class="ca-link" href="?{% if q %}q={{ q }}&{% endif %}{% if selected_tag %}tag={{ selected_tag }}&{% endif %}page={{ problems.previous_page_number }}">← Oldingi</a>{% endif %}
+  {% if problems.has_previous %}<a class="ca-link" href="?{% if q %}q={{ q }}&{% endif %}{% if selected_tag %}tag={{ selected_tag }}&{% endif %}{% if selected_difficulty %}difficulty={{ selected_difficulty }}&{% endif %}{% if selected_status %}status={{ selected_status }}&{% endif %}page={{ problems.previous_page_number }}">← Oldingi</a>{% endif %}
   <span class="tabular text-mute">{{ problems.number }} / {{ problems.paginator.num_pages }}</span>
-  {% if problems.has_next %}<a class="ca-link" href="?{% if q %}q={{ q }}&{% endif %}{% if selected_tag %}tag={{ selected_tag }}&{% endif %}page={{ problems.next_page_number }}">Keyingi →</a>{% endif %}
+  {% if problems.has_next %}<a class="ca-link" href="?{% if q %}q={{ q }}&{% endif %}{% if selected_tag %}tag={{ selected_tag }}&{% endif %}{% if selected_difficulty %}difficulty={{ selected_difficulty }}&{% endif %}{% if selected_status %}status={{ selected_status }}&{% endif %}page={{ problems.next_page_number }}">Keyingi →</a>{% endif %}
 </nav>
 {% endif %}
 {% else %}
-<div class="ca-empty">{% if q or selected_tag %}Hech narsa topilmadi.{% else %}Hali ochiq masala yo‘q.{% endif %}</div>
+<div class="ca-empty">
+  <i data-lucide="folder-open" class="lu mb-2 block text-2xl" aria-hidden="true"></i>
+  {% if q or selected_tag or selected_difficulty or selected_status %}
+  Bu filtr bo‘yicha masala topilmadi. <a class="ca-link" href="{% url 'problems:list' %}">Filtrni tozalash</a>
+  {% else %}Hali ochiq masala yo‘q.{% if user.is_staff %} <a class="ca-link" href="{% url 'moderation:submit' %}">Birinchi masalani qo‘shing</a>{% endif %}{% endif %}
+</div>
 {% endif %}
 {% endblock %}

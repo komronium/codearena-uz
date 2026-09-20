@@ -8,8 +8,8 @@ from apps.problems.models import Problem
 
 class Contest(models.Model):
     class Type(models.TextChoices):
-        ICPC = "icpc"
-        SCORE = "score"
+        ICPC = "icpc", "ICPC"
+        SCORE = "score", "Ball"
 
     title = models.CharField(max_length=200)
     description_md = models.TextField(blank=True)
@@ -29,6 +29,12 @@ class Contest(models.Model):
     def is_running(self) -> bool:
         now = timezone.now()
         return self.start <= now < self.end
+
+    @property
+    def duration_label(self) -> str:
+        minutes = int((self.end - self.start).total_seconds() // 60)
+        h, m = divmod(minutes, 60)
+        return " ".join(p for p in ((f"{h} soat" if h else ""), (f"{m} daq" if m else "")) if p) or "0 daq"
 
     @property
     def has_ended(self) -> bool:
@@ -63,6 +69,9 @@ class Participation(models.Model):
     rating_before = models.IntegerField(null=True, blank=True)
     rating_after = models.IntegerField(null=True, blank=True)
     registered_at = models.DateTimeField(auto_now_add=True)
+    # Set by staff for cheating: can't submit, ranked last (so rating drops), shown struck out.
+    disqualified = models.BooleanField(default=False)
+    disqualified_reason = models.CharField(max_length=200, blank=True)
 
     class Meta:
         unique_together = ("user", "contest")

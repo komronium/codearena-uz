@@ -1,133 +1,415 @@
-{% extends "base.html" %}
-{% block title %}{{ problem.title }}{% endblock %}
+{% extends "base.html" %}{% load tiers %}
+{% block title %}{% if contest_problem %}{{ contest_problem.label }}. {% endif %}{{ problem.title }}{% endblock %}
+{% block sidebar %}{% endblock %}
 {% block content %}
-<div class="mb-6">
-  <h1 class="text-2xl font-semibold tracking-tight text-pretty">{{ problem.title }}</h1>
-  <p class="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-sm text-mute">
-    <span>TL <span class="tabular font-medium text-ink">{{ problem.tl_ms }}</span> ms</span>
-    <span aria-hidden="true">·</span>
-    <span>ML <span class="tabular font-medium text-ink">{{ problem.ml_mb }}</span> MB</span>
-    <span aria-hidden="true">·</span>
-    <span><span class="tabular font-medium text-ink">{{ problem.points }}</span> ball</span>
-  </p>
+<div class="mb-5 flex flex-wrap items-center justify-between gap-3 text-sm">
+  {% if contest %}
+  <a class="ca-link text-mute" href="{% url 'contests:detail' contest.pk %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>{{ contest.title }}</a>
+  <span class="inline-flex items-center gap-2 rounded-full bg-warn-soft px-3 py-1 text-xs font-medium text-warn" role="status">
+    <i data-lucide="lock-keyhole" class="lu" aria-hidden="true"></i>Musobaqa rejimi · nusxalash o‘chirilgan, oyna almashtirish qayd etiladi
+    <span class="tabular font-semibold" data-countdown="{{ contest.end|date:'c' }}" data-label="Tugashiga"></span>
+  </span>
+  {% else %}
+  <a class="ca-link text-mute" href="{% url 'problems:list' %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>Masalalar</a>
+  <div class="flex items-center gap-1">
+    {% if prev_problem %}<a class="ca-btn ca-btn-ghost !px-2.5 !py-1.5" href="{% url 'problems:detail' prev_problem.slug %}" title="{{ prev_problem.title }}" aria-label="Oldingi masala"><i data-lucide="chevron-left" class="lu" aria-hidden="true"></i></a>{% endif %}
+    <span class="tabular text-xs text-mute">{{ problem.id|stringformat:"04d" }}</span>
+    {% if next_problem %}<a class="ca-btn ca-btn-ghost !px-2.5 !py-1.5" href="{% url 'problems:detail' next_problem.slug %}" title="{{ next_problem.title }}" aria-label="Keyingi masala"><i data-lucide="chevron-right" class="lu" aria-hidden="true"></i></a>{% endif %}
+  </div>
+  {% endif %}
 </div>
 
-{% if contest %}
-<p class="mb-4 rounded-[var(--ca-radius)] border border-warn/30 bg-warn-soft px-3 py-2 text-sm text-warn" role="status">
-  Kontest rejimi: «{{ contest.title }}». Nusxa ko‘chirish/joylashtirish o‘chirilgan; oyna almashtirishlar qayd etiladi.
-</p>
+{% if open_contest %}
+<div class="ca-alert mb-5 flex flex-wrap items-center justify-between gap-3" role="status">
+  <span><i data-lucide="trophy" class="lu mr-1.5" aria-hidden="true"></i>Bu masala hozir <strong>«{{ open_contest.title }}»</strong> musobaqasida. Natijalar jadvalida ko‘rinish uchun avval ro‘yxatdan o‘ting — aks holda yechim amaliyot sifatida hisoblanadi.</span>
+  <form method="post" action="{% url 'contests:register' open_contest.pk %}">{% csrf_token %}<button class="ca-btn ca-btn-primary !py-1.5">Musobaqaga qo‘shilish</button></form>
+</div>
 {% endif %}
-
-<div class="grid gap-8 lg:grid-cols-2 lg:items-start">
-  <section class="space-y-5" aria-label="Masala matni">
-    <div class="ca-panel prose max-w-none text-[0.95rem] leading-relaxed">{{ statement_html|safe }}</div>
-    {% if problem.statement_image %}
-    <img class="w-full rounded-[var(--ca-radius)] border border-line" src="{{ problem.statement_image.url }}" alt="Masala rasmi" loading="lazy">
-    {% endif %}
-
-    {% if problem.kind == "sql" %}
-    <div>
-      <h2 class="mb-3 text-lg font-semibold">Jadval tuzilishi</h2>
-      <pre class="overflow-x-auto rounded-[var(--ca-radius)] border border-line bg-[#F0F2F5] p-3 text-sm font-mono">{{ sql_dataset.schema_sql }}</pre>
-      <h2 class="mb-3 mt-4 text-lg font-semibold">Namuna ma'lumotlar</h2>
-      <pre class="overflow-x-auto rounded-[var(--ca-radius)] border border-line bg-[#F0F2F5] p-3 text-sm font-mono">{{ sql_dataset.seed_sql }}</pre>
-    </div>
-    {% else %}
-    <div>
-      <h2 class="mb-3 text-lg font-semibold">Namunalar</h2>
-      {% for t in problem.samples %}
-      <div class="mb-3 grid gap-3 sm:grid-cols-2">
-        <div>
-          <div class="ca-label">Kirish</div>
-          <pre class="overflow-x-auto rounded-[var(--ca-radius)] border border-line bg-[#F0F2F5] p-3 text-sm font-mono">{{ t.input }}</pre>
+<div class="grid gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:items-start">
+  <section aria-label="Masala matni">
+    <div class="ca-panel !p-0 overflow-hidden">
+      <div class="border-b border-line px-6 py-5">
+        <h1 class="ca-page-title">{% if contest_problem %}<span class="text-accent">{{ contest_problem.label }}.</span> {% endif %}{{ problem.title }}</h1>
+        <div class="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-sm text-mute">
+          {% if contest_problem %}
+          <span><i data-lucide="star" class="lu mr-1.5 text-warn" aria-hidden="true"></i><b class="tabular text-ink">{{ contest_problem.points }}</b> ball</span>
+          {% else %}
+          <span class="ca-diff ca-diff-{{ problem.difficulty }}">{{ problem.get_difficulty_display }}</span>
+          {% endif %}
+          <span><i data-lucide="clock" class="lu mr-1.5" aria-hidden="true"></i><b class="tabular text-ink">{{ problem.tl_ms }}</b> ms</span>
+          <span><i data-lucide="cpu" class="lu mr-1.5" aria-hidden="true"></i><b class="tabular text-ink">{{ problem.ml_mb }}</b> MB</span>
+          {% if not contest %}
+          <span><i data-lucide="user" class="lu mr-1.5" aria-hidden="true"></i><a class="font-semibold" href="{% url 'profile' problem.author.username %}" translate="no" style="color: {{ problem.author.rating|tier_color }}">{{ problem.author.username }}</a></span>
+          {% endif %}
         </div>
-        <div>
-          <div class="ca-label">Chiqish</div>
-          <pre class="overflow-x-auto rounded-[var(--ca-radius)] border border-line bg-[#F0F2F5] p-3 text-sm font-mono">{{ t.expected }}</pre>
-        </div>
+        {% if not contest and problem.tags.all %}
+        <div class="mt-2.5 flex flex-wrap gap-1.5">{% for t in problem.tags.all|slice:":3" %}<a class="ca-chip" href="{% url 'problems:list' %}?tag={{ t.name|urlencode }}">{{ t.name }}</a>{% endfor %}</div>
+        {% endif %}
       </div>
-      {% empty %}
-      <div class="ca-empty text-sm">Namuna yo‘q.</div>
-      {% endfor %}
+
+      <div class="ca-statement space-y-6 px-6 py-5">
+        <div class="prose max-w-none">{{ statement_html|safe }}</div>
+        {% if problem.statement_image %}
+        <img class="w-full rounded-[var(--ca-radius)] border border-line" src="{{ problem.statement_image.url }}" alt="Masala rasmi" loading="lazy">
+        {% endif %}
+
+        {% if problem.kind == "sql" %}
+        <div>
+          <h2 class="ca-statement-h">Jadval tuzilishi</h2>
+          <pre class="ca-pre">{{ sql_dataset.schema_sql }}</pre>
+        </div>
+        <div>
+          <h2 class="ca-statement-h">Namuna ma'lumotlar</h2>
+          <pre class="ca-pre">{{ sql_dataset.seed_sql }}</pre>
+        </div>
+        {% else %}
+        {% if input_html %}
+        <div>
+          <h2 class="ca-statement-h">Kirish ma'lumotlari</h2>
+          <div class="prose max-w-none">{{ input_html|safe }}</div>
+        </div>
+        {% endif %}
+        {% if output_html %}
+        <div>
+          <h2 class="ca-statement-h">Chiqish ma'lumotlari</h2>
+          <div class="prose max-w-none">{{ output_html|safe }}</div>
+        </div>
+        {% endif %}
+        <div>
+          <h2 class="ca-statement-h">Misollar</h2>
+          {% for t in problem.samples %}
+          <div class="mb-3 grid gap-3 sm:grid-cols-2">
+            <div class="ca-sample">
+              <div class="ca-sample-head">
+                <span>Kirish</span>
+                <button type="button" class="ca-copy-btn" data-copy-target="sample-in-{{ forloop.counter }}" title="Nusxalash" aria-label="Kirishni nusxalash"><i data-lucide="copy" class="lu" aria-hidden="true"></i></button>
+              </div>
+              <pre id="sample-in-{{ forloop.counter }}">{{ t.input }}</pre>
+            </div>
+            <div class="ca-sample">
+              <div class="ca-sample-head">
+                <span>Chiqish</span>
+                <button type="button" class="ca-copy-btn" data-copy-target="sample-out-{{ forloop.counter }}" title="Nusxalash" aria-label="Chiqishni nusxalash"><i data-lucide="copy" class="lu" aria-hidden="true"></i></button>
+              </div>
+              <pre id="sample-out-{{ forloop.counter }}">{{ t.expected }}</pre>
+            </div>
+          </div>
+          {% empty %}
+          <div class="ca-empty text-sm">Misol yo‘q.</div>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% if my_subs %}
+    <div class="ca-panel mt-6 !p-0 overflow-hidden">
+      <div class="flex items-center justify-between border-b border-line px-4 py-2.5">
+        <h2 class="text-sm font-semibold">Mening urinishlarim</h2>
+        <a class="ca-link text-xs" href="{% url 'submissions:mine' %}">Barchasi</a>
+      </div>
+      {% with s=my_subs.0 %}
+      <div class="border-b border-line px-4 py-3">
+        <div class="mb-1.5 flex items-center justify-between text-xs text-mute">
+          <a class="ca-link" href="{% url 'submissions:detail' s.pk %}">#{{ s.pk|stringformat:"06d" }} · {{ s.language.name }}</a>
+          <span class="tabular">{{ s.created|date:"H:i" }}</span>
+        </div>
+        {% include "submissions/_status.html" with results=None %}
+      </div>
+      {% endwith %}
+      {% if my_subs|length > 1 %}
+      <ul class="divide-y divide-line px-4 text-sm">
+        {% for s in my_subs|slice:"1:" %}
+        <li class="flex items-center justify-between gap-3 py-2">
+          <a class="ca-link tabular text-mute" href="{% url 'submissions:detail' s.pk %}">#{{ s.pk|stringformat:"06d" }}</a>
+          {% include "submissions/_verdict.html" with v=s.verdict %}
+          <span class="tabular text-xs text-mute">{{ s.created|date:"d.m H:i" }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+      {% endif %}
     </div>
     {% endif %}
   </section>
 
   <section class="lg:sticky lg:top-20" aria-label="Yechim yuborish">
     {% if user.is_authenticated %}
-    <div class="ca-panel">
-      <h2 class="mb-4 text-lg font-semibold">Yechim yuborish</h2>
-      <form method="post" action="{% url 'submissions:submit' problem.slug %}" id="submit-form" class="space-y-3">
-        {% csrf_token %}
-        <div>
-          <label class="ca-label" for="language">Til</label>
-          <select name="language" id="language" class="ca-select">
+    <form method="post" action="{% url 'submissions:submit' problem.slug %}" id="submit-form" class="ca-panel !p-0">
+      {% csrf_token %}
+      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-line px-4 py-2.5">
+        <label class="flex items-center gap-2 text-sm text-mute">
+          <i data-lucide="code" class="lu" aria-hidden="true"></i>
+          <select name="language" id="language" class="ca-select !w-auto !py-1.5 text-sm">
             {% for l in languages %}<option value="{{ l.code }}">{{ l.name }}</option>{% endfor %}
           </select>
+        </label>
+        <div class="flex items-center gap-1">
+          <button type="button" id="editor-reset" class="ca-btn ca-btn-ghost !px-2.5 !py-1.5 text-xs" title="Tozalash"><i data-lucide="undo-2" class="lu" aria-hidden="true"></i>Tozalash</button>
+          <details class="relative" id="editor-prefs">
+            <summary class="ca-btn ca-btn-ghost !px-2.5 !py-1.5 cursor-pointer list-none text-xs" title="Muharrir sozlamalari"><i data-lucide="settings-2" class="lu" aria-hidden="true"></i></summary>
+            <div class="ca-panel absolute right-0 z-20 mt-2 w-60 !p-3 text-sm">
+              <label class="mb-2 block text-xs text-mute">Mavzu
+                <select data-pref="theme" class="ca-select mt-1 !py-1.5 text-sm">
+                  <option value="auto">Sayt bilan</option><option value="light">Yorug‘</option><option value="dark">One Dark</option>
+                  <option value="github-light">GitHub Light</option><option value="github-dark">GitHub Dark</option>
+                  <option value="dracula">Dracula</option><option value="monokai">Monokai</option><option value="nord">Nord</option>
+                  <option value="solarized-light">Solarized Light</option><option value="solarized-dark">Solarized Dark</option>
+                </select></label>
+              <label class="mb-2 block text-xs text-mute">Shrift
+                <select data-pref="font" class="ca-select mt-1 !py-1.5 text-sm">
+                  <option value="anthropic">Anthropic Mono</option><option value="jetbrains">JetBrains Mono</option><option value="fira">Fira Code</option><option value="system">Tizim</option>
+                </select></label>
+              <label class="block text-xs text-mute">O‘lcham — <span id="pref-size-val">14</span>px
+                <input type="range" data-pref="size" min="12" max="20" step="1" class="mt-1 w-full">
+              </label>
+            </div>
+          </details>
         </div>
-        <div>
-          <label class="ca-label" for="editor">Kod</label>
-          <div id="editor" class="overflow-hidden border border-line bg-white {% if contest %}select-none{% endif %}" role="textbox" aria-label="Kod muharriri" aria-multiline="true"></div>
-          <textarea name="source" id="source" hidden></textarea>
-        </div>
-        <button type="submit" id="submit-btn" class="ca-btn ca-btn-success w-full sm:w-auto">Yuborish</button>
-      </form>
-    </div>
-    <script type="module">
-      import { EditorView, basicSetup } from "https://esm.sh/codemirror@6.0.1";
-      {% if problem.kind == "sql" %}
-      import { sql } from "https://esm.sh/@codemirror/lang-sql@6.9.1";
-      const langExt = sql();
-      {% else %}
-      import { python } from "https://esm.sh/@codemirror/lang-python@6.1.6";
-      const langExt = python();
-      {% endif %}
-      const view = new EditorView({
-        doc: "",
-        extensions: [basicSetup, langExt],
-        parent: document.getElementById("editor"),
-      });
-      const form = document.getElementById("submit-form");
-      const btn = document.getElementById("submit-btn");
-      form.addEventListener("submit", () => {
-        document.getElementById("source").value = view.state.doc.toString();
-        btn.disabled = true;
-        btn.textContent = "Yuborilmoqda…";
-      });
-    </script>
-    {% if contest %}
-    <script>
-      (function () {
-        const contestId = {{ contest.pk }};
-        const editor = document.getElementById("editor");
-        ["paste", "copy", "cut"].forEach((evt) =>
-          editor.addEventListener(evt, (e) => e.preventDefault()));
+      </div>
+      <div id="editor" role="textbox" aria-label="Kod muharriri" aria-multiline="true">
+        <textarea name="source" id="source" class="ca-editor-fallback" spellcheck="false" placeholder="Kodni shu yerga yozing…"></textarea>
+      </div>
+      <div class="flex flex-wrap items-center justify-between gap-3 border-t border-line px-4 py-3">
+        <span class="text-xs text-mute"><kbd class="ca-kbd">Ctrl</kbd> + <kbd class="ca-kbd">Enter</kbd> — yuborish</span>
+        <button type="submit" id="submit-btn" class="ca-btn ca-btn-success"><i data-lucide="rocket" class="lu" aria-hidden="true"></i>Yuborish</button>
+      </div>
+    </form>
 
-        function report(kind) {
-          fetch("{% url 'integrity:event' %}", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-              "X-CSRFToken": "{{ csrf_token }}",
-            },
-            body: `contest_id=${contestId}&kind=${kind}`,
-          });
-        }
-        window.addEventListener("blur", () => report("blur"));
-        window.addEventListener("focus", () => report("focus"));
-        document.addEventListener("visibilitychange", () => {
-          report(document.hidden ? "blur" : "focus");
-        });
-      })();
-    </script>
-    {% endif %}
     {% else %}
-    <div class="ca-panel">
-      <p class="text-sm text-mute">
-        <a class="ca-link" href="{% url 'login' %}">Kirish</a> — yechim yuborish uchun.
-      </p>
+    <div class="ca-panel text-sm text-mute">
+      Yechim yuborish uchun <a class="ca-link" href="{% url 'login' %}?next={{ request.path }}">tizimga kiring</a>.
     </div>
     {% endif %}
   </section>
 </div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.querySelector('.ca-statement'), {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}], throwOnError: false})"></script>
+<script>
+  document.querySelectorAll(".ca-copy-btn").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const text = document.getElementById(btn.dataset.copyTarget).textContent;
+      try {
+        await navigator.clipboard.writeText(text);
+        btn.classList.add("text-ok");
+        setTimeout(() => btn.classList.remove("text-ok"), 900);
+      } catch {}
+    });
+  });
+</script>
+{% if user.is_authenticated %}
+{% comment %}Every CodeMirror package resolves through this map with deps externalised ("*" prefix),
+so @codemirror/state is a singleton — two copies break with "Unrecognized extension value".{% endcomment %}
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap">
+<script type="importmap">
+{
+  "imports": {
+    "codemirror": "https://esm.sh/*codemirror",
+    "@codemirror/state": "https://esm.sh/*@codemirror/state",
+    "@codemirror/view": "https://esm.sh/*@codemirror/view",
+    "@codemirror/language": "https://esm.sh/*@codemirror/language",
+    "@codemirror/commands": "https://esm.sh/*@codemirror/commands",
+    "@codemirror/search": "https://esm.sh/*@codemirror/search",
+    "@codemirror/autocomplete": "https://esm.sh/*@codemirror/autocomplete",
+    "@codemirror/lint": "https://esm.sh/*@codemirror/lint",
+    "@codemirror/theme-one-dark": "https://esm.sh/*@codemirror/theme-one-dark",
+    "@codemirror/lang-python": "https://esm.sh/*@codemirror/lang-python",
+    "@codemirror/lang-cpp": "https://esm.sh/*@codemirror/lang-cpp",
+    "@codemirror/lang-java": "https://esm.sh/*@codemirror/lang-java",
+    "@codemirror/lang-javascript": "https://esm.sh/*@codemirror/lang-javascript",
+    "@codemirror/lang-sql": "https://esm.sh/*@codemirror/lang-sql",
+    "@lezer/common": "https://esm.sh/*@lezer/common",
+    "@lezer/highlight": "https://esm.sh/*@lezer/highlight",
+    "@lezer/lr": "https://esm.sh/*@lezer/lr",
+    "@lezer/python": "https://esm.sh/*@lezer/python",
+    "@lezer/cpp": "https://esm.sh/*@lezer/cpp",
+    "@lezer/java": "https://esm.sh/*@lezer/java",
+    "@lezer/javascript": "https://esm.sh/*@lezer/javascript",
+    "style-mod": "https://esm.sh/*style-mod",
+    "w3c-keyname": "https://esm.sh/*w3c-keyname",
+    "crelt": "https://esm.sh/*crelt",
+    "@marijn/find-cluster-break": "https://esm.sh/*@marijn/find-cluster-break",
+    "@uiw/codemirror-themes": "https://esm.sh/*@uiw/codemirror-themes",
+    "@uiw/codemirror-theme-github": "https://esm.sh/*@uiw/codemirror-theme-github",
+    "@uiw/codemirror-theme-dracula": "https://esm.sh/*@uiw/codemirror-theme-dracula",
+    "@uiw/codemirror-theme-monokai": "https://esm.sh/*@uiw/codemirror-theme-monokai",
+    "@uiw/codemirror-theme-nord": "https://esm.sh/*@uiw/codemirror-theme-nord",
+    "@uiw/codemirror-theme-solarized": "https://esm.sh/*@uiw/codemirror-theme-solarized",
+    "@babel/runtime/helpers/extends": "https://esm.sh/*@babel/runtime/helpers/extends"
+  }
+}
+</script>
+<script type="module">
+  import { EditorView, basicSetup } from "codemirror";
+  import { Compartment } from "@codemirror/state";
+  import { keymap } from "@codemirror/view";
+  import { indentUnit } from "@codemirror/language";
+  import { indentWithTab } from "@codemirror/commands";
+  import { oneDark } from "@codemirror/theme-one-dark";
+  const LANG_LOADERS = {
+    sql: () => import("@codemirror/lang-sql").then((m) => m.sql()),
+    python: () => import("@codemirror/lang-python").then((m) => m.python()),
+    cpp: () => import("@codemirror/lang-cpp").then((m) => m.cpp()),
+    java: () => import("@codemirror/lang-java").then((m) => m.java()),
+    node: () => import("@codemirror/lang-javascript").then((m) => m.javascript()),
+  };
+  const langSel = document.getElementById("language");
+  const source = document.getElementById("source");
+  const draftKey = "ca-draft-{{ problem.slug }}";
+  const langKey = "ca-lang";
+  const langC = new Compartment(), themeC = new Compartment();
+  const prefKey = "ca-editor";
+  const FONTS = {
+    anthropic: '"Anthropic Mono", ui-monospace, monospace',
+    jetbrains: '"JetBrains Mono", ui-monospace, monospace',
+    fira: '"Fira Code", ui-monospace, monospace',
+    system: "ui-monospace, Menlo, Consolas, monospace",
+  };
+  let prefs = { theme: "auto", font: "anthropic", size: 14 };
+  try { prefs = { ...prefs, ...JSON.parse(localStorage.getItem(prefKey) || "{}") }; } catch {}
+  const THEMES = {
+    "github-light": () => import("@uiw/codemirror-theme-github").then((m) => m.githubLight),
+    "github-dark": () => import("@uiw/codemirror-theme-github").then((m) => m.githubDark),
+    dracula: () => import("@uiw/codemirror-theme-dracula").then((m) => m.dracula),
+    monokai: () => import("@uiw/codemirror-theme-monokai").then((m) => m.monokai),
+    nord: () => import("@uiw/codemirror-theme-nord").then((m) => m.nord),
+    "solarized-light": () => import("@uiw/codemirror-theme-solarized").then((m) => m.solarizedLight),
+    "solarized-dark": () => import("@uiw/codemirror-theme-solarized").then((m) => m.solarizedDark),
+  };
+  const siteDark = () => {
+    const t = document.documentElement.dataset.theme;
+    return t ? t === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+  };
+  const themeExt = async () => {
+    const load = THEMES[prefs.theme];
+    if (load) return load();
+    const dark = prefs.theme === "auto" ? siteDark() : prefs.theme === "dark";
+    return dark ? oneDark : [];
+  };
+  const editorEl = document.getElementById("editor");
+  const applyPrefs = () => {
+    editorEl.style.setProperty("--ed-font", FONTS[prefs.font] || FONTS.anthropic);
+    editorEl.style.setProperty("--ed-size", prefs.size + "px");
+    document.getElementById("pref-size-val").textContent = prefs.size;
+    try { localStorage.setItem(prefKey, JSON.stringify(prefs)); } catch {}
+  };
+  applyPrefs();
+  let draft = source.value;
+  try {
+    draft = localStorage.getItem(draftKey) || draft;
+    const savedLang = localStorage.getItem(langKey);
+    if (savedLang && [...langSel.options].some((o) => o.value === savedLang)) langSel.value = savedLang;
+  } catch {}
+  const view = new EditorView({
+    doc: draft,
+    extensions: [basicSetup, indentUnit.of("    "), keymap.of([indentWithTab]),
+      langC.of([]), themeC.of([]),
+      EditorView.updateListener.of((u) => {
+        if (!u.docChanged) return;
+        try { localStorage.setItem(draftKey, u.state.doc.toString()); } catch {}
+        {% if contest %}
+        let inserted = 0;
+        u.changes.iterChanges((fA, tA, fB, tB, ins) => { inserted += ins.length; });
+        if (inserted > 120) window.dispatchEvent(new CustomEvent("ca-bulk-insert"));
+        {% endif %}
+      })],
+    parent: document.getElementById("editor"),
+  });
+  source.hidden = true;  // CodeMirror loaded — plain textarea was only the no-JS fallback
+  const setLang = async () => {
+    const load = LANG_LOADERS[langSel.value];
+    const ext = load ? await load() : [];
+    view.dispatch({ effects: langC.reconfigure(ext) });
+    try { localStorage.setItem(langKey, langSel.value); } catch {}
+  };
+  setLang();
+  langSel.addEventListener("change", setLang);
+  const syncTheme = async () => view.dispatch({ effects: themeC.reconfigure(await themeExt()) });
+  syncTheme();
+  window.addEventListener("ca-theme", syncTheme);
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", syncTheme);
+  document.querySelectorAll("#editor-prefs [data-pref]").forEach((el) => {
+    el.value = prefs[el.dataset.pref];
+    el.addEventListener("input", () => {
+      prefs[el.dataset.pref] = el.type === "range" ? Number(el.value) : el.value;
+      applyPrefs();
+      if (el.dataset.pref === "theme") syncTheme();
+    });
+  });
+  document.getElementById("editor-reset").addEventListener("click", () => {
+    view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: "" } });
+    view.focus();
+  });
+  const form = document.getElementById("submit-form");
+  const btn = document.getElementById("submit-btn");
+  form.addEventListener("submit", () => {
+    source.value = view.state.doc.toString();
+    btn.disabled = true;
+    btn.textContent = "Yuborilmoqda…";
+  });
+  document.addEventListener("keydown", (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter" && !btn.disabled) {
+      e.preventDefault();
+      form.requestSubmit();
+    }
+  });
+</script>
+{% if contest %}
+<div id="ca-guard" class="ca-guard !hidden" role="status" aria-live="polite"></div>
+<script>
+  (function () {
+    const contestId = {{ contest.pk }};
+    const editor = document.getElementById("editor");
+    const guard = document.getElementById("ca-guard");
+    const stamp = "— CodeArena, musobaqa #{{ contest.pk|stringformat:'03d' }}, {{ user.username }}. Bu matnni AI yordamchisiga yoki boshqa ishtirokchiga yuborish — qoidabuzarlik, nusxa qayd etiladi.";
+    let leaves = 0, hideTimer;
+
+    function notify(msg) {
+      guard.textContent = msg;
+      guard.classList.remove("!hidden");
+      clearTimeout(hideTimer);
+      hideTimer = setTimeout(() => guard.classList.add("!hidden"), 4000);
+    }
+    function report(kind) {
+      fetch("{% url 'integrity:event' %}", {
+        method: "POST", keepalive: true,
+        headers: { "Content-Type": "application/x-www-form-urlencoded", "X-CSRFToken": "{{ csrf_token }}" },
+        body: `contest_id=${contestId}&kind=${kind}`,
+      });
+    }
+
+    // Editor: no paste/drop/cut, no context menu. Every attempt is logged.
+    editor.addEventListener("paste", (e) => {
+      e.preventDefault(); e.stopPropagation();
+      report("paste"); notify("Musobaqada kodni qo‘yish (paste) taqiqlangan — urinish qayd etildi.");
+    }, true);
+    ["copy", "cut", "contextmenu"].forEach((evt) => editor.addEventListener(evt, (e) => e.preventDefault(), true));
+    // Drag-and-drop of selected text is just paste with extra steps: kill it page-wide.
+    ["dragstart", "drop"].forEach((evt) => document.addEventListener(evt, (e) => {
+      e.preventDefault(); e.stopPropagation();
+      if (evt === "drop" && editor.contains(e.target)) { report("paste"); notify("Musobaqada matnni sudrab tashlash taqiqlangan — qayd etildi."); }
+    }, true));
+    window.addEventListener("ca-bulk-insert", () => { report("paste"); notify("Katta hajmdagi matn kiritildi — qayd etildi."); });
+
+    // Statement: copying works, but the clipboard gets a traceable warning stamp and the event is logged.
+    document.addEventListener("copy", (e) => {
+      if (editor.contains(e.target)) return;
+      const text = String(window.getSelection() || "");
+      if (!text.trim()) return;
+      e.clipboardData.setData("text/plain", text + "\n\n" + stamp);
+      e.preventDefault();
+      report("copy"); notify("Nusxa qayd etildi. Matnga ogohlantiruvchi belgi qo‘shildi.");
+    });
+
+    // Leaving the page (other tab/window) is logged; the student sees the count on return.
+    const leave = () => { leaves += 1; report("blur"); };
+    const back = () => { report("focus"); notify(`Sahifadan chiqib ketdingiz — ${leaves} marta qayd etildi.`); };
+    window.addEventListener("blur", leave);
+    window.addEventListener("focus", back);
+    document.addEventListener("visibilitychange", () => (document.hidden ? leave() : back()));
+  })();
+</script>
+{% endif %}
+{% endif %}
 {% endblock %}

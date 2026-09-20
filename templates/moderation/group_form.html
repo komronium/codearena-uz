@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}{% if group %}Guruhni tahrirlash{% else %}Guruh yaratish{% endif %}{% endblock %}
+{% block content %}
+<h1 class="ca-page-title mb-4">Boshqaruv</h1>
+{% include "moderation/_nav.html" %}
+
+<div class="mb-6 flex items-center justify-between gap-3">
+  <h2 class="text-lg font-semibold">{% if group %}{{ group.name }}{% else %}Yangi guruh{% endif %}</h2>
+  <a href="{% url 'moderation:groups' %}" class="ca-btn ca-btn-ghost !py-1.5">Orqaga</a>
+</div>
+
+<form method="post" novalidate class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:items-start">
+  {% csrf_token %}
+  <section class="ca-panel space-y-4">
+    <div><label class="ca-label" for="{{ form.name.id_for_label }}">Nomi</label>{{ form.name }}{{ form.name.errors }}</div>
+    <div><label class="ca-label" for="{{ form.teacher.id_for_label }}">O‘qituvchi</label>{{ form.teacher }}{{ form.teacher.errors }}</div>
+    <div><label class="ca-label" for="{{ form.members.id_for_label }}">A'zolar</label>{{ form.members }}
+      <p class="mt-1 text-xs text-mute">Ctrl bilan bir nechtasini tanlang.</p></div>
+  </section>
+  <aside class="lg:sticky lg:top-20">
+    <button type="submit" class="ca-btn ca-btn-primary w-full"><i data-lucide="check" class="lu" aria-hidden="true"></i>Saqlash</button>
+  </aside>
+</form>
+{% endblock %}

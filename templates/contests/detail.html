@@ -1,42 +1,56 @@
 {% extends "base.html" %}
 {% block title %}{{ contest.title }}{% endblock %}
 {% block content %}
-<div class="mb-6">
-  <h1 class="text-2xl font-semibold tracking-tight text-pretty">{{ contest.title }}</h1>
-  <p class="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-sm text-mute">
-    <span class="tabular">{{ contest.start|date:"d.m H:i" }} — {{ contest.end|date:"d.m H:i" }}</span>
-    <span aria-hidden="true">·</span>
-    <span>{{ contest.get_type_display }}</span>
-    {% if contest.is_rated %}<span aria-hidden="true">·</span><span class="font-medium text-accent">reytingli</span>{% endif %}
-  </p>
+<div class="ca-panel mb-6">
+  <div class="flex flex-wrap items-start justify-between gap-4">
+    <div>
+      <div class="mb-2 flex flex-wrap items-center gap-2">
+        {% if contest.is_running %}<span class="ca-diff ca-diff-easy"><i data-lucide="play" class="lu mr-1.5" aria-hidden="true"></i>Faol</span>
+        {% elif contest.has_ended %}<span class="ca-diff" style="background:rgb(var(--ca-mute-rgb)/.12);color:rgb(var(--ca-mute-rgb))"><i data-lucide="flag" class="lu mr-1.5" aria-hidden="true"></i>Tugagan</span>
+        {% else %}<span class="ca-diff ca-diff-medium"><i data-lucide="hourglass" class="lu mr-1.5" aria-hidden="true"></i>Kutilmoqda</span>{% endif %}
+        <span class="tabular text-xs text-mute">#{{ contest.pk|stringformat:"03d" }}</span>
+        {% include "contests/_type.html" with c=contest %}
+        {% if contest.is_rated %}<span class="ca-chip ca-chip-rated" title="Natija reytingga ta‘sir qiladi"><i data-lucide="trending-up" class="lu mr-1" aria-hidden="true"></i>Reytingli</span>{% endif %}
+      </div>
+      <h1 class="ca-page-title">{{ contest.title }}</h1>
+      <p class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-mute">
+        <span><i data-lucide="calendar" class="lu mr-1.5" aria-hidden="true"></i><span class="tabular">{{ contest.start|date:"d.m.Y H:i" }}</span></span>
+        <span><i data-lucide="clock" class="lu mr-1.5" aria-hidden="true"></i><span class="tabular">{{ contest.start|date:"H:i" }}–{{ contest.end|date:"H:i" }}</span></span>
+        <span><i data-lucide="list-checks" class="lu mr-1.5" aria-hidden="true"></i>{{ problems|length }} ta masala</span>
+        <span><i data-lucide="hourglass" class="lu mr-1.5" aria-hidden="true"></i>{{ contest.duration_label }}</span>
+        {% if not contest.has_ended %}
+        <span class="font-semibold text-ink"><i data-lucide="timer" class="lu mr-1.5 text-accent" aria-hidden="true"></i>
+          <span class="tabular" data-countdown="{% if contest.is_running %}{{ contest.end|date:'c' }}{% else %}{{ contest.start|date:'c' }}{% endif %}"
+                data-label="{% if contest.is_running %}Tugashiga{% else %}Boshlanishiga{% endif %}"></span></span>
+        {% endif %}
+      </p>
+    </div>
+    <div class="flex shrink-0 flex-col items-end gap-2">
+      {% if user.is_authenticated and not registered and not contest.has_ended %}
+      <form method="post" action="{% url 'contests:register' contest.pk %}" id="contest-register-form">
+        {% csrf_token %}
+        <button type="submit" class="ca-btn ca-btn-primary" id="contest-register-btn"><i data-lucide="user-plus" class="lu" aria-hidden="true"></i>Ro‘yxatdan o‘tish</button>
+      </form>
+      <script>
+        document.getElementById("contest-register-form").addEventListener("submit", () => {
+          const b = document.getElementById("contest-register-btn");
+          b.disabled = true;
+          b.textContent = "Yuborilmoqda…";
+        });
+      </script>
+      {% elif registered %}
+      <span class="ca-verdict ca-verdict-ac"><i data-lucide="check" class="lu" aria-hidden="true"></i>Siz ro‘yxatdan o‘tgansiz</span>
+      {% endif %}
+      <a class="ca-btn ca-btn-ghost" href="{% url 'contests:standings' contest.pk %}"><i data-lucide="medal" class="lu" aria-hidden="true"></i>Turnir jadvali</a>
+    </div>
+  </div>
 </div>
 
-{% if user.is_authenticated and not registered and not contest.has_ended %}
-<form method="post" action="{% url 'contests:register' contest.pk %}" class="mb-6" id="contest-register-form">
-  {% csrf_token %}
-  <button type="submit" class="ca-btn ca-btn-success" id="contest-register-btn">Ro‘yxatdan o‘tish</button>
-</form>
-<script>
-  document.getElementById("contest-register-form").addEventListener("submit", () => {
-    const b = document.getElementById("contest-register-btn");
-    b.disabled = true;
-    b.textContent = "Yuborilmoqda…";
-  });
-</script>
-{% elif registered %}
-<p class="mb-6 inline-flex items-center rounded-full border border-ok/30 bg-ok-soft px-3 py-1 text-sm font-medium text-ok">
-  Siz ro‘yxatdan o‘tgansiz
-</p>
-{% endif %}
-
 <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
-  <h2 class="text-lg font-semibold">Masalalar</h2>
-  <div class="flex gap-3">
-    {% if registered or user.is_staff %}
-    <a class="ca-link text-sm" href="{% url 'contests:clarifications' contest.pk %}">Savol-javoblar →</a>
-    {% endif %}
-    <a class="ca-link text-sm" href="{% url 'contests:standings' contest.pk %}">Turnir jadvali →</a>
-  </div>
+  <h2 class="ca-section-title !mb-0">Masalalar</h2>
+  {% if registered or user.is_staff %}
+  <a class="ca-link text-sm" href="{% url 'contests:clarifications' contest.pk %}"><i data-lucide="messages-square" class="lu mr-1" aria-hidden="true"></i>Savol-javoblar</a>
+  {% endif %}
 </div>
 
 {% if problems %}
@@ -48,7 +62,7 @@
   <tbody>
   {% for cp in problems %}
   <tr>
-    <td class="font-mono font-semibold text-accent">{{ cp.label }}</td>
+    <td class="font-semibold text-accent">{{ cp.label }}</td>
     <td class="min-w-0 max-w-md truncate">
       {% if registered or contest.has_ended %}
         <a class="ca-link" href="{% url 'problems:detail' cp.problem.slug %}">{{ cp.problem.title }}</a>

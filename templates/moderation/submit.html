@@ -1,115 +1,173 @@
 {% extends "base.html" %}
-{% block title %}Masala qo'shish{% endblock %}
+{% block title %}{% if problem %}Masalani tahrirlash{% else %}Masala qo'shish{% endif %}{% endblock %}
+{% block sidebar %}{% endblock %}
 {% block content %}
-<div class="mb-6">
-  <h1 class="text-2xl font-semibold tracking-tight">Masala qo'shish</h1>
-  {% if not user.is_staff %}
-  <p class="mt-1 text-sm text-mute">Masalangiz admin tekshiruvidan o'tgach, ro'yxatda paydo bo'ladi.</p>
-  {% endif %}
+<div class="mb-6 flex items-start justify-between gap-3">
+  <div>
+    <h1 class="ca-page-title">{% if problem %}Masalani tahrirlash{% else %}Masala qo'shish{% endif %}</h1>
+    <p class="mt-1 text-sm text-mute">{% if problem %}#{{ problem.pk|stringformat:"04d" }} · {{ problem.slug }}{% else %}Musobaqa masalasini «Ochiq» belgisini olib tashlab saqlang, keyin musobaqaga ulang.{% endif %}</p>
+  </div>
+  <a href="{% url 'moderation:problems' %}" class="ca-btn ca-btn-ghost !py-1.5">Barcha masalalar</a>
 </div>
 
-<form method="post" novalidate>
+{% if error %}<div class="ca-alert ca-alert-bad mb-4" role="alert">{{ error }}</div>{% endif %}
+
+<form method="post" enctype="multipart/form-data" novalidate class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:items-start">
   {% csrf_token %}
-  <div class="ca-panel mb-4 space-y-4">
-    {% if form.non_field_errors %}<div class="text-sm text-bad">{{ form.non_field_errors }}</div>{% endif %}
-    <div>
-      <label class="ca-label" for="{{ form.title.id_for_label }}">Sarlavha</label>
-      {{ form.title }}
-      {{ form.title.errors }}
-    </div>
-    <div>
-      <label class="ca-label" for="{{ form.statement_md.id_for_label }}">Shart (Markdown)</label>
-      {{ form.statement_md }}
-      {{ form.statement_md.errors }}
-    </div>
-    <div class="grid gap-4 sm:grid-cols-4">
+  <div class="space-y-6">
+    <section class="ca-panel space-y-4">
+      <h2 class="ca-section-title !mb-0">Shart</h2>
+      <div>
+        <label class="ca-label" for="{{ form.title.id_for_label }}">Sarlavha</label>
+        {{ form.title }}{{ form.title.errors }}
+      </div>
+      <div>
+        <label class="ca-label" for="{{ form.statement_md.id_for_label }}">Masala matni</label>
+        {{ form.statement_md }}{{ form.statement_md.errors }}
+        <p class="mt-1 text-xs text-mute">Markdown va LaTeX ($n \le 10^5$) qo‘llanadi.</p>
+      </div>
+      <div class="grid gap-4 sm:grid-cols-2" data-kind-only="code">
+        <div>
+          <label class="ca-label" for="{{ form.input_md.id_for_label }}">Kirish ma'lumotlari</label>
+          {{ form.input_md }}
+        </div>
+        <div>
+          <label class="ca-label" for="{{ form.output_md.id_for_label }}">Chiqish ma'lumotlari</label>
+          {{ form.output_md }}
+        </div>
+      </div>
+    </section>
+
+    <section class="ca-panel space-y-4" data-kind-only="sql">
+      <h2 class="ca-section-title !mb-0">SQL ma'lumotlar bazasi</h2>
+      <div>
+        <label class="ca-label" for="{{ sql_form.schema_sql.id_for_label }}">Jadval tuzilishi (CREATE TABLE …)</label>
+        {{ sql_form.schema_sql }}{{ sql_form.schema_sql.errors }}
+      </div>
+      <div>
+        <label class="ca-label" for="{{ sql_form.seed_sql.id_for_label }}">Ma'lumotlar (INSERT …)</label>
+        {{ sql_form.seed_sql }}{{ sql_form.seed_sql.errors }}
+      </div>
+      <div>
+        <label class="ca-label" for="{{ sql_form.expected_result.id_for_label }}">Kutilgan natija</label>
+        {{ sql_form.expected_result }}{{ sql_form.expected_result.errors }}
+        <p class="mt-1 text-xs text-mute">Har qator — bitta natija qatori, ustunlar TAB bilan ajratilgan, sarlavhasiz.</p>
+      </div>
+    </section>
+
+    <section class="ca-panel space-y-4" data-kind-only="code">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <h2 class="ca-section-title !mb-0">Testlar</h2>
+        <span class="text-xs text-mute">Namuna testlar masala sahifasida ko‘rinadi</span>
+      </div>
+
+      <div class="rounded-[var(--ca-radius)] border border-dashed border-line bg-paper/60 p-4">
+        <label class="ca-label" for="{{ form.tests_zip.id_for_label }}"><i data-lucide="file-archive" class="lu mr-1" aria-hidden="true"></i>ZIP orqali ko‘plab test yuklash</label>
+        {{ form.tests_zip }}{{ form.tests_zip.errors }}
+        <p class="mt-2 text-xs text-mute">
+          Fayllar juftlik bo‘lib nomlanadi: <code>01.in</code> + <code>01.out</code> (yoki <code>.ans</code>),
+          yoxud <code>input/01.txt</code> + <code>output/01.txt</code>. Tartib — nom bo‘yicha. Yuzlab test uchun shu usul.
+        </p>
+      </div>
+
+      {{ formset.management_form }}
+      {% if formset.non_form_errors %}<div class="text-sm text-bad">{{ formset.non_form_errors }}</div>{% endif %}
+      <div id="testcase-forms" class="space-y-3">
+        {% for f in formset %}
+        <div class="testcase-row rounded-[var(--ca-radius)] border border-line p-3">
+          {{ f.id }}
+          <div class="grid gap-3 sm:grid-cols-2">
+            <div><label class="ca-label">Kirish</label>{{ f.input }}</div>
+            <div><label class="ca-label">Kutilgan chiqish</label>{{ f.expected }}</div>
+          </div>
+          <div class="mt-2 flex flex-wrap items-center gap-4 text-sm">
+            <label class="flex items-center gap-1.5">{{ f.is_sample }} Namuna</label>
+            <label class="flex items-center gap-1.5 text-mute">Tartib {{ f.order }}</label>
+            {% if f.instance.pk %}<label class="flex items-center gap-1.5 text-bad">{{ f.DELETE }} O'chirish</label>{% endif %}
+          </div>
+          {{ f.non_field_errors }}
+        </div>
+        {% endfor %}
+      </div>
+      <template id="empty-form-template">
+        <div class="testcase-row rounded-[var(--ca-radius)] border border-line p-3">
+          {{ formset.empty_form.id }}
+          <div class="grid gap-3 sm:grid-cols-2">
+            <div><label class="ca-label">Kirish</label>{{ formset.empty_form.input }}</div>
+            <div><label class="ca-label">Kutilgan chiqish</label>{{ formset.empty_form.expected }}</div>
+          </div>
+          <div class="mt-2 flex flex-wrap items-center gap-4 text-sm">
+            <label class="flex items-center gap-1.5">{{ formset.empty_form.is_sample }} Namuna</label>
+            <label class="flex items-center gap-1.5 text-mute">Tartib {{ formset.empty_form.order }}</label>
+          </div>
+        </div>
+      </template>
+      <button type="button" id="add-testcase" class="ca-btn ca-btn-ghost"><i data-lucide="plus" class="lu" aria-hidden="true"></i>Yana test</button>
+    </section>
+  </div>
+
+  <aside class="space-y-6 lg:sticky lg:top-20">
+    <section class="ca-panel space-y-4">
+      <h2 class="ca-section-title !mb-0">Sozlamalar</h2>
+      <div>
+        <label class="ca-label" for="{{ form.kind.id_for_label }}">Turi</label>
+        {{ form.kind }}
+      </div>
       <div>
         <label class="ca-label" for="{{ form.difficulty.id_for_label }}">Qiyinlik</label>
         {{ form.difficulty }}
       </div>
-      <div>
-        <label class="ca-label" for="{{ form.tl_ms.id_for_label }}">Time limit (ms)</label>
-        {{ form.tl_ms }}
+      <div class="grid grid-cols-2 gap-3" data-kind-only="code">
+        <div>
+          <label class="ca-label" for="{{ form.tl_ms.id_for_label }}">Vaqt (ms)</label>
+          {{ form.tl_ms }}
+        </div>
+        <div>
+          <label class="ca-label" for="{{ form.ml_mb.id_for_label }}">Xotira (MB)</label>
+          {{ form.ml_mb }}
+        </div>
       </div>
       <div>
-        <label class="ca-label" for="{{ form.ml_mb.id_for_label }}">Memory limit (MB)</label>
-        {{ form.ml_mb }}
-      </div>
-      <div>
-        <label class="ca-label" for="{{ form.points.id_for_label }}">Ball</label>
+        <label class="ca-label" for="{{ form.points.id_for_label }}">Amaliyot ball</label>
         {{ form.points }}
       </div>
-    </div>
-  </div>
-
-  <h2 class="mb-3 text-lg font-semibold">Test caselar</h2>
-  {{ formset.management_form }}
-  {% if formset.non_form_errors %}
-  <div class="ca-panel mb-3 border-bad text-sm text-bad">{{ formset.non_form_errors }}</div>
-  {% endif %}
-
-  <div id="testcase-forms">
-    {% for f in formset %}
-    <div class="testcase-row ca-panel mb-3">
-      {{ f.id }}
-      <div class="grid gap-3 sm:grid-cols-2">
-        <div>
-          <label class="ca-label">Input</label>
-          {{ f.input }}
-        </div>
-        <div>
-          <label class="ca-label">Kutilgan chiqish</label>
-          {{ f.expected }}
-        </div>
+      <label class="flex items-center gap-2 text-sm">{{ form.is_public }} Ochiq (masalalar ro‘yxatida ko‘rinadi)</label>
+      <div>
+        <label class="ca-label" for="{{ form.tags.id_for_label }}">Mavzular</label>
+        {{ form.tags }}
+        <p class="mt-1 text-xs text-mute">Ctrl bilan bir nechtasini tanlang.</p>
       </div>
-      <div class="mt-2 flex flex-wrap items-center gap-4 text-sm">
-        <label class="flex items-center gap-1.5">{{ f.is_sample }} Sample (barchaga ko'rinadi)</label>
-        <label class="flex items-center gap-1.5">Tartib {{ f.order }}</label>
-        {% if f.instance.pk %}<label class="flex items-center gap-1.5 text-bad">{{ f.DELETE }} O'chirish</label>{% endif %}
-      </div>
-      {{ f.non_field_errors }}
-    </div>
-    {% endfor %}
-  </div>
-
-  <template id="empty-form-template">
-    <div class="testcase-row ca-panel mb-3">
-      {{ formset.empty_form.id }}
-      <div class="grid gap-3 sm:grid-cols-2">
-        <div>
-          <label class="ca-label">Input</label>
-          {{ formset.empty_form.input }}
-        </div>
-        <div>
-          <label class="ca-label">Kutilgan chiqish</label>
-          {{ formset.empty_form.expected }}
-        </div>
-      </div>
-      <div class="mt-2 flex flex-wrap items-center gap-4 text-sm">
-        <label class="flex items-center gap-1.5">{{ formset.empty_form.is_sample }} Sample (barchaga ko'rinadi)</label>
-        <label class="flex items-center gap-1.5">Tartib {{ formset.empty_form.order }}</label>
-      </div>
-    </div>
-  </template>
-
-  <div class="mb-6 mt-2">
-    <button type="button" id="add-testcase" class="ca-btn ca-btn-ghost">+ Yana test case</button>
-  </div>
-
-  <button type="submit" class="ca-btn ca-btn-primary">Yuborish</button>
+    </section>
+    <button type="submit" class="ca-btn ca-btn-primary w-full"><i data-lucide="check" class="lu" aria-hidden="true"></i>Masalani saqlash</button>
+  </aside>
 </form>
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde@2.20.0/dist/easymde.min.css">
+{# EasyMDE toolbar icons come from Font Awesome; loaded only on this staff page #}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+<script src="https://cdn.jsdelivr.net/npm/easymde@2.20.0/dist/easymde.min.js"></script>
 <script>
 (function () {
+  document.querySelectorAll("textarea.ca-md").forEach((el) => {
+    new EasyMDE({ element: el, spellChecker: false, status: false, minHeight: el.rows > 4 ? "220px" : "90px",
+      toolbar: ["bold", "italic", "heading", "|", "code", "quote", "unordered-list", "ordered-list", "table", "|", "preview", "guide"] });
+  });
+
+  const kind = document.getElementById("{{ form.kind.id_for_label }}");
+  const applyKind = () => document.querySelectorAll("[data-kind-only]").forEach((el) => {
+    el.classList.toggle("!hidden", el.dataset.kindOnly !== kind.value);  // !hidden beats Tailwind's .grid/.flex
+  });
+  kind.addEventListener("change", applyKind);
+  applyKind();
+
   const prefix = "{{ formset.prefix }}";
   const totalForms = document.getElementById("id_" + prefix + "-TOTAL_FORMS");
   const container = document.getElementById("testcase-forms");
   const tpl = document.getElementById("empty-form-template");
-  document.getElementById("add-testcase").addEventListener("click", function () {
+  document.getElementById("add-testcase").addEventListener("click", () => {
     const idx = parseInt(totalForms.value, 10);
-    const html = tpl.innerHTML.split("__prefix__").join(idx);
     const wrap = document.createElement("div");
-    wrap.innerHTML = html.trim();
+    wrap.innerHTML = tpl.innerHTML.split("__prefix__").join(idx).trim();
     container.appendChild(wrap.firstElementChild);
     totalForms.value = idx + 1;
   });

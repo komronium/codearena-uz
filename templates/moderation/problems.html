@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Masalalar — boshqaruv{% endblock %}
+{% block content %}
+<h1 class="ca-page-title mb-4">Boshqaruv</h1>
+{% include "moderation/_nav.html" %}
+
+<div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+  <form method="get" class="relative">
+    <i data-lucide="search" class="lu pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-mute" aria-hidden="true"></i>
+    <input type="search" name="q" value="{{ q }}" placeholder="Sarlavha yoki slug…" class="ca-input !py-1.5 pl-8 text-sm w-64" aria-label="Qidirish">
+  </form>
+  <a href="{% url 'moderation:submit' %}" class="ca-btn ca-btn-primary !py-1.5"><i data-lucide="circle-plus" class="lu" aria-hidden="true"></i>Masala qo'shish</a>
+</div>
+
+{% if page.object_list %}
+<div class="ca-panel !p-0 overflow-x-auto">
+<table class="ca-table">
+  <thead><tr><th class="w-16">#</th><th>Masala</th><th class="hidden md:table-cell">Turi</th><th>Qiyinlik</th><th class="hidden md:table-cell text-right">Testlar</th><th>Holat</th><th class="text-right">Amal</th></tr></thead>
+  <tbody>
+  {% for p in page %}
+  <tr>
+    <td class="tabular text-mute">{{ p.pk|stringformat:"04d" }}</td>
+    <td class="min-w-0 max-w-sm"><a class="ca-link font-medium" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a><div class="truncate text-xs text-mute">{{ p.slug }} · {{ p.author.username }}</div></td>
+    <td class="hidden md:table-cell"><span class="ca-chip">{{ p.get_kind_display }}</span></td>
+    <td><span class="ca-diff ca-diff-{{ p.difficulty }}">{{ p.get_difficulty_display }}</span></td>
+    <td class="hidden md:table-cell tabular text-right text-mute">{{ p.n_tests }}</td>
+    <td>
+      {% if p.status == 'pending' %}<span class="ca-chip text-warn">Kutmoqda</span>
+      {% elif p.status == 'rejected' %}<span class="ca-chip text-bad">Rad etilgan</span>
+      {% elif p.is_public %}<span class="ca-chip text-ok"><i data-lucide="eye" class="lu mr-1" aria-hidden="true"></i>Ochiq</span>
+      {% else %}<span class="ca-chip text-mute"><i data-lucide="eye-off" class="lu mr-1" aria-hidden="true"></i>Yashirin</span>{% endif %}
+    </td>
+    <td class="text-right">
+      <div class="flex justify-end gap-1 whitespace-nowrap">
+        <a href="{% url 'moderation:problem_edit' p.pk %}" class="ca-btn ca-btn-ghost !px-2 !py-1.5 text-xs" title="Tahrirlash"><i data-lucide="pencil" class="lu" aria-hidden="true"></i></a>
+        <form method="post" action="{% url 'moderation:problem_toggle' p.pk %}">{% csrf_token %}
+          <button class="ca-btn ca-btn-ghost !px-2 !py-1.5 text-xs" title="{% if p.is_public %}Yashirish{% else %}Ochish{% endif %}"><i data-lucide="{% if p.is_public %}eye-off{% else %}eye{% endif %}" class="lu" aria-hidden="true"></i></button>
+        </form>
+        <form method="post" action="{% url 'moderation:problem_delete' p.pk %}" onsubmit="return confirm('«{{ p.title|escapejs }}» va barcha urinishlari o‘chiriladi. Davom etasizmi?');">{% csrf_token %}
+          <button class="ca-btn ca-btn-ghost !px-2 !py-1.5 text-xs text-bad" title="O'chirish"><i data-lucide="trash-2" class="lu" aria-hidden="true"></i></button>
+        </form>
+      </div>
+    </td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% include "_pagination.html" with page=page %}
+{% else %}
+<div class="ca-empty">Masala topilmadi.</div>
+{% endif %}
+{% endblock %}

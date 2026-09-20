@@ -1,34 +1,31 @@
 {% extends "base.html" %}
 {% block title %}Kirish{% endblock %}
+{% block sidebar %}{% endblock %}
 {% block content %}
-<div class="mx-auto max-w-sm">
-  <h1 class="mb-1 text-2xl font-semibold tracking-tight">Kirish</h1>
-  <p class="mb-6 text-sm text-mute">Hisobingizga kiring</p>
-  <form method="post" class="ca-panel space-y-4">{% csrf_token %}
+<div class="ca-auth">
+  <a href="{% url 'problems:list' %}" class="ca-auth-brand" aria-label="CodeArena bosh sahifa">
+    <span class="ca-brand-mark"><i data-lucide="code-xml" class="lu" aria-hidden="true"></i></span>
+    <span>CodeArena</span>
+  </a>
+  <form method="post" novalidate class="ca-panel ca-auth-card space-y-4">{% csrf_token %}
+    <div>
+      <h1 class="text-xl font-bold">Xush kelibsiz</h1>
+      <p class="mt-1 text-sm text-mute">Hisobingizga kiring va davom eting.</p>
+    </div>
     {% if form.non_field_errors %}
-    <div class="rounded-[var(--ca-radius)] border border-bad/30 bg-bad-soft px-3 py-2 text-sm text-bad" role="alert">
-      {{ form.non_field_errors }}
-    </div>
+    <div class="ca-alert ca-alert-bad" role="alert">Login yoki parol noto‘g‘ri. Qaytadan urinib ko‘ring.</div>
     {% endif %}
+    {% include "registration/_auth_field.html" with name="username" label="Foydalanuvchi nomi" type="text" icon="at-sign" autocomplete="username" value=form.username.value errors=form.username.errors autofocus=True %}
     <div>
-      <label class="ca-label" for="id_username">Foydalanuvchi nomi</label>
-      <input class="ca-input" type="text" name="username" id="id_username" value="{{ form.username.value|default:'' }}"
-             autocomplete="username" spellcheck="false" required autofocus>
-      {% if form.username.errors %}<p class="mt-1 text-sm text-bad">{{ form.username.errors.0 }}</p>{% endif %}
+      {% include "registration/_auth_field.html" with name="password" label="Parol" type="password" icon="lock" autocomplete="current-password" errors=form.password.errors %}
+      <div class="mt-1.5 text-right"><a class="ca-link text-xs" href="{% url 'password_reset' %}">Parolni unutdingizmi?</a></div>
     </div>
-    <div>
-      <label class="ca-label" for="id_password">Parol</label>
-      <input class="ca-input" type="password" name="password" id="id_password"
-             autocomplete="current-password" required>
-      {% if form.password.errors %}<p class="mt-1 text-sm text-bad">{{ form.password.errors.0 }}</p>{% endif %}
-    </div>
-    <button type="submit" class="ca-btn ca-btn-primary w-full">Kirish</button>
+    <button type="submit" class="ca-btn ca-btn-primary w-full !py-2.5"><i data-lucide="log-in" class="lu" aria-hidden="true"></i>Kirish</button>
+    {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
   </form>
-  <p class="mt-3 text-center text-sm">
-    <a class="ca-link" href="{% url 'password_reset' %}">Parolni unutdingizmi?</a>
-  </p>
-  <p class="mt-4 text-center text-sm text-mute">
-    Hisob yo‘qmi? <a class="ca-link" href="{% url 'register' %}">Ro‘yxatdan o‘ting</a>
+  <p class="mt-5 text-center text-sm text-mute">
+    Hisob yo‘qmi? <a class="ca-link font-medium" href="{% url 'register' %}">Ro‘yxatdan o‘ting</a>
   </p>
 </div>
+{% include "registration/_auth_script.html" %}
 {% endblock %}

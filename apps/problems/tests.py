@@ -13,7 +13,7 @@ def problem(db):
     p = Problem.objects.create(slug="a-plus-b", title="A + B", statement_md="Ikki son **yig'indisi**.",
                                author=author)
     TestCase.objects.create(problem=p, input="1 2\n", expected="3\n", is_sample=True, order=0)
-    TestCase.objects.create(problem=p, input="5 7\n", expected="12\n", is_sample=False, order=1)
+    TestCase.objects.create(problem=p, input="99 1\n", expected="100\n", is_sample=False, order=1)
     return p
 
 
@@ -57,7 +57,7 @@ def test_detail_renders_markdown_and_samples_only(client, problem):
     assert r.status_code == 200
     assert b"<strong>yig&#x27;indisi</strong>" in r.content or b"<strong>yig'indisi</strong>" in r.content
     assert b"1 2" in r.content
-    assert b"5 7" not in r.content
+    assert b"99 1" not in r.content
 
 
 def test_private_detail_404(client, problem):
@@ -91,7 +91,7 @@ def test_private_contest_problem_visible_to_registered_participant(client, probl
     client.force_login(user)
     r = client.get(reverse("problems:detail", kwargs={"slug": "a-plus-b"}))
     assert r.status_code == 200
-    assert b"Kontest rejimi" in r.content
+    assert b"Musobaqa rejimi" in r.content
 
 
 def test_private_contest_problem_404_for_non_participant(client, problem, running_contest):
@@ -126,3 +126,21 @@ def test_list_filter_by_tag(client, problem):
     r = client.get(reverse("problems:list"), {"tag": "dp"})
     assert b"DP Problem" in r.content
     assert b"A + B" not in r.content
+
+
+@pytest.mark.django_db
+def test_problem_page_offers_to_join_running_contest(client):
+    from django.utils import timezone
+
+    from apps.contests.models import Contest, ContestProblem, Participation
+
+    staff = User.objects.create_user("teacher", password="x", is_staff=True)
+    ali = User.objects.create_user("ali", password="x")
+    p = Problem.objects.create(slug="p", title="P", statement_md="x", author=staff)
+    c = Contest.objects.create(title="Live", start=timezone.now() - timezone.timedelta(minutes=5),
+                               end=timezone.now() + timezone.timedelta(hours=1))
+    ContestProblem.objects.create(contest=c, problem=p, label="A")
+    client.force_login(ali)
+    assert "Musobaqaga qo‘shilish" in client.get(reverse("problems:detail", args=["p"])).content.decode()
+    Participation.objects.create(user=ali, contest=c)
+    assert "Musobaqaga qo‘shilish" not in client.get(reverse("problems:detail", args=["p"])).content.decode()

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Boshqaruv{% endblock %}
+{% block content %}
+<h1 class="ca-page-title mb-4">Boshqaruv</h1>
+{% include "moderation/_nav.html" %}
+
+<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+  <a href="{% url 'moderation:problems' %}" class="ca-panel ca-stat-card">
+    <i data-lucide="list-checks" class="lu" aria-hidden="true"></i>
+    <div><div class="ca-stat-value !text-2xl">{{ counts.problems }}</div><div class="ca-stat-label">Masalalar</div></div>
+  </a>
+  <a href="{% url 'moderation:contests' %}" class="ca-panel ca-stat-card">
+    <i data-lucide="trophy" class="lu" aria-hidden="true"></i>
+    <div><div class="ca-stat-value !text-2xl">{{ counts.contests }}</div><div class="ca-stat-label">Musobaqalar</div></div>
+  </a>
+  <a href="{% url 'moderation:users' %}" class="ca-panel ca-stat-card">
+    <i data-lucide="users" class="lu" aria-hidden="true"></i>
+    <div><div class="ca-stat-value !text-2xl">{{ counts.users }}</div><div class="ca-stat-label">Foydalanuvchilar</div></div>
+  </a>
+  <a href="{% url 'moderation:groups' %}" class="ca-panel ca-stat-card">
+    <i data-lucide="users-round" class="lu" aria-hidden="true"></i>
+    <div><div class="ca-stat-value !text-2xl">{{ counts.groups }}</div><div class="ca-stat-label">Guruhlar</div></div>
+  </a>
+  <a href="{% url 'submissions:mine' %}" class="ca-panel ca-stat-card">
+    <i data-lucide="history" class="lu" aria-hidden="true"></i>
+    <div><div class="ca-stat-value !text-2xl">{{ counts.submissions }}</div><div class="ca-stat-label">Urinishlar</div></div>
+  </a>
+  <a href="{% url 'moderation:queue' %}" class="ca-panel ca-stat-card {% if counts.pending %}ca-stat-card-warn{% endif %}">
+    <i data-lucide="shield-check" class="lu" aria-hidden="true"></i>
+    <div><div class="ca-stat-value !text-2xl">{{ counts.pending }}</div><div class="ca-stat-label">Tasdiq kutmoqda</div></div>
+  </a>
+</div>
+
+<div class="mt-6 flex flex-wrap gap-2">
+  <a href="{% url 'moderation:submit' %}" class="ca-btn ca-btn-primary"><i data-lucide="circle-plus" class="lu" aria-hidden="true"></i>Masala qo'shish</a>
+  <a href="{% url 'moderation:contest_new' %}" class="ca-btn ca-btn-ghost"><i data-lucide="trophy" class="lu" aria-hidden="true"></i>Musobaqa yaratish</a>
+  <a href="{% url 'moderation:group_new' %}" class="ca-btn ca-btn-ghost"><i data-lucide="users-round" class="lu" aria-hidden="true"></i>Guruh yaratish</a>
+</div>
+{% endblock %}

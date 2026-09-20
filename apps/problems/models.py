@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.core.validators import MinValueValidator
 from django.db import models
 
 
@@ -24,9 +25,11 @@ class Language(models.Model):
 
 class Problem(models.Model):
     class Difficulty(models.TextChoices):
-        EASY = "easy"
-        MEDIUM = "medium"
-        HARD = "hard"
+        BEGINNER = "beginner", "Beginner"
+        EASY = "easy", "Easy"
+        MEDIUM = "medium", "Medium"
+        ADVANCED = "advanced", "Advanced"
+        HARD = "hard", "Hard"
 
     class Status(models.TextChoices):
         PENDING = "pending"    # user-submitted, awaiting staff approval — never public
@@ -34,17 +37,19 @@ class Problem(models.Model):
         REJECTED = "rejected"  # reviewed and declined — never public
 
     class Kind(models.TextChoices):
-        CODE = "code"  # classic stdin/stdout program, judged via judge.runner + Docker sandbox
-        SQL = "sql"    # query problem, judged via judge.sql_judge against a SQLDataset
+        CODE = "code", "Dasturlash"  # classic stdin/stdout program, judged via judge.runner + Docker sandbox
+        SQL = "sql", "SQL"           # query problem, judged via judge.sql_judge against a SQLDataset
 
     slug = models.SlugField(unique=True)
     title = models.CharField(max_length=200)
     statement_md = models.TextField()
+    input_md = models.TextField(blank=True)   # "Kirish ma'lumotlari" section
+    output_md = models.TextField(blank=True)  # "Chiqish ma'lumotlari" section
     statement_image = models.ImageField(upload_to="statements/", blank=True, null=True)
     difficulty = models.CharField(max_length=10, choices=Difficulty.choices, default=Difficulty.EASY)
     kind = models.CharField(max_length=10, choices=Kind.choices, default=Kind.CODE)
     tl_ms = models.IntegerField(default=1000)
-    ml_mb = models.IntegerField(default=256)
+    ml_mb = models.IntegerField(default=256, validators=[MinValueValidator(6)])  # Docker's hard memory-limit floor
     points = models.IntegerField(default=100)
     is_public = models.BooleanField(default=True)
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.APPROVED)

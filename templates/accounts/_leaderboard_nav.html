@@ -1,0 +1,9 @@
+{% if users.has_other_pages %}
+<nav class="mt-4 flex items-center justify-between text-sm" aria-label="Sahifalar">
+  <span class="tabular text-mute">{{ users.start_index }}–{{ users.end_index }} / {{ total }}</span>
+  <div class="flex gap-2">
+    {% if users.has_previous %}<a class="ca-btn ca-btn-ghost !py-1.5" href="?page={{ users.previous_page_number }}"><i data-lucide="chevron-left" class="lu" aria-hidden="true"></i>Oldingi</a>{% endif %}
+    {% if users.has_next %}<a class="ca-btn ca-btn-ghost !py-1.5" href="?page={{ users.next_page_number }}">Keyingi<i data-lucide="chevron-right" class="lu" aria-hidden="true"></i></a>{% endif %}
+  </div>
+</nav>
+{% endif %}

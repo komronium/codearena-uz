@@ -2,7 +2,7 @@
 {% block title %}Moderatsiya{% endblock %}
 {% block content %}
 <div class="mb-6">
-  <h1 class="text-2xl font-semibold tracking-tight">Moderatsiya navbati</h1>
+  <h1 class="ca-page-title">Moderatsiya navbati</h1>
   <p class="mt-1 text-sm text-mute">Foydalanuvchilar yuborgan, tasdiqlanishi kerak bo'lgan masalalar.</p>
 </div>
 
@@ -21,17 +21,17 @@
   <tbody>
   {% for p in problems %}
   <tr>
-    <td><a class="ca-link" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a></td>
-    <td class="text-mute" translate="no">{{ p.author.username }}</td>
-    <td class="capitalize text-mute">{{ p.get_difficulty_display }}</td>
-    <td class="tabular text-mute">{{ p.created|date:"Y-m-d H:i" }}</td>
+    <td><a class="ca-link font-medium" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a></td>
+    <td>{% include "accounts/_user.html" with u=p.author %}</td>
+    <td><span class="ca-diff ca-diff-{{ p.difficulty }}">{{ p.get_difficulty_display }}</span></td>
+    <td class="tabular whitespace-nowrap text-mute">{{ p.created|date:"d.m.Y H:i" }}</td>
     <td class="text-right">
-      <div class="flex justify-end gap-2">
+      <div class="flex justify-end gap-2 whitespace-nowrap">
         <form method="post" action="{% url 'moderation:approve' p.pk %}">{% csrf_token %}
-          <button type="submit" class="ca-btn ca-btn-success text-sm">Tasdiqlash</button>
+          <button type="submit" class="ca-btn ca-btn-success !py-1.5"><i data-lucide="check" class="lu" aria-hidden="true"></i>Tasdiqlash</button>
         </form>
-        <form method="post" action="{% url 'moderation:reject' p.pk %}">{% csrf_token %}
-          <button type="submit" class="ca-btn ca-btn-ghost text-sm text-bad">Rad etish</button>
+        <form method="post" action="{% url 'moderation:reject' p.pk %}" onsubmit="return confirm('«{{ p.title|escapejs }}» masalasini rad etishni tasdiqlaysizmi?');">{% csrf_token %}
+          <button type="submit" class="ca-btn ca-btn-ghost !py-1.5 text-bad"><i data-lucide="x" class="lu" aria-hidden="true"></i>Rad etish</button>
         </form>
       </div>
     </td>
@@ -41,6 +41,6 @@
 </table>
 </div>
 {% else %}
-<div class="ca-empty">Navbat bo'sh.</div>
+<div class="ca-empty"><i data-lucide="circle-check" class="lu mb-2 block text-2xl text-ok" aria-hidden="true"></i>Navbat bo'sh — hamma masala ko'rib chiqilgan.</div>
 {% endif %}
 {% endblock %}
