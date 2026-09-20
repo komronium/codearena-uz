@@ -119,6 +119,24 @@ def test_flag_similarity_flags_near_identical_ac_submissions(flag_contest, flag_
     assert SimilarityFlag.objects.count() == 1
 
 
+def test_flag_similarity_without_id_processes_all_ended_contests(flag_problem, flag_python):
+    """Cron-friendly mode: no contest_id -> every ended contest."""
+    ended = Contest.objects.create(title="Ended", start=timezone.now() - timezone.timedelta(hours=2),
+                                   end=timezone.now() - timezone.timedelta(hours=1))
+    ContestProblem.objects.create(contest=ended, problem=flag_problem, label="A")
+    ali = User.objects.create_user("ali4", password="x")
+    bob = User.objects.create_user("bob4", password="x")
+    source = "a,b=map(int,input().split())\nprint(a+b)"
+    Submission.objects.create(user=ali, problem=flag_problem, contest=ended, language=flag_python,
+                              source=source, verdict="AC")
+    Submission.objects.create(user=bob, problem=flag_problem, contest=ended, language=flag_python,
+                              source=source, verdict="AC")
+
+    call_command("flag_similarity", stdout=StringIO())
+
+    assert SimilarityFlag.objects.filter(submission_a__contest=ended).count() == 1
+
+
 def test_flag_similarity_skips_same_user_and_dissimilar(flag_contest, flag_problem, flag_python):
     ali = User.objects.create_user("ali3", password="x")
     Submission.objects.create(user=ali, problem=flag_problem, contest=flag_contest, language=flag_python,

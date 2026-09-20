@@ -208,6 +208,23 @@ def test_recalc_rating_applies_deltas_and_is_idempotent(ended_rated_contest, pro
     assert winner.rating == rating_after_first_run
 
 
+def test_recalc_rating_without_id_processes_all_eligible_ended_contests(ended_rated_contest, problem_a, python):
+    """Cron-friendly mode: no contest_id -> every ended, rated, not-yet-applied contest."""
+    winner = User.objects.create_user("winner", password="x", rating=1500)
+    Participation.objects.create(user=winner, contest=ended_rated_contest)
+    _sub(winner, problem_a, ended_rated_contest, python, "AC", 5)
+
+    still_running = Contest.objects.create(
+        title="Live", is_rated=True, start=timezone.now(), end=timezone.now() + timezone.timedelta(hours=1))
+
+    call_command("recalc_rating", stdout=StringIO())
+
+    ended_rated_contest.refresh_from_db()
+    still_running.refresh_from_db()
+    assert ended_rated_contest.rating_applied is True
+    assert still_running.rating_applied is False
+
+
 def test_recalc_rating_rejects_unrated_contest(contest):
     with pytest.raises(CommandError):
         call_command("recalc_rating", contest.pk, stdout=StringIO())

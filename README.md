@@ -41,11 +41,20 @@ Contests/problems/standings are authored via `/admin` (`Contest` inline
 except registered participants until `end`; unregistered visitors see only
 the label + points on `/contests/<id>/`.
 
-Two commands are meant to run via cron shortly after a contest ends:
+Three commands are meant to run via cron shortly after contests end. All
+three are idempotent and, run with no `<id>`, sweep every ended contest that
+still needs the action — no scheduler process, no per-contest bookkeeping:
 
-    python manage.py close_ended_contests      # flips ContestProblem.problem.is_public
-    python manage.py flag_similarity <id>       # AC-pair similarity >= 0.85 -> SimilarityFlag
-    python manage.py recalc_rating <id>         # only for is_rated contests; idempotent
+    python manage.py close_ended_contests            # flips ContestProblem.problem.is_public
+    python manage.py flag_similarity [contest_id]    # AC-pair similarity >= 0.85 -> SimilarityFlag
+    python manage.py recalc_rating [contest_id]       # is_rated contests only; no-op once applied
+
+Example crontab (every 5 minutes is enough — these are cheap, idempotent no-ops
+when nothing changed):
+
+    */5 * * * * cd /path/to/codearena && .venv/bin/python manage.py close_ended_contests >> /var/log/codearena-cron.log 2>&1
+    */5 * * * * cd /path/to/codearena && .venv/bin/python manage.py flag_similarity >> /var/log/codearena-cron.log 2>&1
+    */5 * * * * cd /path/to/codearena && .venv/bin/python manage.py recalc_rating >> /var/log/codearena-cron.log 2>&1
 
 `recalc_rating` requires `Contest.is_rated=True` and `Contest.has_ended`; it's
 a no-op if `rating_applied` is already set. Teacher-only per-contest report

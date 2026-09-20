@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
+from django.utils import timezone
 
 from apps.contests.models import Contest, Participation
 from apps.contests.standings import compute_standings
@@ -15,29 +16,40 @@ def _expected_seed(idx, ratings):
 
 
 class Command(BaseCommand):
-    help = "Apply Elo-style rating deltas for a finished rated contest. Idempotent via Contest.rating_applied."
+    help = ("Apply Elo-style rating deltas for a finished rated contest. Idempotent via "
+            "Contest.rating_applied. Omit contest_id to process every ended rated contest "
+            "that hasn't had rating applied yet (cron-friendly).")
 
     def add_arguments(self, parser):
-        parser.add_argument("contest_id", type=int)
+        parser.add_argument("contest_id", type=int, nargs="?", default=None)
 
     def handle(self, *args, **opts):
-        try:
-            contest = Contest.objects.get(pk=opts["contest_id"])
-        except Contest.DoesNotExist:
-            raise CommandError(f"no contest {opts['contest_id']}")
-        if not contest.is_rated:
-            raise CommandError("contest is not rated")
-        if contest.rating_applied:
-            self.stdout.write("already applied, no-op")
+        if opts["contest_id"] is not None:
+            try:
+                contest = Contest.objects.get(pk=opts["contest_id"])
+            except Contest.DoesNotExist:
+                raise CommandError(f"no contest {opts['contest_id']}")
+            if not contest.is_rated:
+                raise CommandError("contest is not rated")
+            if not contest.rating_applied and not contest.has_ended:
+                raise CommandError("contest has not ended yet")
+            self._apply(contest)
             return
-        if not contest.has_ended:
-            raise CommandError("contest has not ended yet")
+
+        contests = Contest.objects.filter(is_rated=True, rating_applied=False, end__lte=timezone.now())
+        for contest in contests:
+            self._apply(contest)
+
+    def _apply(self, contest):
+        if contest.rating_applied:
+            self.stdout.write(f"contest {contest.pk}: already applied, no-op")
+            return
 
         rows = compute_standings(contest)
         if not rows:
             contest.rating_applied = True
             contest.save(update_fields=["rating_applied"])
-            self.stdout.write("no participants, marked applied")
+            self.stdout.write(f"contest {contest.pk}: no participants, marked applied")
             return
 
         users = [r["user"] for r in rows]
