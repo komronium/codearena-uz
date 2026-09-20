@@ -69,6 +69,16 @@ CACHES = {"default": {"BACKEND": "django.core.cache.backends.redis.RedisCache", 
 JUDGE_WORK_DIR = os.environ.get("JUDGE_WORK_DIR", str(BASE_DIR / "work"))
 JUDGE_IMAGE_PREFIX = "codearena-judge-"
 
+# Console backend by default (prints to stdout/log) — set EMAIL_BACKEND to
+# "django.core.mail.backends.smtp.EmailBackend" + EMAIL_HOST/PORT/... in prod.
+EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "")
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "1") == "1"
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@codearena.local")
+
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "Asia/Tashkent"
 USE_TZ = True

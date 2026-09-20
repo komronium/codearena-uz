@@ -10,12 +10,25 @@ from .models import User
 @pytest.mark.django_db
 def test_register_creates_user_and_logs_in(client):
     r = client.post(reverse("register"), {
-        "username": "ali", "password1": "StrongPass123!", "password2": "StrongPass123!",
+        "username": "ali", "email": "ali@example.com",
+        "password1": "StrongPass123!", "password2": "StrongPass123!",
     })
     assert r.status_code == 302
     u = User.objects.get(username="ali")
     assert u.rating == 1500 and u.practice_points == 0 and u.role == "student"
+    assert u.email == "ali@example.com"
     assert client.session["_auth_user_id"] == str(u.pk)
+
+
+@pytest.mark.django_db
+def test_register_rejects_duplicate_email(client):
+    User.objects.create_user("existing", email="dup@example.com", password="x")
+    r = client.post(reverse("register"), {
+        "username": "ali", "email": "dup@example.com",
+        "password1": "StrongPass123!", "password2": "StrongPass123!",
+    })
+    assert r.status_code == 200
+    assert not User.objects.filter(username="ali").exists()
 
 
 @pytest.mark.django_db
@@ -91,3 +104,40 @@ def test_rating_lists_users_by_rating_desc(client):
     assert r.status_code == 200
     users = list(r.context["users"])
     assert [u.username for u in users[:2]] == ["high", "low"]
+
+
+@pytest.mark.django_db
+def test_password_reset_end_to_end(client, mailoutbox):
+    User.objects.create_user("ali", email="ali@example.com", password="OldPass123!")
+
+    r = client.post(reverse("password_reset"), {"email": "ali@example.com"})
+    assert r.status_code == 302
+    assert len(mailoutbox) == 1
+    body = mailoutbox[0].body
+    assert "/accounts/reset/" in body
+
+    import re
+    match = re.search(r"/accounts/reset/(?P<uidb64>[\w-]+)/(?P<token>[\w-]+)/", body)
+    assert match
+
+    # Django's PasswordResetConfirmView needs the raw token session-swapped
+    # on first GET (it replaces it with "set-password" and stashes the real
+    # one in session) before the form POST will accept new_password1/2.
+    confirm_url = reverse("password_reset_confirm", kwargs=match.groupdict())
+    r = client.get(confirm_url, follow=True)
+    assert r.status_code == 200
+
+    r = client.post(r.redirect_chain[-1][0], {
+        "new_password1": "BrandNewPass456!", "new_password2": "BrandNewPass456!",
+    })
+    assert r.status_code == 302
+
+    user = User.objects.get(username="ali")
+    assert user.check_password("BrandNewPass456!")
+
+
+@pytest.mark.django_db
+def test_password_reset_unknown_email_does_not_leak(client, mailoutbox):
+    r = client.post(reverse("password_reset"), {"email": "nobody@example.com"})
+    assert r.status_code == 302  # same redirect whether or not the email exists
+    assert len(mailoutbox) == 0

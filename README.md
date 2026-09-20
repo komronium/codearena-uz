@@ -86,6 +86,20 @@ DROP/ATTACH/PRAGMA) and a `set_progress_handler()` wall-clock timeout
 admin-only for now, via the `SQLDataset` inline on the Problem admin page —
 the self-serve `/moderation/submit/` form only creates `kind="code"` problems.
 
+## Password reset
+
+Registration now requires an email (`RegisterForm` — enforced unique at the
+form level). Password reset uses Django's built-in views at
+`/accounts/password-reset/`. `EMAIL_BACKEND` defaults to the console backend
+(prints the email, no real send) — set these env vars for a real send:
+
+    EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+    EMAIL_HOST=... EMAIL_PORT=587 EMAIL_HOST_USER=... EMAIL_HOST_PASSWORD=...
+    EMAIL_USE_TLS=1 DEFAULT_FROM_EMAIL=noreply@yourdomain
+
+No email-verification-on-signup gate — registration works with an unverified
+email, same as before. Add one later if fake/typo'd emails become a problem.
+
 ## Tests
 
     pytest                                             # unit

@@ -17,6 +17,12 @@
       {% if form.username.errors %}<p class="mt-1 text-sm text-bad">{{ form.username.errors.0 }}</p>{% endif %}
     </div>
     <div>
+      <label class="ca-label" for="id_email">Email</label>
+      <input class="ca-input" type="email" name="email" id="id_email" value="{{ form.email.value|default:'' }}"
+             autocomplete="email" required>
+      {% if form.email.errors %}<p class="mt-1 text-sm text-bad">{{ form.email.errors.0 }}</p>{% endif %}
+    </div>
+    <div>
       <label class="ca-label" for="id_password1">Parol</label>
       <input class="ca-input" type="password" name="password1" id="id_password1"
              autocomplete="new-password" required>
