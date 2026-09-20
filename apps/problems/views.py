@@ -1,5 +1,6 @@
 import bleach
 import markdown
+from django.core.paginator import Paginator
 from django.http import Http404
 from django.shortcuts import render
 
@@ -9,6 +10,7 @@ from apps.submissions.models import UserProblemSolved
 from .models import (
     Language,
     Problem,
+    Tag,
 )
 
 # Markdown itself passes raw HTML straight through; sanitize the rendered
@@ -35,13 +37,28 @@ def _render_statement(statement_md: str) -> str:
 
 def problem_list(request):
     problems = Problem.objects.filter(is_public=True).order_by("id")
+    q = request.GET.get("q", "").strip()
+    if q:
+        problems = problems.filter(title__icontains=q)
+    tag = request.GET.get("tag", "").strip()
+    if tag:
+        problems = problems.filter(tags__name=tag)
+    problems = problems.prefetch_related("tags").distinct()
+
+    page = Paginator(problems, 30).get_page(request.GET.get("page"))
     solved_ids = set()
     if request.user.is_authenticated:
         solved_ids = set(
-            UserProblemSolved.objects.filter(user=request.user, problem__in=problems)
+            UserProblemSolved.objects.filter(user=request.user, problem__in=page.object_list)
             .values_list("problem_id", flat=True)
         )
-    return render(request, "problems/list.html", {"problems": problems, "solved_ids": solved_ids})
+    return render(request, "problems/list.html", {
+        "problems": page,
+        "solved_ids": solved_ids,
+        "all_tags": Tag.objects.order_by("name"),
+        "q": q,
+        "selected_tag": tag,
+    })
 
 
 def problem_detail(request, slug):

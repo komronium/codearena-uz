@@ -35,6 +35,13 @@
   </tbody>
 </table>
 </div>
+{% if subs.has_other_pages %}
+<nav class="mt-4 flex items-center gap-4 text-sm" aria-label="Sahifalar">
+  {% if subs.has_previous %}<a class="ca-link" href="?page={{ subs.previous_page_number }}">← Oldingi</a>{% endif %}
+  <span class="tabular text-mute">{{ subs.number }} / {{ subs.paginator.num_pages }}</span>
+  {% if subs.has_next %}<a class="ca-link" href="?page={{ subs.next_page_number }}">Keyingi →</a>{% endif %}
+</nav>
+{% endif %}
 {% else %}
 <div class="ca-empty">Hali yuborma yo‘q. <a class="ca-link" href="{% url 'problems:list' %}">Masalani tanlang</a>.</div>
 {% endif %}

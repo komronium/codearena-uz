@@ -1,6 +1,8 @@
 import django_rq
 from django.contrib.auth.decorators import login_required
-from django.http import Http404, HttpResponseBadRequest
+from django.core.cache import cache
+from django.core.paginator import Paginator
+from django.http import Http404, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
@@ -11,6 +13,23 @@ from judge.runner import run_submission
 from .models import Submission
 
 MAX_SOURCE = 64 * 1024
+RATE_LIMIT_MAX = 10       # submissions
+RATE_LIMIT_WINDOW_S = 60  # per rolling window
+
+
+def _rate_limited(user_id) -> bool:
+    # ponytail: fixed window, not sliding — a burst can land 2x MAX across a
+    # window boundary. Good enough to stop a submit-spam script; swap for a
+    # sliding/token-bucket counter if that boundary burst becomes a problem.
+    key = f"submit-rl:{user_id}"
+    count = cache.get(key)
+    if count is None:
+        cache.set(key, 1, timeout=RATE_LIMIT_WINDOW_S)
+        return False
+    if count >= RATE_LIMIT_MAX:
+        return True
+    cache.incr(key)
+    return False
 
 
 @login_required
@@ -28,6 +47,8 @@ def submit(request, slug):
     # registration — group membership or client IP can change mid-contest.
     if contest is not None and not access_allowed(request.user, contest, request.META.get("REMOTE_ADDR")):
         return HttpResponseBadRequest("not eligible for this contest")
+    if _rate_limited(request.user.id):
+        return HttpResponse("too many submissions, slow down", status=429)
     language = get_object_or_404(Language, code=request.POST.get("language"), is_active=True)
     source = request.POST.get("source", "")
     if not source.strip() or len(source) > MAX_SOURCE:
@@ -55,5 +76,6 @@ def status(request, pk):
 
 @login_required
 def mine(request):
-    subs = Submission.objects.filter(user=request.user).select_related("problem", "language")[:100]
-    return render(request, "submissions/list.html", {"subs": subs})
+    qs = Submission.objects.filter(user=request.user).select_related("problem", "language")
+    page = Paginator(qs, 50).get_page(request.GET.get("page"))
+    return render(request, "submissions/list.html", {"subs": page})

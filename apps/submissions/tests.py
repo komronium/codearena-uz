@@ -301,3 +301,29 @@ def test_problem_detail_shows_schema_not_testcase_samples(client, sql_problem, s
     assert r.status_code == 200
     assert b"CREATE TABLE users" in r.content
     assert b"Jadval tuzilishi" in r.content
+
+
+def test_mine_paginates_at_50(client, problem, python, user):
+    Submission.objects.bulk_create([
+        Submission(user=user, problem=problem, language=python, source="x") for _ in range(55)
+    ])
+    client.force_login(user)
+    r = client.get(reverse("submissions:mine"))
+    assert r.status_code == 200
+    assert len(r.context["subs"]) == 50
+    assert r.context["subs"].paginator.num_pages == 2
+
+
+@patch("apps.submissions.views.django_rq.enqueue")
+def test_submit_rate_limited_after_max_per_window(enqueue, client, problem, python, user):
+    from django.core.cache import cache
+    from apps.submissions.views import RATE_LIMIT_MAX
+
+    cache.clear()
+    client.force_login(user)
+    for _ in range(RATE_LIMIT_MAX):
+        r = client.post(reverse("submissions:submit", args=[problem.slug]), {"language": "python", "source": "x"})
+        assert r.status_code == 302
+    r = client.post(reverse("submissions:submit", args=[problem.slug]), {"language": "python", "source": "x"})
+    assert r.status_code == 429
+    cache.clear()

@@ -4,7 +4,7 @@ from django.utils import timezone
 
 from apps.accounts.models import User
 from apps.contests.models import Contest, ContestProblem, Participation
-from .models import Problem, TestCase
+from .models import Problem, Tag, TestCase
 
 
 @pytest.fixture
@@ -100,3 +100,29 @@ def test_private_contest_problem_404_for_non_participant(client, problem, runnin
     user = User.objects.create_user("bob", password="x")
     client.force_login(user)
     assert client.get(reverse("problems:detail", kwargs={"slug": "a-plus-b"})).status_code == 404
+
+
+def test_list_paginates_at_30(client, problem):
+    author = problem.author
+    for i in range(35):
+        Problem.objects.create(slug=f"p{i}", title=f"P{i}", statement_md="x", author=author)
+    r = client.get(reverse("problems:list"))
+    assert r.status_code == 200
+    assert len(r.context["problems"]) == 30
+    assert r.context["problems"].paginator.num_pages == 2
+
+
+def test_list_search_by_title(client, problem):
+    Problem.objects.create(slug="other", title="Binary Search", statement_md="x", author=problem.author)
+    r = client.get(reverse("problems:list"), {"q": "Binary"})
+    assert b"Binary Search" in r.content
+    assert b"A + B" not in r.content
+
+
+def test_list_filter_by_tag(client, problem):
+    dp = Tag.objects.create(name="dp")
+    tagged = Problem.objects.create(slug="tagged", title="DP Problem", statement_md="x", author=problem.author)
+    tagged.tags.add(dp)
+    r = client.get(reverse("problems:list"), {"tag": "dp"})
+    assert b"DP Problem" in r.content
+    assert b"A + B" not in r.content

@@ -8,6 +8,19 @@
   </div>
 </div>
 
+<form method="get" class="mb-4 flex flex-wrap gap-3">
+  <input type="search" name="q" value="{{ q }}" placeholder="Nomi bo'yicha qidirish…"
+         class="ca-input max-w-xs" aria-label="Qidirish">
+  <select name="tag" class="ca-select max-w-[10rem]" aria-label="Teg" onchange="this.form.submit()">
+    <option value="">Barcha teglar</option>
+    {% for t in all_tags %}
+    <option value="{{ t.name }}" {% if t.name == selected_tag %}selected{% endif %}>{{ t.name }}</option>
+    {% endfor %}
+  </select>
+  <button type="submit" class="ca-btn ca-btn-ghost">Filtrlash</button>
+  {% if q or selected_tag %}<a href="{% url 'problems:list' %}" class="ca-btn ca-btn-ghost">Tozalash</a>{% endif %}
+</form>
+
 {% if problems %}
 <div class="overflow-x-auto">
 <table class="ca-table">
@@ -25,7 +38,10 @@
   <tr>
     <td class="text-center">{% if p.id in solved_ids %}<span class="text-emerald-500" title="Yechilgan">✓</span>{% endif %}</td>
     <td class="tabular text-mute">{{ p.id }}</td>
-    <td class="min-w-0 max-w-md truncate"><a class="ca-link" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a></td>
+    <td class="min-w-0 max-w-md">
+      <a class="ca-link" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a>
+      {% for t in p.tags.all %}<span class="ml-1.5 rounded-full bg-accent-soft px-2 py-0.5 text-xs text-accent">{{ t.name }}</span>{% endfor %}
+    </td>
     <td class="capitalize text-mute">{{ p.get_difficulty_display }}</td>
     <td class="tabular text-right font-medium">{{ p.points }}</td>
   </tr>
@@ -33,7 +49,14 @@
   </tbody>
 </table>
 </div>
+{% if problems.has_other_pages %}
+<nav class="mt-4 flex items-center gap-4 text-sm" aria-label="Sahifalar">
+  {% if problems.has_previous %}<a class="ca-link" href="?{% if q %}q={{ q }}&{% endif %}{% if selected_tag %}tag={{ selected_tag }}&{% endif %}page={{ problems.previous_page_number }}">← Oldingi</a>{% endif %}
+  <span class="tabular text-mute">{{ problems.number }} / {{ problems.paginator.num_pages }}</span>
+  {% if problems.has_next %}<a class="ca-link" href="?{% if q %}q={{ q }}&{% endif %}{% if selected_tag %}tag={{ selected_tag }}&{% endif %}page={{ problems.next_page_number }}">Keyingi →</a>{% endif %}
+</nav>
+{% endif %}
 {% else %}
-<div class="ca-empty">Hali ochiq masala yo‘q.</div>
+<div class="ca-empty">{% if q or selected_tag %}Hech narsa topilmadi.{% else %}Hali ochiq masala yo‘q.{% endif %}</div>
 {% endif %}
 {% endblock %}
