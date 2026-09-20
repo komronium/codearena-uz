@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}{{ contest.title }} — Savollar{% endblock %}
+{% block content %}
+<div class="mb-6 flex flex-wrap items-end justify-between gap-3">
+  <div>
+    <h1 class="text-2xl font-semibold tracking-tight text-pretty">Savol-javoblar</h1>
+    <p class="mt-1 text-sm text-mute">{{ contest.title }}</p>
+  </div>
+  <a class="ca-link text-sm" href="{% url 'contests:detail' contest.pk %}">← Kontest</a>
+</div>
+
+{% if not contest.has_ended %}
+<form method="post" action="{% url 'contests:ask_clarification' contest.pk %}" class="ca-panel mb-8 space-y-3">
+  {% csrf_token %}
+  <div>
+    <label class="ca-label" for="clar-problem">Masala (ixtiyoriy)</label>
+    <select id="clar-problem" name="problem_id" class="ca-select">
+      <option value="">Umumiy savol</option>
+      {% for cp in problems %}
+      <option value="{{ cp.id }}">{{ cp.label }} — {{ cp.problem.title }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div>
+    <label class="ca-label" for="clar-question">Savol</label>
+    <textarea id="clar-question" name="question" required maxlength="2000" rows="3" class="ca-input w-full"></textarea>
+  </div>
+  <button type="submit" class="ca-btn ca-btn-success text-sm">Yuborish</button>
+</form>
+{% endif %}
+
+{% if clars %}
+<div class="space-y-4">
+{% for c in clars %}
+<div class="ca-panel">
+  <p class="mb-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-mute">
+    <span translate="no">{{ c.user.username }}</span>
+    <span aria-hidden="true">·</span>
+    <span class="tabular">{{ c.created|date:"d.m H:i" }}</span>
+    {% if c.problem %}<span aria-hidden="true">·</span><span>{{ c.problem.label }}</span>{% endif %}
+  </p>
+  <p class="mb-3 whitespace-pre-wrap">{{ c.question }}</p>
+  {% if c.is_answered %}
+  <div class="rounded-md border border-line bg-paper/60 p-3">
+    <p class="mb-1 text-xs font-medium text-accent">Javob — {{ c.answered_by.username }}</p>
+    <p class="whitespace-pre-wrap text-sm">{{ c.answer }}</p>
+  </div>
+  {% elif user.is_staff %}
+  <form method="post" action="{% url 'contests:answer_clarification' contest.pk c.pk %}" class="flex gap-2">
+    {% csrf_token %}
+    <textarea name="answer" required rows="2" class="ca-input flex-1" placeholder="Javob yozing…"></textarea>
+    <button type="submit" class="ca-btn ca-btn-success self-end text-sm">Javob berish</button>
+  </form>
+  {% else %}
+  <p class="text-sm text-mute">Hali javob berilmagan.</p>
+  {% endif %}
+</div>
+{% endfor %}
+</div>
+{% else %}
+<div class="ca-empty">Hali savol yo‘q.</div>
+{% endif %}
+{% endblock %}

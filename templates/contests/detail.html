@@ -31,7 +31,12 @@
 
 <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
   <h2 class="text-lg font-semibold">Masalalar</h2>
-  <a class="ca-link text-sm" href="{% url 'contests:standings' contest.pk %}">Turnir jadvali →</a>
+  <div class="flex gap-3">
+    {% if registered or user.is_staff %}
+    <a class="ca-link text-sm" href="{% url 'contests:clarifications' contest.pk %}">Savol-javoblar →</a>
+    {% endif %}
+    <a class="ca-link text-sm" href="{% url 'contests:standings' contest.pk %}">Turnir jadvali →</a>
+  </div>
 </div>
 
 {% if problems %}

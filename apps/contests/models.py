@@ -66,3 +66,27 @@ class Participation(models.Model):
 
     class Meta:
         unique_together = ("user", "contest")
+
+
+class Clarification(models.Model):
+    """Contest Q&A. An unanswered question is visible only to its asker and
+    staff; once answered it's visible to every participant (standard CP
+    clarification-board behavior — answers are shared, questions in flight
+    aren't)."""
+    contest = models.ForeignKey(Contest, on_delete=models.CASCADE, related_name="clarifications")
+    problem = models.ForeignKey(ContestProblem, null=True, blank=True, on_delete=models.CASCADE,
+                                related_name="clarifications")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="clarifications")
+    question = models.TextField()
+    answer = models.TextField(blank=True)
+    answered_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True,
+                                    on_delete=models.SET_NULL, related_name="+")
+    created = models.DateTimeField(auto_now_add=True)
+    answered_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created"]
+
+    @property
+    def is_answered(self) -> bool:
+        return bool(self.answered_at)

@@ -100,6 +100,15 @@ form level). Password reset uses Django's built-in views at
 No email-verification-on-signup gate — registration works with an unverified
 email, same as before. Add one later if fake/typo'd emails become a problem.
 
+## Contest clarifications
+
+`/contests/<id>/clarifications/` is a Q&A board for a running contest.
+Registered participants (and staff) can ask a question, optionally tied to
+one problem. An unanswered question is visible only to its asker and staff;
+once staff answers it, it's visible to every participant — standard CP
+clarification-board behavior, so answers get shared but questions in flight
+don't leak a hint to everyone.
+
 ## Tests
 
     pytest                                             # unit

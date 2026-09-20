@@ -9,7 +9,7 @@ from apps.accounts.models import User
 from apps.problems.models import Language, Problem
 from apps.submissions.models import Submission
 
-from .models import Contest, ContestProblem, Participation
+from .models import Clarification, Contest, ContestProblem, Participation
 from .standings import compute_standings
 
 
@@ -297,3 +297,95 @@ def test_close_ended_contests_makes_problems_public(problem_a, problem_b, python
     problem_b.refresh_from_db()
     assert problem_a.is_public is True
     assert problem_b.is_public is False
+
+
+@pytest.mark.django_db
+def test_ask_clarification_as_participant(client, contest):
+    user = User.objects.create_user("ali", password="x")
+    Participation.objects.create(user=user, contest=contest)
+    client.force_login(user)
+    r = client.post(reverse("contests:ask_clarification", args=[contest.pk]), {"question": "Time limit?"})
+    assert r.status_code == 302
+    assert Clarification.objects.filter(contest=contest, user=user, question="Time limit?").exists()
+
+
+@pytest.mark.django_db
+def test_ask_clarification_rejects_non_participant(client, contest):
+    user = User.objects.create_user("ali", password="x")
+    client.force_login(user)
+    r = client.post(reverse("contests:ask_clarification", args=[contest.pk]), {"question": "Time limit?"})
+    assert r.status_code == 400
+    assert not Clarification.objects.exists()
+
+
+@pytest.mark.django_db
+def test_ask_clarification_rejects_after_contest_end(client, problem_a):
+    ended = Contest.objects.create(title="Past", start=timezone.now() - timezone.timedelta(hours=2),
+                                   end=timezone.now() - timezone.timedelta(hours=1))
+    user = User.objects.create_user("ali", password="x")
+    Participation.objects.create(user=user, contest=ended)
+    client.force_login(user)
+    r = client.post(reverse("contests:ask_clarification", args=[ended.pk]), {"question": "?"})
+    assert r.status_code == 400
+
+
+@pytest.mark.django_db
+def test_unanswered_clarification_hidden_from_other_participants(client, contest):
+    asker = User.objects.create_user("asker", password="x")
+    other = User.objects.create_user("other", password="x")
+    Participation.objects.create(user=asker, contest=contest)
+    Participation.objects.create(user=other, contest=contest)
+    Clarification.objects.create(contest=contest, user=asker, question="secret?")
+
+    client.force_login(other)
+    r = client.get(reverse("contests:clarifications", args=[contest.pk]))
+    assert list(r.context["clars"]) == []
+
+    client.force_login(asker)
+    r = client.get(reverse("contests:clarifications", args=[contest.pk]))
+    assert len(r.context["clars"]) == 1
+
+
+@pytest.mark.django_db
+def test_unanswered_clarification_visible_to_staff(client, contest):
+    asker = User.objects.create_user("asker", password="x")
+    staff = User.objects.create_user("staff", password="x", is_staff=True)
+    Participation.objects.create(user=asker, contest=contest)
+    Clarification.objects.create(contest=contest, user=asker, question="secret?")
+
+    client.force_login(staff)
+    r = client.get(reverse("contests:clarifications", args=[contest.pk]))
+    assert len(r.context["clars"]) == 1
+
+
+@pytest.mark.django_db
+def test_staff_can_answer_clarification_then_visible_to_all(client, contest):
+    asker = User.objects.create_user("asker", password="x")
+    other = User.objects.create_user("other", password="x")
+    staff = User.objects.create_user("staff", password="x", is_staff=True)
+    Participation.objects.create(user=asker, contest=contest)
+    Participation.objects.create(user=other, contest=contest)
+    clar = Clarification.objects.create(contest=contest, user=asker, question="secret?")
+
+    client.force_login(staff)
+    r = client.post(reverse("contests:answer_clarification", args=[contest.pk, clar.pk]), {"answer": "yes"})
+    assert r.status_code == 302
+    clar.refresh_from_db()
+    assert clar.answer == "yes" and clar.answered_by == staff and clar.answered_at is not None
+
+    client.force_login(other)
+    r = client.get(reverse("contests:clarifications", args=[contest.pk]))
+    assert len(r.context["clars"]) == 1
+
+
+@pytest.mark.django_db
+def test_non_staff_cannot_answer_clarification(client, contest):
+    asker = User.objects.create_user("asker", password="x")
+    Participation.objects.create(user=asker, contest=contest)
+    clar = Clarification.objects.create(contest=contest, user=asker, question="secret?")
+
+    client.force_login(asker)
+    r = client.post(reverse("contests:answer_clarification", args=[contest.pk, clar.pk]), {"answer": "yes"})
+    assert r.status_code == 302  # staff_member_required redirects to admin login
+    clar.refresh_from_db()
+    assert clar.answer == ""
