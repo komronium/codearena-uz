@@ -1,28 +1,68 @@
 {% extends "base.html" %}
 {% block title %}{{ contest.title }} — Nazorat hisoboti{% endblock %}
 {% block content %}
-<h1 class="text-2xl font-bold mb-4">{{ contest.title }} — Nazorat hisoboti</h1>
+<div class="mb-6">
+  <h1 class="text-2xl font-semibold tracking-tight text-pretty">Nazorat hisoboti</h1>
+  <p class="mt-1 text-sm text-mute">{{ contest.title }}</p>
+</div>
 
-<h2 class="text-xl font-semibold mb-2">Diqqat yo'qotish hodisalari</h2>
-<table class="w-full bg-white rounded shadow mb-6">
-  <tr class="text-left border-b"><th class="p-2">Foydalanuvchi</th><th class="p-2">Blur</th><th class="p-2">Focus</th><th class="p-2">Paste</th><th class="p-2">Copy</th></tr>
-  {% for user, c in counts.items %}
-  <tr class="border-b"><td class="p-2">{{ user.username }}</td><td class="p-2">{{ c.blur }}</td>
-    <td class="p-2">{{ c.focus }}</td><td class="p-2">{{ c.paste }}</td><td class="p-2">{{ c.copy }}</td></tr>
-  {% empty %}
-  <tr><td class="p-2 text-gray-500" colspan="5">Hodisa yo'q.</td></tr>
-  {% endfor %}
-</table>
+<section class="mb-8">
+  <h2 class="mb-3 text-lg font-semibold">Diqqat yo‘qotish hodisalari</h2>
+  <div class="overflow-x-auto">
+  <table class="ca-table">
+    <thead>
+      <tr>
+        <th>Foydalanuvchi</th>
+        <th class="text-right">Blur</th>
+        <th class="text-right">Focus</th>
+        <th class="text-right">Paste</th>
+        <th class="text-right">Copy</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for user, c in counts.items %}
+    <tr>
+      <td>{{ user.username }}</td>
+      <td class="tabular text-right">{{ c.blur }}</td>
+      <td class="tabular text-right">{{ c.focus }}</td>
+      <td class="tabular text-right">{{ c.paste }}</td>
+      <td class="tabular text-right">{{ c.copy }}</td>
+    </tr>
+    {% empty %}
+    <tr><td class="text-mute" colspan="5">Hodisa yo‘q.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</section>
 
-<h2 class="text-xl font-semibold mb-2">O'xshashlik belgilari</h2>
-<table class="w-full bg-white rounded shadow">
-  <tr class="text-left border-b"><th class="p-2">Masala</th><th class="p-2">A</th><th class="p-2">B</th><th class="p-2">Ball</th><th class="p-2">Ko'rildi</th></tr>
-  {% for f in flags %}
-  <tr class="border-b"><td class="p-2">{{ f.submission_a.problem.title }}</td>
-    <td class="p-2">{{ f.submission_a.user.username }}</td><td class="p-2">{{ f.submission_b.user.username }}</td>
-    <td class="p-2">{{ f.score|floatformat:2 }}</td><td class="p-2">{{ f.reviewed|yesno:"ha,yo'q" }}</td></tr>
-  {% empty %}
-  <tr><td class="p-2 text-gray-500" colspan="5">Belgi yo'q.</td></tr>
-  {% endfor %}
-</table>
+<section>
+  <h2 class="mb-3 text-lg font-semibold">O‘xshashlik belgilari</h2>
+  <div class="overflow-x-auto">
+  <table class="ca-table">
+    <thead>
+      <tr>
+        <th>Masala</th>
+        <th>A</th>
+        <th>B</th>
+        <th class="text-right">Ball</th>
+        <th>Ko‘rildi</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for f in flags %}
+    <tr>
+      <td class="min-w-0 max-w-xs truncate">{{ f.submission_a.problem.title }}</td>
+      <td>{{ f.submission_a.user.username }}</td>
+      <td>{{ f.submission_b.user.username }}</td>
+      <td class="tabular text-right">{{ f.score|floatformat:2 }}</td>
+      <td>{{ f.reviewed|yesno:"ha,yo‘q" }}</td>
+    </tr>
+    {% empty %}
+    <tr><td class="text-mute" colspan="5">Belgi yo‘q.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</section>
 {% endblock %}

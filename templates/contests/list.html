@@ -1,13 +1,35 @@
 {% extends "base.html" %}
 {% block title %}Kontestlar{% endblock %}
 {% block content %}
-<h1 class="text-2xl font-bold mb-4">Kontestlar</h1>
-<table class="w-full bg-white rounded shadow">
-  <tr class="text-left border-b"><th class="p-2">Nomi</th><th class="p-2">Boshlanishi</th><th class="p-2">Tugashi</th><th class="p-2">Turi</th></tr>
+<div class="mb-6">
+  <h1 class="text-2xl font-semibold tracking-tight">Kontestlar</h1>
+  <p class="mt-1 text-sm text-mute">Yaqin va o‘tgan musobaqalar</p>
+</div>
+
+{% if contests %}
+<div class="overflow-x-auto">
+<table class="ca-table">
+  <thead>
+    <tr>
+      <th>Nomi</th>
+      <th>Boshlanishi</th>
+      <th>Tugashi</th>
+      <th>Turi</th>
+    </tr>
+  </thead>
+  <tbody>
   {% for c in contests %}
-  <tr class="border-b"><td class="p-2"><a class="text-blue-600" href="{% url 'contests:detail' c.pk %}">{{ c.title }}</a></td>
-    <td class="p-2">{{ c.start|date:"d.m H:i" }}</td><td class="p-2">{{ c.end|date:"d.m H:i" }}</td>
-    <td class="p-2">{{ c.get_type_display }}</td></tr>
+  <tr>
+    <td class="min-w-0 max-w-sm truncate"><a class="ca-link" href="{% url 'contests:detail' c.pk %}">{{ c.title }}</a></td>
+    <td class="tabular text-mute">{{ c.start|date:"d.m H:i" }}</td>
+    <td class="tabular text-mute">{{ c.end|date:"d.m H:i" }}</td>
+    <td class="text-mute">{{ c.get_type_display }}</td>
+  </tr>
   {% endfor %}
+  </tbody>
 </table>
+</div>
+{% else %}
+<div class="ca-empty">Hali kontest yo‘q.</div>
+{% endif %}
 {% endblock %}

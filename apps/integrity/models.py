@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 from django.conf import settings
 from django.db import models
 
@@ -18,7 +20,7 @@ class FocusEvent(models.Model):
     at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        indexes = [models.Index(fields=["contest", "user"])]
+        indexes: ClassVar[list[models.Index]] = [models.Index(fields=["contest", "user"])]
 
 
 class SimilarityFlag(models.Model):

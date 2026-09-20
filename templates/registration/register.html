@@ -1,9 +1,37 @@
 {% extends "base.html" %}
 {% block title %}Ro'yxatdan o'tish{% endblock %}
 {% block content %}
-<h1 class="text-2xl font-bold mb-4">Ro'yxatdan o'tish</h1>
-<form method="post" class="space-y-3 max-w-sm">{% csrf_token %}
-  {{ form.as_p }}
-  <button class="px-4 py-2 bg-blue-600 text-white rounded">Yaratish</button>
-</form>
+<div class="mx-auto max-w-sm">
+  <h1 class="mb-1 text-2xl font-semibold tracking-tight">Ro‘yxatdan o‘tish</h1>
+  <p class="mb-6 text-sm text-mute">Yangi hisob yarating</p>
+  <form method="post" class="ca-panel space-y-4">{% csrf_token %}
+    {% if form.non_field_errors %}
+    <div class="rounded-[var(--ca-radius)] border border-bad/30 bg-bad-soft px-3 py-2 text-sm text-bad" role="alert">
+      {{ form.non_field_errors }}
+    </div>
+    {% endif %}
+    <div>
+      <label class="ca-label" for="id_username">Foydalanuvchi nomi</label>
+      <input class="ca-input" type="text" name="username" id="id_username" value="{{ form.username.value|default:'' }}"
+             autocomplete="username" spellcheck="false" required autofocus>
+      {% if form.username.errors %}<p class="mt-1 text-sm text-bad">{{ form.username.errors.0 }}</p>{% endif %}
+    </div>
+    <div>
+      <label class="ca-label" for="id_password1">Parol</label>
+      <input class="ca-input" type="password" name="password1" id="id_password1"
+             autocomplete="new-password" required>
+      {% if form.password1.errors %}<p class="mt-1 text-sm text-bad">{{ form.password1.errors.0 }}</p>{% endif %}
+    </div>
+    <div>
+      <label class="ca-label" for="id_password2">Parolni tasdiqlang</label>
+      <input class="ca-input" type="password" name="password2" id="id_password2"
+             autocomplete="new-password" required>
+      {% if form.password2.errors %}<p class="mt-1 text-sm text-bad">{{ form.password2.errors.0 }}</p>{% endif %}
+    </div>
+    <button type="submit" class="ca-btn ca-btn-primary w-full">Yaratish</button>
+  </form>
+  <p class="mt-4 text-center text-sm text-mute">
+    Allaqachon hisobingiz bormi? <a class="ca-link" href="{% url 'login' %}">Kirish</a>
+  </p>
+</div>
 {% endblock %}

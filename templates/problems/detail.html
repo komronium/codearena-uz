@@ -1,71 +1,118 @@
 {% extends "base.html" %}
 {% block title %}{{ problem.title }}{% endblock %}
 {% block content %}
-<h1 class="text-2xl font-bold">{{ problem.title }}</h1>
-<p class="text-sm text-gray-500 mb-4">TL: {{ problem.tl_ms }} ms · ML: {{ problem.ml_mb }} MB · {{ problem.points }} ball</p>
-<div class="prose max-w-none bg-white p-4 rounded shadow">{{ statement_html|safe }}</div>
-{% if problem.statement_image %}<img class="my-4 rounded" src="{{ problem.statement_image.url }}" alt="">{% endif %}
-
-<h2 class="text-xl font-semibold mt-6 mb-2">Namunalar</h2>
-{% for t in problem.samples %}
-<div class="grid grid-cols-2 gap-4 mb-3">
-  <div><div class="text-sm text-gray-500">Kirish</div><pre class="bg-gray-100 p-2 rounded">{{ t.input }}</pre></div>
-  <div><div class="text-sm text-gray-500">Chiqish</div><pre class="bg-gray-100 p-2 rounded">{{ t.expected }}</pre></div>
+<div class="mb-6">
+  <h1 class="text-2xl font-semibold tracking-tight text-pretty">{{ problem.title }}</h1>
+  <p class="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-sm text-mute">
+    <span>TL <span class="tabular font-medium text-ink">{{ problem.tl_ms }}</span> ms</span>
+    <span aria-hidden="true">·</span>
+    <span>ML <span class="tabular font-medium text-ink">{{ problem.ml_mb }}</span> MB</span>
+    <span aria-hidden="true">·</span>
+    <span><span class="tabular font-medium text-ink">{{ problem.points }}</span> ball</span>
+  </p>
 </div>
-{% endfor %}
 
 {% if contest %}
-<p class="mt-4 mb-2 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded p-2">
-  Kontest rejimi: "{{ contest.title }}". Nusxa ko'chirish/joylashtirish o'chirilgan; oyna almashtirishlar qayd etiladi.
+<p class="mb-4 rounded-[var(--ca-radius)] border border-warn/30 bg-warn-soft px-3 py-2 text-sm text-warn" role="status">
+  Kontest rejimi: «{{ contest.title }}». Nusxa ko‘chirish/joylashtirish o‘chirilgan; oyna almashtirishlar qayd etiladi.
 </p>
 {% endif %}
 
-{% if user.is_authenticated %}
-<h2 class="text-xl font-semibold mt-6 mb-2">Yechim yuborish</h2>
-<form method="post" action="{% url 'submissions:submit' problem.slug %}" id="submit-form">{% csrf_token %}
-  <select name="language" class="border p-1 rounded mb-2">
-    {% for l in languages %}<option value="{{ l.code }}">{{ l.name }}</option>{% endfor %}
-  </select>
-  <div id="editor" class="border rounded bg-white min-h-[300px] {% if contest %}select-none{% endif %}"></div>
-  <textarea name="source" id="source" hidden></textarea>
-  <button class="mt-3 px-4 py-2 bg-green-600 text-white rounded">Yuborish</button>
-</form>
-<script type="module">
-  import { EditorView, basicSetup } from "https://esm.sh/codemirror@6.0.1";
-  import { python } from "https://esm.sh/@codemirror/lang-python@6.1.6";
-  const view = new EditorView({ doc: "", extensions: [basicSetup, python()], parent: document.getElementById("editor") });
-  document.getElementById("submit-form").addEventListener("submit", () => {
-    document.getElementById("source").value = view.state.doc.toString();
-  });
-</script>
-{% if contest %}
-<script>
-  // Contest mode (spec §4.1): deterrent only, not a real anti-cheat guarantee.
-  (function () {
-    const contestId = {{ contest.pk }};
-    const editor = document.getElementById("editor");
-    ["paste", "copy", "cut"].forEach((evt) =>
-      editor.addEventListener(evt, (e) => e.preventDefault()));
+<div class="grid gap-8 lg:grid-cols-2 lg:items-start">
+  <section class="space-y-5" aria-label="Masala matni">
+    <div class="ca-panel prose max-w-none text-[0.95rem] leading-relaxed">{{ statement_html|safe }}</div>
+    {% if problem.statement_image %}
+    <img class="w-full rounded-[var(--ca-radius)] border border-line" src="{{ problem.statement_image.url }}" alt="Masala rasmi" loading="lazy">
+    {% endif %}
 
-    function report(kind) {
-      fetch("{% url 'integrity:event' %}", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          "X-CSRFToken": "{{ csrf_token }}",
-        },
-        body: `contest_id=${contestId}&kind=${kind}`,
+    <div>
+      <h2 class="mb-3 text-lg font-semibold">Namunalar</h2>
+      {% for t in problem.samples %}
+      <div class="mb-3 grid gap-3 sm:grid-cols-2">
+        <div>
+          <div class="ca-label">Kirish</div>
+          <pre class="overflow-x-auto rounded-[var(--ca-radius)] border border-line bg-[#F0F2F5] p-3 text-sm font-mono">{{ t.input }}</pre>
+        </div>
+        <div>
+          <div class="ca-label">Chiqish</div>
+          <pre class="overflow-x-auto rounded-[var(--ca-radius)] border border-line bg-[#F0F2F5] p-3 text-sm font-mono">{{ t.expected }}</pre>
+        </div>
+      </div>
+      {% empty %}
+      <div class="ca-empty text-sm">Namuna yo‘q.</div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="lg:sticky lg:top-20" aria-label="Yechim yuborish">
+    {% if user.is_authenticated %}
+    <div class="ca-panel">
+      <h2 class="mb-4 text-lg font-semibold">Yechim yuborish</h2>
+      <form method="post" action="{% url 'submissions:submit' problem.slug %}" id="submit-form" class="space-y-3">
+        {% csrf_token %}
+        <div>
+          <label class="ca-label" for="language">Til</label>
+          <select name="language" id="language" class="ca-select">
+            {% for l in languages %}<option value="{{ l.code }}">{{ l.name }}</option>{% endfor %}
+          </select>
+        </div>
+        <div>
+          <label class="ca-label" for="editor">Kod</label>
+          <div id="editor" class="overflow-hidden border border-line bg-white {% if contest %}select-none{% endif %}" role="textbox" aria-label="Kod muharriri" aria-multiline="true"></div>
+          <textarea name="source" id="source" hidden></textarea>
+        </div>
+        <button type="submit" id="submit-btn" class="ca-btn ca-btn-success w-full sm:w-auto">Yuborish</button>
+      </form>
+    </div>
+    <script type="module">
+      import { EditorView, basicSetup } from "https://esm.sh/codemirror@6.0.1";
+      import { python } from "https://esm.sh/@codemirror/lang-python@6.1.6";
+      const view = new EditorView({
+        doc: "",
+        extensions: [basicSetup, python()],
+        parent: document.getElementById("editor"),
       });
-    }
-    window.addEventListener("blur", () => report("blur"));
-    window.addEventListener("focus", () => report("focus"));
-    document.addEventListener("visibilitychange", () => {
-      report(document.hidden ? "blur" : "focus");
-    });
-  })();
-</script>
-{% endif %}
-{% else %}
-<p class="mt-6"><a class="text-blue-600" href="{% url 'login' %}">Kirish</a> — yechim yuborish uchun.</p>
-{% endif %}
+      const form = document.getElementById("submit-form");
+      const btn = document.getElementById("submit-btn");
+      form.addEventListener("submit", () => {
+        document.getElementById("source").value = view.state.doc.toString();
+        btn.disabled = true;
+        btn.textContent = "Yuborilmoqda…";
+      });
+    </script>
+    {% if contest %}
+    <script>
+      (function () {
+        const contestId = {{ contest.pk }};
+        const editor = document.getElementById("editor");
+        ["paste", "copy", "cut"].forEach((evt) =>
+          editor.addEventListener(evt, (e) => e.preventDefault()));
+
+        function report(kind) {
+          fetch("{% url 'integrity:event' %}", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+              "X-CSRFToken": "{{ csrf_token }}",
+            },
+            body: `contest_id=${contestId}&kind=${kind}`,
+          });
+        }
+        window.addEventListener("blur", () => report("blur"));
+        window.addEventListener("focus", () => report("focus"));
+        document.addEventListener("visibilitychange", () => {
+          report(document.hidden ? "blur" : "focus");
+        });
+      })();
+    </script>
+    {% endif %}
+    {% else %}
+    <div class="ca-panel">
+      <p class="text-sm text-mute">
+        <a class="ca-link" href="{% url 'login' %}">Kirish</a> — yechim yuborish uchun.
+      </p>
+    </div>
+    {% endif %}
+  </section>
+</div>
 {% endblock %}

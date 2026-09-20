@@ -1,13 +1,41 @@
 {% extends "base.html" %}
 {% block title %}Yuborilganlar{% endblock %}
 {% block content %}
-<h1 class="text-2xl font-bold mb-4">Yuborilganlar</h1>
-<table class="w-full bg-white rounded shadow text-sm">
-  <tr class="text-left border-b"><th class="p-2">#</th><th class="p-2">Masala</th><th class="p-2">Til</th><th class="p-2">Verdikt</th><th class="p-2">Vaqt</th></tr>
+<div class="mb-6">
+  <h1 class="text-2xl font-semibold tracking-tight">Yuborilganlar</h1>
+  <p class="mt-1 text-sm text-mute">So‘nggi yubormalar</p>
+</div>
+
+{% if subs %}
+<div class="overflow-x-auto">
+<table class="ca-table">
+  <thead>
+    <tr>
+      <th class="w-20">#</th>
+      <th>Masala</th>
+      <th>Til</th>
+      <th>Verdikt</th>
+      <th class="text-right">Vaqt</th>
+    </tr>
+  </thead>
+  <tbody>
   {% for s in subs %}
-  <tr class="border-b"><td class="p-2"><a class="text-blue-600" href="{% url 'submissions:detail' s.pk %}">{{ s.pk }}</a></td>
-    <td class="p-2">{{ s.problem.title }}</td><td class="p-2">{{ s.language.name }}</td>
-    <td class="p-2 font-mono {% if s.verdict == 'AC' %}text-green-600{% endif %}">{{ s.verdict }}</td><td class="p-2">{{ s.created|date:"d.m H:i" }}</td></tr>
+  <tr>
+    <td class="tabular"><a class="ca-link" href="{% url 'submissions:detail' s.pk %}">{{ s.pk }}</a></td>
+    <td class="min-w-0 max-w-xs truncate">{{ s.problem.title }}</td>
+    <td class="text-mute">{{ s.language.name }}</td>
+    <td>
+      {% if s.verdict == 'AC' %}<span class="ca-verdict ca-verdict-ac">AC</span>
+      {% elif s.is_terminal %}<span class="ca-verdict ca-verdict-bad">{{ s.verdict }}</span>
+      {% else %}<span class="ca-verdict ca-verdict-pending">{{ s.verdict }}</span>{% endif %}
+    </td>
+    <td class="tabular text-right text-mute">{{ s.created|date:"d.m H:i" }}</td>
+  </tr>
   {% endfor %}
+  </tbody>
 </table>
+</div>
+{% else %}
+<div class="ca-empty">Hali yuborma yo‘q. <a class="ca-link" href="{% url 'problems:list' %}">Masalani tanlang</a>.</div>
+{% endif %}
 {% endblock %}

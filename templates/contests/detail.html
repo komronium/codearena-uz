@@ -1,35 +1,63 @@
 {% extends "base.html" %}
 {% block title %}{{ contest.title }}{% endblock %}
 {% block content %}
-<h1 class="text-2xl font-bold mb-2">{{ contest.title }}</h1>
-<p class="text-sm text-gray-500 mb-4">
-  {{ contest.start|date:"d.m H:i" }} — {{ contest.end|date:"d.m H:i" }} · {{ contest.get_type_display }}
-  {% if contest.is_rated %} · reytingli{% endif %}
-</p>
+<div class="mb-6">
+  <h1 class="text-2xl font-semibold tracking-tight text-pretty">{{ contest.title }}</h1>
+  <p class="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-sm text-mute">
+    <span class="tabular">{{ contest.start|date:"d.m H:i" }} — {{ contest.end|date:"d.m H:i" }}</span>
+    <span aria-hidden="true">·</span>
+    <span>{{ contest.get_type_display }}</span>
+    {% if contest.is_rated %}<span aria-hidden="true">·</span><span class="font-medium text-accent">reytingli</span>{% endif %}
+  </p>
+</div>
 
 {% if user.is_authenticated and not registered and not contest.has_ended %}
-<form method="post" action="{% url 'contests:register' contest.pk %}" class="mb-4">{% csrf_token %}
-  <button class="px-4 py-2 bg-green-600 text-white rounded">Ro'yxatdan o'tish</button>
+<form method="post" action="{% url 'contests:register' contest.pk %}" class="mb-6" id="contest-register-form">
+  {% csrf_token %}
+  <button type="submit" class="ca-btn ca-btn-success" id="contest-register-btn">Ro‘yxatdan o‘tish</button>
 </form>
+<script>
+  document.getElementById("contest-register-form").addEventListener("submit", () => {
+    const b = document.getElementById("contest-register-btn");
+    b.disabled = true;
+    b.textContent = "Yuborilmoqda…";
+  });
+</script>
 {% elif registered %}
-<p class="mb-4 text-green-700">Siz ro'yxatdan o'tgansiz.</p>
+<p class="mb-6 inline-flex items-center rounded-full border border-ok/30 bg-ok-soft px-3 py-1 text-sm font-medium text-ok">
+  Siz ro‘yxatdan o‘tgansiz
+</p>
 {% endif %}
 
-<h2 class="text-xl font-semibold mb-2">Masalalar</h2>
-<table class="w-full bg-white rounded shadow mb-4">
-  <tr class="text-left border-b"><th class="p-2">#</th><th class="p-2">Nomi</th><th class="p-2">Ball</th></tr>
+<div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+  <h2 class="text-lg font-semibold">Masalalar</h2>
+  <a class="ca-link text-sm" href="{% url 'contests:standings' contest.pk %}">Turnir jadvali →</a>
+</div>
+
+{% if problems %}
+<div class="overflow-x-auto">
+<table class="ca-table mb-2">
+  <thead>
+    <tr><th class="w-16">#</th><th>Nomi</th><th class="text-right">Ball</th></tr>
+  </thead>
+  <tbody>
   {% for cp in problems %}
-  <tr class="border-b"><td class="p-2">{{ cp.label }}</td>
-    <td class="p-2">
+  <tr>
+    <td class="font-mono font-semibold text-accent">{{ cp.label }}</td>
+    <td class="min-w-0 max-w-md truncate">
       {% if registered or contest.has_ended %}
-        <a class="text-blue-600" href="{% url 'problems:detail' cp.problem.slug %}">{{ cp.problem.title }}</a>
+        <a class="ca-link" href="{% url 'problems:detail' cp.problem.slug %}">{{ cp.problem.title }}</a>
       {% else %}
-        <span class="text-gray-400">ro'yxatdan o'tgach ko'rinadi</span>
+        <span class="text-mute">ro‘yxatdan o‘tgach ko‘rinadi</span>
       {% endif %}
     </td>
-    <td class="p-2">{{ cp.points }}</td></tr>
+    <td class="tabular text-right">{{ cp.points }}</td>
+  </tr>
   {% endfor %}
+  </tbody>
 </table>
-
-<a class="text-blue-600" href="{% url 'contests:standings' contest.pk %}">Turnir jadvali</a>
+</div>
+{% else %}
+<div class="ca-empty">Masalalar hali qo‘shilmagan.</div>
+{% endif %}
 {% endblock %}

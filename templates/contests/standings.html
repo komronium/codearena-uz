@@ -1,20 +1,46 @@
 {% extends "base.html" %}
 {% block title %}{{ contest.title }} — Turnir jadvali{% endblock %}
 {% block content %}
-<h1 class="text-2xl font-bold mb-4">{{ contest.title }} — Turnir jadvali</h1>
-<table class="w-full bg-white rounded shadow">
-  <tr class="text-left border-b">
-    <th class="p-2">#</th><th class="p-2">Foydalanuvchi</th>
-    {% if contest.type == "icpc" %}<th class="p-2">Yechilgan</th><th class="p-2">Jarima</th>
-    {% else %}<th class="p-2">Ball</th>{% endif %}
-  </tr>
+<div class="mb-6 flex flex-wrap items-end justify-between gap-3">
+  <div>
+    <h1 class="text-2xl font-semibold tracking-tight text-pretty">Turnir jadvali</h1>
+    <p class="mt-1 text-sm text-mute">{{ contest.title }}</p>
+  </div>
+  <a class="ca-link text-sm" href="{% url 'contests:detail' contest.pk %}">← Kontest</a>
+</div>
+
+{% if rows %}
+<div class="overflow-x-auto">
+<table class="ca-table">
+  <thead>
+    <tr>
+      <th class="w-16">#</th>
+      <th>Foydalanuvchi</th>
+      {% if contest.type == "icpc" %}
+      <th class="text-right">Yechilgan</th>
+      <th class="text-right">Jarima</th>
+      {% else %}
+      <th class="text-right">Ball</th>
+      {% endif %}
+    </tr>
+  </thead>
+  <tbody>
   {% for r in rows %}
-  <tr class="border-b">
-    <td class="p-2">{{ r.rank }}</td>
-    <td class="p-2"><a class="text-blue-600" href="{% url 'profile' r.user.username %}">{{ r.user.username }}</a></td>
-    {% if contest.type == "icpc" %}<td class="p-2">{{ r.solved }}</td><td class="p-2">{{ r.penalty }}</td>
-    {% else %}<td class="p-2">{{ r.score }}</td>{% endif %}
+  <tr>
+    <td class="tabular font-medium">{{ r.rank }}</td>
+    <td><a class="ca-link" href="{% url 'profile' r.user.username %}">{{ r.user.username }}</a></td>
+    {% if contest.type == "icpc" %}
+    <td class="tabular text-right">{{ r.solved }}</td>
+    <td class="tabular text-right text-mute">{{ r.penalty }}</td>
+    {% else %}
+    <td class="tabular text-right">{{ r.score }}</td>
+    {% endif %}
   </tr>
   {% endfor %}
+  </tbody>
 </table>
+</div>
+{% else %}
+<div class="ca-empty">Hali ishtirokchi yo‘q.</div>
+{% endif %}
 {% endblock %}

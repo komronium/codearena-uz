@@ -1,9 +1,31 @@
 {% extends "base.html" %}
 {% block title %}Kirish{% endblock %}
 {% block content %}
-<h1 class="text-2xl font-bold mb-4">Kirish</h1>
-<form method="post" class="space-y-3 max-w-sm">{% csrf_token %}
-  {{ form.as_p }}
-  <button class="px-4 py-2 bg-blue-600 text-white rounded">Kirish</button>
-</form>
+<div class="mx-auto max-w-sm">
+  <h1 class="mb-1 text-2xl font-semibold tracking-tight">Kirish</h1>
+  <p class="mb-6 text-sm text-mute">Hisobingizga kiring</p>
+  <form method="post" class="ca-panel space-y-4">{% csrf_token %}
+    {% if form.non_field_errors %}
+    <div class="rounded-[var(--ca-radius)] border border-bad/30 bg-bad-soft px-3 py-2 text-sm text-bad" role="alert">
+      {{ form.non_field_errors }}
+    </div>
+    {% endif %}
+    <div>
+      <label class="ca-label" for="id_username">Foydalanuvchi nomi</label>
+      <input class="ca-input" type="text" name="username" id="id_username" value="{{ form.username.value|default:'' }}"
+             autocomplete="username" spellcheck="false" required autofocus>
+      {% if form.username.errors %}<p class="mt-1 text-sm text-bad">{{ form.username.errors.0 }}</p>{% endif %}
+    </div>
+    <div>
+      <label class="ca-label" for="id_password">Parol</label>
+      <input class="ca-input" type="password" name="password" id="id_password"
+             autocomplete="current-password" required>
+      {% if form.password.errors %}<p class="mt-1 text-sm text-bad">{{ form.password.errors.0 }}</p>{% endif %}
+    </div>
+    <button type="submit" class="ca-btn ca-btn-primary w-full">Kirish</button>
+  </form>
+  <p class="mt-4 text-center text-sm text-mute">
+    Hisob yo‘qmi? <a class="ca-link" href="{% url 'register' %}">Ro‘yxatdan o‘ting</a>
+  </p>
+</div>
 {% endblock %}

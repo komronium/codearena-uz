@@ -1,9 +1,23 @@
 {% extends "base.html" %}
 {% block title %}Yuborma #{{ s.pk }}{% endblock %}
 {% block content %}
-<h1 class="text-2xl font-bold mb-2">Yuborma #{{ s.pk }} — <a class="text-blue-600" href="{% url 'problems:detail' s.problem.slug %}">{{ s.problem.title }}</a></h1>
-<p class="text-sm text-gray-500 mb-4">{{ s.language.name }} · {{ s.created }}</p>
-<div id="status" hx-get="{% url 'submissions:status' s.pk %}" hx-trigger="load">{% include "submissions/_status.html" with results=s.results.all %}</div>
-<h2 class="text-lg font-semibold mt-6 mb-2">Kod</h2>
-<pre class="bg-gray-900 text-gray-100 p-4 rounded overflow-x-auto text-sm">{{ s.source }}</pre>
+<div class="mb-6">
+  <h1 class="text-2xl font-semibold tracking-tight text-pretty">
+    Yuborma <span class="tabular">#{{ s.pk }}</span>
+  </h1>
+  <p class="mt-1.5 text-sm text-mute">
+    <a class="ca-link" href="{% url 'problems:detail' s.problem.slug %}">{{ s.problem.title }}</a>
+    <span aria-hidden="true"> · </span>{{ s.language.name }}
+    <span aria-hidden="true"> · </span><time datetime="{{ s.created|date:'c' }}">{{ s.created|date:"d.m.Y H:i" }}</time>
+  </p>
+</div>
+
+<div id="status" class="mb-8" hx-get="{% url 'submissions:status' s.pk %}" hx-trigger="load">
+  {% include "submissions/_status.html" with results=s.results.all %}
+</div>
+
+<section>
+  <h2 class="mb-3 text-lg font-semibold">Kod</h2>
+  <pre class="overflow-x-auto rounded-[var(--ca-radius)] border border-line bg-ink p-4 text-sm font-mono text-[#E8ECF1]" translate="no">{{ s.source }}</pre>
+</section>
 {% endblock %}

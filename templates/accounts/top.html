@@ -1,19 +1,36 @@
 {% extends "base.html" %}
 {% block title %}Top{% endblock %}
 {% block content %}
-<h1 class="text-2xl font-bold mb-4">Top (amaliyot ballari)</h1>
-<table class="w-full bg-white rounded shadow">
-  <tr class="text-left border-b"><th class="p-2">#</th><th class="p-2">Foydalanuvchi</th><th class="p-2">Ball</th></tr>
-  {% for u in users %}
-  <tr class="border-b"><td class="p-2">{{ forloop.counter0|add:users.start_index }}</td>
-    <td class="p-2"><a class="text-blue-600" href="{% url 'profile' u.username %}">{{ u.username }}</a></td>
-    <td class="p-2">{{ u.practice_points }}</td></tr>
-  {% endfor %}
-</table>
-{% if users.has_other_pages %}
-<div class="mt-4 flex gap-4">
-  {% if users.has_previous %}<a class="text-blue-600" href="?page={{ users.previous_page_number }}">Oldingi</a>{% endif %}
-  {% if users.has_next %}<a class="text-blue-600" href="?page={{ users.next_page_number }}">Keyingi</a>{% endif %}
+<div class="mb-6">
+  <h1 class="text-2xl font-semibold tracking-tight">Top</h1>
+  <p class="mt-1 text-sm text-mute">Amaliyot ballari bo‘yicha</p>
 </div>
+
+{% if users %}
+<div class="overflow-x-auto">
+<table class="ca-table">
+  <thead>
+    <tr><th class="w-16">#</th><th>Foydalanuvchi</th><th class="text-right">Ball</th></tr>
+  </thead>
+  <tbody>
+  {% for u in users %}
+  <tr>
+    <td class="tabular text-mute">{{ forloop.counter0|add:users.start_index }}</td>
+    <td><a class="ca-link" href="{% url 'profile' u.username %}">{{ u.username }}</a></td>
+    <td class="tabular text-right font-medium">{{ u.practice_points }}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% if users.has_other_pages %}
+<nav class="mt-4 flex items-center gap-4 text-sm" aria-label="Sahifalar">
+  {% if users.has_previous %}<a class="ca-link" href="?page={{ users.previous_page_number }}">← Oldingi</a>{% endif %}
+  <span class="tabular text-mute">{{ users.number }} / {{ users.paginator.num_pages }}</span>
+  {% if users.has_next %}<a class="ca-link" href="?page={{ users.next_page_number }}">Keyingi →</a>{% endif %}
+</nav>
+{% endif %}
+{% else %}
+<div class="ca-empty">Hali reyting yo‘q.</div>
 {% endif %}
 {% endblock %}
