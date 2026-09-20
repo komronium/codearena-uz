@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 
 from apps.accounts.models import User
-from apps.problems.models import Language, Problem, TestCase
+from apps.problems.models import Language, Problem, SQLDataset, TestCase
 
 
 class Command(BaseCommand):
@@ -18,6 +18,10 @@ class Command(BaseCommand):
             compile_cmd="javac Main.java", run_cmd="java Main", tl_multiplier=3.0))
         Language.objects.update_or_create(code="node", defaults=dict(
             name="JavaScript (Node)", docker_image="codearena-judge-node", run_cmd="node main.js", tl_multiplier=2.0))
+        # Marker row only — Problem.Kind.SQL submissions run via judge.sql_judge
+        # (stdlib sqlite3, no Docker); docker_image/run_cmd are unused for it.
+        Language.objects.update_or_create(code="sql", defaults=dict(
+            name="SQL (SQLite)", docker_image="-", run_cmd="-"))
         admin, _ = User.objects.get_or_create(username="admin", defaults=dict(role="admin", is_staff=True, is_superuser=True))
         if not admin.has_usable_password():
             admin.set_password("admin")
@@ -32,4 +36,17 @@ class Command(BaseCommand):
                 TestCase(problem=p, input="-5 5\n", expected="0\n", order=1),
                 TestCase(problem=p, input="1000000000 1000000000\n", expected="2000000000\n", order=2),
             ])
+        sql_p, created = Problem.objects.get_or_create(slug="older-than-21", defaults=dict(
+            title="21 yoshdan katta foydalanuvchilar", author=admin, kind=Problem.Kind.SQL,
+            tl_ms=1000, ml_mb=64, points=10,
+            statement_md="`users(id, name, age)` jadvali berilgan.\n\n"
+                         "21 yoshdan katta foydalanuvchilarning ismini, yosh bo'yicha o'sish "
+                         "tartibida chiqaring (bitta ustun: `name`)."))
+        if created:
+            SQLDataset.objects.create(
+                problem=sql_p,
+                schema_sql="CREATE TABLE users(id INTEGER, name TEXT, age INTEGER);",
+                seed_sql="INSERT INTO users VALUES (1,'Ali',20),(2,'Vali',25),(3,'Guli',22);",
+                expected_result="Guli\nVali",
+            )
         self.stdout.write(self.style.SUCCESS("seeded"))

@@ -25,6 +25,14 @@
     <img class="w-full rounded-[var(--ca-radius)] border border-line" src="{{ problem.statement_image.url }}" alt="Masala rasmi" loading="lazy">
     {% endif %}
 
+    {% if problem.kind == "sql" %}
+    <div>
+      <h2 class="mb-3 text-lg font-semibold">Jadval tuzilishi</h2>
+      <pre class="overflow-x-auto rounded-[var(--ca-radius)] border border-line bg-[#F0F2F5] p-3 text-sm font-mono">{{ sql_dataset.schema_sql }}</pre>
+      <h2 class="mb-3 mt-4 text-lg font-semibold">Namuna ma'lumotlar</h2>
+      <pre class="overflow-x-auto rounded-[var(--ca-radius)] border border-line bg-[#F0F2F5] p-3 text-sm font-mono">{{ sql_dataset.seed_sql }}</pre>
+    </div>
+    {% else %}
     <div>
       <h2 class="mb-3 text-lg font-semibold">Namunalar</h2>
       {% for t in problem.samples %}
@@ -42,6 +50,7 @@
       <div class="ca-empty text-sm">Namuna yo‘q.</div>
       {% endfor %}
     </div>
+    {% endif %}
   </section>
 
   <section class="lg:sticky lg:top-20" aria-label="Yechim yuborish">
@@ -66,10 +75,16 @@
     </div>
     <script type="module">
       import { EditorView, basicSetup } from "https://esm.sh/codemirror@6.0.1";
+      {% if problem.kind == "sql" %}
+      import { sql } from "https://esm.sh/@codemirror/lang-sql@6.9.1";
+      const langExt = sql();
+      {% else %}
       import { python } from "https://esm.sh/@codemirror/lang-python@6.1.6";
+      const langExt = python();
+      {% endif %}
       const view = new EditorView({
         doc: "",
-        extensions: [basicSetup, python()],
+        extensions: [basicSetup, langExt],
         parent: document.getElementById("editor"),
       });
       const form = document.getElementById("submit-form");

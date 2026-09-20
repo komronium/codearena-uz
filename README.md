@@ -65,6 +65,27 @@ a no-op if `rating_applied` is already set. Teacher-only per-contest report
 submit ("supervised mode") — checked again on every submit, not just at
 registration.
 
+## Problems, moderation, SQL problems
+
+Any logged-in user can submit a problem (`/moderation/submit/`) with its test
+cases in one form. Staff submissions go live immediately; student submissions
+land as `Problem.status="pending"` and need approval in the moderation queue
+(`/moderation/`, staff-only) before `is_public` flips true. The author (or
+staff) can always preview/submit against their own non-public problem.
+
+`Problem.kind` is `"code"` (default — stdin/stdout program, judged via
+`judge.runner` + the per-language Docker sandbox) or `"sql"` (a query
+problem: submitted SQL runs once against a `SQLDataset` fixture DB and the
+result rows are compared to `SQLDataset.expected_result`, row-order-insensitive).
+SQL problems are judged by `judge.sql_judge` using Python's stdlib `sqlite3`
+directly in the worker process — no Docker image, no new dependency. The
+student's query is sandboxed with `sqlite3.Connection.set_authorizer()`
+(only SELECT/read/function calls are allowed — no INSERT/UPDATE/DELETE/
+DROP/ATTACH/PRAGMA) and a `set_progress_handler()` wall-clock timeout
+(`problem.tl_ms`). Authoring a SQL problem (schema/seed/expected result) is
+admin-only for now, via the `SQLDataset` inline on the Problem admin page —
+the self-serve `/moderation/submit/` form only creates `kind="code"` problems.
+
 ## Tests
 
     pytest                                             # unit

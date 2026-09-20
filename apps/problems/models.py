@@ -33,11 +33,16 @@ class Problem(models.Model):
         APPROVED = "approved"  # staff-created or approved; is_public controls visibility
         REJECTED = "rejected"  # reviewed and declined — never public
 
+    class Kind(models.TextChoices):
+        CODE = "code"  # classic stdin/stdout program, judged via judge.runner + Docker sandbox
+        SQL = "sql"    # query problem, judged via judge.sql_judge against a SQLDataset
+
     slug = models.SlugField(unique=True)
     title = models.CharField(max_length=200)
     statement_md = models.TextField()
     statement_image = models.ImageField(upload_to="statements/", blank=True, null=True)
     difficulty = models.CharField(max_length=10, choices=Difficulty.choices, default=Difficulty.EASY)
+    kind = models.CharField(max_length=10, choices=Kind.choices, default=Kind.CODE)
     tl_ms = models.IntegerField(default=1000)
     ml_mb = models.IntegerField(default=256)
     points = models.IntegerField(default=100)
@@ -62,5 +67,14 @@ class TestCase(models.Model):
     is_sample = models.BooleanField(default=False)
     order = models.IntegerField(default=0)
 
-    class Meta:
-        ordering = ["order", "id"]
+
+class SQLDataset(models.Model):
+    """Fixture DB for a Problem.Kind.SQL problem. One dataset per problem — the
+    submitted query runs once against it (see judge.sql_judge), so there's no
+    per-testcase input/expected the way Kind.CODE problems have."""
+    problem = models.OneToOneField(Problem, on_delete=models.CASCADE, related_name="sql_dataset")
+    schema_sql = models.TextField(help_text="CREATE TABLE statements, run once per submission.")
+    seed_sql = models.TextField(help_text="INSERT statements, run once per submission.")
+    expected_result = models.TextField(
+        help_text="Correct query's result, one row per line, tab-separated values, no header. "
+                   "Row order doesn't matter (compared as a sorted set); column order does.")

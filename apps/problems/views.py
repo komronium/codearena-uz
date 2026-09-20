@@ -55,9 +55,14 @@ def problem_detail(request, slug):
     )
     if not problem.is_public and contest is None and not is_owner_or_staff:
         raise Http404
+    if problem.kind == Problem.Kind.SQL:
+        languages = Language.objects.filter(is_active=True, code="sql")
+    else:
+        languages = Language.objects.filter(is_active=True).exclude(code="sql")
     return render(request, "problems/detail.html", {
         "problem": problem,
         "statement_html": _render_statement(problem.statement_md),
-        "languages": Language.objects.filter(is_active=True),
+        "languages": languages,
+        "sql_dataset": getattr(problem, "sql_dataset", None),
         "contest": contest,
     })

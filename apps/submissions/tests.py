@@ -233,3 +233,71 @@ def test_runner_retry_while_running_does_not_duplicate_results(compile_, run_tes
     s.refresh_from_db()
     assert s.verdict == "AC"
     assert s.results.count() == 2
+
+
+@pytest.fixture
+def sql_lang(db):
+    return Language.objects.create(code="sql", name="SQL (SQLite)", docker_image="-", run_cmd="-")
+
+
+@pytest.fixture
+def sql_problem(db):
+    from apps.problems.models import SQLDataset
+
+    author = User.objects.create_user("teacher2", password="x")
+    p = Problem.objects.create(slug="older-than-21", title="21+", statement_md="x", author=author,
+                               kind=Problem.Kind.SQL, tl_ms=1000, points=10)
+    SQLDataset.objects.create(
+        problem=p,
+        schema_sql="CREATE TABLE users(id INTEGER, name TEXT, age INTEGER);",
+        seed_sql="INSERT INTO users VALUES (1,'ali',20),(2,'vali',25),(3,'guli',22);",
+        expected_result="guli\nvali",
+    )
+    return p
+
+
+def test_runner_sql_ac(sql_problem, sql_lang, user):
+    from judge.runner import run_submission
+    s = Submission.objects.create(user=user, problem=sql_problem, language=sql_lang,
+                                  source="SELECT name FROM users WHERE age > 21")
+    run_submission(s.pk)
+    s.refresh_from_db()
+    assert s.verdict == "AC" and s.passed == 1 and s.total == 1
+    assert s.results.count() == 0
+    user.refresh_from_db()
+    assert user.practice_points == 10
+
+
+def test_runner_sql_wa(sql_problem, sql_lang, user):
+    from judge.runner import run_submission
+    s = Submission.objects.create(user=user, problem=sql_problem, language=sql_lang,
+                                  source="SELECT name FROM users")
+    run_submission(s.pk)
+    s.refresh_from_db()
+    assert s.verdict == "WA"
+
+
+def test_runner_sql_denies_write_query(sql_problem, sql_lang, user):
+    from judge.runner import run_submission
+    s = Submission.objects.create(user=user, problem=sql_problem, language=sql_lang,
+                                  source="DELETE FROM users")
+    run_submission(s.pk)
+    s.refresh_from_db()
+    assert s.verdict == "RE"
+
+
+def test_submit_and_detail_render_for_sql_problem(client, sql_problem, sql_lang, user):
+    with patch("apps.submissions.views.django_rq.enqueue"):
+        client.force_login(user)
+        r = client.post(reverse("submissions:submit", args=[sql_problem.slug]),
+                        {"language": "sql", "source": "SELECT name FROM users"})
+        assert r.status_code == 302
+    s = Submission.objects.get(problem=sql_problem)
+    assert client.get(reverse("submissions:detail", args=[s.pk])).status_code == 200
+
+
+def test_problem_detail_shows_schema_not_testcase_samples(client, sql_problem, sql_lang):
+    r = client.get(reverse("problems:detail", args=[sql_problem.slug]))
+    assert r.status_code == 200
+    assert b"CREATE TABLE users" in r.content
+    assert b"Jadval tuzilishi" in r.content
