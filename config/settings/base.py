@@ -89,3 +89,6 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+PASSWORD_HASHERS = ["apps.accounts.hashers.PBKDF2Hasher300k",
+                    "django.contrib.auth.hashers.PBKDF2PasswordHasher"]
