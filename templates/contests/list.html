@@ -4,12 +4,8 @@
 <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
   <div>
     <h1 class="ca-page-title">Musobaqalar</h1>
-    <p class="mt-1 text-sm text-mute">Yaqin va o‘tgan musobaqalar</p>
+    <p class="mt-1 text-sm text-mute">Ballar yig‘indisi ko‘p bo‘lgan yutadi; teng bo‘lsa jarima vaqti kam bo‘lgan yuqori turadi</p>
   </div>
-  <p class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-mute">
-    <span>{% include "contests/_type.html" with c=icpc_sample %} ko‘proq masala yechgan yutadi</span>
-    <span>{% include "contests/_type.html" with c=score_sample %} ballar yig‘indisi ko‘p bo‘lgan yutadi</span>
-  </p>
 </div>
 
 {% if not running and not upcoming and not ended %}
@@ -27,9 +23,9 @@
   <table class="ca-table">
     <thead><tr>
       <th>Nomi</th>
-      <th class="hidden w-44 md:table-cell">Format</th>
       <th class="w-36">Boshlanishi</th>
       <th class="hidden w-28 sm:table-cell">Davomiyligi</th>
+      <th class="hidden w-28 md:table-cell text-right">Ishtirokchi</th>
       <th class="w-36 text-right">{{ section.last_col }}</th>
     </tr></thead>
     <tbody>

@@ -28,7 +28,6 @@ class Problem(models.Model):
         BEGINNER = "beginner", "Beginner"
         EASY = "easy", "Easy"
         MEDIUM = "medium", "Medium"
-        ADVANCED = "advanced", "Advanced"
         HARD = "hard", "Hard"
 
     class Status(models.TextChoices):

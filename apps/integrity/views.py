@@ -13,7 +13,7 @@ from apps.submissions.models import Submission
 from .models import FocusEvent, SimilarityFlag
 
 # Difficulty tiers a genuine first-read-to-AC pass can't clear in seconds.
-_FAST_SOLVE_DIFFICULTIES = {Problem.Difficulty.MEDIUM, Problem.Difficulty.ADVANCED, Problem.Difficulty.HARD}
+_FAST_SOLVE_DIFFICULTIES = {Problem.Difficulty.MEDIUM, Problem.Difficulty.HARD}
 _FAST_SOLVE_SECONDS = 90
 
 

@@ -3,6 +3,7 @@ import shutil
 import tempfile
 
 from django.conf import settings
+from django.core.cache import cache
 from django.db import transaction
 from django.db.models import F
 
@@ -62,6 +63,7 @@ def run_submission(submission_id: int) -> None:
 
         sub.verdict, sub.passed, sub.total, sub.exec_ms = final, passed, len(tests), max_ms
         sub.save(update_fields=["verdict", "passed", "total", "exec_ms"])
+        _drop_standings_cache(sub)
 
         if final == Submission.Verdict.AC and sub.contest_id is None:
             _award_points_if_first_ac(sub)
@@ -96,9 +98,16 @@ def _run_sql_submission(sub: Submission) -> None:
     sub.passed = 1 if final == Submission.Verdict.AC else 0
     sub.total = 1
     sub.save(update_fields=["verdict", "passed", "total"])
+    _drop_standings_cache(sub)
 
     if final == Submission.Verdict.AC and sub.contest_id is None:
         _award_points_if_first_ac(sub)
+
+
+def _drop_standings_cache(sub: Submission) -> None:
+    """Standings are cached 30s; a fresh verdict should show up right away."""
+    if sub.contest_id is not None:
+        cache.delete(f"contest-standings-{sub.contest_id}")
 
 
 def _award_points_if_first_ac(submission: Submission) -> None:

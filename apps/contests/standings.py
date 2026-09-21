@@ -2,9 +2,9 @@ from apps.submissions.models import Submission
 
 
 def compute_standings(contest):
-    """Per spec §3: ICPC = solved desc, penalty asc (penalty = minutes to
-    first AC + 20 * wrong attempts on solved problems). Score = sum of
-    ContestProblem.points for solved problems, ties by last AC time."""
+    """Score = sum of ContestProblem.points for solved problems; ties broken by
+    penalty = minutes to first AC + 20 * wrong attempts, over solved problems
+    (the ICPC rule). Equal points per problem reproduce plain ICPC ranking."""
     problems = list(contest.contest_problems.select_related("problem"))
     participations = list(contest.participations.select_related("user"))
 
@@ -45,10 +45,7 @@ def compute_standings(contest):
 
     # Disqualified participants always sort below everyone else: they keep their cells
     # for the record but take the last ranks, which is what makes their rating drop.
-    if contest.type == contest.Type.ICPC:
-        def key(r): return (r["disqualified"], -r["solved"], r["penalty"])
-    else:
-        def key(r): return (r["disqualified"], -r["score"], r["last_ac"] or contest.end)
+    def key(r): return (r["disqualified"], -r["score"], r["penalty"])
     rows.sort(key=key)
     # Equal results share a rank ("1, 1, 3"): the order between them is arbitrary,
     # so distinct ranks would hand out arbitrary rating deltas.

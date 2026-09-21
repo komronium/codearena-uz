@@ -1,6 +1,7 @@
 from io import StringIO
 
 import pytest
+from django.core.cache import cache
 from django.core.management import call_command, CommandError
 from django.urls import reverse
 from django.utils import timezone
@@ -50,7 +51,7 @@ def _sub(user, problem, contest, python, verdict, minutes_after_start):
     return s
 
 
-def test_icpc_ranks_by_solved_then_penalty(contest, problem_a, problem_b, python):
+def test_ranks_by_score_then_penalty(contest, problem_a, problem_b, python):
     ali = User.objects.create_user("ali", password="x")
     bob = User.objects.create_user("bob", password="x")
     Participation.objects.create(user=ali, contest=contest)
@@ -68,7 +69,7 @@ def test_icpc_ranks_by_solved_then_penalty(contest, problem_a, problem_b, python
     assert rows[1]["penalty"] == 40 and rows[1]["solved"] == 1
 
 
-def test_icpc_more_solved_ranks_above_lower_penalty(contest, problem_a, problem_b, python):
+def test_more_points_rank_above_lower_penalty(contest, problem_a, problem_b, python):
     ali = User.objects.create_user("ali", password="x")
     bob = User.objects.create_user("bob", password="x")
     Participation.objects.create(user=ali, contest=contest)
@@ -83,9 +84,7 @@ def test_icpc_more_solved_ranks_above_lower_penalty(contest, problem_a, problem_
     assert rows[1]["user"] == bob and rows[1]["solved"] == 1
 
 
-def test_score_type_ranks_by_points_ties_by_last_ac(contest, problem_a, problem_b, python):
-    contest.type = Contest.Type.SCORE
-    contest.save()
+def test_score_ties_break_by_penalty(contest, problem_a, problem_b, python):
     ali = User.objects.create_user("ali", password="x")
     bob = User.objects.create_user("bob", password="x")
     Participation.objects.create(user=ali, contest=contest)
@@ -95,7 +94,7 @@ def test_score_type_ranks_by_points_ties_by_last_ac(contest, problem_a, problem_
     _sub(bob, problem_a, contest, python, "AC", 10)
 
     rows = compute_standings(contest)
-    assert rows[0]["user"] == bob  # same score, earlier last AC wins
+    assert rows[0]["user"] == bob  # same score, lower penalty (10 < 50) wins
     assert rows[0]["score"] == rows[1]["score"] == 100
 
 
@@ -305,6 +304,23 @@ def test_rating_gain_scales_with_solved_fraction():
     assert full > partial > 0
     loss = rating_delta(seed=8, rank=15, n=15, k=150, solved_frac=0.0)
     assert -full < loss < 0
+
+
+def test_contest_detail_shows_my_rank_and_solved_marks(client, contest, problem_a, problem_b, python):
+    ali = User.objects.create_user("ali", password="x")
+    bob = User.objects.create_user("bob", password="x")
+    Participation.objects.create(user=ali, contest=contest)
+    Participation.objects.create(user=bob, contest=contest)
+    _sub(bob, problem_a, contest, python, "AC", 5)
+    _sub(ali, problem_a, contest, python, "WA", 8)
+    _sub(ali, problem_a, contest, python, "AC", 10)
+    cache.clear()  # standings are cached per contest pk; pks repeat across tests
+    client.force_login(ali)
+    r = client.get(reverse("contests:detail", args=[contest.pk]))
+    html = r.content.decode()
+    assert "#2" in html and "Sizning o‘rningiz" in html  # bob solved A earlier -> lower penalty
+    assert 'title="Yechilgan 10:00"' in html
+    assert r.context["problems"][0].solved_count == 2 and r.context["problems"][1].solved_count == 0
 
 
 def test_active_contest_for_prefers_user_participation(problem_a):

@@ -8,14 +8,15 @@ from apps.problems.models import Problem
 
 class Contest(models.Model):
     class Type(models.TextChoices):
-        ICPC = "icpc", "ICPC"
+        # ponytail: single format kept as a field so old rows/migrations stay valid;
+        # ICPC was dropped — equal points per problem gives the same ranking.
         SCORE = "score", "Ball"
 
     title = models.CharField(max_length=200)
     description_md = models.TextField(blank=True)
     start = models.DateTimeField()
     end = models.DateTimeField()
-    type = models.CharField(max_length=10, choices=Type.choices, default=Type.ICPC)
+    type = models.CharField(max_length=10, choices=Type.choices, default=Type.SCORE)
     is_rated = models.BooleanField(default=False)
     allowed_ip_prefix = models.CharField(max_length=50, blank=True)
     require_group = models.ForeignKey(Group, null=True, blank=True, on_delete=models.SET_NULL)

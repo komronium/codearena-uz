@@ -448,7 +448,6 @@
       padding: .15rem .5rem; font-size: .72rem; font-weight: 500; white-space: nowrap;
       background: rgb(var(--ca-accent-rgb) / .09); color: rgb(var(--ca-accent-rgb));
     }
-    .ca-chip-icpc { background: rgb(var(--ca-accent-rgb) / .1); color: rgb(var(--ca-accent-rgb)); }
     .ca-chip-score { background: rgb(var(--ca-warn-rgb) / .14); color: rgb(var(--ca-warn-rgb)); }
     .ca-chip-rated { background: rgb(var(--ca-ok-rgb) / .12); color: rgb(var(--ca-ok-rgb)); }
     .ca-diff {
@@ -463,16 +462,14 @@
     }
     .ca-user-name { font-weight: 600; color: var(--tier); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .ca-user:hover .ca-user-name { text-decoration: underline; text-underline-offset: 3px; }
-    /* 5-step difficulty scale: beginner/easy = greens, medium/advanced = ambers, hard = red */
+    /* 4-step difficulty scale: beginner/easy = greens, medium = amber, hard = red */
     .ca-diff-beginner { background: #0891B21F; color: #0891B2; }
     .ca-diff-easy { background: rgb(var(--ca-ok-rgb) / .12); color: rgb(var(--ca-ok-rgb)); }
     .ca-diff-medium { background: rgb(var(--ca-warn-rgb) / .12); color: rgb(var(--ca-warn-rgb)); }
-    .ca-diff-advanced { background: #EA580C1F; color: #EA580C; }
     .ca-diff-hard { background: rgb(var(--ca-bad-rgb) / .12); color: rgb(var(--ca-bad-rgb)); }
     .ca-gauge-beginner { stroke: #0891B2; }
     .ca-gauge-easy { stroke: rgb(var(--ca-ok-rgb)); }
     .ca-gauge-medium { stroke: rgb(var(--ca-warn-rgb)); }
-    .ca-gauge-advanced { stroke: #EA580C; }
     .ca-gauge-hard { stroke: rgb(var(--ca-bad-rgb)); }
     .ca-pmap {
       display: inline-block; min-width: 3.6rem; padding: .3rem .5rem; text-align: center;
@@ -539,8 +536,8 @@
       Rating
     </a>
     <a href="{% url 'top' %}" class="ca-sidebar-link {% if request.resolver_match.url_name == 'top' %}is-active{% endif %}">
-      <i data-lucide="star" class="lu" aria-hidden="true"></i>
-      Top
+      <i data-lucide="users" class="lu" aria-hidden="true"></i>
+      Foydalanuvchilar
     </a>
     {% if user.is_authenticated %}
     <a href="{% url 'submissions:mine' %}" class="ca-sidebar-link {% if request.resolver_match.namespace == 'submissions' %}is-active{% endif %}">
@@ -550,14 +547,36 @@
     {% endif %}
     {% if user.is_staff %}
     <p class="ca-sidebar-heading mt-3">Admin</p>
-    <a href="{% url 'moderation:dashboard' %}" class="ca-sidebar-link {% if request.resolver_match.namespace == 'moderation' and request.resolver_match.url_name != 'submit' %}is-active{% endif %}">
+    {% with ns=request.resolver_match.namespace un=request.resolver_match.url_name %}
+    <a href="{% url 'moderation:dashboard' %}" class="ca-sidebar-link {% if ns == 'moderation' and un == 'dashboard' %}is-active{% endif %}">
       <i data-lucide="layout-dashboard" class="lu" aria-hidden="true"></i>
       Boshqaruv
     </a>
-    <a href="{% url 'moderation:submit' %}" class="ca-sidebar-link {% if request.resolver_match.url_name == 'submit' %}is-active{% endif %}">
-      <i data-lucide="circle-plus" class="lu" aria-hidden="true"></i>
-      Masala qo'shish
+    <a href="{% url 'moderation:problems' %}" class="ca-sidebar-link {% if ns == 'moderation' and un in 'problems,submit,problem_edit' %}is-active{% endif %}">
+      <i data-lucide="file-code-2" class="lu" aria-hidden="true"></i>
+      Masalalar
     </a>
+    <a href="{% url 'moderation:queue' %}" class="ca-sidebar-link {% if ns == 'moderation' and un == 'queue' %}is-active{% endif %}">
+      <i data-lucide="inbox" class="lu" aria-hidden="true"></i>
+      Navbat
+    </a>
+    <a href="{% url 'moderation:contests' %}" class="ca-sidebar-link {% if ns == 'moderation' and un in 'contests,contest_new,contest_edit' %}is-active{% endif %}">
+      <i data-lucide="trophy" class="lu" aria-hidden="true"></i>
+      Musobaqalar
+    </a>
+    <a href="{% url 'moderation:users' %}" class="ca-sidebar-link {% if ns == 'moderation' and un in 'users,user_edit' %}is-active{% endif %}">
+      <i data-lucide="users-round" class="lu" aria-hidden="true"></i>
+      Foydalanuvchilar
+    </a>
+    <a href="{% url 'moderation:groups' %}" class="ca-sidebar-link {% if ns == 'moderation' and un in 'groups,group_new,group_edit' %}is-active{% endif %}">
+      <i data-lucide="school" class="lu" aria-hidden="true"></i>
+      Guruhlar
+    </a>
+    <a href="{% url 'moderation:tags' %}" class="ca-sidebar-link {% if ns == 'moderation' and un == 'tags' %}is-active{% endif %}">
+      <i data-lucide="tags" class="lu" aria-hidden="true"></i>
+      Teglar
+    </a>
+    {% endwith %}
     {% endif %}
   </aside>{% endblock %}
   <main id="main" class="min-w-0 flex-1 py-8">

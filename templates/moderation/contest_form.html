@@ -61,8 +61,7 @@
   <aside class="space-y-6 lg:sticky lg:top-20">
     <section class="ca-panel space-y-4">
       <h3 class="ca-section-title !mb-0">Sozlamalar</h3>
-      <div><label class="ca-label" for="{{ form.type.id_for_label }}">Turi</label>{{ form.type }}
-        <p class="mt-1 text-xs text-mute"><b>ICPC</b> — kim ko‘proq masala yechsa; teng bo‘lsa jarima vaqti kam bo‘lgan yutadi.<br><b>Ball</b> — har masalaning balli qo‘shiladi, yig‘indisi ko‘p bo‘lgan yutadi.</p></div>
+      <p class="text-xs text-mute">Masalalar ballari yig‘indisi ko‘p bo‘lgan yutadi; teng bo‘lsa jarima vaqti (AC daqiqasi + 20 × noto‘g‘ri urinish) kam bo‘lgan yuqori turadi.</p>
       <label class="flex items-center gap-2 text-sm">{{ form.is_rated }} Reytingli musobaqa</label>
       <div><label class="ca-label" for="{{ form.require_group.id_for_label }}">Faqat guruh uchun</label>{{ form.require_group }}</div>
       <div><label class="ca-label" for="{{ form.allowed_ip_prefix.id_for_label }}">IP prefiks (ixtiyoriy)</label>{{ form.allowed_ip_prefix }}

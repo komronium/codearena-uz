@@ -25,14 +25,14 @@ VERDICTS = ["AC"] * 5 + ["WA"] * 3 + ["TLE", "MLE", "RE", "CE"]
 
 PROBLEM_TITLES = [
     ("Ikki yig'indi", "beginner"), ("Eng uzun o'sib boruvchi ketma-ketlik", "hard"),
-    ("Parenteza balansi", "advanced"), ("Grafda eng qisqa yo'l", "hard"),
+    ("Parenteza balansi", "hard"), ("Grafda eng qisqa yo'l", "hard"),
     ("Anagram tekshiruv", "easy"), ("Knapsack masalasi", "hard"),
     ("Ikkilik qidiruv", "beginner"), ("Median topish", "medium"),
     ("Eng katta umumiy bo'luvchi", "easy"), ("Segment daraxt", "hard"),
-    ("Saralangan massivni birlashtirish", "advanced"), ("Palindrom tekshiruv", "beginner"),
-    ("Chuqurlik bo'yicha qidiruv", "medium"), ("Kengin qidiruv", "advanced"),
+    ("Saralangan massivni birlashtirish", "hard"), ("Palindrom tekshiruv", "beginner"),
+    ("Chuqurlik bo'yicha qidiruv", "medium"), ("Kengin qidiruv", "hard"),
     ("Eng qisqa umumiy qism satr", "hard"), ("Matritsa aylantirish", "medium"),
-    ("Steklar yordamida hisoblash", "advanced"), ("Ikki ko'rsatkich usuli", "easy"),
+    ("Steklar yordamida hisoblash", "hard"), ("Ikki ko'rsatkich usuli", "easy"),
 ]
 
 
@@ -148,7 +148,7 @@ class Command(BaseCommand):
             contests = []
             for title, start, end, is_rated in contest_defs:
                 c, _ = Contest.objects.get_or_create(title=title, defaults=dict(
-                    start=start, end=end, type=Contest.Type.ICPC, is_rated=is_rated,
+                    start=start, end=end, is_rated=is_rated,
                     rating_applied=is_rated))
                 contests.append(c)
                 for i, p in enumerate(random.sample(problems, k=4)):

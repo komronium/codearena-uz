@@ -188,7 +188,7 @@ def test_staff_can_create_contest_with_problems(client):
     p = Problem.objects.create(slug="p", title="P", statement_md="x", author=staff, is_public=False)
     client.force_login(staff)
     data = {"title": "Round 1", "description_md": "", "start": "2030-01-01T10:00", "end": "2030-01-01T12:00",
-            "type": "icpc", "is_rated": "on", "allowed_ip_prefix": "", "require_group": "",
+            "is_rated": "on", "allowed_ip_prefix": "", "require_group": "",
             "cp-TOTAL_FORMS": "1", "cp-INITIAL_FORMS": "0", "cp-MIN_NUM_FORMS": "0", "cp-MAX_NUM_FORMS": "1000",
             "cp-0-label": "A", "cp-0-problem": str(p.pk), "cp-0-points": "100", "cp-0-order": "0"}
     assert client.post(reverse("moderation:contest_new"), data).status_code == 302
@@ -199,7 +199,7 @@ def test_staff_can_create_contest_with_problems(client):
 @pytest.mark.django_db
 def test_contest_end_must_follow_start(client):
     client.force_login(User.objects.create_user("teacher", password="x", is_staff=True))
-    data = {"title": "Bad", "start": "2030-01-01T12:00", "end": "2030-01-01T10:00", "type": "icpc",
+    data = {"title": "Bad", "start": "2030-01-01T12:00", "end": "2030-01-01T10:00",
             "cp-TOTAL_FORMS": "0", "cp-INITIAL_FORMS": "0", "cp-MIN_NUM_FORMS": "0", "cp-MAX_NUM_FORMS": "1000"}
     r = client.post(reverse("moderation:contest_new"), data)
     assert r.status_code == 200
@@ -254,7 +254,7 @@ def test_contest_publish_opens_problems_and_grants_points(client):
 @pytest.mark.django_db
 def test_contest_form_rejects_already_ended_on_create(client):
     client.force_login(User.objects.create_user("teacher", password="x", is_staff=True))
-    data = {"title": "Old", "start": "2020-01-01T10:00", "end": "2020-01-01T12:00", "type": "icpc",
+    data = {"title": "Old", "start": "2020-01-01T10:00", "end": "2020-01-01T12:00",
             "cp-TOTAL_FORMS": "0", "cp-INITIAL_FORMS": "0", "cp-MIN_NUM_FORMS": "0", "cp-MAX_NUM_FORMS": "1000"}
     r = client.post(reverse("moderation:contest_new"), data)
     assert r.status_code == 200 and "tib ketgan" in r.content.decode()

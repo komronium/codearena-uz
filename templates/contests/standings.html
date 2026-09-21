@@ -7,8 +7,7 @@
     <a class="ca-link mb-2 inline-block text-sm text-mute" href="{% url 'contests:detail' contest.pk %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>{{ contest.title }}</a>
     <h1 class="ca-page-title">Natijalar</h1>
     <p class="mt-1 text-sm text-mute">
-      {{ rows|length }} ishtirokchi · {% include "contests/_type.html" with c=contest %}
-      {% if contest.type == "icpc" %}· jarima = AC vaqti (daq) + 20 × noto‘g‘ri urinish{% else %}· ball yig‘indisi bo‘yicha{% endif %}
+      {{ rows|length }} ishtirokchi · ball yig‘indisi bo‘yicha, teng bo‘lsa jarima kam bo‘lgan yuqori
       {% if contest.is_running %}· <span class="tabular font-medium text-ink" data-countdown="{{ contest.end|date:'c' }}" data-label="Tugashiga"></span>{% endif %}
     </p>
   </div>
@@ -25,7 +24,7 @@
       {% if contest.is_rated %}<th class="text-right">Rating</th>{% endif %}
       <th class="text-right">Ball</th>
       <th class="text-right">Yechilgan</th>
-      {% if contest.type == "icpc" %}<th class="text-right">Jarima</th>{% endif %}
+      <th class="text-right" title="AC daqiqasi + 20 × noto‘g‘ri urinish (yechilgan masalalar bo‘yicha)">Jarima</th>
       {% for cp in problems %}
       <th class="text-center">
         {% if registered or contest.has_ended or user.is_staff %}<a class="ca-link !text-accent font-semibold" href="{% url 'problems:detail' cp.problem.slug %}" title="{{ cp.problem.title }}">{{ cp.label }}</a>{% else %}<span class="font-semibold text-accent">{{ cp.label }}</span>{% endif %}
@@ -37,7 +36,7 @@
   <tbody>
   {% for r in rows %}
   <tr class="{% if r.user == user %}ca-row-me{% endif %} {% if r.disqualified %}ca-row-dq{% endif %}">
-    <td>{% if r.disqualified %}<span class="ca-rank ca-rank-n text-bad" title="Diskvalifikatsiya">✕</span>{% elif r.rank <= 3 %}<span class="ca-rank ca-rank-{{ r.rank }}">{{ r.rank }}</span>{% else %}<span class="ca-rank ca-rank-n">{{ r.rank }}</span>{% endif %}</td>
+    <td>{% if r.disqualified %}<span class="ca-rank ca-rank-n text-bad" title="Diskvalifikatsiya">✕</span>{% elif r.rank <= 3 %}<span class="ca-rank ca-rank-{{ r.rank }}" title="{{ r.rank }}-o‘rin"><i data-lucide="{% if r.rank == 1 %}crown{% else %}medal{% endif %}" class="lu" aria-hidden="true"></i><span class="sr-only">{{ r.rank }}</span></span>{% else %}<span class="ca-rank ca-rank-n">{{ r.rank }}</span>{% endif %}</td>
     <td>
       <div class="flex items-center gap-2">
         <a class="ca-user" href="{% url 'profile' r.user.username %}" translate="no" style="--tier: {{ r.user.rating|tier_color }}">
@@ -64,7 +63,7 @@
     {% endif %}
     <td class="tabular text-right font-semibold">{{ r.score }}</td>
     <td class="tabular text-right">{{ r.solved }}</td>
-    {% if contest.type == "icpc" %}<td class="tabular text-right text-mute">{{ r.penalty }}</td>{% endif %}
+    <td class="tabular text-right text-mute">{{ r.penalty }}</td>
     {% for cell in r.cells %}
     <td class="ca-cell {% if cell.solved %}ca-cell-ac{% if cell.first %} ca-cell-first{% endif %}{% elif cell.wrong %}ca-cell-wa{% endif %}">
       {% if cell.solved %}
@@ -88,6 +87,7 @@
   <span><b class="text-bad">-1</b> 1 noto‘g‘ri urinish, yechilmagan</span>
   <span><span class="inline-block h-3 w-3 rounded-sm bg-ok-soft align-middle ring-1 ring-ok/40"></span> birinchi bo‘lib yechgan</span>
   <span>vaqt — musobaqa boshidan <b>daq:son</b></span>
+  <span><b>jarima</b> — yechilgan masalalar AC daqiqalari + 20 × noto‘g‘ri urinishlar; ball teng bo‘lsa kami yutadi</span>
   <span><b class="text-bad">DQ</b> diskvalifikatsiya — oxirgi o‘rin, yubora olmaydi</span>
 </p>
 {% else %}

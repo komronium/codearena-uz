@@ -120,13 +120,12 @@ class _DateTimeLocal(forms.DateTimeInput):
 class ContestForm(ModelForm):
     class Meta:
         model = Contest
-        fields = ["title", "description_md", "start", "end", "type", "is_rated", "allowed_ip_prefix", "require_group"]
+        fields = ["title", "description_md", "start", "end", "is_rated", "allowed_ip_prefix", "require_group"]
         widgets = {
             "title": forms.TextInput(attrs=_CA_INPUT),
             "description_md": forms.Textarea(attrs={**_MD, "rows": 4}),
             "start": _DateTimeLocal(),
             "end": _DateTimeLocal(),
-            "type": forms.Select(attrs={"class": "ca-select"}),
             "allowed_ip_prefix": forms.TextInput(attrs={**_CA_INPUT, "placeholder": "masalan 10.0."}),
             "require_group": forms.Select(attrs={"class": "ca-select"}),
         }

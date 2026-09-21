@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.http import Http404, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -15,7 +15,7 @@ from .standings import compute_standings
 
 def contest_list(request):
     now = timezone.now()
-    contests = Contest.objects.order_by("-start")
+    contests = Contest.objects.annotate(n_participants=Count("participations")).order_by("-start")
     running = [c for c in contests if c.start <= now < c.end]
     upcoming = sorted((c for c in contests if c.start > now), key=lambda c: c.start)
     ended = [c for c in contests if c.end <= now]
@@ -26,20 +26,39 @@ def contest_list(request):
             {"key": "upcoming", "title": "Kutilmoqda", "dot": "bg-warn", "last_col": "Boshlanishiga", "items": upcoming},
             {"key": "ended", "title": "Tugagan", "dot": "bg-mute", "last_col": "", "items": ended},
         ],
-        # legend chips reuse the _type include with a stub carrying only .type
-        "icpc_sample": {"type": "icpc"}, "score_sample": {"type": "score"},
     })
+
+
+def _standings(contest):
+    cache_key = f"contest-standings-{contest.pk}"
+    rows = cache.get(cache_key)
+    if rows is None:
+        rows = compute_standings(contest)
+        cache.set(cache_key, rows, 30)
+    return rows
 
 
 def contest_detail(request, pk):
     contest = get_object_or_404(Contest, pk=pk)
-    problems = contest.contest_problems.select_related("problem")
+    problems = list(contest.contest_problems.select_related("problem"))
     registered = (
         request.user.is_authenticated
         and Participation.objects.filter(user=request.user, contest=contest).exists()
     )
+    my_row, solved_count = None, {}
+    if contest.has_started:
+        rows = _standings(contest)
+        for i, cp in enumerate(problems):
+            solved_count[cp.id] = sum(1 for r in rows if r["cells"][i]["solved"] and not r["disqualified"])
+        if request.user.is_authenticated:
+            my_row = next((r for r in rows if r["user"].pk == request.user.pk), None)
+            for i, cp in enumerate(problems):
+                cp.my_cell = my_row["cells"][i] if my_row else None
+    for cp in problems:
+        cp.solved_count = solved_count.get(cp.id, 0)
     return render(request, "contests/detail.html", {
-        "contest": contest, "problems": problems, "registered": registered,
+        "contest": contest, "problems": problems, "registered": registered, "my_row": my_row,
+        "n_participants": contest.participations.count(),
     })
 
 
@@ -57,11 +76,7 @@ def register(request, pk):
 
 def standings(request, pk):
     contest = get_object_or_404(Contest, pk=pk)
-    cache_key = f"contest-standings-{pk}"
-    rows = cache.get(cache_key)
-    if rows is None:
-        rows = compute_standings(contest)
-        cache.set(cache_key, rows, 30)
+    rows = _standings(contest)
     problems = list(contest.contest_problems.select_related("problem"))
     me = contest.participations.filter(user=request.user).first() if request.user.is_authenticated else None
     return render(request, "contests/standings.html",

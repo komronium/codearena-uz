@@ -4,18 +4,12 @@
     <div class="flex min-w-0 items-center gap-2">
       <span class="tabular shrink-0 text-xs text-mute">{{ c.pk|stringformat:"03d" }}</span>
       <a class="ca-link truncate font-medium" href="{% url 'contests:detail' c.pk %}">{{ c.title }}</a>
-    </div>
-    <div class="mt-1 flex flex-wrap items-center gap-1.5 pl-7 md:hidden">
-      {% include "contests/_type.html" %}{% if c.is_rated %}<span class="ca-chip ca-chip-rated"><i data-lucide="trending-up" class="lu mr-1" aria-hidden="true"></i>Reytingli</span>{% endif %}
-    </div>
-  </td>
-  <td class="hidden md:table-cell">
-    <div class="flex items-center gap-1.5">
-      {% include "contests/_type.html" %}{% if c.is_rated %}<span class="ca-chip ca-chip-rated" title="Natija reytingga ta‘sir qiladi"><i data-lucide="trending-up" class="lu mr-1" aria-hidden="true"></i>Reytingli</span>{% endif %}
+      {% if c.is_rated %}<span class="ca-chip ca-chip-rated shrink-0" title="Natija reytingga ta‘sir qiladi"><i data-lucide="trending-up" class="lu mr-1" aria-hidden="true"></i>Reytingli</span>{% endif %}
     </div>
   </td>
   <td class="tabular whitespace-nowrap text-mute">{{ c.start|date:"d.m.Y" }} <span class="text-ink">{{ c.start|date:"H:i" }}</span></td>
   <td class="tabular hidden whitespace-nowrap text-mute sm:table-cell">{{ c.duration_label }}</td>
+  <td class="tabular hidden text-right text-mute md:table-cell">{{ c.n_participants }}</td>
   <td class="whitespace-nowrap text-right">
     {% if state == "running" %}
       <span class="tabular font-semibold text-ok" data-countdown="{{ c.end|date:'c' }}" data-label="qoldi" data-suffix="1"></span>

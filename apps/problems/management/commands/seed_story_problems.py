@@ -11,7 +11,7 @@ from django.db import transaction
 from apps.accounts.models import User
 from apps.problems.models import Problem, Tag, TestCase
 
-from .seed_problems import NO, YES, Spec, _build_tests, _ints, _lines
+from .seed_problems import Spec, _build_tests, _ints, _lines
 
 
 # ---- batch 2: story problems, one value per line, 25 tests each ---------------
@@ -30,25 +30,22 @@ def _taxi(s):
 
 
 def _electricity(s):
-    prev, cur = _ints(s)
-    used = cur - prev
+    used = int(s)
     return _lines(used * (450 if used <= 200 else 900))
 
 
 def _walk_or_taxi(s):
-    walk, wait, ride = _ints(s)
-    taxi = wait + ride
+    walk, taxi = _ints(s)
     return _lines("Piyoda" if walk < taxi else "Taksi" if taxi < walk else "Farqi yo'q")
 
 
 def _exam(s):
-    a, b, c = _ints(s)
-    return _lines("O'tdi" if min(a, b, c) >= 40 and a + b + c >= 165 else "O'tmadi")
+    return _lines("O'tdi" if int(s) >= 55 else "O'tmadi")
 
 
 def _password(s):
     pw, again = s.split()
-    return _lines("Qisqa" if len(pw) < 8 else "Mos" if pw == again else "Mos emas")
+    return _lines("Mos" if pw == again else "Mos emas")
 
 
 def _parking(s):
@@ -59,14 +56,12 @@ def _parking(s):
 def _weight(s):
     w, h = _ints(s)
     ideal = h - 100
-    return _lines("Kam vazn" if w < ideal - 5 else "Ortiqcha vazn" if w > ideal + 5 else "Normal")
+    return _lines("Kam vazn" if w < ideal else "Ortiqcha vazn" if w > ideal else "Normal")
 
 
 def _weather(s):
-    t, rain = s.split()
-    if rain == YES:
-        return _lines("Soyabon")
-    return _lines("Palto" if int(t) < 0 else "Kurtka" if int(t) < 15 else "Futbolka")
+    t = int(s)
+    return _lines("Palto" if t < 0 else "Kurtka" if t < 15 else "Futbolka")
 
 
 def _change(s):
@@ -75,19 +70,18 @@ def _change(s):
 
 
 def _late(s):
-    h, m = _ints(s)
-    late = h * 60 + m - (8 * 60 + 30)
-    return _lines("Vaqtida" if late <= 0 else late)
+    m = int(s)
+    return _lines("Vaqtida" if m <= 30 else m - 30)
 
 
 def _delivery(s):
-    total, km = _ints(s)
-    return _lines(total if total >= 200000 else total + 5000 + 1000 * km)
+    total = int(s)
+    return _lines(total if total >= 200000 else total + 15000)
 
 
 def _phone(s):
-    used, limit = _ints(s)
-    return _lines(30000 + max(used - limit, 0) * 200)
+    used = int(s)
+    return _lines(30000 + (used - 500) * 200 if used > 500 else 30000)
 
 
 def _shop(s):
@@ -97,12 +91,15 @@ def _shop(s):
 
 
 def _elevator(s):
-    cur, target, kg = _ints(s)
-    if kg > 400:
-        return _lines("Ortiqcha yuk")
+    cur, target = _ints(s)
     if cur == target:
         return _lines("Joyida")
     return _lines(f"Yuqoriga {target - cur}" if target > cur else f"Pastga {cur - target}")
+
+
+def _elevator_gen(r):
+    cur = r.randint(1, 30)
+    return _lines(cur, cur if r.random() < 0.2 else r.randint(1, 30))
 
 
 def _two_legs(s):
@@ -113,13 +110,13 @@ def _two_legs(s):
 
 def _weight_gen(r):
     h = r.randint(150, 200)
-    return _lines(h - 100 + r.randint(-25, 25), h)
+    return _lines(h - 100 + r.choice([0, r.randint(-25, 25)]), h)
 
 
 def _taxi_gen(r):
-    wait, ride = r.randint(0, 15), r.randint(3, 30)
-    walk = wait + ride if r.random() < 0.15 else r.randint(5, 60)
-    return _lines(walk, wait, ride)
+    taxi = r.randint(3, 40)
+    walk = taxi if r.random() < 0.15 else r.randint(5, 60)
+    return _lines(walk, taxi)
 
 
 _WORDS = ["salom", "parol", "python", "olma", "toshkent", "kod", "arena", "qwerty", "maktab", "dastur"]
@@ -127,8 +124,6 @@ _WORDS = ["salom", "parol", "python", "olma", "toshkent", "kod", "arena", "qwert
 
 def _pw_gen(r):
     pw = r.choice(_WORDS) + str(r.randint(1, 9999))
-    if r.random() < 0.3:
-        pw = pw[:r.randint(3, 7)]
     again = pw if r.random() < 0.5 else pw[:-1] + r.choice("0aZ!")
     return _lines(pw, again)
 
@@ -143,36 +138,33 @@ STORY_SPECS: list[Spec] = [
          tags=["if-else", "real-life"]),
 
     Spec("electricity-bill", "Elektr to'lovi",
-         "Hisoblagich o'tgan oy va shu oy ko'rsatkichlari berilgan. Ishlatilgan kVt·soat 200 dan oshmasa har biri "
-         "450 so'm, oshsa hammasi 900 so'mdan hisoblanadi. Oila necha so'm to'laydi?",
-         "Birinchi qatorda o'tgan oy ko'rsatkichi $p$, ikkinchi qatorda shu oy ko'rsatkichi $c$ ($0 \\le p \\le c \\le 10^6$).",
+         "Oila bir oyda $n$ kVt·soat elektr ishlatdi. 200 dan oshmasa har kVt·soat 450 so'm, "
+         "oshsa hammasi 900 so'mdan hisoblanadi. Necha so'm to'laydi?",
+         "Yagona butun son $n$ ($0 \\le n \\le 1000$).",
          "To'lov summasi so'mda.",
-         **_story(lambda r: (lambda p: _lines(p, p + r.randint(0, 500)))(r.randint(0, 10**5)), _electricity,
-                  "1000\n1150\n", "500\n800\n"),
+         **_story(lambda r: _lines(r.randint(0, 1000)), _electricity, "150\n", "300\n"),
          tags=["if-else", "real-life", "math"]),
 
     Spec("walk-or-taxi", "Piyoda yoki taksi",
-         "Aziz maktabga piyoda $a$ daqiqada yetib boradi. Taksi $w$ daqiqada keladi va yana $t$ daqiqa yuradi. "
-         "Qaysi biri tezroq?",
-         "Uch qatorda: piyoda vaqti $a$, taksini kutish $w$, taksida yurish $t$ (daqiqalarda, $0 \\le a, w, t \\le 60$).",
+         "Aziz maktabga piyoda $a$ daqiqada, taksida $t$ daqiqada yetib boradi. Qaysi biri tezroq?",
+         "Birinchi qatorda piyoda vaqti $a$, ikkinchi qatorda taksi vaqti $t$ (daqiqalarda, $1 \\le a, t \\le 60$).",
          "`Piyoda`, `Taksi` yoki vaqt teng bo'lsa `Farqi yo'q`.",
-         **_story(_taxi_gen, _walk_or_taxi, "20\n5\n10\n", "12\n8\n10\n", "15\n5\n10\n"),
+         **_story(_taxi_gen, _walk_or_taxi, "20\n15\n", "12\n18\n", "15\n15\n"),
          tags=["if-else", "real-life"]),
 
     Spec("exam-pass", "Imtihon",
-         "Talaba uchta fandan imtihon topshirdi. O'tish uchun har bir fandan kamida 40 ball va uchta ball "
-         "yig'indisi kamida 165 bo'lishi kerak.",
-         "Uch qatorda uchta ball $a$, $b$, $c$ ($0 \\le a, b, c \\le 100$).",
+         "Imtihondan o'tish uchun kamida 55 ball kerak. Talaba $b$ ball oldi. U o'tdimi?",
+         "Yagona butun son $b$ ($0 \\le b \\le 100$).",
          "`O'tdi` yoki `O'tmadi`.",
-         **_story(lambda r: _lines(*(r.randint(25, 100) for _ in range(3))), _exam, "60\n70\n45\n", "90\n90\n35\n"),
+         **_story(lambda r: _lines(r.randint(0, 100)), _exam, "70\n", "54\n", "55\n"),
          tags=["if-else", "real-life"]),
 
     Spec("password-check", "Parolni tasdiqlash",
-         "Ro'yxatdan o'tishda foydalanuvchi parolni ikki marta kiritadi. Parol 8 belgidan qisqa bo'lsa — `Qisqa`. "
-         "Aks holda ikkalasi bir xil bo'lsa `Mos`, bo'lmasa `Mos emas`.",
+         "Ro'yxatdan o'tishda foydalanuvchi parolni ikki marta kiritadi. Ikkalasi bir xil bo'lsa `Mos`, "
+         "bo'lmasa `Mos emas` deb chiqaring.",
          "Ikki qatorda ikkita parol (faqat harf va raqamlar, uzunligi 1 dan 30 gacha).",
-         "`Qisqa`, `Mos` yoki `Mos emas`.",
-         **_story(_pw_gen, _password, "python2024\npython2024\n", "olma1\nolma1\n", "toshkent99\ntoshkent98\n"),
+         "`Mos` yoki `Mos emas`.",
+         **_story(_pw_gen, _password, "python2024\npython2024\n", "toshkent99\ntoshkent98\n"),
          tags=["if-else", "strings"]),
 
     Spec("parking-fee", "Avtoturargoh",
@@ -184,20 +176,20 @@ STORY_SPECS: list[Spec] = [
          tags=["if-else", "real-life"]),
 
     Spec("ideal-weight", "Ideal vazn",
-         "Oddiy qoida: ideal vazn = bo'y (sm) − 100. Vazn ideal vazndan 5 kg dan ko'proq kam bo'lsa — `Kam vazn`, "
-         "5 kg dan ko'proq ortiq bo'lsa — `Ortiqcha vazn`, aks holda `Normal`.",
+         "Oddiy qoida: ideal vazn = bo'y (sm) − 100. Vazn ideal vazndan kam bo'lsa — `Kam vazn`, "
+         "ko'p bo'lsa — `Ortiqcha vazn`, teng bo'lsa `Normal`.",
          "Birinchi qatorda vazn $w$ kg, ikkinchi qatorda bo'y $h$ sm ($150 \\le h \\le 200$).",
          "Xulosa so'zi.",
-         **_story(_weight_gen, _weight, "70\n175\n", "95\n170\n", "60\n180\n"),
+         **_story(_weight_gen, _weight, "75\n175\n", "95\n170\n", "60\n180\n"),
          tags=["if-else", "real-life"]),
 
     Spec("weather-advice", "Nima kiyay?",
-         "Ob-havo ilovasi maslahat beradi. Yomg'ir bo'lsa — `Soyabon`. Bo'lmasa harorat 0 dan past — `Palto`, "
-         "15 dan past — `Kurtka`, aks holda `Futbolka`.",
-         "Birinchi qatorda harorat $t$ ($-30 \\le t \\le 45$), ikkinchi qatorda yomg'ir bormi: `Ha` yoki `Yo'q`.",
+         "Ob-havo ilovasi maslahat beradi: harorat 0 dan past bo'lsa — `Palto`, 15 dan past bo'lsa — `Kurtka`, "
+         "aks holda `Futbolka`.",
+         "Yagona butun son — harorat $t$ ($-30 \\le t \\le 45$).",
          "Maslahat so'zi.",
-         **_story(lambda r: _lines(r.randint(-30, 45), r.choice([YES, NO, NO])), _weather, "12\nYo'q\n", "25\nHa\n"),
-         tags=["if-else", "strings"]),
+         **_story(lambda r: _lines(r.randint(-30, 45)), _weather, "12\n", "25\n", "-5\n"),
+         tags=["if-else", "real-life"]),
 ]
 
 STORY_CONTEST_SPECS: list[Spec] = [
@@ -210,27 +202,27 @@ STORY_CONTEST_SPECS: list[Spec] = [
          tags=["if-else", "real-life"], is_public=False),
 
     Spec("c2-late", "Darsga kechikish",
-         "Dars 08:30 da boshlanadi. Malika maktabga kelgan vaqt berilgan. Kechikmagan bo'lsa `Vaqtida`, "
-         "kechikkan bo'lsa necha daqiqa kechikkanini chiqaring.",
-         "Birinchi qatorda soat $h$ ($0 \\le h \\le 23$), ikkinchi qatorda daqiqa $m$ ($0 \\le m \\le 59$).",
+         "Dars 08:30 da boshlanadi. Malika maktabga soat 8 dan $m$ daqiqa o'tganda keldi. Kechikmagan bo'lsa "
+         "`Vaqtida`, kechikkan bo'lsa necha daqiqa kechikkanini chiqaring.",
+         "Yagona butun son $m$ ($0 \\le m \\le 59$).",
          "`Vaqtida` yoki kechikish daqiqalari.",
-         **_story(lambda r: _lines(r.randint(7, 10), r.randint(0, 59)), _late, "8\n20\n", "9\n5\n"),
+         **_story(lambda r: _lines(r.randint(0, 59)), _late, "20\n", "45\n", "30\n"),
          tags=["if-else", "real-life"], is_public=False),
 
     Spec("c2-delivery", "Yetkazib berish",
-         "Onlayn do'kon 200 000 so'mdan boshlab bepul yetkazadi. Undan kam buyurtmaga 5000 so'm + har km uchun "
-         "1000 so'm qo'shiladi. Xaridor jami qancha to'laydi?",
-         "Birinchi qatorda buyurtma summasi $s$ ($1000 \\le s \\le 10^6$), ikkinchi qatorda masofa $k$ km ($1 \\le k \\le 50$).",
+         "Onlayn do'kon 200 000 so'mdan boshlab bepul yetkazadi. Undan kam buyurtmaga 15 000 so'm yetkazish "
+         "haqi qo'shiladi. Xaridor jami qancha to'laydi?",
+         "Yagona butun son — buyurtma summasi $s$ ($1000 \\le s \\le 10^6$).",
          "Jami to'lov.",
-         **_story(lambda r: _lines(r.randint(1, 1000) * 1000, r.randint(1, 50)), _delivery, "150000\n3\n", "250000\n10\n"),
+         **_story(lambda r: _lines(r.randint(1, 1000) * 1000), _delivery, "150000\n", "250000\n"),
          tags=["if-else", "real-life"], is_public=False),
 
     Spec("c2-phone-plan", "Tarif rejasi",
-         "Oylik tarif 30 000 so'm, unga $L$ daqiqa kiradi. Limitdan oshgan har daqiqa 200 so'm. "
-         "Oy oxirida abonent qancha to'laydi?",
-         "Birinchi qatorda gaplashilgan daqiqalar $u$ ($0 \\le u \\le 5000$), ikkinchi qatorda limit $L$ ($0 \\le L \\le 3000$).",
+         "Oylik tarif 30 000 so'm, unga 500 daqiqa kiradi. 500 dan oshgan har daqiqa 200 so'm. "
+         "Abonent bir oyda $u$ daqiqa gaplashdi. Qancha to'laydi?",
+         "Yagona butun son $u$ ($0 \\le u \\le 3000$).",
          "To'lov so'mda.",
-         **_story(lambda r: _lines(r.randint(0, 5000), r.choice([300, 500, 1000, 2000, 3000])), _phone, "250\n300\n", "650\n500\n"),
+         **_story(lambda r: _lines(r.randint(0, 3000)), _phone, "250\n", "650\n"),
          tags=["if-else", "real-life"], is_public=False),
 
     Spec("c2-shop-discount", "Ulgurji chegirma",
@@ -242,12 +234,11 @@ STORY_CONTEST_SPECS: list[Spec] = [
          tags=["if-else", "real-life", "math"], is_public=False),
 
     Spec("c2-elevator", "Lift",
-         "Lift eng ko'pi 400 kg ko'taradi. Yuk ortiq bo'lsa `Ortiqcha yuk`. Boriladigan qavat hozirgi qavat bilan "
-         "bir xil bo'lsa `Joyida`. Aks holda yo'nalish va necha qavat yurishini chiqaring: `Yuqoriga 5` yoki `Pastga 3`.",
-         "Uch qatorda: hozirgi qavat $a$, boriladigan qavat $b$ ($1 \\le a, b \\le 30$), yuk $w$ kg ($1 \\le w \\le 700$).",
+         "Lift $a$-qavatda turibdi, $b$-qavatga chaqirildi. Qavatlar bir xil bo'lsa `Joyida`. Aks holda yo'nalish "
+         "va necha qavat yurishini chiqaring: `Yuqoriga 5` yoki `Pastga 3`.",
+         "Birinchi qatorda hozirgi qavat $a$, ikkinchi qatorda boriladigan qavat $b$ ($1 \\le a, b \\le 30$).",
          "Yuqoridagi uch variantdan biri.",
-         **_story(lambda r: _lines(r.randint(1, 30), r.randint(1, 30), r.randint(1, 700)), _elevator,
-                  "3\n8\n250\n", "10\n10\n120\n", "5\n2\n450\n"),
+         **_story(_elevator_gen, _elevator, "3\n8\n", "10\n10\n", "5\n2\n"),
          difficulty=Problem.Difficulty.EASY, tags=["if-else", "real-life"], is_public=False),
 
     Spec("c2-two-legs", "Ikki o'yin",

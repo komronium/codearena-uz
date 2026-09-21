@@ -4,15 +4,20 @@
 <div class="ca-panel mb-6 !p-0 overflow-hidden">
   <div class="h-20" style="background: linear-gradient(90deg, color-mix(in srgb, {{ tier_color }} 22%, transparent), color-mix(in srgb, {{ tier_color }} 6%, transparent))"></div>
   <div class="flex flex-wrap items-end justify-between gap-4 px-6 pb-5">
-    <div class="-mt-10 flex flex-wrap items-end gap-4">
+    <div class="flex flex-wrap items-start gap-4">
       {% if profile_user.avatar %}
-      <img src="{{ profile_user.avatar.url }}" alt="" class="h-24 w-24 rounded-full border-4 border-surface object-cover shadow">
+      <img src="{{ profile_user.avatar.url }}" alt="" class="-mt-10 h-24 w-24 shrink-0 rounded-full border-4 border-surface object-cover shadow">
       {% else %}
-      <div class="ca-avatar h-24 w-24 border-4 border-surface text-4xl shadow" style="background: color-mix(in srgb, {{ tier_color }} 18%, rgb(var(--ca-surface-rgb))); color: {{ tier_color }}" aria-hidden="true">{{ profile_user.username|slice:":1" }}</div>
+      <div class="ca-avatar -mt-10 h-24 w-24 shrink-0 border-4 border-surface text-4xl shadow" style="background: color-mix(in srgb, {{ tier_color }} 18%, rgb(var(--ca-surface-rgb))); color: {{ tier_color }}" aria-hidden="true">{{ profile_user.username|slice:":1" }}</div>
       {% endif %}
-      <div class="pb-1">
-        <h1 class="text-2xl font-bold" translate="no" style="color: {{ tier_color }}">{{ profile_user.username }}</h1>
-        {% if profile_user.get_full_name %}<p class="mt-0.5 text-base font-medium text-ink">{{ profile_user.get_full_name }}</p>{% endif %}
+      {# text stays below the banner so it never sits on the gradient #}
+      <div class="pt-3">
+        {% if profile_user.get_full_name %}
+        <h1 class="text-2xl font-bold leading-tight text-ink">{{ profile_user.get_full_name }}</h1>
+        <p class="mt-0.5 text-base font-semibold" translate="no" style="color: {{ tier_color }}">@{{ profile_user.username }}</p>
+        {% else %}
+        <h1 class="text-2xl font-bold leading-tight" translate="no" style="color: {{ tier_color }}">{{ profile_user.username }}</h1>
+        {% endif %}
         <p class="mt-1.5 flex flex-wrap items-center gap-2">
           <span class="ca-tier" style="--tier: {{ tier_color }}">{{ tier }}</span>
           {% if profile_user.is_staff %}<span class="ca-chip"><i data-lucide="shield-check" class="lu mr-1" aria-hidden="true"></i>Moderator</span>{% endif %}
