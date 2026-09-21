@@ -47,6 +47,13 @@ inside compose: gunicorn + whitenoise (`web`), judge worker (`worker`),
     sudo mkdir -p /var/codearena/work && sudo chmod 777 /var/codearena/work
     for l in python cpp java node; do docker build -t codearena-judge-$l judge/images/$l; done
     docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+
+Once, after the first deploy:
+
+    # nightly DB dump to /var/backups/codearena, 14-day retention
+    (sudo crontab -l 2>/dev/null; echo "30 3 * * * /opt/codearena/deploy/backup.sh") | sudo crontab -
+    # cap container logs (otherwise json-file logs grow unbounded); restarts docker
+    sudo cp deploy/docker-daemon.json /etc/docker/daemon.json && sudo systemctl restart docker
     docker compose exec web python manage.py seed            # languages + admin (admin/admin)
     docker compose exec web python manage.py seed_problems --author admin
     sudo ufw allow 2009/tcp
