@@ -38,9 +38,9 @@
         });
       </script>
       {% elif registered %}
-      <span class="ca-verdict ca-verdict-ac"><i data-lucide="check" class="lu" aria-hidden="true"></i>Siz ro‘yxatdan o‘tgansiz</span>
+      <span class="ca-chip ca-chip-rated"><i data-lucide="check" class="lu mr-1" aria-hidden="true"></i>Ro‘yxatdan o‘tgansiz</span>
       {% endif %}
-      <a class="ca-btn ca-btn-ghost" href="{% url 'contests:standings' contest.pk %}"><i data-lucide="medal" class="lu" aria-hidden="true"></i>Turnir jadvali</a>
+      <a class="ca-btn {% if contest.has_started %}ca-btn-primary{% else %}ca-btn-ghost{% endif %}" href="{% url 'contests:standings' contest.pk %}"><i data-lucide="medal" class="lu" aria-hidden="true"></i>Turnir jadvali</a>
     </div>
   </div>
 </div>
