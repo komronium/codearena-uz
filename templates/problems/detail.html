@@ -312,6 +312,7 @@ so @codemirror/state is a singleton — two copies break with "Unrecognized exte
         let inserted = 0;
         u.changes.iterChanges((fA, tA, fB, tB, ins) => { inserted += ins.length; });
         if (inserted > 120) window.dispatchEvent(new CustomEvent("ca-bulk-insert"));
+        else if (inserted > 0) window.dispatchEvent(new CustomEvent("ca-typed", { detail: inserted }));
         {% endif %}
       })],
     parent: document.getElementById("editor"),
@@ -391,6 +392,20 @@ so @codemirror/state is a singleton — two copies break with "Unrecognized exte
       if (evt === "drop" && editor.contains(e.target)) { report("paste"); notify("Musobaqada matnni sudrab tashlash taqiqlangan — qayd etildi."); }
     }, true));
     window.addEventListener("ca-bulk-insert", () => { report("paste"); notify("Katta hajmdagi matn kiritildi — qayd etildi."); });
+
+    // Sustained fast typing (many sub-threshold inserts in a row) can be the same paste,
+    // done in chunks to dodge the single-insert size check above.
+    let typedWindow = [], fastReportedAt = 0;
+    window.addEventListener("ca-typed", (e) => {
+      const now = Date.now();
+      typedWindow.push([now, e.detail]);
+      typedWindow = typedWindow.filter(([t]) => now - t < 3000);
+      const sum = typedWindow.reduce((a, [, n]) => a + n, 0);
+      if (sum > 200 && now - fastReportedAt > 5000) {
+        fastReportedAt = now;
+        report("fast"); notify("G‘ayrioddiy tez matn kiritish aniqlandi — qayd etildi.");
+      }
+    });
 
     // Statement: copying works, but the clipboard gets a traceable warning stamp and the event is logged.
     document.addEventListener("copy", (e) => {

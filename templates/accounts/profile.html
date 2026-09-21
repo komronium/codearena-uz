@@ -18,7 +18,6 @@
           {% if profile_user.is_staff %}<span class="ca-chip"><i data-lucide="shield-check" class="lu mr-1" aria-hidden="true"></i>Moderator</span>{% endif %}
         </p>
         <p class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-mute">
-          <span>{{ profile_user.get_role_display }}</span>
           {% if profile_user.location %}<span><i data-lucide="map-pin" class="lu mr-1.5" aria-hidden="true"></i>{{ profile_user.location }}</span>{% endif %}
           {% if profile_user.school %}<span><i data-lucide="graduation-cap" class="lu mr-1.5" aria-hidden="true"></i>{{ profile_user.school }}</span>{% endif %}
           <span><i data-lucide="calendar" class="lu mr-1.5" aria-hidden="true"></i>{{ profile_user.date_joined|date:"d.m.Y" }} dan beri</span>

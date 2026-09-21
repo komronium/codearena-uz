@@ -37,7 +37,8 @@ class Command(BaseCommand):
         for problem_id in problem_ids:
             subs = list(Submission.objects.filter(contest=contest, problem_id=problem_id, verdict="AC"))
             for a, b in combinations(subs, 2):
-                if a.user_id == b.user_id:
+                # different languages read too differently for a text similarity score to mean anything
+                if a.user_id == b.user_id or a.language_id != b.language_id:
                     continue
                 score = similarity(a.source, b.source)
                 if score < THRESHOLD:

@@ -13,6 +13,7 @@ class FocusEvent(models.Model):
         FOCUS = "focus"
         PASTE = "paste"
         COPY = "copy"
+        FAST = "fast"  # sustained abnormal typing speed (evades the single-bulk-insert threshold)
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="focus_events")
     contest = models.ForeignKey(Contest, on_delete=models.CASCADE, related_name="focus_events")

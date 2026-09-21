@@ -19,12 +19,12 @@
 <section class="mb-8">
   <div class="mb-3 flex flex-wrap items-end justify-between gap-2">
     <h2 class="ca-section-title !mb-0">Xatti-harakat hodisalari</h2>
-    <p class="text-xs text-mute">Chiqish — boshqa oyna/varaqqa o‘tish · Paste — muharrirga qo‘yish urinishi · Nusxa — shart matnidan nusxa. Xavf = paste×5 + nusxa×2 + chiqish.</p>
+    <p class="text-xs text-mute">Chiqish — boshqa oyna/varaqqa o‘tish · Paste — muharrirga qo‘yish urinishi · Tez — g‘ayrioddiy tez matn kiritish · Nusxa — shart matnidan nusxa. Xavf = paste×5 + tez×3 + nusxa×2 + chiqish + tez yechim×4.</p>
   </div>
   <div class="ca-panel !p-0 overflow-x-auto">
   <table class="ca-table">
     <thead>
-      <tr><th>Ishtirokchi</th><th class="text-right">Chiqish</th><th class="text-right">Paste</th><th class="text-right">Nusxa</th><th class="text-right">Xavf</th><th class="hidden md:table-cell">Oxirgi hodisa</th><th class="text-right">Amal</th></tr>
+      <tr><th>Ishtirokchi</th><th class="text-right">Chiqish</th><th class="text-right">Paste</th><th class="text-right">Tez</th><th class="text-right">Nusxa</th><th class="text-right">Xavf</th><th class="hidden md:table-cell">Oxirgi hodisa</th><th class="text-right">Amal</th></tr>
     </thead>
     <tbody>
     {% for user, c in rows %}
@@ -32,6 +32,7 @@
       <td>{% include "accounts/_user.html" with u=user tier=False %}</td>
       <td class="tabular text-right {% if c.blur > 5 %}text-warn font-semibold{% endif %}">{{ c.blur }}</td>
       <td class="tabular text-right {% if c.paste %}text-bad font-semibold{% endif %}">{{ c.paste }}</td>
+      <td class="tabular text-right {% if c.fast %}text-warn font-semibold{% endif %}">{{ c.fast }}</td>
       <td class="tabular text-right {% if c.copy %}text-warn{% endif %}">{{ c.copy }}</td>
       <td class="text-right"><span class="ca-chip {% if c.risk >= 15 %}text-bad{% elif c.risk >= 6 %}text-warn{% else %}text-mute{% endif %} tabular font-semibold">{{ c.risk }}</span></td>
       <td class="hidden md:table-cell tabular text-xs text-mute">{{ c.last|date:"d.m H:i:s" }}</td>
@@ -49,7 +50,32 @@
       </td>
     </tr>
     {% empty %}
-    <tr><td class="text-mute" colspan="7">Hodisa yo‘q.</td></tr>
+    <tr><td class="text-mute" colspan="8">Hodisa yo‘q.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section class="mb-8">
+  <div class="mb-3 flex flex-wrap items-end justify-between gap-2">
+    <h2 class="ca-section-title !mb-0">Tez yechilgan masalalar</h2>
+    <p class="text-xs text-mute">Birinchi urinishdayoq, o‘rta/qiyin masalani 90 soniya ichida AC qilish — o‘qib-yozish uchun real vaqt emas.</p>
+  </div>
+  <div class="ca-panel !p-0 overflow-x-auto">
+  <table class="ca-table">
+    <thead><tr><th>Ishtirokchi</th><th>Masala</th><th class="text-right">Qiyinlik</th><th class="text-right">Vaqt</th><th class="text-right">Yechim</th></tr></thead>
+    <tbody>
+    {% for r in fast_solves %}
+    <tr>
+      <td>{% include "accounts/_user.html" with u=r.user tier=False %}</td>
+      <td class="min-w-0 max-w-[12rem] truncate">{{ r.problem.title }}</td>
+      <td class="text-right"><span class="ca-diff ca-diff-{{ r.problem.difficulty }}">{{ r.problem.get_difficulty_display }}</span></td>
+      <td class="tabular text-right font-semibold text-warn">{{ r.elapsed }} soniya</td>
+      <td class="text-right"><a class="ca-link text-xs" href="{% url 'submissions:detail' r.submission.pk %}">#{{ r.submission.pk|stringformat:"06d" }}</a></td>
+    </tr>
+    {% empty %}
+    <tr><td class="text-mute" colspan="5">Belgi yo‘q.</td></tr>
     {% endfor %}
     </tbody>
   </table>
