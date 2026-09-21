@@ -308,12 +308,10 @@ so @codemirror/state is a singleton — two copies break with "Unrecognized exte
       EditorView.updateListener.of((u) => {
         if (!u.docChanged) return;
         try { localStorage.setItem(draftKey, u.state.doc.toString()); } catch {}
-        {% if contest %}
         let inserted = 0;
         u.changes.iterChanges((fA, tA, fB, tB, ins) => { inserted += ins.length; });
         if (inserted > 120) window.dispatchEvent(new CustomEvent("ca-bulk-insert"));
         else if (inserted > 0) window.dispatchEvent(new CustomEvent("ca-typed", { detail: inserted }));
-        {% endif %}
       })],
     parent: document.getElementById("editor"),
   });
@@ -356,14 +354,19 @@ so @codemirror/state is a singleton — two copies break with "Unrecognized exte
     }
   });
 </script>
-{% if contest %}
 <div id="ca-guard" class="ca-guard !hidden" role="status" aria-live="polite"></div>
 <script>
+  // Anti-cheat / anti-AI-copy: active on every problem page, not just contests — pasting
+  // an AI answer into practice mode is the same shortcut, it just doesn't affect a rank.
+  // Contest mode additionally reports each event to staff (integrity:event, needs Participation);
+  // practice mode blocks/warns client-side only, nothing is sent to the server.
   (function () {
-    const contestId = {{ contest.pk }};
+    const contestId = {% if contest %}{{ contest.pk }}{% else %}null{% endif %};
     const editor = document.getElementById("editor");
     const guard = document.getElementById("ca-guard");
-    const stamp = "— CodeArena, musobaqa #{{ contest.pk|stringformat:'03d' }}, {{ user.username }}. Bu matnni AI yordamchisiga yoki boshqa ishtirokchiga yuborish — qoidabuzarlik, nusxa qayd etiladi.";
+    const stamp = contestId
+      ? "— CodeArena, musobaqa #{{ contest.pk|default:0|stringformat:'03d' }}, {{ user.username }}. Bu matnni AI yordamchisiga yoki boshqa ishtirokchiga yuborish — qoidabuzarlik, nusxa qayd etiladi."
+      : "— CodeArena ({{ user.username|default:'mehmon' }}). Shart matnini AI yordamchisiga tashlab, javobni ko‘chirib qo‘yish o‘qishga yordam bermaydi — o‘zingiz yeching.";
     let leaves = 0, hideTimer;
 
     function notify(msg) {
@@ -373,6 +376,7 @@ so @codemirror/state is a singleton — two copies break with "Unrecognized exte
       hideTimer = setTimeout(() => guard.classList.add("!hidden"), 4000);
     }
     function report(kind) {
+      if (!contestId) return;
       fetch("{% url 'integrity:event' %}", {
         method: "POST", keepalive: true,
         headers: { "Content-Type": "application/x-www-form-urlencoded", "X-CSRFToken": "{{ csrf_token }}" },
@@ -380,18 +384,18 @@ so @codemirror/state is a singleton — two copies break with "Unrecognized exte
       });
     }
 
-    // Editor: no paste/drop/cut, no context menu. Every attempt is logged.
+    // Editor: no paste/drop/cut, no context menu, contest or not.
     editor.addEventListener("paste", (e) => {
       e.preventDefault(); e.stopPropagation();
-      report("paste"); notify("Musobaqada kodni qo‘yish (paste) taqiqlangan — urinish qayd etildi.");
+      report("paste"); notify("Kodni qo‘yish (paste) taqiqlangan" + (contestId ? " — urinish qayd etildi." : ". O‘zingiz yozing."));
     }, true);
     ["copy", "cut", "contextmenu"].forEach((evt) => editor.addEventListener(evt, (e) => e.preventDefault(), true));
     // Drag-and-drop of selected text is just paste with extra steps: kill it page-wide.
     ["dragstart", "drop"].forEach((evt) => document.addEventListener(evt, (e) => {
       e.preventDefault(); e.stopPropagation();
-      if (evt === "drop" && editor.contains(e.target)) { report("paste"); notify("Musobaqada matnni sudrab tashlash taqiqlangan — qayd etildi."); }
+      if (evt === "drop" && editor.contains(e.target)) { report("paste"); notify("Matnni sudrab tashlash taqiqlangan" + (contestId ? " — qayd etildi." : ".")); }
     }, true));
-    window.addEventListener("ca-bulk-insert", () => { report("paste"); notify("Katta hajmdagi matn kiritildi — qayd etildi."); });
+    window.addEventListener("ca-bulk-insert", () => { report("paste"); notify("Katta hajmdagi matn kiritildi" + (contestId ? " — qayd etildi." : " — bu paste’ga o‘xshaydi.")); });
 
     // Sustained fast typing (many sub-threshold inserts in a row) can be the same paste,
     // done in chunks to dodge the single-insert size check above.
@@ -403,28 +407,30 @@ so @codemirror/state is a singleton — two copies break with "Unrecognized exte
       const sum = typedWindow.reduce((a, [, n]) => a + n, 0);
       if (sum > 200 && now - fastReportedAt > 5000) {
         fastReportedAt = now;
-        report("fast"); notify("G‘ayrioddiy tez matn kiritish aniqlandi — qayd etildi.");
+        report("fast"); notify("G‘ayrioddiy tez matn kiritish aniqlandi" + (contestId ? " — qayd etildi." : "."));
       }
     });
 
-    // Statement: copying works, but the clipboard gets a traceable warning stamp and the event is logged.
+    // Statement: copying works, but the clipboard gets a traceable warning stamp (and,
+    // in a contest, the event is logged for staff).
     document.addEventListener("copy", (e) => {
       if (editor.contains(e.target)) return;
       const text = String(window.getSelection() || "");
       if (!text.trim()) return;
       e.clipboardData.setData("text/plain", text + "\n\n" + stamp);
       e.preventDefault();
-      report("copy"); notify("Nusxa qayd etildi. Matnga ogohlantiruvchi belgi qo‘shildi.");
+      report("copy"); notify("Nusxa olindi. Matnga ogohlantiruvchi belgi qo‘shildi.");
     });
 
-    // Leaving the page (other tab/window) is logged; the student sees the count on return.
-    const leave = () => { leaves += 1; report("blur"); };
-    const back = () => { report("focus"); notify(`Sahifadan chiqib ketdingiz — ${leaves} marta qayd etildi.`); };
-    window.addEventListener("blur", leave);
-    window.addEventListener("focus", back);
-    document.addEventListener("visibilitychange", () => (document.hidden ? leave() : back()));
+    // Leaving the page (other tab/window) is only meaningful — and only reported — during a contest.
+    if (contestId) {
+      const leave = () => { leaves += 1; report("blur"); };
+      const back = () => { report("focus"); notify(`Sahifadan chiqib ketdingiz — ${leaves} marta qayd etildi.`); };
+      window.addEventListener("blur", leave);
+      window.addEventListener("focus", back);
+      document.addEventListener("visibilitychange", () => (document.hidden ? leave() : back()));
+    }
   })();
 </script>
-{% endif %}
 {% endif %}
 {% endblock %}
