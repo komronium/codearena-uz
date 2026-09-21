@@ -8,7 +8,7 @@ services:
 
   web:
     restart: unless-stopped
-    ports: !override ["2009:8000"]
+    ports: !override ["${WEB_PORT:-2009}:8000"]
     volumes: !override
       - "media:/app/media"
     command: >
