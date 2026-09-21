@@ -46,7 +46,7 @@
 </div>
 
 {% if my_row %}
-<div class="ca-panel mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
+<div class="ca-panel mb-6 grid grid-cols-2 gap-4 sm:grid-cols-3 {% if my_row.rating_delta is not None %}lg:grid-cols-5{% else %}lg:grid-cols-4{% endif %}">
   <div>
     <p class="ca-stat-label">Sizning o‘rningiz</p>
     <p class="ca-stat-value mt-1">#{{ my_row.rank }} <span class="text-sm font-normal text-mute">/ {{ n_participants }}</span></p>
@@ -62,8 +62,13 @@
   <div>
     <p class="ca-stat-label">Jarima</p>
     <p class="ca-stat-value mt-1">{{ my_row.penalty }}</p>
-    {% if my_row.rating_delta is not None %}<p class="mt-0.5 text-xs font-medium {% if my_row.rating_delta >= 0 %}text-ok{% else %}text-bad{% endif %}">reyting {{ my_row.rating_delta|stringformat:"+d" }}</p>{% endif %}
   </div>
+  {% if my_row.rating_delta is not None %}
+  <div>
+    <p class="ca-stat-label">Reyting</p>
+    <p class="ca-stat-value mt-1 {% if my_row.rating_delta >= 0 %}text-ok{% else %}text-bad{% endif %}">{{ my_row.rating_delta|stringformat:"+d" }}</p>
+  </div>
+  {% endif %}
 </div>
 {% endif %}
 
