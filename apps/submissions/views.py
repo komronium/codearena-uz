@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
 from apps.contests.models import Participation
-from apps.contests.services import access_allowed, active_contest_for
+from apps.contests.services import access_allowed, active_contest_for, in_upcoming_contest
 from apps.problems.models import Language, Problem
 from judge.runner import run_submission
 
@@ -42,7 +42,7 @@ def submit(request, slug):
         raise Http404
     contest = active_contest_for(request.user, problem)
     is_owner_or_staff = request.user.is_staff or problem.author_id == request.user.id
-    if not problem.is_public and contest is None and not is_owner_or_staff:
+    if not is_owner_or_staff and ((not problem.is_public and contest is None) or in_upcoming_contest(problem)):
         raise Http404
     # re-check supervised-mode eligibility on every submit, not just at
     # registration — group membership or client IP can change mid-contest.

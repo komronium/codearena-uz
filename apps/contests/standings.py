@@ -38,18 +38,22 @@ def compute_standings(contest):
         delta = None
         if p.rating_after is not None and p.rating_before is not None:
             delta = p.rating_after - p.rating_before
+        attempted = any(subs_by_user_problem.get((p.user_id, cp.id)) for cp in problems)
         rows.append({"participation": p, "user": p.user, "solved": solved, "penalty": penalty,
                      "score": score, "last_ac": last_ac, "cells": cells, "rating_delta": delta,
-                     "disqualified": p.disqualified})
+                     "disqualified": p.disqualified, "attempted": attempted})
 
     # Disqualified participants always sort below everyone else: they keep their cells
     # for the record but take the last ranks, which is what makes their rating drop.
     if contest.type == contest.Type.ICPC:
-        rows.sort(key=lambda r: (r["disqualified"], -r["solved"], r["penalty"]))
+        def key(r): return (r["disqualified"], -r["solved"], r["penalty"])
     else:
-        rows.sort(key=lambda r: (r["disqualified"], -r["score"], r["last_ac"] or contest.end))
+        def key(r): return (r["disqualified"], -r["score"], r["last_ac"] or contest.end)
+    rows.sort(key=key)
+    # Equal results share a rank ("1, 1, 3"): the order between them is arbitrary,
+    # so distinct ranks would hand out arbitrary rating deltas.
     for i, r in enumerate(rows, start=1):
-        r["rank"] = i
+        r["rank"] = i if i == 1 or key(r) != key(rows[i - 2]) else rows[i - 2]["rank"]
 
     for col in range(len(problems)):
         times = [r["cells"][col]["ac_at"] for r in rows if r["cells"][col]["solved"] and not r["disqualified"]]

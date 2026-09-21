@@ -4,7 +4,7 @@ from django.utils import timezone
 
 from apps.accounts.models import User
 from apps.contests.models import Contest, ContestProblem, Participation
-from .models import Problem, Tag, TestCase
+from .models import Language, Problem, Tag, TestCase
 
 
 @pytest.fixture
@@ -100,6 +100,30 @@ def test_private_contest_problem_404_for_non_participant(client, problem, runnin
     user = User.objects.create_user("bob", password="x")
     client.force_login(user)
     assert client.get(reverse("problems:detail", kwargs={"slug": "a-plus-b"})).status_code == 404
+
+
+def test_upcoming_contest_problem_secret_even_if_public(client, problem):
+    """Problems of a not-yet-started contest are hidden from list, detail, contest page
+    and submit — is_public is irrelevant until the contest starts."""
+    contest = Contest.objects.create(
+        title="Soon", start=timezone.now() + timezone.timedelta(hours=1),
+        end=timezone.now() + timezone.timedelta(hours=3))
+    ContestProblem.objects.create(contest=contest, problem=problem, label="A", points=100)
+    user = User.objects.create_user("ali", password="x")
+    Participation.objects.create(user=user, contest=contest)
+    client.force_login(user)
+
+    assert problem not in client.get(reverse("problems:list")).context["problems"].object_list
+    assert client.get(reverse("problems:detail", kwargs={"slug": "a-plus-b"})).status_code == 404
+    assert b"a-plus-b" not in client.get(reverse("contests:detail", kwargs={"pk": contest.pk})).content
+    lang = Language.objects.create(code="python", name="Python 3", docker_image="x", run_cmd="x")
+    r = client.post(reverse("submissions:submit", kwargs={"slug": "a-plus-b"}),
+                    {"language": lang.code, "source": "print(1)"})
+    assert r.status_code == 404
+
+    contest.start = timezone.now() - timezone.timedelta(minutes=1)
+    contest.save()
+    assert client.get(reverse("problems:detail", kwargs={"slug": "a-plus-b"})).status_code == 200
 
 
 def test_list_paginates_at_30(client, problem):

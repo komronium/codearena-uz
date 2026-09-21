@@ -64,7 +64,9 @@
   <tr>
     <td class="font-semibold text-accent">{{ cp.label }}</td>
     <td class="min-w-0 max-w-md truncate">
-      {% if registered or contest.has_ended %}
+      {% if not contest.has_started and not user.is_staff %}
+        <span class="text-mute">musobaqa boshlanganda ko‘rinadi</span>
+      {% elif registered or contest.has_ended or user.is_staff %}
         <a class="ca-link" href="{% url 'problems:detail' cp.problem.slug %}">{{ cp.problem.title }}</a>
       {% else %}
         <span class="text-mute">ro‘yxatdan o‘tgach ko‘rinadi</span>

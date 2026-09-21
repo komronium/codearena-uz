@@ -189,6 +189,7 @@ def test_recalc_rating_applies_deltas_and_is_idempotent(ended_rated_contest, pro
     Participation.objects.create(user=winner, contest=ended_rated_contest)
     Participation.objects.create(user=loser, contest=ended_rated_contest)
     _sub(winner, problem_a, ended_rated_contest, python, "AC", 5)
+    _sub(loser, problem_a, ended_rated_contest, python, "WA", 7)
 
     call_command("recalc_rating", ended_rated_contest.pk, stdout=StringIO())
 
@@ -247,6 +248,7 @@ def test_recalc_rating_favorite_win_has_small_delta(ended_rated_contest, problem
     Participation.objects.create(user=favorite, contest=ended_rated_contest)
     Participation.objects.create(user=underdog, contest=ended_rated_contest)
     _sub(favorite, problem_a, ended_rated_contest, python, "AC", 5)
+    _sub(underdog, problem_a, ended_rated_contest, python, "WA", 7)
 
     # Seed for favorite (higher rating) must be better (lower) than underdog's.
     ratings = [1800, 1200]
@@ -257,8 +259,52 @@ def test_recalc_rating_favorite_win_has_small_delta(ended_rated_contest, problem
     favorite.refresh_from_db()
     underdog.refresh_from_db()
     assert favorite.rating > 1800
-    assert favorite.rating - 1800 < 40
+    assert favorite.rating - 1800 < 60  # vs +226 for an upset win in an equal field
     assert underdog.rating < 1200
+
+
+def test_recalc_rating_skips_registered_without_submissions(ended_rated_contest, problem_a, python):
+    """Registered but never submitted = didn't take part: rating untouched, not ranked."""
+    winner = User.objects.create_user("winner", password="x", rating=1500)
+    ghost = User.objects.create_user("ghost", password="x", rating=1500)
+    Participation.objects.create(user=winner, contest=ended_rated_contest)
+    Participation.objects.create(user=ghost, contest=ended_rated_contest)
+    _sub(winner, problem_a, ended_rated_contest, python, "AC", 5)
+
+    call_command("recalc_rating", ended_rated_contest.pk, stdout=StringIO())
+
+    ghost.refresh_from_db()
+    assert ghost.rating == 1500
+    assert Participation.objects.get(user=ghost, contest=ended_rated_contest).rating_after is None
+
+
+def test_tied_results_share_rank_and_rating_delta(ended_rated_contest, problem_a, python):
+    """Same solved+penalty -> same rank ("1, 1, 3") and identical rating change; the
+    arbitrary sort order between equals must not decide who gains and who loses."""
+    users = [User.objects.create_user(f"u{i}", password="x", rating=1500) for i in range(3)]
+    for u in users:
+        Participation.objects.create(user=u, contest=ended_rated_contest)
+    _sub(users[0], problem_a, ended_rated_contest, python, "AC", 5)
+    _sub(users[1], problem_a, ended_rated_contest, python, "AC", 5)
+    _sub(users[2], problem_a, ended_rated_contest, python, "WA", 5)
+
+    rows = compute_standings(ended_rated_contest)
+    assert [r["rank"] for r in rows] == [1, 1, 3]
+
+    call_command("recalc_rating", ended_rated_contest.pk, stdout=StringIO())
+    for u in users:
+        u.refresh_from_db()
+    assert users[0].rating == users[1].rating > 1500 > users[2].rating
+
+
+def test_rating_gain_scales_with_solved_fraction():
+    """Same rank, more solved -> bigger gain (margin of victory); losses are damped."""
+    from apps.contests.management.commands.recalc_rating import rating_delta
+    full = rating_delta(seed=8, rank=1, n=15, k=150, solved_frac=1.0)
+    partial = rating_delta(seed=8, rank=1, n=15, k=150, solved_frac=0.9)
+    assert full > partial > 0
+    loss = rating_delta(seed=8, rank=15, n=15, k=150, solved_frac=0.0)
+    assert -full < loss < 0
 
 
 def test_active_contest_for_prefers_user_participation(problem_a):
@@ -443,14 +489,12 @@ def test_disqualify_requires_staff(client):
 
 
 def test_rating_delta_classroom_scale():
-    """15 newbies at 1200: winner +101, 8th +1, last -99; Elo part zero-sum, +1 each for taking part."""
+    """15 newbies at 1200: full-solve winner +226, 8th +1, last -74 (losses halved)."""
     from apps.contests.management.commands.recalc_rating import _expected_seed, rating_delta
 
     ratings = [1200] * 15
     seed = _expected_seed(0, ratings)  # 8.0 for an all-equal field
-    assert rating_delta(seed, 1, 15, 100) == 101
-    assert rating_delta(seed, 8, 15, 100) == 1
-    assert rating_delta(seed, 15, 15, 100) == -99
-    mixed = [1200, 1500, 1050, 1320, 1200]
-    deltas = [rating_delta(_expected_seed(i, mixed), i + 1, 5, 100) for i in range(5)]
-    assert abs(sum(deltas) - 5) <= 2  # zero-sum + n×bonus, up to rounding
+    assert rating_delta(seed, 1, 15, 150, 1.0) == 226
+    assert rating_delta(seed, 1, 15, 150, 0.2) == 106  # same rank, 1/5 solved: smaller gain
+    assert rating_delta(seed, 8, 15, 150, 0.5) == 1
+    assert rating_delta(seed, 15, 15, 150, 0.0) == -74

@@ -14,10 +14,13 @@ services:
     command: >
       sh -c "python manage.py migrate --noinput &&
              python manage.py collectstatic --noinput &&
-             gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 60"
+             gunicorn config.wsgi:application --bind 0.0.0.0:8000
+             --workers ${WEB_WORKERS:-3} --worker-class gthread --threads ${WEB_THREADS:-8} --timeout 60"
 
   worker:
     restart: unless-stopped
+    # Each judge worker runs one submission at a time; N of them judge N in parallel.
+    command: python manage.py rqworker-pool default --num-workers ${JUDGE_WORKERS:-4}
     volumes: !override
       - "media:/app/media"
       - "/var/run/docker.sock:/var/run/docker.sock"

@@ -7,7 +7,7 @@ from django.shortcuts import render
 from django.utils import timezone
 
 from apps.contests.models import ContestProblem
-from apps.contests.services import active_contest_for
+from apps.contests.services import active_contest_for, in_upcoming_contest
 from apps.submissions.models import Submission, UserProblemSolved
 
 from .models import (
@@ -39,7 +39,7 @@ def _render_statement(statement_md: str) -> str:
 
 
 def problem_list(request):
-    problems = Problem.objects.filter(is_public=True).order_by("id")
+    problems = Problem.objects.filter(is_public=True).exclude(contests__start__gt=timezone.now()).order_by("id")
     q = request.GET.get("q", "").strip()
     if q:
         problems = problems.filter(title__icontains=q)
@@ -88,7 +88,7 @@ def problem_detail(request, slug):
     is_owner_or_staff = request.user.is_authenticated and (
         request.user.is_staff or problem.author_id == request.user.id
     )
-    if not problem.is_public and contest is None and not is_owner_or_staff:
+    if not is_owner_or_staff and ((not problem.is_public and contest is None) or in_upcoming_contest(problem)):
         raise Http404
     if problem.kind == Problem.Kind.SQL:
         languages = Language.objects.filter(is_active=True, code="sql")
@@ -106,7 +106,7 @@ def problem_detail(request, slug):
         cp = (ContestProblem.objects.filter(problem=problem, contest__start__lte=now, contest__end__gt=now)
               .select_related("contest").first())
         open_contest = cp.contest if cp else None
-    public = Problem.objects.filter(is_public=True)
+    public = Problem.objects.filter(is_public=True).exclude(contests__start__gt=timezone.now())
     return render(request, "problems/detail.html", {
         "open_contest": open_contest,
         "problem": problem,

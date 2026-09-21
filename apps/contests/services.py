@@ -24,6 +24,12 @@ def active_contest_for(user, problem):
     return cp.contest if cp is not None else None
 
 
+def in_upcoming_contest(problem) -> bool:
+    """Problems of a not-yet-started contest are secret regardless of is_public:
+    no statement, no submit, not in the list. Staff and the author still see them."""
+    return ContestProblem.objects.filter(problem=problem, contest__start__gt=timezone.now()).exists()
+
+
 def access_allowed(user, contest, remote_addr: str) -> bool:
     """Supervised-mode gate (spec §3/§4.4): checked on register and on each
     submit, since group membership or client IP can change mid-contest."""

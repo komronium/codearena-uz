@@ -21,3 +21,7 @@ if os.environ.get("USE_HTTPS", "0") == "1":
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+
+# Reuse DB connections across requests: with gthread every request would otherwise
+# open a fresh Postgres connection, which dominates the 1s status-poll cost.
+DATABASES["default"]["CONN_MAX_AGE"] = 60  # noqa: F405

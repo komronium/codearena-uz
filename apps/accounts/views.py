@@ -182,7 +182,9 @@ def profile(request, username):
     solved = Problem.objects.filter(userproblemsolved__user=profile_user, is_public=True).order_by("title")
     rating_history = list(
         Participation.objects.filter(user=profile_user, rating_after__isnull=False)
-        .select_related("contest").annotate(n_participants=Count("contest__participations"))
+        .select_related("contest")
+        .annotate(n_participants=Count("contest__participations",
+                                       filter=Q(contest__participations__rating_after__isnull=False)))
         .order_by("contest__end")
     )
     for p in rating_history:
