@@ -48,16 +48,17 @@ def run_submission(submission_id: int) -> None:
 
         final, passed, max_ms = Submission.Verdict.AC, 0, 0
         results = sandbox.run_tests(lang, src_dir, [tc.input for tc in tests], problem.tl_ms, problem.ml_mb)
+        rows = []
         for tc, (out, v, ms) in zip(tests, results):
             max_ms = max(max_ms, ms)
             if v == "OK":
                 v = "AC" if outputs_match(tc.expected, out) else "WA"
-            TestResult.objects.create(submission=sub, testcase=tc, verdict=v, exec_ms=ms,
-                                      stdout_excerpt=out[:1000])
+            rows.append(TestResult(submission=sub, testcase=tc, verdict=v, exec_ms=ms, stdout_excerpt=out[:1000]))
             if v != "AC":
                 final = v
                 break
             passed += 1
+        TestResult.objects.bulk_create(rows)
 
         sub.verdict, sub.passed, sub.total, sub.exec_ms = final, passed, len(tests), max_ms
         sub.save(update_fields=["verdict", "passed", "total", "exec_ms"])
