@@ -31,6 +31,7 @@ class Spec:
     difficulty: str = Problem.Difficulty.BEGINNER
     tags: list[str] = field(default_factory=lambda: ["if-else"])
     is_public: bool = True
+    tests: int = TESTS_PER_PROBLEM
 
 
 def _ints(s: str) -> list[int]:
@@ -352,7 +353,7 @@ class Command(BaseCommand):
                 TestCase.objects.bulk_create(_build_tests(problem, spec))
                 self.stdout.write(f"{'created' if created else 'updated'} {spec.slug}{'' if spec.is_public else ' (hidden)'}")
         self.stdout.write(self.style.SUCCESS(
-            f"{len(SPECS)} public + {len(CONTEST_SPECS)} hidden problems, {TESTS_PER_PROBLEM} tests each"))
+            f"{len(SPECS)} public + {len(CONTEST_SPECS)} hidden problems"))
 
 
 def _build_tests(problem: Problem, spec: Spec) -> list[TestCase]:
@@ -360,13 +361,13 @@ def _build_tests(problem: Problem, spec: Spec) -> list[TestCase]:
     inputs = list(spec.samples)
     seen = set(inputs)
     attempts = 0
-    while len(inputs) < TESTS_PER_PROBLEM:
+    while len(inputs) < spec.tests:
         inp = spec.gen(rng)
         attempts += 1
         if inp not in seen:
             seen.add(inp)
             inputs.append(inp)
         elif attempts > 10_000:
-            raise ValueError(f"{spec.slug}: input space too small for {TESTS_PER_PROBLEM} unique tests")
+            raise ValueError(f"{spec.slug}: input space too small for {spec.tests} unique tests")
     return [TestCase(problem=problem, input=inp, expected=spec.solve(inp),
                      is_sample=i < len(spec.samples), order=i) for i, inp in enumerate(inputs)]

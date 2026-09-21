@@ -1,7 +1,19 @@
+{% load pagination %}
 {% if page.has_other_pages %}
-<nav class="mt-4 flex items-center gap-4 text-sm" aria-label="Sahifalar">
-  {% if page.has_previous %}<a class="ca-link" href="?{% if q %}q={{ q|urlencode }}&{% endif %}page={{ page.previous_page_number }}">← Oldingi</a>{% endif %}
-  <span class="tabular text-mute">{{ page.number }} / {{ page.paginator.num_pages }}</span>
-  {% if page.has_next %}<a class="ca-link" href="?{% if q %}q={{ q|urlencode }}&{% endif %}page={{ page.next_page_number }}">Keyingi →</a>{% endif %}
+<nav class="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm" aria-label="Sahifalar">
+  <span class="text-mute">{{ page.start_index }}–{{ page.end_index }} / {{ page.paginator.count }}</span>
+  <div class="flex items-center gap-1">
+    {% if page.has_previous %}
+    <a class="ca-btn ca-btn-ghost !px-2 !py-1.5" href="{% querystring page=page.previous_page_number %}" aria-label="Oldingi"><i data-lucide="chevron-left" class="lu" aria-hidden="true"></i></a>
+    {% else %}<span class="ca-btn ca-btn-ghost !px-2 !py-1.5 opacity-40" aria-hidden="true"><i data-lucide="chevron-left" class="lu"></i></span>{% endif %}
+    {% for n in page|elided_pages %}
+      {% if n == page.paginator.ELLIPSIS %}<span class="px-1 text-mute">…</span>
+      {% elif n == page.number %}<span class="ca-btn ca-btn-primary !px-3 !py-1.5 tabular" aria-current="page">{{ n }}</span>
+      {% else %}<a class="ca-btn ca-btn-ghost !px-3 !py-1.5 tabular" href="{% querystring page=n %}">{{ n }}</a>{% endif %}
+    {% endfor %}
+    {% if page.has_next %}
+    <a class="ca-btn ca-btn-ghost !px-2 !py-1.5" href="{% querystring page=page.next_page_number %}" aria-label="Keyingi"><i data-lucide="chevron-right" class="lu" aria-hidden="true"></i></a>
+    {% else %}<span class="ca-btn ca-btn-ghost !px-2 !py-1.5 opacity-40" aria-hidden="true"><i data-lucide="chevron-right" class="lu"></i></span>{% endif %}
+  </div>
 </nav>
 {% endif %}

@@ -126,6 +126,31 @@ def test_upcoming_contest_problem_secret_even_if_public(client, problem):
     assert client.get(reverse("problems:detail", kwargs={"slug": "a-plus-b"})).status_code == 200
 
 
+def test_list_sorts_by_column_and_direction(client, problem):
+    author = problem.author
+    hard = Problem.objects.create(slug="z", title="Zzz", statement_md="x", author=author, difficulty="hard")
+    easy = Problem.objects.create(slug="b", title="Bbb", statement_md="x", author=author, difficulty="beginner")
+
+    def ids(**params):
+        return [p.id for p in client.get(reverse("problems:list"), params).context["problems"].object_list]
+
+    assert ids(sort="title") == [problem.id, easy.id, hard.id]  # "A + B" < "Bbb" < "Zzz"
+    assert ids(sort="title", dir="desc") == [hard.id, easy.id, problem.id]
+    assert ids(sort="difficulty")[0] == easy.id and ids(sort="difficulty", dir="desc")[0] == hard.id
+    assert ids(sort="bogus") == ids()  # unknown column falls back to id
+
+
+def test_list_pagination_keeps_filters_and_shows_page_numbers(client, problem):
+    author = problem.author
+    for i in range(65):
+        Problem.objects.create(slug=f"p{i}", title=f"P{i}", statement_md="x", author=author)
+    r = client.get(reverse("problems:list"), {"q": "P", "sort": "title", "page": 2})
+    html = r.content.decode()
+    assert 'aria-current="page">2<' in html
+    assert "?q=P&amp;sort=title&amp;page=3" in html
+    assert "31–60 / 65" in html
+
+
 def test_list_paginates_at_30(client, problem):
     author = problem.author
     for i in range(35):

@@ -1,7 +1,7 @@
 import bleach
 import markdown
 from django.core.paginator import Paginator
-from django.db.models import Count, Q
+from django.db.models import Case, Count, F, IntegerField, Q, Value, When
 from django.http import Http404
 from django.shortcuts import render
 from django.utils import timezone
@@ -38,8 +38,17 @@ def _render_statement(statement_md: str) -> str:
     return bleach.clean(html, tags=_ALLOWED_TAGS, attributes=_ALLOWED_ATTRS)
 
 
+# Clickable column -> ordering expression. Difficulty sorts by level, not alphabetically.
+_DIFFICULTY_RANK = Case(*(When(difficulty=d, then=Value(i)) for i, d in enumerate(Problem.Difficulty.values)),
+                        output_field=IntegerField())
+_SORTS = {
+    "id": F("id"), "title": F("title"), "difficulty": _DIFFICULTY_RANK,
+    "attempts": F("attempts"), "pass_rate": F("pass_rate"),
+}
+
+
 def problem_list(request):
-    problems = Problem.objects.filter(is_public=True).exclude(contests__start__gt=timezone.now()).order_by("id")
+    problems = Problem.objects.filter(is_public=True).exclude(contests__start__gt=timezone.now())
     q = request.GET.get("q", "").strip()
     if q:
         problems = problems.filter(title__icontains=q)
@@ -56,7 +65,16 @@ def problem_list(request):
     problems = problems.prefetch_related("tags").annotate(
         attempts=Count("submissions", distinct=True),
         ac_count=Count("submissions", filter=Q(submissions__verdict="AC"), distinct=True),
+    ).annotate(
+        pass_rate=Case(When(attempts=0, then=Value(0)), default=F("ac_count") * 100 / F("attempts"),
+                       output_field=IntegerField()),
     ).distinct()
+    sort = request.GET.get("sort", "id")
+    if sort not in _SORTS:
+        sort = "id"
+    desc = request.GET.get("dir") == "desc"
+    order = _SORTS[sort].desc() if desc else _SORTS[sort].asc()
+    problems = problems.order_by(order, "id")
 
     page = Paginator(problems, 30).get_page(request.GET.get("page"))
     solved_ids = set()
@@ -65,10 +83,9 @@ def problem_list(request):
             UserProblemSolved.objects.filter(user=request.user, problem__in=page.object_list)
             .values_list("problem_id", flat=True)
         )
-    for p in page.object_list:
-        p.pass_rate = round(p.ac_count / p.attempts * 100) if p.attempts else 0
     return render(request, "problems/list.html", {
         "problems": page,
+        "sort": sort, "dir": "desc" if desc else "asc",
         "solved_ids": solved_ids,
         "all_tags": Tag.objects.order_by("name"),
         "q": q,

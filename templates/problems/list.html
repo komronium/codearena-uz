@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load pagination %}
 {% block title %}Masalalar{% endblock %}
 {% block content %}
 <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
@@ -49,12 +50,12 @@
   <thead>
     <tr>
       <th class="w-10"></th>
-      <th class="w-20">#</th>
-      <th>Nomi</th>
+      <th class="w-20">{% include "problems/_sort_th.html" with key="id" label="#" %}</th>
+      <th>{% include "problems/_sort_th.html" with key="title" label="Nomi" %}</th>
       <th class="hidden md:table-cell">Mavzu</th>
-      <th>Qiyinlik</th>
-      <th class="hidden md:table-cell text-right">Urinishlar</th>
-      <th class="text-right">Yechilish</th>
+      <th>{% include "problems/_sort_th.html" with key="difficulty" label="Qiyinlik" %}</th>
+      <th class="hidden md:table-cell text-right">{% include "problems/_sort_th.html" with key="attempts" label="Urinishlar" %}</th>
+      <th class="text-right">{% include "problems/_sort_th.html" with key="pass_rate" label="Yechilish" %}</th>
     </tr>
   </thead>
   <tbody>
@@ -83,13 +84,7 @@
   </tbody>
 </table>
 </div>
-{% if problems.has_other_pages %}
-<nav class="mt-4 flex items-center gap-4 text-sm" aria-label="Sahifalar">
-  {% if problems.has_previous %}<a class="ca-link" href="?{% if q %}q={{ q }}&{% endif %}{% if selected_tag %}tag={{ selected_tag }}&{% endif %}{% if selected_difficulty %}difficulty={{ selected_difficulty }}&{% endif %}{% if selected_status %}status={{ selected_status }}&{% endif %}page={{ problems.previous_page_number }}">← Oldingi</a>{% endif %}
-  <span class="tabular text-mute">{{ problems.number }} / {{ problems.paginator.num_pages }}</span>
-  {% if problems.has_next %}<a class="ca-link" href="?{% if q %}q={{ q }}&{% endif %}{% if selected_tag %}tag={{ selected_tag }}&{% endif %}{% if selected_difficulty %}difficulty={{ selected_difficulty }}&{% endif %}{% if selected_status %}status={{ selected_status }}&{% endif %}page={{ problems.next_page_number }}">Keyingi →</a>{% endif %}
-</nav>
-{% endif %}
+{% include "_pagination.html" with page=problems %}
 {% else %}
 <div class="ca-empty">
   <i data-lucide="folder-open" class="lu mb-2 block text-2xl" aria-hidden="true"></i>
