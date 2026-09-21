@@ -134,7 +134,7 @@
     <div>
       <div class="flex gap-[3px]">
         {% for w in activity.weeks %}
-        <div class="grid flex-1 gap-[3px]">
+        <div class="grid flex-1 gap-[3px]" style="grid-template-rows: repeat(7, minmax(0, 1fr))">
           {% for d in w %}<div class="ca-heat-cell !h-auto !w-full aspect-square ca-heat-{{ d.level }}" title="{{ d.date|date:'d.m.Y' }}: {{ d.count }} ta urinish"></div>{% endfor %}
         </div>
         {% endfor %}
