@@ -11,11 +11,9 @@ services:
     ports: !override ["${WEB_PORT:-2009}:8000"]
     volumes: !override
       - "media:/app/media"
-    command: >
-      sh -c "python manage.py migrate --noinput &&
-             python manage.py collectstatic --noinput &&
-             gunicorn config.wsgi:application --bind 0.0.0.0:8000
-             --workers ${WEB_WORKERS:-3} --worker-class gthread --threads ${WEB_THREADS:-8} --timeout 60"
+    # Single line on purpose: a YAML folded block keeps newlines for indented
+    # continuation lines, and `sh -c` would then run gunicorn without its flags.
+    command: sh -c "python manage.py migrate --noinput && python manage.py collectstatic --noinput && gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers ${WEB_WORKERS:-3} --worker-class gthread --threads ${WEB_THREADS:-8} --timeout 60"
 
   worker:
     restart: unless-stopped
