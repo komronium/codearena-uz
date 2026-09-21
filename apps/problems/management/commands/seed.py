@@ -29,12 +29,12 @@ class Command(BaseCommand):
         p, created = Problem.objects.get_or_create(slug="a-plus-b", defaults=dict(
             title="A + B", author=admin, tl_ms=1000, ml_mb=64, points=10,
             statement_md="Ikki butun son **a** va **b** berilgan. Ularning yig'indisini chiqaring.\n\n"
-                         "**Kirish:** bir qatorda a va b (−10⁹ ≤ a, b ≤ 10⁹).\n\n**Chiqish:** a + b."))
+                         "**Kirish:** ikki qatorda a va b (−10⁹ ≤ a, b ≤ 10⁹).\n\n**Chiqish:** a + b."))
         if created:
             TestCase.objects.bulk_create([
-                TestCase(problem=p, input="1 2\n", expected="3\n", is_sample=True, order=0),
-                TestCase(problem=p, input="-5 5\n", expected="0\n", order=1),
-                TestCase(problem=p, input="1000000000 1000000000\n", expected="2000000000\n", order=2),
+                TestCase(problem=p, input="1\n2\n", expected="3\n", is_sample=True, order=0),
+                TestCase(problem=p, input="-5\n5\n", expected="0\n", order=1),
+                TestCase(problem=p, input="1000000000\n1000000000\n", expected="2000000000\n", order=2),
             ])
         sql_p, created = Problem.objects.get_or_create(slug="older-than-21", defaults=dict(
             title="21 yoshdan katta foydalanuvchilar", author=admin, kind=Problem.Kind.SQL,

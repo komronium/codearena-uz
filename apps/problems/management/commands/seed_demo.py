@@ -95,8 +95,8 @@ class Command(BaseCommand):
                 if created:
                     p.tags.set(random.sample(tags, k=random.randint(1, 3)))
                     TestCase.objects.bulk_create([
-                        TestCase(problem=p, input="1 2\n", expected="3\n", is_sample=True, order=0),
-                        TestCase(problem=p, input="5 7\n", expected="12\n", order=1),
+                        TestCase(problem=p, input="1\n2\n", expected="3\n", is_sample=True, order=0),
+                        TestCase(problem=p, input="5\n7\n", expected="12\n", order=1),
                     ])
                 problems.append(p)
 
