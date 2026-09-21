@@ -47,8 +47,8 @@ def run_submission(submission_id: int) -> None:
             return
 
         final, passed, max_ms = Submission.Verdict.AC, 0, 0
-        for tc in tests:
-            out, v, ms = sandbox.run_test(lang, src_dir, tc.input, problem.tl_ms, problem.ml_mb)
+        results = sandbox.run_tests(lang, src_dir, [tc.input for tc in tests], problem.tl_ms, problem.ml_mb)
+        for tc, (out, v, ms) in zip(tests, results):
             max_ms = max(max_ms, ms)
             if v == "OK":
                 v = "AC" if outputs_match(tc.expected, out) else "WA"

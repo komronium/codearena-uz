@@ -106,11 +106,11 @@ def test_status_partial_polls_until_terminal(client, problem, python, user):
     assert b"hx-trigger" not in r.content and b"ca-verdict-ac" in r.content
 
 
-@patch("judge.runner.sandbox.run_test")
+@patch("judge.runner.sandbox.run_tests")
 @patch("judge.runner.sandbox.compile", return_value=(True, ""))
-def test_runner_ac(compile_, run_test, problem, python, user):
+def test_runner_ac(compile_, run_tests, problem, python, user):
     from judge.runner import run_submission
-    run_test.side_effect = [("3\n", "OK", 10), ("12\n", "OK", 12)]
+    run_tests.return_value = [("3\n", "OK", 10), ("12\n", "OK", 12)]
     s = Submission.objects.create(user=user, problem=problem, language=python, source="x")
     run_submission(s.pk)
     s.refresh_from_db()
@@ -118,33 +118,32 @@ def test_runner_ac(compile_, run_test, problem, python, user):
     assert s.results.count() == 2
 
 
-@patch("judge.runner.sandbox.run_test")
+@patch("judge.runner.sandbox.run_tests")
 @patch("judge.runner.sandbox.compile", return_value=(True, ""))
-def test_runner_wa_stops_early(compile_, run_test, problem, python, user):
+def test_runner_wa_stops_early(compile_, run_tests, problem, python, user):
     from judge.runner import run_submission
-    run_test.side_effect = [("4\n", "OK", 10), ("12\n", "OK", 12)]
+    run_tests.return_value = [("4\n", "OK", 10), ("12\n", "OK", 12)]
     s = Submission.objects.create(user=user, problem=problem, language=python, source="x")
     run_submission(s.pk)
     s.refresh_from_db()
     assert s.verdict == "WA" and s.passed == 0 and s.total == 2
-    assert run_test.call_count == 1
     assert s.results.get().verdict == "WA"
 
 
-@patch("judge.runner.sandbox.run_test")
+@patch("judge.runner.sandbox.run_tests")
 @patch("judge.runner.sandbox.compile", return_value=(False, "SyntaxError"))
-def test_runner_ce(compile_, run_test, problem, python, user):
+def test_runner_ce(compile_, run_tests, problem, python, user):
     from judge.runner import run_submission
     s = Submission.objects.create(user=user, problem=problem, language=python, source="x")
     run_submission(s.pk)
     s.refresh_from_db()
     assert s.verdict == "CE" and s.compile_log == "SyntaxError"
-    run_test.assert_not_called()
+    run_tests.assert_not_called()
 
 
-@patch("judge.runner.sandbox.run_test", return_value=("", "TLE", 3100))
+@patch("judge.runner.sandbox.run_tests", return_value=[("", "TLE", 3100)])
 @patch("judge.runner.sandbox.compile", return_value=(True, ""))
-def test_runner_tle(compile_, run_test, problem, python, user):
+def test_runner_tle(compile_, run_tests, problem, python, user):
     from judge.runner import run_submission
     s = Submission.objects.create(user=user, problem=problem, language=python, source="x")
     run_submission(s.pk)
@@ -156,11 +155,11 @@ def test_runner_tle(compile_, run_test, problem, python, user):
 # problem.points once, via a UserProblemSolved row. Not in the original task
 # brief text; added here since judge.runner is exactly where AC is decided.
 
-@patch("judge.runner.sandbox.run_test")
+@patch("judge.runner.sandbox.run_tests")
 @patch("judge.runner.sandbox.compile", return_value=(True, ""))
-def test_runner_first_ac_awards_practice_points(compile_, run_test, problem, python, user):
+def test_runner_first_ac_awards_practice_points(compile_, run_tests, problem, python, user):
     from judge.runner import run_submission
-    run_test.side_effect = [("3\n", "OK", 10), ("12\n", "OK", 12)]
+    run_tests.return_value = [("3\n", "OK", 10), ("12\n", "OK", 12)]
     s = Submission.objects.create(user=user, problem=problem, language=python, source="x")
     run_submission(s.pk)
     user.refresh_from_db()
@@ -168,11 +167,11 @@ def test_runner_first_ac_awards_practice_points(compile_, run_test, problem, pyt
     assert UserProblemSolved.objects.filter(user=user, problem=problem, first_ac_submission=s).exists()
 
 
-@patch("judge.runner.sandbox.run_test")
+@patch("judge.runner.sandbox.run_tests")
 @patch("judge.runner.sandbox.compile", return_value=(True, ""))
-def test_runner_second_ac_does_not_award_points_again(compile_, run_test, problem, python, user):
+def test_runner_second_ac_does_not_award_points_again(compile_, run_tests, problem, python, user):
     from judge.runner import run_submission
-    run_test.side_effect = [("3\n", "OK", 10), ("12\n", "OK", 12), ("3\n", "OK", 10), ("12\n", "OK", 12)]
+    run_tests.side_effect = [[("3\n", "OK", 10), ("12\n", "OK", 12)], [("3\n", "OK", 10), ("12\n", "OK", 12)]]
     s1 = Submission.objects.create(user=user, problem=problem, language=python, source="x")
     run_submission(s1.pk)
     s2 = Submission.objects.create(user=user, problem=problem, language=python, source="x")
@@ -182,24 +181,24 @@ def test_runner_second_ac_does_not_award_points_again(compile_, run_test, proble
     assert UserProblemSolved.objects.filter(user=user, problem=problem).count() == 1
 
 
-@patch("judge.runner.sandbox.run_test")
+@patch("judge.runner.sandbox.run_tests")
 @patch("judge.runner.sandbox.compile", return_value=(True, ""))
-def test_runner_wa_awards_no_points(compile_, run_test, problem, python, user):
+def test_runner_wa_awards_no_points(compile_, run_tests, problem, python, user):
     from judge.runner import run_submission
-    run_test.side_effect = [("4\n", "OK", 10)]
+    run_tests.return_value = [("4\n", "OK", 10)]
     s = Submission.objects.create(user=user, problem=problem, language=python, source="x")
     run_submission(s.pk)
     user.refresh_from_db()
     assert user.practice_points == 0
 
 
-@patch("judge.runner.sandbox.run_test")
+@patch("judge.runner.sandbox.run_tests")
 @patch("judge.runner.sandbox.compile", return_value=(True, ""))
-def test_runner_contest_ac_awards_no_practice_points(compile_, run_test, problem, python, user):
+def test_runner_contest_ac_awards_no_practice_points(compile_, run_tests, problem, python, user):
     """spec §2 step 5: practice points are awarded on AC 'outside contest' only."""
     from judge.runner import run_submission
     contest = Contest.objects.create(title="Sprint", start=timezone.now(), end=timezone.now() + timezone.timedelta(hours=1))
-    run_test.side_effect = [("3\n", "OK", 10), ("12\n", "OK", 12)]
+    run_tests.return_value = [("3\n", "OK", 10), ("12\n", "OK", 12)]
     s = Submission.objects.create(user=user, problem=problem, contest=contest, language=python, source="x")
     run_submission(s.pk)
     s.refresh_from_db()
@@ -209,9 +208,9 @@ def test_runner_contest_ac_awards_no_practice_points(compile_, run_test, problem
     assert not UserProblemSolved.objects.filter(user=user, problem=problem).exists()
 
 
-@patch("judge.runner.sandbox.run_test")
+@patch("judge.runner.sandbox.run_tests")
 @patch("judge.runner.sandbox.compile", return_value=(True, ""))
-def test_runner_retry_while_running_does_not_duplicate_results(compile_, run_test, problem, python, user):
+def test_runner_retry_while_running_does_not_duplicate_results(compile_, run_tests, problem, python, user):
     """RQ retry of a RUNNING submission must clear prior TestResults and finish once."""
     from apps.submissions.models import TestResult
     from judge.runner import run_submission
@@ -221,7 +220,7 @@ def test_runner_retry_while_running_does_not_duplicate_results(compile_, run_tes
     # Simulate a crashed prior attempt that left a partial result row.
     TestResult.objects.create(
         submission=s, testcase=problem.testcases.first(), verdict="AC", exec_ms=5)
-    run_test.side_effect = [("3\n", "OK", 10), ("12\n", "OK", 12)]
+    run_tests.return_value = [("3\n", "OK", 10), ("12\n", "OK", 12)]
 
     run_submission(s.pk)
     s.refresh_from_db()

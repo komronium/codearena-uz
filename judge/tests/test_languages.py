@@ -3,7 +3,7 @@ import tempfile
 
 import pytest
 
-from judge.sandbox import SOURCE_FILENAME, compile, run_test
+from judge.sandbox import SOURCE_FILENAME, compile, run_tests
 
 pytestmark = pytest.mark.skipif(os.environ.get("JUDGE_TESTS") != "1", reason="needs docker; set JUDGE_TESTS=1")
 
@@ -47,5 +47,5 @@ def test_a_plus_b_ac(lang_code):
     d = _src(lang_code, A_PLUS_B_SOURCE[lang_code])
     ok, log = compile(lang, d)
     assert ok, log
-    out, verdict, ms = run_test(lang, d, "1 2\n", 1000, 128)
+    out, verdict, ms = run_tests(lang, d, ["1 2\n"], 1000, 128)[0]
     assert verdict == "OK" and out.strip() == "3"
