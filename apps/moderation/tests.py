@@ -314,6 +314,22 @@ def test_generate_problems_wraps_bad_json():
         generate_problems("x", client=client)
 
 
+def test_generate_problems_rejects_too_few_testcases():
+    from apps.moderation.ai import AIGenerationError, generate_problems
+
+    payload = {"problems": [_ai_problem("Kam testli", n_tests=5)]}
+    with pytest.raises(AIGenerationError):
+        generate_problems("x", count=1, client=_fake_client(payload))
+
+
+def test_generate_problems_rejects_count_mismatch():
+    from apps.moderation.ai import AIGenerationError, generate_problems
+
+    payload = {"problems": [_ai_problem("A")]}
+    with pytest.raises(AIGenerationError):
+        generate_problems("x", count=2, client=_fake_client(payload))
+
+
 @pytest.mark.django_db
 def test_ai_generate_creates_pending_problems_for_review(client):
     from apps.problems.models import TestCase

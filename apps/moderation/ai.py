@@ -28,7 +28,6 @@ _PROBLEM_SCHEMA = {
         "tags": {"type": "array", "items": {"type": "string"}},
         "testcases": {
             "type": "array",
-            "minItems": MIN_TESTCASES,
             "items": {
                 "type": "object",
                 "properties": {
@@ -63,7 +62,7 @@ def generate_problems(prompt: str, model: str = DEFAULT_MODEL, count: int = DEFA
     count = max(MIN_COUNT, min(MAX_COUNT, count))
     schema = {
         "type": "object",
-        "properties": {"problems": {"type": "array", "minItems": count, "maxItems": count, "items": _PROBLEM_SCHEMA}},
+        "properties": {"problems": {"type": "array", "items": _PROBLEM_SCHEMA}},
         "required": ["problems"],
         "additionalProperties": False,
     }
@@ -87,4 +86,14 @@ def generate_problems(prompt: str, model: str = DEFAULT_MODEL, count: int = DEFA
         data = json.loads(text)
     except json.JSONDecodeError as e:
         raise AIGenerationError(f"AI javobi JSON emas: {e}") from e
-    return data["problems"]
+
+    problems = data["problems"]
+    if len(problems) != count:
+        raise AIGenerationError(f"{count} ta masala so'ralgan edi, AI {len(problems)} ta qaytardi. Qayta urinib ko'ring.")
+    for p in problems:
+        if len(p.get("testcases", [])) < MIN_TESTCASES:
+            raise AIGenerationError(
+                f"«{p.get('title', '?')}» uchun {len(p.get('testcases', []))} ta test bor, "
+                f"kamida {MIN_TESTCASES} ta kerak. Qayta urinib ko'ring."
+            )
+    return problems
