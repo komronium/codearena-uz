@@ -75,6 +75,24 @@ def test_detail_strips_script_tags_from_statement(client, problem):
     assert b"&lt;script&gt;alert(1)&lt;/script&gt;" in r.content
 
 
+def test_detail_renders_ordered_list_immediately_after_a_paragraph(client, problem):
+    # No blank line before "1." — the editor's own preview renders this as a list
+    # (CommonMark allows a list to interrupt a paragraph); the server must match.
+    problem.input_md = "3 ta son beriladi:\n1. Birinchi\n2. Ikkinchi\n3. Uchinchi"
+    problem.save()
+    r = client.get(reverse("problems:detail", kwargs={"slug": "a-plus-b"}))
+    body = r.content.decode()
+    assert "<ol>" in body and "<li>Birinchi</li>" in body and "<li>Uchinchi</li>" in body
+
+
+def test_detail_still_renders_tables(client, problem):
+    problem.statement_md = "|a|b|\n|-|-|\n|1|2|"
+    problem.save()
+    r = client.get(reverse("problems:detail", kwargs={"slug": "a-plus-b"}))
+    body = r.content.decode()
+    assert "<table>" in body and "<td>1</td>" in body
+
+
 @pytest.fixture
 def running_contest(db, problem):
     contest = Contest.objects.create(

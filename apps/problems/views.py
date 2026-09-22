@@ -1,5 +1,5 @@
 import bleach
-import markdown
+import mistune
 from django.core.paginator import Paginator
 from django.db.models import Case, Count, F, IntegerField, Q, Value, When
 from django.http import Http404
@@ -33,8 +33,14 @@ _ALLOWED_ATTRS = {
 }
 
 
+_markdown = mistune.create_markdown(plugins=["table"])
+
+
 def _render_statement(statement_md: str) -> str:
-    html = markdown.markdown(statement_md, extensions=["tables", "fenced_code"])
+    # mistune (not python-markdown): CommonMark-compliant, so a list right after a
+    # paragraph with no blank line — as the editor's own live preview renders it —
+    # is recognized here too, instead of collapsing into the paragraph's text.
+    html = _markdown(statement_md)
     return bleach.clean(html, tags=_ALLOWED_TAGS, attributes=_ALLOWED_ATTRS)
 
 
