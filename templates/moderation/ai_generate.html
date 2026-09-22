@@ -9,20 +9,26 @@
     {% csrf_token %}
     <div>
       <h2 class="ca-section-title !mb-1">AI bilan masala tuzish</h2>
-      <p class="text-sm text-mute">Masala haqida promt yozing — AI shart matni, kirish/chiqish tavsifi va testlarni tuzadi. Saqlashdan oldin tekshirib, kerak bo'lganini tahrirlab, ortiqchasini o'chirib tashlaysiz.</p>
+      <p class="text-sm text-mute">Mavzu haqida promt yozing — AI bir nechta masala tuzadi, har biri kamida 20 ta test bilan. Tuzilgan masalalar <strong>vaqtinchalik</strong> — «Kutmoqda» holatida, sayt uchun yashirin. <a class="ca-link" href="{% url 'moderation:queue' %}">Navbat</a> bo'limiga o'tib, har birini ko'rib chiqib, kerak bo'lsa tahrirlab, keyin tasdiqlab (asosiyga aylantirib) yoki rad etib chiqasiz.</p>
     </div>
     <div>
       <label class="ca-label" for="ai-prompt">Promt</label>
       <textarea id="ai-prompt" name="prompt" rows="5" class="ca-input" required
-                placeholder="Masalan: ikkita massivning kesishmasini topish, O(n log n) yechim talab qilinadi, boshlang'ich daraja">{{ request.POST.prompt }}</textarea>
+                placeholder="Masalan: massivlar bo'yicha boshlang'ich darajadagi masalalar, har xil mavzularda">{{ request.POST.prompt }}</textarea>
     </div>
-    <div>
-      <label class="ca-label" for="ai-model">Model</label>
-      <select id="ai-model" name="model" class="ca-select">
-        {% for value, label in models %}
-        <option value="{{ value }}" {% if value == default_model %}selected{% endif %}>{{ label }}</option>
-        {% endfor %}
-      </select>
+    <div class="grid gap-4 sm:grid-cols-2">
+      <div>
+        <label class="ca-label" for="ai-model">Model</label>
+        <select id="ai-model" name="model" class="ca-select">
+          {% for value, label in models %}
+          <option value="{{ value }}" {% if value == default_model %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label class="ca-label" for="ai-count">Nechta masala</label>
+        <input id="ai-count" name="count" type="number" min="1" max="10" value="{{ default_count }}" class="ca-input">
+      </div>
     </div>
     <button class="ca-btn ca-btn-primary"><i data-lucide="sparkles" class="lu" aria-hidden="true"></i>Tuzish</button>
   </form>

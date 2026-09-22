@@ -10,8 +10,11 @@ MODEL_CHOICES = [
     ("claude-haiku-4-5", "Haiku 4.5"),
 ]
 DEFAULT_MODEL = "claude-sonnet-5"
+DEFAULT_COUNT = 3
+MIN_COUNT, MAX_COUNT = 1, 10
+MIN_TESTCASES = 20
 
-_SCHEMA = {
+_PROBLEM_SCHEMA = {
     "type": "object",
     "properties": {
         "title": {"type": "string"},
@@ -25,7 +28,7 @@ _SCHEMA = {
         "tags": {"type": "array", "items": {"type": "string"}},
         "testcases": {
             "type": "array",
-            "minItems": 1,
+            "minItems": MIN_TESTCASES,
             "items": {
                 "type": "object",
                 "properties": {
@@ -45,9 +48,10 @@ _SCHEMA = {
 
 _SYSTEM = (
     "Sen dasturlash musobaqasi uchun masala tuzuvchi ekspertsan. Foydalanuvchi so'rovi "
-    "asosida to'liq, aniq, sinovdan o'tkazilishi mumkin bo'lgan masala tuz: markdown "
-    "shart matni, kirish/chiqish tavsifi, va kamida 3 ta test (kamida bittasi "
-    "is_sample=true — shart ichida namunaviy misol sifatida ko'rsatilishi kerak bo'lgan test)."
+    "asosida bir nechta to'liq, aniq, sinovdan o'tkazilishi mumkin bo'lgan masala tuz: "
+    "har biri uchun markdown shart matni, kirish/chiqish tavsifi, va kamida "
+    f"{MIN_TESTCASES} ta xilma-xil test (oddiy holatlar + chegaraviy holatlar; kamida "
+    "bittasi is_sample=true — shart ichida namunaviy misol sifatida ko'rsatiladigan test)."
 )
 
 
@@ -55,16 +59,24 @@ class AIGenerationError(Exception):
     pass
 
 
-def generate_problem(prompt: str, model: str = DEFAULT_MODEL, client=None) -> dict:
+def generate_problems(prompt: str, model: str = DEFAULT_MODEL, count: int = DEFAULT_COUNT, client=None) -> list[dict]:
+    count = max(MIN_COUNT, min(MAX_COUNT, count))
+    schema = {
+        "type": "object",
+        "properties": {"problems": {"type": "array", "minItems": count, "maxItems": count, "items": _PROBLEM_SCHEMA}},
+        "required": ["problems"],
+        "additionalProperties": False,
+    }
     client = client or anthropic.Anthropic()
     try:
-        response = client.messages.create(
+        with client.messages.stream(
             model=model,
-            max_tokens=8000,
+            max_tokens=64000,
             system=_SYSTEM,
-            messages=[{"role": "user", "content": prompt}],
-            output_config={"format": {"type": "json_schema", "schema": _SCHEMA}},
-        )
+            messages=[{"role": "user", "content": f"{count} ta masala tuz. Mavzu/talab: {prompt}"}],
+            output_config={"format": {"type": "json_schema", "schema": schema}},
+        ) as stream:
+            response = stream.get_final_message()
     except Exception as e:
         raise AIGenerationError(str(e)) from e
 
@@ -72,6 +84,7 @@ def generate_problem(prompt: str, model: str = DEFAULT_MODEL, client=None) -> di
     if text is None:
         raise AIGenerationError("AI javobida matn topilmadi.")
     try:
-        return json.loads(text)
+        data = json.loads(text)
     except json.JSONDecodeError as e:
         raise AIGenerationError(f"AI javobi JSON emas: {e}") from e
+    return data["problems"]

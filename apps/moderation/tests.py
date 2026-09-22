@@ -266,59 +266,84 @@ def test_contest_form_rejects_already_ended_on_create(client):
 
 # ---- AI problem generation ----------------------------------------------------
 
-_AI_DRAFT = {
-    "title": "Ikki son yig'indisi", "statement_md": "A va B ni qo'shing.",
-    "input_md": "Bitta qatorda A va B.", "output_md": "Yig'indi.",
-    "difficulty": "easy", "tl_ms": 1000, "ml_mb": 256, "points": 100,
-    "tags": ["arifmetika"],
-    "testcases": [{"input": "1 2\n", "expected": "3\n", "is_sample": True}],
-}
+def _ai_problem(title="Ikki son yig'indisi", n_tests=20):
+    return {
+        "title": title, "statement_md": "A va B ni qo'shing.",
+        "input_md": "Bitta qatorda A va B.", "output_md": "Yig'indi.",
+        "difficulty": "easy", "tl_ms": 1000, "ml_mb": 256, "points": 100,
+        "tags": ["arifmetika"],
+        "testcases": [{"input": f"{i} {i}\n", "expected": f"{2*i}\n", "is_sample": i == 0}
+                      for i in range(n_tests)],
+    }
+
+
+class _FakeStream:
+    def __init__(self, response):
+        self._response = response
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+    def get_final_message(self):
+        return self._response
 
 
 def _fake_client(payload: dict):
     response = SimpleNamespace(content=[SimpleNamespace(type="text", text=json.dumps(payload))])
-    return SimpleNamespace(messages=SimpleNamespace(create=lambda **kw: response))
+    return SimpleNamespace(messages=SimpleNamespace(stream=lambda **kw: _FakeStream(response)))
 
 
-def test_generate_problem_parses_structured_response():
-    from apps.moderation.ai import generate_problem
+def test_generate_problems_parses_structured_response():
+    from apps.moderation.ai import generate_problems
 
-    result = generate_problem("ikki son yig'indisi", client=_fake_client(_AI_DRAFT))
-    assert result == _AI_DRAFT
+    payload = {"problems": [_ai_problem("A"), _ai_problem("B")]}
+    result = generate_problems("ikki masala", count=2, client=_fake_client(payload))
+    assert [p["title"] for p in result] == ["A", "B"]
 
 
-def test_generate_problem_wraps_bad_json():
-    from apps.moderation.ai import AIGenerationError, generate_problem
+def test_generate_problems_wraps_bad_json():
+    from apps.moderation.ai import AIGenerationError, generate_problems
 
     client = SimpleNamespace(messages=SimpleNamespace(
-        create=lambda **kw: SimpleNamespace(content=[SimpleNamespace(type="text", text="not json")])
+        stream=lambda **kw: _FakeStream(SimpleNamespace(content=[SimpleNamespace(type="text", text="not json")]))
     ))
     with pytest.raises(AIGenerationError):
-        generate_problem("x", client=client)
+        generate_problems("x", client=client)
 
 
 @pytest.mark.django_db
-def test_ai_generate_prefills_submit_form(client):
+def test_ai_generate_creates_pending_problems_for_review(client):
+    from apps.problems.models import TestCase
+
     staff = User.objects.create_user("teacher", password="x", is_staff=True)
     client.force_login(staff)
 
-    with patch("apps.moderation.views.generate_problem", return_value=_AI_DRAFT):
-        r = client.post(reverse("moderation:ai_generate"), {"prompt": "ikki son yig'indisi", "model": "claude-sonnet-5"})
-    assert r.status_code == 302 and r.url == reverse("moderation:submit")
+    drafts = [_ai_problem("Birinchi masala"), _ai_problem("Ikkinchi masala")]
+    with patch("apps.moderation.views.generate_problems", return_value=drafts):
+        r = client.post(reverse("moderation:ai_generate"),
+                         {"prompt": "arifmetika", "model": "claude-sonnet-5", "count": "2"})
+    assert r.status_code == 302 and r.url == reverse("moderation:queue")
 
-    r = client.get(reverse("moderation:submit"))
-    body = r.content.decode()
-    assert "Ikki son yig&#x27;indisi" in body or "Ikki son yig'indisi" in body
-    assert "1 2" in body and "3" in body
+    problems = Problem.objects.filter(title__in=["Birinchi masala", "Ikkinchi masala"])
+    assert problems.count() == 2
+    for p in problems:
+        assert p.status == Problem.Status.PENDING
+        assert p.is_public is False
+        assert p.author == staff
+        assert TestCase.objects.filter(problem=p).count() == 20
 
-    # session draft is consumed, not replayed on a second GET
-    r2 = client.get(reverse("moderation:submit"))
-    assert "1 2" not in r2.content.decode()
+    # listed on the review queue, not on the public site
+    q = client.get(reverse("moderation:queue")).content.decode()
+    assert "Birinchi masala" in q and "Ikkinchi masala" in q
 
 
 @pytest.mark.django_db
 def test_ai_generate_requires_prompt(client):
     staff = User.objects.create_user("teacher", password="x", is_staff=True)
     client.force_login(staff)
-    r = client.post(reverse("moderation:ai_generate"), {"prompt": "", "model": "claude-sonnet-5"})
+    r = client.post(reverse("moderation:ai_generate"), {"prompt": "", "model": "claude-sonnet-5", "count": "2"})
     assert r.status_code == 302 and r.url == reverse("moderation:ai_generate")
+    assert Problem.objects.count() == 0

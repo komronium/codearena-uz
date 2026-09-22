@@ -9,7 +9,10 @@
     <i data-lucide="search" class="lu pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-mute" aria-hidden="true"></i>
     <input type="search" name="q" value="{{ q }}" placeholder="Sarlavha yoki slug…" class="ca-input !py-1.5 pl-8 text-sm w-64" aria-label="Qidirish">
   </form>
-  <a href="{% url 'moderation:submit' %}" class="ca-btn ca-btn-primary !py-1.5"><i data-lucide="circle-plus" class="lu" aria-hidden="true"></i>Masala qo'shish</a>
+  <div class="flex gap-2">
+    <a href="{% url 'moderation:ai_generate' %}" class="ca-btn ca-btn-ghost !py-1.5"><i data-lucide="sparkles" class="lu" aria-hidden="true"></i>AI bilan yaratish</a>
+    <a href="{% url 'moderation:submit' %}" class="ca-btn ca-btn-primary !py-1.5"><i data-lucide="circle-plus" class="lu" aria-hidden="true"></i>Masala qo'shish</a>
+  </div>
 </div>
 
 {% if page.object_list %}

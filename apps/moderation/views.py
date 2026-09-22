@@ -13,7 +13,7 @@ from apps.contests.models import Contest
 from apps.problems.models import Problem, Tag, TestCase
 from apps.submissions.models import Submission, UserProblemSolved
 
-from .ai import DEFAULT_MODEL, MODEL_CHOICES, AIGenerationError, generate_problem
+from .ai import DEFAULT_COUNT, DEFAULT_MODEL, MODEL_CHOICES, AIGenerationError, generate_problems
 from .forms import (
     ContestForm,
     ContestProblemFormSet,
@@ -24,17 +24,6 @@ from .forms import (
     TestCaseFormSet,
     UserForm,
 )
-
-
-def _draft_to_problem_initial(draft: dict) -> dict:
-    tag_ids = [Tag.objects.get_or_create(name=name.strip())[0].id
-               for name in draft.get("tags", []) if name.strip()]
-    return {
-        "title": draft["title"], "kind": Problem.Kind.CODE,
-        "statement_md": draft["statement_md"], "input_md": draft["input_md"], "output_md": draft["output_md"],
-        "difficulty": draft["difficulty"], "tl_ms": draft["tl_ms"], "ml_mb": draft["ml_mb"], "points": draft["points"],
-        "tags": tag_ids,
-    }
 
 
 def _unique_slug(title: str) -> str:
@@ -69,29 +58,45 @@ def ai_generate(request):
         model = request.POST.get("model", DEFAULT_MODEL)
         if model not in dict(MODEL_CHOICES):
             model = DEFAULT_MODEL
+        try:
+            count = int(request.POST.get("count", DEFAULT_COUNT))
+        except ValueError:
+            count = DEFAULT_COUNT
         if not prompt:
             messages.error(request, "Promt kiriting.")
             return redirect("moderation:ai_generate")
         try:
-            draft = generate_problem(prompt, model)
+            drafts = generate_problems(prompt, model, count)
         except AIGenerationError as e:
             messages.error(request, f"AI xato: {e}")
             return redirect("moderation:ai_generate")
-        request.session["ai_draft"] = draft
-        messages.success(request, "AI masalani tuzdi — tekshirib, kerak bo'lsa tahrirlab saqlang.")
-        return redirect("moderation:submit")
-    return render(request, "moderation/ai_generate.html", {"models": MODEL_CHOICES, "default_model": DEFAULT_MODEL})
+        with transaction.atomic():
+            for draft in drafts:
+                tags = [Tag.objects.get_or_create(name=name.strip())[0]
+                        for name in draft.get("tags", []) if name.strip()]
+                obj = Problem.objects.create(
+                    title=draft["title"], slug=_unique_slug(draft["title"]), kind=Problem.Kind.CODE,
+                    statement_md=draft["statement_md"], input_md=draft["input_md"], output_md=draft["output_md"],
+                    difficulty=draft["difficulty"], tl_ms=draft["tl_ms"], ml_mb=draft["ml_mb"], points=draft["points"],
+                    is_public=False, status=Problem.Status.PENDING, author=request.user,
+                )
+                obj.tags.set(tags)
+                TestCase.objects.bulk_create([
+                    TestCase(problem=obj, input=tc["input"], expected=tc["expected"],
+                              is_sample=tc["is_sample"], order=i)
+                    for i, tc in enumerate(draft["testcases"])
+                ])
+        messages.success(request, f"{len(drafts)} ta masala tuzildi — Navbat bo'limida ko'rib chiqing va tasdiqlang.")
+        return redirect("moderation:queue")
+    return render(request, "moderation/ai_generate.html",
+                  {"models": MODEL_CHOICES, "default_model": DEFAULT_MODEL, "default_count": DEFAULT_COUNT})
 
 
 @staff_required
 def submit(request, pk=None):
     problem = get_object_or_404(Problem, pk=pk) if pk else None
-    draft = request.session.pop("ai_draft", None) if problem is None and request.method == "GET" else None
-    problem_initial = _draft_to_problem_initial(draft) if draft else None
-    formset_initial = [{**tc, "order": i} for i, tc in enumerate(draft["testcases"])] if draft else None
-
-    form = ProblemForm(request.POST or None, request.FILES or None, instance=problem, initial=problem_initial)
-    formset = TestCaseFormSet(request.POST or None, instance=form.instance, prefix="testcases", initial=formset_initial)
+    form = ProblemForm(request.POST or None, request.FILES or None, instance=problem)
+    formset = TestCaseFormSet(request.POST or None, instance=form.instance, prefix="testcases")
     sql_form = SQLDatasetForm(request.POST or None, prefix="sql",
                               instance=getattr(problem, "sql_dataset", None) if problem else None)
     error = None
