@@ -5,6 +5,7 @@ from django.utils import timezone
 from apps.accounts.models import User
 from apps.contests.models import Contest, ContestProblem, Participation
 from .models import Language, Problem, Tag, TestCase
+from .scoring import BANDS, MIN_ATTEMPTS, compute_points
 
 
 @pytest.fixture
@@ -193,3 +194,69 @@ def test_problem_page_offers_to_join_running_contest(client):
     assert "Musobaqaga qo‘shilish" in client.get(reverse("problems:detail", args=["p"])).content.decode()
     Participation.objects.create(user=ali, contest=c)
     assert "Musobaqaga qo‘shilish" not in client.get(reverse("problems:detail", args=["p"])).content.decode()
+
+
+# ---- dynamic points (difficulty band + solve rate) -----------------------------
+
+def test_compute_points_keeps_band_max_below_min_attempts():
+    assert compute_points("easy", solvers=1, attempts=MIN_ATTEMPTS - 1) == BANDS["easy"][1]
+
+
+def test_compute_points_drops_toward_band_min_for_high_success_rate():
+    band_min, band_max = BANDS["easy"]
+    points = compute_points("easy", solvers=12, attempts=12)  # 100% success, MIN_ATTEMPTS met
+    assert points == band_min
+
+
+def test_compute_points_stays_near_band_max_for_low_success_rate():
+    band_min, band_max = BANDS["easy"]
+    points = compute_points("easy", solvers=1, attempts=20)  # 5% success
+    assert points > (band_min + band_max) / 2
+
+
+def test_compute_points_matches_user_example_96_percent_on_easy():
+    band_min, band_max = BANDS["easy"]
+    points = compute_points("easy", solvers=int(round(12 * 0.96)), attempts=12)
+    assert band_min <= points < band_max // 2
+
+
+def test_compute_points_rounds_to_nearest_5():
+    assert compute_points("medium", solvers=7, attempts=13) % 5 == 0
+
+
+def test_compute_points_never_leaves_its_band():
+    band_min, band_max = BANDS["hard"]
+    for solvers, attempts in [(0, 0), (0, 100), (100, 100), (50, 100)]:
+        points = compute_points("hard", solvers, attempts)
+        assert band_min <= points <= band_max
+
+
+@pytest.mark.django_db
+def test_recalc_points_command_updates_from_real_submissions():
+    from django.core.management import call_command
+
+    from apps.submissions.models import Submission, UserProblemSolved
+
+    author = User.objects.create_user("teacher", password="x", role="teacher")
+    p = Problem.objects.create(slug="easy-one", title="Easy One", statement_md="x", author=author,
+                               difficulty=Problem.Difficulty.EASY, status=Problem.Status.APPROVED)
+    python = Language.objects.create(code="python", name="Python 3", docker_image="x", run_cmd="x")
+    band_min, band_max = BANDS["easy"]
+    assert p.points == 100  # model default, pre-recalc
+
+    for i in range(12):
+        u = User.objects.create_user(f"u{i}", password="x")
+        verdict = "AC" if i < 11 else "WA"  # ~92% success, comfortably below MIN_ATTEMPTS-gate and above midpoint
+        sub = Submission.objects.create(user=u, problem=p, language=python, source="x", verdict=verdict)
+        if verdict == "AC":
+            UserProblemSolved.objects.create(user=u, problem=p, first_ac_submission=sub)
+
+    call_command("recalc_points")
+    p.refresh_from_db()
+    assert band_min <= p.points < band_max
+    assert p.points % 5 == 0
+
+    points_after_first_run = p.points
+    call_command("recalc_points")  # idempotent: same inputs, same output
+    p.refresh_from_db()
+    assert p.points == points_after_first_run
