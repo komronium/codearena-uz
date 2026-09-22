@@ -141,3 +141,27 @@ def test_password_reset_unknown_email_does_not_leak(client, mailoutbox):
     r = client.post(reverse("password_reset"), {"email": "nobody@example.com"})
     assert r.status_code == 302  # same redirect whether or not the email exists
     assert len(mailoutbox) == 0
+
+
+@pytest.mark.django_db
+def test_recalc_practice_points_sums_current_points_of_solved_problems():
+    from django.core.management import call_command
+
+    author = User.objects.create_user("teacher", password="x", role="teacher")
+    python = Language.objects.create(code="python", name="Python 3", docker_image="x", run_cmd="x")
+    cheap = Problem.objects.create(slug="cheap", title="Cheap", statement_md="x", author=author, points=30)
+    pricey = Problem.objects.create(slug="pricey", title="Pricey", statement_md="x", author=author, points=250)
+
+    solver = User.objects.create_user("ali", password="x", practice_points=9999)  # stale, gets overwritten
+    idle = User.objects.create_user("vosil", password="x", practice_points=42)  # never solved anything
+
+    for problem in (cheap, pricey):
+        sub = Submission.objects.create(user=solver, problem=problem, language=python, source="x", verdict="AC")
+        UserProblemSolved.objects.create(user=solver, problem=problem, first_ac_submission=sub)
+
+    call_command("recalc_practice_points")
+
+    solver.refresh_from_db()
+    idle.refresh_from_db()
+    assert solver.practice_points == 30 + 250
+    assert idle.practice_points == 0
