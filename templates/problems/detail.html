@@ -34,7 +34,8 @@
 </div>
 {% endif %}
 <div class="grid gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:items-start">
-  <section aria-label="Masala matni">
+  <section class="relative" aria-label="Masala matni">
+  {% if contest and user.is_authenticated %}<div class="ca-watermark" data-wm="{{ user.username }} · {% now 'd.m.Y H:i' %}" aria-hidden="true"></div>{% endif %}
     <div class="ca-panel !p-0 overflow-hidden">
       <div class="border-b border-line px-6 py-5">
         <h1 class="ca-page-title">{% if contest_problem %}<span class="text-accent">{{ contest_problem.label }}.</span> {% endif %}{{ problem.title }}</h1>
@@ -134,6 +135,7 @@
   </section>
 
   <section class="lg:sticky lg:top-20" aria-label="Yechim yuborish">
+  {% if contest and user.is_authenticated %}<div class="ca-watermark" data-wm="{{ user.username }} · {% now 'd.m.Y H:i' %}" aria-hidden="true"></div>{% endif %}
     {% if user.is_authenticated %}
     <form method="post" action="{% url 'submissions:submit' problem.slug %}" id="submit-form" class="ca-panel !p-0">
       {% csrf_token %}
@@ -485,6 +487,22 @@ so @codemirror/state is a singleton — two copies break with "Unrecognized exte
   });
   // after rating, the redirect lands on #baho: reopen the dialog so the saved stars are visible
   if (location.hash === "#baho") document.getElementById("rate-dialog").showModal();
+</script>
+{% endif %}
+{% if contest %}
+{# contest mode: a leaked screenshot names its source; printing / save-as-PDF yields a blank page #}
+<style media="print">
+  body > * { display: none !important; }
+  body::after { content: "Musobaqa paytida chop etish o‘chirilgan."; display: block; padding: 2rem; font: 16px sans-serif; }
+</style>
+<script>
+  (() => {
+    const esc = (t) => t.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    document.querySelectorAll(".ca-watermark").forEach((el) => {
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="170"><text x="150" y="90" text-anchor="middle" transform="rotate(-24 150 85)" font-family="sans-serif" font-size="13" font-weight="600" fill="rgb(128,128,128)" fill-opacity=".22">${esc(el.dataset.wm)}</text></svg>`;
+      el.style.backgroundImage = `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+    });
+  })();
 </script>
 {% endif %}
 {% endblock %}

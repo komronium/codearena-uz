@@ -111,6 +111,10 @@ def test_private_contest_problem_visible_to_registered_participant(client, probl
     r = client.get(reverse("problems:detail", kwargs={"slug": "a-plus-b"}))
     assert r.status_code == 200
     assert b"Musobaqa rejimi" in r.content
+    # contest mode: statement + editor watermarked with who is viewing, printing blanked
+    body = r.content.decode()
+    assert body.count('class="ca-watermark" data-wm="ali ·') == 2
+    assert '<style media="print">' in body
 
 
 def test_private_contest_problem_404_for_non_participant(client, problem, running_contest):

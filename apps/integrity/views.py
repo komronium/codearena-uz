@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.management import call_command
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.views.decorators.http import require_POST
 
 from apps.accounts.decorators import staff_required
@@ -11,6 +12,7 @@ from apps.problems.models import Problem
 from apps.submissions.models import Submission
 
 from .models import FocusEvent, SimilarityFlag
+from .similarity import MIN_LINES, THRESHOLD, matched_lines
 
 # Difficulty tiers a genuine first-read-to-AC pass can't clear in seconds.
 _FAST_SOLVE_DIFFICULTIES = {Problem.Difficulty.MEDIUM, Problem.Difficulty.HARD}
@@ -55,13 +57,42 @@ def contest_report(request, pk):
         c["risk"] = _risk(c) + fast_solve_counts.get(user, 0) * 4
         c["fast_solves"] = fast_solve_counts.get(user, 0)
         c["participation"] = parts.get(user.pk)
-    flags = SimilarityFlag.objects.filter(submission_a__contest=contest).select_related(
-        "submission_a__user", "submission_b__user", "submission_a__problem")
+    flags = _flag_cards(contest, counts, parts)
     return render(request, "integrity/contest_report.html", {
         "contest": contest, "rows": rows, "flags": flags,
         "open_flags": sum(1 for f in flags if not f.reviewed),
-        "fast_solves": fast_solves,
+        "fast_solves": fast_solves, "min_lines": MIN_LINES, "threshold": round(THRESHOLD * 100),
     })
+
+
+def _flag_cards(contest, counts, parts):
+    """Similarity flags ready for side-by-side review: earlier submission on the left,
+    each line marked if it is part of a shared block. Unreviewed first, then by score."""
+    labels = dict(contest.contest_problems.values_list("problem_id", "label"))
+    flags = sorted(
+        SimilarityFlag.objects.filter(submission_a__contest=contest).select_related(
+            "submission_a__user", "submission_b__user", "submission_a__problem", "submission_a__language",
+            "submission_b__language"),
+        key=lambda f: (f.reviewed, -f.score))
+    for f in flags:
+        first, second = sorted((f.submission_a, f.submission_b), key=lambda s: s.created)
+        hit_first, hit_second = matched_lines(first.source, second.source)
+        f.label = labels.get(first.problem_id, "")
+        f.problem = f.submission_a.problem
+        f.gap_min = int((second.created - first.created).total_seconds() // 60)
+        f.sides = [_side(first, hit_first, counts, parts), _side(second, hit_second, counts, parts)]
+    return flags
+
+
+def _side(sub, hits, counts, parts):
+    lines = [(i + 1, text, i in hits) for i, text in enumerate(sub.source.splitlines())]
+    code = sum(1 for _, text, _ in lines if text.strip())
+    events = counts.get(sub.user, {})
+    return {
+        "sub": sub, "user": sub.user, "lines": lines, "n_hit": len(hits), "n_code": code,
+        "paste": events.get("paste", 0), "blur": events.get("blur", 0),
+        "participation": parts.get(sub.user_id),
+    }
 
 
 def _fast_solves(contest):
@@ -100,7 +131,7 @@ def flag_review(request, pk):
     flag.reviewed = not flag.reviewed
     flag.note = request.POST.get("note", flag.note).strip()
     flag.save(update_fields=["reviewed", "note"])
-    return redirect("integrity:contest_report", flag.submission_a.contest_id)
+    return redirect(reverse("integrity:contest_report", args=[flag.submission_a.contest_id]) + f"#flag-{flag.pk}")
 
 
 @staff_required

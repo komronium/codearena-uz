@@ -11,7 +11,16 @@ from apps.problems.models import Language, Problem
 from apps.submissions.models import Submission
 
 from .models import FocusEvent, SimilarityFlag
-from .similarity import similarity
+from .similarity import matched_lines, similarity
+
+LONG_SOURCE = """n = int(input())
+arr = list(map(int, input().split()))
+arr.sort()
+total = 0
+for x in arr:
+    total += x
+print(total, arr[n // 2])
+"""
 
 
 @pytest.fixture
@@ -102,7 +111,7 @@ def flag_contest(db, flag_problem):
 def test_flag_similarity_flags_near_identical_ac_submissions(flag_contest, flag_problem, flag_python):
     ali = User.objects.create_user("ali2", password="x")
     bob = User.objects.create_user("bob2", password="x")
-    source = "a,b=map(int,input().split())\nprint(a+b)"
+    source = LONG_SOURCE
     Submission.objects.create(user=ali, problem=flag_problem, contest=flag_contest, language=flag_python,
                               source=source, verdict="AC")
     Submission.objects.create(user=bob, problem=flag_problem, contest=flag_contest, language=flag_python,
@@ -126,7 +135,7 @@ def test_flag_similarity_without_id_processes_all_ended_contests(flag_problem, f
     ContestProblem.objects.create(contest=ended, problem=flag_problem, label="A")
     ali = User.objects.create_user("ali4", password="x")
     bob = User.objects.create_user("bob4", password="x")
-    source = "a,b=map(int,input().split())\nprint(a+b)"
+    source = LONG_SOURCE
     Submission.objects.create(user=ali, problem=flag_problem, contest=ended, language=flag_python,
                               source=source, verdict="AC")
     Submission.objects.create(user=bob, problem=flag_problem, contest=ended, language=flag_python,
@@ -176,3 +185,61 @@ def test_report_ranks_by_risk_and_flag_review_toggles(client, contest, user):
 def test_flag_review_requires_staff(client, contest, user):
     client.force_login(user)
     assert client.post(reverse("integrity:flag_run", args=[contest.pk])).status_code in (302, 403)
+
+
+def test_similarity_survives_rename_extra_import_and_comments():
+    renamed = "import sys\n# my own solution\n" + LONG_SOURCE.replace("arr", "xs").replace("total", "acc")
+    assert similarity(LONG_SOURCE, renamed) >= 0.9
+    hit_a, hit_b = matched_lines(LONG_SOURCE, renamed)
+    assert hit_a == set(range(7)) and hit_b == set(range(2, 9))
+
+
+def _ac(user, problem, contest, lang, source):
+    return Submission.objects.create(user=user, problem=problem, contest=contest, language=lang,
+                                     source=source, verdict="AC")
+
+
+def test_flag_similarity_ignores_short_code(flag_contest, flag_problem, flag_python):
+    short = "a, b = map(int, input().split())\nprint(a + b)"
+    for name in ("s1", "s2"):
+        _ac(User.objects.create_user(name, password="x"), flag_problem, flag_contest, flag_python, short)
+    call_command("flag_similarity", flag_contest.pk, stdout=StringIO())
+    assert SimilarityFlag.objects.count() == 0
+
+
+def test_flag_similarity_one_flag_per_user_pair_and_prunes_stale(flag_contest, flag_problem, flag_python):
+    ali = User.objects.create_user("p1", password="x")
+    bob = User.objects.create_user("p2", password="x")
+    _ac(ali, flag_problem, flag_contest, flag_python, LONG_SOURCE)
+    _ac(ali, flag_problem, flag_contest, flag_python, LONG_SOURCE + "\n")
+    _ac(bob, flag_problem, flag_contest, flag_python, LONG_SOURCE)
+    # a loose-rule leftover between the same pair: replaced, not duplicated
+    x = _ac(ali, flag_problem, flag_contest, flag_python, "x")
+    y = _ac(bob, flag_problem, flag_contest, flag_python, "y")
+    SimilarityFlag.objects.create(submission_a=x, submission_b=y, score=0.86)
+    call_command("flag_similarity", flag_contest.pk, stdout=StringIO())
+    assert SimilarityFlag.objects.count() == 1
+    assert SimilarityFlag.objects.get().score == 1.0
+
+
+def test_flag_similarity_keeps_reviewed_flags(flag_contest, flag_problem, flag_python):
+    ali = User.objects.create_user("r1", password="x")
+    bob = User.objects.create_user("r2", password="x")
+    x = _ac(ali, flag_problem, flag_contest, flag_python, "x")
+    y = _ac(bob, flag_problem, flag_contest, flag_python, "y")
+    SimilarityFlag.objects.create(submission_a=x, submission_b=y, score=0.86, reviewed=True, note="checked")
+    call_command("flag_similarity", flag_contest.pk, stdout=StringIO())
+    assert SimilarityFlag.objects.get().note == "checked"
+
+
+def test_report_shows_flag_side_by_side_with_shared_lines(client, flag_contest, flag_problem, flag_python):
+    staff = User.objects.create_user("t9", password="x", is_staff=True)
+    ali = User.objects.create_user("c1", password="x")
+    bob = User.objects.create_user("c2", password="x")
+    _ac(ali, flag_problem, flag_contest, flag_python, LONG_SOURCE)
+    _ac(bob, flag_problem, flag_contest, flag_python, LONG_SOURCE.replace("arr", "xs"))
+    call_command("flag_similarity", flag_contest.pk, stdout=StringIO())
+    client.force_login(staff)
+    html = client.get(reverse("integrity:contest_report", args=[flag_contest.pk])).content.decode()
+    assert html.count("ca-cmp-line is-hit") == 14  # 7 shared lines on each side
+    assert "xs.sort()" in html and "arr.sort()" in html

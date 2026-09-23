@@ -84,43 +84,64 @@
 
 <section>
   <div class="mb-3 flex flex-wrap items-end justify-between gap-2">
-    <h2 class="ca-section-title !mb-0">O‘xshash kodlar {% if open_flags %}<span class="ca-chip text-warn ml-1">{{ open_flags }} ko‘rilmagan</span>{% endif %}</h2>
-    <p class="text-xs text-mute">AC urinishlar juftligi, o‘xshashlik 0–1. Ikkala kodni ochib solishtiring, so‘ng «Ko‘rildi» deb belgilang.</p>
+    <h2 class="ca-section-title !mb-0">O‘xshash kodlar {% if open_flags %}<span class="ca-chip ca-chip-score ml-1">{{ open_flags }} ko‘rilmagan</span>{% endif %}</h2>
+    <p class="text-xs text-mute">Bir masala, bir til, kamida {{ min_lines }} qator kod, o‘xshashlik ≥ {{ threshold }}%. O‘zgaruvchi nomlari va izohlar hisobga olinmaydi. <span class="ca-cmp-key"></span> — ikkala kodda ham bor qatorlar.</p>
   </div>
-  <div class="ca-panel !p-0 overflow-x-auto">
-  <table class="ca-table">
-    <thead>
-      <tr><th>Masala</th><th>A</th><th>B</th><th class="text-right">O‘xshashlik</th><th>Izoh</th><th class="text-right">Holat</th></tr>
-    </thead>
-    <tbody>
+  {% if flags %}
+  <div class="space-y-4">
     {% for f in flags %}
-    <tr class="{% if f.reviewed %}opacity-60{% endif %}">
-      <td class="min-w-0 max-w-[12rem] truncate">{{ f.submission_a.problem.title }}</td>
-      <td class="whitespace-nowrap">{% include "accounts/_user.html" with u=f.submission_a.user tier=False %} <a class="ca-link tabular text-xs" href="{% url 'submissions:detail' f.submission_a.pk %}">#{{ f.submission_a.pk|stringformat:"06d" }}</a></td>
-      <td class="whitespace-nowrap">{% include "accounts/_user.html" with u=f.submission_b.user tier=False %} <a class="ca-link tabular text-xs" href="{% url 'submissions:detail' f.submission_b.pk %}">#{{ f.submission_b.pk|stringformat:"06d" }}</a></td>
-      <td class="text-right">
-        <div class="inline-flex items-center gap-2">
-          <span class="ca-progress w-16"><span class="!bg-bad" style="width: {% widthratio f.score 1 100 %}%"></span></span>
-          <span class="tabular font-semibold text-bad">{{ f.score|floatformat:2 }}</span>
+    <article class="ca-panel !p-0 overflow-hidden{% if f.reviewed %} opacity-70{% endif %}" id="flag-{{ f.pk }}">
+      <header class="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-3.5">
+        <span class="text-2xl font-bold tabular text-bad">{% widthratio f.score 1 100 %}%</span>
+        <div class="min-w-0 flex-1">
+          <p class="truncate font-semibold">{% if f.label %}<span class="text-accent">{{ f.label }}.</span> {% endif %}{{ f.problem.title }}</p>
+          <p class="text-xs text-mute">{{ f.sides.0.sub.language.name }} · {{ f.sides.0.n_hit }} / {{ f.sides.0.n_code }} qator mos · ikkinchi kod {% if f.gap_min %}{{ f.gap_min }} daqiqa{% else %}1 daqiqadan kam{% endif %} keyin yuborilgan</p>
         </div>
-      </td>
-      <td>
-        <form method="post" action="{% url 'integrity:flag_review' f.pk %}" class="flex items-center gap-2">{% csrf_token %}
-          <input name="note" value="{{ f.note }}" placeholder="Izoh…" class="ca-input !py-1 w-40 text-xs" aria-label="Izoh" autocomplete="off">
-          <button class="ca-btn ca-btn-ghost !py-1.5 whitespace-nowrap text-xs">
-            {% if f.reviewed %}<i data-lucide="undo-2" class="lu" aria-hidden="true"></i>Qayta ochish{% else %}<i data-lucide="check" class="lu text-ok" aria-hidden="true"></i>Ko‘rildi deb belgilash{% endif %}
-          </button>
-        </form>
-      </td>
-      <td class="text-right whitespace-nowrap">
         {% if f.reviewed %}<span class="ca-chip ca-chip-rated"><i data-lucide="check" class="lu mr-1" aria-hidden="true"></i>Ko‘rildi</span>{% else %}<span class="ca-chip ca-chip-score">Ko‘rilmagan</span>{% endif %}
-      </td>
-    </tr>
-    {% empty %}
-    <tr><td class="text-mute" colspan="6">Belgi yo‘q. Musobaqa tugagach <code>flag_similarity</code> avtomatik ishlaydi.</td></tr>
+      </header>
+      <details class="ca-cmp border-t border-line"{% if not f.reviewed and forloop.counter <= 3 %} open{% endif %}>
+        <summary class="cursor-pointer px-5 py-2 text-xs font-medium text-mute hover:text-ink">Kodlarni yonma-yon ko‘rish</summary>
+        <div class="grid gap-px bg-line lg:grid-cols-2">
+          {% for side in f.sides %}
+          <div class="min-w-0 bg-surface">
+            <div class="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5">
+              <div class="flex min-w-0 items-center gap-2">
+                {% include "accounts/_user.html" with u=side.user tier=False %}
+                {% if forloop.first %}<span class="ca-chip" title="Bu kod oldinroq yuborilgan — manba bo‘lishi mumkin">birinchi</span>{% endif %}
+              </div>
+              <div class="flex items-center gap-3 text-xs text-mute">
+                <a class="ca-link tabular" href="{% url 'submissions:detail' side.sub.pk %}">#{{ side.sub.pk|stringformat:"06d" }}</a>
+                <span class="tabular">{{ side.sub.created|date:"H:i:s" }}</span>
+                {% if side.paste %}<span class="font-semibold text-bad" title="Muharrirga qo‘yish urinishlari">paste {{ side.paste }}</span>{% endif %}
+                {% if side.blur %}<span class="{% if side.blur > 5 %}font-semibold text-warn{% endif %}" title="Boshqa oynaga o‘tishlar">chiqish {{ side.blur }}</span>{% endif %}
+              </div>
+            </div>
+            <pre class="ca-cmp-code" aria-label="{{ side.user.username }} kodi">{% for n, text, hit in side.lines %}<span class="ca-cmp-line{% if hit %} is-hit{% endif %}"><span class="ca-cmp-n">{{ n }}</span>{{ text }}</span>{% endfor %}</pre>
+            {% if side.participation %}
+            <form method="post" action="{% url 'contests:disqualify' contest.pk side.user.pk %}" class="border-t border-line px-4 py-2 text-right" {% if not side.participation.disqualified %}onsubmit="const s=prompt('Sabab (ixtiyoriy):','O‘xshash kod: #{{ f.sides.0.sub.pk }} / #{{ f.sides.1.sub.pk }}'); if(s===null) return false; this.reason.value=s;"{% endif %}>{% csrf_token %}
+              <input type="hidden" name="back" value="report"><input type="hidden" name="reason" value="">
+              {% if side.participation.disqualified %}
+              <button class="ca-btn ca-btn-ghost !py-1 text-xs"><i data-lucide="undo-2" class="lu" aria-hidden="true"></i>{{ side.user.username }}: DQ bekor</button>
+              {% else %}
+              <button class="ca-btn ca-btn-ghost !py-1 text-xs text-bad"><i data-lucide="ban" class="lu" aria-hidden="true"></i>{{ side.user.username }}ni diskvalifikatsiya</button>
+              {% endif %}
+            </form>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+      </details>
+      <form method="post" action="{% url 'integrity:flag_review' f.pk %}" class="flex flex-wrap items-center gap-2 border-t border-line bg-ink/[.025] px-5 py-3">{% csrf_token %}
+        <input name="note" value="{{ f.note }}" placeholder="Izoh: nima uchun ko‘chirma / tasodif…" class="ca-input !py-1.5 min-w-0 flex-1 text-sm" aria-label="Izoh" autocomplete="off">
+        <button class="ca-btn {% if f.reviewed %}ca-btn-ghost{% else %}ca-btn-primary{% endif %} !py-1.5 whitespace-nowrap text-xs">
+          {% if f.reviewed %}<i data-lucide="undo-2" class="lu" aria-hidden="true"></i>Qayta ochish{% else %}<i data-lucide="check" class="lu" aria-hidden="true"></i>Ko‘rildi{% endif %}
+        </button>
+      </form>
+    </article>
     {% endfor %}
-    </tbody>
-  </table>
   </div>
+  {% else %}
+  <div class="ca-empty">O‘xshash kod topilmadi. Musobaqa tugagach tekshiruv avtomatik ishlaydi; hozir tekshirish uchun yuqoridagi tugmani bosing.</div>
+  {% endif %}
 </section>
 {% endblock %}

@@ -456,6 +456,14 @@
       .ca-spin { animation: none; }
       .ca-btn:active:not(:disabled), .ca-stat-card:hover, .ca-pmap:hover { transform: none; }
     }
+    .ca-watermark { position: absolute; inset: 0; z-index: 5; pointer-events: none; background-repeat: repeat; }
+    /* similarity review: shared lines tinted, line numbers in a gutter */
+    .ca-cmp[open] > summary { border-bottom: 1px solid rgb(var(--ca-line-rgb)); }
+    .ca-cmp-code { margin: 0; max-height: 28rem; overflow: auto; padding: .5rem 0; font-size: .8rem; line-height: 1.55; background: rgb(var(--ca-paper-rgb) / .6); }
+    .ca-cmp-line { display: block; padding-right: 1rem; white-space: pre; }
+    .ca-cmp-line.is-hit, .ca-cmp-key { background: rgb(var(--ca-bad-rgb) / .13); box-shadow: inset 3px 0 0 rgb(var(--ca-bad-rgb) / .7); }
+    .ca-cmp-key { display: inline-block; width: 1.4rem; height: .8rem; vertical-align: middle; border-radius: 2px; }
+    .ca-cmp-n { display: inline-block; width: 2.75rem; padding-right: .75rem; text-align: right; color: rgb(var(--ca-mute-rgb) / .7); user-select: none; }
     .ca-terminal {
       background: #14161A; color: #EAEBE5; border-radius: var(--ca-radius);
       font-family: "Anthropic Mono", ui-monospace, monospace; font-size: .875rem; line-height: 1.55;
