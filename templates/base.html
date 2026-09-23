@@ -89,6 +89,7 @@
       --ca-ok-fill-rgb: 21 128 61;
       --ca-bad-rgb: 185 28 28;
       --ca-warn-rgb: 180 83 9;
+      --ca-info-rgb: 14 116 144;
       --ca-radius: 14px;
       --ca-radius-sm: 10px;
       --ca-shadow: 0 1px 1px rgb(15 23 42 / .03), 0 2px 8px rgb(15 23 42 / .05);
@@ -111,6 +112,7 @@
         --ca-ok-fill-rgb: 74 222 128;
         --ca-bad-rgb: 248 113 113;
         --ca-warn-rgb: 251 191 36;
+        --ca-info-rgb: 34 211 238;
         --ca-shadow: 0 1px 2px rgb(0 0 0 / .25), 0 2px 10px rgb(0 0 0 / .3);
         --ca-shadow-lift: 0 6px 20px rgb(0 0 0 / .4);
       }
@@ -131,6 +133,7 @@
         --ca-ok-fill-rgb: 74 222 128;
         --ca-bad-rgb: 248 113 113;
         --ca-warn-rgb: 251 191 36;
+        --ca-info-rgb: 34 211 238;
         --ca-shadow: 0 1px 2px rgb(0 0 0 / .25), 0 2px 10px rgb(0 0 0 / .3);
         --ca-shadow-lift: 0 6px 20px rgb(0 0 0 / .4);
     }
@@ -154,7 +157,7 @@
     .ca-skip {
       position: absolute; left: -9999px; top: 0; z-index: 100;
       padding: .5rem 1rem; border-radius: 0 0 var(--ca-radius) 0;
-      background: rgb(var(--ca-accent-rgb)); color: #fff;
+      background: rgb(var(--ca-accent-fill-rgb)); color: rgb(var(--ca-on-fill-rgb));
     }
     .ca-skip:focus { left: 1rem; top: 1rem; }
     a, button, .ca-btn, select, input, textarea {
@@ -220,6 +223,9 @@
       color: rgb(var(--ca-mute-rgb)); background: rgb(var(--ca-paper-rgb) / .7); padding: .65rem 1rem;
       border-bottom: 1px solid rgb(var(--ca-line-rgb)); white-space: nowrap;
     }
+    /* .ca-table th outranks Tailwind's .text-right, so alignment utilities need restating */
+    .ca-table th.text-right { text-align: right; }
+    .ca-table th.text-center { text-align: center; }
     .ca-sort { display: inline-flex; align-items: center; gap: .3rem; color: inherit; text-decoration: none; }
     .ca-sort .lu { font-size: .7rem; opacity: .35; }
     .ca-sort:hover .lu { opacity: .8; }
@@ -234,10 +240,141 @@
     .ca-table tbody tr:hover td { background: rgb(var(--ca-accent-rgb) / .045); }
     .ca-table tbody tr:hover td:first-child { box-shadow: inset 3px 0 0 rgb(var(--ca-accent-rgb)); }
     .ca-standings th, .ca-standings td { padding-left: .75rem; padding-right: .75rem; }
-    .ca-cell { text-align: center; min-width: 4rem; }
+    /* standings cells: solved = light green, first solve = stronger green + border, wrong-only = light red */
+    .ca-st-prob { text-align: center !important; min-width: 4.25rem; }
+    .ca-st-label { display: block; font-size: .9rem; font-weight: 700; color: rgb(var(--ca-accent-rgb)); }
+    a.ca-st-label:hover { text-decoration: underline; text-underline-offset: 3px; }
+    .ca-st-sub { display: block; margin-top: .1rem; font-size: .68rem; font-weight: 500; color: rgb(var(--ca-mute-rgb)); }
+    .ca-cell { text-align: center; min-width: 4.25rem; line-height: 1.25; }
     .ca-cell-ac { background: rgb(var(--ca-ok-rgb) / .07); }
     .ca-cell-first { background: rgb(var(--ca-ok-rgb) / .18); box-shadow: inset 0 0 0 1px rgb(var(--ca-ok-rgb) / .35); }
     .ca-cell-wa { background: rgb(var(--ca-bad-rgb) / .06); }
+    .ca-table tbody tr:hover td.ca-cell-ac { background: rgb(var(--ca-ok-rgb) / .1); }
+    .ca-table tbody tr:hover td.ca-cell-first { background: rgb(var(--ca-ok-rgb) / .22); }
+    .ca-table tbody tr:hover td.ca-cell-wa { background: rgb(var(--ca-bad-rgb) / .09); }
+    .ca-legend-swatch { display: inline-block; width: 1.1rem; height: .85rem; border-radius: 3px; vertical-align: middle; }
+    .ca-st-action { display: grid; place-items: center; padding: .4rem; border-radius: .5rem; color: rgb(var(--ca-mute-rgb)); opacity: .45; }
+    .ca-table tr:hover .ca-st-action, .ca-st-action:focus-visible { opacity: 1; }
+    .ca-st-action:hover { color: rgb(var(--ca-bad-rgb)); background: rgb(var(--ca-bad-rgb) / .1); }
+    .ca-stars { display: inline-flex; gap: .1rem; }
+    .ca-stars button { display: grid; place-items: center; padding: .3rem; border-radius: .45rem; color: rgb(var(--ca-mute-rgb) / .55); }
+    .ca-stars button svg.lucide { width: 1.3rem; height: 1.3rem; }
+    .ca-stars button.is-on { color: rgb(var(--ca-warn-rgb)); }
+    .ca-stars button.is-on svg { fill: currentColor; }
+    /* hovering star N previews N stars: light up the hovered one and everything before it */
+    .ca-stars:hover button { color: rgb(var(--ca-warn-rgb)); }
+    .ca-stars:hover button svg { fill: currentColor; }
+    .ca-stars button:hover ~ button { color: rgb(var(--ca-mute-rgb) / .55); }
+    .ca-stars button:hover ~ button svg { fill: none; }
+    .ca-stars-lg button svg.lucide { width: 1.9rem; height: 1.9rem; }
+    .ca-dialog {
+      width: min(34rem, calc(100vw - 2rem)); max-height: calc(100dvh - 3rem); padding: 0; margin: auto;
+      color: rgb(var(--ca-ink-rgb)); background: rgb(var(--ca-surface-rgb));
+      border: 1px solid rgb(var(--ca-line-rgb)); border-radius: var(--ca-radius); box-shadow: var(--ca-shadow-lift);
+    }
+    .ca-dialog::backdrop { background: rgb(8 10 16 / .55); backdrop-filter: blur(2px); }
+    @media (prefers-reduced-motion: no-preference) { .ca-dialog[open] { animation: ca-pop .16s ease-out; } }
+    @keyframes ca-pop { from { opacity: 0; transform: translateY(6px) scale(.98); } }
+    .ca-dialog-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .9rem 1rem .9rem 1.5rem; border-bottom: 1px solid rgb(var(--ca-line-rgb)); }
+    .ca-dialog-head h2 { font-size: 1rem; font-weight: 600; }
+    .ca-dialog-x { display: grid; place-items: center; padding: .4rem; border-radius: .5rem; color: rgb(var(--ca-mute-rgb)); }
+    .ca-dialog-x:hover { color: rgb(var(--ca-ink-rgb)); background: rgb(var(--ca-ink-rgb) / .06); }
+    .ca-stars-sum { display: inline-flex; align-items: center; gap: .3rem; }
+    .ca-stars-sum svg.lucide { color: rgb(var(--ca-warn-rgb)); fill: currentColor; }
+    .ca-stars-sum:hover b { text-decoration: underline; text-underline-offset: 3px; }
+    .ca-live-dot { display: inline-block; width: .45rem; height: .45rem; margin-right: .4rem; border-radius: 50%; background: currentColor; animation: ca-pulse 1.2s ease-in-out infinite; }
+    /* leaderboard podium: DOM order 1,2,3; on wide screens shown 2 · 1 · 3 with first raised */
+    .ca-podium { display: grid; gap: 1.25rem 1rem; list-style: none; margin: 0; padding: 1rem 0 0; }
+    .ca-podium-card {
+      position: relative; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: .15rem;
+      padding: 1.6rem 1rem 1.2rem; text-align: center; background: rgb(var(--ca-surface-rgb));
+      border: 1px solid rgb(var(--ca-line-rgb)); border-top: 3px solid var(--medal);
+      border-radius: var(--ca-radius); box-shadow: var(--ca-shadow);
+    }
+    .ca-podium-1 { --medal: #D9A21B; background: linear-gradient(180deg, rgb(217 162 27 / .1), transparent 55%), rgb(var(--ca-surface-rgb)); }
+    .ca-podium-2 { --medal: #9AA3B2; }
+    .ca-podium-3 { --medal: #B36A34; }
+    .ca-podium-card.is-me { box-shadow: 0 0 0 2px rgb(var(--ca-accent-rgb)), var(--ca-shadow); }
+    .ca-podium-medal {
+      position: absolute; top: -.95rem; width: 1.9rem; height: 1.9rem; display: grid; place-items: center;
+      border-radius: 9999px; color: #fff; background: var(--medal); box-shadow: 0 2px 6px rgb(15 23 42 / .25);
+    }
+    .ca-podium-medal svg.lucide { width: 1rem; height: 1rem; }
+    .ca-podium-avatar {
+      width: 3.5rem; height: 3.5rem; margin: .3rem 0 .35rem; font-size: 1.3rem;
+      background: color-mix(in srgb, var(--tier) 14%, transparent); color: var(--tier);
+      box-shadow: 0 0 0 3px rgb(var(--ca-surface-rgb)), 0 0 0 5px var(--medal);
+    }
+    .ca-podium-1 .ca-podium-avatar { width: 4.25rem; height: 4.25rem; font-size: 1.6rem; }
+    .ca-podium-name { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; color: var(--tier); }
+    .ca-podium-name:hover { text-decoration: underline; text-underline-offset: 3px; }
+    .ca-podium-sub { max-width: 100%; font-size: .75rem; color: rgb(var(--ca-mute-rgb)); }
+    .ca-podium-value { margin-top: .35rem; font-size: 1.6rem; font-weight: 700; line-height: 1.1; letter-spacing: -.02em; }
+    .ca-podium-value small { font-size: .8rem; font-weight: 500; color: rgb(var(--ca-mute-rgb)); }
+    @media (min-width: 640px) {
+      .ca-podium { grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: end; }
+      .ca-podium-1 { order: 2; padding-top: 2.4rem; padding-bottom: 1.8rem; }
+      .ca-podium-2 { order: 1; }
+      .ca-podium-3 { order: 3; }
+    }
+    /* admin lists: stacked rows that wrap instead of wide tables that scroll */
+    .ca-rows { list-style: none; margin: 0; padding: 0; background: rgb(var(--ca-surface-rgb)); border: 1px solid rgb(var(--ca-line-rgb)); border-radius: var(--ca-radius); box-shadow: var(--ca-shadow); }
+    .ca-rows > li + li { border-top: 1px solid rgb(var(--ca-line-rgb) / .8); }
+    .ca-rows > li { transition: background-color .12s ease; }
+    .ca-rows > li:hover { background: rgb(var(--ca-accent-rgb) / .035); }
+    .ca-row { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem 1rem; padding: .85rem 1rem; }
+    .ca-row-main { flex: 1 1 15rem; min-width: 0; }
+    .ca-row-title { display: flex; align-items: center; gap: .5rem; min-width: 0; font-weight: 600; }
+    .ca-row-title > a { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .ca-row-meta { display: flex; flex-wrap: wrap; align-items: center; gap: .2rem .9rem; margin-top: .25rem; font-size: .78rem; color: rgb(var(--ca-mute-rgb)); }
+    .ca-row-meta svg.lucide { width: .95rem; height: .95rem; margin-right: .25rem; }
+    .ca-row-side { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; margin-left: auto; }
+    .ca-row-stat { min-width: 3.5rem; text-align: right; font-size: .8rem; color: rgb(var(--ca-mute-rgb)); line-height: 1.2; }
+    .ca-row-stat b { display: block; font-size: .95rem; color: rgb(var(--ca-ink-rgb)); font-variant-numeric: tabular-nums; }
+    .ca-rows > li.is-me { background: rgb(var(--ca-accent-rgb) / .07); box-shadow: inset 3px 0 0 rgb(var(--ca-accent-rgb)); }
+    .ca-rows > li.is-dq { opacity: .55; }
+    /* calendar tile for contest rows; tint follows contest state */
+    .ca-date {
+      width: 3.25rem; flex-shrink: 0; padding: .35rem 0 .4rem; text-align: center; line-height: 1;
+      border-radius: var(--ca-radius-sm); color: var(--st); background: color-mix(in srgb, var(--st) 11%, transparent);
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--st) 28%, transparent);
+    }
+    .ca-date b { display: block; font-size: 1.3rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .ca-date span { display: block; margin-top: .2rem; font-size: .65rem; font-weight: 600; }
+    .ca-st-running { --st: rgb(var(--ca-ok-rgb)); }
+    .ca-st-upcoming { --st: rgb(var(--ca-warn-rgb)); }
+    .ca-st-ended { --st: rgb(var(--ca-mute-rgb)); }
+    .ca-sealed {
+      display: flex; flex-direction: column; align-items: center; gap: .35rem; padding: 1rem .5rem .85rem;
+      border: 1px dashed rgb(var(--ca-mute-rgb) / .35); border-radius: var(--ca-radius-sm);
+      color: rgb(var(--ca-mute-rgb)); background: rgb(var(--ca-ink-rgb) / .025);
+    }
+    .ca-sealed-label { font-size: 1.5rem; font-weight: 700; line-height: 1; color: rgb(var(--ca-accent-rgb)); }
+    /* whole row is the link; buttons inside sit above the stretched ::after */
+    .ca-stretch::after { content: ""; position: absolute; inset: 0; }
+    .ca-rows > li:has(.ca-stretch:hover) .ca-stretch { color: rgb(var(--ca-accent-rgb)) !important; }
+    .ca-count {
+      display: inline-flex; align-items: center; gap: .4rem; padding: .35rem .75rem; border-radius: 9999px; white-space: nowrap;
+      color: var(--st); background: color-mix(in srgb, var(--st) 10%, transparent);
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--st) 25%, transparent);
+    }
+    .ca-count b { font-size: .875rem; font-variant-numeric: tabular-nums; }
+    .ca-count small { font-size: .75rem; opacity: .8; }
+    .ca-count .ca-live-dot { margin-right: 0; }
+    /* leaderboard + submission rows: fixed grid so columns line up without a table */
+    .ca-lb { display: grid; grid-template-columns: 2.25rem minmax(0, 1fr) auto 4.5rem; align-items: center; gap: .9rem; padding: .7rem 1rem; }
+    .ca-lb-value { text-align: right; font-size: 1.05rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .ca-sub { display: grid; grid-template-columns: 4.75rem minmax(0, 1fr) auto; align-items: center; gap: .9rem; padding: .7rem 1rem; }
+    .ca-sub .ca-verdict { justify-content: center; width: 100%; }
+    /* profile banner: tier-tinted dot grid so an empty banner still reads as intentional */
+    .ca-banner {
+      height: 5.5rem;
+      background:
+        radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--tier) 45%, transparent) 1px, transparent 1.5px) 0 0 / 14px 14px,
+        linear-gradient(100deg, color-mix(in srgb, var(--tier) 30%, transparent), color-mix(in srgb, rgb(var(--ca-accent-rgb)) 12%, transparent));
+      -webkit-mask-image: linear-gradient(180deg, #000 55%, transparent);
+              mask-image: linear-gradient(180deg, #000 55%, transparent);
+    }
     .ca-table tr.ca-row-me td { background: rgb(var(--ca-accent-rgb) / .07); }
     .ca-table tr.ca-row-solved td { background: rgb(var(--ca-ok-rgb) / .05); }
     .ca-table tr.ca-row-dq td { opacity: .55; }
@@ -314,7 +451,10 @@
     @keyframes ca-pulse { 0%,100% { opacity: .35; } 50% { opacity: 1; } }
     @media (prefers-reduced-motion: reduce) {
       .ca-verdict-pending.is-live::after { animation: none; opacity: 1; }
-      .ca-nav-link, .ca-btn, .ca-sidebar-link { transition: none; }
+      .ca-live-dot { animation: none; }
+      .ca-nav-link, .ca-btn, .ca-sidebar-link, .ca-stat-card, .ca-pmap, .ca-table tbody tr { transition: none; }
+      .ca-spin { animation: none; }
+      .ca-btn:active:not(:disabled), .ca-stat-card:hover, .ca-pmap:hover { transform: none; }
     }
     .ca-terminal {
       background: #14161A; color: #EAEBE5; border-radius: var(--ca-radius);
@@ -400,6 +540,8 @@
     .ca-auth-eye:hover { color: rgb(var(--ca-ink-rgb)); background: rgb(var(--ca-ink-rgb) / .06); }
     .ca-auth-eye svg.lucide { width: 1.05rem; height: 1.05rem; }
     .ca-input[aria-invalid="true"] { border-color: rgb(var(--ca-bad-rgb) / .6); }
+    .errorlist { margin-top: .35rem; font-size: .8rem; color: rgb(var(--ca-bad-rgb)); }
+    .errorlist li + li { margin-top: .15rem; }
     .ca-sidebar-heading {
       font-size: .75rem; font-weight: 600;
       color: rgb(var(--ca-mute-rgb)); padding: 0 .8rem; margin: .35rem 0;
@@ -462,12 +604,12 @@
     }
     .ca-user-name { font-weight: 600; color: var(--tier); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .ca-user:hover .ca-user-name { text-decoration: underline; text-underline-offset: 3px; }
-    /* 4-step difficulty scale: beginner/easy = greens, medium = amber, hard = red */
-    .ca-diff-beginner { background: #0891B21F; color: #0891B2; }
+    /* 4-step difficulty scale: beginner = cyan, easy = green, medium = amber, hard = red */
+    .ca-diff-beginner { background: rgb(var(--ca-info-rgb) / .12); color: rgb(var(--ca-info-rgb)); }
     .ca-diff-easy { background: rgb(var(--ca-ok-rgb) / .12); color: rgb(var(--ca-ok-rgb)); }
     .ca-diff-medium { background: rgb(var(--ca-warn-rgb) / .12); color: rgb(var(--ca-warn-rgb)); }
     .ca-diff-hard { background: rgb(var(--ca-bad-rgb) / .12); color: rgb(var(--ca-bad-rgb)); }
-    .ca-gauge-beginner { stroke: #0891B2; }
+    .ca-gauge-beginner { stroke: rgb(var(--ca-info-rgb)); }
     .ca-gauge-easy { stroke: rgb(var(--ca-ok-rgb)); }
     .ca-gauge-medium { stroke: rgb(var(--ca-warn-rgb)); }
     .ca-gauge-hard { stroke: rgb(var(--ca-bad-rgb)); }
@@ -478,8 +620,8 @@
       transition: transform .12s ease, filter .12s ease;
     }
     .ca-pmap:hover { transform: translateY(-1px); filter: brightness(1.08); }
-    .ca-pmap-solved { background: rgb(var(--ca-ok-rgb)); color: rgb(var(--ca-on-fill-rgb)); }
-    .ca-pmap-attempted { background: rgb(var(--ca-warn-rgb)); color: rgb(var(--ca-on-fill-rgb)); }
+    .ca-pmap-solved { background: rgb(var(--ca-ok-rgb) / .16); color: rgb(var(--ca-ok-rgb)); box-shadow: inset 0 0 0 1px rgb(var(--ca-ok-rgb) / .35); }
+    .ca-pmap-attempted { background: rgb(var(--ca-warn-rgb) / .14); color: rgb(var(--ca-warn-rgb)); box-shadow: inset 0 0 0 1px rgb(var(--ca-warn-rgb) / .35); }
     .ca-heat-cell { width: .6rem; height: .6rem; border-radius: 2px; }
     .ca-heat-0 { background: rgb(var(--ca-ink-rgb) / .07); }
     .ca-heat-1 { background: rgb(var(--ca-accent-rgb) / .25); }
@@ -491,7 +633,7 @@
   {% block head %}{% endblock %}
 </head>
 <body class="min-h-full bg-paper text-ink antialiased" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
-<a class="ca-skip" href="#main">Asosiy tarkibga o'tish</a>
+<a class="ca-skip" href="#main">Asosiy tarkibga o‘tish</a>
 <header class="sticky top-0 z-40 border-b border-line bg-surface/85 backdrop-blur">
   <nav class="mx-auto flex max-w-6xl items-center gap-1 px-4 py-2.5" aria-label="Asosiy">
     <a href="{% url 'problems:list' %}" class="ca-brand mr-3 shrink-0">
@@ -506,16 +648,16 @@
       <i data-lucide="sun-moon" class="lu" aria-hidden="true"></i>
     </button>
     {% if user.is_authenticated %}
-        <a href="{% url 'profile' user.username %}" class="ca-nav-link gap-2 max-w-[11rem]" title="{{ user.username }}" style="--tier: {{ user.rating|tier_color }}">
-          <span class="ca-avatar h-6 w-6 text-[.65rem]" style="background: color-mix(in srgb, var(--tier) 14%, transparent); color: var(--tier)">{% if user.avatar %}<img src="{{ user.avatar.url }}" alt="">{% else %}{{ user.username|first }}{% endif %}</span>
-          <span class="truncate font-semibold" style="color: var(--tier)">{{ user.username }}</span>
+        <a href="{% url 'profile' user.username %}" class="ca-nav-link min-w-0 gap-2 max-w-[11rem] !px-1.5 sm:!px-3" title="{{ user.username }}" aria-label="Profil: {{ user.username }}" translate="no" style="--tier: {{ user.rating|tier_color }}">
+          <span class="ca-avatar h-7 w-7 text-xs sm:h-6 sm:w-6 sm:text-[.65rem]" style="background: color-mix(in srgb, var(--tier) 14%, transparent); color: var(--tier)">{% if user.avatar %}<img src="{{ user.avatar.url }}" alt="" width="28" height="28">{% else %}{{ user.username|first }}{% endif %}</span>
+          <span class="hidden truncate font-semibold sm:inline" style="color: var(--tier)">{{ user.username }}</span>
         </a>
         <form method="post" action="{% url 'logout' %}">{% csrf_token %}
-          <button type="submit" class="ca-btn ca-btn-ghost !py-1.5 text-sm">Chiqish</button>
+          <button type="submit" class="ca-btn ca-btn-ghost !px-2.5 !py-1.5 text-sm sm:!px-3" aria-label="Chiqish" title="Chiqish"><i data-lucide="log-out" class="lu sm:!hidden" aria-hidden="true"></i><span class="hidden sm:inline">Chiqish</span></button>
         </form>
     {% else %}
         <a href="{% url 'login' %}" class="ca-btn ca-btn-ghost">Kirish</a>
-        <a href="{% url 'register' %}" class="ca-btn ca-btn-primary hidden sm:inline-flex">Ro'yxatdan o'tish</a>
+        <a href="{% url 'register' %}" class="ca-btn ca-btn-primary hidden sm:inline-flex">Ro‘yxatdan o‘tish</a>
     {% endif %}
     </div>
   </nav>
@@ -533,7 +675,7 @@
     </a>
     <a href="{% url 'rating' %}" class="ca-sidebar-link {% if request.resolver_match.url_name == 'rating' %}is-active{% endif %}">
       <i data-lucide="chart-column" class="lu" aria-hidden="true"></i>
-      Rating
+      Reyting
     </a>
     <a href="{% url 'top' %}" class="ca-sidebar-link {% if request.resolver_match.url_name == 'top' %}is-active{% endif %}">
       <i data-lucide="users" class="lu" aria-hidden="true"></i>
@@ -552,7 +694,7 @@
       <i data-lucide="layout-dashboard" class="lu" aria-hidden="true"></i>
       Boshqaruv
     </a>
-    <a href="{% url 'moderation:problems' %}" class="ca-sidebar-link {% if ns == 'moderation' and un in 'problems,submit,problem_edit' %}is-active{% endif %}">
+    <a href="{% url 'moderation:problems' %}" class="ca-sidebar-link {% if ns == 'moderation' and un in 'problems,submit,problem_edit,ai_generate' %}is-active{% endif %}">
       <i data-lucide="file-code-2" class="lu" aria-hidden="true"></i>
       Masalalar
     </a>
@@ -563,6 +705,10 @@
     <a href="{% url 'moderation:contests' %}" class="ca-sidebar-link {% if ns == 'moderation' and un in 'contests,contest_new,contest_edit' %}is-active{% endif %}">
       <i data-lucide="trophy" class="lu" aria-hidden="true"></i>
       Musobaqalar
+    </a>
+    <a href="{% url 'moderation:submissions' %}" class="ca-sidebar-link {% if ns == 'moderation' and un == 'submissions' %}is-active{% endif %}">
+      <i data-lucide="history" class="lu" aria-hidden="true"></i>
+      Barcha urinishlar
     </a>
     <a href="{% url 'moderation:users' %}" class="ca-sidebar-link {% if ns == 'moderation' and un in 'users,user_edit' %}is-active{% endif %}">
       <i data-lucide="users-round" class="lu" aria-hidden="true"></i>
@@ -593,9 +739,12 @@
 <nav class="ca-bottom-nav md:hidden" aria-label="Mobil menyu">
   <a href="{% url 'problems:list' %}" class="{% if request.resolver_match.namespace == 'problems' %}is-active{% endif %}"><i data-lucide="list-checks" class="lu" aria-hidden="true"></i><span>Masalalar</span></a>
   <a href="{% url 'contests:list' %}" class="{% if request.resolver_match.namespace == 'contests' %}is-active{% endif %}"><i data-lucide="trophy" class="lu" aria-hidden="true"></i><span>Musobaqalar</span></a>
-  <a href="{% url 'rating' %}" class="{% if request.resolver_match.url_name == 'rating' %}is-active{% endif %}"><i data-lucide="chart-column" class="lu" aria-hidden="true"></i><span>Rating</span></a>
+  <a href="{% url 'rating' %}" class="{% if request.resolver_match.url_name == 'rating' %}is-active{% endif %}"><i data-lucide="chart-column" class="lu" aria-hidden="true"></i><span>Reyting</span></a>
   {% if user.is_authenticated %}
   <a href="{% url 'submissions:mine' %}" class="{% if request.resolver_match.namespace == 'submissions' %}is-active{% endif %}"><i data-lucide="history" class="lu" aria-hidden="true"></i><span>Urinishlar</span></a>
+  {% if user.is_staff %}
+  <a href="{% url 'moderation:dashboard' %}" class="{% if request.resolver_match.namespace == 'moderation' %}is-active{% endif %}"><i data-lucide="layout-dashboard" class="lu" aria-hidden="true"></i><span>Boshqaruv</span></a>
+  {% endif %}
   <a href="{% url 'profile' user.username %}" class="{% if request.resolver_match.url_name == 'profile' %}is-active{% endif %}"><i data-lucide="user" class="lu" aria-hidden="true"></i><span>Profil</span></a>
   {% else %}
   <a href="{% url 'login' %}"><i data-lucide="log-in" class="lu" aria-hidden="true"></i><span>Kirish</span></a>
@@ -609,7 +758,7 @@
       const s = Math.max(0, Math.floor(ms / 1000));
       const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60), sec = s % 60;
       const pad = (n) => String(n).padStart(2, "0");
-      return (d ? d + "k " : "") + pad(h) + ":" + pad(m) + ":" + pad(sec);
+      return (d ? d + " kun " : "") + pad(h) + ":" + pad(m) + ":" + pad(sec);
     };
     const tick = () => {
       const now = Date.now();
@@ -625,7 +774,7 @@
     const btn = document.getElementById("theme-toggle");
     const order = ["system", "light", "dark"];
     const icons = { system: "sun-moon", light: "sun", dark: "moon" };
-    const labels = { system: "Tema: tizim", light: "Tema: yorug'", dark: "Tema: qorong'i" };
+    const labels = { system: "Tema: tizim", light: "Tema: yorug‘", dark: "Tema: qorong‘i" };
     let cur = "system";
     try { cur = localStorage.getItem("ca-theme") || "system"; } catch {}
     const apply = () => {

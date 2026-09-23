@@ -1,34 +1,39 @@
 {% extends "base.html" %}{% load tiers %}
 {% block title %}Foydalanuvchilar — boshqaruv{% endblock %}
 {% block content %}
-<h1 class="ca-page-title mb-4">Boshqaruv</h1>
-{% include "moderation/_nav.html" %}
-
-<form method="get" class="relative mb-4">
-  <i data-lucide="search" class="lu pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-mute" aria-hidden="true"></i>
-  <input type="search" name="q" value="{{ q }}" placeholder="Login, email, ism, o‘quv joyi…" class="ca-input !py-1.5 pl-8 text-sm w-72" aria-label="Qidirish">
-</form>
+<div class="mb-6 flex flex-wrap items-end justify-between gap-3">
+  <div>{% include "moderation/_header.html" with title="Foydalanuvchilar" subtitle="Rol, huquq va profil ma’lumotlari" %}</div>
+  <form method="get" class="relative w-full max-w-xs" role="search">
+    <i data-lucide="search" class="lu pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-mute" aria-hidden="true"></i>
+    <input type="search" name="q" value="{{ q }}" placeholder="Login, email, ism, o‘quv joyi…" class="ca-input !py-1.5 pl-8 text-sm" aria-label="Foydalanuvchi qidirish">
+  </form>
+</div>
 
 {% if page.object_list %}
-<div class="ca-panel !p-0 overflow-x-auto">
-<table class="ca-table">
-  <thead><tr><th>Foydalanuvchi</th><th class="hidden md:table-cell">Email</th><th class="hidden md:table-cell">O‘quv joyi</th><th>Rol</th><th class="text-right">Rating</th><th class="hidden md:table-cell text-right">Urinish</th><th class="hidden md:table-cell">Ro‘yxatdan</th><th class="text-right">Amal</th></tr></thead>
-  <tbody>
+<ul class="ca-rows">
   {% for u in page %}
-  <tr class="{% if not u.is_active %}opacity-50{% endif %}">
-    <td>{% include "accounts/_user.html" with tier=False %}</td>
-    <td class="hidden md:table-cell text-sm text-mute">{{ u.email|default:"—" }}</td>
-    <td class="hidden lg:table-cell text-sm text-mute whitespace-nowrap">{{ u.school|default:"—" }}</td>
-    <td>{% if u.is_staff %}<span class="ca-chip text-accent"><i data-lucide="shield" class="lu mr-1" aria-hidden="true"></i>Admin</span>{% else %}<span class="ca-chip">{{ u.get_role_display }}</span>{% endif %}{% if not u.is_active %} <span class="ca-chip text-bad">Bloklangan</span>{% endif %}</td>
-    <td class="tabular text-right font-semibold" style="color: {{ u.rating|tier_color }}">{{ u.rating }}</td>
-    <td class="hidden md:table-cell tabular text-right text-mute">{{ u.n_subs }}</td>
-    <td class="hidden md:table-cell tabular text-mute whitespace-nowrap">{{ u.date_joined|date:"d.m.Y" }}</td>
-    <td class="text-right"><a href="{% url 'moderation:user_edit' u.pk %}" class="ca-btn ca-btn-ghost !px-2 !py-1.5 text-xs" title="Tahrirlash"><i data-lucide="pencil" class="lu" aria-hidden="true"></i></a></td>
-  </tr>
+  <li class="ca-row{% if not u.is_active %} opacity-60{% endif %}">
+    <div class="ca-row-main">
+      <div class="ca-row-title">
+        {% include "accounts/_user.html" with tier=False %}
+        {% if u.is_staff %}<span class="ca-chip shrink-0"><i data-lucide="shield" class="lu mr-1" aria-hidden="true"></i>Admin</span>{% else %}<span class="ca-chip shrink-0 !bg-ink/5 text-mute">{{ u.get_role_display }}</span>{% endif %}
+        {% if not u.is_active %}<span class="ca-chip shrink-0 text-bad">Bloklangan</span>{% endif %}
+      </div>
+      <div class="ca-row-meta pl-9">
+        <span class="truncate" translate="no">{{ u.email|default:"email yo‘q" }}</span>
+        {% if u.school %}<span class="truncate"><i data-lucide="graduation-cap" class="lu" aria-hidden="true"></i>{{ u.school }}</span>{% endif %}
+        <span class="tabular"><i data-lucide="calendar" class="lu" aria-hidden="true"></i>{{ u.date_joined|date:"d.m.Y" }}</span>
+      </div>
+    </div>
+    <div class="ca-row-side">
+      <div class="ca-row-stat"><b style="color: {{ u.rating|tier_color }}">{{ u.rating }}</b>reyting</div>
+      <div class="ca-row-stat"><b>{{ u.n_subs }}</b>urinish</div>
+      <a href="{% url 'moderation:submissions' %}?user={{ u.username|urlencode }}" class="ca-btn ca-btn-ghost !px-2 !py-1.5" title="Urinishlari" aria-label="Urinishlari: {{ u.username }}"><i data-lucide="history" class="lu" aria-hidden="true"></i></a>
+      <a href="{% url 'moderation:user_edit' u.pk %}" class="ca-btn ca-btn-ghost !px-2 !py-1.5" title="Tahrirlash" aria-label="Tahrirlash: {{ u.username }}"><i data-lucide="pencil" class="lu" aria-hidden="true"></i></a>
+    </div>
+  </li>
   {% endfor %}
-  </tbody>
-</table>
-</div>
+</ul>
 {% include "_pagination.html" with page=page %}
 {% else %}
 <div class="ca-empty">Foydalanuvchi topilmadi.</div>

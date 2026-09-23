@@ -8,31 +8,21 @@
   </div>
 </div>
 
-{% if not running and not upcoming and not ended %}
+{% if not running and not upcoming and not ended.paginator.count %}
 <div class="ca-empty">Hali musobaqa yo‘q.</div>
 {% endif %}
 
 {% for section in sections %}{% if section.items %}
 <div class="mb-8">
   <h2 class="ca-section-title flex items-center gap-2">
-    <span class="inline-block h-2 w-2 rounded-full {{ section.dot }}"></span>
+    <span class="inline-block h-2 w-2 rounded-full {{ section.dot }}" aria-hidden="true"></span>
     {{ section.title }}
-    <span class="ca-rank-n text-xs font-normal">{{ section.items|length }}</span>
+    <span class="ca-rank-n text-xs font-normal">{% if section.page %}{{ section.page.paginator.count }}{% else %}{{ section.items|length }}{% endif %}</span>
   </h2>
-  <div class="ca-panel !p-0 overflow-x-auto">
-  <table class="ca-table">
-    <thead><tr>
-      <th>Nomi</th>
-      <th class="w-36">Boshlanishi</th>
-      <th class="hidden w-28 sm:table-cell">Davomiyligi</th>
-      <th class="hidden w-28 md:table-cell text-right">Ishtirokchi</th>
-      <th class="w-36 text-right">{{ section.last_col }}</th>
-    </tr></thead>
-    <tbody>
+  <ul class="ca-rows">
     {% for c in section.items %}{% include "contests/_row.html" with state=section.key %}{% endfor %}
-    </tbody>
-  </table>
-  </div>
+  </ul>
+  {% if section.page %}{% include "_pagination.html" with page=section.page %}{% endif %}
 </div>
 {% endif %}{% endfor %}
 {% endblock %}

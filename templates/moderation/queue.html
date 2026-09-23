@@ -1,13 +1,11 @@
 {% extends "base.html" %}
-{% block title %}Moderatsiya{% endblock %}
+{% block title %}Navbat — boshqaruv{% endblock %}
 {% block content %}
-<div class="mb-6">
-  <h1 class="ca-page-title">Moderatsiya navbati</h1>
-  <p class="mt-1 text-sm text-mute">Foydalanuvchilar yuborgan, tasdiqlanishi kerak bo'lgan masalalar.</p>
-</div>
+
+<div class="mb-6">{% include "moderation/_header.html" with title="Navbat" subtitle="Foydalanuvchilar yuborgan va AI tuzgan qoralamalar. Tasdiqlangach masala saytda ko‘rinadi." %}</div>
 
 {% if problems %}
-<div class="overflow-x-auto">
+<div class="ca-panel !p-0 overflow-x-auto">
 <table class="ca-table">
   <thead>
     <tr>
@@ -41,6 +39,6 @@
 </table>
 </div>
 {% else %}
-<div class="ca-empty"><i data-lucide="circle-check" class="lu mb-2 block text-2xl text-ok" aria-hidden="true"></i>Navbat bo'sh — hamma masala ko'rib chiqilgan.</div>
+<div class="ca-empty"><i data-lucide="circle-check" class="lu mb-2 block text-2xl text-ok" aria-hidden="true"></i>Navbat bo‘sh — hamma masala ko‘rib chiqilgan.</div>
 {% endif %}
 {% endblock %}

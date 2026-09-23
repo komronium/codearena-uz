@@ -1,30 +1,39 @@
 {% extends "base.html" %}
 {% block title %}{{ contest.title }}{% endblock %}
 {% block content %}
-<div class="ca-panel mb-6">
-  <div class="flex flex-wrap items-start justify-between gap-4">
-    <div>
-      <div class="mb-2 flex flex-wrap items-center gap-2">
-        {% if contest.is_running %}<span class="ca-diff ca-diff-easy"><i data-lucide="play" class="lu mr-1.5" aria-hidden="true"></i>Faol</span>
-        {% elif contest.has_ended %}<span class="ca-diff" style="background:rgb(var(--ca-mute-rgb)/.12);color:rgb(var(--ca-mute-rgb))"><i data-lucide="flag" class="lu mr-1.5" aria-hidden="true"></i>Tugagan</span>
-        {% else %}<span class="ca-diff ca-diff-medium"><i data-lucide="hourglass" class="lu mr-1.5" aria-hidden="true"></i>Kutilmoqda</span>{% endif %}
-        <span class="tabular text-xs text-mute">#{{ contest.pk|stringformat:"03d" }}</span>
-        {% if contest.is_rated %}<span class="ca-chip ca-chip-rated" title="Natija reytingga ta‘sir qiladi"><i data-lucide="trending-up" class="lu mr-1" aria-hidden="true"></i>Reytingli</span>{% endif %}
-      </div>
-      <h1 class="ca-page-title">{{ contest.title }}</h1>
-      <p class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-mute">
-        <span><i data-lucide="calendar" class="lu mr-1.5" aria-hidden="true"></i><span class="tabular">{{ contest.start|date:"d.m.Y H:i" }}</span></span>
-        <span><i data-lucide="clock" class="lu mr-1.5" aria-hidden="true"></i><span class="tabular">{{ contest.start|date:"H:i" }}–{{ contest.end|date:"H:i" }}</span></span>
-        <span><i data-lucide="list-checks" class="lu mr-1.5" aria-hidden="true"></i>{{ problems|length }} ta masala</span>
-        <span><i data-lucide="hourglass" class="lu mr-1.5" aria-hidden="true"></i>{{ contest.duration_label }}</span>
-        {% if not contest.has_ended %}
-        <span class="font-semibold text-ink"><i data-lucide="timer" class="lu mr-1.5 text-accent" aria-hidden="true"></i>
-          <span class="tabular" data-countdown="{% if contest.is_running %}{{ contest.end|date:'c' }}{% else %}{{ contest.start|date:'c' }}{% endif %}"
-                data-label="{% if contest.is_running %}Tugashiga{% else %}Boshlanishiga{% endif %}"></span></span>
-        {% endif %}
-      </p>
+<div class="ca-panel mb-6 !p-0 overflow-hidden">
+  <div class="px-6 pb-5 pt-5">
+    <div class="mb-2 flex flex-wrap items-center gap-2">
+      {% if contest.is_running %}<span class="ca-diff ca-diff-easy"><span class="ca-live-dot" aria-hidden="true"></span>Faol</span>
+      {% elif contest.has_ended %}<span class="ca-diff" style="background:rgb(var(--ca-mute-rgb)/.12);color:rgb(var(--ca-mute-rgb))"><i data-lucide="flag" class="lu mr-1.5" aria-hidden="true"></i>Tugagan</span>
+      {% else %}<span class="ca-diff ca-diff-medium"><i data-lucide="hourglass" class="lu mr-1.5" aria-hidden="true"></i>Kutilmoqda</span>{% endif %}
+      {% if contest.is_rated %}<span class="ca-chip ca-chip-rated" title="Natija reytingga ta‘sir qiladi"><i data-lucide="trending-up" class="lu mr-1" aria-hidden="true"></i>Reytingli</span>{% endif %}
+      {% if registered %}<span class="ca-chip"><i data-lucide="check" class="lu mr-1" aria-hidden="true"></i>Ro‘yxatdan o‘tgansiz</span>{% endif %}
     </div>
-    <div class="flex shrink-0 flex-col items-end gap-2">
+    <h1 class="ca-page-title">{{ contest.title }}</h1>
+    <p class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-mute">
+      <span><i data-lucide="calendar" class="lu mr-1.5" aria-hidden="true"></i><span class="tabular">{{ contest.start|date:"d.m.Y" }}</span></span>
+      <span><i data-lucide="clock" class="lu mr-1.5" aria-hidden="true"></i><span class="tabular">{{ contest.start|date:"H:i" }}–{% if contest.start|date:"Ymd" != contest.end|date:"Ymd" %}{{ contest.end|date:"d.m.Y H:i" }}{% else %}{{ contest.end|date:"H:i" }}{% endif %}</span></span>
+      <span><i data-lucide="hourglass" class="lu mr-1.5" aria-hidden="true"></i>{{ contest.duration_label }}</span>
+      <span><i data-lucide="list-checks" class="lu mr-1.5" aria-hidden="true"></i>{{ problems|length }} ta masala</span>
+      <span><i data-lucide="users" class="lu mr-1.5" aria-hidden="true"></i>{{ n_participants }} ishtirokchi</span>
+    </p>
+  </div>
+  {# footer strip: the one number that matters right now on the left, actions on the right #}
+  <div class="flex flex-wrap items-center justify-between gap-3 border-t border-line bg-ink/[.025] px-6 py-3.5">
+    {% if not contest.has_ended %}
+    <div class="flex items-baseline gap-2">
+      <span class="text-sm text-mute">{% if contest.is_running %}Tugashiga{% else %}Boshlanishiga{% endif %}</span>
+      <span class="tabular text-xl font-bold {% if contest.is_running %}text-ok{% else %}text-ink{% endif %}" data-countdown="{% if contest.is_running %}{{ contest.end|date:'c' }}{% else %}{{ contest.start|date:'c' }}{% endif %}" data-label="" data-suffix="1"></span>
+    </div>
+    {% else %}
+    <p class="text-sm text-mute">Musobaqa {{ contest.end|date:"d.m.Y H:i" }} da tugagan</p>
+    {% endif %}
+    <div class="flex flex-wrap items-center gap-2">
+      {% if registered or user.is_staff %}
+      <a class="ca-btn ca-btn-ghost" href="{% url 'contests:clarifications' contest.pk %}"><i data-lucide="messages-square" class="lu" aria-hidden="true"></i>Savol-javoblar</a>
+      {% endif %}
+      <a class="ca-btn {% if contest.has_started %}ca-btn-primary{% else %}ca-btn-ghost{% endif %}" href="{% url 'contests:standings' contest.pk %}"><i data-lucide="medal" class="lu" aria-hidden="true"></i>Natijalar</a>
       {% if user.is_authenticated and not registered and not contest.has_ended %}
       <form method="post" action="{% url 'contests:register' contest.pk %}" id="contest-register-form">
         {% csrf_token %}
@@ -37,10 +46,7 @@
           b.textContent = "Yuborilmoqda…";
         });
       </script>
-      {% elif registered %}
-      <span class="ca-chip ca-chip-rated"><i data-lucide="check" class="lu mr-1" aria-hidden="true"></i>Ro‘yxatdan o‘tgansiz</span>
       {% endif %}
-      <a class="ca-btn {% if contest.has_started %}ca-btn-primary{% else %}ca-btn-ghost{% endif %}" href="{% url 'contests:standings' contest.pk %}"><i data-lucide="medal" class="lu" aria-hidden="true"></i>Turnir jadvali</a>
     </div>
   </div>
 </div>
@@ -72,39 +78,49 @@
 </div>
 {% endif %}
 
-<div class="mb-6 flex flex-wrap items-center justify-between gap-3">
-  <h2 class="ca-section-title !mb-0">Masalalar</h2>
-  {% if registered or user.is_staff %}
-  <a class="ca-link text-sm" href="{% url 'contests:clarifications' contest.pk %}"><i data-lucide="messages-square" class="lu mr-1" aria-hidden="true"></i>Savol-javoblar</a>
-  {% endif %}
-</div>
+<h2 class="ca-section-title">Masalalar</h2>
 
-{% if problems %}
+{% if problems and not contest.has_started %}
+{# sealed until start for everyone, staff included; staff edit problems in moderation #}
+<div class="ca-panel">
+  <ul class="grid grid-cols-2 gap-3 sm:grid-cols-4" aria-label="{{ problems|length }} ta yopiq masala">
+    {% for cp in problems %}
+    <li class="ca-sealed">
+      <span class="ca-sealed-label">{{ cp.label }}</span>
+      <i data-lucide="lock-keyhole" class="lu" aria-hidden="true"></i>
+      <span class="tabular text-xs text-mute">{{ cp.points }} ball</span>
+    </li>
+    {% endfor %}
+  </ul>
+  <p class="mt-4 flex flex-wrap items-center justify-between gap-2 text-sm text-mute">
+    <span>Masalalar musobaqa boshlanganda ochiladi.{% if not registered and user.is_authenticated %} Qatnashish uchun oldindan ro‘yxatdan o‘ting.{% endif %}</span>
+    {% if user.is_staff %}<a class="ca-link" href="{% url 'moderation:contest_edit' contest.pk %}"><i data-lucide="pencil" class="lu mr-1" aria-hidden="true"></i>Boshqaruvda tahrirlash</a>{% endif %}
+  </p>
+</div>
+{% elif problems %}
 <div class="ca-panel !p-0 overflow-x-auto">
 <table class="ca-table">
   <thead>
-    <tr><th class="w-10"></th><th class="w-12">#</th><th>Nomi</th><th class="hidden sm:table-cell">Qiyinlik</th><th class="text-right">Ball</th>{% if contest.has_started %}<th class="hidden sm:table-cell text-right" title="Necha ishtirokchi yechdi">Yechganlar</th>{% endif %}</tr>
+    <tr>{% if my_row %}<th class="w-10"><span class="sr-only">Holat</span></th>{% endif %}<th class="w-12">#</th><th>Nomi</th><th class="hidden sm:table-cell">Qiyinlik</th><th class="text-right">Ball</th><th class="hidden sm:table-cell text-right" title="Necha ishtirokchi yechdi">Yechganlar</th></tr>
   </thead>
   <tbody>
   {% for cp in problems %}
   <tr{% if cp.my_cell.solved %} class="ca-row-solved"{% endif %}>
-    <td class="text-center">
+    {% if my_row %}<td class="text-center">
       {% if cp.my_cell.solved %}<span class="inline-grid h-5 w-5 place-items-center rounded-full bg-ok-soft text-ok" title="Yechilgan {{ cp.my_cell.time }}"><i data-lucide="check" class="lu text-[.7rem]" aria-hidden="true"></i></span>
       {% elif cp.my_cell.wrong %}<span class="text-xs font-semibold text-bad" title="{{ cp.my_cell.wrong }} noto‘g‘ri urinish">-{{ cp.my_cell.wrong }}</span>{% endif %}
-    </td>
+    </td>{% endif %}
     <td class="font-semibold text-accent">{{ cp.label }}</td>
     <td class="min-w-0 max-w-md truncate">
-      {% if not contest.has_started and not user.is_staff %}
-        <span class="text-mute">musobaqa boshlanganda ko‘rinadi</span>
-      {% elif registered or contest.has_ended or user.is_staff %}
+      {% if registered or contest.has_ended or user.is_staff %}
         <a class="ca-link font-medium" href="{% url 'problems:detail' cp.problem.slug %}">{{ cp.problem.title }}</a>
       {% else %}
         <span class="text-mute">ro‘yxatdan o‘tgach ko‘rinadi</span>
       {% endif %}
     </td>
-    <td class="hidden sm:table-cell">{% if contest.has_started or user.is_staff %}<span class="ca-diff ca-diff-{{ cp.problem.difficulty }}">{{ cp.problem.get_difficulty_display }}</span>{% endif %}</td>
+    <td class="hidden sm:table-cell"><span class="ca-diff ca-diff-{{ cp.problem.difficulty }}">{{ cp.problem.get_difficulty_display }}</span></td>
     <td class="tabular text-right font-semibold">{{ cp.points }}</td>
-    {% if contest.has_started %}<td class="hidden sm:table-cell tabular text-right text-mute">{{ cp.solved_count }}</td>{% endif %}
+    <td class="hidden sm:table-cell tabular text-right text-mute">{{ cp.solved_count }}</td>
   </tr>
   {% endfor %}
   </tbody>

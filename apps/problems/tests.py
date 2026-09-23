@@ -278,3 +278,63 @@ def test_recalc_points_command_updates_from_real_submissions():
     call_command("recalc_points")  # idempotent: same inputs, same output
     p.refresh_from_db()
     assert p.points == points_after_first_run
+
+
+# ---- problem rating + solution leaderboards ---------------------------------------------------
+
+def _ac(user, problem, lang, exec_ms, source):
+    from apps.submissions.models import Submission, UserProblemSolved
+    s = Submission.objects.create(user=user, problem=problem, language=lang, source=source,
+                                  verdict="AC", exec_ms=exec_ms)
+    UserProblemSolved.objects.get_or_create(user=user, problem=problem, defaults={"first_ac_submission": s})
+    return s
+
+
+@pytest.fixture
+def py(db):
+    return Language.objects.create(code="python", name="Python 3", docker_image="i", run_cmd="r")
+
+
+def test_only_solver_can_rate_and_stars_are_clamped(client, problem, py):
+    from .models import ProblemRating
+    ali = User.objects.create_user("ali", password="x")
+    client.force_login(ali)
+    url = reverse("problems:rate", args=[problem.slug])
+    assert client.post(url, {"stars": 5}).status_code == 404
+    _ac(ali, problem, py, 10, "print(1)")
+    client.post(url, {"stars": 4})
+    client.post(url, {"stars": 9})  # ignored
+    assert ProblemRating.objects.get(user=ali, problem=problem).stars == 4
+    assert "4.0" in client.get(reverse("problems:detail", args=[problem.slug])).content.decode()
+
+
+def test_leaders_best_per_user_by_time_and_length(client, problem, py):
+    from apps.problems.views import leaders
+    ali, vali = User.objects.create_user("ali", password="x"), User.objects.create_user("vali", password="x")
+    _ac(ali, problem, py, 50, "x" * 10)
+    _ac(ali, problem, py, 20, "x" * 99)   # ali's fastest
+    _ac(vali, problem, py, 30, "x" * 5)
+    assert [(s.user.username, s.exec_ms) for s in leaders(problem, "time")] == [("ali", 20), ("vali", 30)]
+    assert [(s.user.username, s.code_len) for s in leaders(problem, "length")] == [("vali", 5), ("ali", 10)]
+    r = client.get(reverse("problems:leaders", args=[problem.slug]) + "?by=length")
+    assert r.status_code == 200 and r.content.decode().index("vali") < r.content.decode().index(">ali<")
+
+
+def test_solutions_hidden_during_running_contest(client, problem, py):
+    ali, vali = User.objects.create_user("ali", password="x"), User.objects.create_user("vali", password="x")
+    theirs = _ac(vali, problem, py, 10, "secret")
+    _ac(ali, problem, py, 10, "mine")
+    client.force_login(ali)
+    code_url = reverse("submissions:detail", args=[theirs.pk])
+    assert client.get(code_url).status_code == 200  # solver may read others' AC code
+    now = timezone.now()
+    c = Contest.objects.create(title="C", start=now - timezone.timedelta(hours=1), end=now + timezone.timedelta(hours=1))
+    ContestProblem.objects.create(contest=c, problem=problem, label="A", points=100, order=0)
+    assert client.get(code_url).status_code == 404
+    assert client.get(reverse("problems:leaders", args=[problem.slug])).status_code == 404
+
+
+def test_non_solver_cannot_read_others_code(client, problem, py):
+    theirs = _ac(User.objects.create_user("vali", password="x"), problem, py, 10, "secret")
+    client.force_login(User.objects.create_user("ali", password="x"))
+    assert client.get(reverse("submissions:detail", args=[theirs.pk])).status_code == 404

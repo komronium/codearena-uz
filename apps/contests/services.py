@@ -30,6 +30,12 @@ def in_upcoming_contest(problem) -> bool:
     return ContestProblem.objects.filter(problem=problem, contest__start__gt=timezone.now()).exists()
 
 
+def in_running_contest(problem) -> bool:
+    """While a contest with this problem runs, other people's solutions (and who is fastest) stay hidden."""
+    now = timezone.now()
+    return ContestProblem.objects.filter(problem=problem, contest__start__lte=now, contest__end__gt=now).exists()
+
+
 def access_allowed(user, contest, remote_addr: str) -> bool:
     """Supervised-mode gate (spec §3/§4.4): checked on register and on each
     submit, since group membership or client IP can change mid-contest."""

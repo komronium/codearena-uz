@@ -2,7 +2,7 @@
 {% block title %}{{ profile_user.username }}{% endblock %}
 {% block content %}
 <div class="ca-panel mb-6 !p-0 overflow-hidden">
-  <div class="h-20" style="background: linear-gradient(90deg, color-mix(in srgb, {{ tier_color }} 22%, transparent), color-mix(in srgb, {{ tier_color }} 6%, transparent))"></div>
+  <div class="ca-banner" style="--tier: {{ tier_color }}" aria-hidden="true"></div>
   <div class="flex flex-wrap items-end justify-between gap-4 px-6 pb-5">
     <div class="flex flex-wrap items-start gap-4">
       {% if profile_user.avatar %}
@@ -18,10 +18,7 @@
         {% else %}
         <h1 class="text-2xl font-bold leading-tight" translate="no" style="color: {{ tier_color }}">{{ profile_user.username }}</h1>
         {% endif %}
-        <p class="mt-1.5 flex flex-wrap items-center gap-2">
-          <span class="ca-tier" style="--tier: {{ tier_color }}">{{ tier }}</span>
-          {% if profile_user.is_staff %}<span class="ca-chip"><i data-lucide="shield-check" class="lu mr-1" aria-hidden="true"></i>Moderator</span>{% endif %}
-        </p>
+        {% if profile_user.is_staff %}<p class="mt-1.5"><span class="ca-chip"><i data-lucide="shield-check" class="lu mr-1" aria-hidden="true"></i>Moderator</span></p>{% endif %}
         <p class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-mute">
           {% if profile_user.location %}<span><i data-lucide="map-pin" class="lu mr-1.5" aria-hidden="true"></i>{{ profile_user.location }}</span>{% endif %}
           {% if profile_user.school %}<span><i data-lucide="graduation-cap" class="lu mr-1.5" aria-hidden="true"></i>{{ profile_user.school }}</span>{% endif %}
@@ -33,32 +30,29 @@
     <div class="flex flex-wrap gap-2">
       <a href="{% url 'profile_edit' %}" class="ca-btn ca-btn-primary"><i data-lucide="pencil" class="lu" aria-hidden="true"></i>Tahrirlash</a>
       {% if user.is_staff %}
-      <a href="{% url 'moderation:submit' %}" class="ca-btn ca-btn-ghost"><i data-lucide="circle-plus" class="lu" aria-hidden="true"></i>Masala qo'shish</a>
-      <a href="{% url 'moderation:queue' %}" class="ca-btn ca-btn-ghost"><i data-lucide="shield-check" class="lu" aria-hidden="true"></i>Moderatsiya</a>
       <a href="{% url 'moderation:dashboard' %}" class="ca-btn ca-btn-ghost"><i data-lucide="layout-dashboard" class="lu" aria-hidden="true"></i>Boshqaruv</a>
       {% endif %}
-      <a href="{% url 'password_reset' %}" class="ca-btn ca-btn-ghost"><i data-lucide="key-round" class="lu" aria-hidden="true"></i>Parol</a>
     </div>
     {% endif %}
   </div>
   <div class="grid grid-cols-2 divide-line border-t border-line sm:grid-cols-4 sm:divide-x">
     <div class="px-6 py-4">
-      <p class="ca-stat-label">Rating</p>
-      <p class="ca-stat-value mt-1" style="color: {{ tier_color }}">{{ profile_user.rating }}</p>
-      <p class="mt-1 text-xs text-mute">{{ tier }}</p>
+      <p class="ca-stat-label">Reyting</p>
+      <p class="ca-stat-value mt-1">{{ profile_user.rating }}</p>
+      <p class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1"><span class="ca-tier" style="--tier: {{ tier_color }}">{{ tier }}</span><span class="text-xs text-mute">{{ rating_history|length }} ta musobaqa</span></p>
     </div>
     <div class="px-6 py-4">
-      <p class="ca-stat-label">Reyting o'rni</p>
+      <p class="ca-stat-label">Reyting o‘rni</p>
       <p class="ca-stat-value mt-1">#{{ rating_rank }}</p>
       <p class="mt-1 text-xs text-mute">{{ total_users }} ishtirokchidan</p>
     </div>
     <div class="px-6 py-4">
       <p class="ca-stat-label">Amaliyot ball</p>
       <p class="ca-stat-value mt-1">{{ profile_user.practice_points }}</p>
-      <p class="mt-1 text-xs text-mute">{{ rating_history|length }} ta musobaqa</p>
+      <p class="mt-1 text-xs text-mute">{{ solved|length }} ta masala yechilgan</p>
     </div>
     <div class="px-6 py-4">
-      <p class="ca-stat-label">Ball o'rni</p>
+      <p class="ca-stat-label">Ball o‘rni</p>
       <p class="ca-stat-value mt-1">#{{ points_rank }}</p>
       <p class="mt-1 text-xs text-mute">{{ total_users }} ishtirokchidan</p>
     </div>
@@ -73,7 +67,7 @@
         <svg viewBox="0 0 120 120" class="h-full w-full" role="img" aria-label="{{ solved|length }} / {{ total_public_problems }} yechilgan">
           {% for d in by_diff %}
           <circle cx="60" cy="60" r="54" fill="none" stroke-width="7" stroke-linecap="round" class="ca-gauge-{{ d.key }}" opacity=".18"
-                  stroke-dasharray="46.9 339.3" transform="rotate({{ d.angle }} 60 60)"/>
+                  stroke-dasharray="{{ d.seg }} 339.3" transform="rotate({{ d.angle }} 60 60)"/>
           {% if d.arc %}<circle cx="60" cy="60" r="54" fill="none" stroke-width="7" stroke-linecap="round" class="ca-gauge-{{ d.key }}"
                   stroke-dasharray="{{ d.arc }} 339.3" transform="rotate({{ d.angle }} 60 60)"/>{% endif %}
           {% endfor %}
@@ -84,8 +78,7 @@
         </div>
       </div>
       <div class="min-w-0 flex-1">
-        <p class="text-sm text-mute"><span class="font-semibold text-ink tabular">{{ attempting }}</span> ta urinilmoqda</p>
-        <div class="mt-3 grid gap-2">
+        <div class="grid gap-2">
           {% for d in by_diff %}
           <div class="flex items-center justify-between rounded-lg bg-ink/5 px-3 py-2 text-sm">
             <span class="ca-diff ca-diff-{{ d.key }}">{{ d.label }}</span>
@@ -93,17 +86,18 @@
           </div>
           {% endfor %}
         </div>
+        {% if attempting %}<p class="mt-3 text-xs text-mute"><span class="font-semibold text-warn tabular">{{ attempting }}</span> ta masala urinilgan, hali yechilmagan</p>{% endif %}
       </div>
     </div>
 
     <div class="ca-panel">
       <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
         <p class="text-sm text-mute">Yechilgan va urinilgan masalalar xaritasi</p>
-        <div class="flex gap-1.5" id="pmap-filter">
-          <button type="button" class="ca-filter is-active" data-status="">Hammasi</button>
-          <button type="button" class="ca-filter" data-status="solved">Yechilgan</button>
-          <button type="button" class="ca-filter" data-status="attempted">Urinilgan</button>
-          <button type="button" class="ca-filter" data-status="todo">Yechilmagan</button>
+        <div class="flex flex-wrap gap-1.5" id="pmap-filter" role="group" aria-label="Holat bo‘yicha filtr">
+          <button type="button" class="ca-filter is-active" data-status="" aria-pressed="true">Hammasi</button>
+          <button type="button" class="ca-filter" data-status="solved" aria-pressed="false">Yechilgan</button>
+          <button type="button" class="ca-filter" data-status="attempted" aria-pressed="false">Urinilgan</button>
+          <button type="button" class="ca-filter" data-status="todo" aria-pressed="false">Yechilmagan</button>
         </div>
       </div>
       {% if problem_map %}
@@ -115,12 +109,12 @@
       <script>
         document.getElementById("pmap-filter").addEventListener("click", (e) => {
           const b = e.target.closest("button"); if (!b) return;
-          for (const x of b.parentElement.children) x.classList.toggle("is-active", x === b);
+          for (const x of b.parentElement.children) { x.classList.toggle("is-active", x === b); x.setAttribute("aria-pressed", x === b); }
           for (const c of document.querySelectorAll("#pmap .ca-pmap")) c.hidden = !!b.dataset.status && c.dataset.status !== b.dataset.status;
         });
       </script>
       {% else %}
-      <div class="ca-empty">Hali ochiq masalalar yo'q.</div>
+      <div class="ca-empty">Hali ochiq masalalar yo‘q.</div>
       {% endif %}
     </div>
   </div>
@@ -130,14 +124,15 @@
   <h2 class="ca-section-title">Faollik</h2>
   <div class="ca-panel">
     <div class="mb-4 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
-      <p class="text-sm text-mute"><span class="text-xl font-bold text-ink tabular">{{ activity.total }}</span> ta urinish so'nggi bir yilda</p>
+      <p class="text-sm text-mute"><span class="text-xl font-bold text-ink tabular">{{ activity.total }}</span> ta urinish so‘nggi bir yilda</p>
       <p class="flex gap-5 text-xs text-mute">
         <span>Faol kunlar: <b class="text-ink tabular">{{ activity.active_days }}</b></span>
         <span>Eng uzun seriya: <b class="text-ink tabular">{{ activity.max_streak }}</b></span>
       </p>
     </div>
-    <div>
-      <div class="flex gap-[3px]">
+    <div class="-mx-1 overflow-x-auto px-1 pb-1">
+    <div class="min-w-[36rem]" role="img" aria-label="Faollik xaritasi: so‘nggi bir yilda {{ activity.total }} ta urinish, {{ activity.active_days }} faol kun">
+      <div class="flex gap-[3px]" aria-hidden="true">
         {% for w in activity.weeks %}
         <div class="grid flex-1 gap-[3px]" style="grid-template-rows: repeat(7, minmax(0, 1fr))">
           {% for d in w %}<div class="ca-heat-cell !h-auto !w-full aspect-square ca-heat-{{ d.level }}" title="{{ d.date|date:'d.m.Y' }}: {{ d.count }} ta urinish"></div>{% endfor %}
@@ -145,18 +140,20 @@
         {% endfor %}
       </div>
       <div class="relative mt-2 h-4 text-xs text-mute">
-        {% for m in activity.month_labels %}<span class="absolute whitespace-nowrap" style="left: {% widthratio m.week activity.weeks|length 100 %}%">{{ m.name }}</span>{% endfor %}
+        {% for m in activity.month_labels %}<span class="absolute whitespace-nowrap" style="left: {% widthratio m.week activity.weeks|length 100 %}%" aria-hidden="true">{{ m.name }}</span>{% endfor %}
       </div>
+    </div>
     </div>
   </div>
 </section>
 
 {% if rating_history %}
 <section class="mb-8">
-  <h2 class="ca-section-title">Rating tarixi</h2>
-  <div class="ca-panel overflow-x-auto">
+  <h2 class="ca-section-title">Reyting tarixi</h2>
+  {% if rating_history|length > 1 %}
+  <div class="ca-panel mb-3 overflow-x-auto">
     <svg viewBox="0 0 {{ rating_chart.w }} {{ rating_chart.h }}" class="w-full" style="min-width: 480px"
-         role="img" aria-label="Rating tarixi grafigi, {{ rating_history|length }} ta musobaqa">
+         role="img" aria-label="Reyting tarixi grafigi, {{ rating_history|length }} ta musobaqa">
       {% for b in rating_chart.bands %}
       <rect x="{{ rating_chart.left }}" y="{{ b.y }}" width="{{ rating_chart.width }}"
             height="{{ b.h }}" fill="{{ b.color }}" fill-opacity=".12" />
@@ -176,7 +173,8 @@
       {% endfor %}
     </svg>
   </div>
-  <div class="mt-3 overflow-x-auto">
+  {% endif %}
+  <div class="overflow-x-auto">
   <table class="ca-table">
     <thead>
       <tr>
@@ -185,7 +183,7 @@
         <th class="hidden sm:table-cell">Sana</th>
         <th class="text-right">O‘rin</th>
         <th class="text-right">O‘zgarish</th>
-        <th class="text-right">Rating</th>
+        <th class="text-right">Reyting</th>
       </tr>
     </thead>
     <tbody>
@@ -198,14 +196,17 @@
       </td>
       <td class="hidden sm:table-cell tabular text-xs text-mute whitespace-nowrap">{{ p.contest.end|date:"d.m.Y" }}</td>
       <td class="tabular text-right whitespace-nowrap">
-        {% if p.rank == 1 %}<span class="ca-rank ca-rank-1">1</span>{% elif p.rank == 2 %}<span class="ca-rank ca-rank-2">2</span>{% elif p.rank == 3 %}<span class="ca-rank ca-rank-3">3</span>{% else %}<span class="font-medium">{{ p.rank }}</span>{% endif %}
-        <span class="text-xs text-mute">/ {{ p.n_participants }}</span>
+        <span class="inline-flex items-center justify-end gap-1.5">
+          {% if p.rank <= 3 %}{% include "accounts/_rank.html" with rank=p.rank %}{% else %}<span class="font-medium">{{ p.rank }}</span>{% endif %}
+          <span class="text-xs text-mute">/ {{ p.n_participants }}</span>
+        </span>
       </td>
       <td class="text-right">
-        <span class="ca-delta {% if p.delta > 0 %}ca-delta-up{% elif p.delta < 0 %}ca-delta-down{% else %}ca-delta-zero{% endif %}">
-          {% if p.delta > 0 %}<i data-lucide="trending-up" class="lu" aria-hidden="true"></i>{% elif p.delta < 0 %}<i data-lucide="trending-down" class="lu" aria-hidden="true"></i>{% else %}<i data-lucide="minus" class="lu" aria-hidden="true"></i>{% endif %}
-          {{ p.delta|stringformat:"+d" }}
+        {% if p.delta %}
+        <span class="ca-delta {% if p.delta > 0 %}ca-delta-up{% else %}ca-delta-down{% endif %}">
+          <i data-lucide="{% if p.delta > 0 %}trending-up{% else %}trending-down{% endif %}" class="lu" aria-hidden="true"></i>{{ p.delta|stringformat:"+d" }}
         </span>
+        {% else %}<span class="tabular text-sm text-mute" title="O‘zgarmadi">0</span>{% endif %}
       </td>
       <td class="tabular text-right whitespace-nowrap">
         <span class="text-xs text-mute">{{ p.rating_before }}</span>

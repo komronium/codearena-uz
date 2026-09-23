@@ -104,15 +104,16 @@
           <span class="tabular font-semibold text-bad">{{ f.score|floatformat:2 }}</span>
         </div>
       </td>
-      <td class="text-right">
-        <form method="post" action="{% url 'integrity:flag_review' f.pk %}" class="flex items-center justify-end gap-2" id="flag-{{ f.pk }}">{% csrf_token %}
-          <input name="note" value="{{ f.note }}" placeholder="izoh…" class="ca-input !py-1 w-40 text-xs" aria-label="Izoh">
+      <td>
+        <form method="post" action="{% url 'integrity:flag_review' f.pk %}" class="flex items-center gap-2">{% csrf_token %}
+          <input name="note" value="{{ f.note }}" placeholder="Izoh…" class="ca-input !py-1 w-40 text-xs" aria-label="Izoh" autocomplete="off">
+          <button class="ca-btn ca-btn-ghost !py-1.5 whitespace-nowrap text-xs">
+            {% if f.reviewed %}<i data-lucide="undo-2" class="lu" aria-hidden="true"></i>Qayta ochish{% else %}<i data-lucide="check" class="lu text-ok" aria-hidden="true"></i>Ko‘rildi deb belgilash{% endif %}
+          </button>
         </form>
       </td>
       <td class="text-right whitespace-nowrap">
-        <button form="flag-{{ f.pk }}" class="ca-btn ca-btn-ghost !py-1.5 text-xs">
-          {% if f.reviewed %}<i data-lucide="check" class="lu text-ok" aria-hidden="true"></i>Ko‘rildi{% else %}<i data-lucide="eye" class="lu text-warn" aria-hidden="true"></i>Ko‘rilmagan{% endif %}
-        </button>
+        {% if f.reviewed %}<span class="ca-chip ca-chip-rated"><i data-lucide="check" class="lu mr-1" aria-hidden="true"></i>Ko‘rildi</span>{% else %}<span class="ca-chip ca-chip-score">Ko‘rilmagan</span>{% endif %}
       </td>
     </tr>
     {% empty %}

@@ -1,18 +1,23 @@
 import bleach
 import mistune
 from django.core.paginator import Paginator
-from django.db.models import Case, Count, F, IntegerField, Q, Value, When
+from django.contrib.auth.decorators import login_required
+from django.db.models import Avg, Case, Count, F, IntegerField, OuterRef, Q, Subquery, Value, When
+from django.db.models.functions import Length
 from django.http import Http404
-from django.shortcuts import render
+from django.shortcuts import redirect, render
+from django.urls import reverse
+from django.views.decorators.http import require_POST
 from django.utils import timezone
 
 from apps.contests.models import ContestProblem
-from apps.contests.services import active_contest_for, in_upcoming_contest
+from apps.contests.services import active_contest_for, in_running_contest, in_upcoming_contest
 from apps.submissions.models import Submission, UserProblemSolved
 
 from .models import (
     Language,
     Problem,
+    ProblemRating,
     Tag,
 )
 
@@ -49,8 +54,16 @@ _DIFFICULTY_RANK = Case(*(When(difficulty=d, then=Value(i)) for i, d in enumerat
                         output_field=IntegerField())
 _SORTS = {
     "id": F("id"), "title": F("title"), "difficulty": _DIFFICULTY_RANK,
-    "attempts": F("attempts"), "pass_rate": F("pass_rate"),
+    "attempts": F("attempts"), "pass_rate": F("pass_rate"), "rating": F("avg_stars"),
 }
+
+_AVG_STARS = Subquery(ProblemRating.objects.filter(problem=OuterRef("pk")).values("problem")
+                      .annotate(a=Avg("stars")).values("a")[:1])
+_N_RATINGS = Subquery(ProblemRating.objects.filter(problem=OuterRef("pk")).values("problem")
+                      .annotate(n=Count("id")).values("n")[:1])
+
+# Leaderboard metric -> ordering of AC submissions (ties go to whoever got there first).
+_LEADER_ORDER = {"time": ("exec_ms", "pk"), "length": ("code_len", "pk")}
 
 
 def problem_list(request):
@@ -71,6 +84,7 @@ def problem_list(request):
     problems = problems.prefetch_related("tags").annotate(
         attempts=Count("submissions", distinct=True),
         ac_count=Count("submissions", filter=Q(submissions__verdict="AC"), distinct=True),
+        avg_stars=_AVG_STARS,
     ).annotate(
         pass_rate=Case(When(attempts=0, then=Value(0)), default=F("ac_count") * 100 / F("attempts"),
                        output_field=IntegerField()),
@@ -79,7 +93,7 @@ def problem_list(request):
     if sort not in _SORTS:
         sort = "id"
     desc = request.GET.get("dir") == "desc"
-    order = _SORTS[sort].desc() if desc else _SORTS[sort].asc()
+    order = _SORTS[sort].desc(nulls_last=True) if desc else _SORTS[sort].asc(nulls_last=True)
     problems = problems.order_by(order, "id")
 
     page = Paginator(problems, 30).get_page(request.GET.get("page"))
@@ -102,9 +116,11 @@ def problem_list(request):
     })
 
 
-def problem_detail(request, slug):
+def _visible_problem(request, slug):
+    """(problem, running contest the user is in or None); 404 when the user may not see it."""
     try:
-        problem = Problem.objects.select_related("author").prefetch_related("tags").get(slug=slug)
+        problem = (Problem.objects.select_related("author").prefetch_related("tags")
+                   .annotate(avg_stars=_AVG_STARS, n_ratings=_N_RATINGS).get(slug=slug))
     except Problem.DoesNotExist:
         raise Http404
     contest = active_contest_for(request.user, problem)
@@ -113,6 +129,30 @@ def problem_detail(request, slug):
     )
     if not is_owner_or_staff and ((not problem.is_public and contest is None) or in_upcoming_contest(problem)):
         raise Http404
+    return problem, contest
+
+
+def leaders(problem, by: str, lang: str = "", limit: int = 20) -> list:
+    """Best AC submission per user by `by` ("time" | "length"), optionally for one language."""
+    qs = (Submission.objects.filter(problem=problem, verdict="AC")
+          .select_related("user", "language").annotate(code_len=Length("source"))
+          .defer("source", "compile_log").order_by(*_LEADER_ORDER[by]))
+    if lang:
+        qs = qs.filter(language__code=lang)
+    # ponytail: dedupe per user in Python; scans AC rows until `limit` users — fine for thousands of ACs.
+    best, seen = [], set()
+    for s in qs.iterator(chunk_size=500):
+        if s.user_id in seen:
+            continue
+        seen.add(s.user_id)
+        best.append(s)
+        if len(best) == limit:
+            break
+    return best
+
+
+def problem_detail(request, slug):
+    problem, contest = _visible_problem(request, slug)
     if problem.kind == Problem.Kind.SQL:
         languages = Language.objects.filter(is_active=True, code="sql")
     else:
@@ -130,7 +170,18 @@ def problem_detail(request, slug):
               .select_related("contest").first())
         open_contest = cp.contest if cp else None
     public = Problem.objects.filter(is_public=True).exclude(contests__start__gt=timezone.now())
+    solved = request.user.is_authenticated and UserProblemSolved.objects.filter(
+        user=request.user, problem=problem).exists()
+    show_leaders = contest is None and not in_running_contest(problem)
+    my_stars = (ProblemRating.objects.filter(user=request.user, problem=problem).values_list("stars", flat=True).first()
+                if solved else None)
     return render(request, "problems/detail.html", {
+        "solved": solved,
+        "my_stars": my_stars,
+        "star_range": range(1, 6),
+        "fastest": leaders(problem, "time", limit=3) if show_leaders else [],
+        "shortest": leaders(problem, "length", limit=3) if show_leaders else [],
+        "show_leaders": show_leaders,
         "open_contest": open_contest,
         "problem": problem,
         "my_subs": my_subs,
@@ -144,3 +195,37 @@ def problem_detail(request, slug):
         "sql_dataset": getattr(problem, "sql_dataset", None),
         "contest": contest,
     })
+
+
+def problem_leaders(request, slug):
+    problem, contest = _visible_problem(request, slug)
+    if contest is not None or in_running_contest(problem):
+        raise Http404  # solutions stay hidden while a contest with this problem runs
+    by = request.GET.get("by") if request.GET.get("by") in _LEADER_ORDER else "time"
+    languages = Language.objects.filter(is_active=True, submission__problem=problem,
+                                        submission__verdict="AC").distinct().order_by("name")
+    lang = request.GET.get("lang", "")
+    if lang not in {lg.code for lg in languages}:
+        lang = ""
+    solved = request.user.is_authenticated and UserProblemSolved.objects.filter(
+        user=request.user, problem=problem).exists()
+    return render(request, "problems/leaders.html", {
+        "problem": problem, "by": by, "lang": lang, "languages": languages,
+        "rows": leaders(problem, by, lang, limit=50),
+        "can_view_code": solved or request.user.is_staff,
+    })
+
+
+@login_required
+@require_POST
+def rate_problem(request, slug):
+    problem, _contest = _visible_problem(request, slug)
+    if not UserProblemSolved.objects.filter(user=request.user, problem=problem).exists():
+        raise Http404  # only solvers rate — keeps the score about the problem, not about frustration
+    try:
+        stars = int(request.POST.get("stars", ""))
+    except ValueError:
+        stars = 0
+    if 1 <= stars <= 5:
+        ProblemRating.objects.update_or_create(user=request.user, problem=problem, defaults={"stars": stars})
+    return redirect(reverse("problems:detail", args=[problem.slug]) + "#baho")

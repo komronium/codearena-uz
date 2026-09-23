@@ -5,13 +5,21 @@
 <div class="mb-5 flex flex-wrap items-center justify-between gap-3 text-sm">
   {% if contest %}
   <a class="ca-link text-mute" href="{% url 'contests:detail' contest.pk %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>{{ contest.title }}</a>
-  <span class="inline-flex items-center gap-2 rounded-full bg-warn-soft px-3 py-1 text-xs font-medium text-warn" role="status">
+  <span class="inline-flex items-center gap-2 rounded-full bg-warn-soft px-3 py-1 text-xs font-medium text-warn">
     <i data-lucide="lock-keyhole" class="lu" aria-hidden="true"></i>Musobaqa rejimi · nusxalash o‘chirilgan, oyna almashtirish qayd etiladi
     <span class="tabular font-semibold" data-countdown="{{ contest.end|date:'c' }}" data-label="Tugashiga"></span>
   </span>
   {% else %}
   <a class="ca-link text-mute" href="{% url 'problems:list' %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>Masalalar</a>
-  <div class="flex items-center gap-1">
+  <div class="flex flex-wrap items-center gap-1">
+    {% if show_leaders %}
+    <button type="button" class="ca-btn ca-btn-ghost !py-1.5" data-dialog="rate-dialog" aria-haspopup="dialog">
+      <i data-lucide="star" class="lu text-warn {% if problem.n_ratings %}fill-current{% endif %}" aria-hidden="true"></i>
+      {% if problem.n_ratings %}<b class="tabular">{{ problem.avg_stars|floatformat:1 }}</b><span class="tabular font-normal text-mute">({{ problem.n_ratings }})</span>{% else %}Baholash{% endif %}
+    </button>
+    <button type="button" class="ca-btn ca-btn-ghost !py-1.5" data-dialog="leaders-dialog" aria-haspopup="dialog"><i data-lucide="trophy" class="lu text-accent" aria-hidden="true"></i>Eng yaxshi yechimlar</button>
+    <span class="mx-1.5 h-5 w-px bg-line" aria-hidden="true"></span>
+    {% endif %}
     {% if prev_problem %}<a class="ca-btn ca-btn-ghost !px-2.5 !py-1.5" href="{% url 'problems:detail' prev_problem.slug %}" title="{{ prev_problem.title }}" aria-label="Oldingi masala"><i data-lucide="chevron-left" class="lu" aria-hidden="true"></i></a>{% endif %}
     <span class="tabular text-xs text-mute">{{ problem.id|stringformat:"04d" }}</span>
     {% if next_problem %}<a class="ca-btn ca-btn-ghost !px-2.5 !py-1.5" href="{% url 'problems:detail' next_problem.slug %}" title="{{ next_problem.title }}" aria-label="Keyingi masala"><i data-lucide="chevron-right" class="lu" aria-hidden="true"></i></a>{% endif %}
@@ -38,6 +46,9 @@
           {% endif %}
           <span><i data-lucide="clock" class="lu mr-1.5" aria-hidden="true"></i><b class="tabular text-ink">{{ problem.tl_ms }}</b> ms</span>
           <span><i data-lucide="cpu" class="lu mr-1.5" aria-hidden="true"></i><b class="tabular text-ink">{{ problem.ml_mb }}</b> MB</span>
+          {% if not contest and problem.n_ratings %}
+          <button type="button" class="ca-stars-sum" data-dialog="rate-dialog" title="{{ problem.n_ratings }} ta baho"><i data-lucide="star" class="lu" aria-hidden="true"></i><b class="tabular text-ink">{{ problem.avg_stars|floatformat:1 }}</b><span class="sr-only">/5,</span> <span class="tabular">({{ problem.n_ratings }})</span></button>
+          {% endif %}
           {% if not contest %}
           <span><i data-lucide="user" class="lu mr-1.5" aria-hidden="true"></i><a class="font-semibold" href="{% url 'profile' problem.author.username %}" translate="no" style="color: {{ problem.author.rating|tier_color }}">{{ problem.author.username }}</a></span>
           {% endif %}
@@ -59,19 +70,19 @@
           <pre class="ca-pre">{{ sql_dataset.schema_sql }}</pre>
         </div>
         <div>
-          <h2 class="ca-statement-h">Namuna ma'lumotlar</h2>
+          <h2 class="ca-statement-h">Namuna ma‘lumotlar</h2>
           <pre class="ca-pre">{{ sql_dataset.seed_sql }}</pre>
         </div>
         {% else %}
         {% if input_html %}
         <div>
-          <h2 class="ca-statement-h">Kirish ma'lumotlari</h2>
+          <h2 class="ca-statement-h">Kirish ma‘lumotlari</h2>
           <div class="prose max-w-none">{{ input_html|safe }}</div>
         </div>
         {% endif %}
         {% if output_html %}
         <div>
-          <h2 class="ca-statement-h">Chiqish ma'lumotlari</h2>
+          <h2 class="ca-statement-h">Chiqish ma‘lumotlari</h2>
           <div class="prose max-w-none">{{ output_html|safe }}</div>
         </div>
         {% endif %}
@@ -107,26 +118,17 @@
         <h2 class="text-sm font-semibold">Mening urinishlarim</h2>
         <a class="ca-link text-xs" href="{% url 'submissions:mine' %}">Barchasi</a>
       </div>
-      {% with s=my_subs.0 %}
-      <div class="border-b border-line px-4 py-3">
-        <div class="mb-1.5 flex items-center justify-between text-xs text-mute">
-          <a class="ca-link" href="{% url 'submissions:detail' s.pk %}">#{{ s.pk|stringformat:"06d" }} · {{ s.language.name }}</a>
-          <span class="tabular">{{ s.created|date:"H:i" }}</span>
-        </div>
-        {% include "submissions/_status.html" with results=None %}
-      </div>
-      {% endwith %}
-      {% if my_subs|length > 1 %}
       <ul class="divide-y divide-line px-4 text-sm">
-        {% for s in my_subs|slice:"1:" %}
-        <li class="flex items-center justify-between gap-3 py-2">
-          <a class="ca-link tabular text-mute" href="{% url 'submissions:detail' s.pk %}">#{{ s.pk|stringformat:"06d" }}</a>
-          {% include "submissions/_verdict.html" with v=s.verdict %}
-          <span class="tabular text-xs text-mute">{{ s.created|date:"d.m H:i" }}</span>
+        {% for s in my_subs %}
+        <li class="py-2.5">
+          <div class="flex items-center justify-between gap-3">
+            <a class="ca-link tabular text-mute" href="{% url 'submissions:detail' s.pk %}">#{{ s.pk|stringformat:"06d" }} · {{ s.language.name }}</a>
+            <span class="tabular text-xs text-mute">{{ s.created|date:"d.m H:i" }}</span>
+          </div>
+          <div class="mt-1.5">{% include "submissions/_status.html" with compact=True %}</div>
         </li>
         {% endfor %}
       </ul>
-      {% endif %}
     </div>
     {% endif %}
   </section>
@@ -165,8 +167,8 @@
           </details>
         </div>
       </div>
-      <div id="editor" role="textbox" aria-label="Kod muharriri" aria-multiline="true">
-        <textarea name="source" id="source" class="ca-editor-fallback" spellcheck="false" placeholder="Kodni shu yerga yozing…"></textarea>
+      <div id="editor">
+        <textarea name="source" id="source" class="ca-editor-fallback" spellcheck="false" aria-label="Kod muharriri" placeholder="Kodni shu yerga yozing…"></textarea>
       </div>
       <div class="flex flex-wrap items-center justify-between gap-3 border-t border-line px-4 py-3">
         <span class="text-xs text-mute"><kbd class="ca-kbd">Ctrl</kbd> + <kbd class="ca-kbd">Enter</kbd> — yuborish</span>
@@ -315,6 +317,7 @@ so @codemirror/state is a singleton — two copies break with "Unrecognized exte
       })],
     parent: document.getElementById("editor"),
   });
+  view.contentDOM.setAttribute("aria-label", "Kod muharriri");
   source.hidden = true;  // CodeMirror loaded — plain textarea was only the no-JS fallback
   const setLang = async () => {
     const load = LANG_LOADERS[langSel.value];
@@ -337,6 +340,7 @@ so @codemirror/state is a singleton — two copies break with "Unrecognized exte
     });
   });
   document.getElementById("editor-reset").addEventListener("click", () => {
+    if (view.state.doc.length && !confirm("Kod o‘chiriladi. Davom etasizmi? (Ctrl+Z bilan qaytarish mumkin)")) return;
     view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: "" } });
     view.focus();
   });
@@ -431,6 +435,56 @@ so @codemirror/state is a singleton — two copies break with "Unrecognized exte
       document.addEventListener("visibilitychange", () => (document.hidden ? leave() : back()));
     }
   })();
+</script>
+{% endif %}
+{% if show_leaders %}
+<dialog id="rate-dialog" class="ca-dialog" aria-labelledby="rate-dialog-title">
+  <div class="ca-dialog-head">
+    <h2 id="rate-dialog-title">Masala bahosi</h2>
+    <form method="dialog"><button class="ca-dialog-x" aria-label="Yopish"><i data-lucide="x" class="lu" aria-hidden="true"></i></button></form>
+  </div>
+  <div class="px-6 pb-6 pt-5 text-center">
+    {% if problem.n_ratings %}
+    <p class="text-4xl font-bold tabular">{{ problem.avg_stars|floatformat:1 }}<span class="text-base font-normal text-mute"> / 5</span></p>
+    <p class="mt-1 text-sm text-mute">{{ problem.n_ratings }} ta baho</p>
+    {% else %}
+    <p class="text-sm text-mute">Hali hech kim baholamagan.</p>
+    {% endif %}
+    <div class="mt-5 border-t border-line pt-5">
+      {% if solved %}
+      <p class="mb-2 text-sm font-medium">{% if my_stars %}Sizning bahoyingiz — o‘zgartirish mumkin{% else %}Masala sizga qanday tuyuldi?{% endif %}</p>
+      <form method="post" action="{% url 'problems:rate' problem.slug %}" class="ca-stars ca-stars-lg" role="group" aria-label="Masalani baholang">{% csrf_token %}
+        {% for n in star_range %}
+        <button name="stars" value="{{ n }}" class="{% if my_stars and n <= my_stars %}is-on{% endif %}" aria-label="{{ n }} yulduz" aria-pressed="{% if my_stars == n %}true{% else %}false{% endif %}" title="{{ n }} / 5"><i data-lucide="star" class="lu" aria-hidden="true"></i></button>
+        {% endfor %}
+      </form>
+      {% elif user.is_authenticated %}
+      <p class="text-sm text-mute"><i data-lucide="lock" class="lu mr-1" aria-hidden="true"></i>Masalani yechgandan so‘ng baholay olasiz.</p>
+      {% else %}
+      <p class="text-sm text-mute">Baholash uchun <a class="ca-link" href="{% url 'login' %}?next={{ request.path }}">tizimga kiring</a>.</p>
+      {% endif %}
+    </div>
+  </div>
+</dialog>
+
+<dialog id="leaders-dialog" class="ca-dialog" aria-labelledby="leaders-dialog-title">
+  <div class="ca-dialog-head">
+    <h2 id="leaders-dialog-title">Eng yaxshi yechimlar</h2>
+    <form method="dialog"><button class="ca-dialog-x" aria-label="Yopish"><i data-lucide="x" class="lu" aria-hidden="true"></i></button></form>
+  </div>
+  <div class="divide-y divide-line">
+    {% include "problems/_leaders_mini.html" with title="Eng tez" icon="zap" rows=fastest by="time" %}
+    {% include "problems/_leaders_mini.html" with title="Eng qisqa" icon="scissors" rows=shortest by="length" %}
+  </div>
+</dialog>
+<script>
+  document.addEventListener("click", (e) => {
+    const t = e.target.closest("[data-dialog]");
+    if (t) { document.getElementById(t.dataset.dialog).showModal(); return; }
+    if (e.target.tagName === "DIALOG") e.target.close();  // backdrop click
+  });
+  // after rating, the redirect lands on #baho: reopen the dialog so the saved stars are visible
+  if (location.hash === "#baho") document.getElementById("rate-dialog").showModal();
 </script>
 {% endif %}
 {% endblock %}

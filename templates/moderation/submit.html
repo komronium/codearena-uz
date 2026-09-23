@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-{% block title %}{% if problem %}Masalani tahrirlash{% else %}Masala qo'shish{% endif %}{% endblock %}
+{% block title %}{% if problem %}Masalani tahrirlash{% else %}Masala qo‘shish{% endif %}{% endblock %}
 {% block sidebar %}{% endblock %}
 {% block content %}
 <div class="mb-6 flex items-start justify-between gap-3">
   <div>
-    <h1 class="ca-page-title">{% if problem %}Masalani tahrirlash{% else %}Masala qo'shish{% endif %}</h1>
+    <h1 class="ca-page-title">{% if problem %}Masalani tahrirlash{% else %}Masala qo‘shish{% endif %}</h1>
     <p class="mt-1 text-sm text-mute">{% if problem %}#{{ problem.pk|stringformat:"04d" }} · {{ problem.slug }}{% else %}Musobaqa masalasini «Ochiq» belgisini olib tashlab saqlang, keyin musobaqaga ulang.{% endif %}</p>
   </div>
   <a href="{% url 'moderation:problems' %}" class="ca-btn ca-btn-ghost !py-1.5">Barcha masalalar</a>
@@ -28,24 +28,24 @@
       </div>
       <div class="grid gap-4 sm:grid-cols-2" data-kind-only="code">
         <div>
-          <label class="ca-label" for="{{ form.input_md.id_for_label }}">Kirish ma'lumotlari</label>
+          <label class="ca-label" for="{{ form.input_md.id_for_label }}">Kirish ma‘lumotlari</label>
           {{ form.input_md }}
         </div>
         <div>
-          <label class="ca-label" for="{{ form.output_md.id_for_label }}">Chiqish ma'lumotlari</label>
+          <label class="ca-label" for="{{ form.output_md.id_for_label }}">Chiqish ma‘lumotlari</label>
           {{ form.output_md }}
         </div>
       </div>
     </section>
 
     <section class="ca-panel space-y-4" data-kind-only="sql">
-      <h2 class="ca-section-title !mb-0">SQL ma'lumotlar bazasi</h2>
+      <h2 class="ca-section-title !mb-0">SQL ma‘lumotlar bazasi</h2>
       <div>
         <label class="ca-label" for="{{ sql_form.schema_sql.id_for_label }}">Jadval tuzilishi (CREATE TABLE …)</label>
         {{ sql_form.schema_sql }}{{ sql_form.schema_sql.errors }}
       </div>
       <div>
-        <label class="ca-label" for="{{ sql_form.seed_sql.id_for_label }}">Ma'lumotlar (INSERT …)</label>
+        <label class="ca-label" for="{{ sql_form.seed_sql.id_for_label }}">Ma‘lumotlar (INSERT …)</label>
         {{ sql_form.seed_sql }}{{ sql_form.seed_sql.errors }}
       </div>
       <div>
@@ -77,13 +77,13 @@
         <div class="testcase-row rounded-[var(--ca-radius)] border border-line p-3">
           {{ f.id }}
           <div class="grid gap-3 sm:grid-cols-2">
-            <div><label class="ca-label">Kirish</label>{{ f.input }}</div>
-            <div><label class="ca-label">Kutilgan chiqish</label>{{ f.expected }}</div>
+            <div><label class="ca-label" for="{{ f.input.id_for_label }}">Kirish</label>{{ f.input }}</div>
+            <div><label class="ca-label" for="{{ f.expected.id_for_label }}">Kutilgan chiqish</label>{{ f.expected }}</div>
           </div>
           <div class="mt-2 flex flex-wrap items-center gap-4 text-sm">
             <label class="flex items-center gap-1.5">{{ f.is_sample }} Namuna</label>
             <label class="flex items-center gap-1.5 text-mute">Tartib {{ f.order }}</label>
-            {% if f.instance.pk %}<label class="flex items-center gap-1.5 text-bad">{{ f.DELETE }} O'chirish</label>{% endif %}
+            {% if f.instance.pk %}<label class="flex items-center gap-1.5 text-bad">{{ f.DELETE }} O‘chirish</label>{% endif %}
           </div>
           {{ f.non_field_errors }}
         </div>
@@ -93,8 +93,8 @@
         <div class="testcase-row rounded-[var(--ca-radius)] border border-line p-3">
           {{ formset.empty_form.id }}
           <div class="grid gap-3 sm:grid-cols-2">
-            <div><label class="ca-label">Kirish</label>{{ formset.empty_form.input }}</div>
-            <div><label class="ca-label">Kutilgan chiqish</label>{{ formset.empty_form.expected }}</div>
+            <div><label class="ca-label" for="{{ formset.empty_form.input.id_for_label }}">Kirish</label>{{ formset.empty_form.input }}</div>
+            <div><label class="ca-label" for="{{ formset.empty_form.expected.id_for_label }}">Kutilgan chiqish</label>{{ formset.empty_form.expected }}</div>
           </div>
           <div class="mt-2 flex flex-wrap items-center gap-4 text-sm">
             <label class="flex items-center gap-1.5">{{ formset.empty_form.is_sample }} Namuna</label>
@@ -135,7 +135,7 @@
       <div>
         <label class="ca-label" for="{{ form.tags.id_for_label }}">Mavzular</label>
         {{ form.tags }}
-        <p class="mt-1 text-xs text-mute">Ctrl bilan bir nechtasini tanlang.</p>
+        <p class="mt-1 text-xs text-mute">Bir nechtasini tanlash: Ctrl (Mac’da ⌘) ni bosib turing.</p>
       </div>
     </section>
     <button type="submit" class="ca-btn ca-btn-primary w-full"><i data-lucide="check" class="lu" aria-hidden="true"></i>Masalani saqlash</button>

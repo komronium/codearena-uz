@@ -33,15 +33,18 @@
         <div>
           <label class="ca-label" for="id_last_name">Familiya</label>
           <input class="ca-input" type="text" name="last_name" id="id_last_name" value="{{ form.last_name.value|default:'' }}" autocomplete="family-name" maxlength="150">
+          {% if form.last_name.errors %}<p class="mt-1 text-sm text-bad">{{ form.last_name.errors.0 }}</p>{% endif %}
         </div>
       </div>
       <div>
         <label class="ca-label" for="id_location">Shahar</label>
         <input class="ca-input" type="text" name="location" id="id_location" value="{{ form.location.value|default:'' }}" placeholder="Toshkent" autocomplete="address-level2">
+        {% if form.location.errors %}<p class="mt-1 text-sm text-bad">{{ form.location.errors.0 }}</p>{% endif %}
       </div>
       <div>
         <label class="ca-label" for="id_school">O‘quv joyi</label>
         <input class="ca-input" type="text" name="school" id="id_school" value="{{ form.school.value|default:'' }}" placeholder="TATU, 1-kurs" autocomplete="organization">
+        {% if form.school.errors %}<p class="mt-1 text-sm text-bad">{{ form.school.errors.0 }}</p>{% endif %}
       </div>
     </div>
     <div class="flex items-center justify-between gap-3 border-t border-line bg-paper/60 px-6 py-4">

@@ -1,0 +1,5 @@
+{% comment %}Place badge; ctx: rank, dq (optional). Top 3 get a medal instead of a bare number.{% endcomment %}
+{% if dq %}<span class="ca-rank ca-rank-n text-bad" title="Diskvalifikatsiya">✕</span>
+{% elif rank == 1 %}<span class="ca-rank ca-rank-1" title="1-o‘rin"><i data-lucide="crown" class="lu" aria-hidden="true"></i><span class="sr-only">1</span></span>
+{% elif rank == 2 or rank == 3 %}<span class="ca-rank ca-rank-{{ rank }}" title="{{ rank }}-o‘rin"><i data-lucide="medal" class="lu" aria-hidden="true"></i><span class="sr-only">{{ rank }}</span></span>
+{% else %}<span class="ca-rank ca-rank-n tabular">{{ rank }}</span>{% endif %}

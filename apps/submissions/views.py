@@ -7,11 +7,11 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
 from apps.contests.models import Participation
-from apps.contests.services import access_allowed, active_contest_for, in_upcoming_contest
+from apps.contests.services import access_allowed, active_contest_for, in_running_contest, in_upcoming_contest
 from apps.problems.models import Language, Problem
 from judge.runner import run_submission
 
-from .models import Submission
+from .models import Submission, UserProblemSolved
 
 MAX_SOURCE = 64 * 1024
 RATE_LIMIT_MAX = 10       # submissions
@@ -63,7 +63,15 @@ def submit(request, slug):
 
 
 def _own(request, pk):
-    return get_object_or_404(Submission.objects.select_related("problem", "language"), pk=pk, user=request.user)
+    """Owner's submission. Staff may open anyone's; a user who solved the problem may read
+    other people's accepted code (problem leaderboard), except while a contest with it runs."""
+    s = get_object_or_404(Submission.objects.select_related("problem", "language", "user"), pk=pk)
+    if s.user_id == request.user.pk or request.user.is_staff:
+        return s
+    if (s.verdict == "AC" and not in_running_contest(s.problem)
+            and UserProblemSolved.objects.filter(user=request.user, problem=s.problem).exists()):
+        return s
+    raise Http404
 
 
 def _results_ctx(s):
@@ -84,7 +92,9 @@ def detail(request, pk):
 
 @login_required
 def status(request, pk):
-    return render(request, "submissions/_status.html", _results_ctx(_own(request, pk)))
+    ctx = _results_ctx(_own(request, pk))
+    ctx["compact"] = request.GET.get("compact") == "1"
+    return render(request, "submissions/_status.html", ctx)
 
 
 @login_required

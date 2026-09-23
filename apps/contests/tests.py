@@ -514,3 +514,39 @@ def test_rating_delta_classroom_scale():
     assert rating_delta(seed, 1, 15, 150, 0.2) == 106  # same rank, 1/5 solved: smaller gain
     assert rating_delta(seed, 8, 15, 150, 0.5) == 1
     assert rating_delta(seed, 15, 15, 150, 0.0) == -74
+
+
+def test_upcoming_contest_problem_titles_stay_secret(client, author):
+    """Registered users see no problem titles before the start: standings, clarifications, profile map."""
+    secret = Problem.objects.create(slug="secret-sauce", title="Maxfiy retsept", statement_md="x", author=author,
+                                    is_public=True)
+    c = Contest.objects.create(title="Soon", start=timezone.now() + timezone.timedelta(hours=2),
+                               end=timezone.now() + timezone.timedelta(hours=4))
+    ContestProblem.objects.create(contest=c, problem=secret, label="A", order=0, points=100)
+    ali = User.objects.create_user("ali", password="x")
+    Participation.objects.create(contest=c, user=ali)
+    client.force_login(ali)
+    for url in (reverse("contests:standings", args=[c.pk]), reverse("contests:clarifications", args=[c.pk]),
+                reverse("profile", args=["ali"]), reverse("problems:list")):
+        body = client.get(url).content.decode()
+        assert "Maxfiy retsept" not in body and "secret-sauce" not in body, url
+
+
+def test_duration_label_rolls_hours_into_days():
+    start = timezone.now()
+    c = Contest(start=start, end=start + timezone.timedelta(days=7, minutes=3))
+    assert c.duration_label == "7 kun 3 daq"
+    c.end = start + timezone.timedelta(hours=3)
+    assert c.duration_label == "3 soat"
+
+
+def test_upcoming_contest_problems_sealed_even_for_staff(client, author):
+    secret = Problem.objects.create(slug="sealed", title="Muhrlangan", statement_md="x", author=author)
+    c = Contest.objects.create(title="Soon", start=timezone.now() + timezone.timedelta(hours=2),
+                               end=timezone.now() + timezone.timedelta(hours=4))
+    ContestProblem.objects.create(contest=c, problem=secret, label="A", order=0, points=100)
+    client.force_login(User.objects.create_user("boss", password="x", is_staff=True))
+    for url in (reverse("contests:detail", args=[c.pk]), reverse("contests:standings", args=[c.pk]),
+                reverse("contests:clarifications", args=[c.pk])):
+        body = client.get(url).content.decode()
+        assert "Muhrlangan" not in body and "/problems/sealed/" not in body, url

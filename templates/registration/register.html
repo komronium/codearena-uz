@@ -1,12 +1,9 @@
 {% extends "base.html" %}
-{% block title %}Ro'yxatdan o'tish{% endblock %}
+{% block title %}Ro‘yxatdan o‘tish{% endblock %}
 {% block sidebar %}{% endblock %}
 {% block content %}
 <div class="ca-auth">
-  <a href="{% url 'problems:list' %}" class="ca-auth-brand" aria-label="CodeArena bosh sahifa">
-    <span class="ca-brand-mark"><i data-lucide="code-xml" class="lu" aria-hidden="true"></i></span>
-    <span>CodeArena</span>
-  </a>
+  {% include "registration/_auth_brand.html" %}
   <form method="post" novalidate class="ca-panel ca-auth-card space-y-3">{% csrf_token %}
     <div>
       <h1 class="text-xl font-bold">Ro‘yxatdan o‘tish</h1>

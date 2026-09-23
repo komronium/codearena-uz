@@ -1,0 +1,21 @@
+{% comment %}Top-3 preview on the problem page; ctx: title, icon, rows, by ("time"|"length").{% endcomment %}
+<div class="px-6 py-4">
+  <div class="mb-2 flex items-center justify-between">
+    <h3 class="flex items-center gap-1.5 text-xs font-semibold text-mute"><i data-lucide="{{ icon }}" class="lu" aria-hidden="true"></i>{{ title }}</h3>
+    <a class="ca-link text-xs" href="{% url 'problems:leaders' problem.slug %}?by={{ by }}">Barchasi</a>
+  </div>
+  {% if rows %}
+  <ol class="space-y-2.5">
+    {% for s in rows %}
+    <li class="grid grid-cols-[auto_minmax(0,1fr)_auto_4.5rem] items-center gap-3 text-sm">
+      {% include "accounts/_rank.html" with rank=forloop.counter %}
+      <span class="flex min-w-0">{% include "accounts/_user.html" with u=s.user tier=False %}</span>
+      <span class="ca-chip !bg-ink/5 !text-mute">{{ s.language.name }}</span>
+      <b class="tabular text-right">{% if by == "time" %}{{ s.exec_ms }} ms{% else %}{{ s.code_len }} belgi{% endif %}</b>
+    </li>
+    {% endfor %}
+  </ol>
+  {% else %}
+  <p class="py-2 text-xs text-mute">Hali to‘g‘ri yechim yo‘q — birinchi bo‘ling.</p>
+  {% endif %}
+</div>

@@ -5,12 +5,12 @@
 <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
   <div>
     <h1 class="ca-page-title">Masalalar</h1>
-    <p class="mt-1 text-sm text-mute">{{ problems.paginator.count }} ta ochiq masala — yeching, ball to'plang</p>
+    <p class="mt-1 text-sm text-mute">{{ problems.paginator.count }} ta ochiq masala — yeching, ball to‘plang</p>
   </div>
   {% if user.is_staff %}
   <a href="{% url 'moderation:submit' %}" class="ca-btn ca-btn-primary">
     <i data-lucide="circle-plus" class="lu" aria-hidden="true"></i>
-    Masala qo'shish
+    Masala qo‘shish
   </a>
   {% endif %}
 </div>
@@ -18,7 +18,7 @@
 <form method="get" class="mb-4 flex flex-wrap gap-3">
   <div class="relative max-w-xs flex-1">
     <i data-lucide="search" class="lu pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-mute" aria-hidden="true"></i>
-    <input type="search" name="q" value="{{ q }}" placeholder="Nomi bo'yicha qidirish…"
+    <input type="search" name="q" value="{{ q }}" placeholder="Nomi bo‘yicha qidirish…"
            class="ca-input pl-9" aria-label="Qidirish">
   </div>
   <select name="tag" class="ca-select max-w-[10rem]" aria-label="Teg" onchange="this.form.submit()">
@@ -40,7 +40,6 @@
     <option value="unsolved" {% if selected_status == "unsolved" %}selected{% endif %}>Yechilmagan</option>
   </select>
   {% endif %}
-  <button type="submit" class="ca-btn ca-btn-ghost"><i data-lucide="list-filter" class="lu" aria-hidden="true"></i>Filtrlash</button>
   {% if q or selected_tag or selected_difficulty or selected_status %}<a href="{% url 'problems:list' %}" class="ca-btn ca-btn-ghost"><i data-lucide="x" class="lu" aria-hidden="true"></i>Tozalash</a>{% endif %}
 </form>
 
@@ -54,6 +53,7 @@
       <th>{% include "problems/_sort_th.html" with key="title" label="Nomi" %}</th>
       <th class="hidden md:table-cell">Mavzu</th>
       <th>{% include "problems/_sort_th.html" with key="difficulty" label="Qiyinlik" %}</th>
+      <th class="hidden lg:table-cell text-right">{% include "problems/_sort_th.html" with key="rating" label="Baho" %}</th>
       <th class="hidden md:table-cell text-right">{% include "problems/_sort_th.html" with key="attempts" label="Urinishlar" %}</th>
       <th class="text-right">{% include "problems/_sort_th.html" with key="pass_rate" label="Yechilish" %}</th>
     </tr>
@@ -72,6 +72,7 @@
     <td>
       <span class="ca-diff ca-diff-{{ p.difficulty }}">{{ p.get_difficulty_display }}</span>
     </td>
+    <td class="hidden lg:table-cell tabular text-right text-mute">{% if p.avg_stars %}<span class="ca-stars-sum justify-end" title="O‘rtacha baho"><i data-lucide="star" class="lu" aria-hidden="true"></i>{{ p.avg_stars|floatformat:1 }}</span>{% else %}<span aria-label="baho yo‘q">—</span>{% endif %}</td>
     <td class="hidden md:table-cell tabular text-right text-mute">{{ p.attempts }}</td>
     <td class="text-right">
       <div class="inline-flex items-center gap-2" title="{{ p.ac_count }} / {{ p.attempts }} urinish muvaffaqiyatli">

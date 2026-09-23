@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.core.validators import MinValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 
@@ -82,3 +82,17 @@ class SQLDataset(models.Model):
     expected_result = models.TextField(
         help_text="Correct query's result, one row per line, tab-separated values, no header. "
                    "Row order doesn't matter (compared as a sorted set); column order does.")
+
+
+class ProblemRating(models.Model):
+    """1–5 stars a user gives a problem. Only solvers may rate (enforced in the view)."""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="problem_ratings")
+    problem = models.ForeignKey(Problem, on_delete=models.CASCADE, related_name="ratings")
+    stars = models.PositiveSmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["user", "problem"], name="one_rating_per_user_problem"),
+            models.CheckConstraint(condition=models.Q(stars__gte=1, stars__lte=5), name="stars_1_to_5"),
+        ]

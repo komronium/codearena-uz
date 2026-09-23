@@ -1,22 +1,23 @@
-<div {% if not s.is_terminal %}hx-get="{% url 'submissions:status' s.pk %}" hx-trigger="every 1s" hx-swap="outerHTML"{% endif %}
+{% comment %}compact=True: verdict line only (problem page sidebar); the poll keeps it compact.{% endcomment %}
+<div {% if not s.is_terminal %}hx-get="{% url 'submissions:status' s.pk %}{% if compact %}?compact=1{% endif %}" hx-trigger="every 1s" hx-swap="outerHTML"{% endif %}
      role="status" aria-live="polite" aria-busy="{% if not s.is_terminal %}true{% else %}false{% endif %}">
   <div class="flex flex-wrap items-center gap-3">
     {% include "submissions/_verdict.html" with v=s.verdict %}
     {% if s.is_terminal and s.verdict != 'CE' %}
     <span class="tabular text-sm text-mute">{{ s.passed }}/{{ s.total }} test · {{ s.exec_ms }} ms</span>
-    {% elif s.verdict == 'RUNNING' %}
+    {% elif s.verdict == 'RUNNING' and progress %}
     <span class="tabular text-sm text-mute">{{ progress.done }}/{{ progress.total }} test</span>
     {% endif %}
   </div>
-  {% if s.verdict == 'RUNNING' %}
+  {% if s.verdict == 'RUNNING' and progress %}
   <div class="ca-progress mt-3 w-full max-w-sm" aria-hidden="true"><span style="width: {{ progress.pct }}%"></span></div>
   {% endif %}
-  {% if s.verdict == 'CE' %}
+  {% if s.verdict == 'CE' and not compact %}
   <pre class="mt-3 overflow-x-auto rounded-[var(--ca-radius)] border border-bad/30 bg-bad-soft p-3 text-sm font-mono text-bad">{{ s.compile_log }}</pre>
   {% endif %}
-  {% if results and s.is_terminal %}
+  {% if results and s.is_terminal and not compact %}
   {# one square per test — 200 tests still fit on a screen; the first failure gets its details below #}
-  <div class="mt-4 flex flex-wrap gap-1" aria-label="Testlar">
+  <div class="mt-4 flex flex-wrap gap-1" role="group" aria-label="Testlar natijasi">
     {% for r in results %}
     <span class="ca-test ca-test-{{ r.verdict }}" title="Test {{ forloop.counter }}: {{ r.verdict }} · {{ r.exec_ms }} ms">{{ forloop.counter }}</span>
     {% endfor %}
@@ -35,7 +36,7 @@
       <div><p class="mb-1 text-xs font-medium text-mute">Sizning chiqishingiz</p><pre class="ca-pre !py-2 text-xs">{{ first_fail.stdout_excerpt|default:"—" }}</pre></div>
     </div>
     {% else %}
-    <p class="text-xs text-mute">Yashirin test — kirish ma'lumotlari ko‘rsatilmaydi.</p>
+    <p class="text-xs text-mute">Yashirin test — kirish ma‘lumotlari ko‘rsatilmaydi.</p>
     {% endif %}
   </div>
   {% endif %}

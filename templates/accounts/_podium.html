@@ -1,0 +1,21 @@
+{% load tiers %}
+{% comment %}Top-3 cards; ctx: podium (users with .rank), metric ("rating"|"points").
+Visual order on wide screens is 2 · 1 · 3 with first place raised; DOM/reading order stays 1, 2, 3.{% endcomment %}
+<ol class="ca-podium mb-6" aria-label="Kuchli uchlik">
+  {% for u in podium %}
+  <li class="ca-podium-card ca-podium-{{ u.rank }}{% if u == user %} is-me{% endif %}" style="--tier: {{ u.rating|tier_color }}">
+    <span class="ca-podium-medal" aria-hidden="true"><i data-lucide="{% if u.rank == 1 %}crown{% else %}medal{% endif %}" class="lu"></i></span>
+    <span class="sr-only">{{ u.rank }}-o‘rin</span>
+    <a href="{% url 'profile' u.username %}" class="ca-podium-avatar ca-avatar" translate="no" tabindex="-1" aria-hidden="true">{% if u.avatar %}<img src="{{ u.avatar.url }}" alt="" width="64" height="64">{% else %}{{ u.username|first }}{% endif %}</a>
+    <a href="{% url 'profile' u.username %}" class="ca-podium-name" translate="no">{{ u.username }}</a>
+    <span class="ca-podium-sub truncate">{{ u.rating|tier_name }}</span>
+    {% if metric == "rating" %}
+    <span class="ca-podium-value tabular" style="color: var(--tier)">{{ u.rating }}</span>
+    <span class="ca-podium-sub">{{ u.contest_count }} ta musobaqa</span>
+    {% else %}
+    <span class="ca-podium-value tabular">{{ u.practice_points }}<small> ball</small></span>
+    <span class="ca-podium-sub">{{ u.solved_count }} ta yechilgan</span>
+    {% endif %}
+  </li>
+  {% endfor %}
+</ol>

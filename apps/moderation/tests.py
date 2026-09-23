@@ -363,3 +363,22 @@ def test_ai_generate_requires_prompt(client):
     r = client.post(reverse("moderation:ai_generate"), {"prompt": "", "model": "claude-sonnet-5", "count": "2"})
     assert r.status_code == 302 and r.url == reverse("moderation:ai_generate")
     assert Problem.objects.count() == 0
+
+
+@pytest.mark.django_db
+def test_staff_sees_every_users_submissions(client):
+    from apps.problems.models import Language
+    from apps.submissions.models import Submission
+    boss = User.objects.create_user("boss", password="x", is_staff=True)
+    ali = User.objects.create_user("ali", password="x")
+    lang = Language.objects.create(code="python", name="Python 3", docker_image="i", run_cmd="r")
+    p = Problem.objects.create(slug="p1", title="P1", statement_md="x", author=boss)
+    s = Submission.objects.create(user=ali, problem=p, language=lang, source="print('ali')", verdict="WA")
+    client.force_login(boss)
+    r = client.get(reverse("moderation:submissions") + "?user=ali&verdict=WA")
+    assert r.status_code == 200 and f"#{s.pk:06d}".encode() in r.content
+    assert f"#{s.pk:06d}".encode() not in client.get(reverse("moderation:submissions") + "?user=nobody").content
+    client.force_login(ali)
+    assert client.get(reverse("moderation:submissions")).status_code in (302, 403)
+    client.force_login(boss)
+    assert b"print(&#x27;ali&#x27;)" in client.get(reverse("submissions:detail", args=[s.pk])).content

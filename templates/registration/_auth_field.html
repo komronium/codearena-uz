@@ -5,7 +5,7 @@
   <div class="ca-auth-field">
     <i data-lucide="{{ icon }}" class="lu" aria-hidden="true"></i>
     <input class="ca-input" type="{{ type }}" name="{{ name }}" id="id_{{ name }}" value="{{ value|default:'' }}"
-           autocomplete="{{ autocomplete }}" {% if name == 'username' %}spellcheck="false" autocapitalize="none"{% endif %} {% if not optional %}required{% endif %} {% if autofocus %}autofocus{% endif %}
+           autocomplete="{{ autocomplete }}" {% if name == 'username' or type == 'email' %}spellcheck="false" autocapitalize="none"{% endif %} {% if not optional %}required{% endif %} {% if autofocus %}autofocus{% endif %}
            {% if errors %}aria-invalid="true" aria-describedby="err_{{ name }}"{% elif hint %}aria-describedby="hint_{{ name }}"{% endif %}>
     {% if type == 'password' %}
     <button type="button" class="ca-auth-eye" data-toggle-password="id_{{ name }}" aria-label="Parolni ko‘rsatish" aria-pressed="false">

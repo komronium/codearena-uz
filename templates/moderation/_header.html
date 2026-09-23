@@ -1,0 +1,4 @@
+{% comment %}Admin page header; ctx: title, subtitle (opt), back_url + back_label (opt). Actions go in the including page.{% endcomment %}
+{% if back_url %}<a class="ca-link mb-2 inline-block text-sm text-mute" href="{{ back_url }}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>{{ back_label }}</a>{% endif %}
+<h1 class="ca-page-title">{{ title }}</h1>
+{% if subtitle %}<p class="mt-1 text-sm text-mute">{{ subtitle }}</p>{% endif %}

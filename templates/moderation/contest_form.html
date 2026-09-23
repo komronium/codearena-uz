@@ -1,15 +1,11 @@
 {% extends "base.html" %}
 {% block title %}{% if contest %}Musobaqani tahrirlash{% else %}Musobaqa yaratish{% endif %}{% endblock %}
 {% block content %}
-<h1 class="ca-page-title mb-4">Boshqaruv</h1>
-{% include "moderation/_nav.html" %}
 
-<div class="mb-6 flex items-center justify-between gap-3">
-  <div>
-    <h2 class="text-lg font-semibold">{% if contest %}#{{ contest.pk|stringformat:"03d" }} — {{ contest.title }}{% else %}Yangi musobaqa{% endif %}</h2>
-    <p class="mt-1 text-sm text-mute">Musobaqa masalalarini avval yashirin qilib qo‘shing; musobaqa tugagach ochiq qilishingiz mumkin.</p>
-  </div>
-  <a href="{% url 'moderation:contests' %}" class="ca-btn ca-btn-ghost !py-1.5">Orqaga</a>
+<div class="mb-6">
+  <a class="ca-link mb-2 inline-block text-sm text-mute" href="{% url 'moderation:contests' %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>Musobaqalar</a>
+  <h1 class="ca-page-title">{% if contest %}{{ contest.title }}{% else %}Yangi musobaqa{% endif %}</h1>
+  <p class="mt-1 text-sm text-mute">Musobaqa masalalarini yashirin qilib qo‘shing — boshlanguncha ular hech kimga ko‘rinmaydi. Tugagach ochish mumkin.</p>
 </div>
 
 {% if form.non_field_errors %}<div class="ca-alert ca-alert-bad mb-4" role="alert">{{ form.non_field_errors }}</div>{% endif %}
@@ -36,11 +32,11 @@
         {% for f in formset %}
         <div class="cp-row flex flex-wrap items-end gap-2 rounded-[var(--ca-radius)] border border-line p-2">
           {{ f.id }}
-          <div><label class="ca-label">Yorliq</label>{{ f.label }}</div>
-          <div class="min-w-[14rem] flex-1"><label class="ca-label">Masala</label>{{ f.problem }}</div>
-          <div><label class="ca-label">Ball</label>{{ f.points }}</div>
-          <div><label class="ca-label">Tartib</label>{{ f.order }}</div>
-          {% if f.instance.pk %}<label class="flex items-center gap-1.5 pb-2 text-sm text-bad">{{ f.DELETE }} O'chirish</label>{% endif %}
+          <div><label class="ca-label" for="{{ f.label.id_for_label }}">Yorliq</label>{{ f.label }}</div>
+          <div class="min-w-[14rem] flex-1"><label class="ca-label" for="{{ f.problem.id_for_label }}">Masala</label>{{ f.problem }}</div>
+          <div><label class="ca-label" for="{{ f.points.id_for_label }}">Ball</label>{{ f.points }}</div>
+          <div><label class="ca-label" for="{{ f.order.id_for_label }}">Tartib</label>{{ f.order }}</div>
+          {% if f.instance.pk %}<label class="flex items-center gap-1.5 pb-2 text-sm text-bad">{{ f.DELETE }} O‘chirish</label>{% endif %}
           {% if f.errors %}<div class="w-full text-sm text-bad">{{ f.errors }}</div>{% endif %}
         </div>
         {% endfor %}
@@ -48,10 +44,10 @@
       <template id="cp-empty">
         <div class="cp-row flex flex-wrap items-end gap-2 rounded-[var(--ca-radius)] border border-line p-2">
           {{ formset.empty_form.id }}
-          <div><label class="ca-label">Yorliq</label>{{ formset.empty_form.label }}</div>
-          <div class="min-w-[14rem] flex-1"><label class="ca-label">Masala</label>{{ formset.empty_form.problem }}</div>
-          <div><label class="ca-label">Ball</label>{{ formset.empty_form.points }}</div>
-          <div><label class="ca-label">Tartib</label>{{ formset.empty_form.order }}</div>
+          <div><label class="ca-label" for="{{ formset.empty_form.label.id_for_label }}">Yorliq</label>{{ formset.empty_form.label }}</div>
+          <div class="min-w-[14rem] flex-1"><label class="ca-label" for="{{ formset.empty_form.problem.id_for_label }}">Masala</label>{{ formset.empty_form.problem }}</div>
+          <div><label class="ca-label" for="{{ formset.empty_form.points.id_for_label }}">Ball</label>{{ formset.empty_form.points }}</div>
+          <div><label class="ca-label" for="{{ formset.empty_form.order.id_for_label }}">Tartib</label>{{ formset.empty_form.order }}</div>
         </div>
       </template>
       <button type="button" id="cp-add" class="ca-btn ca-btn-ghost"><i data-lucide="plus" class="lu" aria-hidden="true"></i>Yana masala</button>

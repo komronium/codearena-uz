@@ -6,6 +6,9 @@ from apps.accounts.models import Group
 from apps.problems.models import Problem
 
 
+_UZ_MONTHS_SHORT = "Yan Fev Mar Apr May Iyn Iyl Avg Sen Okt Noy Dek".split()
+
+
 class Contest(models.Model):
     class Type(models.TextChoices):
         # ponytail: single format kept as a field so old rows/migrations stay valid;
@@ -35,7 +38,13 @@ class Contest(models.Model):
     def duration_label(self) -> str:
         minutes = int((self.end - self.start).total_seconds() // 60)
         h, m = divmod(minutes, 60)
-        return " ".join(p for p in ((f"{h} soat" if h else ""), (f"{m} daq" if m else "")) if p) or "0 daq"
+        d, h = divmod(h, 24)
+        parts = (f"{d} kun" if d else "", f"{h} soat" if h else "", f"{m} daq" if m else "")
+        return " ".join(p for p in parts if p) or "0 daq"
+
+    @property
+    def start_month_short(self) -> str:
+        return _UZ_MONTHS_SHORT[timezone.localtime(self.start).month - 1]
 
     @property
     def has_ended(self) -> bool:

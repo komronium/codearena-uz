@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Sahifa topilmadi{% endblock %}
+{% block content %}
+<div class="mx-auto max-w-md py-10 text-center">
+  <p class="tabular text-6xl font-bold text-accent" aria-hidden="true">404</p>
+  <h1 class="ca-page-title mt-4">Sahifa topilmadi</h1>
+  <p class="mt-2 text-sm text-mute">Havola noto‘g‘ri yoki sahifa o‘chirilgan. Masala yashirin yoki musobaqa hali boshlanmagan bo‘lishi ham mumkin.</p>
+  <div class="mt-6 flex flex-wrap justify-center gap-2">
+    <a class="ca-btn ca-btn-primary" href="{% url 'problems:list' %}"><i data-lucide="list-checks" class="lu" aria-hidden="true"></i>Masalalarga o‘tish</a>
+    <a class="ca-btn ca-btn-ghost" href="{% url 'contests:list' %}"><i data-lucide="trophy" class="lu" aria-hidden="true"></i>Musobaqalar</a>
+  </div>
+</div>
+{% endblock %}

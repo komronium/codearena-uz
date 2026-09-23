@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}{{ problem.title }} — eng yaxshi yechimlar{% endblock %}
+{% block content %}
+<div class="mb-6">
+  <a class="ca-link mb-2 inline-block text-sm text-mute" href="{% url 'problems:detail' problem.slug %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>{{ problem.title }}</a>
+  <h1 class="ca-page-title">Eng yaxshi yechimlar</h1>
+  <p class="mt-1 text-sm text-mute">Har bir foydalanuvchining eng yaxshi to‘g‘ri (AC) yechimi. Teng bo‘lsa — kim oldin yuborgan.</p>
+</div>
+
+<nav class="ca-tabs mb-4" aria-label="Saralash">
+  <a class="ca-tab {% if by == 'time' %}is-active{% endif %}" href="?by=time{% if lang %}&lang={{ lang }}{% endif %}"{% if by == 'time' %} aria-current="page"{% endif %}><i data-lucide="zap" class="lu" aria-hidden="true"></i>Eng tez</a>
+  <a class="ca-tab {% if by == 'length' %}is-active{% endif %}" href="?by=length{% if lang %}&lang={{ lang }}{% endif %}"{% if by == 'length' %} aria-current="page"{% endif %}><i data-lucide="scissors" class="lu" aria-hidden="true"></i>Eng qisqa</a>
+</nav>
+
+{% if languages|length > 1 %}
+<div class="mb-4 flex flex-wrap gap-1.5" role="group" aria-label="Til">
+  <a class="ca-filter {% if not lang %}is-active{% endif %}" href="?by={{ by }}"{% if not lang %} aria-current="true"{% endif %}>Barcha tillar</a>
+  {% for lg in languages %}
+  <a class="ca-filter {% if lang == lg.code %}is-active{% endif %}" href="?by={{ by }}&lang={{ lg.code }}"{% if lang == lg.code %} aria-current="true"{% endif %}>{{ lg.name }}</a>
+  {% endfor %}
+</div>
+{% endif %}
+{% if by == "length" and not lang and languages|length > 1 %}
+<p class="mb-3 text-xs text-mute"><i data-lucide="info" class="lu mr-1" aria-hidden="true"></i>Kod uzunligini bir til ichida solishtirish adolatliroq — yuqoridan tilni tanlang.</p>
+{% endif %}
+
+{% if rows %}
+<ol class="ca-rows">
+  {% for s in rows %}
+  <li class="ca-row !py-2.5{% if s.user == user %} bg-accent-soft{% endif %}">
+    <span class="w-8 shrink-0 text-center">{% include "accounts/_rank.html" with rank=forloop.counter %}</span>
+    <div class="ca-row-main !basis-40">{% include "accounts/_user.html" with u=s.user tier=False %}</div>
+    <div class="ca-row-side">
+      <span class="ca-chip !bg-ink/5 text-mute">{{ s.language.name }}</span>
+      <div class="ca-row-stat !min-w-[5rem]"><b>{% if by == "time" %}{{ s.exec_ms }} ms{% else %}{{ s.code_len }}{% endif %}</b>{% if by == "time" %}{{ s.code_len }} belgi{% else %}belgi · {{ s.exec_ms }} ms{% endif %}</div>
+      {% if can_view_code %}
+      <a class="ca-btn ca-btn-ghost !px-2 !py-1.5" href="{% url 'submissions:detail' s.pk %}" title="Kodni ko‘rish" aria-label="{{ s.user.username }} kodini ko‘rish"><i data-lucide="code" class="lu" aria-hidden="true"></i></a>
+      {% endif %}
+    </div>
+  </li>
+  {% endfor %}
+</ol>
+{% if not can_view_code %}
+<p class="mt-3 text-xs text-mute"><i data-lucide="lock-keyhole" class="lu mr-1" aria-hidden="true"></i>Boshqalarning kodini ko‘rish uchun avval masalani o‘zingiz yeching.</p>
+{% endif %}
+{% else %}
+<div class="ca-empty">Hali to‘g‘ri yechim yo‘q{% if lang %} bu tilda{% endif %}. <a class="ca-link" href="{% url 'problems:detail' problem.slug %}">Birinchi bo‘ling</a></div>
+{% endif %}
+{% endblock %}

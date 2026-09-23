@@ -1,58 +1,52 @@
 {% extends "base.html" %}
 {% block title %}Musobaqalar — boshqaruv{% endblock %}
 {% block content %}
-<h1 class="ca-page-title mb-4">Boshqaruv</h1>
-{% include "moderation/_nav.html" %}
-
-<div class="mb-4 flex justify-end">
-  <a href="{% url 'moderation:contest_new' %}" class="ca-btn ca-btn-primary !py-1.5"><i data-lucide="plus" class="lu" aria-hidden="true"></i>Musobaqa yaratish</a>
+<div class="mb-6 flex flex-wrap items-end justify-between gap-3">
+  <div>{% include "moderation/_header.html" with title="Musobaqalar" subtitle="Yaratish, tahrirlash, natijalar va halollik hisoboti" %}</div>
+  <a href="{% url 'moderation:contest_new' %}" class="ca-btn ca-btn-primary"><i data-lucide="plus" class="lu" aria-hidden="true"></i>Musobaqa yaratish</a>
 </div>
 
 {% if contests %}
-<div class="ca-panel !p-0 overflow-x-auto">
-<table class="ca-table">
-  <thead><tr><th class="w-14">#</th><th>Nomi</th><th>Boshlanishi</th><th class="hidden md:table-cell">Tugashi</th><th class="hidden md:table-cell text-right">Masala</th><th class="hidden md:table-cell text-right">Ishtirokchi</th><th>Holat</th><th class="text-right">Amal</th></tr></thead>
-  <tbody>
+<ul class="ca-rows">
   {% for c in contests %}
-  <tr>
-    <td class="tabular text-mute">{{ c.pk|stringformat:"03d" }}</td>
-    <td class="min-w-0 max-w-xs"><a class="ca-link font-medium" href="{% url 'contests:detail' c.pk %}">{{ c.title }}</a>
-      <div class="text-xs text-mute">{{ c.get_type_display }}{% if c.is_rated %} · reytingli{% endif %}</div></td>
-    <td class="tabular text-mute whitespace-nowrap">{{ c.start|date:"d.m.Y H:i" }}</td>
-    <td class="hidden md:table-cell tabular text-mute whitespace-nowrap">{{ c.end|date:"d.m.Y H:i" }}</td>
-    <td class="hidden md:table-cell tabular text-right text-mute">{{ c.n_problems }}</td>
-    <td class="hidden md:table-cell tabular text-right text-mute">{{ c.n_participants }}</td>
-    <td>
-      {% if c.is_running %}<span class="ca-diff ca-diff-easy">Faol</span>
-      {% elif c.has_ended %}<span class="ca-chip text-mute">Tugagan</span>{% if c.is_rated %} {% if c.rating_applied %}<span class="ca-chip text-ok">Reyting ✓</span>{% else %}<span class="ca-chip text-warn">Reyting yo‘q</span>{% endif %}{% endif %}
-      {% else %}<span class="ca-chip text-warn">Kutilmoqda</span>{% endif %}
-    </td>
-    <td class="text-right">
-      <div class="flex justify-end gap-1 whitespace-nowrap">
-        {% if c.has_ended and c.n_hidden %}
-        <form method="post" action="{% url 'moderation:contest_publish' c.pk %}" onsubmit="return confirm('{{ c.n_hidden }} ta yashirin masala ochiladi va ishtirokchilarning AC yechimlari amaliyot balliga o‘tadi. Davom etasizmi?');">{% csrf_token %}
-          <button class="ca-btn ca-btn-ghost !py-1.5 text-xs" title="Masalalarni ochish"><i data-lucide="eye" class="lu" aria-hidden="true"></i>Ochish ({{ c.n_hidden }})</button>
-        </form>
-        {% endif %}
-        {% if c.is_rated and c.has_ended and not c.rating_applied %}
-        <form method="post" action="{% url 'moderation:contest_apply_rating' c.pk %}">{% csrf_token %}
-          <button class="ca-btn ca-btn-ghost !py-1.5 text-xs" title="Reytingni hisoblash"><i data-lucide="trending-up" class="lu" aria-hidden="true"></i>Reyting</button>
-        </form>
-        {% endif %}
-        <a href="{% url 'contests:standings' c.pk %}" class="ca-btn ca-btn-ghost !px-2 !py-1.5 text-xs" title="Natijalar"><i data-lucide="table" class="lu" aria-hidden="true"></i></a>
-        <a href="{% url 'integrity:contest_report' c.pk %}" class="ca-btn ca-btn-ghost !px-2 !py-1.5 text-xs" title="Halollik hisoboti"><i data-lucide="shield-alert" class="lu" aria-hidden="true"></i></a>
-        <a href="{% url 'moderation:contest_edit' c.pk %}" class="ca-btn ca-btn-ghost !px-2 !py-1.5 text-xs" title="Tahrirlash"><i data-lucide="pencil" class="lu" aria-hidden="true"></i></a>
-        <form method="post" action="{% url 'moderation:contest_delete' c.pk %}" onsubmit="return confirm('«{{ c.title|escapejs }}» musobaqasi va natijalari o‘chiriladi. Davom etasizmi?');">{% csrf_token %}
-          <button class="ca-btn ca-btn-ghost !px-2 !py-1.5 text-xs text-bad" title="O'chirish"><i data-lucide="trash-2" class="lu" aria-hidden="true"></i></button>
-        </form>
+  <li class="ca-row">
+    <div class="ca-row-main">
+      <div class="ca-row-title">
+        <span class="tabular shrink-0 text-xs font-normal text-mute">{{ c.pk|stringformat:"03d" }}</span>
+        <a class="ca-link" href="{% url 'contests:detail' c.pk %}">{{ c.title }}</a>
+        {% if c.is_running %}<span class="ca-diff ca-diff-easy shrink-0"><span class="ca-live-dot" aria-hidden="true"></span>Faol</span>
+        {% elif c.has_ended %}<span class="ca-chip shrink-0 !bg-ink/5 text-mute">Tugagan</span>
+        {% else %}<span class="ca-chip ca-chip-score shrink-0">Kutilmoqda</span>{% endif %}
       </div>
-    </td>
-  </tr>
+      <div class="ca-row-meta">
+        <span class="tabular"><i data-lucide="calendar" class="lu" aria-hidden="true"></i>{{ c.start|date:"d.m.Y H:i" }} – {% if c.start|date:"Ymd" == c.end|date:"Ymd" %}{{ c.end|date:"H:i" }}{% else %}{{ c.end|date:"d.m.Y H:i" }}{% endif %}</span>
+        <span><i data-lucide="list-checks" class="lu" aria-hidden="true"></i>{{ c.n_problems }} masala{% if c.n_hidden %} · {{ c.n_hidden }} yashirin{% endif %}</span>
+        <span><i data-lucide="users" class="lu" aria-hidden="true"></i>{{ c.n_participants }} ishtirokchi</span>
+        {% if c.is_rated %}<span class="{% if c.has_ended and not c.rating_applied %}text-warn{% else %}text-ok{% endif %}"><i data-lucide="trending-up" class="lu" aria-hidden="true"></i>Reytingli{% if c.has_ended %}{% if c.rating_applied %} · hisoblangan{% else %} · hisoblanmagan{% endif %}{% endif %}</span>{% endif %}
+      </div>
+    </div>
+    <div class="ca-row-side">
+      {% if c.has_ended and c.n_hidden %}
+      <form method="post" action="{% url 'moderation:contest_publish' c.pk %}" onsubmit="return confirm('{{ c.n_hidden }} ta yashirin masala ochiladi va ishtirokchilarning AC yechimlari amaliyot balliga o‘tadi. Davom etasizmi?');">{% csrf_token %}
+        <button class="ca-btn ca-btn-ghost !py-1.5 text-xs"><i data-lucide="eye" class="lu" aria-hidden="true"></i>Masalalarni ochish</button>
+      </form>
+      {% endif %}
+      {% if c.is_rated and c.has_ended and not c.rating_applied %}
+      <form method="post" action="{% url 'moderation:contest_apply_rating' c.pk %}">{% csrf_token %}
+        <button class="ca-btn ca-btn-primary !py-1.5 text-xs"><i data-lucide="trending-up" class="lu" aria-hidden="true"></i>Reytingni hisoblash</button>
+      </form>
+      {% endif %}
+      <a href="{% url 'contests:standings' c.pk %}" class="ca-btn ca-btn-ghost !px-2 !py-1.5" title="Natijalar" aria-label="Natijalar: {{ c.title }}"><i data-lucide="medal" class="lu" aria-hidden="true"></i></a>
+      <a href="{% url 'integrity:contest_report' c.pk %}" class="ca-btn ca-btn-ghost !px-2 !py-1.5" title="Halollik hisoboti" aria-label="Halollik hisoboti: {{ c.title }}"><i data-lucide="shield-alert" class="lu" aria-hidden="true"></i></a>
+      <a href="{% url 'moderation:contest_edit' c.pk %}" class="ca-btn ca-btn-ghost !px-2 !py-1.5" title="Tahrirlash" aria-label="Tahrirlash: {{ c.title }}"><i data-lucide="pencil" class="lu" aria-hidden="true"></i></a>
+      <form method="post" action="{% url 'moderation:contest_delete' c.pk %}" onsubmit="return confirm('«{{ c.title|escapejs }}» musobaqasi va natijalari o‘chiriladi. Davom etasizmi?');">{% csrf_token %}
+        <button class="ca-btn ca-btn-ghost !px-2 !py-1.5 text-bad" title="O‘chirish" aria-label="O‘chirish: {{ c.title }}"><i data-lucide="trash-2" class="lu" aria-hidden="true"></i></button>
+      </form>
+    </div>
+  </li>
   {% endfor %}
-  </tbody>
-</table>
-</div>
+</ul>
 {% else %}
-<div class="ca-empty">Hali musobaqa yo‘q.</div>
+<div class="ca-empty">Hali musobaqa yo‘q. <a class="ca-link" href="{% url 'moderation:contest_new' %}">Birinchisini yarating</a></div>
 {% endif %}
 {% endblock %}

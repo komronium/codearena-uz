@@ -44,6 +44,7 @@ def dashboard(request):
             "contests": Contest.objects.count(),
             "users": User.objects.count(),
             "submissions": Submission.objects.count(),
+            "tags": Tag.objects.count(),
             "groups": Group.objects.count(),
         },
     })
@@ -277,6 +278,26 @@ def contest_apply_rating(request, pk):
 
 
 # ---- users -------------------------------------------------------------------
+
+@staff_required
+def submissions(request):
+    """Every user's submissions, newest first; filters live in the query string so views are linkable."""
+    qs = Submission.objects.select_related("user", "problem", "language", "contest").defer("source", "compile_log")
+    f = {k: request.GET.get(k, "").strip() for k in ("user", "problem", "verdict", "contest")}
+    if f["user"]:
+        qs = qs.filter(user__username=f["user"])
+    if f["problem"]:
+        qs = qs.filter(problem__slug=f["problem"])
+    if f["verdict"] in Submission.Verdict.values:
+        qs = qs.filter(verdict=f["verdict"])
+    if f["contest"].isdigit():
+        qs = qs.filter(contest_id=int(f["contest"]))
+    page = Paginator(qs.order_by("-pk"), 50).get_page(request.GET.get("page"))
+    return render(request, "moderation/submissions.html", {
+        "page": page, "f": f, "verdicts": Submission.Verdict.values,
+        "contests": Contest.objects.order_by("-start").only("id", "title")[:50],
+    })
+
 
 @staff_required
 def users(request):

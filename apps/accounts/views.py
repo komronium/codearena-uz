@@ -1,4 +1,5 @@
 import datetime
+import math
 
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
@@ -162,11 +163,20 @@ def profile_edit(request):
     return render(request, "accounts/profile_edit.html", {"form": form})
 
 
+def _podium_split(page):
+    """Leaderboard page -> first page's top 3 as podium cards, the rest as table rows (each with .rank)."""
+    rows = list(page)
+    for i, u in enumerate(rows):
+        u.rank = page.start_index() + i
+    podium = rows[:3] if page.number == 1 else []
+    return {"podium": podium, "rows": rows[len(podium):]}
+
+
 def top(request):
     qs = (User.objects.annotate(solved_count=Count("userproblemsolved", distinct=True))
           .order_by("-practice_points", "username"))
     page = Paginator(qs, 50).get_page(request.GET.get("page"))
-    return render(request, "accounts/top.html", {"users": page, "total": qs.count()})
+    return render(request, "accounts/top.html", {"users": page, "total": qs.count(), **_podium_split(page)})
 
 
 def rating(request):
@@ -174,7 +184,8 @@ def rating(request):
           .order_by("-rating", "username"))
     page = Paginator(qs, 50).get_page(request.GET.get("page"))
     tiers = [{"name": n, "color": c, "floor": f, "ceiling": ce} for f, ce, n, c in _RATING_TIERS]
-    return render(request, "accounts/rating.html", {"users": page, "total": qs.count(), "tiers": tiers})
+    return render(request, "accounts/rating.html",
+                  {"users": page, "total": qs.count(), "tiers": tiers, **_podium_split(page)})
 
 
 def profile(request, username):
@@ -198,17 +209,21 @@ def profile(request, username):
     # ponytail: full public list in one query; paginate the map if catalog grows past ~1k.
     problem_map = [
         (pr, "solved" if pr.id in solved_ids else "attempted" if pr.id in attempted_ids else "todo")
-        for pr in Problem.objects.filter(is_public=True).only("id", "slug", "title", "difficulty").order_by("id")
+        # upcoming-contest problems stay secret here too, same rule as the problem list
+        for pr in Problem.objects.filter(is_public=True).exclude(contests__start__gt=timezone.now()).distinct()
+        .only("id", "slug", "title", "difficulty").order_by("id")
     ]
+    # gauge: one arc per difficulty sharing a 270° sweep on r=54, 4 units of gap between arcs.
+    sweep = 270 / len(Problem.Difficulty.choices)
+    seg_len = round(2 * math.pi * 54 * sweep / 360 - 4, 1)
     by_diff = []
     for value, label in Problem.Difficulty.choices:
         total = sum(1 for pr, _ in problem_map if pr.difficulty == value)
         done = sum(1 for pr in solved if pr.difficulty == value)
         by_diff.append({
             "key": value, "label": label, "solved": done, "total": total,
-            # gauge: 5 equal 54° arcs on r=54 (arc length 50.9 each, 4 gap); start angle 135° + i*54.
-            "arc": round(46.9 * done / total, 1) if total else 0,
-            "angle": 135 + 54 * len(by_diff),
+            "seg": seg_len, "arc": round(seg_len * done / total, 1) if total else 0,
+            "angle": round(135 + sweep * len(by_diff), 1),
         })
 
     total_users = User.objects.count()

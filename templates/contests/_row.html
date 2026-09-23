@@ -1,22 +1,25 @@
 {% comment %}One contest row; ctx: c, state ("running"|"upcoming"|"ended"){% endcomment %}
-<tr>
-  <td class="min-w-0">
-    <div class="flex min-w-0 items-center gap-2">
-      <span class="tabular shrink-0 text-xs text-mute">{{ c.pk|stringformat:"03d" }}</span>
-      <a class="ca-link truncate font-medium" href="{% url 'contests:detail' c.pk %}">{{ c.title }}</a>
+<li class="ca-row relative">
+  <div class="ca-date ca-st-{{ state }}" aria-hidden="true"><b>{{ c.start|date:"d" }}</b><span>{{ c.start_month_short }}</span></div>
+  <div class="ca-row-main">
+    <div class="ca-row-title">
+      <a class="ca-link ca-stretch !text-ink" href="{% url 'contests:detail' c.pk %}">{{ c.title }}</a>
       {% if c.is_rated %}<span class="ca-chip ca-chip-rated shrink-0" title="Natija reytingga ta‘sir qiladi"><i data-lucide="trending-up" class="lu mr-1" aria-hidden="true"></i>Reytingli</span>{% endif %}
     </div>
-  </td>
-  <td class="tabular whitespace-nowrap text-mute">{{ c.start|date:"d.m.Y" }} <span class="text-ink">{{ c.start|date:"H:i" }}</span></td>
-  <td class="tabular hidden whitespace-nowrap text-mute sm:table-cell">{{ c.duration_label }}</td>
-  <td class="tabular hidden text-right text-mute md:table-cell">{{ c.n_participants }}</td>
-  <td class="whitespace-nowrap text-right">
+    <div class="ca-row-meta">
+      <span class="tabular"><i data-lucide="clock" class="lu" aria-hidden="true"></i>{{ c.start|date:"d.m.Y H:i" }}</span>
+      <span><i data-lucide="hourglass" class="lu" aria-hidden="true"></i>{{ c.duration_label }}</span>
+      <span><i data-lucide="users" class="lu" aria-hidden="true"></i>{{ c.n_participants }} ishtirokchi</span>
+    </div>
+  </div>
+  <div class="ca-row-side">
     {% if state == "running" %}
-      <span class="tabular font-semibold text-ok" data-countdown="{{ c.end|date:'c' }}" data-label="qoldi" data-suffix="1"></span>
+      <span class="ca-count ca-st-running"><span class="ca-live-dot" aria-hidden="true"></span><b data-countdown="{{ c.end|date:'c' }}" data-label="" data-suffix="1"></b><small>qoldi</small></span>
     {% elif state == "upcoming" %}
-      <span class="tabular font-medium text-ink" data-countdown="{{ c.start|date:'c' }}" data-label="gacha" data-suffix="1"></span>
+      <span class="ca-count ca-st-upcoming"><i data-lucide="hourglass" class="lu" aria-hidden="true"></i><b data-countdown="{{ c.start|date:'c' }}" data-label="" data-suffix="1"></b><small>keyin</small></span>
     {% else %}
-      <a class="ca-link text-sm" href="{% url 'contests:standings' c.pk %}"><i data-lucide="medal" class="lu mr-1" aria-hidden="true"></i>Natijalar</a>
+      <a class="ca-btn ca-btn-ghost relative z-[1] !py-1.5 text-xs" href="{% url 'contests:standings' c.pk %}"><i data-lucide="medal" class="lu" aria-hidden="true"></i>Natijalar</a>
     {% endif %}
-  </td>
-</tr>
+    <i data-lucide="chevron-right" class="lu text-mute" aria-hidden="true"></i>
+  </div>
+</li>

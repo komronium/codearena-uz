@@ -1,20 +1,18 @@
 {% extends "base.html" %}
 {% block title %}AI bilan masala yaratish{% endblock %}
 {% block content %}
-<h1 class="ca-page-title mb-4">Boshqaruv</h1>
-{% include "moderation/_nav.html" %}
+<div class="mb-6">{% url "moderation:problems" as back %}{% include "moderation/_header.html" with title="AI bilan masala tuzish" back_url=back back_label="Masalalar" %}</div>
 
 <div class="max-w-2xl">
-  <form method="post" class="ca-panel space-y-4">
+  <form method="post" class="ca-panel space-y-4" id="ai-form">
     {% csrf_token %}
     <div>
-      <h2 class="ca-section-title !mb-1">AI bilan masala tuzish</h2>
-      <p class="text-sm text-mute">Mavzu haqida promt yozing — AI bir nechta masala tuzadi, har biri kamida 20 ta test bilan. Tuzilgan masalalar <strong>vaqtinchalik</strong> — «Kutmoqda» holatida, sayt uchun yashirin. <a class="ca-link" href="{% url 'moderation:queue' %}">Navbat</a> bo'limiga o'tib, har birini ko'rib chiqib, kerak bo'lsa tahrirlab, keyin tasdiqlab (asosiyga aylantirib) yoki rad etib chiqasiz.</p>
+      <p class="text-sm text-mute">Mavzu haqida promt yozing — AI bir nechta masala tuzadi, har biri kamida 20 ta test bilan. Tuzilgan masalalar <strong>vaqtinchalik</strong> — «Kutmoqda» holatida, sayt uchun yashirin. <a class="ca-link" href="{% url 'moderation:queue' %}">Navbat</a> bo‘limiga o‘tib, har birini ko‘rib chiqib, kerak bo‘lsa tahrirlab, keyin tasdiqlab (asosiyga aylantirib) yoki rad etib chiqasiz.</p>
     </div>
     <div>
       <label class="ca-label" for="ai-prompt">Promt</label>
       <textarea id="ai-prompt" name="prompt" rows="5" class="ca-input" required
-                placeholder="Masalan: massivlar bo'yicha boshlang'ich darajadagi masalalar, har xil mavzularda">{{ request.POST.prompt }}</textarea>
+                placeholder="Masalan: massivlar bo‘yicha boshlang‘ich darajadagi masalalar, har xil mavzularda">{{ request.POST.prompt }}</textarea>
     </div>
     <div class="grid gap-4 sm:grid-cols-2">
       <div>
@@ -30,7 +28,20 @@
         <input id="ai-count" name="count" type="number" min="1" max="10" value="{{ default_count }}" class="ca-input">
       </div>
     </div>
-    <button class="ca-btn ca-btn-primary"><i data-lucide="sparkles" class="lu" aria-hidden="true"></i>Tuzish</button>
+    <div class="flex flex-wrap items-center gap-3">
+      <button class="ca-btn ca-btn-primary" id="ai-submit"><i data-lucide="sparkles" class="lu" aria-hidden="true"></i>Masalalarni tuzish</button>
+      <p class="text-xs text-mute" id="ai-status" role="status" aria-live="polite"></p>
+    </div>
   </form>
 </div>
+<script>
+  // Generation is one long request (can take minutes): lock the form so it isn't sent twice.
+  document.getElementById("ai-form").addEventListener("submit", () => {
+    const b = document.getElementById("ai-submit");
+    b.disabled = true;
+    b.innerHTML = '<i data-lucide="loader-circle" class="lu ca-spin" aria-hidden="true"></i>Tuzilmoqda…';
+    window.caIcons();
+    document.getElementById("ai-status").textContent = "AI masalalar va testlarni tuzmoqda — bu bir necha daqiqa olishi mumkin. Sahifani yopmang.";
+  });
+</script>
 {% endblock %}

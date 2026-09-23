@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
+from django.core.paginator import Paginator
 from django.db.models import Count, Q
 from django.http import Http404, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
@@ -18,13 +19,13 @@ def contest_list(request):
     contests = Contest.objects.annotate(n_participants=Count("participations")).order_by("-start")
     running = [c for c in contests if c.start <= now < c.end]
     upcoming = sorted((c for c in contests if c.start > now), key=lambda c: c.start)
-    ended = [c for c in contests if c.end <= now]
+    ended = Paginator([c for c in contests if c.end <= now], 20).get_page(request.GET.get("page"))
     return render(request, "contests/list.html", {
         "running": running, "upcoming": upcoming, "ended": ended,
         "sections": [
             {"key": "running", "title": "Faol", "dot": "bg-ok", "last_col": "Tugashiga", "items": running},
             {"key": "upcoming", "title": "Kutilmoqda", "dot": "bg-warn", "last_col": "Boshlanishiga", "items": upcoming},
-            {"key": "ended", "title": "Tugagan", "dot": "bg-mute", "last_col": "", "items": ended},
+            {"key": "ended", "title": "Tugagan", "dot": "bg-mute", "last_col": "Natijalar", "items": ended, "page": ended},
         ],
     })
 
@@ -78,6 +79,9 @@ def standings(request, pk):
     contest = get_object_or_404(Contest, pk=pk)
     rows = _standings(contest)
     problems = list(contest.contest_problems.select_related("problem"))
+    for i, cp in enumerate(problems):  # column footer-style summary: solved / tried
+        cp.n_solved = sum(1 for r in rows if r["cells"][i]["solved"])
+        cp.n_tried = sum(1 for r in rows if r["cells"][i]["solved"] or r["cells"][i]["wrong"])
     me = contest.participations.filter(user=request.user).first() if request.user.is_authenticated else None
     return render(request, "contests/standings.html",
                   {"contest": contest, "rows": rows, "problems": problems, "registered": me is not None,
@@ -111,7 +115,9 @@ def clarifications(request, pk):
     return render(request, "contests/clarifications.html", {
         "contest": contest,
         "clars": qs,
-        "problems": contest.contest_problems.select_related("problem"),
+        # Titles are secret until the start; before it only general questions are possible.
+        "problems": contest.contest_problems.select_related("problem")
+        if contest.has_started else [],
     })
 
 

@@ -6,7 +6,7 @@
     <h1 class="ca-page-title">Savol-javoblar</h1>
     <p class="mt-1 text-sm text-mute">{{ contest.title }}</p>
   </div>
-  <a class="ca-link text-sm" href="{% url 'contests:detail' contest.pk %}">← Musobaqa</a>
+  <a class="ca-link text-sm text-mute" href="{% url 'contests:detail' contest.pk %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>Musobaqa</a>
 </div>
 
 {% if not contest.has_ended %}
@@ -17,7 +17,7 @@
     <select id="clar-problem" name="problem_id" class="ca-select">
       <option value="">Umumiy savol</option>
       {% for cp in problems %}
-      <option value="{{ cp.id }}">{{ cp.label }} — {{ cp.problem.title }}</option>
+      <option value="{{ cp.id }}">{{ cp.label }}. {{ cp.problem.title }}</option>
       {% endfor %}
     </select>
   </div>

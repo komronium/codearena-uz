@@ -1,14 +1,15 @@
 {% extends "base.html" %}
 {% block title %}{{ obj.username }} — tahrirlash{% endblock %}
 {% block content %}
-<h1 class="ca-page-title mb-4">Boshqaruv</h1>
-{% include "moderation/_nav.html" %}
 
-<div class="mb-6 flex items-center justify-between gap-3">
-  <h2 class="text-lg font-semibold">{{ obj.username }}</h2>
+<div class="mb-6 flex flex-wrap items-end justify-between gap-3">
+  <div>
+    <a class="ca-link mb-2 inline-block text-sm text-mute" href="{% url 'moderation:users' %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>Foydalanuvchilar</a>
+    <h1 class="ca-page-title" translate="no">{{ obj.username }}</h1>
+  </div>
   <div class="flex gap-2">
-    <a href="{% url 'profile' obj.username %}" class="ca-btn ca-btn-ghost !py-1.5"><i data-lucide="user" class="lu" aria-hidden="true"></i>Profil</a>
-    <a href="{% url 'moderation:users' %}" class="ca-btn ca-btn-ghost !py-1.5">Orqaga</a>
+    <a href="{% url 'moderation:submissions' %}?user={{ obj.username|urlencode }}" class="ca-btn ca-btn-ghost"><i data-lucide="history" class="lu" aria-hidden="true"></i>Urinishlari</a>
+    <a href="{% url 'profile' obj.username %}" class="ca-btn ca-btn-ghost"><i data-lucide="user" class="lu" aria-hidden="true"></i>Profil</a>
   </div>
 </div>
 
@@ -26,7 +27,7 @@
       <div><label class="ca-label" for="{{ form.location.id_for_label }}">Shahar</label>{{ form.location }}</div>
     </div>
     <div class="grid gap-4 sm:grid-cols-2">
-      <div><label class="ca-label" for="{{ form.rating.id_for_label }}">Rating</label>{{ form.rating }}{{ form.rating.errors }}</div>
+      <div><label class="ca-label" for="{{ form.rating.id_for_label }}">Reyting</label>{{ form.rating }}{{ form.rating.errors }}</div>
       <div><label class="ca-label" for="{{ form.practice_points.id_for_label }}">Amaliyot ball</label>{{ form.practice_points }}{{ form.practice_points.errors }}</div>
     </div>
     <p class="text-xs text-mute">Parolni faqat foydalanuvchining o‘zi <a class="ca-link" href="{% url 'password_reset' %}">tiklash havolasi</a> orqali o‘zgartiradi.</p>

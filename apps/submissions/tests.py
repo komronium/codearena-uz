@@ -8,7 +8,7 @@ from apps.accounts.models import User
 from apps.contests.models import Contest, ContestProblem, Participation
 from apps.problems.models import Language, Problem, TestCase
 
-from .models import Submission, UserProblemSolved
+from .models import Submission, TestResult, UserProblemSolved
 
 
 @pytest.fixture
@@ -104,6 +104,22 @@ def test_status_partial_polls_until_terminal(client, problem, python, user):
     s.save()
     r = client.get(reverse("submissions:status", args=[s.pk]))
     assert b"hx-trigger" not in r.content and b"ca-verdict-ac" in r.content
+
+
+def test_status_compact_poll_stays_compact(client, problem, python, user):
+    """Problem-page sidebar polls with ?compact=1: once terminal it must not grow the test grid."""
+    s = Submission.objects.create(user=user, problem=problem, language=python, source="x", verdict="RUNNING")
+    client.force_login(user)
+    r = client.get(reverse("submissions:status", args=[s.pk]) + "?compact=1")
+    assert b"?compact=1" in r.content  # next poll keeps the flag
+    tc = problem.testcases.first()
+    TestResult.objects.create(submission=s, testcase=tc, verdict="WA")
+    s.verdict, s.passed, s.total = "WA", 0, 2
+    s.save()
+    compact = client.get(reverse("submissions:status", args=[s.pk]) + "?compact=1").content
+    full = client.get(reverse("submissions:status", args=[s.pk])).content
+    assert b"ca-test-WA" not in compact and b"ca-verdict-bad" in compact
+    assert b"ca-test-WA" in full
 
 
 @patch("judge.runner.sandbox.run_tests")

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Urinishlar — boshqaruv{% endblock %}
+{% block content %}
+<div class="mb-6">{% include "moderation/_header.html" with title="Barcha urinishlar" subtitle="Har bir foydalanuvchi yuborgan yechimlar, eng yangisi tepada" %}</div>
+
+<form method="get" class="mb-4 flex flex-wrap items-end gap-3">
+  <div class="w-full max-w-[12rem]">
+    <label class="ca-label" for="f-user">Foydalanuvchi</label>
+    <input id="f-user" name="user" value="{{ f.user }}" class="ca-input !py-1.5 text-sm" placeholder="login…" autocomplete="off" spellcheck="false">
+  </div>
+  <div class="w-full max-w-[12rem]">
+    <label class="ca-label" for="f-problem">Masala (slug)</label>
+    <input id="f-problem" name="problem" value="{{ f.problem }}" class="ca-input !py-1.5 text-sm" placeholder="a-plus-b…" autocomplete="off" spellcheck="false">
+  </div>
+  <div>
+    <label class="ca-label" for="f-verdict">Holat</label>
+    <select id="f-verdict" name="verdict" class="ca-select !w-auto !py-1.5 text-sm">
+      <option value="">Hammasi</option>
+      {% for v in verdicts %}<option value="{{ v }}" {% if v == f.verdict %}selected{% endif %}>{{ v }}</option>{% endfor %}
+    </select>
+  </div>
+  <div>
+    <label class="ca-label" for="f-contest">Musobaqa</label>
+    <select id="f-contest" name="contest" class="ca-select !w-auto max-w-[14rem] !py-1.5 text-sm">
+      <option value="">Hammasi</option>
+      {% for c in contests %}<option value="{{ c.pk }}" {% if f.contest == c.pk|stringformat:"d" %}selected{% endif %}>{{ c.title }}</option>{% endfor %}
+    </select>
+  </div>
+  <button class="ca-btn ca-btn-ghost !py-1.5"><i data-lucide="list-filter" class="lu" aria-hidden="true"></i>Filtrlash</button>
+  {% if f.user or f.problem or f.verdict or f.contest %}<a class="ca-link text-sm" href="{% url 'moderation:submissions' %}">Tozalash</a>{% endif %}
+</form>
+
+{% if page.object_list %}
+<ul class="ca-rows">
+  {% for s in page %}
+  <li class="ca-row !py-3">
+    <div class="ca-row-main">
+      <div class="ca-row-title">
+        <a class="ca-link tabular shrink-0 text-sm" href="{% url 'submissions:detail' s.pk %}">#{{ s.pk|stringformat:"06d" }}</a>
+        {% include "accounts/_user.html" with u=s.user tier=False %}
+      </div>
+      <div class="ca-row-meta">
+        <a class="ca-link !font-normal" href="{% url 'problems:detail' s.problem.slug %}">{{ s.problem.title }}</a>
+        <span>{{ s.language.name }}</span>
+        {% if s.contest %}<a class="ca-link !font-normal" href="{% url 'contests:standings' s.contest_id %}"><i data-lucide="trophy" class="lu" aria-hidden="true"></i>{{ s.contest.title }}</a>{% endif %}
+        <time class="tabular" datetime="{{ s.created|date:'c' }}">{{ s.created|date:"d.m.Y H:i:s" }}</time>
+      </div>
+    </div>
+    <div class="ca-row-side">
+      {% if s.is_terminal and s.verdict != 'CE' %}<span class="tabular text-xs text-mute">{{ s.passed }}/{{ s.total }} · {{ s.exec_ms }} ms</span>{% endif %}
+      {% include "submissions/_verdict.html" with v=s.verdict %}
+      <a class="ca-btn ca-btn-ghost !px-2 !py-1.5" href="{% url 'submissions:detail' s.pk %}" title="Kodni ko‘rish" aria-label="Kodni ko‘rish: #{{ s.pk }}"><i data-lucide="code" class="lu" aria-hidden="true"></i></a>
+    </div>
+  </li>
+  {% endfor %}
+</ul>
+{% include "_pagination.html" with page=page %}
+{% else %}
+<div class="ca-empty">Bu filtr bo‘yicha urinish yo‘q.</div>
+{% endif %}
+{% endblock %}

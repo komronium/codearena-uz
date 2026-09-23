@@ -3,49 +3,38 @@
 {% block content %}
 <div class="mb-6">
   <h1 class="ca-page-title">Urinishlar</h1>
-  <p class="mt-1 text-sm text-mute">So‘nggi urinishlar</p>
+  <p class="mt-1 text-sm text-mute">Yuborgan yechimlaringiz, eng yangisi tepada</p>
 </div>
 <div class="mb-4 flex flex-wrap gap-1.5" role="group" aria-label="Holat bo‘yicha filtr">
-  <a href="{% url 'submissions:mine' %}" class="ca-filter {% if not verdict %}is-active{% endif %}">Hammasi</a>
+  <a href="{% url 'submissions:mine' %}" class="ca-filter {% if not verdict %}is-active{% endif %}"{% if not verdict %} aria-current="true"{% endif %}>Hammasi</a>
   {% for v, label in verdicts %}
-  <a href="?verdict={{ v }}" class="ca-filter {% if verdict == v %}is-active{% endif %}">{{ label }}</a>
+  <a href="?verdict={{ v }}" class="ca-filter {% if verdict == v %}is-active{% endif %}"{% if verdict == v %} aria-current="true"{% endif %}>{{ label }}</a>
   {% endfor %}
 </div>
 
 {% if subs %}
-<div class="overflow-x-auto">
-<table class="ca-table">
-  <thead>
-    <tr>
-      <th class="w-20">#</th>
-      <th>Masala</th>
-      <th class="hidden md:table-cell">Til</th>
-      <th>Holat</th>
-      <th class="text-right">Vaqt</th>
-    </tr>
-  </thead>
-  <tbody>
+<ul class="ca-rows">
   {% for s in subs %}
-  <tr>
-    <td class="tabular"><a class="ca-link" href="{% url 'submissions:detail' s.pk %}">{{ s.pk|stringformat:"06d" }}</a></td>
-    <td class="min-w-0 max-w-xs truncate"><a class="ca-link" href="{% url 'problems:detail' s.problem.slug %}">{{ s.problem.title }}</a></td>
-    <td class="hidden md:table-cell text-mute">{{ s.language.name }}</td>
-    <td>
-      {% include "submissions/_verdict.html" with v=s.verdict %}
-    </td>
-    <td class="tabular text-right text-mute">{{ s.created|date:"d.m H:i" }}</td>
-  </tr>
+  <li class="ca-sub">
+    {% include "submissions/_verdict.html" with v=s.verdict %}
+    <div class="min-w-0">
+      <a class="ca-link block truncate !text-ink hover:!text-accent" href="{% url 'problems:detail' s.problem.slug %}">{{ s.problem.title }}</a>
+      <p class="ca-row-meta !mt-0.5">
+        <a class="tabular hover:text-accent" href="{% url 'submissions:detail' s.pk %}" aria-label="Urinish #{{ s.pk }} kodi">#{{ s.pk|stringformat:"06d" }}</a>
+        <span>{{ s.language.name }}</span>
+        <span class="tabular sm:hidden">{{ s.created|date:"d.m H:i" }}</span>
+        {% if s.total %}<span class="tabular">{{ s.passed }}/{{ s.total }} test</span>{% endif %}
+        {% if s.verdict == "AC" %}<span class="tabular"><i data-lucide="timer" class="lu" aria-hidden="true"></i>{{ s.exec_ms }} ms</span>{% endif %}
+      </p>
+    </div>
+    <div class="flex items-center gap-3">
+      <time class="tabular hidden text-sm text-mute sm:inline" datetime="{{ s.created|date:'c' }}">{{ s.created|date:"d.m H:i" }}</time>
+      <a class="ca-btn ca-btn-ghost !px-2 !py-1.5" href="{% url 'submissions:detail' s.pk %}" title="Kodni ko‘rish" aria-label="Kodni ko‘rish: #{{ s.pk }}"><i data-lucide="code" class="lu" aria-hidden="true"></i></a>
+    </div>
+  </li>
   {% endfor %}
-  </tbody>
-</table>
-</div>
-{% if subs.has_other_pages %}
-<nav class="mt-4 flex items-center gap-4 text-sm" aria-label="Sahifalar">
-  {% if subs.has_previous %}<a class="ca-link" href="?{% if verdict %}verdict={{ verdict }}&{% endif %}page={{ subs.previous_page_number }}">← Oldingi</a>{% endif %}
-  <span class="tabular text-mute">{{ subs.number }} / {{ subs.paginator.num_pages }}</span>
-  {% if subs.has_next %}<a class="ca-link" href="?{% if verdict %}verdict={{ verdict }}&{% endif %}page={{ subs.next_page_number }}">Keyingi →</a>{% endif %}
-</nav>
-{% endif %}
+</ul>
+{% include "_pagination.html" with page=subs %}
 {% else %}
 <div class="ca-empty"><i data-lucide="history" class="lu mb-2 block text-2xl" aria-hidden="true"></i>{% if verdict %}Bu holatda urinish yo‘q.{% else %}Hali urinish yo‘q. Birinchi masalani yeching.{% endif %}<div class="mt-3"><a class="ca-btn ca-btn-primary" href="{% url 'problems:list' %}">Masalalarga o‘tish</a></div></div>
 {% endif %}
