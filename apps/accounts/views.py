@@ -173,14 +173,14 @@ def _podium_split(page):
 
 
 def top(request):
-    qs = (User.objects.annotate(solved_count=Count("userproblemsolved", distinct=True))
+    qs = (User.objects.filter(is_active=True).annotate(solved_count=Count("userproblemsolved", distinct=True))
           .order_by("-practice_points", "username"))
     page = Paginator(qs, 50).get_page(request.GET.get("page"))
     return render(request, "accounts/top.html", {"users": page, "total": qs.count(), **_podium_split(page)})
 
 
 def rating(request):
-    qs = (User.objects.annotate(contest_count=Count("participations", filter=Q(participations__rating_after__isnull=False)))
+    qs = (User.objects.filter(is_active=True).annotate(contest_count=Count("participations", filter=Q(participations__rating_after__isnull=False)))
           .order_by("-rating", "username"))
     page = Paginator(qs, 50).get_page(request.GET.get("page"))
     tiers = [{"name": n, "color": c, "floor": f, "ceiling": ce} for f, ce, n, c in _RATING_TIERS]
@@ -226,9 +226,13 @@ def profile(request, username):
             "angle": round(135 + sweep * len(by_diff), 1),
         })
 
-    total_users = User.objects.count()
-    rating_rank = User.objects.filter(rating__gt=profile_user.rating).count() + 1
-    points_rank = User.objects.filter(practice_points__gt=profile_user.practice_points).count() + 1
+    # blocked (inactive) users hold no place on the boards and push nobody down
+    ranked = User.objects.filter(is_active=True)
+    total_users = ranked.count()
+    rating_rank = points_rank = None
+    if profile_user.is_active:
+        rating_rank = ranked.filter(rating__gt=profile_user.rating).count() + 1
+        points_rank = ranked.filter(practice_points__gt=profile_user.practice_points).count() + 1
 
     return render(request, "accounts/profile.html", {
         "profile_user": profile_user,

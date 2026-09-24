@@ -107,6 +107,20 @@ def test_rating_lists_users_by_rating_desc(client):
 
 
 @pytest.mark.django_db
+def test_blocked_users_get_no_place_on_boards(client):
+    User.objects.create_user("ok", password="x", rating=1400, practice_points=5)
+    User.objects.create_user("banned", password="x", rating=1800, practice_points=50, is_active=False)
+    for name in ("top", "rating"):
+        r = client.get(reverse(name))
+        assert [u.username for u in r.context["users"]] == ["ok"] and r.context["total"] == 1
+
+    r = client.get(reverse("profile", args=["ok"]))
+    assert r.context["rating_rank"] == 1 and r.context["points_rank"] == 1 and r.context["total_users"] == 1
+    r = client.get(reverse("profile", args=["banned"]))
+    assert r.context["rating_rank"] is None and r.context["points_rank"] is None
+
+
+@pytest.mark.django_db
 def test_password_reset_end_to_end(client, mailoutbox):
     User.objects.create_user("ali", email="ali@example.com", password="OldPass123!")
 

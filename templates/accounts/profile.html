@@ -43,7 +43,7 @@
     </div>
     <div class="px-6 py-4">
       <p class="ca-stat-label">Reyting o‘rni</p>
-      <p class="ca-stat-value mt-1">#{{ rating_rank }}</p>
+      <p class="ca-stat-value mt-1">{% if rating_rank %}#{{ rating_rank }}{% else %}—{% endif %}</p>
       <p class="mt-1 text-xs text-mute">{{ total_users }} ishtirokchidan</p>
     </div>
     <div class="px-6 py-4">
@@ -53,7 +53,7 @@
     </div>
     <div class="px-6 py-4">
       <p class="ca-stat-label">Ball o‘rni</p>
-      <p class="ca-stat-value mt-1">#{{ points_rank }}</p>
+      <p class="ca-stat-value mt-1">{% if points_rank %}#{{ points_rank }}{% else %}—{% endif %}</p>
       <p class="mt-1 text-xs text-mute">{{ total_users }} ishtirokchidan</p>
     </div>
   </div>
