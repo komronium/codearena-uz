@@ -45,6 +45,7 @@ class TestResult(models.Model):
     testcase = models.ForeignKey(TestCase, on_delete=models.CASCADE)
     verdict = models.CharField(max_length=8)
     exec_ms = models.IntegerField(default=0)
+    mem_kb = models.IntegerField(default=0)
     stdout_excerpt = models.TextField(blank=True)
 
     class Meta:

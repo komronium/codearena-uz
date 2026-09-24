@@ -35,12 +35,12 @@ def run_trial(lang_code: str, source: str, inputs: list[str], expected: list[str
             return {"verdict": "CE", "log": log, "cases": [], "total": len(inputs)}
         cases = []
         results = sandbox.run_tests(lang, src_dir, inputs, tl_ms, ml_mb)
-        for i, (inp, (out, v, ms)) in enumerate(zip(inputs, results)):
+        for i, (inp, (out, v, ms, kb)) in enumerate(zip(inputs, results)):
             want = expected[i] if expected is not None else None
             if v == "OK":
                 v = "OK" if want is None else ("AC" if outputs_match(want, out) else "WA")
             cases.append({"input": inp[:TRIAL_OUTPUT_CHARS], "output": out[:TRIAL_OUTPUT_CHARS],
-                          "expected": want, "verdict": v, "ms": ms})
+                          "expected": want, "verdict": v, "ms": ms, "kb": kb})
         bad = next((c["verdict"] for c in cases if c["verdict"] not in ("OK", "AC")), None)
         return {"verdict": bad or ("OK" if expected is None else "AC"), "log": "", "cases": cases,
                 "total": len(inputs)}
@@ -81,22 +81,22 @@ def run_submission(submission_id: int) -> None:
             sub.save(update_fields=["verdict", "compile_log", "total"])
             return
 
-        final, passed, max_ms = Submission.Verdict.AC, 0, 0
+        final, passed, max_ms, max_kb = Submission.Verdict.AC, 0, 0, 0
         results = sandbox.run_tests(lang, src_dir, [tc.input for tc in tests], problem.tl_ms, problem.ml_mb)
         rows = []
-        for tc, (out, v, ms) in zip(tests, results):
-            max_ms = max(max_ms, ms)
+        for tc, (out, v, ms, kb) in zip(tests, results):
+            max_ms, max_kb = max(max_ms, ms), max(max_kb, kb)
             if v == "OK":
                 v = "AC" if outputs_match(tc.expected, out) else "WA"
-            rows.append(TestResult(submission=sub, testcase=tc, verdict=v, exec_ms=ms, stdout_excerpt=out[:1000]))
+            rows.append(TestResult(submission=sub, testcase=tc, verdict=v, exec_ms=ms, mem_kb=kb, stdout_excerpt=out[:1000]))
             if v != "AC":
                 final = v
                 break
             passed += 1
         TestResult.objects.bulk_create(rows)
 
-        sub.verdict, sub.passed, sub.total, sub.exec_ms = final, passed, len(tests), max_ms
-        sub.save(update_fields=["verdict", "passed", "total", "exec_ms"])
+        sub.verdict, sub.passed, sub.total, sub.exec_ms, sub.mem_kb = final, passed, len(tests), max_ms, max_kb
+        sub.save(update_fields=["verdict", "passed", "total", "exec_ms", "mem_kb"])
         _drop_standings_cache(sub)
 
         if final == Submission.Verdict.AC and sub.contest_id is None:

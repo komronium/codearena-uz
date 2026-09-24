@@ -100,10 +100,11 @@ def test_status_partial_polls_until_terminal(client, problem, python, user):
     client.force_login(user)
     r = client.get(reverse("submissions:status", args=[s.pk]))
     assert b'hx-trigger="every 1s"' in r.content
-    s.verdict = "AC"
+    s.verdict, s.mem_kb = "AC", 9216
     s.save()
     r = client.get(reverse("submissions:status", args=[s.pk]))
     assert b"hx-trigger" not in r.content and b"ca-verdict-ac" in r.content
+    assert b"9 MB" in r.content
 
 
 def test_status_compact_poll_stays_compact(client, problem, python, user):
@@ -156,14 +157,14 @@ def test_trial_status_is_private(get_queue, client, problem, user):
     assert client.get(reverse("submissions:trial_status", args=["job1"])).json()["verdict"] == "AC"
 
 
-@patch("judge.runner.sandbox.run_tests", return_value=[("3\n", "OK", 5), ("7\n", "OK", 6)])
+@patch("judge.runner.sandbox.run_tests", return_value=[("3\n", "OK", 5, 1024), ("7\n", "OK", 6, 1024)])
 @patch("judge.runner.sandbox.compile", return_value=(True, ""))
 def test_run_trial_marks_each_sample(compile_, run_tests, python):
     from judge.runner import run_trial
     r = run_trial("python", "x", ["1 2\n", "3 3\n"], ["3\n", "6\n"], 1000, 256)
     assert r["verdict"] == "WA" and r["total"] == 2
     assert [c["verdict"] for c in r["cases"]] == ["AC", "WA"]
-    run_tests.return_value = [("3\n", "OK", 5)]
+    run_tests.return_value = [("3\n", "OK", 5, 1024)]
     custom = run_trial("python", "x", ["1 2\n"], None, 1000, 256)
     assert custom["verdict"] == "OK" and custom["cases"][0]["expected"] is None
 
@@ -172,11 +173,11 @@ def test_run_trial_marks_each_sample(compile_, run_tests, python):
 @patch("judge.runner.sandbox.compile", return_value=(True, ""))
 def test_runner_ac(compile_, run_tests, problem, python, user):
     from judge.runner import run_submission
-    run_tests.return_value = [("3\n", "OK", 10), ("12\n", "OK", 12)]
+    run_tests.return_value = [("3\n", "OK", 10, 2048), ("12\n", "OK", 12, 1024)]
     s = Submission.objects.create(user=user, problem=problem, language=python, source="x")
     run_submission(s.pk)
     s.refresh_from_db()
-    assert s.verdict == "AC" and s.passed == 2 and s.total == 2 and s.exec_ms == 12
+    assert s.verdict == "AC" and s.passed == 2 and s.total == 2 and s.exec_ms == 12 and s.mem_kb == 2048
     assert s.results.count() == 2
 
 
@@ -184,7 +185,7 @@ def test_runner_ac(compile_, run_tests, problem, python, user):
 @patch("judge.runner.sandbox.compile", return_value=(True, ""))
 def test_runner_wa_stops_early(compile_, run_tests, problem, python, user):
     from judge.runner import run_submission
-    run_tests.return_value = [("4\n", "OK", 10), ("12\n", "OK", 12)]
+    run_tests.return_value = [("4\n", "OK", 10, 1024), ("12\n", "OK", 12, 1024)]
     s = Submission.objects.create(user=user, problem=problem, language=python, source="x")
     run_submission(s.pk)
     s.refresh_from_db()
@@ -203,7 +204,7 @@ def test_runner_ce(compile_, run_tests, problem, python, user):
     run_tests.assert_not_called()
 
 
-@patch("judge.runner.sandbox.run_tests", return_value=[("", "TLE", 3100)])
+@patch("judge.runner.sandbox.run_tests", return_value=[("", "TLE", 3100, 1024)])
 @patch("judge.runner.sandbox.compile", return_value=(True, ""))
 def test_runner_tle(compile_, run_tests, problem, python, user):
     from judge.runner import run_submission
@@ -221,7 +222,7 @@ def test_runner_tle(compile_, run_tests, problem, python, user):
 @patch("judge.runner.sandbox.compile", return_value=(True, ""))
 def test_runner_first_ac_awards_practice_points(compile_, run_tests, problem, python, user):
     from judge.runner import run_submission
-    run_tests.return_value = [("3\n", "OK", 10), ("12\n", "OK", 12)]
+    run_tests.return_value = [("3\n", "OK", 10, 1024), ("12\n", "OK", 12, 1024)]
     s = Submission.objects.create(user=user, problem=problem, language=python, source="x")
     run_submission(s.pk)
     user.refresh_from_db()
@@ -233,7 +234,7 @@ def test_runner_first_ac_awards_practice_points(compile_, run_tests, problem, py
 @patch("judge.runner.sandbox.compile", return_value=(True, ""))
 def test_runner_second_ac_does_not_award_points_again(compile_, run_tests, problem, python, user):
     from judge.runner import run_submission
-    run_tests.side_effect = [[("3\n", "OK", 10), ("12\n", "OK", 12)], [("3\n", "OK", 10), ("12\n", "OK", 12)]]
+    run_tests.side_effect = [[("3\n", "OK", 10, 1024), ("12\n", "OK", 12, 1024)], [("3\n", "OK", 10, 1024), ("12\n", "OK", 12, 1024)]]
     s1 = Submission.objects.create(user=user, problem=problem, language=python, source="x")
     run_submission(s1.pk)
     s2 = Submission.objects.create(user=user, problem=problem, language=python, source="x")
@@ -247,7 +248,7 @@ def test_runner_second_ac_does_not_award_points_again(compile_, run_tests, probl
 @patch("judge.runner.sandbox.compile", return_value=(True, ""))
 def test_runner_wa_awards_no_points(compile_, run_tests, problem, python, user):
     from judge.runner import run_submission
-    run_tests.return_value = [("4\n", "OK", 10)]
+    run_tests.return_value = [("4\n", "OK", 10, 1024)]
     s = Submission.objects.create(user=user, problem=problem, language=python, source="x")
     run_submission(s.pk)
     user.refresh_from_db()
@@ -260,7 +261,7 @@ def test_runner_contest_ac_awards_no_practice_points(compile_, run_tests, proble
     """spec §2 step 5: practice points are awarded on AC 'outside contest' only."""
     from judge.runner import run_submission
     contest = Contest.objects.create(title="Sprint", start=timezone.now(), end=timezone.now() + timezone.timedelta(hours=1))
-    run_tests.return_value = [("3\n", "OK", 10), ("12\n", "OK", 12)]
+    run_tests.return_value = [("3\n", "OK", 10, 1024), ("12\n", "OK", 12, 1024)]
     s = Submission.objects.create(user=user, problem=problem, contest=contest, language=python, source="x")
     run_submission(s.pk)
     s.refresh_from_db()
@@ -282,7 +283,7 @@ def test_runner_retry_while_running_does_not_duplicate_results(compile_, run_tes
     # Simulate a crashed prior attempt that left a partial result row.
     TestResult.objects.create(
         submission=s, testcase=problem.testcases.first(), verdict="AC", exec_ms=5)
-    run_tests.return_value = [("3\n", "OK", 10), ("12\n", "OK", 12)]
+    run_tests.return_value = [("3\n", "OK", 10, 1024), ("12\n", "OK", 12, 1024)]
 
     run_submission(s.pk)
     s.refresh_from_db()

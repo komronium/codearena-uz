@@ -24,7 +24,7 @@
         <span>{{ s.language.name }}</span>
         <span class="tabular sm:hidden">{{ s.created|date:"d.m H:i" }}</span>
         {% if s.total %}<span class="tabular">{{ s.passed }}/{{ s.total }} test</span>{% endif %}
-        {% if s.verdict == "AC" %}<span class="tabular"><i data-lucide="timer" class="lu" aria-hidden="true"></i>{{ s.exec_ms }} ms</span>{% endif %}
+        {% if s.verdict == "AC" %}<span class="tabular"><i data-lucide="timer" class="lu" aria-hidden="true"></i>{{ s.exec_ms }} ms</span>{% if s.mem_kb %}<span class="tabular"><i data-lucide="memory-stick" class="lu" aria-hidden="true"></i>{% widthratio s.mem_kb 1024 1 %} MB</span>{% endif %}{% endif %}
       </p>
     </div>
     <div class="flex items-center gap-3">

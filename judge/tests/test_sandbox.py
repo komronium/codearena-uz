@@ -34,35 +34,41 @@ def test_ok():
     d = _src("a,b=map(int,input().split());print(a+b)")
     ok, log = compile(Lang, d)
     assert ok and log == ""
-    out, verdict, ms = run_tests(Lang, d, ["1 2\n"], 1000, 64)[0]
+    out, verdict, ms, _ = run_tests(Lang, d, ["1 2\n"], 1000, 64)[0]
     assert verdict == "OK" and out == "3\n" and ms < 1000
 
 
 def test_re():
     d = _src("print(1/0)")
-    _, verdict, _ = run_tests(Lang, d, [""], 1000, 64)[0]
+    _, verdict, _, _ = run_tests(Lang, d, [""], 1000, 64)[0]
     assert verdict == "RE"
 
 
 def test_tle():
     d = _src("while True: pass")
-    _, verdict, ms = run_tests(Lang, d, [""], 500, 64)[0]
+    _, verdict, ms, _ = run_tests(Lang, d, [""], 500, 64)[0]
     assert verdict == "TLE" and ms >= 500
 
 
 def test_mle():
     d = _src("x=[0]*(10**8)")
-    _, verdict, _ = run_tests(Lang, d, [""], 3000, 32)[0]
+    _, verdict, _, _ = run_tests(Lang, d, [""], 3000, 32)[0]
     assert verdict == "MLE"
 
 
 def test_no_network():
     d = _src("import socket; socket.create_connection(('1.1.1.1',53),timeout=1)")
-    _, verdict, _ = run_tests(Lang, d, [""], 3000, 64)[0]
+    _, verdict, _, _ = run_tests(Lang, d, [""], 3000, 64)[0]
     assert verdict == "RE"
 
 
 def test_many_tests_one_container_stops_at_first_failure():
     d = _src("n=int(input())\nprint(n*2) if n < 3 else 1/0")
     res = run_tests(Lang, d, ["1\n", "2\n", "3\n", "4\n"], 1000, 64)
-    assert [(o, v) for o, v, _ in res] == [("2\n", "OK"), ("4\n", "OK"), ("", "RE")]
+    assert [(o, v) for o, v, _, _ in res] == [("2\n", "OK"), ("4\n", "OK"), ("", "RE")]
+
+
+def test_reports_peak_memory_per_test():
+    d = _src("n=int(input())\nx=bytearray(n*1024*1024)\nprint(len(x))")
+    (_, v1, _, small), (_, v2, _, big) = run_tests(Lang, d, ["1\n", "40\n"], 2000, 128)
+    assert v1 == v2 == "OK" and small < 20_000 and big >= 40 * 1024

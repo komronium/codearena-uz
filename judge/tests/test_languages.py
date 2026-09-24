@@ -47,5 +47,5 @@ def test_a_plus_b_ac(lang_code):
     d = _src(lang_code, A_PLUS_B_SOURCE[lang_code])
     ok, log = compile(lang, d)
     assert ok, log
-    out, verdict, ms = run_tests(lang, d, ["1 2\n"], 1000, 128)[0]
-    assert verdict == "OK" and out.strip() == "3"
+    out, verdict, ms, kb = run_tests(lang, d, ["1 2\n"], 1000, 128)[0]
+    assert verdict == "OK" and out.strip() == "3" and kb > 0

@@ -4,7 +4,7 @@
   <div class="flex flex-wrap items-center gap-3">
     {% include "submissions/_verdict.html" with v=s.verdict %}
     {% if s.is_terminal and s.verdict != 'CE' %}
-    <span class="tabular text-sm text-mute">{{ s.passed }}/{{ s.total }} test · {{ s.exec_ms }} ms</span>
+    <span class="tabular text-sm text-mute">{{ s.passed }}/{{ s.total }} test · {{ s.exec_ms }} ms{% if s.mem_kb %} · {% widthratio s.mem_kb 1024 1 %} MB{% endif %}</span>
     {% elif s.verdict == 'RUNNING' and progress %}
     <span class="tabular text-sm text-mute">{{ progress.done }}/{{ progress.total }} test</span>
     {% endif %}
@@ -19,7 +19,7 @@
   {# one square per test — 200 tests still fit on a screen; the first failure gets its details below #}
   <div class="mt-4 flex flex-wrap gap-1" role="group" aria-label="Testlar natijasi">
     {% for r in results %}
-    <span class="ca-test ca-test-{{ r.verdict }}" title="Test {{ forloop.counter }}: {{ r.verdict }} · {{ r.exec_ms }} ms">{{ forloop.counter }}</span>
+    <span class="ca-test ca-test-{{ r.verdict }}" title="Test {{ forloop.counter }}: {{ r.verdict }} · {{ r.exec_ms }} ms{% if r.mem_kb %} · {% widthratio r.mem_kb 1024 1 %} MB{% endif %}">{{ forloop.counter }}</span>
     {% endfor %}
   </div>
   {% if first_fail %}
@@ -27,7 +27,7 @@
     <div class="mb-2 flex items-center gap-2">
       <span class="font-semibold">Test {{ first_fail.index }}</span>
       {% include "submissions/_verdict.html" with v=first_fail.verdict %}
-      <span class="tabular text-xs text-mute">{{ first_fail.exec_ms }} ms</span>
+      <span class="tabular text-xs text-mute">{{ first_fail.exec_ms }} ms{% if first_fail.mem_kb %} · {% widthratio first_fail.mem_kb 1024 1 %} MB{% endif %}</span>
     </div>
     {% if first_fail.testcase.is_sample %}
     <div class="grid gap-2 sm:grid-cols-3">

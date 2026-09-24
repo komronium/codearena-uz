@@ -15,14 +15,23 @@ _BASE = ["docker", "run", "--rm", "--network", "none", "--cpus", "1", "--pids-li
 # Runs inside the (alpine/busybox) image. Stops at the first non-zero exit so a
 # TLE solution doesn't burn TL x tests; WA is decided on the host and keeps going.
 # /proc/uptime gives 10ms resolution without needing `date +%N`.
+# `busybox time -f %M` records peak RSS (KB) as the last field (on failure busybox
+# prefixes "Command exited with non-zero status N"). It wraps `timeout`, not the other
+# way round: busybox timeout execs the command in its own pid, so a kill hits the
+# solution itself and nothing is orphaned. time reports a SIGKILL as rc=9, so map
+# that back to 137, which the TLE/MLE split below expects.
 _RUNNER = """#!/bin/sh
 for f in /work/tests/*.in; do
   n=$(basename "$f" .in)
+  rm -f /tmp/mem
   s=$(cut -d' ' -f1 /proc/uptime)
-  timeout -s KILL {tl} {run} < "$f" > "/out/$n.out" 2>/dev/null
+  busybox time -f %M -o /tmp/mem timeout -s KILL {tl} {run} < "$f" > "/out/$n.out" 2>/dev/null
   rc=$?
   e=$(cut -d' ' -f1 /proc/uptime)
-  echo "$n $rc $s $e" >> /out/result
+  grep -q "terminated by signal 9" /tmp/mem 2>/dev/null && rc=137
+  m=$(awk 'END{{print $NF}}' /tmp/mem 2>/dev/null)
+  case "$m" in ''|*[!0-9]*) m=0;; esac  # /tmp is writable by the solution too; keep the field numeric
+  echo "$n $rc $s $e ${{m:-0}}" >> /out/result
   [ "$rc" -ne 0 ] && break
 done
 """
@@ -50,8 +59,8 @@ def compile(lang, src_dir: str) -> tuple[bool, str]:
     return p.returncode == 0, (p.stderr or "")[:4000]
 
 
-def run_tests(lang, src_dir: str, inputs: list[str], tl_ms: int, ml_mb: int) -> list[tuple[str, str, int]]:
-    """Run every input in one container. Returns (stdout, verdict, ms) per test in
+def run_tests(lang, src_dir: str, inputs: list[str], tl_ms: int, ml_mb: int) -> list[tuple[str, str, int, int]]:
+    """Run every input in one container. Returns (stdout, verdict, ms, kb) per test in
     order, verdict in {OK, TLE, MLE, RE}; stops after the first non-OK test, so
     the list may be shorter than `inputs`."""
     tests_dir, out_dir = os.path.join(src_dir, "tests"), os.path.join(src_dir, "out")
@@ -79,12 +88,12 @@ def run_tests(lang, src_dir: str, inputs: list[str], tl_ms: int, ml_mb: int) -> 
         with open(os.path.join(out_dir, "result")) as f:
             lines = f.read().split("\n")
     except FileNotFoundError:
-        return [("", "RE", 0)]  # container never got going: treat as runtime error
+        return [("", "RE", 0, 0)]  # container never got going: treat as runtime error
     for line in lines:
         if not line.strip():
             continue
-        n, rc, s, e = line.split()
-        ms = int((float(e) - float(s)) * 1000)
+        n, rc, s, e, kb = line.split()
+        ms, kb = int((float(e) - float(s)) * 1000), int(kb)
         try:
             with open(os.path.join(out_dir, f"{n}.out"), errors="replace") as f:
                 out = f.read()
@@ -92,11 +101,11 @@ def run_tests(lang, src_dir: str, inputs: list[str], tl_ms: int, ml_mb: int) -> 
             out = ""
         rc = int(rc)
         if rc == 0:
-            results.append((out, "OK", ms))
+            results.append((out, "OK", ms, kb))
         elif rc == 137 and ms >= tl_ms * lang.tl_multiplier:
-            results.append(("", "TLE", ms))
+            results.append(("", "TLE", ms, kb))
         elif rc == 137:
-            results.append(("", "MLE", ms))
+            results.append(("", "MLE", ms, kb))
         else:
-            results.append((out, "RE", ms))
+            results.append((out, "RE", ms, kb))
     return results

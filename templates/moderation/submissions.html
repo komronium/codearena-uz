@@ -47,7 +47,7 @@
       </div>
     </div>
     <div class="ca-row-side">
-      {% if s.is_terminal and s.verdict != 'CE' %}<span class="tabular text-xs text-mute">{{ s.passed }}/{{ s.total }} · {{ s.exec_ms }} ms</span>{% endif %}
+      {% if s.is_terminal and s.verdict != 'CE' %}<span class="tabular text-xs text-mute">{{ s.passed }}/{{ s.total }} · {{ s.exec_ms }} ms{% if s.mem_kb %} · {% widthratio s.mem_kb 1024 1 %} MB{% endif %}</span>{% endif %}
       {% include "submissions/_verdict.html" with v=s.verdict %}
       <a class="ca-btn ca-btn-ghost !px-2 !py-1.5" href="{% url 'submissions:detail' s.pk %}" title="Kodni ko‘rish" aria-label="Kodni ko‘rish: #{{ s.pk }}"><i data-lucide="code" class="lu" aria-hidden="true"></i></a>
     </div>

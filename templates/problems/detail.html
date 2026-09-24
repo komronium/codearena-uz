@@ -525,7 +525,7 @@ so @codemirror/state is a singleton — two copies break with "Unrecognized exte
       const head = custom ? "O‘z inputingiz" : `Namunaviy testlar: ${passed}/${r.total} o‘tdi`;
       const cases = r.cases.map((c, i) => `
         <details class="mt-2 rounded-md border border-line"${c.verdict === "AC" ? "" : " open"}>
-          <summary class="flex cursor-pointer list-none items-center gap-2 px-3 py-2">${chip(c.verdict)}<span>${custom ? "Natija" : `Test ${i + 1}`}</span><span class="tabular ml-auto text-xs text-mute">${c.ms} ms</span></summary>
+          <summary class="flex cursor-pointer list-none items-center gap-2 px-3 py-2">${chip(c.verdict)}<span>${custom ? "Natija" : `Test ${i + 1}`}</span><span class="tabular ml-auto text-xs text-mute">${c.ms} ms${c.kb ? ` · ${Math.round(c.kb / 1024)} MB` : ""}</span></summary>
           <div class="grid gap-2 px-3 pb-3 ${custom ? "sm:grid-cols-2" : "sm:grid-cols-3"}">
             ${box("Kirish", c.input)}${box(custom ? "Chiqish" : "Sizning chiqishingiz", c.output)}${custom ? "" : box("Kutilgan", c.expected)}
           </div>
