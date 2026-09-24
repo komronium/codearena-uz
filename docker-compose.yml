@@ -27,7 +27,7 @@ services:
   worker:
     build: .
     env_file: .env
-    command: python manage.py rqworker default
+    command: python manage.py rqworker default run
     volumes:
       - ".:/app"
       - "/var/run/docker.sock:/var/run/docker.sock"

@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}{{ participant.username }} · {{ cp.label }} — yozilish tarixi{% endblock %}
+{% block sidebar %}{% endblock %}
+{% block content %}
+<a class="ca-link mb-4 inline-flex text-sm text-mute" href="{% url 'integrity:contest_report' contest.pk %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>Nazorat hisoboti</a>
+<div class="mb-5 flex flex-wrap items-end justify-between gap-3">
+  <div class="min-w-0">
+    <h1 class="ca-page-title">Kod qanday yozilgan</h1>
+    <p class="mt-1 flex flex-wrap items-center gap-2 text-sm text-mute">
+      {% include "accounts/_user.html" with u=participant tier=False %}
+      <span>· <span class="text-accent font-semibold">{{ cp.label }}.</span> {{ cp.problem.title }}</span>
+    </p>
+  </div>
+  <nav class="flex flex-wrap gap-1.5" aria-label="Boshqa masalalar">
+    {% for o in others %}
+    <a class="ca-filter {% if o.problem_id == cp.problem_id %}is-active{% endif %}" href="{% url 'integrity:replay' contest.pk participant.pk o.problem_id %}"{% if o.problem_id == cp.problem_id %} aria-current="page"{% endif %}>{{ o.label }}</a>
+    {% endfor %}
+  </nav>
+</div>
+
+{% if frames %}
+<div class="grid gap-5 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start">
+  <section class="ca-panel !p-0 overflow-hidden" aria-label="Kod ijrosi">
+    <div class="flex flex-wrap items-center gap-3 border-b border-line px-4 py-3">
+      <div class="flex items-center gap-1">
+        <button type="button" class="ca-btn ca-btn-ghost !px-2 !py-1.5" id="rp-prev" aria-label="Oldingi holat"><i data-lucide="step-back" class="lu" aria-hidden="true"></i></button>
+        <button type="button" class="ca-btn ca-btn-primary !px-2.5 !py-1.5" id="rp-play" aria-label="Ijro"><i data-lucide="play" class="lu" aria-hidden="true"></i></button>
+        <button type="button" class="ca-btn ca-btn-ghost !px-2 !py-1.5" id="rp-next" aria-label="Keyingi holat"><i data-lucide="step-forward" class="lu" aria-hidden="true"></i></button>
+      </div>
+      <input type="range" id="rp-range" min="0" max="{{ frames|length|add:'-1' }}" value="0" class="min-w-[8rem] flex-1 accent-[rgb(var(--ca-accent-rgb))]" aria-label="Vaqt bo‘yicha surish">
+      <p class="tabular text-sm"><b id="rp-time"></b> <span class="text-mute" id="rp-meta"></span></p>
+    </div>
+    <pre class="ca-cmp-code !max-h-[34rem] !bg-transparent" id="rp-code" aria-live="off"></pre>
+    <p class="border-t border-line px-4 py-2 text-xs text-mute"><span class="ca-rp-key"></span> — oldingi holatdan keyin paydo bo‘lgan qatorlar. Har ~10 soniyada saqlanadi, faqat kod o‘zgarganda.</p>
+  </section>
+
+  <aside aria-label="Vaqt chizig‘i">
+    {% if jumps %}
+    <div class="ca-alert ca-alert-bad mb-3 text-sm">
+      <b>{{ jumps|length }} ta keskin sakrash</b> — 10 soniya atrofida {{ jumps.0.chars }}+ belgi paydo bo‘lgan. Qo‘lda yozilgan kodda bu kam uchraydi.
+    </div>
+    {% endif %}
+    <ol class="ca-rows max-h-[36rem] overflow-y-auto text-sm">
+      {% for it in timeline %}
+      <li><button type="button" class="ca-rp-item{% if not it.here %} opacity-60{% endif %}" data-t="{{ it.at|date:'c' }}">
+        <span class="tabular w-16 shrink-0 text-xs text-mute">{{ it.at|date:"H:i:s" }}</span>
+        {% if it.kind == "submit" %}{% include "submissions/_verdict.html" with v=it.sub.verdict %}<span>yuborildi</span>
+        {% elif it.kind == "jump" %}<span class="font-semibold text-bad"><i data-lucide="zap" class="lu mr-1" aria-hidden="true"></i>+{{ it.chars }} belgi {{ it.secs }} s ichida</span>
+        {% elif it.kind == "blur" %}<span class="text-warn"><i data-lucide="log-out" class="lu mr-1" aria-hidden="true"></i>Sahifadan chiqdi</span>
+        {% elif it.kind == "focus" %}<span class="{% if it.away_s >= 20 %}font-semibold text-warn{% endif %}"><i data-lucide="log-in" class="lu mr-1" aria-hidden="true"></i>Qaytdi · {{ it.away_s }} s tashqarida</span>
+        {% elif it.kind == "paste" %}<span class="font-semibold text-bad"><i data-lucide="clipboard" class="lu mr-1" aria-hidden="true"></i>Paste urinishi</span>
+        {% elif it.kind == "fast" %}<span class="text-warn"><i data-lucide="gauge" class="lu mr-1" aria-hidden="true"></i>Juda tez yozish</span>
+        {% elif it.kind == "view" %}<span class="text-mute"><i data-lucide="eye" class="lu mr-1" aria-hidden="true"></i>Masalani ochdi</span>{% endif %}
+        {% if not it.here %}<span class="text-xs text-mute">(boshqa sahifa)</span>{% endif %}
+      </button></li>
+      {% endfor %}
+    </ol>
+  </aside>
+</div>
+{{ frames|json_script:"rp-frames" }}
+<script>
+  (() => {
+    const frames = JSON.parse(document.getElementById("rp-frames").textContent);
+    const range = document.getElementById("rp-range"), code = document.getElementById("rp-code");
+    const playBtn = document.getElementById("rp-play");
+    const t0 = new Date(frames[0].t);
+    const esc = (t) => t.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+    const clock = (d) => d.toLocaleTimeString("uz", { hour12: false });
+    function show(i) {
+      range.value = i;
+      const f = frames[i], before = new Set(i ? frames[i - 1].src.split("\n") : []);
+      code.innerHTML = f.src.split("\n").map((line, n) =>
+        `<span class="ca-cmp-line${i && !before.has(line) && line.trim() ? " is-new" : ""}"><span class="ca-cmp-n">${n + 1}</span>${esc(line)}</span>`).join("");
+      const since = Math.round((new Date(f.t) - t0) / 1000);
+      document.getElementById("rp-time").textContent = clock(new Date(f.t));
+      document.getElementById("rp-meta").textContent = `· ${i + 1}/${frames.length} · +${Math.floor(since / 60)} daq ${since % 60} s · ${f.src.length} belgi${f.lang ? " · " + f.lang : ""}`;
+    }
+    let timer = null;
+    const stop = () => { clearInterval(timer); timer = null; playBtn.innerHTML = '<i data-lucide="play" class="lu"></i>'; window.caIcons?.(); };
+    playBtn.addEventListener("click", () => {
+      if (timer) return stop();
+      if (+range.value >= frames.length - 1) show(0);
+      playBtn.innerHTML = '<i data-lucide="pause" class="lu"></i>'; window.caIcons?.();
+      timer = setInterval(() => (+range.value < frames.length - 1 ? show(+range.value + 1) : stop()), 700);
+    });
+    range.addEventListener("input", () => show(+range.value));
+    document.getElementById("rp-prev").addEventListener("click", () => show(Math.max(0, +range.value - 1)));
+    document.getElementById("rp-next").addEventListener("click", () => show(Math.min(frames.length - 1, +range.value + 1)));
+    // timeline click: jump to the code as it was at that moment
+    document.querySelectorAll(".ca-rp-item").forEach((b) => b.addEventListener("click", () => {
+      const t = new Date(b.dataset.t);
+      let i = 0;
+      while (i + 1 < frames.length && new Date(frames[i + 1].t) <= t) i++;
+      stop(); show(i);
+    }));
+    show(0);
+  })();
+</script>
+{% else %}
+<div class="ca-empty">Bu masala uchun saqlangan kod holati yo‘q. Ishtirokchi masalani ochmagan yoki bu musobaqa yozilish tarixi qo‘shilishidan oldin o‘tgan.</div>
+{% endif %}
+{% endblock %}

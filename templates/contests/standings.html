@@ -12,24 +12,28 @@
       {% if contest.is_running %}· <span class="tabular font-medium text-ink" data-countdown="{{ contest.end|date:'c' }}" data-label="Tugashiga"></span>{% endif %}
     </p>
   </div>
-  {% if contest.is_running %}<span class="ca-diff ca-diff-easy"><span class="ca-live-dot" aria-hidden="true"></span>Jonli</span>{% endif %}
+  <div class="flex flex-wrap items-center gap-2">
+    {% if contest.is_running %}<span class="ca-diff ca-diff-easy"><span class="ca-live-dot" aria-hidden="true"></span>Jonli</span>{% endif %}
+    {% if me_in_rows %}<a class="ca-btn ca-btn-ghost !py-1.5 text-sm" href="#me"><i data-lucide="locate-fixed" class="lu" aria-hidden="true"></i>Mening o‘rnim</a>{% endif %}
+  </div>
 </div>
 
 {% if rows %}
-<div class="ca-panel !p-0 overflow-x-auto">
+<div class="ca-panel !p-0 overflow-x-auto" tabindex="0" aria-label="Natijalar jadvali (gorizontal suriladi)">
 <table class="ca-table ca-standings">
   <thead>
     <tr>
-      <th class="w-12 !text-center">#</th>
-      <th>Ishtirokchi</th>
+      <th class="ca-sticky ca-sticky-rank !text-center">#</th>
+      <th class="ca-sticky ca-sticky-user">Ishtirokchi</th>
       <th class="text-right">Ball</th>
       <th class="text-right" title="AC daqiqasi + 20 × noto‘g‘ri urinish (yechilgan masalalar bo‘yicha)">Jarima</th>
       {% if contest.is_rated %}<th class="hidden text-right md:table-cell">Reyting</th>{% endif %}
       {% for cp in problems %}
       <th class="ca-st-prob">
         {% if contest.has_started and registered or contest.has_ended or contest.has_started and user.is_staff %}<a class="ca-st-label" href="{% url 'problems:detail' cp.problem.slug %}" title="{{ cp.problem.title }}">{{ cp.label }}</a>{% else %}<span class="ca-st-label">{{ cp.label }}</span>{% endif %}
-        <span class="ca-st-sub tabular">{{ cp.points }}</span>
-        <span class="ca-st-sub tabular" title="{{ cp.n_solved }} kishi yechdi, {{ cp.n_tried }} kishi urindi">{{ cp.n_solved }}/{{ cp.n_tried }}</span>
+        <span class="ca-st-sub tabular">{{ cp.points }} ball</span>
+        <span class="ca-st-rate" title="{{ cp.n_solved }} kishi yechdi, {{ cp.n_tried }} kishi urindi"><span style="width: {{ cp.solve_pct }}%"></span></span>
+        <span class="ca-st-sub tabular">{{ cp.n_solved }}/{{ cp.n_tried }}</span>
       </th>
       {% endfor %}
       {% if user.is_staff %}<th class="w-10"><span class="sr-only">Amal</span></th>{% endif %}
@@ -37,14 +41,14 @@
   </thead>
   <tbody>
   {% for r in rows %}
-  <tr class="{% if r.user == user %}ca-row-me{% endif %} {% if r.disqualified %}ca-row-dq{% endif %}">
-    <td class="text-center">{% include "accounts/_rank.html" with rank=r.rank dq=r.disqualified %}</td>
-    <td class="min-w-[11rem] max-w-[16rem]">
+  <tr class="{% if r.user == user %}ca-row-me{% endif %} {% if r.disqualified %}ca-row-dq{% endif %}"{% if r.user == user %} id="me"{% endif %}>
+    <td class="ca-sticky ca-sticky-rank text-center">{% include "accounts/_rank.html" with rank=r.rank dq=r.disqualified %}</td>
+    <td class="ca-sticky ca-sticky-user">
       <div class="flex min-w-0 items-center gap-2">
         {% include "accounts/_user.html" with u=r.user tier=False %}
         {% if r.disqualified %}<span class="ca-chip text-bad shrink-0" title="{{ r.participation.disqualified_reason|default:'Diskvalifikatsiya' }}">DQ</span>{% endif %}
       </div>
-      {% if r.user.get_full_name or r.user.school %}<div class="mt-0.5 truncate pl-9 text-xs text-mute">{{ r.user.get_full_name }}{% if r.user.get_full_name and r.user.school %} · {% endif %}{{ r.user.school }}</div>{% endif %}
+      {% if r.user.get_full_name %}<div class="mt-0.5 truncate pl-9 text-xs text-mute">{{ r.user.get_full_name }}</div>{% endif %}
     </td>
     <td class="tabular text-right">
       <div class="text-base font-bold">{{ r.score }}</div>
@@ -59,6 +63,7 @@
     {% endif %}
     {% for cell in r.cells %}
     <td class="ca-cell {% if cell.solved %}ca-cell-ac{% if cell.first %} ca-cell-first{% endif %}{% elif cell.wrong %}ca-cell-wa{% endif %}"{% if cell.first %} title="Birinchi bo‘lib yechdi"{% endif %}>
+      {% if cell.first %}<span class="sr-only">birinchi bo‘lib yechdi,</span>{% endif %}
       {% if cell.solved %}
         <div class="font-semibold text-ok">+{% if cell.wrong %}{{ cell.wrong }}{% endif %}</div>
         <div class="tabular text-xs text-mute">{{ cell.time }}</div>
@@ -92,7 +97,7 @@
   <span><b class="text-bad">−1</b> 1 noto‘g‘ri urinish, yechilmagan</span>
   <span><span class="ca-legend-swatch ca-cell-first" aria-hidden="true"></span> birinchi bo‘lib yechgan</span>
   <span>vaqt — boshlanishdan <b>daq:son</b></span>
-  <span>ustun sarlavhasida — <b>ball</b>, ostida <b>yechdi/urindi</b></span>
+  <span>ustun sarlavhasida — <b>ball</b>, chiziq va <b>yechdi/urindi</b></span>
   <span><b>jarima</b> — AC daqiqalari + 20 × noto‘g‘ri urinish</span>
   <span><b class="text-bad">DQ</b> — diskvalifikatsiya, oxirgi o‘rin</span>
 </div>

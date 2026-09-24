@@ -25,6 +25,7 @@
     <div class="flex items-baseline gap-2">
       <span class="text-sm text-mute">{% if contest.is_running %}Tugashiga{% else %}Boshlanishiga{% endif %}</span>
       <span class="tabular text-xl font-bold {% if contest.is_running %}text-ok{% else %}text-ink{% endif %}" data-countdown="{% if contest.is_running %}{{ contest.end|date:'c' }}{% else %}{{ contest.start|date:'c' }}{% endif %}" data-label="" data-suffix="1"></span>
+      {% if contest.is_running and registered %}<span data-leaves-wrap class="!hidden text-sm text-bad">· sahifadan chiqishlar: <b class="tabular" data-leaves>0</b></span>{% endif %}
     </div>
     {% else %}
     <p class="text-sm text-mute">Musobaqa {{ contest.end|date:"d.m.Y H:i" }} da tugagan</p>
@@ -129,4 +130,5 @@
 {% else %}
 <div class="ca-empty">Masalalar hali qo‘shilmagan.</div>
 {% endif %}
+{% if contest.is_running and registered %}{% include "integrity/_tracker.html" %}{% endif %}
 {% endblock %}

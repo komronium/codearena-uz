@@ -252,8 +252,25 @@
     .ca-table tbody tr:hover td.ca-cell-ac { background: rgb(var(--ca-ok-rgb) / .1); }
     .ca-table tbody tr:hover td.ca-cell-first { background: rgb(var(--ca-ok-rgb) / .22); }
     .ca-table tbody tr:hover td.ca-cell-wa { background: rgb(var(--ca-bad-rgb) / .09); }
+    /* first solve: a corner flag too, so it isn't told by colour alone */
+    .ca-cell-first { position: relative; }
+    .ca-cell-first::after { content: ""; position: absolute; top: 0; right: 0; border-style: solid; border-width: 0 .55rem .55rem 0; border-color: transparent rgb(var(--ca-ok-rgb)) transparent transparent; }
+    .ca-st-rate { display: block; width: 2.6rem; height: 3px; margin: .3rem auto .15rem; border-radius: 9999px; background: rgb(var(--ca-ink-rgb) / .1); overflow: hidden; }
+    .ca-st-rate span { display: block; height: 100%; background: rgb(var(--ca-ok-rgb)); }
+    /* rank + name stay put while the problem columns scroll sideways; opaque so cells don't show through */
+    .ca-table.ca-standings { overflow: visible; }  /* overflow:hidden would make the table the sticky scroller */
+    .ca-standings .ca-sticky { position: sticky; z-index: 1; background-color: rgb(var(--ca-surface-rgb)); }
+    .ca-standings th.ca-sticky { background: rgb(var(--ca-paper-rgb)); z-index: 2; }
+    .ca-sticky-rank { left: 0; width: 3.25rem; min-width: 3.25rem; }
+    .ca-sticky-user { left: 3.25rem; min-width: 12rem; max-width: 16rem; box-shadow: inset -1px 0 0 rgb(var(--ca-line-rgb)); }
+    .ca-standings tbody tr:hover td.ca-sticky { background: linear-gradient(rgb(var(--ca-accent-rgb) / .045), rgb(var(--ca-accent-rgb) / .045)), rgb(var(--ca-surface-rgb)); }
+    .ca-standings tr.ca-row-me td.ca-sticky { background: linear-gradient(rgb(var(--ca-accent-rgb) / .07), rgb(var(--ca-accent-rgb) / .07)), rgb(var(--ca-surface-rgb)); }
+    .ca-standings tbody tr:hover td.ca-sticky-user { box-shadow: inset -1px 0 0 rgb(var(--ca-line-rgb)); }
+    .ca-standings tbody tr:hover td.ca-sticky-rank { box-shadow: inset 3px 0 0 rgb(var(--ca-accent-rgb)); }
+    #me { scroll-margin-top: 6rem; }
     .ca-legend-swatch { display: inline-block; width: 1.1rem; height: .85rem; border-radius: 3px; vertical-align: middle; }
     .ca-st-action { display: grid; place-items: center; padding: .4rem; border-radius: .5rem; color: rgb(var(--ca-mute-rgb)); opacity: .45; }
+    @media (hover: hover) { .ca-st-action { opacity: 0; } }
     .ca-table tr:hover .ca-st-action, .ca-st-action:focus-visible { opacity: 1; }
     .ca-st-action:hover { color: rgb(var(--ca-bad-rgb)); background: rgb(var(--ca-bad-rgb) / .1); }
     .ca-stars { display: inline-flex; gap: .1rem; }
@@ -297,7 +314,7 @@
     .ca-podium-card.is-me { box-shadow: 0 0 0 2px rgb(var(--ca-accent-rgb)), var(--ca-shadow); }
     .ca-podium-medal {
       position: absolute; top: -.95rem; width: 1.9rem; height: 1.9rem; display: grid; place-items: center;
-      border-radius: 9999px; color: #fff; background: var(--medal); box-shadow: 0 2px 6px rgb(15 23 42 / .25);
+      border-radius: 9999px; color: rgb(var(--ca-paper-rgb)); background: var(--medal); box-shadow: 0 2px 6px rgb(15 23 42 / .25);
     }
     .ca-podium-medal svg.lucide { width: 1rem; height: 1rem; }
     .ca-podium-avatar {
@@ -419,6 +436,17 @@
     }
     .ca-filter:hover { color: rgb(var(--ca-ink-rgb)); border-color: rgb(var(--ca-mute-rgb) / .5); }
     .ca-filter.is-active { color: rgb(var(--ca-on-fill-rgb)); background: rgb(var(--ca-accent-fill-rgb)); border-color: rgb(var(--ca-accent-fill-rgb)); }
+    /* checkbox chip: native input kept (keyboard, form), the span wears the ca-filter look */
+    .ca-pick { position: relative; }
+    .ca-pick input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+    .ca-pick span {
+      display: inline-grid; place-items: center; min-width: 2.25rem; padding: .35rem .7rem; border-radius: 9999px;
+      font-size: .85rem; font-weight: 600; color: rgb(var(--ca-mute-rgb)); background: rgb(var(--ca-surface-rgb));
+      border: 1px solid rgb(var(--ca-line-rgb)); transition: color .15s ease, background-color .15s ease, border-color .15s ease;
+    }
+    .ca-pick:hover span { color: rgb(var(--ca-ink-rgb)); border-color: rgb(var(--ca-mute-rgb) / .5); }
+    .ca-pick input:checked + span { color: rgb(var(--ca-on-fill-rgb)); background: rgb(var(--ca-accent-fill-rgb)); border-color: rgb(var(--ca-accent-fill-rgb)); }
+    .ca-pick input:focus-visible + span { outline: 2px solid rgb(var(--ca-accent-rgb)); outline-offset: 2px; }
     .ca-kbd {
       display: inline-block; padding: .05rem .4rem; border-radius: 5px; font-size: .7rem; font-family: "Anthropic Mono", monospace;
       border: 1px solid rgb(var(--ca-line-rgb)); border-bottom-width: 2px; background: rgb(var(--ca-surface-rgb)); color: rgb(var(--ca-mute-rgb));
@@ -462,6 +490,10 @@
     .ca-cmp-code { margin: 0; max-height: 28rem; overflow: auto; padding: .5rem 0; font-size: .8rem; line-height: 1.55; background: rgb(var(--ca-paper-rgb) / .6); }
     .ca-cmp-line { display: block; padding-right: 1rem; white-space: pre; }
     .ca-cmp-line.is-hit, .ca-cmp-key { background: rgb(var(--ca-bad-rgb) / .13); box-shadow: inset 3px 0 0 rgb(var(--ca-bad-rgb) / .7); }
+    .ca-cmp-line.is-new, .ca-rp-key { background: rgb(var(--ca-ok-rgb) / .13); box-shadow: inset 3px 0 0 rgb(var(--ca-ok-rgb) / .7); }
+    .ca-rp-key { display: inline-block; width: 1.4rem; height: .8rem; vertical-align: middle; border-radius: 2px; }
+    .ca-rp-item { display: flex; width: 100%; flex-wrap: wrap; align-items: center; gap: .3rem .6rem; padding: .55rem .9rem; text-align: left; }
+    .ca-rp-item:hover { background: rgb(var(--ca-accent-rgb) / .06); }
     .ca-cmp-key { display: inline-block; width: 1.4rem; height: .8rem; vertical-align: middle; border-radius: 2px; }
     .ca-cmp-n { display: inline-block; width: 2.75rem; padding-right: .75rem; text-align: right; color: rgb(var(--ca-mute-rgb) / .7); user-select: none; }
     .ca-terminal {
@@ -488,6 +520,8 @@
     #editor .cm-editor { height: min(70vh, 560px); font-size: var(--ed-size, 14px); }
     #editor .cm-scroller { font-family: var(--ed-font, "Anthropic Mono", ui-monospace, monospace); line-height: 1.55; }
     #editor .cm-focused { outline: none; }
+    section.ca-ed-full { position: fixed; inset: 0; z-index: 60; padding: 1rem; background: rgb(var(--ca-paper-rgb)); }
+    section.ca-ed-full #editor .cm-editor { height: calc(100vh - 9.5rem); }
     .ca-editor-fallback {
       display: block; width: 100%; height: min(70vh, 560px); padding: .75rem 1rem; resize: vertical;
       background: transparent; color: rgb(var(--ca-ink-rgb)); border: 0; outline: none;
@@ -578,6 +612,8 @@
     .ca-rank-1 { background: linear-gradient(180deg, #F5C542, #D9A21B); }
     .ca-rank-2 { background: linear-gradient(180deg, #C7CDD8, #9AA3B2); }
     .ca-rank-3 { background: linear-gradient(180deg, #D9935A, #B36A34); }
+    /* paper = white in light, near-black in dark: medal glyph stays crisp on both */
+    .ca-rank-1, .ca-rank-2, .ca-rank-3 { color: rgb(var(--ca-paper-rgb)); }
     .ca-rank-n { color: rgb(var(--ca-mute-rgb)); box-shadow: none; font-weight: 600; font-size: .8rem; }
     .ca-delta {
       display: inline-flex; align-items: center; gap: .25rem; padding: .15rem .5rem; border-radius: 6px;

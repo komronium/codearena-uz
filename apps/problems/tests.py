@@ -115,6 +115,7 @@ def test_private_contest_problem_visible_to_registered_participant(client, probl
     body = r.content.decode()
     assert body.count('class="ca-watermark" data-wm="ali ·') == 2
     assert '<style media="print">' in body
+    assert 'id="ca-away"' in body  # leave tracker + warning dialog
 
 
 def test_private_contest_problem_404_for_non_participant(client, problem, running_contest):

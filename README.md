@@ -11,7 +11,7 @@ Competitive programming platform for students. Django + HTMX, Docker judge.
     mkdir -p work
     # terminal 1
     docker run -d -p 6379:6379 redis:7
-    python manage.py rqworker default
+    python manage.py rqworker default run
     # terminal 2
     python manage.py runserver
 
@@ -38,7 +38,7 @@ Languages: Python 3, C++ (g++ -O2), Java, JavaScript (Node 20).
 
 Ubuntu/Debian with Docker Engine + compose plugin installed. Everything runs
 inside compose: gunicorn + whitenoise (`web`), judge worker (`worker`),
-`scheduler` (rating + similarity sweeps every 5 min), Postgres, Redis.
+`scheduler` (points sweep every 5 min), Postgres, Redis.
 
     git clone <repo> /opt/codearena && cd /opt/codearena
     cp .env.prod.example .env
@@ -75,11 +75,16 @@ Contests/problems are authored in Boshqaruv (`/moderation/`, staff only). A cont
 except registered participants until `end`; unregistered visitors see only
 the label + points on `/contests/<id>/`.
 
-Two idempotent sweeps run from the `scheduler` container (dev: run by hand
-or via cron):
+Rating is never applied automatically: after the contest ends and cheaters are
+disqualified (they rank last), staff press Boshqaruv → Musobaqalar → Reytingni
+hisoblash. CLI equivalent:
 
-    python manage.py flag_similarity [contest_id]    # AC-pair similarity >= 0.85 -> SimilarityFlag
     python manage.py recalc_rating [contest_id]       # is_rated contests only; no-op once applied
+
+Similarity is checked on demand from the contest's Nazorat hisoboti, for the
+problems staff pick (same-language AC pairs, both 4+ lines, >= 90%):
+
+    python manage.py flag_similarity <contest_id> --problems A,C
 
 Publishing contest problems (making them public + awarding practice points)
 is a manual staff action: Boshqaruv → Musobaqalar → Ochish. The old

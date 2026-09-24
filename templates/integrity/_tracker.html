@@ -1,0 +1,104 @@
+{% comment %}
+Contest focus tracker; ctx: contest, problem_id (optional).
+Counts every time the participant leaves the contest workspace — another tab/window,
+the address bar, or another page of this site (standings, profile, …) — and reports how
+long they were away when they come back. Moving between the contest page and its problem
+pages, submitting, and reloading are not leaves. Problem pages also send editor snapshots
+for staff replay.
+{% endcomment %}
+<dialog id="ca-away" class="ca-dialog" aria-labelledby="ca-away-title">
+  <div class="px-6 pb-5 pt-6 text-center">
+    <span class="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-full bg-warn-soft text-warn"><i data-lucide="eye-off" class="lu !h-6 !w-6" aria-hidden="true"></i></span>
+    <h2 id="ca-away-title" class="text-lg font-semibold">Musobaqa sahifasidan chiqdingiz</h2>
+    <p class="mt-2 text-sm text-mute"><span id="ca-away-n" class="font-semibold text-ink"></span>-marta, <span id="ca-away-t" class="font-semibold text-ink"></span> tashqarida bo‘ldingiz.</p>
+    <p class="mt-3 text-sm text-mute">Har bir chiqish vaqti bilan qayd etiladi va hakamlarga ko‘rinadi. Boshqa oyna, AI yordamchisi yoki boshqa sahifadan foydalanish diskvalifikatsiyaga olib kelishi mumkin.</p>
+    <form method="dialog" class="mt-5"><button class="ca-btn ca-btn-primary w-full">Tushundim</button></form>
+  </div>
+</dialog>
+<script>
+  (() => {
+    const contestId = {{ contest.pk }}, problemId = {{ problem_id|default:"null" }};
+    const url = "{% url 'integrity:event' %}", csrf = "{{ csrf_token }}";
+    const inside = new Set(["{% url 'contests:detail' contest.pk %}"{% for cp in contest.contest_problems.all %}, "{% url 'problems:detail' cp.problem.slug %}"{% endfor %}]);
+    const k = (name) => `ca-${name}-${contestId}`;
+    const store = {  // storage can be blocked; tracking still reports, only the counter/away time degrade
+      get: (key) => { try { return sessionStorage.getItem(key); } catch { return null; } },
+      set: (key, v) => { try { sessionStorage.setItem(key, v); } catch {} },
+      del: (key) => { try { sessionStorage.removeItem(key); } catch {} },
+    };
+    const count = { get: () => { try { return +localStorage.getItem(k("leaves")) || 0; } catch { return 0; } },
+                    bump: () => { const n = count.get() + 1; try { localStorage.setItem(k("leaves"), n); } catch {} return n; } };
+
+    function post(kind, extra = "") {
+      fetch(url, {
+        method: "POST", keepalive: true,
+        headers: { "Content-Type": "application/x-www-form-urlencoded", "X-CSRFToken": csrf },
+        body: `contest_id=${contestId}${problemId ? `&problem_id=${problemId}` : ""}&kind=${kind}${extra}`,
+      });
+    }
+    const fmt = (ms) => { const s = Math.round(ms / 1000); return s < 60 ? `${s} soniya` : `${Math.floor(s / 60)} daq ${s % 60} s`; };
+    function showCounter(n) { document.querySelectorAll("[data-leaves]").forEach((el) => { el.textContent = n; el.closest("[data-leaves-wrap]")?.classList.toggle("!hidden", !n); }); }
+
+    let away = false;
+    function leave() {
+      if (away) return;
+      away = true;
+      store.set(k("left-at"), Date.now());
+      post("blur");
+    }
+    function back() {
+      if (!away) return;
+      away = false;
+      const leftAt = +store.get(k("left-at"));
+      store.del(k("left-at"));
+      const ms = leftAt ? Date.now() - leftAt : 0;
+      if (ms < 300) return;  // focus flicker, not a real leave
+      post("focus", `&away_ms=${ms}`);
+      const n = count.bump();
+      showCounter(n);
+      document.getElementById("ca-away-n").textContent = n;
+      document.getElementById("ca-away-t").textContent = fmt(ms);
+      const d = document.getElementById("ca-away");
+      if (!d.open) d.showModal();
+    }
+
+    // Arrival: the previous page of the workspace either handed over (internal) or we are back from outside.
+    const nav = performance.getEntriesByType("navigation")[0];
+    if (store.get(k("internal")) || nav?.type === "reload") {
+      store.del(k("internal"));
+      store.del(k("left-at"));
+    } else if (store.get(k("left-at"))) {
+      away = true;
+      back();
+    }
+    showCounter(count.get());
+    if (problemId) post("view");
+
+    // Leaving the page: internal moves are marked just before they happen.
+    document.addEventListener("click", (e) => {
+      const a = e.target.closest("a[href]");
+      if (a && a.origin === location.origin && inside.has(a.pathname) && !a.target) store.set(k("internal"), 1);
+    }, true);
+    document.addEventListener("submit", (e) => { if (e.target.id === "submit-form") store.set(k("internal"), 1); }, true);
+    window.addEventListener("pagehide", () => { if (!store.get(k("internal"))) leave(); });
+    window.addEventListener("blur", leave);
+    window.addEventListener("focus", back);
+    document.addEventListener("visibilitychange", () => (document.hidden ? leave() : back()));
+
+    // Editor snapshots for staff replay: every 10 s when the code changed, and on the way out.
+    if (problemId) {
+      let sent = null;
+      const snap = () => {
+        if (!window.caCode) return;
+        const { source, language } = window.caCode();
+        if (source === sent) return;
+        sent = source;
+        const body = new URLSearchParams({ contest_id: contestId, problem_id: problemId, source, language });
+        fetch("{% url 'integrity:snapshot' %}", { method: "POST", keepalive: true, headers: { "X-CSRFToken": csrf }, body });
+      };
+      setInterval(snap, 10000);
+      window.addEventListener("pagehide", snap);
+      document.addEventListener("submit", (e) => { if (e.target.id === "submit-form") snap(); }, true);
+    }
+  })();
+</script>

@@ -6,6 +6,13 @@ from .models import User
 _CA_INPUT = {"class": "ca-input"}
 
 
+def validate_public_username(username: str) -> str:
+    # usernames are shown on standings and in profile URLs; an email there leaks it to everyone
+    if "@" in username:
+        raise forms.ValidationError("Foydalanuvchi nomida @ bo‘lmasin — u hammaga ko‘rinadi. Email alohida maydonga yoziladi.")
+    return username
+
+
 class RegisterForm(UserCreationForm):
     email = forms.EmailField(required=True)
     first_name = forms.CharField(max_length=150, label="Ism")
@@ -14,6 +21,9 @@ class RegisterForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = User
         fields = ("username", "email", "first_name", "last_name")
+
+    def clean_username(self):
+        return validate_public_username(super().clean_username())
 
     def clean_email(self):
         email = self.cleaned_data["email"]

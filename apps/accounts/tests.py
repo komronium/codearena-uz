@@ -165,3 +165,37 @@ def test_recalc_practice_points_sums_current_points_of_solved_problems():
     idle.refresh_from_db()
     assert solver.practice_points == 30 + 250
     assert idle.practice_points == 0
+
+
+@pytest.mark.django_db
+def test_register_rejects_email_as_username(client):
+    r = client.post(reverse("register"), {
+        "username": "ali@gmail.com", "email": "ali@gmail.com", "first_name": "Ali",
+        "password1": "StrongPass123!", "password2": "StrongPass123!",
+    })
+    assert r.status_code == 200
+    assert "bo‘lmasin" in r.content.decode()
+    assert not User.objects.exists()
+
+
+@pytest.mark.django_db
+def test_login_accepts_email(client):
+    User.objects.create_user("ozod", email="Ozod@Gmail.com", password="StrongPass123!")
+    r = client.post(reverse("login"), {"username": "ozod@gmail.com", "password": "StrongPass123!"})
+    assert r.status_code == 302 and "_auth_user_id" in client.session
+
+
+@pytest.mark.django_db
+def test_migration_strips_email_usernames_and_login_still_works(client):
+    import importlib
+
+    from django.apps import apps
+    migration = importlib.import_module("apps.accounts.migrations.0005_usernames_without_email")
+    User.objects.create_user("ozodbek", password="x")
+    User.objects.create_user("ozodbek@gmail.com", email="ozodbek@gmail.com", password="StrongPass123!")
+    User.objects.create_user("x.y@mail.uz", email="", password="x")
+    migration.strip_email_usernames(apps, None)
+    assert set(User.objects.values_list("username", flat=True)) == {"ozodbek", "ozodbek2", "x.y"}
+    assert User.objects.get(username="x.y").email == "x.y@mail.uz"
+    r = client.post(reverse("login"), {"username": "ozodbek@gmail.com", "password": "StrongPass123!"})
+    assert r.status_code == 302

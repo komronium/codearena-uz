@@ -32,7 +32,7 @@
       </form>
       {% endif %}
       {% if c.is_rated and c.has_ended and not c.rating_applied %}
-      <form method="post" action="{% url 'moderation:contest_apply_rating' c.pk %}">{% csrf_token %}
+      <form method="post" action="{% url 'moderation:contest_apply_rating' c.pk %}" onsubmit="return confirm('Reyting bir marta hisoblanadi va qaytarib bo‘lmaydi. Cheaterlar diskvalifikatsiya qilinganmi?');">{% csrf_token %}
         <button class="ca-btn ca-btn-primary !py-1.5 text-xs"><i data-lucide="trending-up" class="lu" aria-hidden="true"></i>Reytingni hisoblash</button>
       </form>
       {% endif %}

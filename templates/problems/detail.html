@@ -6,7 +6,8 @@
   {% if contest %}
   <a class="ca-link text-mute" href="{% url 'contests:detail' contest.pk %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>{{ contest.title }}</a>
   <span class="inline-flex items-center gap-2 rounded-full bg-warn-soft px-3 py-1 text-xs font-medium text-warn">
-    <i data-lucide="lock-keyhole" class="lu" aria-hidden="true"></i>Musobaqa rejimi · nusxalash o‘chirilgan, oyna almashtirish qayd etiladi
+    <i data-lucide="lock-keyhole" class="lu" aria-hidden="true"></i>Musobaqa rejimi · sahifadan chiqish qayd etiladi
+    <span data-leaves-wrap class="!hidden font-semibold text-bad">· chiqishlar: <b class="tabular" data-leaves>0</b></span>
     <span class="tabular font-semibold" data-countdown="{{ contest.end|date:'c' }}" data-label="Tugashiga"></span>
   </span>
   {% else %}
@@ -134,7 +135,7 @@
     {% endif %}
   </section>
 
-  <section class="lg:sticky lg:top-20" aria-label="Yechim yuborish">
+  <section class="lg:sticky lg:top-20" id="solve-pane" aria-label="Yechim yuborish">
   {% if contest and user.is_authenticated %}<div class="ca-watermark" data-wm="{{ user.username }} · {% now 'd.m.Y H:i' %}" aria-hidden="true"></div>{% endif %}
     {% if user.is_authenticated %}
     <form method="post" action="{% url 'submissions:submit' problem.slug %}" id="submit-form" class="ca-panel !p-0">
@@ -148,23 +149,41 @@
         </label>
         <div class="flex items-center gap-1">
           <button type="button" id="editor-reset" class="ca-btn ca-btn-ghost !px-2.5 !py-1.5 text-xs" title="Tozalash"><i data-lucide="undo-2" class="lu" aria-hidden="true"></i>Tozalash</button>
+          <button type="button" id="editor-full" class="ca-btn ca-btn-ghost !px-2.5 !py-1.5 text-xs" title="To‘liq ekran" aria-label="To‘liq ekran" aria-pressed="false"><i data-lucide="maximize-2" class="lu" aria-hidden="true"></i></button>
           <details class="relative" id="editor-prefs">
             <summary class="ca-btn ca-btn-ghost !px-2.5 !py-1.5 cursor-pointer list-none text-xs" title="Muharrir sozlamalari"><i data-lucide="settings-2" class="lu" aria-hidden="true"></i></summary>
             <div class="ca-panel absolute right-0 z-20 mt-2 w-60 !p-3 text-sm">
               <label class="mb-2 block text-xs text-mute">Mavzu
                 <select data-pref="theme" class="ca-select mt-1 !py-1.5 text-sm">
-                  <option value="auto">Sayt bilan</option><option value="light">Yorug‘</option><option value="dark">One Dark</option>
-                  <option value="github-light">GitHub Light</option><option value="github-dark">GitHub Dark</option>
-                  <option value="dracula">Dracula</option><option value="monokai">Monokai</option><option value="nord">Nord</option>
-                  <option value="solarized-light">Solarized Light</option><option value="solarized-dark">Solarized Dark</option>
+                  <option value="auto">Sayt bilan</option>
+                  <optgroup label="Qorong‘i">
+                    <option value="dark">One Dark</option><option value="vscode-dark">VS Code Dark</option><option value="github-dark">GitHub Dark</option>
+                    <option value="tokyo-night">Tokyo Night</option><option value="tokyo-night-storm">Tokyo Night Storm</option>
+                    <option value="dracula">Dracula</option><option value="monokai">Monokai</option><option value="material-dark">Material</option>
+                    <option value="atomone">Atom One</option><option value="gruvbox-dark">Gruvbox</option><option value="nord">Nord</option>
+                    <option value="xcode-dark">Xcode Dark</option><option value="sublime">Sublime</option><option value="aura">Aura</option>
+                    <option value="copilot">Copilot</option><option value="andromeda">Andromeda</option><option value="solarized-dark">Solarized Dark</option>
+                  </optgroup>
+                  <optgroup label="Yorug‘">
+                    <option value="light">Oddiy</option><option value="vscode-light">VS Code Light</option><option value="github-light">GitHub Light</option>
+                    <option value="xcode-light">Xcode Light</option><option value="material-light">Material Light</option>
+                    <option value="gruvbox-light">Gruvbox Light</option><option value="solarized-light">Solarized Light</option>
+                  </optgroup>
                 </select></label>
               <label class="mb-2 block text-xs text-mute">Shrift
                 <select data-pref="font" class="ca-select mt-1 !py-1.5 text-sm">
                   <option value="anthropic">Anthropic Mono</option><option value="jetbrains">JetBrains Mono</option><option value="fira">Fira Code</option><option value="system">Tizim</option>
                 </select></label>
-              <label class="block text-xs text-mute">O‘lcham — <span id="pref-size-val">14</span>px
-                <input type="range" data-pref="size" min="12" max="20" step="1" class="mt-1 w-full">
+              <label class="mb-2 block text-xs text-mute">O‘lcham — <span id="pref-size-val">14</span>px
+                <input type="range" data-pref="size" min="12" max="22" step="1" class="mt-1 w-full">
               </label>
+              <label class="mb-3 block text-xs text-mute">Chekinish
+                <select data-pref="tab" class="ca-select mt-1 !py-1.5 text-sm">
+                  <option value="4">4 bo‘sh joy</option><option value="2">2 bo‘sh joy</option>
+                </select></label>
+              <label class="mb-2 flex items-center gap-2 text-sm"><input type="checkbox" data-pref="wrap"> Uzun qatorlarni o‘rash</label>
+              <label class="mb-2 flex items-center gap-2 text-sm"><input type="checkbox" data-pref="vim"> Vim rejimi</label>
+              <label class="flex items-center gap-2 text-sm"><input type="checkbox" data-pref="starter"> Til shabloni (bo‘sh muharrirda)</label>
             </div>
           </details>
         </div>
@@ -173,9 +192,21 @@
         <textarea name="source" id="source" class="ca-editor-fallback" spellcheck="false" aria-label="Kod muharriri" placeholder="Kodni shu yerga yozing…"></textarea>
       </div>
       <div class="flex flex-wrap items-center justify-between gap-3 border-t border-line px-4 py-3">
-        <span class="text-xs text-mute"><kbd class="ca-kbd">Ctrl</kbd> + <kbd class="ca-kbd">Enter</kbd> — yuborish</span>
-        <button type="submit" id="submit-btn" class="ca-btn ca-btn-success"><i data-lucide="rocket" class="lu" aria-hidden="true"></i>Yuborish</button>
+        <span class="text-xs text-mute"><kbd class="ca-kbd">Ctrl</kbd> + <kbd class="ca-kbd">Enter</kbd> — yuborish{% if problem.kind != "sql" %} · <kbd class="ca-kbd">Ctrl</kbd> + <kbd class="ca-kbd">'</kbd> — sinash{% endif %}</span>
+        <div class="ml-auto flex items-center gap-2">
+          {% if problem.kind != "sql" %}<button type="button" id="trial-btn" class="ca-btn ca-btn-ghost" title="Namunaviy testlarda sinash — urinish hisoblanmaydi"><i data-lucide="play" class="lu" aria-hidden="true"></i>Sinab ko‘rish</button>{% endif %}
+          <button type="submit" id="submit-btn" class="ca-btn ca-btn-success"><i data-lucide="rocket" class="lu" aria-hidden="true"></i>Yuborish</button>
+        </div>
       </div>
+      {% if problem.kind != "sql" %}
+      <details id="trial-custom" class="border-t border-line">
+        <summary class="flex cursor-pointer list-none items-center gap-2 px-4 py-2 text-xs text-mute"><i data-lucide="terminal" class="lu" aria-hidden="true"></i>O‘z inputim bilan sinash</summary>
+        <div class="px-4 pb-3">
+          <textarea id="trial-stdin" rows="4" class="ca-input w-full font-mono text-sm" spellcheck="false" aria-label="Sinov uchun kirish ma’lumoti" placeholder="Bo‘sh qoldirilsa — namunaviy testlarda sinaladi"></textarea>
+        </div>
+      </details>
+      <div id="trial-out" class="border-t border-line px-4 py-3 text-sm" aria-live="polite" hidden></div>
+      {% endif %}
     </form>
 
     {% else %}
@@ -240,16 +271,31 @@ so @codemirror/state is a singleton — two copies break with "Unrecognized exte
     "@uiw/codemirror-theme-monokai": "https://esm.sh/*@uiw/codemirror-theme-monokai",
     "@uiw/codemirror-theme-nord": "https://esm.sh/*@uiw/codemirror-theme-nord",
     "@uiw/codemirror-theme-solarized": "https://esm.sh/*@uiw/codemirror-theme-solarized",
+    "@uiw/codemirror-theme-solarized/": "https://esm.sh/*@uiw/codemirror-theme-solarized/",
+    "@uiw/codemirror-theme-vscode": "https://esm.sh/*@uiw/codemirror-theme-vscode",
+    "@uiw/codemirror-theme-tokyo-night": "https://esm.sh/*@uiw/codemirror-theme-tokyo-night",
+    "@uiw/codemirror-theme-tokyo-night-storm": "https://esm.sh/*@uiw/codemirror-theme-tokyo-night-storm",
+    "@uiw/codemirror-theme-material": "https://esm.sh/*@uiw/codemirror-theme-material",
+    "@uiw/codemirror-theme-gruvbox-dark": "https://esm.sh/*@uiw/codemirror-theme-gruvbox-dark",
+    "@uiw/codemirror-theme-atomone": "https://esm.sh/*@uiw/codemirror-theme-atomone",
+    "@uiw/codemirror-theme-xcode": "https://esm.sh/*@uiw/codemirror-theme-xcode",
+    "@uiw/codemirror-theme-aura": "https://esm.sh/*@uiw/codemirror-theme-aura",
+    "@uiw/codemirror-theme-sublime": "https://esm.sh/*@uiw/codemirror-theme-sublime",
+    "@uiw/codemirror-theme-copilot": "https://esm.sh/*@uiw/codemirror-theme-copilot",
+    "@uiw/codemirror-theme-andromeda": "https://esm.sh/*@uiw/codemirror-theme-andromeda",
+    "@replit/codemirror-vim": "https://esm.sh/*@replit/codemirror-vim",
+    "@replit/codemirror-vim-core": "https://esm.sh/*@replit/codemirror-vim-core",
     "@babel/runtime/helpers/extends": "https://esm.sh/*@babel/runtime/helpers/extends"
   }
 }
 </script>
 <script type="module">
   import { EditorView, basicSetup } from "codemirror";
-  import { Compartment } from "@codemirror/state";
+  import { Compartment, EditorState, Transaction } from "@codemirror/state";
   import { keymap } from "@codemirror/view";
   import { indentUnit } from "@codemirror/language";
   import { indentWithTab } from "@codemirror/commands";
+  import { snippetCompletion as snip, completeFromList, acceptCompletion } from "@codemirror/autocomplete";
   import { oneDark } from "@codemirror/theme-one-dark";
   const LANG_LOADERS = {
     sql: () => import("@codemirror/lang-sql").then((m) => m.sql()),
@@ -263,6 +309,7 @@ so @codemirror/state is a singleton — two copies break with "Unrecognized exte
   const draftKey = "ca-draft-{{ problem.slug }}";
   const langKey = "ca-lang";
   const langC = new Compartment(), themeC = new Compartment();
+  const tabC = new Compartment(), wrapC = new Compartment(), vimC = new Compartment();
   const prefKey = "ca-editor";
   const FONTS = {
     anthropic: '"Anthropic Mono", ui-monospace, monospace',
@@ -270,7 +317,7 @@ so @codemirror/state is a singleton — two copies break with "Unrecognized exte
     fira: '"Fira Code", ui-monospace, monospace',
     system: "ui-monospace, Menlo, Consolas, monospace",
   };
-  let prefs = { theme: "auto", font: "anthropic", size: 14 };
+  let prefs = { theme: "auto", font: "anthropic", size: 14, tab: "4", wrap: false, vim: false, starter: true };
   try { prefs = { ...prefs, ...JSON.parse(localStorage.getItem(prefKey) || "{}") }; } catch {}
   const THEMES = {
     "github-light": () => import("@uiw/codemirror-theme-github").then((m) => m.githubLight),
@@ -280,7 +327,73 @@ so @codemirror/state is a singleton — two copies break with "Unrecognized exte
     nord: () => import("@uiw/codemirror-theme-nord").then((m) => m.nord),
     "solarized-light": () => import("@uiw/codemirror-theme-solarized").then((m) => m.solarizedLight),
     "solarized-dark": () => import("@uiw/codemirror-theme-solarized").then((m) => m.solarizedDark),
+    "vscode-dark": () => import("@uiw/codemirror-theme-vscode").then((m) => m.vscodeDark),
+    "vscode-light": () => import("@uiw/codemirror-theme-vscode").then((m) => m.vscodeLight),
+    "tokyo-night": () => import("@uiw/codemirror-theme-tokyo-night").then((m) => m.tokyoNight),
+    "tokyo-night-storm": () => import("@uiw/codemirror-theme-tokyo-night-storm").then((m) => m.tokyoNightStorm),
+    "material-dark": () => import("@uiw/codemirror-theme-material").then((m) => m.materialDark),
+    "material-light": () => import("@uiw/codemirror-theme-material").then((m) => m.materialLight),
+    "gruvbox-dark": () => import("@uiw/codemirror-theme-gruvbox-dark").then((m) => m.gruvboxDark),
+    "gruvbox-light": () => import("@uiw/codemirror-theme-gruvbox-dark").then((m) => m.gruvboxLight),
+    atomone: () => import("@uiw/codemirror-theme-atomone").then((m) => m.atomone),
+    "xcode-dark": () => import("@uiw/codemirror-theme-xcode").then((m) => m.xcodeDark),
+    "xcode-light": () => import("@uiw/codemirror-theme-xcode").then((m) => m.xcodeLight),
+    aura: () => import("@uiw/codemirror-theme-aura").then((m) => m.aura),
+    sublime: () => import("@uiw/codemirror-theme-sublime").then((m) => m.sublime),
+    copilot: () => import("@uiw/codemirror-theme-copilot").then((m) => m.copilot),
+    andromeda: () => import("@uiw/codemirror-theme-andromeda").then((m) => m.andromeda),
   };
+  // Boilerplate only where the language demands it (Java's class name must be Main for the judge).
+  const STARTERS = {
+    cpp: "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    ios::sync_with_stdio(false);\n    cin.tie(nullptr);\n\n    \n    return 0;\n}\n",
+    java: "import java.util.*;\nimport java.io.*;\n\npublic class Main {\n    public static void main(String[] args) throws IOException {\n        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));\n        \n    }\n}\n",
+    node: "const lines = require(\"fs\").readFileSync(0, \"utf8\").split(\"\\n\");\n\n",
+  };
+  // Tab-completed snippets (type the label, e.g. "fori", then Tab; Tab again jumps between fields).
+  const S = (label, detail, template) => snip(template, { label, detail, type: "keyword" });
+  const SNIPPETS = {
+    python: [
+      S("fori", "for sikli", "for ${i} in range(${n}):\n\t${}"),
+      S("inp", "bitta son", "int(input())"),
+      S("ints", "qatordagi sonlar", "map(int, input().split())"),
+      S("lst", "sonlar ro‘yxati", "list(map(int, input().split()))"),
+      S("fastio", "tez o‘qish", "import sys\ninput = sys.stdin.readline\n"),
+      S("gcd", "EKUB", "def gcd(a, b):\n\twhile b:\n\t\ta, b = b, a % b\n\treturn a\n"),
+      S("binsearch", "binar qidiruv", "lo, hi = ${0}, ${n}\nwhile lo < hi:\n\tmid = (lo + hi) // 2\n\tif ${check(mid)}:\n\t\thi = mid\n\telse:\n\t\tlo = mid + 1\n"),
+      S("main", "main funksiya", "def main():\n\t${}\n\n\nmain()\n"),
+    ],
+    cpp: [
+      S("fori", "for sikli", "for (int ${i} = 0; ${i} < ${n}; ${i}++) {\n\t${}\n}"),
+      S("forr", "teskari for", "for (int ${i} = ${n} - 1; ${i} >= 0; ${i}--) {\n\t${}\n}"),
+      S("fastio", "tez kiritish", "ios::sync_with_stdio(false);\ncin.tie(nullptr);"),
+      S("vi", "vector o‘qish", "vector<int> ${a}(${n});\nfor (auto &x : ${a}) cin >> x;"),
+      S("ll", "long long", "typedef long long ll;"),
+      S("all", "v.begin(), v.end()", "${v}.begin(), ${v}.end()"),
+      S("gcd", "EKUB", "long long gcd(long long a, long long b) { return b ? gcd(b, a % b) : a; }"),
+      S("binsearch", "binar qidiruv", "int lo = ${0}, hi = ${n};\nwhile (lo < hi) {\n\tint mid = lo + (hi - lo) / 2;\n\tif (${check(mid)}) hi = mid;\n\telse lo = mid + 1;\n}"),
+    ],
+    java: [
+      S("fori", "for sikli", "for (int ${i} = 0; ${i} < ${n}; ${i}++) {\n\t${}\n}"),
+      S("forr", "teskari for", "for (int ${i} = ${n} - 1; ${i} >= 0; ${i}--) {\n\t${}\n}"),
+      S("fastio", "tez o‘qish", "BufferedReader br = new BufferedReader(new InputStreamReader(System.in));\nStringTokenizer st = new StringTokenizer(br.readLine());"),
+      S("nextint", "keyingi son", "Integer.parseInt(st.nextToken())"),
+      S("sout", "chiqarish", "System.out.println(${});"),
+      S("gcd", "EKUB", "static long gcd(long a, long b) { return b == 0 ? a : gcd(b, a % b); }"),
+      S("binsearch", "binar qidiruv", "int lo = ${0}, hi = ${n};\nwhile (lo < hi) {\n\tint mid = lo + (hi - lo) / 2;\n\tif (${check(mid)}) hi = mid;\n\telse lo = mid + 1;\n}"),
+    ],
+    node: [
+      S("fori", "for sikli", "for (let ${i} = 0; ${i} < ${n}; ${i}++) {\n\t${}\n}"),
+      S("lines", "stdin qatorlari", "const lines = require(\"fs\").readFileSync(0, \"utf8\").split(\"\\n\");"),
+      S("nums", "qatordagi sonlar", "${line}.split(\" \").map(Number)"),
+      S("log", "chiqarish", "console.log(${});"),
+      S("gcd", "EKUB", "const gcd = (a, b) => (b ? gcd(b, a % b) : a);"),
+      S("binsearch", "binar qidiruv", "let lo = ${0}, hi = ${n};\nwhile (lo < hi) {\n\tconst mid = (lo + hi) >> 1;\n\tif (${check(mid)}) hi = mid;\n\telse lo = mid + 1;\n}"),
+    ],
+  };
+  const isStarter = (text) => !text.trim() || Object.values(STARTERS).includes(text);
+  const tabExt = () => [indentUnit.of(" ".repeat(+prefs.tab)), EditorState.tabSize.of(+prefs.tab)];
+  const wrapExt = () => (prefs.wrap ? EditorView.lineWrapping : []);
+  const vimExt = async () => (prefs.vim ? (await import("@replit/codemirror-vim")).vim() : []);
   const siteDark = () => {
     const t = document.documentElement.dataset.theme;
     return t ? t === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -307,11 +420,13 @@ so @codemirror/state is a singleton — two copies break with "Unrecognized exte
   } catch {}
   const view = new EditorView({
     doc: draft,
-    extensions: [basicSetup, indentUnit.of("    "), keymap.of([indentWithTab]),
+    extensions: [vimC.of([]), basicSetup, tabC.of(tabExt()), wrapC.of(wrapExt()), keymap.of([{ key: "Tab", run: acceptCompletion }, indentWithTab]),
       langC.of([]), themeC.of([]),
       EditorView.updateListener.of((u) => {
         if (!u.docChanged) return;
         try { localStorage.setItem(draftKey, u.state.doc.toString()); } catch {}
+        // Only keystrokes count: our own starter/reset edits and snippet completions are not pastes.
+        if (!u.transactions.some((t) => t.annotation(Transaction.userEvent) && !t.isUserEvent("input.complete"))) return;
         let inserted = 0;
         u.changes.iterChanges((fA, tA, fB, tB, ins) => { inserted += ins.length; });
         if (inserted > 120) window.dispatchEvent(new CustomEvent("ca-bulk-insert"));
@@ -320,12 +435,19 @@ so @codemirror/state is a singleton — two copies break with "Unrecognized exte
     parent: document.getElementById("editor"),
   });
   view.contentDOM.setAttribute("aria-label", "Kod muharriri");
+  window.caCode = () => ({ source: view.state.doc.toString(), language: langSel.value });  // integrity snapshots
   source.hidden = true;  // CodeMirror loaded — plain textarea was only the no-JS fallback
   const setLang = async () => {
     const load = LANG_LOADERS[langSel.value];
     const ext = load ? await load() : [];
-    view.dispatch({ effects: langC.reconfigure(ext) });
+    const snippets = EditorState.languageData.of(() => [{ autocomplete: completeFromList(SNIPPETS[langSel.value] || []) }]);
+    view.dispatch({ effects: langC.reconfigure([ext, snippets]) });
     try { localStorage.setItem(langKey, langSel.value); } catch {}
+    const doc = view.state.doc.toString();
+    if (prefs.starter && isStarter(doc)) {
+      const text = STARTERS[langSel.value] || "";
+      if (text !== doc) view.dispatch({ changes: { from: 0, to: doc.length, insert: text } });
+    }
   };
   setLang();
   langSel.addEventListener("change", setLang);
@@ -333,14 +455,33 @@ so @codemirror/state is a singleton — two copies break with "Unrecognized exte
   syncTheme();
   window.addEventListener("ca-theme", syncTheme);
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", syncTheme);
+  const syncVim = async () => view.dispatch({ effects: vimC.reconfigure(await vimExt()) });
+  if (prefs.vim) syncVim();
   document.querySelectorAll("#editor-prefs [data-pref]").forEach((el) => {
-    el.value = prefs[el.dataset.pref];
+    const key = el.dataset.pref;
+    if (el.type === "checkbox") el.checked = !!prefs[key]; else el.value = prefs[key];
     el.addEventListener("input", () => {
-      prefs[el.dataset.pref] = el.type === "range" ? Number(el.value) : el.value;
+      prefs[key] = el.type === "checkbox" ? el.checked : el.type === "range" ? Number(el.value) : el.value;
       applyPrefs();
-      if (el.dataset.pref === "theme") syncTheme();
+      if (key === "theme") syncTheme();
+      else if (key === "tab") view.dispatch({ effects: tabC.reconfigure(tabExt()) });
+      else if (key === "wrap") view.dispatch({ effects: wrapC.reconfigure(wrapExt()) });
+      else if (key === "vim") syncVim();
+      else if (key === "starter") setLang();
     });
   });
+  const pane = document.getElementById("solve-pane"), fullBtn = document.getElementById("editor-full");
+  const setFull = (on) => {
+    pane.classList.toggle("ca-ed-full", on);
+    document.body.classList.toggle("overflow-hidden", on);
+    fullBtn.setAttribute("aria-pressed", on);
+    fullBtn.innerHTML = `<i data-lucide="${on ? "minimize-2" : "maximize-2"}" class="lu" aria-hidden="true"></i>`;
+    window.caIcons?.();
+    view.focus();
+  };
+  fullBtn.addEventListener("click", () => setFull(!pane.classList.contains("ca-ed-full")));
+  // Esc belongs to Vim when it is on; otherwise it leaves full screen.
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !prefs.vim && pane.classList.contains("ca-ed-full")) setFull(false); });
   document.getElementById("editor-reset").addEventListener("click", () => {
     if (view.state.doc.length && !confirm("Kod o‘chiriladi. Davom etasizmi? (Ctrl+Z bilan qaytarish mumkin)")) return;
     view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: "" } });
@@ -358,9 +499,71 @@ so @codemirror/state is a singleton — two copies break with "Unrecognized exte
       e.preventDefault();
       form.requestSubmit();
     }
+    if ((e.ctrlKey || e.metaKey) && e.key === "'" && trialBtn && !trialBtn.disabled) {
+      e.preventDefault();
+      trialBtn.click();
+    }
   });
+
+  // "Sinab ko'rish": samples (or the custom stdin) in the judge's "run" queue; nothing is saved.
+  const trialBtn = document.getElementById("trial-btn");
+  if (trialBtn) {
+    const out = document.getElementById("trial-out"), stdinEl = document.getElementById("trial-stdin");
+    const esc = (t) => (t ?? "").replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+    const V = { AC: ["ac", "check", "AC"], OK: ["ac", "check", "Bajarildi"], WA: ["bad", "x", "WA"],
+                TLE: ["warn", "clock", "TL"], MLE: ["warn", "cpu", "ML"], RE: ["bad", "triangle-alert", "RE"],
+                CE: ["mute", "code", "CE"], IE: ["mute", "circle-alert", "Xato"] };
+    const chip = (v) => { const [c, i, t] = V[v] || V.IE; return `<span class="ca-verdict ca-verdict-${c}"><i data-lucide="${i}" class="lu" aria-hidden="true"></i>${t}</span>`; };
+    const box = (label, text) => `<div class="ca-sample"><div class="ca-sample-head"><span>${label}</span></div><pre class="max-h-48">${text ? esc(text) : '<span class="text-mute">(bo‘sh)</span>'}</pre></div>`;
+    const show = (html) => { out.hidden = false; out.innerHTML = html; window.caIcons?.(); };
+    const HINT = { TLE: "Vaqt chegarasi oshdi.", MLE: "Xotira chegarasi oshdi.", RE: "Dastur xato bilan tugadi." };
+    function render(r) {
+      if (r.verdict === "CE") return show(`<p class="mb-2 flex items-center gap-2">${chip("CE")} Kompilyatsiya xatosi</p><pre class="ca-pre max-h-60 text-xs">${esc(r.log)}</pre>`);
+      if (!r.cases.length) return show(`<p class="flex items-center gap-2">${chip(r.verdict)} Sinovni ishga tushirib bo‘lmadi — qayta urinib ko‘ring.</p>`);
+      const custom = r.cases[0].expected === null;
+      const passed = r.cases.filter((c) => c.verdict === "AC").length;
+      const head = custom ? "O‘z inputingiz" : `Namunaviy testlar: ${passed}/${r.total} o‘tdi`;
+      const cases = r.cases.map((c, i) => `
+        <details class="mt-2 rounded-md border border-line"${c.verdict === "AC" ? "" : " open"}>
+          <summary class="flex cursor-pointer list-none items-center gap-2 px-3 py-2">${chip(c.verdict)}<span>${custom ? "Natija" : `Test ${i + 1}`}</span><span class="tabular ml-auto text-xs text-mute">${c.ms} ms</span></summary>
+          <div class="grid gap-2 px-3 pb-3 ${custom ? "sm:grid-cols-2" : "sm:grid-cols-3"}">
+            ${box("Kirish", c.input)}${box(custom ? "Chiqish" : "Sizning chiqishingiz", c.output)}${custom ? "" : box("Kutilgan", c.expected)}
+          </div>
+          ${HINT[c.verdict] ? `<p class="px-3 pb-3 text-xs text-mute">${HINT[c.verdict]}</p>` : ""}
+        </details>`).join("");
+      show(`<p class="flex items-center gap-2 font-medium">${chip(r.verdict)}${head}</p>${cases}<p class="mt-2 text-xs text-mute">Sinov urinish hisoblanmaydi va jarima bermaydi.</p>`);
+    }
+    const busy = (on) => {
+      trialBtn.disabled = on;
+      trialBtn.innerHTML = on ? '<i data-lucide="loader-circle" class="lu ca-spin" aria-hidden="true"></i>Ishlamoqda…'
+                              : '<i data-lucide="play" class="lu" aria-hidden="true"></i>Sinab ko‘rish';
+      window.caIcons?.();
+    };
+    trialBtn.addEventListener("click", async () => {
+      busy(true);
+      show('<p class="text-mute">Navbatda…</p>');
+      try {
+        const body = new URLSearchParams({ source: view.state.doc.toString(), language: langSel.value, stdin: stdinEl.value });
+        const res = await fetch("{% url 'submissions:trial' problem.slug %}", { method: "POST", headers: { "X-CSRFToken": "{{ csrf_token }}" }, body });
+        const data = await res.json().catch(() => ({ error: "Server javob bermadi" }));
+        if (!res.ok) return show(`<p class="text-bad">${esc(data.error)}</p>`);
+        for (let t = 0; t < 90; t++) {  // ~60 s: queue wait + compile + run
+          await new Promise((r) => setTimeout(r, t < 10 ? 400 : 800));
+          const st = await (await fetch(`{% url 'submissions:trial_status' 'JOB' %}`.replace("JOB", data.id))).json();
+          if (st.done) return render(st);
+          if (st.status === "started") show('<p class="flex items-center gap-2 text-mute"><i data-lucide="loader-circle" class="lu ca-spin" aria-hidden="true"></i>Ishga tushirilmoqda…</p>');
+        }
+        show('<p class="text-bad">Sinov juda uzoq kutdi — keyinroq qayta urinib ko‘ring.</p>');
+      } catch {
+        show('<p class="text-bad">Tarmoq xatosi — qayta urinib ko‘ring.</p>');
+      } finally {
+        busy(false);
+      }
+    });
+  }
 </script>
 <div id="ca-guard" class="ca-guard !hidden" role="status" aria-live="polite"></div>
+{% if contest %}{% include "integrity/_tracker.html" with problem_id=problem.pk %}{% endif %}
 <script>
   // Anti-cheat / anti-AI-copy: active on every problem page, not just contests — pasting
   // an AI answer into practice mode is the same shortcut, it just doesn't affect a rank.
@@ -373,7 +576,7 @@ so @codemirror/state is a singleton — two copies break with "Unrecognized exte
     const stamp = contestId
       ? "— CodeArena, musobaqa #{{ contest.pk|default:0|stringformat:'03d' }}, {{ user.username }}. Bu matnni AI yordamchisiga yoki boshqa ishtirokchiga yuborish — qoidabuzarlik, nusxa qayd etiladi."
       : "— CodeArena ({{ user.username|default:'mehmon' }}). Shart matnini AI yordamchisiga tashlab, javobni ko‘chirib qo‘yish o‘qishga yordam bermaydi — o‘zingiz yeching.";
-    let leaves = 0, hideTimer;
+    let hideTimer;
 
     function notify(msg) {
       guard.textContent = msg;
@@ -386,7 +589,7 @@ so @codemirror/state is a singleton — two copies break with "Unrecognized exte
       fetch("{% url 'integrity:event' %}", {
         method: "POST", keepalive: true,
         headers: { "Content-Type": "application/x-www-form-urlencoded", "X-CSRFToken": "{{ csrf_token }}" },
-        body: `contest_id=${contestId}&kind=${kind}`,
+        body: `contest_id=${contestId}&problem_id={{ problem.pk }}&kind=${kind}`,
       });
     }
 
@@ -428,14 +631,6 @@ so @codemirror/state is a singleton — two copies break with "Unrecognized exte
       report("copy"); notify("Nusxa olindi. Matnga ogohlantiruvchi belgi qo‘shildi.");
     });
 
-    // Leaving the page (other tab/window) is only meaningful — and only reported — during a contest.
-    if (contestId) {
-      const leave = () => { leaves += 1; report("blur"); };
-      const back = () => { report("focus"); notify(`Sahifadan chiqib ketdingiz — ${leaves} marta qayd etildi.`); };
-      window.addEventListener("blur", leave);
-      window.addEventListener("focus", back);
-      document.addEventListener("visibilitychange", () => (document.hidden ? leave() : back()));
-    }
   })();
 </script>
 {% endif %}

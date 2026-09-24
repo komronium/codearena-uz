@@ -8,9 +8,6 @@
     <p class="mt-1 text-sm text-mute">#{{ contest.pk|stringformat:"03d" }} · {{ contest.title }} · {{ contest.start|date:"d.m.Y H:i" }}</p>
   </div>
   <div class="flex gap-2">
-    <form method="post" action="{% url 'integrity:flag_run' contest.pk %}">{% csrf_token %}
-      <button class="ca-btn ca-btn-primary !py-1.5"><i data-lucide="scan-search" class="lu" aria-hidden="true"></i>O‘xshashlikni tekshirish</button>
-    </form>
     <a href="{% url 'contests:standings' contest.pk %}" class="ca-btn ca-btn-ghost !py-1.5"><i data-lucide="table" class="lu" aria-hidden="true"></i>Natijalar</a>
     <a href="{% url 'moderation:contests' %}" class="ca-btn ca-btn-ghost !py-1.5">Orqaga</a>
   </div>
@@ -19,18 +16,19 @@
 <section class="mb-8">
   <div class="mb-3 flex flex-wrap items-end justify-between gap-2">
     <h2 class="ca-section-title !mb-0">Xatti-harakat hodisalari</h2>
-    <p class="text-xs text-mute">Chiqish — boshqa oyna/varaqqa o‘tish · Paste — muharrirga qo‘yish urinishi · Tez — g‘ayrioddiy tez matn kiritish · Nusxa — shart matnidan nusxa. Xavf = paste×5 + tez×3 + nusxa×2 + chiqish + tez yechim×4.</p>
+    <p class="text-xs text-mute">Chiqish — musobaqa sahifalaridan tashqariga (boshqa oyna, varaq yoki saytning boshqa sahifasi) · Tashqarida — jami vaqt · Paste — muharrirga qo‘yish urinishi · Tez — g‘ayrioddiy tez matn kiritish · Nusxa — shart matnidan nusxa. Xavf = paste×5 + tez×3 + nusxa×2 + chiqish + tashqarida daqiqa + shubhali yechim×4.</p>
   </div>
   <div class="ca-panel !p-0 overflow-x-auto">
   <table class="ca-table">
     <thead>
-      <tr><th>Ishtirokchi</th><th class="text-right">Chiqish</th><th class="text-right">Paste</th><th class="text-right">Tez</th><th class="text-right">Nusxa</th><th class="text-right">Xavf</th><th class="hidden md:table-cell">Oxirgi hodisa</th><th class="text-right">Amal</th></tr>
+      <tr><th>Ishtirokchi</th><th class="text-right">Chiqish</th><th class="text-right">Tashqarida</th><th class="text-right">Paste</th><th class="text-right">Tez</th><th class="text-right">Nusxa</th><th class="text-right">Xavf</th><th class="hidden md:table-cell">Oxirgi hodisa</th><th class="text-right">Amal</th></tr>
     </thead>
     <tbody>
     {% for user, c in rows %}
     <tr>
       <td>{% include "accounts/_user.html" with u=user tier=False %}</td>
       <td class="tabular text-right {% if c.blur > 5 %}text-warn font-semibold{% endif %}">{{ c.blur }}</td>
+      <td class="tabular text-right whitespace-nowrap {% if c.away_ms >= 120000 %}text-warn font-semibold{% endif %}">{% if c.away_ms %}{% widthratio c.away_ms 60000 1 %} daq{% else %}—{% endif %}</td>
       <td class="tabular text-right {% if c.paste %}text-bad font-semibold{% endif %}">{{ c.paste }}</td>
       <td class="tabular text-right {% if c.fast %}text-warn font-semibold{% endif %}">{{ c.fast }}</td>
       <td class="tabular text-right {% if c.copy %}text-warn{% endif %}">{{ c.copy }}</td>
@@ -50,7 +48,7 @@
       </td>
     </tr>
     {% empty %}
-    <tr><td class="text-mute" colspan="8">Hodisa yo‘q.</td></tr>
+    <tr><td class="text-mute" colspan="9">Hodisa yo‘q.</td></tr>
     {% endfor %}
     </tbody>
   </table>
@@ -59,34 +57,52 @@
 
 <section class="mb-8">
   <div class="mb-3 flex flex-wrap items-end justify-between gap-2">
-    <h2 class="ca-section-title !mb-0">Tez yechilgan masalalar</h2>
-    <p class="text-xs text-mute">Birinchi urinishdayoq, o‘rta/qiyin masalani 90 soniya ichida AC qilish — o‘qib-yozish uchun real vaqt emas.</p>
+    <h2 class="ca-section-title !mb-0">Shubhali yechimlar {% if suspicious %}<span class="ca-chip ca-chip-score ml-1">{{ suspicious|length }}</span>{% endif %}</h2>
+    <p class="text-xs text-mute">Juda tez — masala ochilgandan AC gacha: Easy &lt; {{ speed_limits.easy }} s, Medium &lt; {{ speed_limits.medium }} s, Hard &lt; {{ speed_limits.hard }} s. Chiqib-qaytib — {{ min_away_s }}+ s tashqarida bo‘lib, qaytgach {{ quick_after_return_s }} s ichida AC.</p>
   </div>
-  <div class="ca-panel !p-0 overflow-x-auto">
-  <table class="ca-table">
-    <thead><tr><th>Ishtirokchi</th><th>Masala</th><th class="text-right">Qiyinlik</th><th class="text-right">Vaqt</th><th class="text-right">Yechim</th></tr></thead>
-    <tbody>
-    {% for r in fast_solves %}
-    <tr>
-      <td>{% include "accounts/_user.html" with u=r.user tier=False %}</td>
-      <td class="min-w-0 max-w-[12rem] truncate">{{ r.problem.title }}</td>
-      <td class="text-right"><span class="ca-diff ca-diff-{{ r.problem.difficulty }}">{{ r.problem.get_difficulty_display }}</span></td>
-      <td class="tabular text-right font-semibold text-warn">{{ r.elapsed }} soniya</td>
-      <td class="text-right"><a class="ca-link text-xs" href="{% url 'submissions:detail' r.submission.pk %}">#{{ r.submission.pk|stringformat:"06d" }}</a></td>
-    </tr>
-    {% empty %}
-    <tr><td class="text-mute" colspan="5">Belgi yo‘q.</td></tr>
+  {% if suspicious %}
+  <ul class="ca-rows">
+    {% for r in suspicious %}
+    <li class="ca-row">
+      <div class="ca-row-main">
+        <div class="ca-row-title">
+          {% include "accounts/_user.html" with u=r.user tier=False %}
+          <span class="truncate font-normal text-mute">· {{ r.problem.title }}</span>
+          <span class="ca-diff ca-diff-{{ r.problem.difficulty }} shrink-0">{{ r.problem.get_difficulty_display }}</span>
+        </div>
+        <div class="ca-row-meta">
+          {% if r.too_fast %}<span class="font-semibold text-bad"><i data-lucide="zap" class="lu" aria-hidden="true"></i>{% if r.has_view %}ochilgandan{% else %}boshlanishdan{% endif %} {{ r.elapsed }} s da AC</span>{% endif %}
+          {% if r.back_and_solve %}<span class="font-semibold text-warn"><i data-lucide="log-in" class="lu" aria-hidden="true"></i>{{ r.away_s }} s tashqarida, qaytgach {{ r.after_return }} s da AC</span>{% endif %}
+        </div>
+      </div>
+      <div class="ca-row-side">
+        <a class="ca-btn ca-btn-primary !py-1.5 text-xs" href="{% url 'integrity:replay' contest.pk r.user.pk r.problem.pk %}"><i data-lucide="history" class="lu" aria-hidden="true"></i>Yozilishini ko‘rish</a>
+        <a class="ca-btn ca-btn-ghost !px-2 !py-1.5" href="{% url 'submissions:detail' r.submission.pk %}" title="Yechim #{{ r.submission.pk }}" aria-label="Yechim #{{ r.submission.pk }}"><i data-lucide="code" class="lu" aria-hidden="true"></i></a>
+      </div>
+    </li>
     {% endfor %}
-    </tbody>
-  </table>
-  </div>
+  </ul>
+  {% else %}
+  <div class="ca-empty">Shubhali yechim topilmadi.</div>
+  {% endif %}
 </section>
 
 <section>
   <div class="mb-3 flex flex-wrap items-end justify-between gap-2">
     <h2 class="ca-section-title !mb-0">O‘xshash kodlar {% if open_flags %}<span class="ca-chip ca-chip-score ml-1">{{ open_flags }} ko‘rilmagan</span>{% endif %}</h2>
-    <p class="text-xs text-mute">Bir masala, bir til, kamida {{ min_lines }} qator kod, o‘xshashlik ≥ {{ threshold }}%. O‘zgaruvchi nomlari va izohlar hisobga olinmaydi. <span class="ca-cmp-key"></span> — ikkala kodda ham bor qatorlar.</p>
+    <p class="max-w-2xl text-xs text-mute">Bir masala, bir til, kamida {{ min_lines }} qator kod, o‘xshashlik ≥ {{ threshold }}%. O‘zgaruvchi nomlari va izohlar hisobga olinmaydi. <span class="ca-cmp-key"></span> — ikkala kodda ham bor qatorlar.</p>
   </div>
+  <form method="post" action="{% url 'integrity:flag_run' contest.pk %}" class="ca-panel mb-4 flex flex-wrap items-center gap-x-4 gap-y-3 !py-3">{% csrf_token %}
+    <fieldset class="flex flex-wrap items-center gap-1.5">
+      <legend class="sr-only">Tekshiriladigan masalalar</legend>
+      <span class="mr-1 text-sm text-mute">Qaysi masalalar:</span>
+      {% for cp in contest_problems %}
+      <label class="ca-pick" title="{{ cp.problem.title }}"><input type="checkbox" name="problems" value="{{ cp.label }}"><span>{{ cp.label }}</span></label>
+      {% endfor %}
+      <button type="button" class="ca-link ml-1 text-xs" onclick="this.form.querySelectorAll('[name=problems]').forEach((c) => (c.checked = true))">hammasi</button>
+    </fieldset>
+    <button class="ca-btn ca-btn-primary ml-auto !py-1.5"><i data-lucide="scan-search" class="lu" aria-hidden="true"></i>Tanlanganlarni tekshirish</button>
+  </form>
   {% if flags %}
   <div class="space-y-4">
     {% for f in flags %}
@@ -111,6 +127,7 @@
               </div>
               <div class="flex items-center gap-3 text-xs text-mute">
                 <a class="ca-link tabular" href="{% url 'submissions:detail' side.sub.pk %}">#{{ side.sub.pk|stringformat:"06d" }}</a>
+                <a class="ca-link" href="{% url 'integrity:replay' contest.pk side.user.pk f.problem.pk %}"><i data-lucide="history" class="lu mr-0.5" aria-hidden="true"></i>yozilishi</a>
                 <span class="tabular">{{ side.sub.created|date:"H:i:s" }}</span>
                 {% if side.paste %}<span class="font-semibold text-bad" title="Muharrirga qo‘yish urinishlari">paste {{ side.paste }}</span>{% endif %}
                 {% if side.blur %}<span class="{% if side.blur > 5 %}font-semibold text-warn{% endif %}" title="Boshqa oynaga o‘tishlar">chiqish {{ side.blur }}</span>{% endif %}
@@ -141,7 +158,7 @@
     {% endfor %}
   </div>
   {% else %}
-  <div class="ca-empty">O‘xshash kod topilmadi. Musobaqa tugagach tekshiruv avtomatik ishlaydi; hozir tekshirish uchun yuqoridagi tugmani bosing.</div>
+  <div class="ca-empty">O‘xshash kod topilmadi. Masalalarni tanlab, «Tanlanganlarni tekshirish» ni bosing.</div>
   {% endif %}
 </section>
 {% endblock %}

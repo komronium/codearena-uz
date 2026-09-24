@@ -8,10 +8,44 @@ from django.db import transaction
 from django.db.models import F
 
 from apps.accounts.models import User
-from apps.problems.models import Problem
+from apps.problems.models import Language, Problem
 from apps.submissions.models import Submission, TestResult, UserProblemSolved
 from judge import sandbox, sql_judge
 from judge.compare import outputs_match
+
+
+TRIAL_OUTPUT_CHARS = 4000
+
+
+def run_trial(lang_code: str, source: str, inputs: list[str], expected: list[str] | None,
+              tl_ms: int, ml_mb: int) -> dict:
+    """"Sinab ko'rish": run code on sample tests (expected given) or one custom input
+    (expected None). Nothing touches the DB; the result lives only in the RQ job."""
+    lang = Language.objects.get(code=lang_code)
+    os.makedirs(settings.JUDGE_WORK_DIR, exist_ok=True)
+    src_dir = tempfile.mkdtemp(prefix="trial-", dir=settings.JUDGE_WORK_DIR)
+    os.chmod(src_dir, 0o777 if lang.compile_cmd else 0o755)
+    try:
+        source_path = os.path.join(src_dir, sandbox.SOURCE_FILENAME[lang.code])
+        with open(source_path, "w") as f:
+            f.write(source)
+        os.chmod(source_path, 0o644)
+        ok, log = sandbox.compile(lang, src_dir)
+        if not ok:
+            return {"verdict": "CE", "log": log, "cases": [], "total": len(inputs)}
+        cases = []
+        results = sandbox.run_tests(lang, src_dir, inputs, tl_ms, ml_mb)
+        for i, (inp, (out, v, ms)) in enumerate(zip(inputs, results)):
+            want = expected[i] if expected is not None else None
+            if v == "OK":
+                v = "OK" if want is None else ("AC" if outputs_match(want, out) else "WA")
+            cases.append({"input": inp[:TRIAL_OUTPUT_CHARS], "output": out[:TRIAL_OUTPUT_CHARS],
+                          "expected": want, "verdict": v, "ms": ms})
+        bad = next((c["verdict"] for c in cases if c["verdict"] not in ("OK", "AC")), None)
+        return {"verdict": bad or ("OK" if expected is None else "AC"), "log": "", "cases": cases,
+                "total": len(inputs)}
+    finally:
+        shutil.rmtree(src_dir, ignore_errors=True)
 
 
 def run_submission(submission_id: int) -> None:

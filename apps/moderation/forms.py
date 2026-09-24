@@ -7,6 +7,7 @@ from django.forms import inlineformset_factory
 from django.forms.models import BaseInlineFormSet, ModelForm
 from django.utils import timezone
 
+from apps.accounts.forms import validate_public_username
 from apps.accounts.models import Group, User
 from apps.contests.models import Contest, ContestProblem
 from apps.problems.models import Problem, SQLDataset, Tag, TestCase
@@ -162,6 +163,9 @@ class UserForm(ModelForm):
             "rating": forms.NumberInput(attrs=_CA_INPUT),
             "practice_points": forms.NumberInput(attrs=_CA_INPUT),
         }
+
+    def clean_username(self):
+        return validate_public_username(self.cleaned_data["username"])
 
 
 class GroupForm(ModelForm):

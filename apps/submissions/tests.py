@@ -122,6 +122,52 @@ def test_status_compact_poll_stays_compact(client, problem, python, user):
     assert b"ca-test-WA" in full
 
 
+@patch("apps.submissions.views.django_rq.get_queue")
+def test_trial_runs_samples_without_a_submission(get_queue, client, problem, python, user):
+    get_queue.return_value.enqueue.return_value.id = "job1"
+    client.force_login(user)
+    r = client.post(reverse("submissions:trial", args=[problem.slug]), {"language": "python", "source": "x"})
+    assert r.json() == {"id": "job1"}
+    get_queue.assert_called_with("run")
+    args, kwargs = get_queue.return_value.enqueue.call_args
+    assert args[1:4] == ("python", "x", ["1 2\n"]) and args[4] == ["3\n"]  # samples only
+    assert kwargs["meta"] == {"user_id": user.pk}
+    assert not Submission.objects.exists()
+
+
+@patch("apps.submissions.views.django_rq.get_queue")
+def test_trial_custom_stdin_has_no_expected(get_queue, client, problem, python, user):
+    get_queue.return_value.enqueue.return_value.id = "job1"
+    client.force_login(user)
+    client.post(reverse("submissions:trial", args=[problem.slug]), {"language": "python", "source": "x", "stdin": "9 9"})
+    args = get_queue.return_value.enqueue.call_args.args
+    assert args[3] == ["9 9"] and args[4] is None
+
+
+@patch("apps.submissions.views.django_rq.get_queue")
+def test_trial_status_is_private(get_queue, client, problem, user):
+    job = get_queue.return_value.fetch_job.return_value
+    job.meta = {"user_id": user.pk + 1}
+    client.force_login(user)
+    assert client.get(reverse("submissions:trial_status", args=["job1"])).status_code == 404
+    job.meta = {"user_id": user.pk}
+    job.get_status.return_value = "finished"
+    job.return_value.return_value = {"verdict": "AC", "log": "", "cases": [], "total": 1}
+    assert client.get(reverse("submissions:trial_status", args=["job1"])).json()["verdict"] == "AC"
+
+
+@patch("judge.runner.sandbox.run_tests", return_value=[("3\n", "OK", 5), ("7\n", "OK", 6)])
+@patch("judge.runner.sandbox.compile", return_value=(True, ""))
+def test_run_trial_marks_each_sample(compile_, run_tests, python):
+    from judge.runner import run_trial
+    r = run_trial("python", "x", ["1 2\n", "3 3\n"], ["3\n", "6\n"], 1000, 256)
+    assert r["verdict"] == "WA" and r["total"] == 2
+    assert [c["verdict"] for c in r["cases"]] == ["AC", "WA"]
+    run_tests.return_value = [("3\n", "OK", 5)]
+    custom = run_trial("python", "x", ["1 2\n"], None, 1000, 256)
+    assert custom["verdict"] == "OK" and custom["cases"][0]["expected"] is None
+
+
 @patch("judge.runner.sandbox.run_tests")
 @patch("judge.runner.sandbox.compile", return_value=(True, ""))
 def test_runner_ac(compile_, run_tests, problem, python, user):

@@ -18,13 +18,15 @@ services:
   worker:
     restart: unless-stopped
     # Each judge worker runs one submission at a time; N of them judge N in parallel.
-    command: python manage.py rqworker-pool default --num-workers ${JUDGE_WORKERS:-4}
+    command: python manage.py rqworker-pool default run --num-workers ${JUDGE_WORKERS:-4}
     volumes: !override
       - "media:/app/media"
       - "/var/run/docker.sock:/var/run/docker.sock"
       - "/var/codearena/work:/var/codearena/work"
 
-  # Replaces host crontab: rating + similarity + points sweeps every 5 minutes (all idempotent).
+  # Replaces host crontab: points sweep every 5 minutes (idempotent). Rating is applied by staff
+  # (Boshqaruv -> Musobaqalar) after disqualifying cheaters; similarity is run from the contest
+  # report for the problems they pick. Neither is swept automatically.
   scheduler:
     build: .
     restart: unless-stopped
@@ -36,8 +38,6 @@ services:
       - codearena-net
     command: >
       sh -c "while true; do
-               python manage.py recalc_rating;
-               python manage.py flag_similarity;
                python manage.py recalc_points;
                sleep 300;
              done"

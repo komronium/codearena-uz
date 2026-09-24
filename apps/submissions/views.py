@@ -2,40 +2,41 @@ import django_rq
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.core.paginator import Paginator
-from django.http import Http404, HttpResponse, HttpResponseBadRequest
+from django.http import Http404, HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
 from apps.contests.models import Participation
 from apps.contests.services import access_allowed, active_contest_for, in_running_contest, in_upcoming_contest
 from apps.problems.models import Language, Problem
-from judge.runner import run_submission
+from judge.runner import run_submission, run_trial
 
 from .models import Submission, UserProblemSolved
 
 MAX_SOURCE = 64 * 1024
 RATE_LIMIT_MAX = 10       # submissions
 RATE_LIMIT_WINDOW_S = 60  # per rolling window
+TRIAL_RATE_MAX = 20       # "Sinab ko'rish" runs per window: cheaper than a submit, but still a container
+MAX_TRIAL_INPUT = 64 * 1024
 
 
-def _rate_limited(user_id) -> bool:
+def _rate_limited(user_id, kind="submit", limit=RATE_LIMIT_MAX) -> bool:
     # ponytail: fixed window, not sliding — a burst can land 2x MAX across a
     # window boundary. Good enough to stop a submit-spam script; swap for a
     # sliding/token-bucket counter if that boundary burst becomes a problem.
-    key = f"submit-rl:{user_id}"
+    key = f"{kind}-rl:{user_id}"
     count = cache.get(key)
     if count is None:
         cache.set(key, 1, timeout=RATE_LIMIT_WINDOW_S)
         return False
-    if count >= RATE_LIMIT_MAX:
+    if count >= limit:
         return True
     cache.incr(key)
     return False
 
 
-@login_required
-@require_POST
-def submit(request, slug):
+def _gate(request, slug):
+    """(problem, contest, error) for someone about to run code against `slug`."""
     try:
         problem = Problem.objects.get(slug=slug)
     except Problem.DoesNotExist:
@@ -47,9 +48,18 @@ def submit(request, slug):
     # re-check supervised-mode eligibility on every submit, not just at
     # registration — group membership or client IP can change mid-contest.
     if contest is not None and not access_allowed(request.user, contest, request.META.get("REMOTE_ADDR")):
-        return HttpResponseBadRequest("not eligible for this contest")
+        return problem, contest, HttpResponseBadRequest("not eligible for this contest")
     if contest is not None and Participation.objects.filter(user=request.user, contest=contest, disqualified=True).exists():
-        return HttpResponseBadRequest("disqualified from this contest")
+        return problem, contest, HttpResponseBadRequest("disqualified from this contest")
+    return problem, contest, None
+
+
+@login_required
+@require_POST
+def submit(request, slug):
+    problem, contest, error = _gate(request, slug)
+    if error:
+        return error
     if _rate_limited(request.user.id):
         return HttpResponse("too many submissions, slow down", status=429)
     language = get_object_or_404(Language, code=request.POST.get("language"), is_active=True)
@@ -60,6 +70,47 @@ def submit(request, slug):
                                     language=language, source=source)
     django_rq.enqueue(run_submission, sub.pk)
     return redirect("problems:detail", problem.slug)
+
+
+@login_required
+@require_POST
+def trial(request, slug):
+    """Run code on the samples (or one custom stdin) without creating a Submission."""
+    problem, _, error = _gate(request, slug)
+    if error:
+        return JsonResponse({"error": error.content.decode()}, status=400)
+    if problem.kind == Problem.Kind.SQL:
+        return JsonResponse({"error": "SQL masalalarda sinov yo‘q"}, status=400)
+    language = get_object_or_404(Language, code=request.POST.get("language"), is_active=True)
+    source, stdin = request.POST.get("source", ""), request.POST.get("stdin", "")
+    if not source.strip() or len(source) > MAX_SOURCE or len(stdin) > MAX_TRIAL_INPUT:
+        return JsonResponse({"error": "Kod bo‘sh yoki juda katta"}, status=400)
+    if _rate_limited(request.user.id, "trial", TRIAL_RATE_MAX):
+        return JsonResponse({"error": "Juda tez-tez — bir daqiqadan keyin urinib ko‘ring"}, status=429)
+    if stdin.strip():
+        inputs, expected = [stdin], None
+    else:
+        samples = list(problem.samples)
+        if not samples:
+            return JsonResponse({"error": "Namunaviy test yo‘q — o‘z inputingizni kiriting"}, status=400)
+        inputs, expected = [t.input for t in samples], [t.expected for t in samples]
+    job = django_rq.get_queue("run").enqueue(
+        run_trial, language.code, source, inputs, expected, problem.tl_ms, problem.ml_mb,
+        result_ttl=300, failure_ttl=300, meta={"user_id": request.user.pk})
+    return JsonResponse({"id": job.id})
+
+
+@login_required
+def trial_status(request, job_id):
+    job = django_rq.get_queue("run").fetch_job(job_id)
+    if job is None or job.meta.get("user_id") != request.user.pk:
+        raise Http404
+    status = job.get_status()
+    if status == "finished":
+        return JsonResponse({"done": True, **job.return_value()})
+    if status in ("failed", "stopped", "canceled"):
+        return JsonResponse({"done": True, "verdict": "IE", "log": "", "cases": []})
+    return JsonResponse({"done": False, "status": status})
 
 
 def _own(request, pk):

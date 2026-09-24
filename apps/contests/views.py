@@ -82,10 +82,13 @@ def standings(request, pk):
     for i, cp in enumerate(problems):  # column footer-style summary: solved / tried
         cp.n_solved = sum(1 for r in rows if r["cells"][i]["solved"])
         cp.n_tried = sum(1 for r in rows if r["cells"][i]["solved"] or r["cells"][i]["wrong"])
+    for cp in problems:
+        cp.solve_pct = round(100 * cp.n_solved / len(rows)) if rows else 0
     me = contest.participations.filter(user=request.user).first() if request.user.is_authenticated else None
     return render(request, "contests/standings.html",
                   {"contest": contest, "rows": rows, "problems": problems, "registered": me is not None,
-                   "my_participation": me})
+                   "my_participation": me,
+                   "me_in_rows": me is not None and any(r["user"].pk == request.user.pk for r in rows)})
 
 
 @staff_required

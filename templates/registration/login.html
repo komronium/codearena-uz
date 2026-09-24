@@ -12,7 +12,7 @@
     {% if form.non_field_errors %}
     <div class="ca-alert ca-alert-bad" role="alert">Login yoki parol noto‘g‘ri. Qaytadan urinib ko‘ring.</div>
     {% endif %}
-    {% include "registration/_auth_field.html" with name="username" label="Foydalanuvchi nomi" type="text" icon="at-sign" autocomplete="username" value=form.username.value errors=form.username.errors autofocus=True %}
+    {% include "registration/_auth_field.html" with name="username" label="Foydalanuvchi nomi yoki email" type="text" icon="at-sign" autocomplete="username" value=form.username.value errors=form.username.errors autofocus=True %}
     <div>
       {% include "registration/_auth_field.html" with name="password" label="Parol" type="password" icon="lock" autocomplete="current-password" errors=form.password.errors %}
       <div class="mt-1.5 text-right"><a class="ca-link text-xs" href="{% url 'password_reset' %}">Parolni unutdingizmi?</a></div>

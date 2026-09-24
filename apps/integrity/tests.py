@@ -243,3 +243,93 @@ def test_report_shows_flag_side_by_side_with_shared_lines(client, flag_contest, 
     html = client.get(reverse("integrity:contest_report", args=[flag_contest.pk])).content.decode()
     assert html.count("ca-cmp-line is-hit") == 14  # 7 shared lines on each side
     assert "xs.sort()" in html and "arr.sort()" in html
+
+
+def test_event_records_problem_and_away_time(client, flag_contest, flag_problem):
+    ali = User.objects.create_user("ev1", password="x")
+    Participation.objects.create(user=ali, contest=flag_contest)
+    client.force_login(ali)
+    url = reverse("integrity:event")
+    r = client.post(url, {"contest_id": flag_contest.pk, "problem_id": flag_problem.pk, "kind": "focus", "away_ms": "65000"})
+    assert r.status_code == 200
+    fe = FocusEvent.objects.get()
+    assert fe.problem == flag_problem and fe.away_ms == 65000
+    other = Problem.objects.create(slug="zz", title="Z", statement_md="x", author=ali)
+    r = client.post(url, {"contest_id": flag_contest.pk, "problem_id": other.pk, "kind": "blur"})
+    assert r.status_code == 400
+
+
+def test_snapshot_saves_only_changes(client, flag_contest, flag_problem, flag_python):
+    from .models import CodeSnapshot
+    ali = User.objects.create_user("sn1", password="x")
+    Participation.objects.create(user=ali, contest=flag_contest)
+    client.force_login(ali)
+    url = reverse("integrity:snapshot")
+    data = {"contest_id": flag_contest.pk, "problem_id": flag_problem.pk, "language": "python", "source": "a = 1"}
+    for _ in range(2):
+        assert client.post(url, data).status_code == 200
+    client.post(url, data | {"source": "a = 1\nprint(a)"})
+    assert list(CodeSnapshot.objects.values_list("source", flat=True)) == ["a = 1", "a = 1\nprint(a)"]
+    assert CodeSnapshot.objects.first().language == flag_python
+    stranger = User.objects.create_user("sn2", password="x")
+    client.force_login(stranger)
+    assert client.post(url, data).status_code == 400
+
+
+def test_report_lists_too_fast_and_back_and_solve(client, flag_contest, flag_problem, flag_python):
+    flag_problem.difficulty = Problem.Difficulty.MEDIUM
+    flag_problem.save()
+    staff = User.objects.create_user("st1", password="x", is_staff=True)
+    fast = User.objects.create_user("quick", password="x")
+    back = User.objects.create_user("returner", password="x")
+    for u in (fast, back):
+        Participation.objects.create(user=u, contest=flag_contest)
+    FocusEvent.objects.create(user=fast, contest=flag_contest, kind="view", problem=flag_problem)
+    _ac(fast, flag_problem, flag_contest, flag_python, LONG_SOURCE)
+    FocusEvent.objects.create(user=back, contest=flag_contest, kind="focus", away_ms=95_000)
+    _ac(back, flag_problem, flag_contest, flag_python, LONG_SOURCE)
+    client.force_login(staff)
+    html = client.get(reverse("integrity:contest_report", args=[flag_contest.pk])).content.decode()
+    section = html[html.index("Shubhali yechimlar"):html.index("O‘xshash kodlar")]
+    assert "quick" in section and "ochilgandan" in section
+    assert "returner" in section and "95 s tashqarida" in section
+
+
+def test_replay_shows_frames_and_jumps_for_staff_only(client, flag_contest, flag_problem, flag_python):
+    from .models import CodeSnapshot
+    ali = User.objects.create_user("rp1", password="x")
+    CodeSnapshot.objects.create(user=ali, contest=flag_contest, problem=flag_problem, source="n = 1")
+    CodeSnapshot.objects.create(user=ali, contest=flag_contest, problem=flag_problem, source=LONG_SOURCE * 3)
+    url = reverse("integrity:replay", args=[flag_contest.pk, ali.pk, flag_problem.pk])
+    client.force_login(ali)
+    assert client.get(url).status_code in (302, 403)
+    client.force_login(User.objects.create_user("rp2", password="x", is_staff=True))
+    r = client.get(url)
+    assert r.status_code == 200
+    assert len(r.context["frames"]) == 2 and len(r.context["jumps"]) == 1
+    assert "keskin sakrash" in r.content.decode()
+
+
+def test_contest_page_tracks_registered_participant_during_contest(client, flag_contest):
+    ali = User.objects.create_user("tr1", password="x")
+    client.force_login(ali)
+    url = reverse("contests:detail", args=[flag_contest.pk])
+    assert "ca-away" not in client.get(url).content.decode()
+    Participation.objects.create(user=ali, contest=flag_contest)
+    assert 'id="ca-away"' in client.get(url).content.decode()
+
+
+def test_flag_run_checks_only_chosen_problems(client, flag_contest, flag_problem, flag_python):
+    other = Problem.objects.create(slug="b", title="B", statement_md="x", author=flag_problem.author)
+    ContestProblem.objects.create(contest=flag_contest, problem=other, label="B")
+    ali = User.objects.create_user("ch1", password="x")
+    bob = User.objects.create_user("ch2", password="x")
+    for p in (flag_problem, other):
+        for u in (ali, bob):
+            _ac(u, p, flag_contest, flag_python, LONG_SOURCE)
+    client.force_login(User.objects.create_user("ch3", password="x", is_staff=True))
+    url = reverse("integrity:flag_run", args=[flag_contest.pk])
+    client.post(url)  # nothing picked: nothing checked
+    assert SimilarityFlag.objects.count() == 0
+    client.post(url, {"problems": ["B"]})
+    assert list(SimilarityFlag.objects.values_list("submission_a__problem__slug", flat=True)) == ["b"]

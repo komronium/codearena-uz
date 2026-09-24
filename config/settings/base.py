@@ -58,12 +58,15 @@ else:
     DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": BASE_DIR / "db.sqlite3"}}
 
 AUTH_USER_MODEL = "accounts.User"
+AUTHENTICATION_BACKENDS = ["apps.accounts.backends.EmailOrUsernameBackend"]
 LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "problems:list"
 LOGOUT_REDIRECT_URL = "problems:list"
 
 REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
-RQ_QUEUES = {"default": {"URL": REDIS_URL, "DEFAULT_TIMEOUT": 600}}
+# "run" = "Sinab ko'rish" trial runs; workers listen `default run`, so real submissions go first.
+RQ_QUEUES = {"default": {"URL": REDIS_URL, "DEFAULT_TIMEOUT": 600},
+             "run": {"URL": REDIS_URL, "DEFAULT_TIMEOUT": 120}}
 CACHES = {"default": {"BACKEND": "django.core.cache.backends.redis.RedisCache", "LOCATION": REDIS_URL}}
 
 # Host path shared between worker container and docker daemon; must be identical on both sides.

@@ -15,6 +15,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument("contest_id", type=int, nargs="?", default=None)
+        parser.add_argument("--problems", default="", help="comma-separated labels (A,C) to check; default all")
 
     def handle(self, *args, **opts):
         if opts["contest_id"] is not None:
@@ -22,7 +23,8 @@ class Command(BaseCommand):
                 contest = Contest.objects.get(pk=opts["contest_id"])
             except Contest.DoesNotExist:
                 raise CommandError(f"no contest {opts['contest_id']}")
-            created = self._flag(contest)
+            labels = [x.strip() for x in opts["problems"].split(",") if x.strip()]
+            created = self._flag(contest, labels)
             self.stdout.write(self.style.SUCCESS(f"{created} similarity flag(s) created"))
             return
 
@@ -31,14 +33,18 @@ class Command(BaseCommand):
             total += self._flag(contest)
         self.stdout.write(self.style.SUCCESS(f"{total} similarity flag(s) created"))
 
-    def _flag(self, contest) -> int:
+    def _flag(self, contest, labels=None) -> int:
         """Keep exactly one flag per (problem, user pair): their most similar AC pair,
         if both sides have MIN_LINES+ lines of code and score >= THRESHOLD.
         Unreviewed flags that no longer qualify (older, looser rules) are dropped;
         reviewed ones stay — a human already looked at them."""
         created = 0
         keep: set[int] = set()
-        for problem_id in contest.contest_problems.values_list("problem_id", flat=True):
+        cps = contest.contest_problems.all()
+        if labels:
+            cps = cps.filter(label__in=labels)
+        problem_ids = list(cps.values_list("problem_id", flat=True))
+        for problem_id in problem_ids:
             subs = [s for s in Submission.objects.filter(contest=contest, problem_id=problem_id, verdict="AC")
                     if code_lines(s.source) >= MIN_LINES]
             best: dict[tuple[int, int], tuple[float, Submission, Submission]] = {}
@@ -64,5 +70,6 @@ class Command(BaseCommand):
                     flag.submission_a, flag.submission_b, flag.score = lo, hi, score
                     flag.save(update_fields=["submission_a", "submission_b", "score"])
                 keep.add(flag.pk)
-        SimilarityFlag.objects.filter(submission_a__contest=contest, reviewed=False).exclude(pk__in=keep).delete()
+        SimilarityFlag.objects.filter(submission_a__contest=contest, submission_a__problem_id__in=problem_ids,
+                                      reviewed=False).exclude(pk__in=keep).delete()
         return created
