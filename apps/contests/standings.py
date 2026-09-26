@@ -1,5 +1,9 @@
 from apps.submissions.models import Submission
 
+# Only a judged wrong answer is a wrong try: compile errors and submissions still in
+# the queue cost no penalty and are not shown as tries.
+PENALIZED = {"WA", "TLE", "MLE", "RE", "OLE"}
+
 
 def compute_standings(contest):
     """Score = sum of ContestProblem.points for solved problems; ties broken by
@@ -22,10 +26,10 @@ def compute_standings(contest):
             subs = subs_by_user_problem.get((p.user_id, cp.id), [])
             ac = next((s for s in subs if s.verdict == "AC"), None)
             if ac is None:
-                wrong = sum(1 for s in subs if s.verdict != "AC")
+                wrong = sum(1 for s in subs if s.verdict in PENALIZED)
                 cells.append({"solved": False, "wrong": wrong, "minutes": None, "ac_at": None})
                 continue
-            wrong = sum(1 for s in subs if s.created < ac.created and s.verdict != "AC")
+            wrong = sum(1 for s in subs if s.created < ac.created and s.verdict in PENALIZED)
             seconds = int((ac.created - contest.start).total_seconds())
             minutes = seconds // 60
             cells.append({"solved": True, "wrong": wrong, "minutes": minutes, "ac_at": ac.created,

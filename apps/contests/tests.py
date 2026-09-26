@@ -98,6 +98,29 @@ def test_score_ties_break_by_penalty(contest, problem_a, problem_b, python):
     assert rows[0]["score"] == rows[1]["score"] == 100
 
 
+def test_only_judged_wrong_answers_cost_penalty(contest, problem_a, problem_b, python):
+    ali = User.objects.create_user("ali", password="x")
+    bob = User.objects.create_user("bob", password="x")
+    Participation.objects.create(user=ali, contest=contest)
+    Participation.objects.create(user=bob, contest=contest)
+
+    # ali: a compile error and a still-pending run before the AC cost nothing
+    _sub(ali, problem_a, contest, python, "CE", 1)
+    _sub(ali, problem_a, contest, python, "PENDING", 2)
+    _sub(ali, problem_a, contest, python, "AC", 10)
+    # unsolved B: CE and RUNNING are not shown as wrong tries either
+    _sub(ali, problem_b, contest, python, "CE", 3)
+    _sub(ali, problem_b, contest, python, "RUNNING", 4)
+    # bob: an output-limit failure is a real wrong try
+    _sub(bob, problem_a, contest, python, "OLE", 1)
+    _sub(bob, problem_a, contest, python, "AC", 10)
+
+    rows = {r["user"]: r for r in compute_standings(contest)}
+    assert rows[ali]["penalty"] == 10 and rows[ali]["cells"][0]["wrong"] == 0
+    assert rows[ali]["cells"][1]["wrong"] == 0
+    assert rows[bob]["penalty"] == 30 and rows[bob]["cells"][0]["wrong"] == 1
+
+
 @pytest.mark.django_db
 def test_register_creates_participation(client):
     c = Contest.objects.create(title="Sprint", start=timezone.now() - timezone.timedelta(hours=1),
