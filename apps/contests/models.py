@@ -114,3 +114,22 @@ class Clarification(models.Model):
     @property
     def is_answered(self) -> bool:
         return bool(self.answered_at)
+
+
+class VirtualParticipation(models.Model):
+    """Replaying a published contest on your own clock (apps.contests.virtual). Unrated;
+    the submissions in the window are practice submissions tagged with it."""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="virtuals")
+    contest = models.ForeignKey(Contest, on_delete=models.CASCADE, related_name="virtuals")
+    start = models.DateTimeField()
+
+    class Meta:
+        unique_together = ("user", "contest")
+
+    @property
+    def end(self):
+        return self.start + (self.contest.end - self.contest.start)
+
+    @property
+    def is_running(self):
+        return self.start <= timezone.now() < self.end

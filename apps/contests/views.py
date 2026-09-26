@@ -13,8 +13,8 @@ from apps.submissions.solves import refresh_solves
 
 from apps.integrity import audit
 
-from . import rating
-from .models import Clarification, Contest, Participation
+from . import rating, virtual
+from .models import Clarification, Contest, Participation, VirtualParticipation
 from .services import access_allowed
 from .standings import compute_standings
 
@@ -65,7 +65,17 @@ def contest_detail(request, pk):
         "contest": contest, "problems": problems, "registered": registered, "my_row": my_row,
         "my_participation": me,
         "n_participants": contest.participations.count(),
+        **_virtual_ctx(request, contest),
     })
+
+
+def _virtual_ctx(request, contest) -> dict:
+    if not (request.user.is_authenticated and contest.has_ended):
+        return {}
+    vp = VirtualParticipation.objects.filter(user=request.user, contest=contest).first()
+    if vp is not None:
+        return {"virtual": virtual.virtual_result(vp), "vp": vp}
+    return {"can_virtual": not virtual.start_refusal(request.user, contest)}
 
 
 @login_required
@@ -184,3 +194,16 @@ def answer_clarification(request, pk, cid):
     clar.answered_at = timezone.now()
     clar.save(update_fields=["answer", "answered_by", "answered_at"])
     return redirect("contests:clarifications", pk=pk)
+
+
+@login_required
+@require_POST
+def virtual_start(request, pk):
+    contest = get_object_or_404(Contest, pk=pk)
+    if not contest.has_ended:
+        return HttpResponseBadRequest("contest has not ended")
+    refusal = virtual.start_refusal(request.user, contest)
+    if refusal:
+        return HttpResponseBadRequest(refusal)
+    VirtualParticipation.objects.create(user=request.user, contest=contest, start=timezone.now())
+    return redirect("contests:detail", pk=pk)

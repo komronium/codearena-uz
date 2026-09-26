@@ -1,4 +1,5 @@
 from io import StringIO
+from unittest.mock import patch
 
 import pytest
 from django.core.cache import cache
@@ -721,3 +722,71 @@ def test_dq_after_rating_leaves_older_contests_alone(client, problem_a, python):
     r = client.post(reverse("contests:disqualify", args=[old.pk, cheat.pk]), {"disqualified": "1"}, follow=True)
     assert dict(User.objects.values_list("username", "rating")) == before
     assert "reyting o‘zgarmadi" in r.content.decode()
+
+
+# ---- virtual contests ---------------------------------------------------------------------------
+
+@pytest.fixture
+def past_contest(problem_a, python):
+    """Published 2-hour contest: ali solved A at 0:30 with one WA, bob at 1:00."""
+    c = Contest.objects.create(title="O‘tgan", start=timezone.now() - timezone.timedelta(days=1),
+                               end=timezone.now() - timezone.timedelta(days=1) + timezone.timedelta(hours=2),
+                               published_at=timezone.now())
+    ContestProblem.objects.create(contest=c, problem=problem_a, label="A", points=100)
+    for name, minutes, wrong in (("ali", 30, 1), ("bob", 60, 0)):
+        u = User.objects.create_user(name, password="x")
+        Participation.objects.create(user=u, contest=c)
+        for i in range(wrong):
+            s = Submission.objects.create(user=u, problem=problem_a, contest=c, language=python, source="x",
+                                          verdict="WA")
+            Submission.objects.filter(pk=s.pk).update(created=c.start + timezone.timedelta(minutes=minutes - 5))
+        s = Submission.objects.create(user=u, problem=problem_a, contest=c, language=python, source="x",
+                                      verdict="AC")
+        Submission.objects.filter(pk=s.pk).update(created=c.start + timezone.timedelta(minutes=minutes))
+    problem_a.is_public = True
+    problem_a.save()
+    return c
+
+
+@pytest.mark.django_db
+def test_virtual_start_rules(client, past_contest):
+    from .models import VirtualParticipation
+
+    url = reverse("contests:virtual", args=[past_contest.pk])
+    client.force_login(User.objects.get(username="ali"))
+    assert client.post(url).status_code == 400  # took part for real
+    vali = User.objects.create_user("vali", password="x")
+    client.force_login(vali)
+    Contest.objects.filter(pk=past_contest.pk).update(published_at=None)
+    assert client.post(url).status_code == 400  # not published: its problems may still be hidden
+    Contest.objects.filter(pk=past_contest.pk).update(published_at=timezone.now())
+    assert client.post(url).status_code == 302
+    assert client.post(url).status_code == 400  # once
+    assert VirtualParticipation.objects.filter(user=vali).count() == 1
+
+
+@pytest.mark.django_db
+@patch("apps.submissions.views.django_rq.enqueue")
+def test_virtual_run_tags_submissions_and_ranks_among_real_participants(enqueue, client, past_contest, problem_a):
+    from .models import VirtualParticipation
+    from .virtual import virtual_result
+
+    vali = User.objects.create_user("vali", password="x")
+    client.force_login(vali)
+    client.post(reverse("contests:virtual", args=[past_contest.pk]))
+    vp = VirtualParticipation.objects.get(user=vali)
+    client.post(reverse("submissions:submit", args=[problem_a.slug]), {"language": "python", "source": "x"})
+    s = Submission.objects.get(user=vali)
+    assert s.virtual == vp and s.contest is None
+    Submission.objects.filter(pk=s.pk).update(verdict="AC", created=vp.start + timezone.timedelta(minutes=45))
+
+    res = virtual_result(vp)
+    # ali: 30 min + 20 for the WA = 50; bob: 60; vali: 45 from the virtual start -> 1st of 2
+    assert (res["score"], res["penalty"], res["rank"], res["field"]) == (100, 45, 1, 2)
+    assert res["cells"][0]["time"] == "45:00"
+    page = client.get(reverse("contests:detail", args=[past_contest.pk])).content.decode()
+    assert "1-o‘rin" in page and "Virtual" in page
+
+    VirtualParticipation.objects.filter(pk=vp.pk).update(start=timezone.now() - timezone.timedelta(hours=3))
+    client.post(reverse("submissions:submit", args=[problem_a.slug]), {"language": "python", "source": "y"})
+    assert Submission.objects.filter(user=vali).latest("id").virtual is None  # the window is over: practice

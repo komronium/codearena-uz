@@ -29,6 +29,9 @@ class Submission(models.Model):
     device = models.CharField(max_length=64, blank=True, default="")
     ip = models.GenericIPAddressField(null=True, blank=True)
     tracker_seen_at = models.DateTimeField(null=True, blank=True)
+    # Made during the user's virtual run of a past contest (apps.contests.virtual).
+    virtual = models.ForeignKey("contests.VirtualParticipation", null=True, blank=True, on_delete=models.SET_NULL,
+                                related_name="submissions")
     verdict = models.CharField(max_length=8, choices=Verdict.choices, default=Verdict.PENDING)
     exec_ms = models.IntegerField(default=0)
     mem_kb = models.IntegerField(default=0)

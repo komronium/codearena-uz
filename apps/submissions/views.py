@@ -7,10 +7,10 @@ from django.views.decorators.http import require_POST
 
 from apps.contests.models import Participation
 from apps.contests.services import access_allowed, active_contest_for, in_running_contest, in_upcoming_contest
+from apps.contests.virtual import active_virtual_for
 from apps.problems.models import Language, Problem
-from judge.runner import run_submission, run_trial
-
 from apps.classroom.access import can_review, teaches
+from judge.runner import run_submission, run_trial
 
 from .models import Submission, UserProblemSolved
 from .ratelimit import rate_limited
@@ -58,6 +58,8 @@ def submit(request, slug):
                 .values_list("last_seen_at", flat=True).first())
         telemetry = {"device": request.POST.get("device", "")[:64], "tracker_seen_at": seen,
                      "ip": request.META.get("REMOTE_ADDR") or None}
+    if contest is None:
+        telemetry["virtual"] = active_virtual_for(request.user, problem)
     sub = Submission.objects.create(user=request.user, problem=problem, contest=contest,
                                     language=language, source=source, **telemetry)
     django_rq.enqueue(run_submission, sub.pk)
