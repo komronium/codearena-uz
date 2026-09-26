@@ -511,12 +511,13 @@ so @codemirror/state is a singleton — two copies break with "Unrecognized exte
     const out = document.getElementById("trial-out"), stdinEl = document.getElementById("trial-stdin");
     const esc = (t) => (t ?? "").replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
     const V = { AC: ["ac", "check", "AC"], OK: ["ac", "check", "Bajarildi"], WA: ["bad", "x", "WA"],
-                TLE: ["warn", "clock", "TL"], MLE: ["warn", "cpu", "ML"], RE: ["bad", "triangle-alert", "RE"],
-                CE: ["mute", "code", "CE"], IE: ["mute", "circle-alert", "Xato"] };
+                TLE: ["warn", "clock", "TL"], MLE: ["warn", "cpu", "ML"], OLE: ["warn", "scissors", "OL"],
+                RE: ["bad", "triangle-alert", "RE"], CE: ["mute", "code", "CE"], IE: ["mute", "circle-alert", "Xato"] };
     const chip = (v) => { const [c, i, t] = V[v] || V.IE; return `<span class="ca-verdict ca-verdict-${c}"><i data-lucide="${i}" class="lu" aria-hidden="true"></i>${t}</span>`; };
     const box = (label, text) => `<div class="ca-sample"><div class="ca-sample-head"><span>${label}</span></div><pre class="max-h-48">${text ? esc(text) : '<span class="text-mute">(bo‘sh)</span>'}</pre></div>`;
     const show = (html) => { out.hidden = false; out.innerHTML = html; window.caIcons?.(); };
-    const HINT = { TLE: "Vaqt chegarasi oshdi.", MLE: "Xotira chegarasi oshdi.", RE: "Dastur xato bilan tugadi." };
+    const HINT = { TLE: "Vaqt chegarasi oshdi.", MLE: "Xotira chegarasi oshdi.", OLE: "Chiqish hajmi chegarasi oshdi.",
+                   RE: "Dastur xato bilan tugadi." };
     function render(r) {
       if (r.verdict === "CE") return show(`<p class="mb-2 flex items-center gap-2">${chip("CE")} Kompilyatsiya xatosi</p><pre class="ca-pre max-h-60 text-xs">${esc(r.log)}</pre>`);
       if (!r.cases.length) return show(`<p class="flex items-center gap-2">${chip(r.verdict)} Sinovni ishga tushirib bo‘lmadi — qayta urinib ko‘ring.</p>`);

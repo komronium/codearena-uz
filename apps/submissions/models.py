@@ -13,10 +13,11 @@ class Submission(models.Model):
         WA = "WA"
         TLE = "TLE"
         MLE = "MLE"
+        OLE = "OLE"
         RE = "RE"
         CE = "CE"
 
-    TERMINAL = {"AC", "WA", "TLE", "MLE", "RE", "CE"}
+    TERMINAL = {"AC", "WA", "TLE", "MLE", "OLE", "RE", "CE"}
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="submissions")
     problem = models.ForeignKey(Problem, on_delete=models.CASCADE, related_name="submissions")

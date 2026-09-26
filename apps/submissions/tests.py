@@ -123,6 +123,20 @@ def test_status_compact_poll_stays_compact(client, problem, python, user):
     assert b"ca-test-WA" in full
 
 
+def test_ole_verdict_shows_as_output_limit(client, problem, python, user):
+    Submission.objects.create(user=user, problem=problem, language=python, source="x", verdict="WA")
+    s = Submission.objects.create(user=user, problem=problem, language=python, source="x", verdict="OLE",
+                                  total=2)
+    TestResult.objects.create(submission=s, testcase=problem.testcases.first(), verdict="OLE")
+    client.force_login(user)
+    status = client.get(reverse("submissions:status", args=[s.pk])).content
+    assert b"ca-verdict-warn" in status and b"Output Limit" in status and b"ca-test-OLE" in status
+    mine = client.get(reverse("submissions:mine") + "?verdict=OLE")
+    assert list(mine.context["subs"]) == [s] and ("OLE", "OL") in mine.context["verdicts"]
+    detail = client.get(reverse("problems:detail", args=[problem.slug])).content
+    assert b'OLE: ["warn", "scissors", "OL"]' in detail and b"Chiqish hajmi chegarasi oshdi." in detail
+
+
 @patch("apps.submissions.views.django_rq.get_queue")
 def test_trial_runs_samples_without_a_submission(get_queue, client, problem, python, user):
     get_queue.return_value.enqueue.return_value.id = "job1"

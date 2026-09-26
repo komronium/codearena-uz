@@ -155,5 +155,5 @@ def mine(request):
     if verdict in Submission.TERMINAL:
         qs = qs.filter(verdict=verdict)
     page = Paginator(qs, 50).get_page(request.GET.get("page"))
-    verdicts = [("AC", "AC"), ("WA", "WA"), ("TLE", "TL"), ("MLE", "ML"), ("RE", "RE"), ("CE", "CE")]
+    verdicts = [("AC", "AC"), ("WA", "WA"), ("TLE", "TL"), ("MLE", "ML"), ("OLE", "OL"), ("RE", "RE"), ("CE", "CE")]
     return render(request, "submissions/list.html", {"subs": page, "verdict": verdict, "verdicts": verdicts})
