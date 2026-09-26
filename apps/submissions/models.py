@@ -54,8 +54,8 @@ class TestResult(models.Model):
 
 
 class UserProblemSolved(models.Model):
-    """One row per (user, problem) first-AC. Guards practice_points from being
-    awarded more than once for the same problem — see judge.runner."""
+    """Derived: the user's earliest eligible AC for the problem. Maintained by
+    apps.submissions.solves.refresh_solves; practice points are computed from these rows."""
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     problem = models.ForeignKey(Problem, on_delete=models.CASCADE)
     first_ac_submission = models.ForeignKey(Submission, on_delete=models.PROTECT)

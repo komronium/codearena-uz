@@ -4,12 +4,10 @@ import tempfile
 
 from django.conf import settings
 from django.core.cache import cache
-from django.db import transaction
-from django.db.models import F
 
-from apps.accounts.models import User
 from apps.problems.models import Language, Problem
-from apps.submissions.models import Submission, TestResult, UserProblemSolved
+from apps.submissions.models import Submission, TestResult
+from apps.submissions.solves import refresh_solves
 from judge import sandbox, sql_judge
 from judge.compare import outputs_match
 
@@ -59,8 +57,15 @@ def run_submission(submission_id: int) -> None:
 
     if sub.problem.kind == Problem.Kind.SQL:
         _run_sql_submission(sub)
-        return
+    else:
+        _run_code_submission(sub)
+    # Every final verdict, CE included (a rejudge can turn an AC into one), moves the
+    # contest standings and this user's solve and practice points.
+    _drop_standings_cache(sub)
+    refresh_solves(sub.problem_id, [sub.user_id])
 
+
+def _run_code_submission(sub: Submission) -> None:
     lang = sub.language
     problem = sub.problem
     tests = list(problem.testcases.all())
@@ -100,10 +105,6 @@ def run_submission(submission_id: int) -> None:
 
         sub.verdict, sub.passed, sub.total, sub.exec_ms, sub.mem_kb = final, passed, len(tests), max_ms, max_kb
         sub.save(update_fields=["verdict", "passed", "total", "exec_ms", "mem_kb"])
-        _drop_standings_cache(sub)
-
-        if final == Submission.Verdict.AC and sub.contest_id is None:
-            _award_points_if_first_ac(sub)
     finally:
         shutil.rmtree(src_dir, ignore_errors=True)
 
@@ -135,26 +136,9 @@ def _run_sql_submission(sub: Submission) -> None:
     sub.passed = 1 if final == Submission.Verdict.AC else 0
     sub.total = 1
     sub.save(update_fields=["verdict", "passed", "total"])
-    _drop_standings_cache(sub)
-
-    if final == Submission.Verdict.AC and sub.contest_id is None:
-        _award_points_if_first_ac(sub)
 
 
 def _drop_standings_cache(sub: Submission) -> None:
     """Standings are cached 30s; a fresh verdict should show up right away."""
     if sub.contest_id is not None:
         cache.delete(f"contest-standings-{sub.contest_id}")
-
-
-def _award_points_if_first_ac(submission: Submission) -> None:
-    """First AC per (user, problem) awards problem.points once — spec §2 step 5."""
-    with transaction.atomic():
-        _, created = UserProblemSolved.objects.get_or_create(
-            user=submission.user, problem=submission.problem,
-            defaults={"first_ac_submission": submission},
-        )
-        if created:
-            User.objects.filter(pk=submission.user_id).update(
-                practice_points=F("practice_points") + submission.problem.points,
-            )

@@ -336,6 +336,39 @@ def test_runner_retry_while_running_does_not_duplicate_results(compile_, run_tes
     assert s.results.count() == 2
 
 
+@pytest.mark.parametrize("compiled, run, verdict", [
+    ((False, "error: expected ';'"), [], "CE"),
+    ((True, ""), [("4\n", "OK", 10, 1024)], "WA"),
+])
+def test_rejudged_ac_that_now_fails_loses_its_solve(compiled, run, verdict, problem, python, user):
+    """A rejudge resets an AC to PENDING. Whatever the new verdict, CE included, the runner
+    must move the solve, the points and the contest standings."""
+    from django.core.cache import cache
+
+    from apps.submissions.solves import refresh_solves
+    from judge.runner import run_submission
+
+    contest = Contest.objects.create(title="Past", start=timezone.now() - timezone.timedelta(hours=3),
+                                     end=timezone.now() - timezone.timedelta(hours=2), published_at=timezone.now())
+    s = Submission.objects.create(user=user, problem=problem, contest=contest, language=python, source="x",
+                                  verdict="AC")
+    refresh_solves(problem.pk, [user.pk])
+    user.refresh_from_db()
+    assert user.practice_points == 10
+    cache.set(f"contest-standings-{contest.pk}", "stale")
+    Submission.objects.filter(pk=s.pk).update(verdict="PENDING")  # what the rejudge view does
+
+    with (patch("judge.runner.sandbox.compile", return_value=compiled),
+          patch("judge.runner.sandbox.run_tests", return_value=run)):
+        run_submission(s.pk)
+
+    s.refresh_from_db()
+    user.refresh_from_db()
+    assert s.verdict == verdict
+    assert not UserProblemSolved.objects.filter(user=user).exists() and user.practice_points == 0
+    assert cache.get(f"contest-standings-{contest.pk}") is None
+
+
 @pytest.fixture
 def sql_lang(db):
     return Language.objects.create(code="sql", name="SQL (SQLite)", docker_image="-", run_cmd="-")
