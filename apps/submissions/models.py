@@ -58,7 +58,7 @@ class UserProblemSolved(models.Model):
     apps.submissions.solves.refresh_solves; practice points are computed from these rows."""
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     problem = models.ForeignKey(Problem, on_delete=models.CASCADE)
-    first_ac_submission = models.ForeignKey(Submission, on_delete=models.PROTECT)
+    first_ac_submission = models.ForeignKey(Submission, on_delete=models.CASCADE)
     solved_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

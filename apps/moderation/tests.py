@@ -491,3 +491,54 @@ def test_contest_edit_is_not_blocked_by_its_own_or_ended_problems(client):
     for c in (running, ended):
         r = client.post(reverse("moderation:contest_edit", args=[c.pk]), _contest_edit_data(c))
         assert r.status_code == 302, r.content.decode()[:2000]
+
+
+@pytest.mark.django_db
+def test_problem_delete_refuses_when_others_depend_on_it(client):
+    from django.utils import timezone
+
+    from apps.contests.models import Contest, ContestProblem
+    from apps.problems.models import Language
+    from apps.submissions.models import Submission, UserProblemSolved
+
+    staff = User.objects.create_user("teacher", password="x", is_staff=True)
+    ali = User.objects.create_user("ali", password="x")
+    lang = Language.objects.create(code="python", name="Python 3", docker_image="x", run_cmd="x")
+    in_contest = Problem.objects.create(slug="c", title="C", statement_md="x", author=staff)
+    c = Contest.objects.create(title="R", start=timezone.now() + timezone.timedelta(days=1),
+                               end=timezone.now() + timezone.timedelta(days=2))
+    ContestProblem.objects.create(contest=c, problem=in_contest, label="A")
+    tried = Problem.objects.create(slug="t", title="T", statement_md="x", author=staff)
+    Submission.objects.create(user=ali, problem=tried, language=lang, source="x", verdict="WA")
+    own = Problem.objects.create(slug="m", title="M", statement_md="x", author=staff)
+    own_ac = Submission.objects.create(user=staff, problem=own, language=lang, source="x", verdict="AC")
+    UserProblemSolved.objects.create(user=staff, problem=own, first_ac_submission=own_ac)
+
+    client.force_login(staff)
+    for p in (in_contest, tried):
+        r = client.post(reverse("moderation:problem_delete", args=[p.pk]), follow=True)
+        assert 'class="ca-alert ca-alert-bad"' in r.content.decode()
+    assert Problem.objects.filter(pk__in=[in_contest.pk, tried.pk]).count() == 2
+    client.post(reverse("moderation:problem_delete", args=[own.pk]))  # only the author's solve: no ProtectedError
+    assert not Problem.objects.filter(pk=own.pk).exists()
+
+
+@pytest.mark.django_db
+def test_contest_delete_refuses_when_it_has_submissions(client):
+    from django.utils import timezone
+
+    from apps.contests.models import Contest
+    from apps.problems.models import Language
+    from apps.submissions.models import Submission
+
+    staff = User.objects.create_user("teacher", password="x", is_staff=True)
+    p = Problem.objects.create(slug="p", title="P", statement_md="x", author=staff)
+    lang = Language.objects.create(code="python", name="Python 3", docker_image="x", run_cmd="x")
+    times = {"start": timezone.now() - timezone.timedelta(hours=3), "end": timezone.now() - timezone.timedelta(hours=2)}
+    used = Contest.objects.create(title="Used", **times)
+    Submission.objects.create(user=staff, problem=p, contest=used, language=lang, source="x", verdict="AC")
+    empty = Contest.objects.create(title="Empty", **times)
+    client.force_login(staff)
+    client.post(reverse("moderation:contest_delete", args=[used.pk]))
+    client.post(reverse("moderation:contest_delete", args=[empty.pk]))
+    assert list(Contest.objects.values_list("title", flat=True)) == ["Used"]
