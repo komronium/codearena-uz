@@ -15,6 +15,23 @@
   {% endif %}
 </div>
 
+{% if next_picks %}
+<section class="mb-6" aria-labelledby="next-title">
+  <h2 id="next-title" class="mb-2 text-sm font-semibold"><i data-lucide="compass" class="lu mr-1.5 text-accent" aria-hidden="true"></i>Keyingi masala</h2>
+  <div class="grid gap-3 sm:grid-cols-3">
+    {% for p, reason in next_picks %}
+    <a href="{% url 'problems:detail' p.slug %}" class="ca-panel block !py-3 transition hover:border-accent">
+      <p class="truncate font-semibold">{{ p.title }}</p>
+      <p class="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-mute">
+        <span class="ca-diff ca-diff-{{ p.difficulty }}">{{ p.get_difficulty_display }}</span>
+        {% if reason %}<span>zaif mavzu: <b class="text-ink">{{ reason }}</b></span>{% else %}<span>darajangizga mos</span>{% endif %}
+      </p>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
 <form method="get" class="mb-4 flex flex-wrap gap-3">
   <div class="relative max-w-xs flex-1">
     <i data-lucide="search" class="lu pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-mute" aria-hidden="true"></i>

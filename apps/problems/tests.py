@@ -487,3 +487,69 @@ def test_staff_edit_hints_and_editorial_on_the_problem_form(client, problem):
     problem.refresh_from_db()
     assert r.status_code == 302 and problem.editorial_md == "Tahlil"
     assert list(problem.hints.values_list("body_md", "cost_pct")) == [("Birinchi", 10), ("Ikkinchi", 25)]
+
+
+# ---- skill map and next problem -----------------------------------------------------------------
+
+@pytest.fixture
+def catalog(db):
+    """Tags dp (4 problems) and math (3); one hidden and one contest-locked extra."""
+    author = User.objects.create_user("author", password="x")
+    dp, math = Tag.objects.create(name="dp"), Tag.objects.create(name="math")
+    made = {}
+    for slug, tag, diff in [("dp1", dp, "easy"), ("dp2", dp, "easy"), ("dp3", dp, "medium"), ("dp4", dp, "hard"),
+                            ("m1", math, "easy"), ("m2", math, "easy"), ("m3", math, "easy")]:
+        p = Problem.objects.create(slug=slug, title=slug, statement_md="x", author=author, difficulty=diff)
+        p.tags.add(tag)
+        made[slug] = p
+    hidden = Problem.objects.create(slug="h", title="h", statement_md="x", author=author, is_public=False)
+    hidden.tags.add(dp)
+    soon = Problem.objects.create(slug="soon", title="soon", statement_md="x", author=author)
+    soon.tags.add(dp)
+    c = Contest.objects.create(title="C", start=timezone.now() + timezone.timedelta(days=1),
+                               end=timezone.now() + timezone.timedelta(days=2))
+    ContestProblem.objects.create(contest=c, problem=soon, label="A")
+    return made
+
+
+def _solve(user, *problems):
+    from apps.submissions.models import Submission, UserProblemSolved
+
+    lang, _ = Language.objects.get_or_create(code="python", defaults={"name": "Python 3", "docker_image": "x",
+                                                                       "run_cmd": "x"})
+    for p in problems:
+        s = Submission.objects.create(user=user, problem=p, language=lang, source="x", verdict="AC")
+        UserProblemSolved.objects.create(user=user, problem=p, first_ac_submission=s)
+
+
+@pytest.mark.django_db
+def test_skill_map_counts_open_problems_per_tag(catalog):
+    from .skills import skill_map
+
+    ali = User.objects.create_user("ali", password="x")
+    _solve(ali, catalog["m1"], catalog["m2"], catalog["dp1"])
+    got = {row["tag"].name: (row["solved"], row["total"]) for row in skill_map(ali)}
+    assert got == {"dp": (1, 4), "math": (2, 3)}  # hidden and contest-locked don't count
+
+
+@pytest.mark.django_db
+def test_next_problems_come_from_the_weakest_tag_at_the_users_level(catalog):
+    from .skills import next_problems
+
+    ali = User.objects.create_user("ali", password="x")
+    _solve(ali, catalog["m1"], catalog["m2"], catalog["dp1"])  # weakest: dp (1/4); level: easy
+    picks = next_problems(ali)
+    assert [p.slug for p, _ in picks][:2] == ["dp2", "dp3"]  # easy first, then one step up; never dp4 (hard)
+    assert all(reason == "dp" for _, reason in picks[:2])
+    assert {p.slug for p, _ in picks} <= {"dp2", "dp3", "m3"}
+    assert "dp4" not in {p.slug for p, _ in picks}
+
+
+@pytest.mark.django_db
+def test_problem_list_and_profile_show_them(client, catalog):
+    ali = User.objects.create_user("ali", password="x")
+    _solve(ali, catalog["m1"])
+    client.force_login(ali)
+    page = client.get(reverse("problems:list")).content.decode()
+    assert "Keyingi masala" in page
+    assert "Mavzular" in client.get(reverse("profile", args=["ali"])).content.decode()

@@ -10,6 +10,7 @@ from django.utils import timezone
 
 from apps.contests.models import Participation
 from apps.problems.models import Problem
+from apps.problems.skills import skill_map
 from apps.submissions.models import Submission
 
 from .forms import ProfileEditForm, RegisterForm
@@ -255,4 +256,5 @@ def profile(request, username):
         "rating_history": rating_history,
         "rating_chart": _rating_chart(rating_history) if rating_history else None,
         "activity": _activity_calendar(profile_user),
+        "skills": skill_map(profile_user),
     })

@@ -21,6 +21,7 @@ from .models import (
     ProblemRating,
     Tag,
 )
+from .skills import next_problems
 
 # Markdown itself passes raw HTML straight through; sanitize the rendered
 # output before any template marks it |safe, since statement_md is authored
@@ -104,8 +105,12 @@ def problem_list(request):
             UserProblemSolved.objects.filter(user=request.user, problem__in=page.object_list)
             .values_list("problem_id", flat=True)
         )
+    # Only on the plain first page: with a search or filter the user already knows what they want.
+    browsing = not (q or tag or difficulty or status) and page.number == 1
+    next_picks = next_problems(request.user) if request.user.is_authenticated and browsing else []
     return render(request, "problems/list.html", {
         "problems": page,
+        "next_picks": next_picks,
         "sort": sort, "dir": "desc" if desc else "asc",
         "solved_ids": solved_ids,
         "all_tags": Tag.objects.order_by("name"),

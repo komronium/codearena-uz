@@ -125,6 +125,25 @@
   </div>
 </section>
 
+{% if skills %}
+<section class="mb-8">
+  <h2 class="ca-section-title">Mavzular</h2>
+  <div class="ca-panel grid gap-x-8 gap-y-3 sm:grid-cols-2">
+    {% for r in skills %}
+    <div>
+      <div class="mb-1 flex items-baseline justify-between gap-2 text-sm">
+        <a class="ca-link truncate font-medium" href="{% url 'problems:list' %}?tag={{ r.tag.name|urlencode }}">{{ r.tag.name }}</a>
+        <span class="tabular text-xs text-mute">{{ r.solved }} / {{ r.total }}</span>
+      </div>
+      <div class="h-2 overflow-hidden rounded-full bg-ink/10" role="progressbar" aria-label="{{ r.tag.name }}" aria-valuemin="0" aria-valuemax="{{ r.total }}" aria-valuenow="{{ r.solved }}">
+        <div class="h-full rounded-full bg-accent" style="width: {{ r.pct }}%"></div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
 <section class="mb-8">
   <h2 class="ca-section-title">Faollik</h2>
   <div class="ca-panel">
