@@ -38,13 +38,18 @@
   <div class="grid grid-cols-2 divide-line border-t border-line sm:grid-cols-4 sm:divide-x">
     <div class="px-6 py-4">
       <p class="ca-stat-label">Reyting</p>
+      {% if rating_history %}
       <p class="ca-stat-value mt-1">{{ profile_user.rating }}</p>
       <p class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1"><span class="ca-tier" style="--tier: {{ tier_color }}">{{ tier }}</span><span class="text-xs text-mute">{{ rating_history|length }} ta musobaqa</span></p>
+      {% else %}
+      <p class="ca-stat-value mt-1">—</p>
+      <p class="mt-1.5"><span class="ca-tier" style="--tier: #6B7280">Reytingsiz</span></p>
+      {% endif %}
     </div>
     <div class="px-6 py-4">
       <p class="ca-stat-label">Reyting o‘rni</p>
       <p class="ca-stat-value mt-1">{% if rating_rank %}#{{ rating_rank }}{% else %}—{% endif %}</p>
-      <p class="mt-1 text-xs text-mute">{{ total_users }} ishtirokchidan</p>
+      <p class="mt-1 text-xs text-mute">{{ total_rated }} ishtirokchidan</p>
     </div>
     <div class="px-6 py-4">
       <p class="ca-stat-label">Amaliyot ball</p>

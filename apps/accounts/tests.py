@@ -7,6 +7,19 @@ from apps.submissions.models import Submission, UserProblemSolved
 from .models import User
 
 
+def _rated(*users):
+    """A finished rated contest the given users took part in (rating_after set)."""
+    from django.utils import timezone
+
+    from apps.contests.models import Contest, Participation
+
+    c = Contest.objects.create(title="R", is_rated=True, rating_applied=True,
+                               start=timezone.now() - timezone.timedelta(hours=3),
+                               end=timezone.now() - timezone.timedelta(hours=2))
+    for u in users:
+        Participation.objects.create(user=u, contest=c, rating_before=1200, rating_after=u.rating)
+
+
 @pytest.mark.django_db
 def test_register_creates_user_and_logs_in(client):
     r = client.post(reverse("register"), {
@@ -98,24 +111,27 @@ def test_profile_hides_rating_graph_without_rated_contests(client):
 
 @pytest.mark.django_db
 def test_rating_lists_users_by_rating_desc(client):
-    User.objects.create_user("low", password="x", rating=1400)
-    User.objects.create_user("high", password="x", rating=1800)
+    low = User.objects.create_user("low", password="x", rating=1400)
+    high = User.objects.create_user("high", password="x", rating=1800)
+    User.objects.create_user("fresh", password="x", rating=2000)  # never rated: not on the board
+    _rated(low, high)
     r = client.get(reverse("rating"))
     assert r.status_code == 200
-    users = list(r.context["users"])
-    assert [u.username for u in users[:2]] == ["high", "low"]
+    assert [u.username for u in r.context["users"]] == ["high", "low"] and r.context["total"] == 2
 
 
 @pytest.mark.django_db
 def test_blocked_users_get_no_place_on_boards(client):
-    User.objects.create_user("ok", password="x", rating=1400, practice_points=5)
-    User.objects.create_user("banned", password="x", rating=1800, practice_points=50, is_active=False)
+    ok = User.objects.create_user("ok", password="x", rating=1400, practice_points=5)
+    banned = User.objects.create_user("banned", password="x", rating=1800, practice_points=50, is_active=False)
+    _rated(ok, banned)
     for name in ("top", "rating"):
         r = client.get(reverse(name))
         assert [u.username for u in r.context["users"]] == ["ok"] and r.context["total"] == 1
 
     r = client.get(reverse("profile", args=["ok"]))
-    assert r.context["rating_rank"] == 1 and r.context["points_rank"] == 1 and r.context["total_users"] == 1
+    assert r.context["rating_rank"] == 1 and r.context["points_rank"] == 1
+    assert r.context["total_users"] == 1 and r.context["total_rated"] == 1
     r = client.get(reverse("profile", args=["banned"]))
     assert r.context["rating_rank"] is None and r.context["points_rank"] is None
 
@@ -236,3 +252,15 @@ def test_migration_strips_email_usernames_and_login_still_works(client):
     assert User.objects.get(username="x.y").email == "x.y@mail.uz"
     r = client.post(reverse("login"), {"username": "ozodbek@gmail.com", "password": "StrongPass123!"})
     assert r.status_code == 302
+
+
+@pytest.mark.django_db
+def test_unrated_profile_says_reytingsiz(client):
+    vet = User.objects.create_user("vet", password="x", rating=1500)
+    _rated(vet)
+    User.objects.create_user("new", password="x", rating=1700)  # staff-set rating, no rated contest
+    r = client.get(reverse("profile", args=["new"]))
+    assert r.context["rating_rank"] is None and r.context["total_rated"] == 1
+    assert "Reytingsiz" in r.content.decode()
+    r = client.get(reverse("profile", args=["vet"]))
+    assert r.context["rating_rank"] == 1 and "Reytingsiz" not in r.content.decode()

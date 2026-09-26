@@ -180,8 +180,10 @@ def top(request):
 
 
 def rating(request):
-    qs = (User.objects.filter(is_active=True).annotate(contest_count=Count("participations", filter=Q(participations__rating_after__isnull=False)))
-          .order_by("-rating", "username"))
+    # Only users who finished a rated contest; a default 1200 says nothing about anyone.
+    qs = (User.objects.filter(is_active=True)
+          .annotate(contest_count=Count("participations", filter=Q(participations__rating_after__isnull=False)))
+          .filter(contest_count__gt=0).order_by("-rating", "username"))
     page = Paginator(qs, 50).get_page(request.GET.get("page"))
     tiers = [{"name": n, "color": c, "floor": f, "ceiling": ce} for f, ce, n, c in _RATING_TIERS]
     return render(request, "accounts/rating.html",
@@ -226,17 +228,21 @@ def profile(request, username):
             "angle": round(135 + sweep * len(by_diff), 1),
         })
 
-    # blocked (inactive) users hold no place on the boards and push nobody down
+    # blocked (inactive) users hold no place on the boards and push nobody down; the
+    # rating rank only counts users who finished a rated contest, like /rating
     ranked = User.objects.filter(is_active=True)
-    total_users = ranked.count()
+    rated = ranked.filter(participations__rating_after__isnull=False).distinct()
+    total_users, total_rated = ranked.count(), rated.count()
     rating_rank = points_rank = None
     if profile_user.is_active:
-        rating_rank = ranked.filter(rating__gt=profile_user.rating).count() + 1
         points_rank = ranked.filter(practice_points__gt=profile_user.practice_points).count() + 1
+        if rating_history:
+            rating_rank = rated.filter(rating__gt=profile_user.rating).count() + 1
 
     return render(request, "accounts/profile.html", {
         "profile_user": profile_user,
         "total_users": total_users,
+        "total_rated": total_rated,
         "rating_rank": rating_rank,
         "points_rank": points_rank,
         "solved": solved,
