@@ -542,3 +542,60 @@ def test_contest_delete_refuses_when_it_has_submissions(client):
     client.post(reverse("moderation:contest_delete", args=[used.pk]))
     client.post(reverse("moderation:contest_delete", args=[empty.pk]))
     assert list(Contest.objects.values_list("title", flat=True)) == ["Used"]
+
+
+@pytest.mark.django_db
+def test_rejudge_requeues_finished_submissions_once(client, django_capture_on_commit_callbacks):
+    from apps.problems.models import Language
+    from apps.submissions.models import Submission, TestResult
+
+    staff = User.objects.create_user("teacher", password="x", is_staff=True)
+    ali = User.objects.create_user("ali", password="x")
+    p = Problem.objects.create(slug="p", title="P", statement_md="x", author=staff)
+    tc = p.testcases.create(input="1\n", expected="1\n")
+    lang = Language.objects.create(code="python", name="Python 3", docker_image="x", run_cmd="x")
+    ac, wa, running = [Submission.objects.create(user=ali, problem=p, language=lang, source="x", verdict=v,
+                                                 passed=1, total=1) for v in ("AC", "WA", "RUNNING")]
+    TestResult.objects.create(submission=ac, testcase=tc, verdict="AC")
+    client.force_login(staff)
+    assert "2 ta urinish qayta tekshiriladi" in client.get(reverse("moderation:problems")).content.decode()
+
+    with patch("apps.moderation.views.django_rq.get_queue") as get_queue:
+        for _ in range(2):  # a double click: the second finds nothing left to reset
+            with django_capture_on_commit_callbacks(execute=True):
+                assert client.post(reverse("moderation:problem_rejudge", args=[p.pk])).status_code == 302
+    get_queue.assert_called_with("rejudge")
+    assert [c.args[1] for c in get_queue.return_value.enqueue.call_args_list] == [ac.pk, wa.pk]
+    ac.refresh_from_db()
+    running.refresh_from_db()
+    assert (ac.verdict, ac.passed, ac.total) == ("PENDING", 0, 0) and not ac.results.exists()
+    assert running.verdict == "RUNNING"  # in flight: left alone
+
+
+@pytest.mark.django_db
+def test_rejudge_warns_about_applied_rating_and_needs_staff(client):
+    from django.utils import timezone
+
+    from apps.contests.models import Contest, ContestProblem
+    from apps.problems.models import Language
+    from apps.submissions.models import Submission
+
+    staff = User.objects.create_user("teacher", password="x", is_staff=True)
+    ali = User.objects.create_user("ali", password="x")
+    p = Problem.objects.create(slug="p", title="P", statement_md="x", author=staff)
+    c = Contest.objects.create(title="Final", is_rated=True, rating_applied=True,
+                               start=timezone.now() - timezone.timedelta(hours=3),
+                               end=timezone.now() - timezone.timedelta(hours=2))
+    ContestProblem.objects.create(contest=c, problem=p, label="A")
+    lang = Language.objects.create(code="python", name="Python 3", docker_image="x", run_cmd="x")
+    s = Submission.objects.create(user=ali, problem=p, contest=c, language=lang, source="x", verdict="AC")
+
+    client.force_login(ali)
+    assert client.post(reverse("moderation:problem_rejudge", args=[p.pk])).status_code == 302
+    s.refresh_from_db()
+    assert s.verdict == "AC"  # not staff: nothing happened
+
+    client.force_login(staff)
+    with patch("apps.moderation.views.django_rq.get_queue"):
+        r = client.post(reverse("moderation:problem_rejudge", args=[p.pk]), follow=True)
+    assert "Final: reyting allaqachon hisoblangan" in r.content.decode()

@@ -36,6 +36,9 @@
       {% elif p.is_public %}<span class="ca-chip ca-chip-rated"><i data-lucide="eye" class="lu mr-1" aria-hidden="true"></i>Ochiq</span>
       {% else %}<span class="ca-chip !bg-ink/5 text-mute"><i data-lucide="eye-off" class="lu mr-1" aria-hidden="true"></i>Yashirin</span>{% endif %}
       <a href="{% url 'moderation:submissions' %}?problem={{ p.slug|urlencode }}" class="ca-btn ca-btn-ghost !px-2 !py-1.5" title="Urinishlar" aria-label="Urinishlar: {{ p.title }}"><i data-lucide="history" class="lu" aria-hidden="true"></i></a>
+      <form method="post" action="{% url 'moderation:problem_rejudge' p.pk %}" onsubmit="return confirm('«{{ p.title|escapejs }}»: {{ p.n_subs }} ta urinish qayta tekshiriladi. Davom etasizmi?');">{% csrf_token %}
+        <button class="ca-btn ca-btn-ghost !px-2 !py-1.5" title="Qayta tekshirish" aria-label="Qayta tekshirish: {{ p.title }}"{% if not p.n_subs %} disabled{% endif %}><i data-lucide="refresh-cw" class="lu" aria-hidden="true"></i></button>
+      </form>
       <a href="{% url 'moderation:problem_edit' p.pk %}" class="ca-btn ca-btn-ghost !px-2 !py-1.5" title="Tahrirlash" aria-label="Tahrirlash: {{ p.title }}"><i data-lucide="pencil" class="lu" aria-hidden="true"></i></a>
       <form method="post" action="{% url 'moderation:problem_toggle' p.pk %}">{% csrf_token %}
         <button class="ca-btn ca-btn-ghost !px-2 !py-1.5" title="{% if p.is_public %}Yashirish{% else %}Ochish{% endif %}" aria-label="{% if p.is_public %}Yashirish{% else %}Ochish{% endif %}: {{ p.title }}"><i data-lucide="{% if p.is_public %}eye-off{% else %}eye{% endif %}" class="lu" aria-hidden="true"></i></button>

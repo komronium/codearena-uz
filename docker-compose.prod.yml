@@ -18,7 +18,7 @@ services:
   worker:
     restart: unless-stopped
     # Each judge worker runs one submission at a time; N of them judge N in parallel.
-    command: python manage.py rqworker-pool default run --num-workers ${JUDGE_WORKERS:-4}
+    command: python manage.py rqworker-pool default run rejudge --num-workers ${JUDGE_WORKERS:-4}
     volumes: !override
       - "media:/app/media"
       - "/var/run/docker.sock:/var/run/docker.sock"

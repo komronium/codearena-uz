@@ -64,9 +64,11 @@ LOGIN_REDIRECT_URL = "problems:list"
 LOGOUT_REDIRECT_URL = "problems:list"
 
 REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
-# "run" = "Sinab ko'rish" trial runs; workers listen `default run`, so real submissions go first.
+# "run" = "Sinab ko'rish" trial runs, "rejudge" = staff rejudges; workers listen
+# `default run rejudge`, so real submissions go first and a rejudge never delays them.
 RQ_QUEUES = {"default": {"URL": REDIS_URL, "DEFAULT_TIMEOUT": 600},
-             "run": {"URL": REDIS_URL, "DEFAULT_TIMEOUT": 120}}
+             "run": {"URL": REDIS_URL, "DEFAULT_TIMEOUT": 120},
+             "rejudge": {"URL": REDIS_URL, "DEFAULT_TIMEOUT": 600}}
 CACHES = {"default": {"BACKEND": "django.core.cache.backends.redis.RedisCache", "LOCATION": REDIS_URL}}
 
 # Host path shared between worker container and docker daemon; must be identical on both sides.

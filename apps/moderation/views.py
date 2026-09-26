@@ -1,8 +1,10 @@
+import django_rq
 from django.contrib import messages
 from django.core.management import CommandError, call_command
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Count, Q
+from django.db.models import Count, OuterRef, Q, Subquery
+from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.text import slugify
@@ -13,8 +15,9 @@ from apps.accounts.models import Group, User
 from apps.contests.models import Contest
 from apps.contests.services import reuse_reason
 from apps.problems.models import Problem, Tag, TestCase
-from apps.submissions.models import Submission, UserProblemSolved
+from apps.submissions.models import Submission, TestResult, UserProblemSolved
 from apps.submissions.solves import refresh_solves
+from judge.runner import run_submission
 
 from .ai import DEFAULT_COUNT, DEFAULT_MODEL, MODEL_CHOICES, AIGenerationError, generate_problems
 from .forms import (
@@ -140,7 +143,11 @@ def submit(request, pk=None):
 @staff_required
 def problems(request):
     q = request.GET.get("q", "").strip()
-    qs = Problem.objects.select_related("author").annotate(n_tests=Count("testcases")).order_by("-pk")
+    # A subquery, not a second Count join: two joins would multiply tests by submissions.
+    finished = (Submission.objects.filter(problem=OuterRef("pk"), verdict__in=Submission.TERMINAL)
+                .order_by().values("problem").annotate(n=Count("pk")).values("n"))
+    qs = (Problem.objects.select_related("author")
+          .annotate(n_tests=Count("testcases"), n_subs=Coalesce(Subquery(finished), 0)).order_by("-pk"))
     if q:
         qs = qs.filter(Q(title__icontains=q) | Q(slug__icontains=q))
     page = Paginator(qs, 30).get_page(request.GET.get("page"))
@@ -167,6 +174,38 @@ def problem_delete(request, pk):
         return redirect("moderation:problems")
     problem.delete()
     messages.success(request, f"«{problem.title}» o'chirildi.")
+    return redirect("moderation:problems")
+
+
+@staff_required
+@require_POST
+def problem_rejudge(request, pk):
+    """Judge every finished submission of the problem again, e.g. after its tests were
+    fixed. In-flight ones are left alone. The runner then moves verdicts, solves, points
+    and standings like for a fresh submission."""
+    problem = get_object_or_404(Problem, pk=pk)
+    with transaction.atomic():
+        # The row locks make a concurrent double click find nothing left to reset.
+        ids = list(Submission.objects.filter(problem=problem, verdict__in=Submission.TERMINAL)
+                   .select_for_update().order_by("created", "id").values_list("pk", flat=True))
+        # Reset by id, not by verdict again: a submission that finished after the SELECT is
+        # not locked, and resetting it without queueing it would leave it PENDING for good.
+        # ponytail: one IN list; chunk it past ~65k submissions of one problem (Postgres
+        # takes at most 65535 parameters per statement).
+        TestResult.objects.filter(submission_id__in=ids).delete()
+        Submission.objects.filter(pk__in=ids).update(verdict=Submission.Verdict.PENDING, passed=0, total=0,
+                                                     exec_ms=0, mem_kb=0, compile_log="")
+
+        def enqueue():
+            queue = django_rq.get_queue("rejudge")
+            for submission_id in ids:
+                queue.enqueue(run_submission, submission_id)
+        transaction.on_commit(enqueue)
+    messages.success(request, f"{len(ids)} ta urinish qayta tekshirishga yuborildi.")
+    applied = list(problem.contests.filter(rating_applied=True).values_list("title", flat=True))
+    if applied:
+        messages.warning(request, f"{', '.join(applied)}: reyting allaqachon hisoblangan — "
+                                  "qayta tekshiruvdan keyin ham o‘zgarmaydi.")
     return redirect("moderation:problems")
 
 

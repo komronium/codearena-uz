@@ -11,7 +11,7 @@ Competitive programming platform for students. Django + HTMX, Docker judge.
     mkdir -p work
     # terminal 1
     docker run -d -p 6379:6379 redis:7
-    python manage.py rqworker default run
+    python manage.py rqworker default run rejudge
     # terminal 2
     python manage.py runserver
 
@@ -101,6 +101,11 @@ participants' contest ACs count as practice solves. Disqualified participants'
 contest ACs never count, and disqualifying after publish takes those solves
 back. The old `close_ended_contests` command still exists but is intentionally
 not scheduled; it only opens problems and does not publish.
+
+After fixing a problem's tests, staff rejudge it from Boshqaruv → Masalalar
+(the ↻ button): its finished submissions go back to the low-priority `rejudge`
+RQ queue, and verdicts, solves, points and standings follow the new results.
+Ratings already applied do not change.
 
 `recalc_rating` requires `Contest.is_rated=True` and `Contest.has_ended`; it's
 a no-op if `rating_applied` is already set. Teacher-only per-contest report
