@@ -231,28 +231,51 @@ def test_staff_can_edit_user_but_not_demote_self(client):
 def test_contest_publish_opens_problems_and_grants_points(client):
     from django.utils import timezone
 
-    from apps.contests.models import Contest, ContestProblem
+    from apps.contests.models import Contest, ContestProblem, Participation
     from apps.problems.models import Language
-    from apps.submissions.models import Submission
+    from apps.submissions.models import Submission, UserProblemSolved
 
     staff = User.objects.create_user("teacher", password="x", is_staff=True)
     ali = User.objects.create_user("ali", password="x")
+    cheat = User.objects.create_user("cheat", password="x")
     p = Problem.objects.create(slug="p", title="P", statement_md="x", author=staff, is_public=False, points=70)
     c = Contest.objects.create(title="C", start=timezone.now() - timezone.timedelta(hours=3),
                                end=timezone.now() - timezone.timedelta(hours=1))
     ContestProblem.objects.create(contest=c, problem=p, label="A")
+    Participation.objects.create(user=cheat, contest=c, disqualified=True)
     lang = Language.objects.create(code="python", name="Python 3", docker_image="x", run_cmd="x")
     for v in ("WA", "AC", "AC"):
         Submission.objects.create(user=ali, problem=p, contest=c, language=lang, source="x", verdict=v)
+    Submission.objects.create(user=cheat, problem=p, contest=c, language=lang, source="x", verdict="AC")
 
     client.force_login(staff)
     assert client.post(reverse("moderation:contest_publish", args=[c.pk])).status_code == 302
-    p.refresh_from_db(); ali.refresh_from_db()
-    assert p.is_public is True
+    p.refresh_from_db(); ali.refresh_from_db(); cheat.refresh_from_db(); c.refresh_from_db()
+    assert p.is_public is True and c.published_at is not None
     assert ali.practice_points == 70  # once, not per AC
+    assert cheat.practice_points == 0 and not UserProblemSolved.objects.filter(user=cheat).exists()
+    published_at = c.published_at
+    client.post(reverse("moderation:contest_publish", args=[c.pk]))  # publishing again changes nothing
+    ali.refresh_from_db(); c.refresh_from_db()
+    assert ali.practice_points == 70 and c.published_at == published_at
+
+
+@pytest.mark.django_db
+def test_publish_button_shows_until_published(client):
+    from django.utils import timezone
+
+    from apps.contests.models import Contest, ContestProblem
+
+    staff = User.objects.create_user("teacher", password="x", is_staff=True)
+    public = Problem.objects.create(slug="p", title="P", statement_md="x", author=staff, is_public=True)
+    c = Contest.objects.create(title="C", start=timezone.now() - timezone.timedelta(hours=3),
+                               end=timezone.now() - timezone.timedelta(hours=1))
+    ContestProblem.objects.create(contest=c, problem=public, label="A")
+    client.force_login(staff)
+    publish_url = reverse("moderation:contest_publish", args=[c.pk]).encode()
+    assert publish_url in client.get(reverse("moderation:contests")).content  # all problems public, still unpublished
     client.post(reverse("moderation:contest_publish", args=[c.pk]))
-    ali.refresh_from_db()
-    assert ali.practice_points == 70
+    assert publish_url not in client.get(reverse("moderation:contests")).content
 
 
 @pytest.mark.django_db

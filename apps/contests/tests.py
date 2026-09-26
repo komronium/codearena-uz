@@ -608,3 +608,28 @@ def test_backfill_published_at_marks_contests_the_old_publish_handled(author, py
     got = dict(Contest.objects.values_list("title", "published_at"))
     assert got["traced"] == traced.end and got["opened"] == opened.end
     assert got["closed"] is None and got["empty"] is None and got["running"] is None
+
+
+@pytest.mark.django_db
+def test_disqualifying_after_publish_takes_contest_solves_back(client, problem_a, python):
+    staff = User.objects.create_user("boss", password="x", is_staff=True)
+    ali = User.objects.create_user("ali", password="x")
+    problem_a.points = 50
+    problem_a.save()
+    c = Contest.objects.create(title="Past", start=timezone.now() - timezone.timedelta(hours=3),
+                               end=timezone.now() - timezone.timedelta(hours=2))
+    ContestProblem.objects.create(contest=c, problem=problem_a, label="A")
+    Participation.objects.create(user=ali, contest=c)
+    Submission.objects.create(user=ali, problem=problem_a, contest=c, language=python, source="x", verdict="AC")
+    client.force_login(staff)
+    client.post(reverse("moderation:contest_publish", args=[c.pk]))
+    ali.refresh_from_db()
+    assert ali.practice_points == 50
+
+    url = reverse("contests:disqualify", args=[c.pk, ali.pk])
+    client.post(url, {"reason": "copy"})
+    ali.refresh_from_db()
+    assert ali.practice_points == 0 and not ali.userproblemsolved_set.exists()
+    client.post(url)  # re-qualify
+    ali.refresh_from_db()
+    assert ali.practice_points == 50 and ali.userproblemsolved_set.count() == 1

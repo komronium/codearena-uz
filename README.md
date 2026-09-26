@@ -95,10 +95,12 @@ The scheduler's `recalc_points` reprices problems and resyncs every total every
 
     docker compose exec web python manage.py recalc_practice_points
 
-Publishing contest problems (making them public + awarding practice points)
-is a manual staff action: Boshqaruv → Musobaqalar → Ochish. The old
-`close_ended_contests` command still exists but is intentionally not
-scheduled.
+Publishing a contest is a manual staff action after it ends: Boshqaruv →
+Musobaqalar → Masalalarni ochish. It makes the problems public and lets
+participants' contest ACs count as practice solves. Disqualified participants'
+contest ACs never count, and disqualifying after publish takes those solves
+back. The old `close_ended_contests` command still exists but is intentionally
+not scheduled; it only opens problems and does not publish.
 
 `recalc_rating` requires `Contest.is_rated=True` and `Contest.has_ended`; it's
 a no-op if `rating_applied` is already set. Teacher-only per-contest report

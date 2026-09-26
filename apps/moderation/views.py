@@ -2,8 +2,9 @@ from django.contrib import messages
 from django.core.management import CommandError, call_command
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Count, F, Q
+from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.utils.text import slugify
 from django.views.decorators.http import require_POST
 
@@ -12,6 +13,7 @@ from apps.accounts.models import Group, User
 from apps.contests.models import Contest
 from apps.problems.models import Problem, Tag, TestCase
 from apps.submissions.models import Submission, UserProblemSolved
+from apps.submissions.solves import refresh_solves
 
 from .ai import DEFAULT_COUNT, DEFAULT_MODEL, MODEL_CHOICES, AIGenerationError, generate_problems
 from .forms import (
@@ -245,23 +247,21 @@ def contest_delete(request, pk):
 @staff_required
 @require_POST
 def contest_publish(request, pk):
-    """After a contest: make its problems public and turn each participant's first
-    contest AC into a practice solve (points were withheld during the contest)."""
+    """After a contest: make its problems public and let participants' contest ACs count
+    as practice solves. Disqualified participants get nothing (apps.submissions.solves).
+    Publishing again keeps the first time and re-applies the rule."""
     contest = get_object_or_404(Contest, pk=pk)
     if not contest.has_ended:
         messages.error(request, "Musobaqa hali tugamagan.")
         return redirect("moderation:contests")
-    granted = 0
     with transaction.atomic():
         Problem.objects.filter(contests=contest).update(is_public=True)
-        acs = (Submission.objects.filter(contest=contest, verdict="AC")
-               .select_related("problem").order_by("created"))
-        for sub in acs:
-            _, created = UserProblemSolved.objects.get_or_create(
-                user_id=sub.user_id, problem=sub.problem, defaults={"first_ac_submission": sub})
-            if created:
-                User.objects.filter(pk=sub.user_id).update(practice_points=F("practice_points") + sub.problem.points)
-                granted += 1
+        if contest.published_at is None:
+            contest.published_at = timezone.now()
+            contest.save(update_fields=["published_at"])
+        for problem_id in contest.contest_problems.values_list("problem_id", flat=True):
+            refresh_solves(problem_id)
+    granted = UserProblemSolved.objects.filter(first_ac_submission__contest=contest).count()
     messages.success(request, f"Masalalar ochildi; {granted} ta yechim amaliyot balliga o'tkazildi.")
     return redirect("moderation:contests")
 

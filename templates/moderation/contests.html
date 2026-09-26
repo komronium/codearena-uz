@@ -26,8 +26,8 @@
       </div>
     </div>
     <div class="ca-row-side">
-      {% if c.has_ended and c.n_hidden %}
-      <form method="post" action="{% url 'moderation:contest_publish' c.pk %}" onsubmit="return confirm('{{ c.n_hidden }} ta yashirin masala ochiladi va ishtirokchilarning AC yechimlari amaliyot balliga o‘tadi. Davom etasizmi?');">{% csrf_token %}
+      {% if c.has_ended and not c.published_at %}
+      <form method="post" action="{% url 'moderation:contest_publish' c.pk %}" onsubmit="return confirm('Masalalar ochiladi va ishtirokchilarning AC yechimlari amaliyot balliga o‘tadi. Davom etasizmi?');">{% csrf_token %}
         <button class="ca-btn ca-btn-ghost !py-1.5 text-xs"><i data-lucide="eye" class="lu" aria-hidden="true"></i>Masalalarni ochish</button>
       </form>
       {% endif %}
