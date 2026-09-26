@@ -250,13 +250,15 @@ def test_contest_publish_opens_problems_and_grants_points(client):
 
     client.force_login(staff)
     assert client.post(reverse("moderation:contest_publish", args=[c.pk])).status_code == 302
-    p.refresh_from_db(); ali.refresh_from_db(); cheat.refresh_from_db(); c.refresh_from_db()
+    for obj in (p, ali, cheat, c):
+        obj.refresh_from_db()
     assert p.is_public is True and c.published_at is not None
     assert ali.practice_points == 70  # once, not per AC
     assert cheat.practice_points == 0 and not UserProblemSolved.objects.filter(user=cheat).exists()
     published_at = c.published_at
     client.post(reverse("moderation:contest_publish", args=[c.pk]))  # publishing again changes nothing
-    ali.refresh_from_db(); c.refresh_from_db()
+    ali.refresh_from_db()
+    c.refresh_from_db()
     assert ali.practice_points == 70 and c.published_at == published_at
 
 

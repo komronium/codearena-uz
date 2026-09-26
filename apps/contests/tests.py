@@ -638,6 +638,8 @@ def test_disqualifying_after_publish_takes_contest_solves_back(client, problem_a
 @pytest.mark.django_db
 def test_disqualify_sets_the_asked_state_so_a_stale_click_changes_nothing(client, problem_a, python):
     """Two teachers, or one stale tab: a second "disqualify" must not re-qualify."""
+    from django.core.cache import cache
+
     staff = User.objects.create_user("boss", password="x", is_staff=True)
     ali = User.objects.create_user("ali", password="x")
     c = Contest.objects.create(title="Live", start=timezone.now() - timezone.timedelta(hours=1),
@@ -660,3 +662,4 @@ def test_disqualify_sets_the_asked_state_so_a_stale_click_changes_nothing(client
     assert not p.disqualified and p.disqualified_reason == ""
     page = client.get(reverse("contests:standings", args=[c.pk])).content.decode()
     assert 'name="disqualified" value="1"' in page
+    cache.clear()  # standings are cached by contest pk, and pks repeat across tests
