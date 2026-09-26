@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base.html" %}{% load static %}
 {% block title %}Urinish #{{ s.pk|stringformat:"06d" }}{% endblock %}
 {% block content %}
 <div class="mb-6 flex flex-wrap items-start justify-between gap-3">
@@ -58,8 +58,8 @@
 </section>
 {% endif %}
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/styles/github-dark.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/highlight.min.js"></script>
+<link rel="stylesheet" href="{% static 'vendor/highlight-github-dark.min.css' %}">
+<script src="{% static 'vendor/highlight.min.js' %}"></script>
 <script>
   // language.code "node" -> hljs "javascript"; others match hljs names already
   const code = document.querySelector("pre code");

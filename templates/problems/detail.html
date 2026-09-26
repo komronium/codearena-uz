@@ -1,4 +1,4 @@
-{% extends "base.html" %}{% load tiers %}
+{% extends "base.html" %}{% load static tiers %}
 {% block title %}{% if contest_problem %}{{ contest_problem.label }}. {% endif %}{{ problem.title }}{% endblock %}
 {% block sidebar %}{% endblock %}
 {% block content %}
@@ -125,7 +125,7 @@
     <div class="ca-panel mt-6 space-y-3" id="hints">
       <div class="flex flex-wrap items-center justify-between gap-2">
         <h2 class="text-sm font-semibold"><i data-lucide="lightbulb" class="lu mr-1.5 text-warn" aria-hidden="true"></i>Yordam</h2>
-        {% if help_locked %}<span class="text-xs text-mute">Musobaqa davomida yopiq</span>
+        {% if help_locked %}<span class="text-xs text-mute">{{ help_locked }}</span>
         {% elif hints and not solved %}<span class="text-xs text-mute">Maslahat ochilsa, yechganingizda ball shuncha kamayadi</span>{% endif %}
       </div>
       {% for h in hints %}
@@ -212,7 +212,7 @@
                 </select></label>
               <label class="mb-2 block text-xs text-mute">Shrift
                 <select data-pref="font" class="ca-select mt-1 !py-1.5 text-sm">
-                  <option value="anthropic">Anthropic Mono</option><option value="jetbrains">JetBrains Mono</option><option value="fira">Fira Code</option><option value="system">Tizim</option>
+                  <option value="jetbrains">JetBrains Mono</option><option value="fira">Fira Code</option><option value="system">Tizim</option>
                 </select></label>
               <label class="mb-2 block text-xs text-mute">O‘lcham — <span id="pref-size-val">14</span>px
                 <input type="range" data-pref="size" min="12" max="22" step="1" class="mt-1 w-full">
@@ -257,9 +257,9 @@
   </section>
 </div>
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+<link rel="stylesheet" href="{% static 'vendor/katex/katex.min.css' %}">
+<script defer src="{% static 'vendor/katex/katex.min.js' %}"></script>
+<script defer src="{% static 'vendor/katex/auto-render.min.js' %}"
         onload="renderMathInElement(document.querySelector('.ca-statement'), {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}], throwOnError: false})"></script>
 <script>
   document.querySelectorAll(".ca-copy-btn").forEach((btn) => {
@@ -274,61 +274,10 @@
   });
 </script>
 {% if user.is_authenticated %}
-{% comment %}Every CodeMirror package resolves through this map with deps externalised ("*" prefix),
-so @codemirror/state is a singleton — two copies break with "Unrecognized extension value".{% endcomment %}
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap">
-<script type="importmap">
-{
-  "imports": {
-    "codemirror": "https://esm.sh/*codemirror",
-    "@codemirror/state": "https://esm.sh/*@codemirror/state",
-    "@codemirror/view": "https://esm.sh/*@codemirror/view",
-    "@codemirror/language": "https://esm.sh/*@codemirror/language",
-    "@codemirror/commands": "https://esm.sh/*@codemirror/commands",
-    "@codemirror/search": "https://esm.sh/*@codemirror/search",
-    "@codemirror/autocomplete": "https://esm.sh/*@codemirror/autocomplete",
-    "@codemirror/lint": "https://esm.sh/*@codemirror/lint",
-    "@codemirror/theme-one-dark": "https://esm.sh/*@codemirror/theme-one-dark",
-    "@codemirror/lang-python": "https://esm.sh/*@codemirror/lang-python",
-    "@codemirror/lang-cpp": "https://esm.sh/*@codemirror/lang-cpp",
-    "@codemirror/lang-java": "https://esm.sh/*@codemirror/lang-java",
-    "@codemirror/lang-javascript": "https://esm.sh/*@codemirror/lang-javascript",
-    "@codemirror/lang-sql": "https://esm.sh/*@codemirror/lang-sql",
-    "@lezer/common": "https://esm.sh/*@lezer/common",
-    "@lezer/highlight": "https://esm.sh/*@lezer/highlight",
-    "@lezer/lr": "https://esm.sh/*@lezer/lr",
-    "@lezer/python": "https://esm.sh/*@lezer/python",
-    "@lezer/cpp": "https://esm.sh/*@lezer/cpp",
-    "@lezer/java": "https://esm.sh/*@lezer/java",
-    "@lezer/javascript": "https://esm.sh/*@lezer/javascript",
-    "style-mod": "https://esm.sh/*style-mod",
-    "w3c-keyname": "https://esm.sh/*w3c-keyname",
-    "crelt": "https://esm.sh/*crelt",
-    "@marijn/find-cluster-break": "https://esm.sh/*@marijn/find-cluster-break",
-    "@uiw/codemirror-themes": "https://esm.sh/*@uiw/codemirror-themes",
-    "@uiw/codemirror-theme-github": "https://esm.sh/*@uiw/codemirror-theme-github",
-    "@uiw/codemirror-theme-dracula": "https://esm.sh/*@uiw/codemirror-theme-dracula",
-    "@uiw/codemirror-theme-monokai": "https://esm.sh/*@uiw/codemirror-theme-monokai",
-    "@uiw/codemirror-theme-nord": "https://esm.sh/*@uiw/codemirror-theme-nord",
-    "@uiw/codemirror-theme-solarized": "https://esm.sh/*@uiw/codemirror-theme-solarized",
-    "@uiw/codemirror-theme-solarized/": "https://esm.sh/*@uiw/codemirror-theme-solarized/",
-    "@uiw/codemirror-theme-vscode": "https://esm.sh/*@uiw/codemirror-theme-vscode",
-    "@uiw/codemirror-theme-tokyo-night": "https://esm.sh/*@uiw/codemirror-theme-tokyo-night",
-    "@uiw/codemirror-theme-tokyo-night-storm": "https://esm.sh/*@uiw/codemirror-theme-tokyo-night-storm",
-    "@uiw/codemirror-theme-material": "https://esm.sh/*@uiw/codemirror-theme-material",
-    "@uiw/codemirror-theme-gruvbox-dark": "https://esm.sh/*@uiw/codemirror-theme-gruvbox-dark",
-    "@uiw/codemirror-theme-atomone": "https://esm.sh/*@uiw/codemirror-theme-atomone",
-    "@uiw/codemirror-theme-xcode": "https://esm.sh/*@uiw/codemirror-theme-xcode",
-    "@uiw/codemirror-theme-aura": "https://esm.sh/*@uiw/codemirror-theme-aura",
-    "@uiw/codemirror-theme-sublime": "https://esm.sh/*@uiw/codemirror-theme-sublime",
-    "@uiw/codemirror-theme-copilot": "https://esm.sh/*@uiw/codemirror-theme-copilot",
-    "@uiw/codemirror-theme-andromeda": "https://esm.sh/*@uiw/codemirror-theme-andromeda",
-    "@replit/codemirror-vim": "https://esm.sh/*@replit/codemirror-vim",
-    "@replit/codemirror-vim-core": "https://esm.sh/*@replit/codemirror-vim-core",
-    "@babel/runtime/helpers/extends": "https://esm.sh/*@babel/runtime/helpers/extends"
-  }
-}
-</script>
+{% comment %}Every CodeMirror package is its own local module; the map (built by frontend/build.mjs)
+resolves their bare imports so @codemirror/state loads once — two copies break with
+"Unrecognized extension value".{% endcomment %}
+{% include "_importmap.html" %}
 <script type="module">
   import { EditorView, basicSetup } from "codemirror";
   import { Compartment, EditorState, Transaction } from "@codemirror/state";
@@ -352,12 +301,11 @@ so @codemirror/state is a singleton — two copies break with "Unrecognized exte
   const tabC = new Compartment(), wrapC = new Compartment(), vimC = new Compartment();
   const prefKey = "ca-editor";
   const FONTS = {
-    anthropic: '"Anthropic Mono", ui-monospace, monospace',
     jetbrains: '"JetBrains Mono", ui-monospace, monospace',
     fira: '"Fira Code", ui-monospace, monospace',
     system: "ui-monospace, Menlo, Consolas, monospace",
   };
-  let prefs = { theme: "auto", font: "anthropic", size: 14, tab: "4", wrap: false, vim: false, starter: true };
+  let prefs = { theme: "auto", font: "jetbrains", size: 14, tab: "4", wrap: false, vim: false, starter: true };
   try { prefs = { ...prefs, ...JSON.parse(localStorage.getItem(prefKey) || "{}") }; } catch {}
   const THEMES = {
     "github-light": () => import("@uiw/codemirror-theme-github").then((m) => m.githubLight),
@@ -446,7 +394,7 @@ so @codemirror/state is a singleton — two copies break with "Unrecognized exte
   };
   const editorEl = document.getElementById("editor");
   const applyPrefs = () => {
-    editorEl.style.setProperty("--ed-font", FONTS[prefs.font] || FONTS.anthropic);
+    editorEl.style.setProperty("--ed-font", FONTS[prefs.font] || FONTS.jetbrains);
     editorEl.style.setProperty("--ed-size", prefs.size + "px");
     document.getElementById("pref-size-val").textContent = prefs.size;
     try { localStorage.setItem(prefKey, JSON.stringify(prefs)); } catch {}

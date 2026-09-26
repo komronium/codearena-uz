@@ -191,7 +191,8 @@ def problem_detail(request, slug):
     show_leaders = contest is None and not in_running_contest(problem)
     # Hints and the editorial stay shut while a contest uses the problem.
     duel = active_duel_for(request.user, problem)
-    help_locked = not show_leaders or duel is not None
+    help_locked = ("Duel davomida yopiq" if duel is not None
+                   else "Musobaqa davomida yopiq" if not show_leaders else "")
     hints = list(problem.hints.all())
     opened = set()
     if request.user.is_authenticated and hints:

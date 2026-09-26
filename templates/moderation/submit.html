@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base.html" %}{% load static %}
 {% block title %}{% if problem %}Masalani tahrirlash{% else %}Masala qo‘shish{% endif %}{% endblock %}
 {% block sidebar %}{% endblock %}
 {% block content %}
@@ -163,14 +163,15 @@
   </aside>
 </form>
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde@2.20.0/dist/easymde.min.css">
+<link rel="stylesheet" href="{% static 'vendor/easymde/easymde.min.css' %}">
 {# EasyMDE toolbar icons come from Font Awesome; loaded only on this staff page #}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
-<script src="https://cdn.jsdelivr.net/npm/easymde@2.20.0/dist/easymde.min.js"></script>
+<link rel="stylesheet" href="{% static 'vendor/fontawesome/css/all.min.css' %}">
+<script src="{% static 'vendor/easymde/easymde.min.js' %}"></script>
 <script>
 (function () {
   document.querySelectorAll("textarea.ca-md").forEach((el) => {
-    new EasyMDE({ element: el, spellChecker: false, status: false, minHeight: el.rows > 4 ? "220px" : "90px",
+    // autoDownloadFontAwesome: false, or it fetches its own copy from a CDN
+    new EasyMDE({ element: el, spellChecker: false, status: false, autoDownloadFontAwesome: false, minHeight: el.rows > 4 ? "220px" : "90px",
       toolbar: ["bold", "italic", "heading", "|", "code", "quote", "unordered-list", "ordered-list", "table", "|", "preview", "guide"] });
   });
 

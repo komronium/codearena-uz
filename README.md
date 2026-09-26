@@ -25,6 +25,22 @@ with a real `compile_cmd` (C++, Java — both seeded).
 
 Languages: Python 3, C++ (g++ -O2), Java, JavaScript (Node 20).
 
+## Front end
+
+Everything the browser loads is served from `static/`: no CDN, so the site works
+where a CDN is slow or blocked. `frontend/build.mjs` makes it from the versions
+pinned in `frontend/package.json` — Tailwind CSS (scanning `templates/` and
+`apps/`), the fonts (Inter, JetBrains Mono, Fira Code; SIL OFL), htmx, the Lucide
+icons the templates use, highlight.js, KaTeX, EasyMDE and the CodeMirror modules
+behind `templates/_importmap.html`. The outputs are committed, so deploys need no
+Node. After adding a Tailwind class or an icon to a template:
+
+    cd frontend && npm ci && npm run build   # then commit static/ and templates/_importmap.html
+
+`tests/test_frontend.py` fails when the committed build is stale (it runs where
+Node and `frontend/node_modules` exist) and when a template loads a third-party
+script or stylesheet.
+
 ## Docker compose (dev)
 
     cp .env.example .env
