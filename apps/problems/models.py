@@ -126,3 +126,22 @@ class HintUnlock(models.Model):
 
     class Meta:
         unique_together = ("user", "hint")
+
+
+class DailyProblem(models.Model):
+    """One problem for everyone per (Tashkent) day; see apps.problems.daily."""
+    date = models.DateField(unique=True)
+    problem = models.ForeignKey(Problem, on_delete=models.CASCADE, related_name="+")
+
+    class Meta:
+        ordering = ["-date"]
+
+
+class DailySolve(models.Model):
+    """Derived: a practice AC on the daily problem on its own day. Kept by
+    apps.submissions.solves.refresh_solves like solves; worth a small bonus."""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="+")
+    daily = models.ForeignKey(DailyProblem, on_delete=models.CASCADE, related_name="solves")
+
+    class Meta:
+        unique_together = ("user", "daily")

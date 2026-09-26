@@ -14,7 +14,9 @@ from apps.contests.models import ContestProblem
 from apps.contests.services import active_contest_for, in_running_contest, in_upcoming_contest
 from apps.submissions.models import Submission, UserProblemSolved
 
+from .daily import daily_for, streaks
 from .models import (
+    DailySolve,
     HintUnlock,
     Language,
     Problem,
@@ -107,10 +109,17 @@ def problem_list(request):
         )
     # Only on the plain first page: with a search or filter the user already knows what they want.
     browsing = not (q or tag or difficulty or status) and page.number == 1
-    next_picks = next_problems(request.user) if request.user.is_authenticated and browsing else []
+    daily = daily_for() if browsing else None
+    daily_done = streak = None
+    if daily and request.user.is_authenticated:
+        daily_done = DailySolve.objects.filter(user=request.user, daily=daily).exists()
+        streak = streaks(request.user)[0]
+    next_picks = (next_problems(request.user, exclude=(daily.problem_id,) if daily else ())
+                  if request.user.is_authenticated and browsing else [])
     return render(request, "problems/list.html", {
         "problems": page,
         "next_picks": next_picks,
+        "daily": daily, "daily_done": daily_done, "streak": streak,
         "sort": sort, "dir": "desc" if desc else "asc",
         "solved_ids": solved_ids,
         "all_tags": Tag.objects.order_by("name"),

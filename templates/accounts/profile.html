@@ -145,7 +145,12 @@
 {% endif %}
 
 <section class="mb-8">
-  <h2 class="ca-section-title">Faollik</h2>
+  <div class="mb-3 flex flex-wrap items-end justify-between gap-2">
+    <h2 class="ca-section-title !mb-0">Faollik</h2>
+    {% with cur=streak.0 best=streak.1 %}{% if best %}
+    <p class="text-sm text-mute"><i data-lucide="flame" class="lu mr-1 {% if cur %}text-warn{% endif %}" aria-hidden="true"></i>Kun masalasi seriyasi: <b class="tabular text-ink">{{ cur }}</b> kun · eng uzuni <b class="tabular text-ink">{{ best }}</b></p>
+    {% endif %}{% endwith %}
+  </div>
   <div class="ca-panel">
     <div class="mb-4 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
       <p class="text-sm text-mute"><span class="text-xl font-bold text-ink tabular">{{ activity.total }}</span> ta urinish so‘nggi bir yilda</p>

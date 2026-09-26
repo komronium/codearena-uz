@@ -553,3 +553,66 @@ def test_problem_list_and_profile_show_them(client, catalog):
     page = client.get(reverse("problems:list")).content.decode()
     assert "Keyingi masala" in page
     assert "Mavzular" in client.get(reverse("profile", args=["ali"])).content.decode()
+
+
+# ---- daily problem and streak -------------------------------------------------------------------
+
+@pytest.mark.django_db
+def test_daily_problem_is_picked_once_a_day_from_fresh_open_problems(catalog):
+    import datetime
+
+    from .daily import daily_for
+    from .models import DailyProblem
+
+    day = datetime.date(2030, 1, 7)  # a Monday: easy
+    first = daily_for(day)
+    assert first is not None and daily_for(day).pk == first.pk and DailyProblem.objects.count() == 1
+    assert first.problem.difficulty == "easy" and first.problem.slug not in ("h", "soon")
+    # the next 60 days never repeat a problem while fresh ones of the day's level remain
+    easy = {p.pk for p in catalog.values() if p.difficulty == "easy"}
+    used = [daily_for(day + datetime.timedelta(days=7 * i)).problem.pk for i in range(len(easy))]
+    assert sorted(used) == sorted(easy)
+
+
+@pytest.mark.django_db
+def test_daily_solves_give_bonus_and_streaks(catalog):
+    import datetime
+
+    from apps.submissions.models import Submission
+    from apps.submissions.solves import refresh_solves
+
+    from .daily import DAILY_BONUS, daily_for, streaks
+    from .models import DailySolve
+
+    ali = User.objects.create_user("ali", password="x")
+    lang = Language.objects.create(code="python", name="Python 3", docker_image="x", run_cmd="x")
+    today = timezone.localdate()
+    for back in (0, 1, 2, 5):  # a 3-day run up to today, and an older single day
+        day = today - datetime.timedelta(days=back)
+        d = daily_for(day)
+        at = timezone.make_aware(datetime.datetime.combine(day, datetime.time(12, 0)))
+        s = Submission.objects.create(user=ali, problem=d.problem, language=lang, source="x", verdict="AC")
+        Submission.objects.filter(pk=s.pk).update(created=at)
+        refresh_solves(d.problem_id, [ali.pk])
+    assert DailySolve.objects.filter(user=ali).count() == 4
+    assert streaks(ali) == (3, 3)
+    ali.refresh_from_db()
+    solved_points = sum(p.points for p in Problem.objects.filter(userproblemsolved__user=ali))
+    assert ali.practice_points == solved_points + 4 * DAILY_BONUS
+
+    # an AC on another day than the problem's day is not a daily solve; a rejudge that
+    # takes the AC away takes the daily solve and its bonus away too
+    Submission.objects.filter(user=ali, problem=daily_for(today).problem).update(verdict="WA")
+    refresh_solves(daily_for(today).problem_id, [ali.pk])
+    assert DailySolve.objects.filter(user=ali).count() == 3
+    assert streaks(ali) == (2, 2)  # yesterday's run is still alive today
+
+
+@pytest.mark.django_db
+def test_problem_list_shows_the_daily_problem(client, catalog):
+    ali = User.objects.create_user("ali", password="x")
+    client.force_login(ali)
+    r = client.get(reverse("problems:list"))
+    assert "Kun masalasi" in r.content.decode()
+    daily = r.context["daily"]
+    assert daily.problem.pk not in [p.pk for p, _ in r.context["next_picks"]]

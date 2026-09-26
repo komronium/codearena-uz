@@ -15,6 +15,22 @@
   {% endif %}
 </div>
 
+{% if daily %}
+<a href="{% url 'problems:detail' daily.problem.slug %}" class="ca-panel mb-4 flex flex-wrap items-center justify-between gap-3 !py-3.5 transition hover:border-accent">
+  <div class="min-w-0">
+    <p class="text-xs font-semibold uppercase tracking-wide text-warn"><i data-lucide="calendar-check" class="lu mr-1" aria-hidden="true"></i>Kun masalasi · {{ daily.date|date:"d.m" }}</p>
+    <p class="mt-1 truncate text-lg font-semibold">{{ daily.problem.title }}</p>
+    <p class="mt-1 flex flex-wrap items-center gap-2 text-xs text-mute"><span class="ca-diff ca-diff-{{ daily.problem.difficulty }}">{{ daily.problem.get_difficulty_display }}</span>Bugun yechsangiz — seriya davom etadi va +5 ball</p>
+  </div>
+  {% if user.is_authenticated %}
+  <div class="text-right text-sm">
+    {% if daily_done %}<span class="ca-verdict ca-verdict-ac">✓ Bugun yechildi</span>{% endif %}
+    {% if streak %}<p class="mt-1 text-mute"><i data-lucide="flame" class="lu mr-1 text-warn" aria-hidden="true"></i><b class="tabular text-ink">{{ streak }}</b> kunlik seriya</p>{% endif %}
+  </div>
+  {% endif %}
+</a>
+{% endif %}
+
 {% if next_picks %}
 <section class="mb-6" aria-labelledby="next-title">
   <h2 id="next-title" class="mb-2 text-sm font-semibold"><i data-lucide="compass" class="lu mr-1.5 text-accent" aria-hidden="true"></i>Keyingi masala</h2>

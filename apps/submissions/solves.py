@@ -6,12 +6,13 @@ through here."""
 from collections.abc import Iterable
 
 from django.db import transaction
-from django.db.models import Exists, F, IntegerField, OuterRef, Q, Subquery, Sum
+from django.db.models import Count, Exists, F, IntegerField, OuterRef, Q, Subquery, Sum
 from django.db.models.functions import Coalesce
 
 from apps.accounts.models import User
 from apps.contests.models import Participation
-from apps.problems.models import MAX_HINT_PCT, HintUnlock
+from apps.problems.daily import DAILY_BONUS, refresh_daily
+from apps.problems.models import MAX_HINT_PCT, DailySolve, HintUnlock
 
 from .models import Submission, UserProblemSolved
 
@@ -60,12 +61,15 @@ def refresh_solves(problem_id: int, user_ids: Iterable[int] | None = None) -> No
                 UserProblemSolved.objects.update_or_create(
                     user_id=user_id, problem_id=problem_id,
                     defaults={"first_ac_submission_id": want[0], "hint_pct": want[1]})
+    refresh_daily(problem_id, None if user_ids is None else users)
     sync_practice_points(users)
 
 
 def sync_practice_points(user_ids: Iterable[int] | None = None) -> None:
     """practice_points = current price of each solved problem the user did not author,
     less the share paid for hints. One UPDATE; None = every user."""
+    bonus = (DailySolve.objects.filter(user_id=OuterRef("pk")).exclude(daily__problem__author_id=OuterRef("pk"))
+             .values("user_id").annotate(n=Count("pk")).values("n"))
     total = (UserProblemSolved.objects.filter(user_id=OuterRef("pk"))
              .exclude(problem__author_id=OuterRef("pk"))
              .values("user_id")
@@ -73,4 +77,5 @@ def sync_practice_points(user_ids: Iterable[int] | None = None) -> None:
     users = User.objects.all() if user_ids is None else User.objects.filter(pk__in=list(user_ids))
     # ponytail: rewrites every row of `users`, changed or not; filter to changed rows if
     # the 5-minute sweep over all users ever shows up in DB load.
-    users.update(practice_points=Coalesce(Subquery(total, output_field=IntegerField()), 0))
+    users.update(practice_points=Coalesce(Subquery(total, output_field=IntegerField()), 0)
+                 + DAILY_BONUS * Coalesce(Subquery(bonus, output_field=IntegerField()), 0))
