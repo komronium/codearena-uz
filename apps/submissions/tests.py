@@ -214,6 +214,16 @@ def test_runner_tle(compile_, run_tests, problem, python, user):
     assert s.verdict == "TLE"
 
 
+@patch("judge.runner.sandbox.run_tests", return_value=[])
+@patch("judge.runner.sandbox.compile", return_value=(True, ""))
+def test_runner_runs_tests_in_their_order(compile_, run_tests, problem, python, user):
+    from judge.runner import run_submission
+    TestCase.objects.create(problem=problem, input="first\n", expected="x\n", order=-1)
+    s = Submission.objects.create(user=user, problem=problem, language=python, source="x")
+    run_submission(s.pk)
+    assert run_tests.call_args.args[2] == ["first\n", "1 2\n", "5 7\n"]
+
+
 # --- practice points: spec §2 step 5 says first AC per (user, problem) awards
 # problem.points once, via a UserProblemSolved row. Not in the original task
 # brief text; added here since judge.runner is exactly where AC is decided.

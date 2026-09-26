@@ -71,6 +71,10 @@ class TestCase(models.Model):
     is_sample = models.BooleanField(default=False)
     order = models.IntegerField(default=0)
 
+    class Meta:
+        # "Test 1" must stay the same test after an edit; the runner and the samples use this.
+        ordering = ["order", "id"]
+
 
 class SQLDataset(models.Model):
     """Fixture DB for a Problem.Kind.SQL problem. One dataset per problem — the
