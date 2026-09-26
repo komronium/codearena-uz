@@ -353,12 +353,32 @@ a.ca-st-label:hover { text-decoration: underline; text-underline-offset: 3px; }
   background: rgb(var(--ca-surface-rgb) / .95); backdrop-filter: blur(8px);
   border-top: 1px solid rgb(var(--ca-line-rgb)); padding-bottom: env(safe-area-inset-bottom);
 }
-.ca-bottom-nav a {
-  flex: 1; display: flex; flex-direction: column; align-items: center; gap: .15rem;
+.ca-bottom-nav a, .ca-bottom-nav button {
+  position: relative; flex: 1; display: flex; flex-direction: column; align-items: center; gap: .15rem;
   padding: .5rem 0 .4rem; font-size: .65rem; font-weight: 500; color: rgb(var(--ca-mute-rgb)); min-height: 44px;
 }
-.ca-bottom-nav a svg.lucide { width: 1.35rem; height: 1.35rem; }
+.ca-bottom-nav svg.lucide { width: 1.35rem; height: 1.35rem; }
 .ca-bottom-nav a.is-active { color: rgb(var(--ca-accent-rgb)); }
+/* unread badge on a bottom-bar item: a dot at the icon's top right */
+.ca-nav-dot {
+  position: absolute; top: .4rem; left: calc(50% + .45rem); width: .55rem; height: .55rem; border-radius: 9999px;
+  background: rgb(var(--ca-warn-rgb)); box-shadow: 0 0 0 2px rgb(var(--ca-surface-rgb));
+}
+/* phone menu: a bottom sheet holding every destination (templates/_nav.html) */
+.ca-sheet {
+  width: 100%; max-width: 32rem; max-height: 85dvh; margin: auto auto 0; padding: 0 0 env(safe-area-inset-bottom);
+  color: rgb(var(--ca-ink-rgb)); background: rgb(var(--ca-surface-rgb));
+  border: 1px solid rgb(var(--ca-line-rgb)); border-bottom: 0; border-radius: var(--ca-radius) var(--ca-radius) 0 0;
+  box-shadow: var(--ca-shadow-lift);
+}
+.ca-sheet[open] { display: flex; flex-direction: column; }
+.ca-sheet::backdrop { background: rgb(8 10 16 / .55); }
+@media (prefers-reduced-motion: no-preference) { .ca-sheet[open] { animation: ca-sheet-up .2s ease-out; } }
+@keyframes ca-sheet-up { from { transform: translateY(100%); } }
+.ca-sheet .ca-sidebar-heading { grid-column: 1 / -1; margin-top: .6rem; }
+.ca-sheet .ca-sidebar-heading:first-child { display: none; }  /* the sheet's own title says it */
+/* phones: tables keep more room for their content */
+@media (max-width: 639px) { .ca-table th, .ca-table td { padding-left: .65rem; padding-right: .65rem; } }
 @media (max-width: 767px) { body { padding-bottom: 4rem; } }
 .ca-filter {
   display: inline-flex; align-items: center; padding: .35rem .8rem; border-radius: 9999px; font-size: .8rem; font-weight: 500;
