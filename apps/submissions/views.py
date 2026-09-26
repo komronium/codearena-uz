@@ -1,6 +1,5 @@
 import django_rq
 from django.contrib.auth.decorators import login_required
-from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.http import Http404, HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -12,27 +11,12 @@ from apps.problems.models import Language, Problem
 from judge.runner import run_submission, run_trial
 
 from .models import Submission, UserProblemSolved
+from .ratelimit import rate_limited
 
 MAX_SOURCE = 64 * 1024
-RATE_LIMIT_MAX = 10       # submissions
-RATE_LIMIT_WINDOW_S = 60  # per rolling window
-TRIAL_RATE_MAX = 20       # "Sinab ko'rish" runs per window: cheaper than a submit, but still a container
+RATE_LIMIT_MAX = 10       # submissions per minute
+TRIAL_RATE_MAX = 20       # "Sinab ko'rish" runs per minute: cheaper than a submit, but still a container
 MAX_TRIAL_INPUT = 64 * 1024
-
-
-def _rate_limited(user_id, kind="submit", limit=RATE_LIMIT_MAX) -> bool:
-    # ponytail: fixed window, not sliding — a burst can land 2x MAX across a
-    # window boundary. Good enough to stop a submit-spam script; swap for a
-    # sliding/token-bucket counter if that boundary burst becomes a problem.
-    key = f"{kind}-rl:{user_id}"
-    count = cache.get(key)
-    if count is None:
-        cache.set(key, 1, timeout=RATE_LIMIT_WINDOW_S)
-        return False
-    if count >= limit:
-        return True
-    cache.incr(key)
-    return False
 
 
 def _gate(request, slug):
@@ -60,7 +44,7 @@ def submit(request, slug):
     problem, contest, error = _gate(request, slug)
     if error:
         return error
-    if _rate_limited(request.user.id):
+    if rate_limited(request.user.id, "submit", RATE_LIMIT_MAX):
         return HttpResponse("too many submissions, slow down", status=429)
     language = get_object_or_404(Language, code=request.POST.get("language"), is_active=True)
     source = request.POST.get("source", "")
@@ -85,7 +69,7 @@ def trial(request, slug):
     source, stdin = request.POST.get("source", ""), request.POST.get("stdin", "")
     if not source.strip() or len(source) > MAX_SOURCE or len(stdin) > MAX_TRIAL_INPUT:
         return JsonResponse({"error": "Kod bo‘sh yoki juda katta"}, status=400)
-    if _rate_limited(request.user.id, "trial", TRIAL_RATE_MAX):
+    if rate_limited(request.user.id, "trial", TRIAL_RATE_MAX):
         return JsonResponse({"error": "Juda tez-tez — bir daqiqadan keyin urinib ko‘ring"}, status=429)
     if stdin.strip():
         inputs, expected = [stdin], None

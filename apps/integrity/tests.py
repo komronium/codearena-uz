@@ -333,3 +333,27 @@ def test_flag_run_checks_only_chosen_problems(client, flag_contest, flag_problem
     assert SimilarityFlag.objects.count() == 0
     client.post(url, {"problems": ["B"]})
     assert list(SimilarityFlag.objects.values_list("submission_a__problem__slug", flat=True)) == ["b"]
+
+
+def test_event_and_snapshot_are_rate_limited(client, flag_contest, flag_problem, flag_python):
+    from django.core.cache import cache
+
+    from .models import CodeSnapshot
+    from .views import EVENT_RATE_MAX, SNAPSHOT_RATE_MAX
+
+    cache.clear()  # counters live in the cache, and user pks repeat across tests
+    ali = User.objects.create_user("rl", password="x")
+    Participation.objects.create(user=ali, contest=flag_contest)
+    client.force_login(ali)
+    event = {"contest_id": flag_contest.pk, "kind": "blur"}
+    for _ in range(EVENT_RATE_MAX):
+        assert client.post(reverse("integrity:event"), event).status_code == 200
+    assert client.post(reverse("integrity:event"), event).status_code == 429
+    assert FocusEvent.objects.count() == EVENT_RATE_MAX
+
+    snap = {"contest_id": flag_contest.pk, "problem_id": flag_problem.pk, "language": "python"}
+    for i in range(SNAPSHOT_RATE_MAX):
+        assert client.post(reverse("integrity:snapshot"), snap | {"source": f"v{i}"}).status_code == 200
+    assert client.post(reverse("integrity:snapshot"), snap | {"source": "late"}).status_code == 429
+    assert not CodeSnapshot.objects.filter(source="late").exists()
+    cache.clear()

@@ -11,6 +11,7 @@ from apps.accounts.models import User
 from apps.contests.models import Contest, Participation
 from apps.problems.models import Language, Problem
 from apps.submissions.models import Submission
+from apps.submissions.ratelimit import rate_limited
 
 from .models import CodeSnapshot, FocusEvent, SimilarityFlag
 from .similarity import MIN_LINES, THRESHOLD, matched_lines
@@ -26,6 +27,10 @@ _JUMP_CHARS = 150
 
 _MAX_AWAY_MS = 6 * 3600 * 1000
 _MAX_SNAPSHOT_CHARS = 64_000
+# Per user per minute. The client sends a snapshot every 10 s plus one per submit or page
+# exit; a flood of events leaves a visible trail before it hits the limit.
+EVENT_RATE_MAX = 60
+SNAPSHOT_RATE_MAX = 20
 
 
 def _participant_contest(request):
@@ -44,6 +49,8 @@ def _participant_contest(request):
 @login_required
 @require_POST
 def event(request):
+    if rate_limited(request.user.id, "event", EVENT_RATE_MAX):
+        return JsonResponse({"error": "too many requests"}, status=429)
     kind = request.POST.get("kind")
     if kind not in FocusEvent.Kind.values:
         return HttpResponseBadRequest("bad kind")
@@ -59,6 +66,8 @@ def event(request):
 @login_required
 @require_POST
 def snapshot(request):
+    if rate_limited(request.user.id, "snapshot", SNAPSHOT_RATE_MAX):
+        return JsonResponse({"error": "too many requests"}, status=429)
     contest, problem, error = _participant_contest(request)
     if error:
         return error
