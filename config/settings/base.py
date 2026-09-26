@@ -62,8 +62,8 @@ else:
 AUTH_USER_MODEL = "accounts.User"
 AUTHENTICATION_BACKENDS = ["apps.accounts.backends.EmailOrUsernameBackend"]
 LOGIN_URL = "login"
-LOGIN_REDIRECT_URL = "problems:list"
-LOGOUT_REDIRECT_URL = "problems:list"
+LOGIN_REDIRECT_URL = "home"
+LOGOUT_REDIRECT_URL = "home"
 
 REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
 # "run" = "Sinab ko'rish" trial runs, "rejudge" = staff rejudges; workers listen

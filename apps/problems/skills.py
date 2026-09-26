@@ -35,14 +35,15 @@ def skill_map(user) -> list[dict]:
 
 def next_problems(user, n: int = 3, exclude: tuple[int, ...] = ()) -> list[tuple[Problem, str]]:
     """(problem, reason) picks: unsolved problems of the weakest tags first, at the
-    difficulty the user solves most (or one step up), most-solved first."""
+    difficulty the user solves most, then one step up, then one step down (so a user at
+    the top level still gets a full set), most-solved first."""
     solved = set(UserProblemSolved.objects.filter(user=user).values_list("problem_id", flat=True))
     done_levels = Counter(Problem.objects.filter(pk__in=solved).values_list("difficulty", flat=True))
     level = LEVELS.index(done_levels.most_common(1)[0][0]) if done_levels else 1
-    allowed = LEVELS[level:level + 2]
-    candidates = list(open_problems().filter(difficulty__in=allowed).exclude(pk__in=solved).exclude(pk__in=exclude)
+    rank = {LEVELS[i]: r for r, i in enumerate((level, level + 1, level - 1)) if 0 <= i < len(LEVELS)}
+    candidates = list(open_problems().filter(difficulty__in=rank).exclude(pk__in=solved).exclude(pk__in=exclude)
                       .annotate(solvers=Count("userproblemsolved", distinct=True)).prefetch_related("tags"))
-    candidates.sort(key=lambda p: (LEVELS.index(p.difficulty), -p.solvers, p.pk))
+    candidates.sort(key=lambda p: (rank[p.difficulty], -p.solvers, p.pk))
 
     weak = [r for r in skill_map(user) if r["total"] >= MIN_TAG_PROBLEMS and r["solved"] < r["total"]]
     weak.sort(key=lambda r: (r["solved"] / r["total"], -r["total"]))

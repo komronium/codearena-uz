@@ -1,5 +1,9 @@
 {% comment %}Every destination, for the desktop sidebar and the phone menu sheet (base.html).{% endcomment %}
 <p class="ca-sidebar-heading">Menyu</p>
+<a href="{% url 'home' %}" class="ca-sidebar-link {% if request.resolver_match.url_name == 'home' %}is-active{% endif %}">
+  <i data-lucide="house" class="lu" aria-hidden="true"></i>
+  Bosh sahifa
+</a>
 <a href="{% url 'problems:list' %}" class="ca-sidebar-link {% if request.resolver_match.namespace == 'problems' %}is-active{% endif %}">
   <i data-lucide="list-checks" class="lu" aria-hidden="true"></i>
   Masalalar
@@ -29,6 +33,10 @@
 <a href="{% url 'classroom:duels' %}" class="ca-sidebar-link {% if request.resolver_match.namespace == 'classroom' and 'duel' in request.resolver_match.url_name %}is-active{% endif %}">
   <i data-lucide="swords" class="lu" aria-hidden="true"></i>
   Duellar
+</a>
+<a href="{% url 'profile' user.username %}" class="ca-sidebar-link {% if request.resolver_match.url_name == 'profile' and profile_user == user %}is-active{% endif %}">
+  <i data-lucide="user" class="lu" aria-hidden="true"></i>
+  Profilim
 </a>
 {% endif %}
 {% if user.is_staff %}

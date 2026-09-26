@@ -1,0 +1,85 @@
+{% extends "base.html" %}{% load numbers %}
+{% block title %}CodeArena — dasturlashni musobaqada o‘rganing{% endblock %}
+{% block sidebar %}{% endblock %}
+{% block content %}
+<section class="grid items-center gap-10 pb-6 pt-2 lg:grid-cols-[1.15fr_1fr]">
+  <div>
+    <p class="text-sm font-semibold text-accent">Talabalar uchun dasturlash platformasi</p>
+    <h1 class="mt-3 text-4xl font-bold leading-[1.1] tracking-tight sm:text-5xl">Masala yeching, musobaqada g‘olib bo‘ling, sinfdoshingiz bilan bellashing</h1>
+    <p class="mt-5 max-w-xl text-lg text-mute">Python, C++, Java yoki JavaScript’da yozing — kodingiz shu zahoti serverda testlanadi. Reyting, uy vazifalari va duellar bir joyda, natijalar esa halol.</p>
+    <div class="mt-8 flex flex-wrap gap-3">
+      <a class="ca-btn ca-btn-primary !px-5 !py-3 text-base" href="{% url 'register' %}"><i data-lucide="user-plus" class="lu" aria-hidden="true"></i>Ro‘yxatdan o‘tish — bepul</a>
+      <a class="ca-btn ca-btn-ghost !px-5 !py-3 text-base" href="{% url 'problems:list' %}"><i data-lucide="list-checks" class="lu" aria-hidden="true"></i>Masalalarni ko‘rish</a>
+    </div>
+    <p class="mt-4 text-sm text-mute">Hisobingiz bormi? <a class="ca-link" href="{% url 'login' %}">Kirish</a></p>
+  </div>
+  {# illustration: what a solve looks like; decorative, so hidden from screen readers #}
+  <div class="ca-terminal overflow-hidden shadow-xl" aria-hidden="true">
+    <div class="flex items-center gap-2 border-b border-white/10 px-4 py-2.5 text-xs text-white/60">
+      <span class="h-2.5 w-2.5 rounded-full bg-white/20"></span><span class="h-2.5 w-2.5 rounded-full bg-white/20"></span><span class="h-2.5 w-2.5 rounded-full bg-white/20"></span>
+      <span class="ml-2">main.py</span>
+    </div>
+    <pre class="overflow-x-auto px-5 py-4 text-[.9rem] leading-7"><span class="text-white/40">1</span>  n = <span class="text-sky-300">int</span>(<span class="text-sky-300">input</span>())
+<span class="text-white/40">2</span>  a = <span class="text-sky-300">list</span>(<span class="text-sky-300">map</span>(<span class="text-sky-300">int</span>, <span class="text-sky-300">input</span>().split()))
+<span class="text-white/40">3</span>  <span class="text-sky-300">print</span>(<span class="text-sky-300">max</span>(a) - <span class="text-sky-300">min</span>(a))</pre>
+    <div class="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-white/10 px-5 py-3 text-sm">
+      <span class="font-semibold text-emerald-300">✓ Accepted</span>
+      <span class="text-white/60">12/12 test · 38 ms</span>
+      <span class="ml-auto text-white/60">+100 ball</span>
+    </div>
+  </div>
+</section>
+
+<section class="my-10 grid grid-cols-2 gap-4 lg:grid-cols-4" aria-label="CodeArena raqamlarda">
+  <div class="ca-panel ca-kpi-tile"><span class="ca-kpi-label">Masalalar</span><span class="ca-kpi-value">{{ stats.problems|compact }}</span></div>
+  <div class="ca-panel ca-kpi-tile"><span class="ca-kpi-label">Foydalanuvchilar</span><span class="ca-kpi-value">{{ stats.users|compact }}</span></div>
+  <div class="ca-panel ca-kpi-tile"><span class="ca-kpi-label">Musobaqalar</span><span class="ca-kpi-value">{{ stats.contests|compact }}</span></div>
+  <div class="ca-panel ca-kpi-tile"><span class="ca-kpi-label">Tekshirilgan yechimlar</span><span class="ca-kpi-value">{{ stats.submissions|compact }}</span></div>
+</section>
+
+<section class="my-14" aria-labelledby="features-title">
+  <h2 id="features-title" class="mb-6 text-2xl font-bold tracking-tight">Nimasi bilan boshqacha</h2>
+  <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    {% for icon, title, text in features %}
+    <article class="ca-panel">
+      <span class="ca-stat-icon bg-accent-soft text-accent"><i data-lucide="{{ icon }}" class="lu" aria-hidden="true"></i></span>
+      <h3 class="mt-3 font-semibold">{{ title }}</h3>
+      <p class="mt-1.5 text-sm text-mute">{{ text }}</p>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="my-14 grid gap-6 lg:grid-cols-2" aria-label="Bugun">
+  {% if daily %}
+  <a href="{% url 'problems:detail' daily.problem.slug %}" class="ca-panel flex flex-col transition hover:border-accent">
+    <p class="text-xs font-semibold uppercase tracking-wide text-warn"><i data-lucide="calendar-check" class="lu mr-1" aria-hidden="true"></i>Kun masalasi · {{ daily.date|date:"d.m" }}</p>
+    <p class="mt-2 text-lg font-semibold">{{ daily.problem.title }}</p>
+    <p class="mt-1.5 flex flex-wrap items-center gap-2 text-sm text-mute"><span class="ca-diff ca-diff-{{ daily.problem.difficulty }}">{{ daily.problem.get_difficulty_display }}</span>Hoziroq yechib ko‘ring — ro‘yxatdan o‘tish shart emas</p>
+    <span class="ca-link mt-auto pt-4 text-sm">Masalani ochish →</span>
+  </a>
+  {% endif %}
+  <div>
+    <div class="mb-3 flex items-end justify-between gap-2">
+      <h2 class="ca-section-title !mb-0">Musobaqalar</h2>
+      <a class="ca-link text-sm" href="{% url 'contests:list' %}">Hammasi →</a>
+    </div>
+    {% if running or upcoming %}
+    <ul class="ca-rows">
+      {% for c in running %}{% include "contests/_row.html" with state="running" %}{% endfor %}
+      {% for c in upcoming %}{% include "contests/_row.html" with state="upcoming" %}{% endfor %}
+    </ul>
+    {% else %}
+    <div class="ca-empty">Yangi musobaqa tez orada e’lon qilinadi.</div>
+    {% endif %}
+  </div>
+</section>
+
+<section class="ca-panel my-14 flex flex-wrap items-center justify-between gap-4 !py-6">
+  <div>
+    <h2 class="text-xl font-bold">Bugun boshlang</h2>
+    <p class="mt-1 text-sm text-mute">Ro‘yxatdan o‘tish bir daqiqa oladi. O‘qituvchi bo‘lsangiz, guruhingiz uchun vazifa berishingiz mumkin.</p>
+  </div>
+  <a class="ca-btn ca-btn-primary !px-5 !py-3" href="{% url 'register' %}">Ro‘yxatdan o‘tish</a>
+</section>
+{% endblock %}

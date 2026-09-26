@@ -152,7 +152,7 @@ def register(request):
     if request.method == "POST" and form.is_valid():
         user = form.save()
         login(request, user)
-        return redirect("problems:list")
+        return redirect("home")
     return render(request, "registration/register.html", {"form": form})
 
 

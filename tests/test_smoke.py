@@ -3,10 +3,8 @@ from django.urls import reverse
 
 
 @pytest.mark.django_db
-def test_root_redirects_to_problems(client):
-    r = client.get("/")
-    assert r.status_code == 302
-    assert r.url == reverse("problems:list")
+def test_root_is_the_home_page(client):
+    assert client.get("/").status_code == 200
 
 
 @pytest.mark.django_db

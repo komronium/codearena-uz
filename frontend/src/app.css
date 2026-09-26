@@ -73,8 +73,9 @@
 html { color-scheme: light dark; }
 body {
   font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  /* no-repeat: the glow tile is viewport-sized and would otherwise recur down long pages */
   background:
-    radial-gradient(900px 320px at 18% -8%, rgb(var(--ca-accent-rgb) / .09), transparent 65%),
+    radial-gradient(900px 320px at 18% -8%, rgb(var(--ca-accent-rgb) / .09), transparent 65%) no-repeat,
     rgb(var(--ca-paper-rgb));
 }
 h1, h2, h3 { letter-spacing: -.02em; }
@@ -340,7 +341,19 @@ a.ca-st-label:hover { text-decoration: underline; text-underline-offset: 3px; }
 }
 .ca-stat { display: flex; flex-direction: column; gap: .35rem; }
 .ca-stat-label { font-size: .8rem; font-weight: 500; color: rgb(var(--ca-mute-rgb)); }
-.ca-stat-value { font-size: 2rem; font-weight: 700; line-height: 1; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+/* standalone values use proportional figures: tabular digits look loose at this size */
+.ca-stat-value { font-size: 2rem; font-weight: 700; line-height: 1; letter-spacing: -.02em; }
+/* stat chips and KPI tiles: the number wears ink, only the icon carries colour */
+.ca-kpi {
+  display: inline-flex; align-items: center; gap: .45rem; padding: .35rem .8rem; border-radius: 9999px;
+  font-size: .8rem; color: rgb(var(--ca-mute-rgb)); background: rgb(var(--ca-surface-rgb));
+  border: 1px solid rgb(var(--ca-line-rgb)); box-shadow: var(--ca-shadow);
+}
+.ca-kpi b { font-size: .95rem; font-weight: 600; color: rgb(var(--ca-ink-rgb)); }
+.ca-kpi svg.lucide { width: 1rem; height: 1rem; }
+.ca-kpi-tile { display: flex; flex-direction: column; gap: .35rem; }
+.ca-kpi-label { font-size: .8rem; font-weight: 500; color: rgb(var(--ca-mute-rgb)); }
+.ca-kpi-value { font-size: 1.9rem; font-weight: 600; line-height: 1.05; letter-spacing: -.02em; }
 .ca-stat-icon { width: 2.25rem; height: 2.25rem; display: grid; place-items: center; border-radius: var(--ca-radius-sm); }
 .ca-stat-icon svg.lucide { width: 1.35rem; height: 1.35rem; }
 .ca-empty {

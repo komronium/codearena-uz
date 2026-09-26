@@ -30,7 +30,7 @@
 <a class="ca-skip" href="#main">Asosiy tarkibga o‘tish</a>
 <header class="sticky top-0 z-40 border-b border-line bg-surface/85 backdrop-blur">
   <nav class="mx-auto flex max-w-6xl items-center gap-1 px-4 py-2.5" aria-label="Asosiy">
-    <a href="{% url 'problems:list' %}" class="ca-brand mr-3 shrink-0">
+    <a href="{% url 'home' %}" class="ca-brand mr-3 shrink-0">
       <span class="ca-brand-mark" aria-hidden="true"><i data-lucide="code" class="lu"></i></span>CodeArena
     </a>
     <form method="get" action="{% url 'problems:list' %}" class="relative ml-auto hidden w-56 md:block" role="search">
@@ -73,13 +73,12 @@
 </div>
 <nav class="ca-bottom-nav md:hidden" aria-label="Mobil menyu">
   {% with ns=request.resolver_match.namespace un=request.resolver_match.url_name %}
+  <a href="{% url 'home' %}" class="{% if un == 'home' %}is-active{% endif %}"><i data-lucide="house" class="lu" aria-hidden="true"></i><span>Bosh sahifa</span></a>
   <a href="{% url 'problems:list' %}" class="{% if ns == 'problems' %}is-active{% endif %}"><i data-lucide="list-checks" class="lu" aria-hidden="true"></i><span>Masalalar</span></a>
   <a href="{% url 'contests:list' %}" class="{% if ns == 'contests' %}is-active{% endif %}"><i data-lucide="trophy" class="lu" aria-hidden="true"></i><span>Musobaqalar</span></a>
   {% if user.is_authenticated %}
   <a href="{% url 'submissions:mine' %}" class="{% if ns == 'submissions' %}is-active{% endif %}"><i data-lucide="history" class="lu" aria-hidden="true"></i><span>Urinishlar</span>{% if unread_reviews %}<b class="ca-nav-dot" aria-label="{{ unread_reviews }} ta o‘qilmagan sharh"></b>{% endif %}</a>
-  <a href="{% url 'profile' user.username %}" class="{% if un == 'profile' %}is-active{% endif %}"><i data-lucide="user" class="lu" aria-hidden="true"></i><span>Profil</span></a>
   {% else %}
-  <a href="{% url 'rating' %}" class="{% if un == 'rating' %}is-active{% endif %}"><i data-lucide="chart-column" class="lu" aria-hidden="true"></i><span>Reyting</span></a>
   <a href="{% url 'login' %}" class="{% if un == 'login' %}is-active{% endif %}"><i data-lucide="log-in" class="lu" aria-hidden="true"></i><span>Kirish</span></a>
   {% endif %}
   <button type="button" data-menu-open aria-haspopup="dialog" aria-controls="ca-menu"><i data-lucide="menu" class="lu" aria-hidden="true"></i><span>Menyu</span></button>

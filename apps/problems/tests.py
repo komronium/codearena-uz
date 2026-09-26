@@ -616,3 +616,13 @@ def test_problem_list_shows_the_daily_problem(client, catalog):
     assert "Kun masalasi" in r.content.decode()
     daily = r.context["daily"]
     assert daily.problem.pk not in [p.pk for p, _ in r.context["next_picks"]]
+
+
+@pytest.mark.django_db
+def test_next_problems_reach_down_a_level_for_the_strongest(catalog):
+    from .skills import next_problems
+
+    ali = User.objects.create_user("ali", password="x")
+    _solve(ali, catalog["dp4"])  # only a hard one solved: nothing is above hard
+    picks = [p.slug for p, _ in next_problems(ali)]
+    assert picks and picks[0] == "dp3" and len(picks) == 1  # dp3 is the only unsolved medium; easy is two down
