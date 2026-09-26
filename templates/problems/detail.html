@@ -115,6 +115,39 @@
         {% endif %}
       </div>
     </div>
+    {% if hints or editorial_html or problem.editorial_md %}
+    <div class="ca-panel mt-6 space-y-3" id="hints">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <h2 class="text-sm font-semibold"><i data-lucide="lightbulb" class="lu mr-1.5 text-warn" aria-hidden="true"></i>Yordam</h2>
+        {% if help_locked %}<span class="text-xs text-mute">Musobaqa davomida yopiq</span>
+        {% elif hints and not solved %}<span class="text-xs text-mute">Maslahat ochilsa, yechganingizda ball shuncha kamayadi</span>{% endif %}
+      </div>
+      {% for h in hints %}
+      <div class="rounded-[var(--ca-radius)] border border-line px-4 py-3" id="hint-{{ h.pk }}">
+        {% if h.opened %}
+        <p class="mb-1 text-xs font-semibold text-mute">{{ forloop.counter }}-maslahat</p>
+        <div class="prose prose-sm max-w-none">{{ h.html|safe }}</div>
+        {% else %}
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <span class="text-sm"><i data-lucide="lock" class="lu mr-1.5 text-mute" aria-hidden="true"></i>{{ forloop.counter }}-maslahat{% if not solved %} · <span class="font-semibold text-warn">−{{ h.cost_pct }}%</span> ball{% else %} · bepul (yechilgan){% endif %}</span>
+          {% if h.can_open and user.is_authenticated %}
+          <form method="post" action="{% url 'problems:hint' problem.slug h.pk %}"{% if not solved %} onsubmit="return confirm('Maslahatni ochasizmi? Masalani yechganingizda ballning {{ h.cost_pct }}% i ayriladi.');"{% endif %}>{% csrf_token %}
+            <button class="ca-btn ca-btn-ghost !py-1 text-xs">Ochish</button>
+          </form>
+          {% endif %}
+        </div>
+        {% endif %}
+      </div>
+      {% endfor %}
+      {% if problem.editorial_md %}
+      <details class="rounded-[var(--ca-radius)] border border-line px-4 py-3"{% if not editorial_html %} aria-disabled="true"{% endif %}>
+        <summary class="cursor-pointer text-sm font-medium"><i data-lucide="book-open-check" class="lu mr-1.5" aria-hidden="true"></i>Yechim tahlili{% if not editorial_html %} <span class="text-xs font-normal text-mute">· masalani yechgach ochiladi</span>{% endif %}</summary>
+        {% if editorial_html %}<div class="prose prose-sm mt-3 max-w-none">{{ editorial_html|safe }}</div>{% endif %}
+      </details>
+      {% endif %}
+    </div>
+    {% endif %}
+
     {% if my_subs %}
     <div class="ca-panel mt-6 !p-0 overflow-hidden">
       <div class="flex items-center justify-between border-b border-line px-4 py-2.5">

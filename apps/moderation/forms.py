@@ -11,7 +11,7 @@ from apps.accounts.forms import validate_public_username
 from apps.accounts.models import Group, User
 from apps.contests.models import Contest, ContestProblem
 from apps.contests.services import reuse_reason
-from apps.problems.models import Problem, SQLDataset, Tag, TestCase
+from apps.problems.models import MAX_HINT_PCT, Problem, ProblemHint, SQLDataset, Tag, TestCase
 
 _CA_INPUT = {"class": "ca-input"}
 _MD = {"class": "ca-input ca-md", "rows": 6}
@@ -26,13 +26,14 @@ class ProblemForm(ModelForm):
     class Meta:
         model = Problem
         fields = ["title", "kind", "statement_md", "input_md", "output_md", "difficulty", "tags",
-                  "tl_ms", "ml_mb", "points", "is_public"]
+                  "tl_ms", "ml_mb", "points", "is_public", "editorial_md"]
         widgets = {
             "title": forms.TextInput(attrs=_CA_INPUT),
             "kind": forms.Select(attrs={"class": "ca-select"}),
             "statement_md": forms.Textarea(attrs=_MD),
             "input_md": forms.Textarea(attrs={**_MD, "rows": 3}),
             "output_md": forms.Textarea(attrs={**_MD, "rows": 3}),
+            "editorial_md": forms.Textarea(attrs={**_MD, "rows": 5}),
             "difficulty": forms.Select(attrs={"class": "ca-select"}),
             "tags": forms.SelectMultiple(attrs={"class": "ca-select", "size": 5}),
             "tl_ms": forms.NumberInput(attrs=_CA_INPUT),
@@ -161,6 +162,16 @@ class BaseContestProblemFormSet(BaseInlineFormSet):
             reason = reuse_reason(problem, contest)
             if reason:
                 form.add_error("problem", reason)
+
+
+HintFormSet = inlineformset_factory(
+    Problem, ProblemHint, fields=["order", "body_md", "cost_pct"], extra=1, can_delete=True,
+    widgets={
+        "order": forms.NumberInput(attrs={"class": "ca-input w-20"}),
+        "body_md": forms.Textarea(attrs={**_MD, "rows": 2}),
+        "cost_pct": forms.NumberInput(attrs={"class": "ca-input w-24", "min": 0, "max": MAX_HINT_PCT}),
+    },
+)
 
 
 ContestProblemFormSet = inlineformset_factory(

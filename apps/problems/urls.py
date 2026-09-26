@@ -8,4 +8,5 @@ urlpatterns = [
     path("<slug:slug>/", views.problem_detail, name="detail"),
     path("<slug:slug>/leaders/", views.problem_leaders, name="leaders"),
     path("<slug:slug>/rate/", views.rate_problem, name="rate"),
+    path("<slug:slug>/hints/<int:hint_id>/", views.hint_unlock, name="hint"),
 ]

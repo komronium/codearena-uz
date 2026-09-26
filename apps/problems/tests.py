@@ -367,3 +367,123 @@ def test_non_solver_cannot_read_others_code(client, problem, py):
     theirs = _ac(User.objects.create_user("vali", password="x"), problem, py, 10, "secret")
     client.force_login(User.objects.create_user("ali", password="x"))
     assert client.get(reverse("submissions:detail", args=[theirs.pk])).status_code == 404
+
+
+# ---- hints and editorials ---------------------------------------------------------------------
+
+def _hints(problem, *costs):
+    from .models import ProblemHint
+
+    return [ProblemHint.objects.create(problem=problem, order=i, body_md=f"Maslahat {i + 1}", cost_pct=c)
+            for i, c in enumerate(costs)]
+
+
+@pytest.mark.django_db
+def test_hints_open_in_order_and_cost_points_only_before_the_solve(client, problem):
+    from apps.submissions.models import Submission, UserProblemSolved
+    from apps.submissions.solves import refresh_solves
+
+    from .models import HintUnlock
+
+    problem.points = 100
+    problem.save()
+    h1, h2, h3 = _hints(problem, 20, 30, 50)
+    ali = User.objects.create_user("ali", password="x")
+    client.force_login(ali)
+    url = lambda h: reverse("problems:hint", args=[problem.slug, h.pk])  # noqa: E731
+
+    assert client.post(url(h2)).status_code == 400  # hint 1 first
+    page = client.get(reverse("problems:detail", args=[problem.slug])).content.decode()
+    assert "Maslahat 1" not in page and "20%" in page  # locked, cost shown up front
+    assert client.post(url(h1)).status_code == 302
+    assert "Maslahat 1" in client.get(reverse("problems:detail", args=[problem.slug])).content.decode()
+    client.post(url(h1))  # opening twice costs once
+    assert HintUnlock.objects.filter(user=ali).count() == 1
+
+    lang = Language.objects.create(code="python", name="Python 3", docker_image="x", run_cmd="x")
+    Submission.objects.create(user=ali, problem=problem, language=lang, source="x", verdict="AC")
+    refresh_solves(problem.pk, [ali.pk])
+    ali.refresh_from_db()
+    assert UserProblemSolved.objects.get(user=ali).hint_pct == 20 and ali.practice_points == 80
+
+    client.post(url(h2))  # after the solve: free
+    client.post(url(h3))
+    refresh_solves(problem.pk, [ali.pk])
+    ali.refresh_from_db()
+    assert ali.practice_points == 80
+
+
+@pytest.mark.django_db
+def test_hint_costs_are_capped(client, problem):
+    from apps.submissions.models import Submission
+    from apps.submissions.solves import refresh_solves
+
+    problem.points = 100
+    problem.save()
+    ali = User.objects.create_user("ali", password="x")
+    client.force_login(ali)
+    for h in _hints(problem, 50, 50):
+        client.post(reverse("problems:hint", args=[problem.slug, h.pk]))
+    lang = Language.objects.create(code="python", name="Python 3", docker_image="x", run_cmd="x")
+    Submission.objects.create(user=ali, problem=problem, language=lang, source="x", verdict="AC")
+    refresh_solves(problem.pk, [ali.pk])
+    ali.refresh_from_db()
+    assert ali.practice_points == 10
+
+
+@pytest.mark.django_db
+def test_hints_are_locked_while_the_problem_is_in_a_contest(client, problem):
+    (h1,) = _hints(problem, 10)
+    c = Contest.objects.create(title="Soon", start=timezone.now() + timezone.timedelta(days=1),
+                               end=timezone.now() + timezone.timedelta(days=2))
+    ContestProblem.objects.create(contest=c, problem=problem, label="A")
+    ali = User.objects.create_user("ali", password="x")
+    client.force_login(ali)
+    assert client.post(reverse("problems:hint", args=[problem.slug, h1.pk])).status_code in (400, 404)
+    Contest.objects.filter(pk=c.pk).update(start=timezone.now() - timezone.timedelta(hours=1),
+                                           end=timezone.now() + timezone.timedelta(hours=1))
+    Participation.objects.create(user=ali, contest=c)
+    assert client.post(reverse("problems:hint", args=[problem.slug, h1.pk])).status_code == 400
+
+
+@pytest.mark.django_db
+def test_editorial_opens_after_the_solve(client, problem):
+    from apps.submissions.models import Submission
+    from apps.submissions.solves import refresh_solves
+
+    problem.editorial_md = "Javob: **a + b**"
+    problem.save()
+    ali = User.objects.create_user("ali", password="x")
+    client.force_login(ali)
+    page = client.get(reverse("problems:detail", args=[problem.slug])).content.decode()
+    assert "<strong>a + b</strong>" not in page and "Yechim tahlili" in page
+    lang = Language.objects.create(code="python", name="Python 3", docker_image="x", run_cmd="x")
+    Submission.objects.create(user=ali, problem=problem, language=lang, source="x", verdict="AC")
+    refresh_solves(problem.pk, [ali.pk])
+    assert "<strong>a + b</strong>" in client.get(reverse("problems:detail", args=[problem.slug])).content.decode()
+    client.force_login(problem.author)
+    assert "<strong>a + b</strong>" in client.get(reverse("problems:detail", args=[problem.slug])).content.decode()
+
+
+@pytest.mark.django_db
+def test_staff_edit_hints_and_editorial_on_the_problem_form(client, problem):
+    staff = User.objects.create_user("boss", password="x", is_staff=True)
+    client.force_login(staff)
+    data = {"title": problem.title, "statement_md": "x", "difficulty": "easy", "kind": "code",
+            "tl_ms": "1000", "ml_mb": "256", "points": "100", "is_public": "on", "editorial_md": "Tahlil",
+            "testcases-TOTAL_FORMS": "2", "testcases-INITIAL_FORMS": "2",
+            "testcases-MIN_NUM_FORMS": "0", "testcases-MAX_NUM_FORMS": "1000",
+            "hints-TOTAL_FORMS": "2", "hints-INITIAL_FORMS": "0", "hints-MIN_NUM_FORMS": "0",
+            "hints-MAX_NUM_FORMS": "1000",
+            "hints-0-order": "0", "hints-0-body_md": "Birinchi", "hints-0-cost_pct": "10",
+            "hints-1-order": "1", "hints-1-body_md": "Ikkinchi", "hints-1-cost_pct": "150"}
+    for i, tc in enumerate(problem.testcases.all()):
+        data |= {f"testcases-{i}-id": str(tc.pk), f"testcases-{i}-input": tc.input,
+                 f"testcases-{i}-expected": tc.expected, f"testcases-{i}-order": str(tc.order)}
+    r = client.post(reverse("moderation:problem_edit", args=[problem.pk]), data)
+    assert r.status_code == 200 and not problem.hints.exists()  # 150% is refused
+    data["hints-1-cost_pct"] = "25"
+    r = client.post(reverse("moderation:problem_edit", args=[problem.pk]), data)
+    problem.refresh_from_db()
+    assert r.status_code == 302 and problem.editorial_md == "Tahlil"
+    assert list(problem.hints.values_list("body_md", "cost_pct")) == [("Birinchi", 10), ("Ikkinchi", 25)]

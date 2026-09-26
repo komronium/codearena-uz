@@ -25,6 +25,7 @@ from .forms import (
     ContestForm,
     ContestProblemFormSet,
     GroupForm,
+    HintFormSet,
     ProblemForm,
     SQLDatasetForm,
     TagForm,
@@ -105,10 +106,14 @@ def submit(request, pk=None):
     problem = get_object_or_404(Problem, pk=pk) if pk else None
     form = ProblemForm(request.POST or None, request.FILES or None, instance=problem)
     formset = TestCaseFormSet(request.POST or None, instance=form.instance, prefix="testcases")
+    # A client that doesn't send the hints block (older forms, scripts) leaves hints as they are.
+    hint_data = request.POST if "hints-TOTAL_FORMS" in request.POST else None
+    hint_formset = HintFormSet(hint_data, instance=form.instance, prefix="hints")
     sql_form = SQLDatasetForm(request.POST or None, prefix="sql",
                               instance=getattr(problem, "sql_dataset", None) if problem else None)
     error = None
-    if request.method == "POST" and form.is_valid() and formset.is_valid():
+    if (request.method == "POST" and form.is_valid() and formset.is_valid()
+            and (hint_data is None or hint_formset.is_valid())):
         is_sql = form.cleaned_data["kind"] == Problem.Kind.SQL
         zipped = form.cleaned_data["tests_zip"]
         if is_sql and not sql_form.is_valid():
@@ -125,6 +130,9 @@ def submit(request, pk=None):
                 obj.save()
                 form.save_m2m()
                 formset.save()
+                if hint_data is not None:
+                    hint_formset.instance = obj
+                    hint_formset.save()
                 if zipped:
                     start = obj.testcases.count()
                     TestCase.objects.bulk_create([
@@ -138,7 +146,8 @@ def submit(request, pk=None):
             messages.success(request, "Masala saqlandi.")
             return redirect("problems:detail", obj.slug)
     return render(request, "moderation/submit.html",
-                  {"form": form, "formset": formset, "sql_form": sql_form, "error": error, "problem": problem})
+                  {"form": form, "formset": formset, "sql_form": sql_form, "error": error, "problem": problem,
+                   "hint_formset": hint_formset})
 
 
 @staff_required

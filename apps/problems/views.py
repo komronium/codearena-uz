@@ -4,7 +4,7 @@ from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.db.models import Avg, Case, Count, F, IntegerField, OuterRef, Q, Subquery, Value, When
 from django.db.models.functions import Length
-from django.http import Http404
+from django.http import Http404, HttpResponseBadRequest
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
@@ -15,6 +15,7 @@ from apps.contests.services import active_contest_for, in_running_contest, in_up
 from apps.submissions.models import Submission, UserProblemSolved
 
 from .models import (
+    HintUnlock,
     Language,
     Problem,
     ProblemRating,
@@ -173,6 +174,19 @@ def problem_detail(request, slug):
     solved = request.user.is_authenticated and UserProblemSolved.objects.filter(
         user=request.user, problem=problem).exists()
     show_leaders = contest is None and not in_running_contest(problem)
+    # Hints and the editorial stay shut while a contest uses the problem.
+    help_locked = not show_leaders
+    hints = list(problem.hints.all())
+    opened = set()
+    if request.user.is_authenticated and hints:
+        opened = set(HintUnlock.objects.filter(user=request.user, hint__problem=problem)
+                     .values_list("hint_id", flat=True))
+    for i, h in enumerate(hints):
+        h.opened = h.pk in opened and not help_locked
+        h.html = _render_statement(h.body_md) if h.opened else ""
+        h.can_open = not help_locked and not h.opened and all(x.pk in opened for x in hints[:i])
+    editorial_open = bool(problem.editorial_md) and not help_locked and (
+        solved or (request.user.is_authenticated and (request.user.is_staff or problem.author_id == request.user.id)))
     my_stars = (ProblemRating.objects.filter(user=request.user, problem=problem).values_list("stars", flat=True).first()
                 if solved else None)
     return render(request, "problems/detail.html", {
@@ -182,6 +196,9 @@ def problem_detail(request, slug):
         "fastest": leaders(problem, "time", limit=3) if show_leaders else [],
         "shortest": leaders(problem, "length", limit=3) if show_leaders else [],
         "show_leaders": show_leaders,
+        "hints": hints,
+        "help_locked": help_locked,
+        "editorial_html": _render_statement(problem.editorial_md) if editorial_open else "",
         "open_contest": open_contest,
         "problem": problem,
         "my_subs": my_subs,
@@ -231,3 +248,22 @@ def rate_problem(request, slug):
     if 1 <= stars <= 5:
         ProblemRating.objects.update_or_create(user=request.user, problem=problem, defaults={"stars": stars})
     return redirect(reverse("problems:detail", args=[problem.slug]) + "#baho")
+
+
+@login_required
+@require_POST
+def hint_unlock(request, slug, hint_id):
+    """Open one hint, in order. Its cost is settled when the user's AC lands
+    (apps.submissions.solves): a hint opened after solving is free."""
+    problem, contest = _visible_problem(request, slug)
+    if contest is not None or in_running_contest(problem) or in_upcoming_contest(problem):
+        return HttpResponseBadRequest("hints are locked while a contest uses this problem")
+    hints = list(problem.hints.all())
+    hint = next((h for h in hints if h.pk == hint_id), None)
+    if hint is None:
+        raise Http404
+    opened = set(HintUnlock.objects.filter(user=request.user, hint__problem=problem).values_list("hint_id", flat=True))
+    if any(h.pk not in opened for h in hints[:hints.index(hint)]):
+        return HttpResponseBadRequest("open the earlier hints first")
+    HintUnlock.objects.get_or_create(user=request.user, hint=hint)
+    return redirect(reverse("problems:detail", args=[problem.slug]) + f"#hint-{hint.pk}")
