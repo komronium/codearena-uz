@@ -461,6 +461,7 @@
       box-shadow: inset 4px 0 0 rgb(var(--ca-accent-rgb)), var(--ca-shadow);
     }
     .ca-alert-bad { box-shadow: inset 4px 0 0 rgb(var(--ca-bad-rgb)), var(--ca-shadow); color: rgb(var(--ca-bad-rgb)); }
+    .ca-alert-warn { box-shadow: inset 4px 0 0 rgb(var(--ca-warn-rgb)), var(--ca-shadow); }
     .ca-verdict {
       display: inline-flex; align-items: center; gap: .35rem;
       font-size: .8rem; font-weight: 600; letter-spacing: .02em;
@@ -773,7 +774,7 @@
     {% if messages %}
     <div class="mb-6 space-y-2" role="status" aria-live="polite">
       {% for m in messages %}
-      <div class="ca-alert">{{ m }}</div>
+      <div class="ca-alert{% if m.level_tag == 'error' %} ca-alert-bad{% elif m.level_tag == 'warning' %} ca-alert-warn{% endif %}">{{ m }}</div>
       {% endfor %}
     </div>
     {% endif %}

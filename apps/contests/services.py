@@ -44,3 +44,12 @@ def access_allowed(user, contest, remote_addr: str) -> bool:
     if contest.allowed_ip_prefix and not (remote_addr or "").startswith(contest.allowed_ip_prefix):
         return False
     return True
+
+
+def reuse_reason(problem, contest) -> str:
+    """Why participants of `contest` may already know `problem`; "" when it is fresh."""
+    if problem.is_public:
+        return "Ochiq masala — reytingli musobaqaga faqat yashirin, yangi masala qo‘shiladi."
+    if ContestProblem.objects.filter(problem=problem).exclude(contest_id=contest.pk).exists():
+        return "Bu masala boshqa musobaqada ishlatilgan."
+    return ""

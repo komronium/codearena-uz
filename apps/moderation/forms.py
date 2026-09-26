@@ -10,6 +10,7 @@ from django.utils import timezone
 from apps.accounts.forms import validate_public_username
 from apps.accounts.models import Group, User
 from apps.contests.models import Contest, ContestProblem
+from apps.contests.services import reuse_reason
 from apps.problems.models import Problem, SQLDataset, Tag, TestCase
 
 _CA_INPUT = {"class": "ca-input"}
@@ -140,8 +141,24 @@ class ContestForm(ModelForm):
         return data
 
 
+class BaseContestProblemFormSet(BaseInlineFormSet):
+    def clean(self):
+        super().clean()
+        contest = self.instance  # contest_edit validates ContestForm first, which copies the POSTed values here
+        if any(self.errors) or not contest.is_rated or contest.end is None or contest.end <= timezone.now():
+            return  # an ended contest is skipped: publishing makes its problems public
+        for form in self.forms:
+            problem = form.cleaned_data.get("problem")
+            if problem is None or form.cleaned_data.get("DELETE"):
+                continue
+            reason = reuse_reason(problem, contest)
+            if reason:
+                form.add_error("problem", reason)
+
+
 ContestProblemFormSet = inlineformset_factory(
-    Contest, ContestProblem, fields=["label", "problem", "points", "order"], extra=1, can_delete=True,
+    Contest, ContestProblem, formset=BaseContestProblemFormSet,
+    fields=["label", "problem", "points", "order"], extra=1, can_delete=True,
     widgets={
         "label": forms.TextInput(attrs={"class": "ca-input w-16 text-center", "maxlength": 2}),
         "problem": forms.Select(attrs={"class": "ca-select"}),

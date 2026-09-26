@@ -405,3 +405,89 @@ def test_staff_sees_every_users_submissions(client):
     assert client.get(reverse("moderation:submissions")).status_code in (302, 403)
     client.force_login(boss)
     assert b"print(&#x27;ali&#x27;)" in client.get(reverse("submissions:detail", args=[s.pk])).content
+
+
+def _contest_data(problem, rated=True):
+    """POST body for moderation:contest_new with one problem row."""
+    data = {"title": "Round", "description_md": "", "start": "2030-01-01T10:00", "end": "2030-01-01T12:00",
+            "allowed_ip_prefix": "", "require_group": "",
+            "cp-TOTAL_FORMS": "1", "cp-INITIAL_FORMS": "0", "cp-MIN_NUM_FORMS": "0", "cp-MAX_NUM_FORMS": "1000",
+            "cp-0-label": "A", "cp-0-problem": str(problem.pk), "cp-0-points": "100", "cp-0-order": "0"}
+    if rated:
+        data["is_rated"] = "on"
+    return data
+
+
+def _contest_edit_data(contest):
+    """POST body that saves `contest` and its problem rows unchanged."""
+    from django.utils import timezone
+
+    fmt = "%Y-%m-%dT%H:%M"
+    rows = list(contest.contest_problems.all())
+    data = {"title": contest.title, "description_md": "", "allowed_ip_prefix": "", "require_group": "",
+            "start": timezone.localtime(contest.start).strftime(fmt),
+            "end": timezone.localtime(contest.end).strftime(fmt),
+            "cp-TOTAL_FORMS": str(len(rows)), "cp-INITIAL_FORMS": str(len(rows)),
+            "cp-MIN_NUM_FORMS": "0", "cp-MAX_NUM_FORMS": "1000"}
+    if contest.is_rated:
+        data["is_rated"] = "on"
+    for i, cp in enumerate(rows):
+        data |= {f"cp-{i}-id": str(cp.pk), f"cp-{i}-label": cp.label, f"cp-{i}-problem": str(cp.problem_id),
+                 f"cp-{i}-points": str(cp.points), f"cp-{i}-order": str(cp.order)}
+    return data
+
+
+@pytest.mark.django_db
+def test_rated_contest_takes_only_fresh_problems(client):
+    from django.utils import timezone
+
+    from apps.contests.models import Contest, ContestProblem
+
+    staff = User.objects.create_user("teacher", password="x", is_staff=True)
+    client.force_login(staff)
+    public = Problem.objects.create(slug="pub", title="Pub", statement_md="x", author=staff, is_public=True)
+    r = client.post(reverse("moderation:contest_new"), _contest_data(public))
+    assert r.status_code == 200 and "Ochiq masala" in r.content.decode()
+
+    used = Problem.objects.create(slug="used", title="Used", statement_md="x", author=staff, is_public=False)
+    old = Contest.objects.create(title="Old", start=timezone.now() + timezone.timedelta(days=1),
+                                 end=timezone.now() + timezone.timedelta(days=2))
+    ContestProblem.objects.create(contest=old, problem=used, label="A")
+    r = client.post(reverse("moderation:contest_new"), _contest_data(used))
+    assert r.status_code == 200 and "Bu masala boshqa musobaqada ishlatilgan" in r.content.decode()
+    assert not Contest.objects.filter(title="Round").exists()
+
+
+@pytest.mark.django_db
+def test_unrated_contest_saves_reused_problem_with_warning(client):
+    from apps.contests.models import Contest
+
+    staff = User.objects.create_user("teacher", password="x", is_staff=True)
+    client.force_login(staff)
+    public = Problem.objects.create(slug="pub", title="Pub", statement_md="x", author=staff, is_public=True)
+    r = client.post(reverse("moderation:contest_new"), _contest_data(public, rated=False), follow=True)
+    html = r.content.decode()
+    assert Contest.objects.filter(title="Round").exists()
+    assert 'class="ca-alert ca-alert-warn"' in html and "A: ochiq yoki boshqa musobaqada ishlatilgan" in html
+
+
+@pytest.mark.django_db
+def test_contest_edit_is_not_blocked_by_its_own_or_ended_problems(client):
+    from django.utils import timezone
+
+    from apps.contests.models import Contest, ContestProblem
+
+    staff = User.objects.create_user("teacher", password="x", is_staff=True)
+    client.force_login(staff)
+    now = timezone.now()
+    running = Contest.objects.create(title="Live", is_rated=True, start=now - timezone.timedelta(hours=1),
+                                     end=now + timezone.timedelta(hours=1))
+    ContestProblem.objects.create(contest=running, label="A", problem=Problem.objects.create(
+        slug="fresh", title="Fresh", statement_md="x", author=staff, is_public=False))
+    ended = Contest.objects.create(title="Past", is_rated=True, start=now - timezone.timedelta(hours=3),
+                                   end=now - timezone.timedelta(hours=2))
+    ContestProblem.objects.create(contest=ended, label="A", problem=Problem.objects.create(
+        slug="opened", title="Opened", statement_md="x", author=staff, is_public=True))
+    for c in (running, ended):
+        r = client.post(reverse("moderation:contest_edit", args=[c.pk]), _contest_edit_data(c))
+        assert r.status_code == 302, r.content.decode()[:2000]

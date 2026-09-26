@@ -11,6 +11,7 @@ from django.views.decorators.http import require_POST
 from apps.accounts.decorators import staff_required
 from apps.accounts.models import Group, User
 from apps.contests.models import Contest
+from apps.contests.services import reuse_reason
 from apps.problems.models import Problem, Tag, TestCase
 from apps.submissions.models import Submission, UserProblemSolved
 from apps.submissions.solves import refresh_solves
@@ -231,6 +232,12 @@ def contest_edit(request, pk=None):
             formset.instance = contest
             formset.save()
         messages.success(request, "Musobaqa saqlandi.")
+        if not contest.is_rated and not contest.has_ended:
+            known = [cp.label for cp in contest.contest_problems.select_related("problem")
+                     if reuse_reason(cp.problem, contest)]
+            if known:
+                messages.warning(request, f"{', '.join(known)}: ochiq yoki boshqa musobaqada ishlatilgan — "
+                                          "ishtirokchilar bu masalalarni oldindan bilishi mumkin.")
         return redirect("moderation:contests")
     return render(request, "moderation/contest_form.html", {"form": form, "formset": formset, "contest": contest})
 
