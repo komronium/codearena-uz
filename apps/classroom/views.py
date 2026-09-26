@@ -3,14 +3,17 @@ import csv
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
-from django.http import Http404, HttpResponse
+from django.http import Http404, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
+from django.views.decorators.http import require_POST
 
 from apps.submissions.models import Submission
 
+from .access import can_review
 from .forms import AssignmentForm
-from .models import Assignment, AssignmentProblem
+from .models import Assignment, AssignmentProblem, ReviewComment
 from .progress import cell, grid
 
 
@@ -97,3 +100,22 @@ def _csv(assignment, problems, rows):
                     *[_CSV_STATUS.get(c["status"], f"x{c['tries']}") for c in r["cells"]],
                     r["on_time"], r["solved"]])
     return resp
+
+
+@login_required
+@require_POST
+def review(request, pk):
+    submission = get_object_or_404(Submission, pk=pk)
+    if not can_review(request.user, submission):
+        raise Http404
+    body = request.POST.get("body", "").strip()
+    line = request.POST.get("line", "").strip()
+    n_lines = len(submission.source.splitlines())
+    if not body or len(body) > 2000:
+        return HttpResponseBadRequest("izoh bo‘sh yoki juda uzun")
+    if line and not (line.isdigit() and 1 <= int(line) <= n_lines):
+        return HttpResponseBadRequest(f"qator 1..{n_lines} oralig‘ida bo‘lishi kerak")
+    ReviewComment.objects.create(submission=submission, author=request.user, body=body,
+                                 line=int(line) if line else None,
+                                 read=request.user.pk == submission.user_id)
+    return redirect(reverse("submissions:detail", args=[pk]) + "#review")

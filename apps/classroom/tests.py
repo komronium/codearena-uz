@@ -115,3 +115,48 @@ def test_students_see_their_groups_assignments_only(client, teacher, klass, pyth
     client.force_login(stranger)
     assert list(client.get(reverse("classroom:list")).context["assignments"]) == []
     assert client.get(reverse("classroom:detail", args=[a.pk])).status_code == 404
+
+
+# ---- code review ---------------------------------------------------------------------------------
+
+@pytest.fixture
+def ali_sub(klass, python, teacher):
+    ali = User.objects.get(username="ali")
+    p = _problem("p1", teacher)
+    return Submission.objects.create(user=ali, problem=p, language=python, verdict="WA",
+                                     source="n = int(input())\nprint(n + 1)\nprint(n)\n")
+
+
+@pytest.mark.django_db
+def test_group_teacher_reviews_a_students_code(client, teacher, ali_sub):
+    from .models import ReviewComment
+
+    url = reverse("classroom:review", args=[ali_sub.pk])
+    client.force_login(teacher)
+    assert client.get(reverse("submissions:detail", args=[ali_sub.pk])).status_code == 200
+    assert client.post(url, {"line": "9", "body": "yo‘q qator"}).status_code == 400
+    assert client.post(url, {"line": "2", "body": "n + 1 emas, n * 2 kerak"}).status_code == 302
+    assert client.post(url, {"line": "", "body": "Umumiy: yaxshi boshlanish"}).status_code == 302
+
+    ali = ali_sub.user
+    client.force_login(ali)
+    assert client.get(reverse("problems:list")).context["unread_reviews"] == 2
+    page = client.get(reverse("submissions:detail", args=[ali_sub.pk])).content.decode()
+    assert "n + 1 emas, n * 2 kerak" in page and "2-qator" in page and "print(n + 1)" in page
+    assert client.get(reverse("problems:list")).context["unread_reviews"] == 0  # opening marked them read
+    assert client.post(url, {"body": "Tushundim, rahmat"}).status_code == 302  # the student can reply
+    assert list(ReviewComment.objects.values_list("author__username", "line")) == [
+        ("teacher", 2), ("teacher", None), ("ali", None)]
+    client.force_login(teacher)
+    assert client.get(reverse("problems:list")).context["unread_reviews"] == 0  # replies don't badge staff
+
+
+@pytest.mark.django_db
+def test_only_the_students_teachers_and_staff_can_review(client, ali_sub):
+    other = User.objects.create_user("t2", password="x")
+    Group.objects.create(name="Boshqa", teacher=other)  # teaches, but not ali
+    client.force_login(other)
+    assert client.get(reverse("submissions:detail", args=[ali_sub.pk])).status_code == 404
+    assert client.post(reverse("classroom:review", args=[ali_sub.pk]), {"body": "x"}).status_code == 404
+    client.force_login(User.objects.create_user("boss", password="x", is_staff=True))
+    assert client.post(reverse("classroom:review", args=[ali_sub.pk]), {"body": "ok"}).status_code == 302

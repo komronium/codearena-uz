@@ -10,6 +10,8 @@ from apps.contests.services import access_allowed, active_contest_for, in_runnin
 from apps.problems.models import Language, Problem
 from judge.runner import run_submission, run_trial
 
+from apps.classroom.access import can_review, teaches
+
 from .models import Submission, UserProblemSolved
 from .ratelimit import rate_limited
 
@@ -107,7 +109,7 @@ def _own(request, pk):
     """Owner's submission. Staff may open anyone's; a user who solved the problem may read
     other people's accepted code (problem leaderboard), except while a contest with it runs."""
     s = get_object_or_404(Submission.objects.select_related("problem", "language", "user"), pk=pk)
-    if s.user_id == request.user.pk or request.user.is_staff:
+    if s.user_id == request.user.pk or request.user.is_staff or teaches(request.user, s.user_id):
         return s
     if (s.verdict == "AC" and not in_running_contest(s.problem)
             and UserProblemSolved.objects.filter(user=request.user, problem=s.problem).exists()):
@@ -128,7 +130,17 @@ def _results_ctx(s):
 
 @login_required
 def detail(request, pk):
-    return render(request, "submissions/detail.html", _results_ctx(_own(request, pk)))
+    s = _own(request, pk)
+    ctx = _results_ctx(s)
+    if can_review(request.user, s):
+        reviews = list(s.reviews.select_related("author"))
+        lines = s.source.splitlines()
+        for r in reviews:
+            r.code = lines[r.line - 1] if r.line and r.line <= len(lines) else ""
+        if s.user_id == request.user.pk:
+            s.reviews.filter(read=False).exclude(author=request.user).update(read=True)
+        ctx |= {"reviews": reviews, "can_review": True, "n_lines": len(lines)}
+    return render(request, "submissions/detail.html", ctx)
 
 
 @login_required

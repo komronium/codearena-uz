@@ -3,6 +3,7 @@ from django.db import models
 
 from apps.accounts.models import Group
 from apps.problems.models import Problem
+from apps.submissions.models import Submission
 
 
 class Assignment(models.Model):
@@ -31,3 +32,17 @@ class AssignmentProblem(models.Model):
     class Meta:
         ordering = ["order", "id"]
         unique_together = ("assignment", "problem")
+
+
+class ReviewComment(models.Model):
+    """A teacher's note on a student's code (line = None: on the whole submission), or
+    the student's reply. `read` is for the student's unread badge."""
+    submission = models.ForeignKey(Submission, on_delete=models.CASCADE, related_name="reviews")
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="+")
+    line = models.PositiveIntegerField(null=True, blank=True)
+    body = models.TextField(max_length=2000)
+    created = models.DateTimeField(auto_now_add=True)
+    read = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["created", "id"]
