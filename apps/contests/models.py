@@ -24,6 +24,9 @@ class Contest(models.Model):
     allowed_ip_prefix = models.CharField(max_length=50, blank=True)
     require_group = models.ForeignKey(Group, null=True, blank=True, on_delete=models.SET_NULL)
     rating_applied = models.BooleanField(default=False)
+    # Set by staff publishing the ended contest; from then on participants' contest ACs
+    # count as practice solves (apps.submissions.solves).
+    published_at = models.DateTimeField(null=True, blank=True)
     problems = models.ManyToManyField(Problem, through="ContestProblem", related_name="contests")
 
     def __str__(self):

@@ -428,3 +428,73 @@ def test_submit_rate_limited_after_max_per_window(enqueue, client, problem, pyth
     r = client.post(reverse("submissions:submit", args=[problem.slug]), {"language": "python", "source": "x"})
     assert r.status_code == 429
     cache.clear()
+
+
+# ---- solves & practice points (apps.submissions.solves) -----------------------------
+
+def _solve(user, problem):
+    return (UserProblemSolved.objects.filter(user=user, problem=problem)
+            .values_list("first_ac_submission_id", flat=True).first())
+
+
+def test_contest_ac_counts_after_publish_unless_disqualified(problem, python, user):
+    from apps.submissions.solves import refresh_solves
+    contest = Contest.objects.create(title="Past", start=timezone.now() - timezone.timedelta(hours=3),
+                                     end=timezone.now() - timezone.timedelta(hours=2))
+    ContestProblem.objects.create(contest=contest, problem=problem, label="A")
+    part = Participation.objects.create(user=user, contest=contest)
+    contest_ac = Submission.objects.create(user=user, problem=problem, contest=contest, language=python,
+                                           source="x", verdict="AC")
+    refresh_solves(problem.pk, [user.pk])
+    assert _solve(user, problem) is None  # not published yet
+
+    contest.published_at = timezone.now()
+    contest.save()
+    refresh_solves(problem.pk)
+    user.refresh_from_db()
+    assert _solve(user, problem) == contest_ac.pk and user.practice_points == 10
+
+    part.disqualified = True
+    part.save()
+    refresh_solves(problem.pk, [user.pk])
+    user.refresh_from_db()
+    assert _solve(user, problem) is None and user.practice_points == 0
+
+    practice_ac = Submission.objects.create(user=user, problem=problem, language=python, source="x",
+                                            verdict="AC")
+    refresh_solves(problem.pk, [user.pk])
+    assert _solve(user, problem) == practice_ac.pk  # a practice AC still counts
+
+    part.disqualified = False
+    part.save()
+    refresh_solves(problem.pk, [user.pk])
+    assert _solve(user, problem) == contest_ac.pk  # the earliest eligible AC again
+
+
+def test_solve_follows_verdict_changes(problem, python, user):
+    from apps.submissions.solves import refresh_solves
+    first, second = [Submission.objects.create(user=user, problem=problem, language=python, source="x",
+                                               verdict="AC") for _ in range(2)]
+    refresh_solves(problem.pk, [user.pk])
+    assert _solve(user, problem) == first.pk
+    Submission.objects.filter(pk=first.pk).update(verdict="WA")  # e.g. a rejudge after a test fix
+    refresh_solves(problem.pk, [user.pk])
+    assert _solve(user, problem) == second.pk
+    Submission.objects.filter(pk=second.pk).update(verdict="WA")
+    refresh_solves(problem.pk)  # everyone: also clears rows with no eligible AC left
+    user.refresh_from_db()
+    assert _solve(user, problem) is None and user.practice_points == 0
+
+
+def test_points_are_live_and_skip_own_problems(problem, python, user):
+    from apps.submissions.solves import refresh_solves, sync_practice_points
+    own = Problem.objects.create(slug="own", title="Own", statement_md="x", author=user, points=50)
+    for p in (problem, own):
+        Submission.objects.create(user=user, problem=p, language=python, source="x", verdict="AC")
+        refresh_solves(p.pk, [user.pk])
+    user.refresh_from_db()
+    assert _solve(user, own) is not None and user.practice_points == 10  # solved, but no points for own
+    Problem.objects.filter(pk=problem.pk).update(points=40)
+    sync_practice_points()
+    user.refresh_from_db()
+    assert user.practice_points == 40

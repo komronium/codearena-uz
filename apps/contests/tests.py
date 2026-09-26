@@ -573,3 +573,38 @@ def test_upcoming_contest_problems_sealed_even_for_staff(client, author):
                 reverse("contests:clarifications", args=[c.pk])):
         body = client.get(url).content.decode()
         assert "Muhrlangan" not in body and "/problems/sealed/" not in body, url
+
+
+def test_backfill_published_at_marks_contests_the_old_publish_handled(author, python):
+    import importlib
+
+    from django.apps import apps
+
+    from apps.submissions.models import UserProblemSolved
+
+    migration = importlib.import_module("apps.contests.migrations.0006_contest_published_at")
+    past = {"start": timezone.now() - timezone.timedelta(hours=3), "end": timezone.now() - timezone.timedelta(hours=2)}
+    hidden = Problem.objects.create(slug="h", title="H", statement_md="x", author=author, is_public=False)
+    public = Problem.objects.create(slug="o", title="O", statement_md="x", author=author, is_public=True)
+
+    def contest(title, problems, **times):
+        c = Contest.objects.create(title=title, **(times or past))
+        for i, p in enumerate(problems):
+            ContestProblem.objects.create(contest=c, problem=p, label="AB"[i])
+        return c
+
+    traced = contest("traced", [hidden])  # the old publish left a solve pointing at its AC
+    ac = Submission.objects.create(user=author, problem=hidden, contest=traced, language=python, source="x",
+                                   verdict="AC")
+    UserProblemSolved.objects.create(user=author, problem=hidden, first_ac_submission=ac)
+    opened = contest("opened", [public])  # every problem already public
+    contest("closed", [hidden])
+    contest("empty", [])
+    contest("running", [public], start=timezone.now() - timezone.timedelta(hours=1),
+            end=timezone.now() + timezone.timedelta(hours=1))
+
+    migration.backfill_published_at(apps, None)
+
+    got = dict(Contest.objects.values_list("title", "published_at"))
+    assert got["traced"] == traced.end and got["opened"] == opened.end
+    assert got["closed"] is None and got["empty"] is None and got["running"] is None
