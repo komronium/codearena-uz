@@ -10,6 +10,7 @@ from django.urls import reverse
 from django.views.decorators.http import require_POST
 from django.utils import timezone
 
+from apps.classroom.duels import active_duel_for
 from apps.contests.models import ContestProblem
 from apps.contests.services import active_contest_for, in_running_contest, in_upcoming_contest
 from apps.submissions.models import Submission, UserProblemSolved
@@ -189,7 +190,8 @@ def problem_detail(request, slug):
         user=request.user, problem=problem).exists()
     show_leaders = contest is None and not in_running_contest(problem)
     # Hints and the editorial stay shut while a contest uses the problem.
-    help_locked = not show_leaders
+    duel = active_duel_for(request.user, problem)
+    help_locked = not show_leaders or duel is not None
     hints = list(problem.hints.all())
     opened = set()
     if request.user.is_authenticated and hints:
@@ -211,6 +213,7 @@ def problem_detail(request, slug):
         "shortest": leaders(problem, "length", limit=3) if show_leaders else [],
         "show_leaders": show_leaders,
         "hints": hints,
+        "duel": duel,
         "help_locked": help_locked,
         "editorial_html": _render_statement(problem.editorial_md) if editorial_open else "",
         "open_contest": open_contest,
@@ -272,6 +275,8 @@ def hint_unlock(request, slug, hint_id):
     problem, contest = _visible_problem(request, slug)
     if contest is not None or in_running_contest(problem) or in_upcoming_contest(problem):
         return HttpResponseBadRequest("hints are locked while a contest uses this problem")
+    if active_duel_for(request.user, problem) is not None:
+        return HttpResponseBadRequest("hints are locked during your duel on this problem")
     hints = list(problem.hints.all())
     hint = next((h for h in hints if h.pk == hint_id), None)
     if hint is None:

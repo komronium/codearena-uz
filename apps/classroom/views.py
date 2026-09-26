@@ -1,8 +1,10 @@
 import csv
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
+from django.db.models import Q
 from django.http import Http404, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -11,9 +13,10 @@ from django.views.decorators.http import require_POST
 
 from apps.submissions.models import Submission
 
+from . import duels
 from .access import can_review
 from .forms import AssignmentForm
-from .models import Assignment, AssignmentProblem, ReviewComment
+from .models import Assignment, AssignmentProblem, Duel, ReviewComment
 from .progress import cell, grid
 
 
@@ -119,3 +122,55 @@ def review(request, pk):
                                  line=int(line) if line else None,
                                  read=request.user.pk == submission.user_id)
     return redirect(reverse("submissions:detail", args=[pk]) + "#review")
+
+
+@login_required
+def duel_list(request):
+    duels.settle_open(request.user)
+    error = ""
+    if request.method == "POST":
+        duel, error = duels.challenge(request.user, request.POST.get("opponent", ""),
+                                      request.POST.get("difficulty", ""))
+        if duel is not None:
+            return redirect("classroom:duel", duel.pk)
+    mine = (Duel.objects.filter(Q(challenger=request.user) | Q(opponent=request.user))
+            .select_related("challenger", "opponent", "winner", "problem"))
+    return render(request, "classroom/duels.html", {
+        "incoming": [d for d in mine if d.status == Duel.Status.PENDING and d.opponent_id == request.user.pk],
+        "open": [d for d in mine if d.status in duels.OPEN
+                 and not (d.status == Duel.Status.PENDING and d.opponent_id == request.user.pk)],
+        "history": [d for d in mine if d.status not in duels.OPEN][:30],
+        "error": error, "difficulties": Duel._meta.get_field("difficulty").choices,
+        "form": request.POST if error else {},
+    })
+
+
+def _my_duel(request, pk):
+    duel = get_object_or_404(Duel.objects.select_related("challenger", "opponent", "winner", "problem"), pk=pk)
+    if request.user.pk not in duel.players() and not request.user.is_staff:
+        raise Http404
+    return duel
+
+
+@login_required
+@require_POST
+def duel_answer(request, pk):
+    duel = _my_duel(request, pk)
+    if request.POST.get("accept") == "1":
+        if duel.opponent_id != request.user.pk:
+            raise Http404
+        error = duels.accept(duel, request.user)
+        if error:
+            messages.error(request, error)
+    else:
+        duels.decline(duel, request.user)
+    return redirect("classroom:duel", duel.pk)
+
+
+@login_required
+def duel_detail(request, pk):
+    duel = _my_duel(request, pk)
+    duels.settle(duel)
+    duel.refresh_from_db()
+    template = "classroom/_duel_status.html" if request.headers.get("HX-Request") else "classroom/duel.html"
+    return render(request, template, {"duel": duel})

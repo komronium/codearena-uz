@@ -732,9 +732,13 @@
       Urinishlar
       {% if unread_reviews %}<span class="ca-chip ca-chip-score ml-auto tabular" title="O‘qilmagan kod sharhlari">{{ unread_reviews }}</span>{% endif %}
     </a>
-    <a href="{% url 'classroom:list' %}" class="ca-sidebar-link {% if request.resolver_match.namespace == 'classroom' %}is-active{% endif %}">
+    <a href="{% url 'classroom:list' %}" class="ca-sidebar-link {% if request.resolver_match.namespace == 'classroom' and 'duel' not in request.resolver_match.url_name %}is-active{% endif %}">
       <i data-lucide="notebook-pen" class="lu" aria-hidden="true"></i>
       Vazifalar
+    </a>
+    <a href="{% url 'classroom:duels' %}" class="ca-sidebar-link {% if request.resolver_match.namespace == 'classroom' and 'duel' in request.resolver_match.url_name %}is-active{% endif %}">
+      <i data-lucide="swords" class="lu" aria-hidden="true"></i>
+      Duellar
     </a>
     {% endif %}
     {% if user.is_staff %}

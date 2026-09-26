@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import pytest
 from django.urls import reverse
 from django.utils import timezone
@@ -160,3 +162,118 @@ def test_only_the_students_teachers_and_staff_can_review(client, ali_sub):
     assert client.post(reverse("classroom:review", args=[ali_sub.pk]), {"body": "x"}).status_code == 404
     client.force_login(User.objects.create_user("boss", password="x", is_staff=True))
     assert client.post(reverse("classroom:review", args=[ali_sub.pk]), {"body": "ok"}).status_code == 302
+
+
+# ---- duels ------------------------------------------------------------------------------------------
+
+@pytest.fixture
+def duel_pool(teacher):
+    """Three easy problems and one medium; ali already tried e1."""
+    return {slug: _problem(slug, teacher, difficulty=diff)
+            for slug, diff in (("e1", "easy"), ("e2", "easy"), ("e3", "easy"), ("m1", "medium"))}
+
+
+def _players():
+    return User.objects.create_user("p1", password="x"), User.objects.create_user("p2", password="x")
+
+
+@pytest.mark.django_db
+def test_challenge_accept_picks_a_problem_neither_player_tried(client, duel_pool, python):
+    from .models import Duel
+
+    p1, p2 = _players()
+    Submission.objects.create(user=p1, problem=duel_pool["e1"], language=python, source="x", verdict="WA")
+    Submission.objects.create(user=p2, problem=duel_pool["e2"], language=python, source="x", verdict="AC")
+    client.force_login(p1)
+    url = reverse("classroom:duels")
+    assert client.post(url, {"opponent": "p1", "difficulty": "easy"}).status_code == 200  # not yourself
+    assert client.post(url, {"opponent": "nobody", "difficulty": "easy"}).status_code == 200
+    assert client.post(url, {"opponent": "p2", "difficulty": "easy"}).status_code == 302
+    assert client.post(url, {"opponent": "p2", "difficulty": "easy"}).status_code == 200  # one open duel per pair
+    duel = Duel.objects.get()
+    assert duel.status == "pending" and duel.problem is None  # nobody sees the problem before the start
+
+    assert client.post(reverse("classroom:duel_answer", args=[duel.pk]), {"accept": "1"}).status_code == 404
+    client.force_login(p2)
+    assert client.post(reverse("classroom:duel_answer", args=[duel.pk]), {"accept": "1"}).status_code == 302
+    duel.refresh_from_db()
+    assert duel.status == "active" and duel.problem.slug == "e3"
+    assert duel.ends_at - duel.started_at == timezone.timedelta(minutes=30)
+
+    page = client.get(reverse("classroom:duels")).content.decode()
+    assert "Ochiq duellar" in page and "p1" in page
+    page = client.get(reverse("classroom:duel", args=[duel.pk])).content.decode()
+    assert "E3" in page and 'hx-trigger="every 5s"' in page
+    partial = client.get(reverse("classroom:duel", args=[duel.pk]), HTTP_HX_REQUEST="true").content.decode()
+    assert "<html" not in partial and "E3" in partial
+    client.force_login(User.objects.create_user("spy", password="x"))
+    assert client.get(reverse("classroom:duel", args=[duel.pk])).status_code == 404
+
+
+@pytest.mark.django_db
+def test_first_ac_wins_and_moves_duel_elo_once(duel_pool, python):
+    from judge.runner import run_submission
+
+    from .duels import accept, challenge
+    from .models import Duel
+
+    for slug in ("e1", "e2", "e3"):
+        duel_pool[slug].testcases.create(input="1\n", expected="1\n")
+    p1, p2 = _players()
+    duel, _ = challenge(p1, "p2", "easy")
+    accept(duel, p2)
+    duel.refresh_from_db()
+    before = Submission.objects.create(user=p2, problem=duel.problem, language=python, source="x", verdict="AC")
+    Submission.objects.filter(pk=before.pk).update(created=duel.started_at - timezone.timedelta(seconds=1))
+    s = Submission.objects.create(user=p1, problem=duel.problem, language=python, source="print(1)")
+    with (patch("judge.runner.sandbox.compile", return_value=(True, "")),
+          patch("judge.runner.sandbox.run_tests", return_value=[("1\n", "OK", 10, 1024)])):
+        run_submission(s.pk)
+    duel.refresh_from_db()
+    p1.refresh_from_db()
+    p2.refresh_from_db()
+    assert duel.status == "finished" and duel.winner == p1
+    assert (p1.duel_rating, p2.duel_rating) == (1216, 1184)
+    from .duels import settle
+
+    settle(Duel.objects.get(pk=duel.pk))  # settling again changes nothing
+    p1.refresh_from_db()
+    assert p1.duel_rating == 1216
+
+
+@pytest.mark.django_db
+def test_no_ac_in_time_is_a_draw_and_unanswered_challenges_expire(duel_pool):
+    from .duels import accept, challenge, settle
+    from .models import Duel
+
+    p1, p2 = _players()
+    User.objects.filter(pk=p2.pk).update(duel_rating=1400)
+    duel, _ = challenge(p1, "p2", "easy")
+    accept(duel, User.objects.get(pk=p2.pk))
+    Duel.objects.filter(pk=duel.pk).update(ends_at=timezone.now() - timezone.timedelta(seconds=1))
+    settle(Duel.objects.get(pk=duel.pk))
+    duel.refresh_from_db()
+    p1.refresh_from_db()
+    assert duel.status == "finished" and duel.winner is None and p1.duel_rating > 1200  # a draw lifts the lower one
+
+    late, _ = challenge(p1, "p2", "easy")
+    Duel.objects.filter(pk=late.pk).update(created=timezone.now() - timezone.timedelta(hours=2))
+    settle(Duel.objects.get(pk=late.pk))
+    assert Duel.objects.get(pk=late.pk).status == "expired"
+
+
+@pytest.mark.django_db
+def test_hints_are_locked_for_the_players_of_an_active_duel(client, duel_pool):
+    from apps.problems.models import ProblemHint
+
+    from .duels import accept, challenge
+
+    p1, p2 = _players()
+    duel, _ = challenge(p1, "p2", "easy")
+    accept(duel, p2)
+    duel.refresh_from_db()
+    hint = ProblemHint.objects.create(problem=duel.problem, body_md="sir", cost_pct=10)
+    client.force_login(p1)
+    assert client.post(reverse("problems:hint", args=[duel.problem.slug, hint.pk])).status_code == 400
+    page = client.get(reverse("problems:detail", args=[duel.problem.slug])).content.decode()
+    assert "Duel" in page

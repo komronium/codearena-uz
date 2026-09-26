@@ -3,6 +3,12 @@
 {% block sidebar %}{% endblock %}
 {% block content %}
 {% include "contests/_dq_banner.html" with participation=my_participation %}
+{% if duel %}
+<a href="{% url 'classroom:duel' duel.pk %}" class="ca-alert ca-alert-warn mb-6 flex flex-wrap items-center justify-between gap-2">
+  <span><i data-lucide="swords" class="lu mr-1.5" aria-hidden="true"></i><b>Duel:</b> {{ duel.challenger.username }} vs {{ duel.opponent.username }} — birinchi AC g‘olib. Maslahatlar yopiq.</span>
+  <span class="tabular font-bold" data-countdown="{{ duel.ends_at|date:'c' }}" data-label="" data-suffix="1"></span>
+</a>
+{% endif %}
 <div class="mb-5 flex flex-wrap items-center justify-between gap-3 text-sm">
   {% if contest %}
   <a class="ca-link text-mute" href="{% url 'contests:detail' contest.pk %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>{{ contest.title }}</a>

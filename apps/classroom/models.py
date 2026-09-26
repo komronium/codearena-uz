@@ -46,3 +46,33 @@ class ReviewComment(models.Model):
 
     class Meta:
         ordering = ["created", "id"]
+
+
+class Duel(models.Model):
+    """1v1: the same unseen problem for both, first AC in the window wins
+    (apps.classroom.duels)."""
+    class Status(models.TextChoices):
+        PENDING = "pending", "Kutilmoqda"
+        ACTIVE = "active", "Davom etmoqda"
+        FINISHED = "finished", "Tugagan"
+        DECLINED = "declined", "Rad etilgan"
+        EXPIRED = "expired", "Muddati o‘tgan"
+
+    challenger = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="+")
+    opponent = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="+")
+    difficulty = models.CharField(max_length=10, choices=Problem.Difficulty.choices)
+    problem = models.ForeignKey(Problem, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDING)
+    created = models.DateTimeField(auto_now_add=True)
+    started_at = models.DateTimeField(null=True, blank=True)
+    ends_at = models.DateTimeField(null=True, blank=True)
+    winner = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
+                               related_name="+")
+    challenger_delta = models.IntegerField(null=True, blank=True)
+    opponent_delta = models.IntegerField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created", "-id"]
+
+    def players(self):
+        return (self.challenger_id, self.opponent_id)

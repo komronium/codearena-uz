@@ -1,0 +1,18 @@
+{% comment %}Duel state, polled every 5 s while open; ctx: duel, user.{% endcomment %}
+<div class="flex flex-wrap items-center justify-between gap-3">
+  <p class="flex items-center gap-2"><span class="ca-diff ca-diff-{{ duel.difficulty }}">{{ duel.get_difficulty_display }}</span><b>{{ duel.get_status_display }}</b></p>
+  {% if duel.status == "active" %}<p class="text-sm"><span class="text-mute">Tugashiga</span> <span class="tabular text-lg font-bold text-ok" data-countdown="{{ duel.ends_at|date:'c' }}" data-label="" data-suffix="1"></span></p>{% endif %}
+</div>
+{% if duel.status == "pending" %}
+<p class="mt-3 text-sm text-mute">{% if duel.opponent_id == user.pk %}Sizni chaqirishdi.{% else %}{{ duel.opponent.username }} javobini kutyapmiz…{% endif %} Masala boshlanganda tanlanadi.</p>
+<div class="mt-3 flex gap-2">
+  {% if duel.opponent_id == user.pk %}<form method="post" action="{% url 'classroom:duel_answer' duel.pk %}">{% csrf_token %}<input type="hidden" name="accept" value="1"><button class="ca-btn ca-btn-primary">Qabul qilish</button></form>{% endif %}
+  <form method="post" action="{% url 'classroom:duel_answer' duel.pk %}">{% csrf_token %}<button class="ca-btn ca-btn-ghost">{% if duel.opponent_id == user.pk %}Rad etish{% else %}Bekor qilish{% endif %}</button></form>
+</div>
+{% elif duel.status == "active" %}
+<a class="ca-btn ca-btn-primary mt-4" href="{% url 'problems:detail' duel.problem.slug %}"><i data-lucide="swords" class="lu" aria-hidden="true"></i>Masala: {{ duel.problem.title }}</a>
+<p class="mt-2 text-xs text-mute">Birinchi AC g‘olib. Maslahatlar duel davomida yopiq.</p>
+{% elif duel.status == "finished" %}
+<p class="mt-3 text-lg">{% if duel.winner %}<b>{{ duel.winner.username }}</b> g‘olib!{% else %}Durang — hech kim vaqtida yecha olmadi.{% endif %}</p>
+<p class="mt-1 text-sm text-mute">Duel reytingi: {{ duel.challenger.username }} {{ duel.challenger_delta|stringformat:"+d" }}, {{ duel.opponent.username }} {{ duel.opponent_delta|stringformat:"+d" }}{% if duel.problem %} · masala: <a class="ca-link" href="{% url 'problems:detail' duel.problem.slug %}">{{ duel.problem.title }}</a>{% endif %}</p>
+{% endif %}

@@ -1,0 +1,19 @@
+{% comment %}One duel in a list; ctx: d, user.{% endcomment %}
+<li class="ca-row">
+  <div class="ca-row-main">
+    <a class="ca-row-title ca-link" href="{% url 'classroom:duel' d.pk %}">{{ d.challenger.username }} <span class="text-mute">vs</span> {{ d.opponent.username }}</a>
+    <div class="ca-row-meta">
+      <span class="ca-diff ca-diff-{{ d.difficulty }}">{{ d.get_difficulty_display }}</span>
+      <span>{{ d.get_status_display }}</span>
+      <time datetime="{{ d.created|date:'c' }}">{{ d.created|date:"d.m H:i" }}</time>
+    </div>
+  </div>
+  <div class="ca-row-side text-sm">
+    {% if d.status == "finished" %}
+      {% if d.winner_id == user.pk %}<span class="ca-verdict ca-verdict-ac">G‘alaba</span>
+      {% elif d.winner_id %}<span class="ca-verdict ca-verdict-bad">Mag‘lubiyat</span>
+      {% else %}<span class="ca-verdict ca-verdict-mute">Durang</span>{% endif %}
+      {% if d.challenger_id == user.pk %}<span class="tabular text-mute">{{ d.challenger_delta|stringformat:"+d" }}</span>{% else %}<span class="tabular text-mute">{{ d.opponent_delta|stringformat:"+d" }}</span>{% endif %}
+    {% endif %}
+  </div>
+</li>

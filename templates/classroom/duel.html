@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Duel: {{ duel.challenger.username }} vs {{ duel.opponent.username }}{% endblock %}
+{% block content %}
+<a class="ca-link mb-2 inline-block text-sm text-mute" href="{% url 'classroom:duels' %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>Duellar</a>
+<h1 class="ca-page-title mb-6">{{ duel.challenger.username }} <span class="text-mute">vs</span> {{ duel.opponent.username }}</h1>
+<div id="duel-status" class="ca-panel"{% if duel.status == "pending" or duel.status == "active" %} hx-get="{% url 'classroom:duel' duel.pk %}" hx-trigger="every 5s" hx-swap="innerHTML"{% endif %}>
+  {% include "classroom/_duel_status.html" %}
+</div>
+{% endblock %}
