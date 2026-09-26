@@ -145,8 +145,15 @@ class BaseContestProblemFormSet(BaseInlineFormSet):
     def clean(self):
         super().clean()
         contest = self.instance  # contest_edit validates ContestForm first, which copies the POSTed values here
-        if any(self.errors) or not contest.is_rated or contest.end is None or contest.end <= timezone.now():
-            return  # an ended contest is skipped: publishing makes its problems public
+        if any(self.errors) or not contest.is_rated or contest.end is None:
+            return
+        # Only a rated contest that had already ended and stays ended is skipped: publishing
+        # made its problems public. Judge by the stored row too, so moving `end` into the
+        # past, reopening, or turning `is_rated` on after the end can't skip the check.
+        now = timezone.now()
+        stored = Contest.objects.filter(pk=contest.pk).values("is_rated", "end").first() if contest.pk else None
+        if stored and stored["is_rated"] and stored["end"] <= now and contest.end <= now:
+            return
         for form in self.forms:
             problem = form.cleaned_data.get("problem")
             if problem is None or form.cleaned_data.get("DELETE"):

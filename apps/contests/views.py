@@ -95,16 +95,22 @@ def standings(request, pk):
 @staff_required
 @require_POST
 def disqualify(request, pk, user_id):
-    """Toggle a participant's disqualification; standings cache is dropped so the
-    table reorders immediately. After publish the user's contest solves follow the
-    toggle (a disqualified participant's contest ACs don't count)."""
+    """Set a participant's disqualification to the POSTed state; standings cache is
+    dropped so the table reorders immediately. After publish the user's contest solves
+    follow it (a disqualified participant's contest ACs don't count)."""
+    # An explicit state, not a toggle: a click from a stale page or a second teacher's
+    # tab must not quietly re-qualify someone.
+    want = {"1": True, "0": False}.get(request.POST.get("disqualified"))
+    if want is None:
+        return HttpResponseBadRequest("disqualified must be 0 or 1")
     p = get_object_or_404(Participation.objects.select_related("contest"), contest_id=pk, user_id=user_id)
-    p.disqualified = not p.disqualified
-    p.disqualified_reason = request.POST.get("reason", "").strip()[:200] if p.disqualified else ""
-    p.save(update_fields=["disqualified", "disqualified_reason"])
-    if p.contest.published_at is not None:
-        for problem_id in p.contest.contest_problems.values_list("problem_id", flat=True):
-            refresh_solves(problem_id, [p.user_id])
+    if p.disqualified != want:
+        p.disqualified = want
+        p.disqualified_reason = request.POST.get("reason", "").strip()[:200] if want else ""
+        p.save(update_fields=["disqualified", "disqualified_reason"])
+        if p.contest.published_at is not None:
+            for problem_id in p.contest.contest_problems.values_list("problem_id", flat=True):
+                refresh_solves(problem_id, [p.user_id])
     cache.delete(f"contest-standings-{pk}")
     if request.POST.get("back") == "report":
         return redirect("integrity:contest_report", pk)

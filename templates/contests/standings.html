@@ -77,7 +77,7 @@
     {% if user.is_staff %}
     <td class="text-right">
       <form method="post" action="{% url 'contests:disqualify' contest.pk r.user.pk %}" {% if not r.disqualified %}onsubmit="const s=prompt('Diskvalifikatsiya sababi (ixtiyoriy):',''); if(s===null) return false; this.reason.value=s;"{% endif %}>{% csrf_token %}
-        <input type="hidden" name="reason" value="">
+        <input type="hidden" name="reason" value=""><input type="hidden" name="disqualified" value="{% if r.disqualified %}0{% else %}1{% endif %}">
         <button class="ca-st-action" title="{% if r.disqualified %}Diskvalifikatsiyani bekor qilish{% else %}Diskvalifikatsiya qilish{% endif %}" aria-label="{% if r.disqualified %}Diskvalifikatsiyani bekor qilish{% else %}Diskvalifikatsiya qilish{% endif %}: {{ r.user.username }}">
           <i data-lucide="{% if r.disqualified %}undo-2{% else %}ban{% endif %}" class="lu" aria-hidden="true"></i>
         </button>

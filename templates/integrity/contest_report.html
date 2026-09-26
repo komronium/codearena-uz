@@ -37,7 +37,7 @@
       <td class="text-right">
         {% if c.participation %}
         <form method="post" action="{% url 'contests:disqualify' contest.pk user.pk %}" {% if not c.participation.disqualified %}onsubmit="const s=prompt('Sabab (ixtiyoriy):',''); if(s===null) return false; this.reason.value=s;"{% endif %}>{% csrf_token %}
-          <input type="hidden" name="back" value="report"><input type="hidden" name="reason" value="">
+          <input type="hidden" name="back" value="report"><input type="hidden" name="reason" value=""><input type="hidden" name="disqualified" value="{% if c.participation.disqualified %}0{% else %}1{% endif %}">
           {% if c.participation.disqualified %}
           <button class="ca-btn ca-btn-ghost !py-1 text-xs"><i data-lucide="undo-2" class="lu" aria-hidden="true"></i>DQ bekor</button>
           {% else %}
@@ -136,7 +136,7 @@
             <pre class="ca-cmp-code" aria-label="{{ side.user.username }} kodi">{% for n, text, hit in side.lines %}<span class="ca-cmp-line{% if hit %} is-hit{% endif %}"><span class="ca-cmp-n">{{ n }}</span>{{ text }}</span>{% endfor %}</pre>
             {% if side.participation %}
             <form method="post" action="{% url 'contests:disqualify' contest.pk side.user.pk %}" class="border-t border-line px-4 py-2 text-right" {% if not side.participation.disqualified %}onsubmit="const s=prompt('Sabab (ixtiyoriy):','O‘xshash kod: #{{ f.sides.0.sub.pk }} / #{{ f.sides.1.sub.pk }}'); if(s===null) return false; this.reason.value=s;"{% endif %}>{% csrf_token %}
-              <input type="hidden" name="back" value="report"><input type="hidden" name="reason" value="">
+              <input type="hidden" name="back" value="report"><input type="hidden" name="reason" value=""><input type="hidden" name="disqualified" value="{% if side.participation.disqualified %}0{% else %}1{% endif %}">
               {% if side.participation.disqualified %}
               <button class="ca-btn ca-btn-ghost !py-1 text-xs"><i data-lucide="undo-2" class="lu" aria-hidden="true"></i>{{ side.user.username }}: DQ bekor</button>
               {% else %}

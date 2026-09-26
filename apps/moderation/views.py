@@ -166,13 +166,17 @@ def problem_toggle(request, pk):
 @staff_required
 @require_POST
 def problem_delete(request, pk):
-    problem = get_object_or_404(Problem, pk=pk)
-    # A contest's record or other people's work hangs on it; hiding keeps both.
-    if problem.contests.exists() or problem.submissions.exclude(user_id=problem.author_id).exists():
-        messages.error(request, f"«{problem.title}» musobaqada ishlatilgan yoki unga boshqalar urinish yuborgan — "
-                                "o‘chirib bo‘lmaydi, yashirib qo‘ying.")
-        return redirect("moderation:problems")
-    problem.delete()
+    with transaction.atomic():
+        # The row lock makes check-then-delete atomic: an insert that references the problem
+        # (a submission, a contest row) takes a key-share lock on it for its FK check, so it
+        # either commits first and the check sees it, or waits and then fails on the FK.
+        problem = get_object_or_404(Problem.objects.select_for_update(), pk=pk)
+        # A contest's record or other people's work hangs on it; hiding keeps both.
+        if problem.contests.exists() or problem.submissions.exclude(user_id=problem.author_id).exists():
+            messages.error(request, f"«{problem.title}» musobaqada ishlatilgan yoki unga boshqalar urinish "
+                                    "yuborgan — o‘chirib bo‘lmaydi, yashirib qo‘ying.")
+            return redirect("moderation:problems")
+        problem.delete()
     messages.success(request, f"«{problem.title}» o'chirildi.")
     return redirect("moderation:problems")
 
@@ -289,13 +293,15 @@ def contest_edit(request, pk=None):
 @staff_required
 @require_POST
 def contest_delete(request, pk):
-    contest = get_object_or_404(Contest, pk=pk)
-    # Submission.contest is SET_NULL: deleting would turn its ACs, unpublished and
-    # disqualified ones included, into practice ACs that count as solves.
-    if contest.submissions.exists():
-        messages.error(request, f"«{contest.title}» musobaqasida urinishlar bor — o‘chirib bo‘lmaydi.")
-        return redirect("moderation:contests")
-    contest.delete()
+    with transaction.atomic():
+        # Locked like in problem_delete, so a submission can't land between check and delete.
+        contest = get_object_or_404(Contest.objects.select_for_update(), pk=pk)
+        # Submission.contest is SET_NULL: deleting would turn its ACs, unpublished and
+        # disqualified ones included, into practice ACs that count as solves.
+        if contest.submissions.exists():
+            messages.error(request, f"«{contest.title}» musobaqasida urinishlar bor — o‘chirib bo‘lmaydi.")
+            return redirect("moderation:contests")
+        contest.delete()
     messages.success(request, f"«{contest.title}» o'chirildi.")
     return redirect("moderation:contests")
 

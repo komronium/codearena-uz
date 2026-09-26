@@ -599,3 +599,45 @@ def test_rejudge_warns_about_applied_rating_and_needs_staff(client):
     with patch("apps.moderation.views.django_rq.get_queue"):
         r = client.post(reverse("moderation:problem_rejudge", args=[p.pk]), follow=True)
     assert "Final: reyting allaqachon hisoblangan" in r.content.decode()
+
+
+@pytest.mark.django_db
+def test_rated_freshness_check_follows_the_stored_contest_not_the_posted_dates(client):
+    """Only a rated contest that had already ended, and stays ended, skips the check.
+    Moving `end` into the past, reopening an ended contest, or turning `is_rated` on after
+    the end must not let a public problem into a rated contest."""
+    from django.utils import timezone
+
+    from apps.contests.models import Contest, ContestProblem
+
+    staff = User.objects.create_user("teacher", password="x", is_staff=True)
+    client.force_login(staff)
+    now = timezone.now()
+    public = Problem.objects.create(slug="pub", title="Pub", statement_md="x", author=staff, is_public=True)
+    fmt = "%Y-%m-%dT%H:%M"
+
+    def post(contest, **changes):
+        data = _contest_edit_data(contest) | changes
+        return client.post(reverse("moderation:contest_edit", args=[contest.pk]), data)
+
+    running = Contest.objects.create(title="Live", is_rated=True, start=now - timezone.timedelta(hours=1),
+                                     end=now + timezone.timedelta(hours=1))
+    ended_early = timezone.localtime(now - timezone.timedelta(minutes=10)).strftime(fmt)
+    r = post(running, end=ended_early, **{"cp-TOTAL_FORMS": "1", "cp-0-label": "A", "cp-0-problem": str(public.pk),
+                                          "cp-0-points": "100", "cp-0-order": "0"})
+    assert r.status_code == 200 and not running.contest_problems.exists()
+
+    unrated = Contest.objects.create(title="Past", start=now - timezone.timedelta(hours=3),
+                                     end=now - timezone.timedelta(hours=2))
+    ContestProblem.objects.create(contest=unrated, problem=public, label="A")
+    assert post(unrated, is_rated="on").status_code == 200
+    unrated.refresh_from_db()
+    assert not unrated.is_rated
+
+    rated = Contest.objects.create(title="Old", is_rated=True, start=now - timezone.timedelta(hours=3),
+                                   end=now - timezone.timedelta(hours=2))
+    ContestProblem.objects.create(contest=rated, problem=public, label="A")
+    reopened = timezone.localtime(now + timezone.timedelta(hours=1)).strftime(fmt)
+    assert post(rated, end=reopened).status_code == 200
+    rated.refresh_from_db()
+    assert rated.end < now

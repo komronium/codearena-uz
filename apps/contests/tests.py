@@ -501,7 +501,7 @@ def test_disqualified_participant_ranks_last_and_cannot_submit(client):
     assert [r["user"] for r in compute_standings(c)] == [a, b]
 
     client.force_login(staff)
-    r = client.post(reverse("contests:disqualify", args=[c.pk, a.pk]), {"reason": "paste"})
+    r = client.post(reverse("contests:disqualify", args=[c.pk, a.pk]), {"disqualified": "1", "reason": "paste"})
     assert r.status_code == 302
     rows = compute_standings(c)
     assert [r["user"] for r in rows] == [b, a] and rows[1]["disqualified"] and rows[1]["rank"] == 2
@@ -511,7 +511,7 @@ def test_disqualified_participant_ranks_last_and_cannot_submit(client):
     assert r.status_code == 400
 
     client.force_login(staff)
-    client.post(reverse("contests:disqualify", args=[c.pk, a.pk]))
+    client.post(reverse("contests:disqualify", args=[c.pk, a.pk]), {"disqualified": "0"})
     assert [r["user"] for r in compute_standings(c)] == [a, b]
 
 
@@ -627,9 +627,36 @@ def test_disqualifying_after_publish_takes_contest_solves_back(client, problem_a
     assert ali.practice_points == 50
 
     url = reverse("contests:disqualify", args=[c.pk, ali.pk])
-    client.post(url, {"reason": "copy"})
+    client.post(url, {"disqualified": "1", "reason": "copy"})
     ali.refresh_from_db()
     assert ali.practice_points == 0 and not ali.userproblemsolved_set.exists()
-    client.post(url)  # re-qualify
+    client.post(url, {"disqualified": "0"})  # re-qualify
     ali.refresh_from_db()
     assert ali.practice_points == 50 and ali.userproblemsolved_set.count() == 1
+
+
+@pytest.mark.django_db
+def test_disqualify_sets_the_asked_state_so_a_stale_click_changes_nothing(client, problem_a, python):
+    """Two teachers, or one stale tab: a second "disqualify" must not re-qualify."""
+    staff = User.objects.create_user("boss", password="x", is_staff=True)
+    ali = User.objects.create_user("ali", password="x")
+    c = Contest.objects.create(title="Live", start=timezone.now() - timezone.timedelta(hours=1),
+                               end=timezone.now() + timezone.timedelta(hours=1))
+    p = Participation.objects.create(user=ali, contest=c)
+    url = reverse("contests:disqualify", args=[c.pk, ali.pk])
+    client.force_login(staff)
+
+    for reason in ("copy", "again"):
+        assert client.post(url, {"disqualified": "1", "reason": reason}).status_code == 302
+        p.refresh_from_db()
+        assert p.disqualified and p.disqualified_reason == "copy"  # the second click keeps the first reason
+    assert client.post(url, {"reason": "no state"}).status_code == 400
+    p.refresh_from_db()
+    assert p.disqualified
+    page = client.get(reverse("contests:standings", args=[c.pk])).content.decode()
+    assert 'name="disqualified" value="0"' in page  # the button undoes the DQ it shows
+    client.post(url, {"disqualified": "0"})
+    p.refresh_from_db()
+    assert not p.disqualified and p.disqualified_reason == ""
+    page = client.get(reverse("contests:standings", args=[c.pk])).content.decode()
+    assert 'name="disqualified" value="1"' in page
