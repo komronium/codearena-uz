@@ -9,7 +9,7 @@
   <ul class="flex flex-wrap gap-2 text-sm" aria-label="Ko‘rsatkichlaringiz">
     <li class="ca-kpi" title="Kun masalasi seriyasi; eng uzuni {{ best_streak }} kun"><i data-lucide="flame" class="lu text-warn" aria-hidden="true"></i><b>{{ streak }}</b> kunlik seriya</li>
     <li class="ca-kpi"><i data-lucide="star" class="lu text-ok" aria-hidden="true"></i><b>{{ user.practice_points }}</b> ball</li>
-    <li class="ca-kpi"><i data-lucide="trending-up" class="lu" style="color: {{ user.rating|tier_color }}" aria-hidden="true"></i><b>{{ user.rating }}</b> reyting</li>
+    <li class="ca-kpi"><i data-lucide="trending-up" class="ca-tier-ink lu" style="--tier: {{ user.rating|tier_color }}" aria-hidden="true"></i><b>{{ user.rating }}</b> reyting</li>
   </ul>
 </div>
 

@@ -57,3 +57,19 @@ place that tells a student what to do next.
 ## Out of scope
 
 A new colour palette or component library, a SPA, PWA/offline mode.
+
+## Verification (2026-09-27)
+
+- Every page opened in headless Chromium at 1366×900 and 390×844, light and dark, as a
+  guest, a student, a teacher and staff: HTTP 200, no console errors, no failed
+  requests, no missing icons, no horizontal page overflow.
+- The editor mounts from the local modules, switches language, theme and vim mode, and
+  loads each module once; on a phone the "Yechim" pane gives it the full width.
+- axe-core 4 on 27 page views (all roles, both themes, desktop and phone): no violations.
+  Fixed on the way: an unlabelled language select, an empty table header, two search
+  landmarks without names, light-mode green/amber/cyan text on their own chips (4.25:1,
+  now ≥ 4.7:1), translucent chips darkening on tinted rows (now opaque), and rating-tier
+  colours used raw as text (as low as 3.3:1; now mixed 62% toward the theme's ink, ≥ 4.77:1
+  for every tier in both themes).
+- `collectstatic` with the production manifest storage succeeds (hashed CSS, fonts and
+  modules).

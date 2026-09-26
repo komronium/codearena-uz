@@ -57,7 +57,7 @@
     <td class="tabular text-right text-mute">{{ r.penalty }}</td>
     {% if contest.is_rated %}
     <td class="tabular hidden text-right md:table-cell">
-      <div class="font-semibold" style="color: {{ r.user.rating|tier_color }}">{{ r.participation.rating_after|default:r.user.rating }}</div>
+      <div class="ca-tier-ink font-semibold" style="--tier: {{ r.user.rating|tier_color }}">{{ r.participation.rating_after|default:r.user.rating }}</div>
       {% if r.rating_delta is not None %}<div class="text-xs font-medium {% if r.rating_delta >= 0 %}text-ok{% else %}text-bad{% endif %}">{{ r.rating_delta|stringformat:"+d" }}</div>{% endif %}
     </td>
     {% endif %}

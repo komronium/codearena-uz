@@ -1,18 +1,42 @@
-{% comment %}Duel state, polled every 5 s while open; ctx: duel, user.{% endcomment %}
-<div class="flex flex-wrap items-center justify-between gap-3">
-  <p class="flex items-center gap-2"><span class="ca-diff ca-diff-{{ duel.difficulty }}">{{ duel.get_difficulty_display }}</span><b>{{ duel.get_status_display }}</b></p>
-  {% if duel.status == "active" %}<p class="text-sm"><span class="text-mute">Tugashiga</span> <span class="tabular text-lg font-bold text-ok" data-countdown="{{ duel.ends_at|date:'c' }}" data-label="" data-suffix="1"></span></p>{% endif %}
+{% comment %}Duel state, polled every 5 s while open; ctx: duel, players, user.{% endcomment %}
+<div class="grid items-stretch gap-3 sm:grid-cols-[1fr_auto_1fr]">
+  {% for p in players %}
+  <div class="rounded-[var(--ca-radius)] border px-4 py-4 text-center {% if p.winner %}border-ok bg-ok-soft{% else %}border-line{% endif %}{% if not forloop.first %} sm:order-3{% endif %}">
+    <span class="ca-avatar mx-auto h-11 w-11 text-lg" aria-hidden="true">{{ p.user.username|first }}</span>
+    <p class="mt-2 truncate font-semibold">{{ p.user.username }}{% if p.user == user %} <span class="text-xs font-normal text-mute">(siz)</span>{% endif %}</p>
+    <p class="text-xs text-mute">Duel reytingi <b class="text-ink">{{ p.user.duel_rating }}</b>{% if p.delta is not None %} <span class="font-semibold {% if p.delta > 0 %}text-ok{% elif p.delta < 0 %}text-bad{% endif %}">{{ p.delta|stringformat:"+d" }}</span>{% endif %}</p>
+    {% if duel.status == "active" or duel.status == "finished" %}
+    <p class="mt-2 text-sm">
+      {% if p.solved_in %}<span class="ca-verdict ca-verdict-ac">✓ {{ p.solved_in }} da yechdi</span>
+      {% else %}<span class="text-mute">{{ p.attempts }} ta urinish</span>{% endif %}
+    </p>
+    {% endif %}
+  </div>
+  {% if forloop.first %}
+  <div class="flex flex-col items-center justify-center px-2 text-center sm:order-2">
+    <span class="text-sm font-bold tracking-widest text-mute">VS</span>
+    {% if duel.status == "active" %}<span class="mt-1 tabular text-2xl font-bold text-ok" data-countdown="{{ duel.ends_at|date:'c' }}" data-label="" data-suffix="1"></span><span class="text-xs text-mute">qoldi</span>{% endif %}
+  </div>
+  {% endif %}
+  {% endfor %}
+</div>
+
+<div class="mt-4 flex flex-wrap items-center justify-center gap-2 text-center">
+  <span class="ca-diff ca-diff-{{ duel.difficulty }}">{{ duel.get_difficulty_display }}</span>
+  <b>{{ duel.get_status_display }}</b>
 </div>
 {% if duel.status == "pending" %}
-<p class="mt-3 text-sm text-mute">{% if duel.opponent_id == user.pk %}Sizni chaqirishdi.{% else %}{{ duel.opponent.username }} javobini kutyapmiz…{% endif %} Masala boshlanganda tanlanadi.</p>
-<div class="mt-3 flex gap-2">
+<p class="mt-3 text-center text-sm text-mute">{% if duel.opponent_id == user.pk %}Sizni chaqirishdi.{% else %}{{ duel.opponent.username }} javobini kutyapmiz…{% endif %} Masala boshlanganda tanlanadi — ikkalangiz ham ko‘rmagan bo‘ladi.</p>
+<div class="mt-3 flex justify-center gap-2">
   {% if duel.opponent_id == user.pk %}<form method="post" action="{% url 'classroom:duel_answer' duel.pk %}">{% csrf_token %}<input type="hidden" name="accept" value="1"><button class="ca-btn ca-btn-primary">Qabul qilish</button></form>{% endif %}
   <form method="post" action="{% url 'classroom:duel_answer' duel.pk %}">{% csrf_token %}<button class="ca-btn ca-btn-ghost">{% if duel.opponent_id == user.pk %}Rad etish{% else %}Bekor qilish{% endif %}</button></form>
 </div>
 {% elif duel.status == "active" %}
-<a class="ca-btn ca-btn-primary mt-4" href="{% url 'problems:detail' duel.problem.slug %}"><i data-lucide="swords" class="lu" aria-hidden="true"></i>Masala: {{ duel.problem.title }}</a>
-<p class="mt-2 text-xs text-mute">Birinchi AC g‘olib. Maslahatlar duel davomida yopiq.</p>
+<div class="mt-4 text-center">
+  <a class="ca-btn ca-btn-primary" href="{% url 'problems:detail' duel.problem.slug %}#yechim"><i data-lucide="swords" class="lu" aria-hidden="true"></i>Masala: {{ duel.problem.title }}</a>
+  <p class="mt-2 text-xs text-mute">Birinchi AC g‘olib. Maslahatlar duel davomida yopiq.</p>
+</div>
 {% elif duel.status == "finished" %}
-<p class="mt-3 text-lg">{% if duel.winner %}<b>{{ duel.winner.username }}</b> g‘olib!{% else %}Durang — hech kim vaqtida yecha olmadi.{% endif %}</p>
-<p class="mt-1 text-sm text-mute">Duel reytingi: {{ duel.challenger.username }} {{ duel.challenger_delta|stringformat:"+d" }}, {{ duel.opponent.username }} {{ duel.opponent_delta|stringformat:"+d" }}{% if duel.problem %} · masala: <a class="ca-link" href="{% url 'problems:detail' duel.problem.slug %}">{{ duel.problem.title }}</a>{% endif %}</p>
+<p class="mt-3 text-center text-lg">{% if duel.winner %}<b>{{ duel.winner.username }}</b> g‘olib!{% else %}Durang — hech kim vaqtida yecha olmadi.{% endif %}</p>
+{% if duel.problem %}<p class="mt-1 text-center text-sm text-mute">Masala: <a class="ca-link" href="{% url 'problems:detail' duel.problem.slug %}">{{ duel.problem.title }}</a></p>{% endif %}
 {% endif %}

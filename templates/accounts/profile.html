@@ -8,15 +8,15 @@
       {% if profile_user.avatar %}
       <img src="{{ profile_user.avatar.url }}" alt="" class="-mt-10 h-24 w-24 shrink-0 rounded-full border-4 border-surface object-cover shadow">
       {% else %}
-      <div class="ca-avatar -mt-10 h-24 w-24 shrink-0 border-4 border-surface text-4xl shadow" style="background: color-mix(in srgb, {{ tier_color }} 18%, rgb(var(--ca-surface-rgb))); color: {{ tier_color }}" aria-hidden="true">{{ profile_user.username|slice:":1" }}</div>
+      <div class="ca-avatar -mt-10 h-24 w-24 shrink-0 border-4 border-surface text-4xl shadow" style="background: color-mix(in srgb, {{ tier_color }} 18%, rgb(var(--ca-surface-rgb))); --tier: {{ tier_color }}; color: color-mix(in oklab, var(--tier) 62%, rgb(var(--ca-ink-rgb)))" aria-hidden="true">{{ profile_user.username|slice:":1" }}</div>
       {% endif %}
       {# text stays below the banner so it never sits on the gradient #}
       <div class="pt-3">
         {% if profile_user.get_full_name %}
         <h1 class="text-2xl font-bold leading-tight text-ink">{{ profile_user.get_full_name }}</h1>
-        <p class="mt-0.5 text-base font-semibold" translate="no" style="color: {{ tier_color }}">@{{ profile_user.username }}</p>
+        <p class="ca-tier-ink mt-0.5 text-base font-semibold" translate="no" style="--tier: {{ tier_color }}">@{{ profile_user.username }}</p>
         {% else %}
-        <h1 class="text-2xl font-bold leading-tight" translate="no" style="color: {{ tier_color }}">{{ profile_user.username }}</h1>
+        <h1 class="ca-tier-ink text-2xl font-bold leading-tight" translate="no" style="--tier: {{ tier_color }}">{{ profile_user.username }}</h1>
         {% endif %}
         {% if profile_user.is_staff %}<p class="mt-1.5"><span class="ca-chip"><i data-lucide="shield-check" class="lu mr-1" aria-hidden="true"></i>Moderator</span></p>{% endif %}
         <p class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-mute">
@@ -69,7 +69,7 @@
   <div class="grid gap-5 lg:grid-cols-[1fr_1.4fr]">
     <div class="ca-panel flex items-center gap-6">
       <div class="relative h-36 w-36 shrink-0">
-        <svg viewBox="0 0 120 120" class="h-full w-full" role="img" aria-label="{{ solved|length }} / {{ total_public_problems }} yechilgan">
+        <svg viewBox="0 0 120 120" class="h-full w-full" role="img" aria-label="{{ solved_shown }} / {{ total_public_problems }} yechilgan">
           {% for d in by_diff %}
           <circle cx="60" cy="60" r="54" fill="none" stroke-width="7" stroke-linecap="round" class="ca-gauge-{{ d.key }}" opacity=".18"
                   stroke-dasharray="{{ d.seg }} 339.3" transform="rotate({{ d.angle }} 60 60)"/>
@@ -78,7 +78,7 @@
           {% endfor %}
         </svg>
         <div class="absolute inset-0 flex flex-col items-center justify-center">
-          <p class="text-3xl font-bold leading-none tabular">{{ solved|length }}<span class="text-sm font-normal text-mute">/{{ total_public_problems }}</span></p>
+          <p class="text-3xl font-bold leading-none">{{ solved_shown }}<span class="text-sm font-normal text-mute">/{{ total_public_problems }}</span></p>
           <p class="mt-1 text-sm font-medium"><i data-lucide="check" class="lu mr-1 text-ok" aria-hidden="true"></i>Yechilgan</p>
         </div>
       </div>
@@ -240,7 +240,7 @@
       <td class="tabular text-right whitespace-nowrap">
         <span class="text-xs text-mute">{{ p.rating_before }}</span>
         <i data-lucide="arrow-right" class="lu mx-0.5 !h-3 !w-3 text-mute" aria-hidden="true"></i>
-        <span class="font-semibold" style="color: {{ p.rating_after|tier_color }}">{{ p.rating_after }}</span>
+        <span class="ca-tier-ink font-semibold" style="--tier: {{ p.rating_after|tier_color }}">{{ p.rating_after }}</span>
       </td>
     </tr>
     {% endfor %}

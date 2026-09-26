@@ -10,7 +10,7 @@ Visual order on wide screens is 2 · 1 · 3 with first place raised; DOM/reading
     <a href="{% url 'profile' u.username %}" class="ca-podium-name" translate="no">{{ u.username }}</a>
     <span class="ca-podium-sub truncate">{{ u.rating|tier_name }}</span>
     {% if metric == "rating" %}
-    <span class="ca-podium-value tabular" style="color: var(--tier)">{{ u.rating }}</span>
+    <span class="ca-tier-ink ca-podium-value tabular">{{ u.rating }}</span>
     <span class="ca-podium-sub">{{ u.contest_count }} ta musobaqa</span>
     {% else %}
     <span class="ca-podium-value tabular">{{ u.practice_points }}<small> ball</small></span>

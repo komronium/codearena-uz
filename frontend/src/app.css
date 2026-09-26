@@ -16,11 +16,11 @@
   --ca-accent-fill-rgb: 79 70 229;
   --ca-accent-fill-hover-rgb: 67 56 202;
   --ca-on-fill-rgb: 255 255 255;
-  --ca-ok-rgb: 21 128 61;
-  --ca-ok-fill-rgb: 21 128 61;
+  --ca-ok-rgb: 20 120 57;  /* 4.7:1 as text on its own 12% chip (AA) */
+  --ca-ok-fill-rgb: 20 120 57;
   --ca-bad-rgb: 185 28 28;
-  --ca-warn-rgb: 180 83 9;
-  --ca-info-rgb: 14 116 144;
+  --ca-warn-rgb: 167 77 8;
+  --ca-info-rgb: 14 113 140;
   --ca-radius: 14px;
   --ca-radius-sm: 10px;
   --ca-shadow: 0 1px 1px rgb(15 23 42 / .03), 0 2px 8px rgb(15 23 42 / .05);
@@ -186,6 +186,7 @@ a.ca-st-label:hover { text-decoration: underline; text-underline-offset: 3px; }
 .ca-table tbody tr:hover td.ca-cell-wa { background: rgb(var(--ca-bad-rgb) / .09); }
 /* first solve: a corner flag too, so it isn't told by colour alone */
 .ca-cell-first { position: relative; }
+.ca-cell-first .text-mute { color: rgb(var(--ca-ink-rgb) / .75); }  /* muted grey is too faint on the 18% green */
 .ca-cell-first::after { content: ""; position: absolute; top: 0; right: 0; border-style: solid; border-width: 0 .55rem .55rem 0; border-color: transparent rgb(var(--ca-ok-rgb)) transparent transparent; }
 .ca-st-rate { display: block; width: 2.6rem; height: 3px; margin: .3rem auto .15rem; border-radius: 9999px; background: rgb(var(--ca-ink-rgb) / .1); overflow: hidden; }
 .ca-st-rate span { display: block; height: 100%; background: rgb(var(--ca-ok-rgb)); }
@@ -249,13 +250,14 @@ a.ca-st-label:hover { text-decoration: underline; text-underline-offset: 3px; }
   border-radius: 9999px; color: rgb(var(--ca-paper-rgb)); background: var(--medal); box-shadow: 0 2px 6px rgb(15 23 42 / .25);
 }
 .ca-podium-medal svg.lucide { width: 1rem; height: 1rem; }
-.ca-podium-avatar {
+/* .ca-podium qualifies it: the generic .ca-avatar (later, same weight) painted it indigo */
+.ca-podium .ca-podium-avatar {
   width: 3.5rem; height: 3.5rem; margin: .3rem 0 .35rem; font-size: 1.3rem;
-  background: color-mix(in srgb, var(--tier) 14%, transparent); color: var(--tier);
+  background: color-mix(in srgb, var(--tier) 14%, transparent); color: color-mix(in oklab, var(--tier) 62%, rgb(var(--ca-ink-rgb)));
   box-shadow: 0 0 0 3px rgb(var(--ca-surface-rgb)), 0 0 0 5px var(--medal);
 }
 .ca-podium-1 .ca-podium-avatar { width: 4.25rem; height: 4.25rem; font-size: 1.6rem; }
-.ca-podium-name { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; color: var(--tier); }
+.ca-podium-name { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; color: color-mix(in oklab, var(--tier) 62%, rgb(var(--ca-ink-rgb))); }
 .ca-podium-name:hover { text-decoration: underline; text-underline-offset: 3px; }
 .ca-podium-sub { max-width: 100%; font-size: .75rem; color: rgb(var(--ca-mute-rgb)); }
 .ca-podium-value { margin-top: .35rem; font-size: 1.6rem; font-weight: 700; line-height: 1.1; letter-spacing: -.02em; }
@@ -308,7 +310,7 @@ a.ca-st-label:hover { text-decoration: underline; text-underline-offset: 3px; }
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--st) 25%, transparent);
 }
 .ca-count b { font-size: .875rem; font-variant-numeric: tabular-nums; }
-.ca-count small { font-size: .75rem; opacity: .8; }
+.ca-count small { font-size: .75rem; }  /* full colour: at .8 opacity it fell to 3.4:1 */
 .ca-count .ca-live-dot { margin-right: 0; }
 /* leaderboard + submission rows: fixed grid so columns line up without a table */
 .ca-lb { display: grid; grid-template-columns: 2.25rem minmax(0, 1fr) auto 4.5rem; align-items: center; gap: .9rem; padding: .7rem 1rem; }
@@ -390,6 +392,19 @@ a.ca-st-label:hover { text-decoration: underline; text-underline-offset: 3px; }
 @keyframes ca-sheet-up { from { transform: translateY(100%); } }
 .ca-sheet .ca-sidebar-heading { grid-column: 1 / -1; margin-top: .6rem; }
 .ca-sheet .ca-sidebar-heading:first-child { display: none; }  /* the sheet's own title says it */
+/* two-way switch (problem page below lg: Masala | Yechim) */
+.ca-seg {
+  display: flex; gap: .25rem; padding: .25rem; border-radius: 9999px;
+  background: rgb(var(--ca-paper-rgb) / .92); box-shadow: inset 0 0 0 1px rgb(var(--ca-line-rgb)); backdrop-filter: blur(8px);
+}
+.ca-seg button {
+  flex: 1; display: inline-flex; align-items: center; justify-content: center; padding: .5rem .9rem; border-radius: 9999px;
+  font-size: .875rem; font-weight: 600; color: rgb(var(--ca-mute-rgb)); transition: background-color .15s ease, color .15s ease;
+}
+.ca-seg button[aria-pressed="true"] { color: rgb(var(--ca-ink-rgb)); background: rgb(var(--ca-surface-rgb)); box-shadow: var(--ca-shadow); }
+@media (max-width: 1023px) {
+  #panes[data-pane="statement"] > #solve-pane, #panes[data-pane="solve"] > #statement-pane { display: none; }
+}
 /* phones: tables keep more room for their content */
 @media (max-width: 639px) { .ca-table th, .ca-table td { padding-left: .65rem; padding-right: .65rem; } }
 @media (max-width: 767px) { body { padding-bottom: 4rem; } }
@@ -590,7 +605,7 @@ section.ca-ed-full #editor .cm-editor { height: calc(100vh - 9.5rem); }
 .ca-delta-zero { color: rgb(var(--ca-mute-rgb)); background: rgb(var(--ca-ink-rgb) / .06); }
 .ca-tier {
   display: inline-flex; align-items: center; gap: .4rem; font-size: .75rem; font-weight: 600;
-  color: var(--tier); background: color-mix(in srgb, var(--tier) 12%, transparent);
+  color: color-mix(in oklab, var(--tier) 62%, rgb(var(--ca-ink-rgb))); background: color-mix(in srgb, var(--tier) 12%, transparent);
   padding: .2rem .6rem; border-radius: 9999px;
 }
 .ca-tier::before { content: ""; width: .4rem; height: .4rem; border-radius: 9999px; background: var(--tier); }
@@ -606,18 +621,23 @@ section.ca-ed-full #editor .cm-editor { height: calc(100vh - 9.5rem); }
   padding: .15rem .6rem; font-size: .75rem; font-weight: 500; white-space: nowrap;
 }
 .ca-user { display: inline-flex; align-items: center; gap: .55rem; color: rgb(var(--ca-ink-rgb)); min-width: 0; }
-    .ca-user .ca-avatar { background: color-mix(in srgb, var(--tier) 14%, transparent); color: var(--tier); }
+    .ca-user .ca-avatar { background: color-mix(in srgb, var(--tier) 14%, transparent); color: color-mix(in oklab, var(--tier) 62%, rgb(var(--ca-ink-rgb))); }
 .ca-user-tier {
-  font-size: .68rem; font-weight: 600; color: var(--tier); white-space: nowrap;
+  font-size: .68rem; font-weight: 600; color: color-mix(in oklab, var(--tier) 62%, rgb(var(--ca-ink-rgb))); white-space: nowrap;
   padding: .1rem .45rem; border-radius: 6px; background: color-mix(in srgb, var(--tier) 12%, transparent);
 }
-.ca-user-name { font-weight: 600; color: var(--tier); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* tier colours as text: mixed 62% toward the theme's ink so every tier reads at 4.5:1 or
+   more on light and dark surfaces (the pure colour stays for dots, rings and tints) */
+.ca-tier-ink { color: color-mix(in oklab, var(--tier) 62%, rgb(var(--ca-ink-rgb))); }
+.ca-user-name { font-weight: 600; color: color-mix(in oklab, var(--tier) 62%, rgb(var(--ca-ink-rgb))); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ca-user:hover .ca-user-name { text-decoration: underline; text-underline-offset: 3px; }
 /* 4-step difficulty scale: beginner = cyan, easy = green, medium = amber, hard = red */
-.ca-diff-beginner { background: rgb(var(--ca-info-rgb) / .12); color: rgb(var(--ca-info-rgb)); }
-.ca-diff-easy { background: rgb(var(--ca-ok-rgb) / .12); color: rgb(var(--ca-ok-rgb)); }
-.ca-diff-medium { background: rgb(var(--ca-warn-rgb) / .12); color: rgb(var(--ca-warn-rgb)); }
-.ca-diff-hard { background: rgb(var(--ca-bad-rgb) / .12); color: rgb(var(--ca-bad-rgb)); }
+/* opaque tints (mixed with the surface, not see-through): on a tinted row, e.g. a solved
+   one, a translucent chip would darken and its text drop below 4.5:1 */
+.ca-diff-beginner { background: color-mix(in srgb, rgb(var(--ca-info-rgb)) 12%, rgb(var(--ca-surface-rgb))); color: rgb(var(--ca-info-rgb)); }
+.ca-diff-easy { background: color-mix(in srgb, rgb(var(--ca-ok-rgb)) 12%, rgb(var(--ca-surface-rgb))); color: rgb(var(--ca-ok-rgb)); }
+.ca-diff-medium { background: color-mix(in srgb, rgb(var(--ca-warn-rgb)) 12%, rgb(var(--ca-surface-rgb))); color: rgb(var(--ca-warn-rgb)); }
+.ca-diff-hard { background: color-mix(in srgb, rgb(var(--ca-bad-rgb)) 12%, rgb(var(--ca-surface-rgb))); color: rgb(var(--ca-bad-rgb)); }
 .ca-gauge-beginner { stroke: rgb(var(--ca-info-rgb)); }
 .ca-gauge-easy { stroke: rgb(var(--ca-ok-rgb)); }
 .ca-gauge-medium { stroke: rgb(var(--ca-warn-rgb)); }
@@ -629,8 +649,8 @@ section.ca-ed-full #editor .cm-editor { height: calc(100vh - 9.5rem); }
   transition: transform .12s ease, filter .12s ease;
 }
 .ca-pmap:hover { transform: translateY(-1px); filter: brightness(1.08); }
-.ca-pmap-solved { background: rgb(var(--ca-ok-rgb) / .16); color: rgb(var(--ca-ok-rgb)); box-shadow: inset 0 0 0 1px rgb(var(--ca-ok-rgb) / .35); }
-.ca-pmap-attempted { background: rgb(var(--ca-warn-rgb) / .14); color: rgb(var(--ca-warn-rgb)); box-shadow: inset 0 0 0 1px rgb(var(--ca-warn-rgb) / .35); }
+.ca-pmap-solved { background: color-mix(in srgb, rgb(var(--ca-ok-rgb)) 12%, rgb(var(--ca-surface-rgb))); color: rgb(var(--ca-ok-rgb)); box-shadow: inset 0 0 0 1px rgb(var(--ca-ok-rgb) / .35); }
+.ca-pmap-attempted { background: color-mix(in srgb, rgb(var(--ca-warn-rgb)) 12%, rgb(var(--ca-surface-rgb))); color: rgb(var(--ca-warn-rgb)); box-shadow: inset 0 0 0 1px rgb(var(--ca-warn-rgb) / .35); }
 .ca-heat-cell { width: .6rem; height: .6rem; border-radius: 2px; }
 .ca-heat-0 { background: rgb(var(--ca-ink-rgb) / .07); }
 .ca-heat-1 { background: rgb(var(--ca-accent-rgb) / .25); }

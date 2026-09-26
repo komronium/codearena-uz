@@ -11,6 +11,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
+from apps.accounts.models import User
 from apps.submissions.models import Submission
 
 from . import duels
@@ -142,6 +143,10 @@ def duel_list(request):
         "history": [d for d in mine if d.status not in duels.OPEN][:30],
         "error": error, "difficulties": Duel._meta.get_field("difficulty").choices,
         "form": request.POST if error else {},
+        # usernames are hard to remember: offer the people from your groups
+        "classmates": sorted(set(User.objects.filter(student_groups__in=request.user.student_groups.all(),
+                                                     is_active=True)
+                                 .exclude(pk=request.user.pk).values_list("username", flat=True)[:100])),
     })
 
 
@@ -173,4 +178,21 @@ def duel_detail(request, pk):
     duels.settle(duel)
     duel.refresh_from_db()
     template = "classroom/_duel_status.html" if request.headers.get("HX-Request") else "classroom/duel.html"
-    return render(request, template, {"duel": duel})
+    return render(request, template, {"duel": duel, "players": _duel_players(duel)})
+
+
+def _duel_players(duel) -> list[dict]:
+    """Each player's attempts in the window and how long their AC took; open to both
+    players, like a live standings row."""
+    rows = []
+    for u, delta in ((duel.challenger, duel.challenger_delta), (duel.opponent, duel.opponent_delta)):
+        subs = []
+        if duel.started_at and duel.problem_id:
+            subs = list(Submission.objects.filter(user=u, problem_id=duel.problem_id, contest__isnull=True,
+                                                  created__gte=duel.started_at, created__lt=duel.ends_at)
+                        .order_by("created", "id").only("verdict", "created"))
+        ac = next((s for s in subs if s.verdict == Submission.Verdict.AC), None)
+        took = int((ac.created - duel.started_at).total_seconds()) if ac else None
+        rows.append({"user": u, "attempts": len(subs), "delta": delta, "winner": duel.winner_id == u.pk,
+                     "solved_in": f"{took // 60:02d}:{took % 60:02d}" if ac else None})
+    return rows

@@ -11,11 +11,11 @@
         {% if user.avatar %}
         <img id="avatar-preview" src="{{ user.avatar.url }}" alt="" class="h-20 w-20 rounded-full object-cover">
         {% else %}
-        <div class="ca-avatar h-20 w-20 text-3xl" style="--tier: {{ user.rating|tier_color }}; background: color-mix(in srgb, var(--tier) 14%, transparent); color: var(--tier)"><span id="avatar-letter">{{ user.username|first }}</span><img id="avatar-preview" src="" alt="" class="hidden h-20 w-20 rounded-full object-cover"></div>
+        <div class="ca-avatar h-20 w-20 text-3xl" style="--tier: {{ user.rating|tier_color }}; background: color-mix(in srgb, var(--tier) 14%, transparent); color: color-mix(in oklab, var(--tier) 62%, rgb(var(--ca-ink-rgb)))"><span id="avatar-letter">{{ user.username|first }}</span><img id="avatar-preview" src="" alt="" class="hidden h-20 w-20 rounded-full object-cover"></div>
         {% endif %}
       </div>
       <div class="min-w-0">
-        <p class="truncate text-lg font-bold" translate="no" style="color: {{ user.rating|tier_color }}">{{ user.username }}</p>
+        <p class="ca-tier-ink truncate text-lg font-bold" translate="no" style="--tier: {{ user.rating|tier_color }}">{{ user.username }}</p>
         <p class="text-sm text-mute">{{ user.rating|tier_name }} · {{ user.rating }}</p>
         <label class="ca-btn ca-btn-ghost mt-2 cursor-pointer !py-1.5 text-sm" for="id_avatar"><i data-lucide="camera" class="lu" aria-hidden="true"></i>Rasm tanlash</label>
         <input class="sr-only" type="file" name="avatar" id="id_avatar" accept="image/*">

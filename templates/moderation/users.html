@@ -26,7 +26,7 @@
       </div>
     </div>
     <div class="ca-row-side">
-      <div class="ca-row-stat"><b style="color: {{ u.rating|tier_color }}">{{ u.rating }}</b>reyting</div>
+      <div class="ca-row-stat"><b style="--tier: {{ u.rating|tier_color }}" class="ca-tier-ink">{{ u.rating }}</b>reyting</div>
       <div class="ca-row-stat"><b>{{ u.n_subs }}</b>urinish</div>
       <a href="{% url 'moderation:submissions' %}?user={{ u.username|urlencode }}" class="ca-btn ca-btn-ghost !px-2 !py-1.5" title="Urinishlari" aria-label="Urinishlari: {{ u.username }}"><i data-lucide="history" class="lu" aria-hidden="true"></i></a>
       <a href="{% url 'moderation:user_edit' u.pk %}" class="ca-btn ca-btn-ghost !px-2 !py-1.5" title="Tahrirlash" aria-label="Tahrirlash: {{ u.username }}"><i data-lucide="pencil" class="lu" aria-hidden="true"></i></a>

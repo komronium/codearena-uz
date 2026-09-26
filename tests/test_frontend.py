@@ -33,3 +33,12 @@ def test_committed_build_matches_the_templates():
     """A class added to a template, or an icon, only exists once the CSS is rebuilt."""
     r = subprocess.run(["node", "build.mjs", "--check"], cwd=FRONTEND, capture_output=True, text=True, timeout=300)
     assert r.returncode == 0, r.stderr or r.stdout
+
+
+def test_tier_colours_are_not_used_raw_as_text():
+    """Several tier colours fail contrast as text (Pupil green is 3.3:1 on white); text goes
+    through .ca-tier-ink, which mixes the tier toward the theme's ink."""
+    raw = re.compile(r"(?<![-\w])color:\s*(?:\{\{[^}]*(?:tier_color|t\.color)[^}]*\}\}|var\(--tier\))")
+    sources = [*TEMPLATES, FRONTEND / "src" / "app.css"]
+    offenders = [f"{p.relative_to(ROOT)}: {m.group(0)}" for p in sources for m in raw.finditer(p.read_text())]
+    assert not offenders, "\n".join(offenders)

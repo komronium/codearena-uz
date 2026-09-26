@@ -37,6 +37,9 @@
 
 {% if grid is not None %}
 <h2 class="ca-section-title">Guruh natijalari</h2>
+<ol class="mb-3 flex flex-wrap gap-x-4 gap-y-1 text-sm" aria-label="Ustunlardagi masalalar">
+  {% for p in problems %}<li><b class="tabular text-accent">{{ forloop.counter }}.</b> <a class="ca-link !text-ink" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a></li>{% endfor %}
+</ol>
 <div class="ca-panel !p-0 overflow-x-auto">
 <table class="ca-table">
   <thead><tr>

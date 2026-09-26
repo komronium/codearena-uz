@@ -41,8 +41,13 @@
   <form method="post" action="{% url 'contests:register' open_contest.pk %}">{% csrf_token %}<button class="ca-btn ca-btn-primary !py-1.5">Musobaqaga qo‘shilish</button></form>
 </div>
 {% endif %}
-<div class="grid gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:items-start">
-  <section class="relative" aria-label="Masala matni">
+{# phones and tablets: one pane at a time, so the editor isn't a long scroll below the statement #}
+<div class="ca-seg sticky top-[61px] z-30 mb-4 lg:hidden" role="group" aria-label="Ko‘rinish">
+  <button type="button" data-pane-tab="statement" aria-pressed="true" aria-controls="statement-pane"><i data-lucide="file-text" class="lu mr-1.5" aria-hidden="true"></i>Masala</button>
+  <button type="button" data-pane-tab="solve" aria-pressed="false" aria-controls="solve-pane"><i data-lucide="code" class="lu mr-1.5" aria-hidden="true"></i>Yechim</button>
+</div>
+<div id="panes" data-pane="statement" class="grid gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:items-start">
+  <section class="relative" id="statement-pane" aria-label="Masala matni">
   {% if contest and user.is_authenticated %}<div class="ca-watermark" data-wm="{{ user.username }} · {% now 'd.m.Y H:i' %}" aria-hidden="true"></div>{% endif %}
     <div class="ca-panel !p-0 overflow-hidden">
       <div class="border-b border-line px-6 py-5">
@@ -59,7 +64,7 @@
           <button type="button" class="ca-stars-sum" data-dialog="rate-dialog" title="{{ problem.n_ratings }} ta baho"><i data-lucide="star" class="lu" aria-hidden="true"></i><b class="tabular text-ink">{{ problem.avg_stars|floatformat:1 }}</b><span class="sr-only">/5,</span> <span class="tabular">({{ problem.n_ratings }})</span></button>
           {% endif %}
           {% if not contest %}
-          <span><i data-lucide="user" class="lu mr-1.5" aria-hidden="true"></i><a class="font-semibold" href="{% url 'profile' problem.author.username %}" translate="no" style="color: {{ problem.author.rating|tier_color }}">{{ problem.author.username }}</a></span>
+          <span><i data-lucide="user" class="lu mr-1.5" aria-hidden="true"></i><a class="ca-tier-ink font-semibold" href="{% url 'profile' problem.author.username %}" translate="no" style="--tier: {{ problem.author.rating|tier_color }}">{{ problem.author.username }}</a></span>
           {% endif %}
         </div>
         {% if not contest and problem.tags.all %}
@@ -183,7 +188,7 @@
       <div class="flex flex-wrap items-center justify-between gap-2 border-b border-line px-4 py-2.5">
         <label class="flex items-center gap-2 text-sm text-mute">
           <i data-lucide="code" class="lu" aria-hidden="true"></i>
-          <select name="language" id="language" class="ca-select !w-auto !py-1.5 text-sm">
+          <select name="language" id="language" class="ca-select !w-auto !py-1.5 text-sm" aria-label="Dasturlash tili">
             {% for l in languages %}<option value="{{ l.code }}">{{ l.name }}</option>{% endfor %}
           </select>
         </label>
@@ -261,6 +266,21 @@
 <script defer src="{% static 'vendor/katex/katex.min.js' %}"></script>
 <script defer src="{% static 'vendor/katex/auto-render.min.js' %}"
         onload="renderMathInElement(document.querySelector('.ca-statement'), {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}], throwOnError: false})"></script>
+<script>
+  (() => {
+    const panes = document.getElementById("panes"), tabs = document.querySelectorAll("[data-pane-tab]");
+    const key = "ca-pane-{{ problem.pk }}";
+    const show = (name) => {
+      panes.dataset.pane = name;
+      tabs.forEach((t) => t.setAttribute("aria-pressed", String(t.dataset.paneTab === name)));
+      try { sessionStorage.setItem(key, name); } catch {}
+    };
+    tabs.forEach((t) => t.addEventListener("click", () => { show(t.dataset.paneTab); scrollTo({ top: 0 }); }));
+    let saved = null;
+    try { saved = sessionStorage.getItem(key); } catch {}
+    if (location.hash === "#yechim" || saved === "solve") show("solve");  // a reload after submitting stays on the code
+  })();
+</script>
 <script>
   document.querySelectorAll(".ca-copy-btn").forEach((btn) => {
     btn.addEventListener("click", async () => {

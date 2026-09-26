@@ -277,3 +277,31 @@ def test_hints_are_locked_for_the_players_of_an_active_duel(client, duel_pool):
     assert client.post(reverse("problems:hint", args=[duel.problem.slug, hint.pk])).status_code == 400
     page = client.get(reverse("problems:detail", args=[duel.problem.slug])).content.decode()
     assert "Duel" in page
+
+
+@pytest.mark.django_db
+def test_duel_page_shows_both_players_attempts_and_solve_time(client, duel_pool, python):
+    from .duels import accept, challenge
+
+    p1, p2 = _players()
+    duel, _ = challenge(p1, "p2", "easy")
+    accept(duel, p2)
+    duel.refresh_from_db()
+    for verdict, minutes in (("WA", 3), ("AC", 7)):
+        s = Submission.objects.create(user=p1, problem=duel.problem, language=python, source="x", verdict=verdict)
+        Submission.objects.filter(pk=s.pk).update(created=duel.started_at + timezone.timedelta(minutes=minutes))
+    Submission.objects.create(user=p2, problem=duel.problem, language=python, source="x", verdict="WA")
+    client.force_login(p2)
+    r = client.get(reverse("classroom:duel", args=[duel.pk]))
+    players = {p["user"].username: p for p in r.context["players"]}
+    assert (players["p1"]["attempts"], players["p1"]["solved_in"]) == (2, "07:00")
+    assert (players["p2"]["attempts"], players["p2"]["solved_in"]) == (1, None)
+    assert players["p1"]["winner"] and "07:00" in r.content.decode()
+
+
+@pytest.mark.django_db
+def test_challenge_form_suggests_classmates(client, klass):
+    ali = User.objects.get(username="ali")
+    client.force_login(ali)
+    names = client.get(reverse("classroom:duels")).context["classmates"]
+    assert sorted(names) == ["sami", "vali"]  # the group, minus yourself; the teacher isn't a member

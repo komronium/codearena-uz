@@ -33,7 +33,7 @@
     <a href="{% url 'home' %}" class="ca-brand mr-3 shrink-0">
       <span class="ca-brand-mark" aria-hidden="true"><i data-lucide="code" class="lu"></i></span>CodeArena
     </a>
-    <form method="get" action="{% url 'problems:list' %}" class="relative ml-auto hidden w-56 md:block" role="search">
+    <form method="get" action="{% url 'problems:list' %}" class="relative ml-auto hidden w-56 md:block" role="search" aria-label="Masala qidirish">
       <i data-lucide="search" class="lu pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-mute" aria-hidden="true"></i>
       <input type="search" name="q" placeholder="Masala qidirish…" class="ca-input !py-1.5 pl-8 text-sm" aria-label="Masala qidirish">
     </form>
@@ -43,8 +43,8 @@
     </button>
     {% if user.is_authenticated %}
         <a href="{% url 'profile' user.username %}" class="ca-nav-link min-w-0 gap-2 max-w-[11rem] !px-1.5 sm:!px-3" title="{{ user.username }}" aria-label="Profil: {{ user.username }}" translate="no" style="--tier: {{ user.rating|tier_color }}">
-          <span class="ca-avatar h-7 w-7 text-xs sm:h-6 sm:w-6 sm:text-[.65rem]" style="background: color-mix(in srgb, var(--tier) 14%, transparent); color: var(--tier)">{% if user.avatar %}<img src="{{ user.avatar.url }}" alt="" width="28" height="28">{% else %}{{ user.username|first }}{% endif %}</span>
-          <span class="hidden truncate font-semibold sm:inline" style="color: var(--tier)">{{ user.username }}</span>
+          <span class="ca-avatar h-7 w-7 text-xs sm:h-6 sm:w-6 sm:text-[.65rem]" style="background: color-mix(in srgb, var(--tier) 14%, transparent); color: color-mix(in oklab, var(--tier) 62%, rgb(var(--ca-ink-rgb)))">{% if user.avatar %}<img src="{{ user.avatar.url }}" alt="" width="28" height="28">{% else %}{{ user.username|first }}{% endif %}</span>
+          <span class="ca-tier-ink hidden truncate font-semibold sm:inline">{{ user.username }}</span>
         </a>
         <form method="post" action="{% url 'logout' %}">{% csrf_token %}
           <button type="submit" class="ca-btn ca-btn-ghost !px-2.5 !py-1.5 text-sm sm:!px-3" aria-label="Chiqish" title="Chiqish"><i data-lucide="log-out" class="lu sm:!hidden" aria-hidden="true"></i><span class="hidden sm:inline">Chiqish</span></button>
