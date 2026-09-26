@@ -108,9 +108,19 @@ RQ queue, and verdicts, solves, points and standings follow the new results.
 Ratings already applied do not change.
 
 `recalc_rating` requires `Contest.is_rated=True` and `Contest.has_ended`; it's
-a no-op if `rating_applied` is already set. Teacher-only per-contest report
-(focus events + similarity flags) is at `/integrity/contest/<id>/`
-(`is_staff` required).
+a no-op if `rating_applied` is already set. Disqualifying or re-qualifying
+someone after that recomputes the contest's rating when it is still the latest
+rated contest of its participants; otherwise ratings stay and staff get a warning.
+
+Teacher-only per-contest report is at `/integrity/contest/<id>/` (`is_staff`
+required): browser events, plus server-side evidence the browser can't hide —
+submits with no tracker heartbeat, code that never appeared in the editor
+snapshots, code jumps, one device shared by two participants, one participant on
+two devices at once — and similarity flags (contest ACs, the last attempt of
+those without AC, and solutions from before the contest). Every staff action
+that changes a result (DQ, rejudge, publish, rating, flag review, deletes) is in
+the audit log at `/integrity/audit/`; a disqualified participant sees the reason
+on the contest page.
 
 `Contest.require_group` / `allowed_ip_prefix` restrict who can register and
 submit ("supervised mode") — checked again on every submit, not just at

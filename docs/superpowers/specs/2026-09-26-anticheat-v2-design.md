@@ -99,7 +99,7 @@ otherwise → a warning that ratings stay.
 ## Migrations
 
 `contests/0007_participation_last_seen_at`, `submissions/0006_submission_telemetry`,
-`integrity/0004_deviceseen_auditentry`.
+`integrity/0004_deviceseen`, `integrity/0005_auditentry`.
 
 ## Tasks
 

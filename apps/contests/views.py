@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.core.paginator import Paginator
@@ -12,6 +13,7 @@ from apps.submissions.solves import refresh_solves
 
 from apps.integrity import audit
 
+from . import rating
 from .models import Clarification, Contest, Participation
 from .services import access_allowed
 from .standings import compute_standings
@@ -115,10 +117,24 @@ def disqualify(request, pk, user_id):
         if p.contest.published_at is not None:
             for problem_id in p.contest.contest_problems.values_list("problem_id", flat=True):
                 refresh_solves(problem_id, [p.user_id])
+        if p.contest.rating_applied:
+            _rerate_after_dq(request, p.contest)
     cache.delete(f"contest-standings-{pk}")
     if request.POST.get("back") == "report":
         return redirect("integrity:contest_report", pk)
     return redirect("contests:standings", pk=pk)
+
+
+def _rerate_after_dq(request, contest):
+    """A DQ moves the participant to last place, which changes everyone's delta. Only the
+    latest rated contest can be redone without breaking later rating chains."""
+    if rating.is_latest(contest):
+        rating.recompute(contest)
+        audit.record(request, audit.Action.RATING_RECOMPUTE, contest=contest)
+        messages.success(request, "Reyting qayta hisoblandi.")
+    else:
+        messages.warning(request, "Ishtirokchilar keyinroq boshqa reytingli musobaqada qatnashgan — "
+                                  "bu musobaqaning reyting o‘zgarmadi.")
 
 
 @login_required
