@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.management import call_command
+from django.core.paginator import Paginator
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -14,8 +15,9 @@ from apps.problems.models import Language, Problem
 from apps.submissions.models import Submission
 from apps.submissions.ratelimit import rate_limited
 
+from . import audit
 from .evidence import JUMP_CHARS, contest_evidence
-from .models import CodeSnapshot, DeviceSeen, FocusEvent, SimilarityFlag
+from .models import AuditEntry, CodeSnapshot, DeviceSeen, FocusEvent, SimilarityFlag
 from .similarity import MIN_LINES, THRESHOLD, matched_lines
 
 # First-open-to-AC time no genuine read-think-type pass beats, per difficulty (beginner: none).
@@ -143,6 +145,7 @@ def contest_report(request, pk):
         "suspicious": suspicious, "min_lines": MIN_LINES, "threshold": round(THRESHOLD * 100),
         "quick_after_return_s": _QUICK_AFTER_RETURN_S, "min_away_s": _MIN_AWAY_S,
         "speed_limits": _SPEED_LIMITS_S, "contest_problems": contest.contest_problems.select_related("problem"),
+        "audit": AuditEntry.objects.filter(contest=contest).select_related("actor", "subject")[:20],
     })
 
 
@@ -260,12 +263,25 @@ def replay(request, pk, user_id, problem_id):
 
 
 @staff_required
+def audit_log(request):
+    entries = AuditEntry.objects.select_related("actor", "subject", "contest")
+    contest = None
+    if request.GET.get("contest", "").isdigit():
+        contest = Contest.objects.filter(pk=request.GET["contest"]).first()
+        entries = entries.filter(contest=contest)
+    page = Paginator(entries, 50).get_page(request.GET.get("page"))
+    return render(request, "integrity/audit.html", {"entries": page, "contest": contest})
+
+
+@staff_required
 @require_POST
 def flag_review(request, pk):
     flag = get_object_or_404(SimilarityFlag, pk=pk)
     flag.reviewed = not flag.reviewed
     flag.note = request.POST.get("note", flag.note).strip()
     flag.save(update_fields=["reviewed", "note"])
+    if flag.reviewed:
+        audit.record(request, audit.Action.FLAG_REVIEW, contest=flag.submission_a.contest, note=flag.note)
     return redirect(reverse("integrity:contest_report", args=[flag.submission_a.contest_id]) + f"#flag-{flag.pk}")
 
 

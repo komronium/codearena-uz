@@ -2,6 +2,7 @@
 {% block title %}{% if contest_problem %}{{ contest_problem.label }}. {% endif %}{{ problem.title }}{% endblock %}
 {% block sidebar %}{% endblock %}
 {% block content %}
+{% include "contests/_dq_banner.html" with participation=my_participation %}
 <div class="mb-5 flex flex-wrap items-center justify-between gap-3 text-sm">
   {% if contest %}
   <a class="ca-link text-mute" href="{% url 'contests:detail' contest.pk %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>{{ contest.title }}</a>

@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{{ contest.title }}{% endblock %}
 {% block content %}
+{% include "contests/_dq_banner.html" with participation=my_participation %}
 <div class="ca-panel mb-6 !p-0 overflow-hidden">
   <div class="px-6 pb-5 pt-5">
     <div class="mb-2 flex flex-wrap items-center gap-2">

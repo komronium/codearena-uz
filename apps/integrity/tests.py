@@ -524,3 +524,49 @@ def test_flag_similarity_catches_copies_of_prior_solutions(client, flag_contest,
     assert "Musobaqadan oldingi yechim" in r.content.decode()
     ev = dict(r.context["rows"])[ali]["evidence"]
     assert "similar" in [e.kind for e in ev]
+
+
+def test_staff_actions_land_in_the_audit_log(client, flag_contest, flag_problem, flag_python):
+    from unittest.mock import patch
+
+    from .models import AuditEntry
+
+    boss = User.objects.create_user("aud-boss", password="x", is_staff=True)
+    ali = User.objects.create_user("aud-ali", password="x")
+    Participation.objects.create(user=ali, contest=flag_contest)
+    a = _ac(ali, flag_problem, flag_contest, flag_python, LONG_SOURCE)
+    b = _ac(User.objects.create_user("aud-bob", password="x"), flag_problem, flag_contest, flag_python, LONG_SOURCE)
+    flag = SimilarityFlag.objects.create(submission_a=a, submission_b=b, score=1.0)
+    client.force_login(boss)
+    dq = reverse("contests:disqualify", args=[flag_contest.pk, ali.pk])
+    client.post(dq, {"disqualified": "1", "reason": "copy of #2"})
+    client.post(dq, {"disqualified": "1", "reason": "again"})  # no change, no entry
+    client.post(dq, {"disqualified": "0"})
+    client.post(reverse("integrity:flag_review", args=[flag.pk]), {"note": "same code"})
+    with patch("apps.moderation.views.django_rq.get_queue"):
+        client.post(reverse("moderation:problem_rejudge", args=[flag_problem.pk]))
+
+    got = list(AuditEntry.objects.order_by("id").values_list("action", "actor__username", "subject__username",
+                                                              "contest_id", "note"))
+    assert got == [
+        ("disqualify", "aud-boss", "aud-ali", flag_contest.pk, "copy of #2"),
+        ("requalify", "aud-boss", "aud-ali", flag_contest.pk, ""),
+        ("flag_review", "aud-boss", None, flag_contest.pk, "same code"),
+        ("rejudge", "aud-boss", None, None, "A: 2 ta urinish"),
+    ]
+    page = client.get(reverse("integrity:audit")).content.decode()
+    assert "copy of #2" in page and "aud-ali" in page
+    assert "copy of #2" in client.get(reverse("integrity:contest_report", args=[flag_contest.pk])).content.decode()
+    client.force_login(ali)
+    assert client.get(reverse("integrity:audit")).status_code in (302, 403)
+
+
+def test_disqualified_participant_sees_why(client, flag_contest, flag_problem):
+    ali = User.objects.create_user("dqv", password="x")
+    Participation.objects.create(user=ali, contest=flag_contest, disqualified=True,
+                                 disqualified_reason="Kod #12 bilan bir xil")
+    client.force_login(ali)
+    for url in (reverse("contests:detail", args=[flag_contest.pk]),
+                reverse("problems:detail", args=[flag_problem.slug])):
+        page = client.get(url).content.decode()
+        assert "diskvalifikatsiya qilingansiz" in page and "Kod #12 bilan bir xil" in page, url

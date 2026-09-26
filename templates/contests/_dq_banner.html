@@ -1,0 +1,7 @@
+{% comment %}The participant's own disqualification, with the reason staff gave; ctx: participation.{% endcomment %}
+{% if participation.disqualified %}
+<div class="ca-alert ca-alert-bad mb-6" role="alert">
+  <p class="font-semibold"><i data-lucide="ban" class="lu mr-1.5" aria-hidden="true"></i>Siz ushbu musobaqadan diskvalifikatsiya qilingansiz.</p>
+  <p class="mt-1 text-sm">{% if participation.disqualified_reason %}Sabab: {{ participation.disqualified_reason }}{% else %}Sabab ko‘rsatilmagan.{% endif %} Natijangiz hisobga olinmaydi. Xato deb hisoblasangiz, o‘qituvchingizga murojaat qiling.</p>
+</div>
+{% endif %}

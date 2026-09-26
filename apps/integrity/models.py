@@ -68,3 +68,28 @@ class DeviceSeen(models.Model):
 
     class Meta:
         unique_together = ("contest", "user", "device")
+
+
+class AuditEntry(models.Model):
+    """Who did what to a result, and why. Links are SET_NULL so the record outlives them."""
+    class Action(models.TextChoices):
+        DISQUALIFY = "disqualify", "Diskvalifikatsiya"
+        REQUALIFY = "requalify", "Diskvalifikatsiya bekor"
+        REJUDGE = "rejudge", "Qayta tekshiruv"
+        PUBLISH = "publish", "Masalalar ochildi"
+        RATING_APPLY = "rating_apply", "Reyting hisoblandi"
+        RATING_RECOMPUTE = "rating_recompute", "Reyting qayta hisoblandi"
+        FLAG_REVIEW = "flag_review", "O‘xshashlik ko‘rildi"
+        PROBLEM_DELETE = "problem_delete", "Masala o‘chirildi"
+        CONTEST_DELETE = "contest_delete", "Musobaqa o‘chirildi"
+
+    actor = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="+")
+    action = models.CharField(max_length=20, choices=Action.choices)
+    contest = models.ForeignKey(Contest, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    subject = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
+                                related_name="+")
+    note = models.CharField(max_length=300, blank=True)
+    at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-at", "-id"]

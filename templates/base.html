@@ -767,6 +767,10 @@
       <i data-lucide="tags" class="lu" aria-hidden="true"></i>
       Teglar
     </a>
+    <a href="{% url 'integrity:audit' %}" class="ca-sidebar-link {% if ns == 'integrity' and un == 'audit' %}is-active{% endif %}">
+      <i data-lucide="scroll-text" class="lu" aria-hidden="true"></i>
+      Amallar jurnali
+    </a>
     {% endwith %}
     {% endif %}
   </aside>{% endblock %}

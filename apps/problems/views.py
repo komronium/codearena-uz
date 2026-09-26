@@ -194,6 +194,8 @@ def problem_detail(request, slug):
         "languages": languages,
         "sql_dataset": getattr(problem, "sql_dataset", None),
         "contest": contest,
+        "my_participation": (contest.participations.filter(user=request.user).first()
+                             if contest and request.user.is_authenticated else None),
     })
 
 

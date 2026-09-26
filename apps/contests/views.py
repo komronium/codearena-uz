@@ -10,6 +10,8 @@ from django.views.decorators.http import require_POST
 from apps.accounts.decorators import staff_required
 from apps.submissions.solves import refresh_solves
 
+from apps.integrity import audit
+
 from .models import Clarification, Contest, Participation
 from .services import access_allowed
 from .standings import compute_standings
@@ -43,10 +45,9 @@ def _standings(contest):
 def contest_detail(request, pk):
     contest = get_object_or_404(Contest, pk=pk)
     problems = list(contest.contest_problems.select_related("problem"))
-    registered = (
-        request.user.is_authenticated
-        and Participation.objects.filter(user=request.user, contest=contest).exists()
-    )
+    me = (Participation.objects.filter(user=request.user, contest=contest).first()
+          if request.user.is_authenticated else None)
+    registered = me is not None
     my_row, solved_count = None, {}
     if contest.has_started:
         rows = _standings(contest)
@@ -60,6 +61,7 @@ def contest_detail(request, pk):
         cp.solved_count = solved_count.get(cp.id, 0)
     return render(request, "contests/detail.html", {
         "contest": contest, "problems": problems, "registered": registered, "my_row": my_row,
+        "my_participation": me,
         "n_participants": contest.participations.count(),
     })
 
@@ -108,6 +110,8 @@ def disqualify(request, pk, user_id):
         p.disqualified = want
         p.disqualified_reason = request.POST.get("reason", "").strip()[:200] if want else ""
         p.save(update_fields=["disqualified", "disqualified_reason"])
+        audit.record(request, audit.Action.DISQUALIFY if want else audit.Action.REQUALIFY,
+                     contest=p.contest, subject=p.user, note=p.disqualified_reason)
         if p.contest.published_at is not None:
             for problem_id in p.contest.contest_problems.values_list("problem_id", flat=True):
                 refresh_solves(problem_id, [p.user_id])

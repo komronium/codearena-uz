@@ -17,6 +17,7 @@ from apps.contests.services import reuse_reason
 from apps.problems.models import Problem, Tag, TestCase
 from apps.submissions.models import Submission, TestResult, UserProblemSolved
 from apps.submissions.solves import refresh_solves
+from apps.integrity import audit
 from judge.runner import run_submission
 
 from .ai import DEFAULT_COUNT, DEFAULT_MODEL, MODEL_CHOICES, AIGenerationError, generate_problems
@@ -177,6 +178,7 @@ def problem_delete(request, pk):
                                     "yuborgan — o‘chirib bo‘lmaydi, yashirib qo‘ying.")
             return redirect("moderation:problems")
         problem.delete()
+        audit.record(request, audit.Action.PROBLEM_DELETE, note=f"{problem.slug} — {problem.title}")
     messages.success(request, f"«{problem.title}» o'chirildi.")
     return redirect("moderation:problems")
 
@@ -205,6 +207,8 @@ def problem_rejudge(request, pk):
             for submission_id in ids:
                 queue.enqueue(run_submission, submission_id)
         transaction.on_commit(enqueue)
+        if ids:
+            audit.record(request, audit.Action.REJUDGE, note=f"{problem.title}: {len(ids)} ta urinish")
     messages.success(request, f"{len(ids)} ta urinish qayta tekshirishga yuborildi.")
     applied = list(problem.contests.filter(rating_applied=True).values_list("title", flat=True))
     if applied:
@@ -301,6 +305,7 @@ def contest_delete(request, pk):
         if contest.submissions.exists():
             messages.error(request, f"«{contest.title}» musobaqasida urinishlar bor — o‘chirib bo‘lmaydi.")
             return redirect("moderation:contests")
+        audit.record(request, audit.Action.CONTEST_DELETE, note=f"#{contest.pk} — {contest.title}")
         contest.delete()
     messages.success(request, f"«{contest.title}» o'chirildi.")
     return redirect("moderation:contests")
@@ -323,6 +328,7 @@ def contest_publish(request, pk):
             contest.save(update_fields=["published_at"])
         for problem_id in contest.contest_problems.values_list("problem_id", flat=True):
             refresh_solves(problem_id)
+        audit.record(request, audit.Action.PUBLISH, contest=contest)
     granted = UserProblemSolved.objects.filter(first_ac_submission__contest=contest).count()
     messages.success(request, f"Masalalar ochildi; {granted} ta yechim amaliyot balliga o'tkazildi.")
     return redirect("moderation:contests")
@@ -333,6 +339,7 @@ def contest_publish(request, pk):
 def contest_apply_rating(request, pk):
     try:
         call_command("recalc_rating", pk)
+        audit.record(request, audit.Action.RATING_APPLY, contest=Contest.objects.get(pk=pk))
         messages.success(request, "Reyting hisoblandi.")
     except CommandError as e:
         messages.error(request, f"Reyting hisoblanmadi: {e}")

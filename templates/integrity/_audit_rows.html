@@ -1,0 +1,21 @@
+{% if entries %}
+<div class="ca-panel !p-0 overflow-x-auto">
+<table class="ca-table">
+  <thead><tr><th>Vaqt</th><th>Kim</th><th>Amal</th><th>Kimga</th><th>Musobaqa</th><th>Izoh</th></tr></thead>
+  <tbody>
+  {% for e in entries %}
+  <tr>
+    <td class="tabular whitespace-nowrap text-xs text-mute">{{ e.at|date:"d.m.Y H:i" }}</td>
+    <td>{% if e.actor %}{{ e.actor.username }}{% else %}<span class="text-mute">—</span>{% endif %}</td>
+    <td class="whitespace-nowrap font-medium{% if e.action == 'disqualify' %} text-bad{% endif %}">{{ e.get_action_display }}</td>
+    <td>{% if e.subject %}{{ e.subject.username }}{% else %}<span class="text-mute">—</span>{% endif %}</td>
+    <td>{% if e.contest %}<a class="ca-link" href="?contest={{ e.contest.pk }}">{{ e.contest.title }}</a>{% else %}<span class="text-mute">—</span>{% endif %}</td>
+    <td class="text-sm">{{ e.note|default:"" }}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% else %}
+<div class="ca-empty">Hali amal yo‘q.</div>
+{% endif %}
