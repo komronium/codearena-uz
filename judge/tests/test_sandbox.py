@@ -72,3 +72,40 @@ def test_reports_peak_memory_per_test():
     d = _src("n=int(input())\nx=bytearray(n*1024*1024)\nprint(len(x))")
     (_, v1, _, small), (_, v2, _, big) = run_tests(Lang, d, ["1\n", "40\n"], 2000, 128)
     assert v1 == v2 == "OK" and small < 20_000 and big >= 40 * 1024
+
+
+def test_solution_cannot_read_test_inputs():
+    d = _src("try:\n    print(open('/work/tests/0001.in').read().strip())\nexcept OSError:\n    print('blocked')")
+    res = run_tests(Lang, d, ["1\n", "secret\n"], 1000, 64)
+    assert [o for o, _, _, _ in res] == ["blocked\n", "blocked\n"]
+
+
+def test_solution_cannot_forge_results():
+    # A forged "test 2 passed" line would show up as a second result.
+    d = _src("try:\n    open('/out/result', 'a').write('0001 0 0 0 0\\n')\nexcept OSError:\n    pass\nprint(1/0)")
+    assert [v for _, v, _, _ in run_tests(Lang, d, ["", ""], 1000, 64)] == ["RE"]
+
+
+def test_output_flood_is_ole_and_capped():
+    d = _src("import sys\nwhile True: sys.stdout.write('x' * 65536)")
+    res = run_tests(Lang, d, ["", ""], 2000, 64, output_limit=1 << 20)
+    assert [v for _, v, _, _ in res] == ["OLE"]
+    assert os.path.getsize(os.path.join(d, "out", "0000.out")) <= 1 << 20
+
+
+def test_output_limit_counts_all_tests_together():
+    d = _src("print('x' * 300_000)")
+    res = run_tests(Lang, d, ["", "", ""], 2000, 64, output_limit=700_000)
+    assert [v for _, v, _, _ in res] == ["OK", "OK", "OLE"]
+
+
+def test_orphan_is_killed_before_next_test():
+    d = _src("import subprocess\n"
+             "if input() == '1':\n"
+             "    subprocess.Popen(['sleep', '30'], start_new_session=True)\n"
+             "    print('spawned')\n"
+             "else:\n"
+             "    r = subprocess.run(['pgrep', 'sleep'], capture_output=True)\n"
+             "    print('alive' if r.stdout.strip() else 'gone')")
+    res = run_tests(Lang, d, ["1\n", "2\n"], 2000, 64)
+    assert [o for o, _, _, _ in res] == ["spawned\n", "gone\n"]

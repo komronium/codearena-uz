@@ -82,7 +82,10 @@ def run_submission(submission_id: int) -> None:
             return
 
         final, passed, max_ms, max_kb = Submission.Verdict.AC, 0, 0, 0
-        results = sandbox.run_tests(lang, src_dir, [tc.input for tc in tests], problem.tl_ms, problem.ml_mb)
+        # The cap covers all tests together; a problem with big answers gets room for them.
+        output_limit = max(sandbox.DEFAULT_OUTPUT_LIMIT, 2 * sum(len(tc.expected.encode()) for tc in tests))
+        results = sandbox.run_tests(lang, src_dir, [tc.input for tc in tests], problem.tl_ms, problem.ml_mb,
+                                    output_limit=output_limit)
         rows = []
         for tc, (out, v, ms, kb) in zip(tests, results):
             max_ms, max_kb = max(max_ms, ms), max(max_kb, kb)

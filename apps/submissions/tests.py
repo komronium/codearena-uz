@@ -238,6 +238,21 @@ def test_runner_runs_tests_in_their_order(compile_, run_tests, problem, python, 
     assert run_tests.call_args.args[2] == ["first\n", "1 2\n", "5 7\n"]
 
 
+@patch("judge.runner.sandbox.run_tests", return_value=[])
+@patch("judge.runner.sandbox.compile", return_value=(True, ""))
+def test_runner_output_limit_leaves_room_for_big_answers(compile_, run_tests, problem, python, user):
+    from judge import sandbox
+    from judge.runner import run_submission
+    s = Submission.objects.create(user=user, problem=problem, language=python, source="x")
+    run_submission(s.pk)
+    assert run_tests.call_args.kwargs["output_limit"] == sandbox.DEFAULT_OUTPUT_LIMIT
+    big = "x" * (9 * 1024 * 1024)
+    TestCase.objects.create(problem=problem, input="0\n", expected=big, order=2)
+    s = Submission.objects.create(user=user, problem=problem, language=python, source="x")
+    run_submission(s.pk)
+    assert run_tests.call_args.kwargs["output_limit"] == 2 * (len("3\n") + len("12\n") + len(big))
+
+
 # --- practice points: spec §2 step 5 says first AC per (user, problem) awards
 # problem.points once, via a UserProblemSolved row. Not in the original task
 # brief text; added here since judge.runner is exactly where AC is decided.

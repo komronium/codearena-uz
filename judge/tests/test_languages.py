@@ -49,3 +49,24 @@ def test_a_plus_b_ac(lang_code):
     assert ok, log
     out, verdict, ms, kb = run_tests(lang, d, ["1 2\n"], 1000, 128)[0]
     assert verdict == "OK" and out.strip() == "3" and kb > 0
+
+
+FLOOD_SOURCE = {
+    "cpp": "#include <cstdio>\nint main(){static char b[65536]; for(auto&c:b)c='x';"
+           " while(1) fwrite(b,1,sizeof b,stdout);}\n",
+    "java": "public class Main{public static void main(String[] a){String s=\"x\".repeat(65536);"
+            "while(true) System.out.print(s);}}\n",
+    "node": "const s='x'.repeat(65536); while(true) process.stdout.write(s);\n",
+}
+
+
+@pytest.mark.parametrize("lang_code", ["cpp", "java", "node"])
+def test_output_flood_is_ole(lang_code):
+    # Only C++ dies of SIGXFSZ; Java and Node keep running with failed writes, so the
+    # verdict has to come from the capped output size, not from how the program ended.
+    lang = LANGS[lang_code]
+    d = _src(lang_code, FLOOD_SOURCE[lang_code])
+    ok, log = compile(lang, d)
+    assert ok, log
+    res = run_tests(lang, d, [""], 1000, 256, output_limit=1 << 20)
+    assert [v for _, v, _, _ in res] == ["OLE"]
