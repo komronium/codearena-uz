@@ -11,6 +11,7 @@ from apps.contests.models import Clarification, Contest, ContestProblem, Partici
 from apps.integrity.models import FocusEvent, SimilarityFlag
 from apps.problems.models import Language, Problem, Tag, TestCase
 from apps.submissions.models import Submission, UserProblemSolved
+from apps.submissions.solves import sync_practice_points
 
 TAGS = ["arrays", "graphs", "dp", "math", "strings",
         "search", "greedy", "sorting", "recursion", "binary search"]
@@ -207,6 +208,8 @@ class Command(BaseCommand):
                         kinds += ["copy"] * random.randint(0, 3)
                         events += [FocusEvent(user=u, contest=c, kind=k) for k in kinds]
                     FocusEvent.objects.bulk_create(events)
+
+        sync_practice_points()  # demo totals follow the demo solves, like real ones
 
         self.stdout.write(self.style.SUCCESS(
             f"seeded demo data: {len(users)} users, {len(problems)} problems, "

@@ -1,29 +1,18 @@
 from django.core.management.base import BaseCommand
-from django.db import transaction
-from django.db.models import Sum
 
-from apps.accounts.models import User
-from apps.submissions.models import UserProblemSolved
+from apps.submissions.models import Submission, UserProblemSolved
+from apps.submissions.solves import refresh_solves, sync_practice_points
 
 
 class Command(BaseCommand):
-    help = ("One-off backfill: recompute every user's practice_points from the CURRENT "
-            "points value of each problem they've solved. Run once after changing how "
-            "Problem.points is scored (e.g. recalc_points) to bring past solves onto the "
-            "new values; not wired into the scheduler.")
+    help = ("Rebuild every solve from the eligibility rule (apps.submissions.solves), then "
+            "every user's practice_points. Idempotent. Run once after deploying the honest-results "
+            "change; the recalc_points sweep keeps points live after that.")
 
     def handle(self, *args, **opts):
-        totals = dict(
-            UserProblemSolved.objects.values("user_id")
-            .annotate(total=Sum("problem__points"))
-            .values_list("user_id", "total")
-        )
-        updated = 0
-        with transaction.atomic():
-            for user in User.objects.all():
-                new_total = totals.get(user.pk, 0)
-                if user.practice_points != new_total:
-                    user.practice_points = new_total
-                    user.save(update_fields=["practice_points"])
-                    updated += 1
-        self.stdout.write(self.style.SUCCESS(f"{updated} user(s) repointed"))
+        problem_ids = (set(Submission.objects.filter(verdict=Submission.Verdict.AC).values_list("problem_id", flat=True))
+                       | set(UserProblemSolved.objects.values_list("problem_id", flat=True)))
+        for problem_id in problem_ids:
+            refresh_solves(problem_id)
+        sync_practice_points()  # users with no solve left drop to 0
+        self.stdout.write(self.style.SUCCESS(f"{len(problem_ids)} problem(s) resynced"))

@@ -155,13 +155,12 @@ class UserForm(ModelForm):
     class Meta:
         model = User
         fields = ["username", "email", "first_name", "last_name", "role", "is_staff", "is_active",
-                  "rating", "practice_points", "school", "location"]
+                  "rating", "school", "location"]
         widgets = {
             **{k: forms.TextInput(attrs=_CA_INPUT) for k in ["username", "first_name", "last_name", "school", "location"]},
             "email": forms.EmailInput(attrs=_CA_INPUT),
             "role": forms.Select(attrs={"class": "ca-select"}),
             "rating": forms.NumberInput(attrs=_CA_INPUT),
-            "practice_points": forms.NumberInput(attrs=_CA_INPUT),
         }
 
     def clean_username(self):

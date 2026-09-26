@@ -28,7 +28,7 @@
     </div>
     <div class="grid gap-4 sm:grid-cols-2">
       <div><label class="ca-label" for="{{ form.rating.id_for_label }}">Reyting</label>{{ form.rating }}{{ form.rating.errors }}</div>
-      <div><label class="ca-label" for="{{ form.practice_points.id_for_label }}">Amaliyot ball</label>{{ form.practice_points }}{{ form.practice_points.errors }}</div>
+      <div><p class="ca-label">Amaliyot ball</p><p class="tabular py-2 text-sm">{{ form.instance.practice_points }} <span class="text-mute">· yechilgan masalalardan hisoblanadi</span></p></div>
     </div>
     <p class="text-xs text-mute">Parolni faqat foydalanuvchining o‘zi <a class="ca-link" href="{% url 'password_reset' %}">tiklash havolasi</a> orqali o‘zgartiradi.</p>
   </section>

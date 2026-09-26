@@ -216,10 +216,10 @@ def test_staff_can_edit_user_but_not_demote_self(client):
     student = User.objects.create_user("ali", password="x")
     client.force_login(staff)
     base = {"username": "ali", "email": "", "first_name": "", "last_name": "", "role": "student",
-            "rating": "1500", "practice_points": "0", "school": "", "location": "", "is_active": "on"}
+            "rating": "1500", "practice_points": "999", "school": "", "location": "", "is_active": "on"}
     assert client.post(reverse("moderation:user_edit", args=[student.pk]), {**base, "is_staff": "on"}).status_code == 302
     student.refresh_from_db()
-    assert student.is_staff is True and student.rating == 1500
+    assert student.is_staff is True and student.rating == 1500 and student.practice_points == 0
 
     r = client.post(reverse("moderation:user_edit", args=[staff.pk]), {**base, "username": "teacher"})
     assert r.status_code == 200

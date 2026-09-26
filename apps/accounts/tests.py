@@ -182,6 +182,29 @@ def test_recalc_practice_points_sums_current_points_of_solved_problems():
 
 
 @pytest.mark.django_db
+def test_recalc_practice_points_drops_solves_the_rule_no_longer_allows():
+    from django.core.management import call_command
+    from django.utils import timezone
+
+    from apps.contests.models import Contest, Participation
+
+    author = User.objects.create_user("teacher", password="x")
+    cheat = User.objects.create_user("cheat", password="x", practice_points=70)
+    python = Language.objects.create(code="python", name="Python 3", docker_image="x", run_cmd="x")
+    p = Problem.objects.create(slug="p", title="P", statement_md="x", author=author, points=70)
+    c = Contest.objects.create(title="C", start=timezone.now() - timezone.timedelta(hours=3),
+                               end=timezone.now() - timezone.timedelta(hours=2), published_at=timezone.now())
+    Participation.objects.create(user=cheat, contest=c, disqualified=True)
+    sub = Submission.objects.create(user=cheat, problem=p, contest=c, language=python, source="x", verdict="AC")
+    UserProblemSolved.objects.create(user=cheat, problem=p, first_ac_submission=sub)  # left by the old publish
+
+    call_command("recalc_practice_points")
+
+    cheat.refresh_from_db()
+    assert not UserProblemSolved.objects.filter(user=cheat).exists() and cheat.practice_points == 0
+
+
+@pytest.mark.django_db
 def test_register_rejects_email_as_username(client):
     r = client.post(reverse("register"), {
         "username": "ali@gmail.com", "email": "ali@gmail.com", "first_name": "Ali",

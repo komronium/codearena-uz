@@ -285,6 +285,30 @@ def test_recalc_points_command_updates_from_real_submissions():
     assert p.points == points_after_first_run
 
 
+@pytest.mark.django_db
+def test_recalc_points_makes_practice_points_live():
+    from django.core.management import call_command
+
+    from apps.submissions.models import Submission
+    from apps.submissions.solves import refresh_solves
+
+    author = User.objects.create_user("teacher", password="x", role="teacher")
+    ali = User.objects.create_user("ali", password="x")
+    p = Problem.objects.create(slug="p", title="P", statement_md="x", author=author, points=999,
+                               difficulty=Problem.Difficulty.EASY, status=Problem.Status.APPROVED)
+    python = Language.objects.create(code="python", name="Python 3", docker_image="x", run_cmd="x")
+    Submission.objects.create(user=ali, problem=p, language=python, source="x", verdict="AC")
+    refresh_solves(p.pk)
+    ali.refresh_from_db()
+    assert ali.practice_points == 999
+
+    call_command("recalc_points")
+
+    p.refresh_from_db()
+    ali.refresh_from_db()
+    assert p.points != 999 and ali.practice_points == p.points
+
+
 # ---- problem rating + solution leaderboards ---------------------------------------------------
 
 def _ac(user, problem, lang, exec_ms, source):

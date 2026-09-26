@@ -86,6 +86,15 @@ problems staff pick (same-language AC pairs, both 4+ lines, >= 90%):
 
     python manage.py flag_similarity <contest_id> --problems A,C
 
+Solves and practice points are derived (`apps/submissions/solves.py`): a solve is
+the user's earliest eligible AC (practice, or contest after the contest is
+published and the user is not disqualified), and `practice_points` is the
+current price of the solved problems, excluding problems the user authored.
+The scheduler's `recalc_points` reprices problems and resyncs every total every
+5 minutes. After deploying this change, rebuild every solve once:
+
+    docker compose exec web python manage.py recalc_practice_points
+
 Publishing contest problems (making them public + awarding practice points)
 is a manual staff action: Boshqaruv → Musobaqalar → Ochish. The old
 `close_ended_contests` command still exists but is intentionally not
