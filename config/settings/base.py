@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     "apps.submissions.apps.SubmissionsConfig",
     "apps.integrity.apps.IntegrityConfig",
     "apps.moderation.apps.ModerationConfig",
+    "apps.classroom.apps.ClassroomConfig",
 ]
 
 MIDDLEWARE = [

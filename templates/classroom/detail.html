@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}{{ assignment.title }}{% endblock %}
+{% block content %}
+<div class="mb-6 flex flex-wrap items-start justify-between gap-3">
+  <div>
+    <a class="ca-link mb-2 inline-block text-sm text-mute" href="{% url 'classroom:list' %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>Vazifalar</a>
+    <h1 class="ca-page-title">{{ assignment.title }}</h1>
+    <p class="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm text-mute">
+      <span><i data-lucide="users" class="lu mr-1" aria-hidden="true"></i>{{ assignment.group.name }}</span>
+      <span><i data-lucide="calendar-clock" class="lu mr-1" aria-hidden="true"></i>Muddat: <span class="tabular">{{ assignment.deadline|date:"d.m.Y H:i" }}</span></span>
+      <span><i data-lucide="list-checks" class="lu mr-1" aria-hidden="true"></i>{{ problems|length }} ta masala</span>
+    </p>
+  </div>
+  {% if grid is not None %}
+  <div class="flex gap-2">
+    <a class="ca-btn ca-btn-ghost !py-1.5" href="?format=csv"><i data-lucide="download" class="lu" aria-hidden="true"></i>CSV</a>
+    <a class="ca-btn ca-btn-ghost !py-1.5" href="{% url 'classroom:edit' assignment.pk %}"><i data-lucide="pencil" class="lu" aria-hidden="true"></i>Tahrirlash</a>
+  </div>
+  {% endif %}
+</div>
+
+{% if assignment.description_md %}<div class="ca-panel mb-6 whitespace-pre-line text-sm">{{ assignment.description_md }}</div>{% endif %}
+
+{% if mine %}
+<ul class="ca-rows mb-8">
+  {% for m in mine %}
+  <li class="ca-row">
+    <div class="ca-row-main">
+      <a class="ca-row-title ca-link" href="{% url 'problems:detail' m.problem.slug %}">{{ forloop.counter }}. {{ m.problem.title }}</a>
+      <div class="ca-row-meta"><span class="ca-diff ca-diff-{{ m.problem.difficulty }}">{{ m.problem.get_difficulty_display }}</span></div>
+    </div>
+    <div class="ca-row-side">{% include "classroom/_status.html" with c=m %}</div>
+  </li>
+  {% endfor %}
+</ul>
+{% endif %}
+
+{% if grid is not None %}
+<h2 class="ca-section-title">Guruh natijalari</h2>
+<div class="ca-panel !p-0 overflow-x-auto">
+<table class="ca-table">
+  <thead><tr>
+    <th>O‘quvchi</th>
+    {% for p in problems %}<th class="text-center"><a class="ca-link" href="{% url 'problems:detail' p.slug %}" title="{{ p.title }}">{{ forloop.counter }}</a></th>{% endfor %}
+    <th class="text-right">O‘z vaqtida</th><th class="text-right">Jami</th>
+  </tr></thead>
+  <tbody>
+  {% for r in grid %}
+  <tr>
+    <td>{% include "accounts/_user.html" with u=r.user tier=False %}</td>
+    {% for c in r.cells %}<td class="text-center whitespace-nowrap text-xs">{% include "classroom/_status.html" with c=c %}</td>{% endfor %}
+    <td class="tabular text-right font-semibold">{{ r.on_time }}</td>
+    <td class="tabular text-right text-mute">{{ r.solved }}</td>
+  </tr>
+  {% empty %}
+  <tr><td class="text-mute" colspan="{{ problems|length|add:3 }}">Guruhda o‘quvchi yo‘q.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+<p class="mt-2 text-xs text-mute">✓ sana — muddatida yechilgan · ✓ kech — muddatdan keyin · ✗ n — n ta noto‘g‘ri urinish, yechilmagan · — urinmagan</p>
+{% endif %}
+{% endblock %}

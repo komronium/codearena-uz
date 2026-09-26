@@ -11,6 +11,7 @@ urlpatterns = [
     path("submissions/", include("apps.submissions.urls")),
     path("integrity/", include("apps.integrity.urls")),
     path("moderation/", include("apps.moderation.urls")),
+    path("classroom/", include("apps.classroom.urls")),
     path("", RedirectView.as_view(pattern_name="problems:list", permanent=False)),
 ]
 
