@@ -14,6 +14,7 @@ from apps.problems.models import Language, Problem
 from apps.submissions.models import Submission
 from apps.submissions.ratelimit import rate_limited
 
+from .evidence import JUMP_CHARS, contest_evidence
 from .models import CodeSnapshot, DeviceSeen, FocusEvent, SimilarityFlag
 from .similarity import MIN_LINES, THRESHOLD, matched_lines
 
@@ -22,8 +23,6 @@ _SPEED_LIMITS_S = {Problem.Difficulty.EASY: 90, Problem.Difficulty.MEDIUM: 240, 
 # An absence this long, followed by AC this soon after coming back, is the PrtSc -> AI -> retype shape.
 _MIN_AWAY_S = 20
 _QUICK_AFTER_RETURN_S = 180
-# chars that appeared between two consecutive snapshots (~10 s apart) worth pointing at
-_JUMP_CHARS = 150
 
 
 _MAX_AWAY_MS = 6 * 3600 * 1000
@@ -120,12 +119,19 @@ def contest_report(request, pk):
         n_suspicious[r["user"]] = n_suspicious.get(r["user"], 0) + 1
         counts.setdefault(r["user"], _empty_counts())
 
+    evidence = contest_evidence(contest)
+    by_id = {u.pk: u for u in counts}
+    for user in User.objects.filter(pk__in=evidence.keys() - by_id.keys()):
+        counts[user] = _empty_counts()
+
     # ponytail: risk = weighted event count; tune weights once real contests give data
     def _risk(user, c):
         return (c["paste"] * 5 + c["copy"] * 2 + c["blur"] + c["fast"] * 3
-                + c["away_ms"] // 60_000 + n_suspicious.get(user, 0) * 4)
+                + c["away_ms"] // 60_000 + n_suspicious.get(user, 0) * 4
+                + sum(e.weight for e in c["evidence"]))
     parts = {p.user_id: p for p in Participation.objects.filter(contest=contest)}
     for user, c in counts.items():
+        c["evidence"] = evidence.get(user.pk, [])
         c["risk"] = _risk(user, c)
         c["suspicious"] = n_suspicious.get(user, 0)
         c["participation"] = parts.get(user.pk)
@@ -228,7 +234,7 @@ def replay(request, pk, user_id, problem_id):
         frames.append({"t": snap.at.isoformat(), "src": snap.source,
                        "lang": snap.language.name if snap.language else ""})
         # a big chunk appearing between two 10-second snapshots is text that wasn't typed here
-        if grew >= _JUMP_CHARS:
+        if grew >= JUMP_CHARS:
             jumps.append({"at": snap.at, "chars": grew, "secs": secs, "frame": len(frames) - 1})
         prev_len, prev_at = len(snap.source), snap.at
     timeline = [

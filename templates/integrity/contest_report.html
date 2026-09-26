@@ -16,12 +16,12 @@
 <section class="mb-8">
   <div class="mb-3 flex flex-wrap items-end justify-between gap-2">
     <h2 class="ca-section-title !mb-0">Xatti-harakat hodisalari</h2>
-    <p class="text-xs text-mute">Chiqish — musobaqa sahifalaridan tashqariga (boshqa oyna, varaq yoki saytning boshqa sahifasi) · Tashqarida — jami vaqt · Paste — muharrirga qo‘yish urinishi · Tez — g‘ayrioddiy tez matn kiritish · Nusxa — shart matnidan nusxa. Xavf = paste×5 + tez×3 + nusxa×2 + chiqish + tashqarida daqiqa + shubhali yechim×4.</p>
+    <p class="text-xs text-mute">Chiqish — musobaqa sahifalaridan tashqariga (boshqa oyna, varaq yoki saytning boshqa sahifasi) · Tashqarida — jami vaqt · Paste — muharrirga qo‘yish urinishi · Tez — g‘ayrioddiy tez matn kiritish · Nusxa — shart matnidan nusxa. Dalillar — serverda tekshirilgani, brauzerda o‘chirib bo‘lmaydi: tracker o‘chiq (×6), muharrirda yozilmagan kod (×8), kod sakrashi (×3), umumiy qurilma (×10), ikki qurilma (×5), o‘xshash kod (×8). Xavf = paste×5 + tez×3 + nusxa×2 + chiqish + tashqarida daqiqa + shubhali yechim×4 + dalillar.</p>
   </div>
   <div class="ca-panel !p-0 overflow-x-auto">
   <table class="ca-table">
     <thead>
-      <tr><th>Ishtirokchi</th><th class="text-right">Chiqish</th><th class="text-right">Tashqarida</th><th class="text-right">Paste</th><th class="text-right">Tez</th><th class="text-right">Nusxa</th><th class="text-right">Xavf</th><th class="hidden md:table-cell">Oxirgi hodisa</th><th class="text-right">Amal</th></tr>
+      <tr><th>Ishtirokchi</th><th class="text-right">Chiqish</th><th class="text-right">Tashqarida</th><th class="text-right">Paste</th><th class="text-right">Tez</th><th class="text-right">Nusxa</th><th>Dalillar</th><th class="text-right">Xavf</th><th class="hidden md:table-cell">Oxirgi hodisa</th><th class="text-right">Amal</th></tr>
     </thead>
     <tbody>
     {% for user, c in rows %}
@@ -32,6 +32,7 @@
       <td class="tabular text-right {% if c.paste %}text-bad font-semibold{% endif %}">{{ c.paste }}</td>
       <td class="tabular text-right {% if c.fast %}text-warn font-semibold{% endif %}">{{ c.fast }}</td>
       <td class="tabular text-right {% if c.copy %}text-warn{% endif %}">{{ c.copy }}</td>
+      <td class="min-w-56 text-xs">{% for e in c.evidence %}<p class="leading-5"><b class="text-bad">{{ e.label }}</b> · {% if e.submission %}<a class="ca-link" href="{% url 'submissions:detail' e.submission.pk %}">{{ e.text }}</a>{% else %}{{ e.text }}{% endif %}</p>{% empty %}<span class="text-mute">—</span>{% endfor %}</td>
       <td class="text-right"><span class="ca-chip {% if c.risk >= 15 %}text-bad{% elif c.risk >= 6 %}text-warn{% else %}text-mute{% endif %} tabular font-semibold">{{ c.risk }}</span></td>
       <td class="hidden md:table-cell tabular text-xs text-mute">{{ c.last|date:"d.m H:i:s" }}</td>
       <td class="text-right">
@@ -48,7 +49,7 @@
       </td>
     </tr>
     {% empty %}
-    <tr><td class="text-mute" colspan="9">Hodisa yo‘q.</td></tr>
+    <tr><td class="text-mute" colspan="10">Hodisa yo‘q.</td></tr>
     {% endfor %}
     </tbody>
   </table>

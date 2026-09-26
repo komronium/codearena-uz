@@ -391,3 +391,93 @@ def test_contest_page_sends_heartbeat_and_device(client, flag_contest):
     client.force_login(ali)
     page = client.get(reverse("contests:detail", args=[flag_contest.pk])).content.decode()
     assert reverse("integrity:beat") in page and "ca-device" in page
+
+
+def _snap(user, contest, problem, source, at):
+    from .models import CodeSnapshot
+
+    s = CodeSnapshot.objects.create(user=user, contest=contest, problem=problem, source=source)
+    CodeSnapshot.objects.filter(pk=s.pk).update(at=at)
+
+
+def _contest_sub(user, contest, problem, lang, source, at, **extra):
+    s = Submission.objects.create(user=user, problem=problem, contest=contest, language=lang, source=source,
+                                  verdict="AC", **extra)
+    Submission.objects.filter(pk=s.pk).update(created=at)
+    s.refresh_from_db()
+    return s
+
+
+def test_evidence_flags_silent_tracker_and_code_never_typed(flag_contest, flag_problem, flag_python):
+    from .evidence import contest_evidence
+
+    now = timezone.now()
+    honest = User.objects.create_user("ev1", password="x")
+    curl = User.objects.create_user("ev2", password="x")
+    for u in (honest, curl):
+        Participation.objects.create(user=u, contest=flag_contest)
+    # honest: typed it (the last snapshot is the code, reformatted), tracker beat 20 s before
+    _snap(honest, flag_contest, flag_problem, "n = int(input())\n", now - timezone.timedelta(minutes=3))
+    _snap(honest, flag_contest, flag_problem, LONG_SOURCE + "\n\n", now - timezone.timedelta(seconds=5))
+    _contest_sub(honest, flag_contest, flag_problem, flag_python, LONG_SOURCE, now,
+                 tracker_seen_at=now - timezone.timedelta(seconds=20))
+    # curl: no heartbeat, no snapshot; two submissions make one piece of evidence of each kind
+    for i in range(2):
+        _contest_sub(curl, flag_contest, flag_problem, flag_python, LONG_SOURCE, now + timezone.timedelta(minutes=i))
+
+    ev = contest_evidence(flag_contest)
+    assert ev.get(honest.pk, []) == []
+    kinds = sorted(e.kind for e in ev[curl.pk])
+    assert kinds == ["silent", "unseen"]
+    assert all("2" in e.text for e in ev[curl.pk])  # "2 ta yuborish"
+
+
+def test_evidence_flags_jumps_but_not_the_first_snapshot(flag_contest, flag_problem, flag_python):
+    from .evidence import contest_evidence
+
+    now = timezone.now()
+    ali = User.objects.create_user("ev3", password="x")
+    Participation.objects.create(user=ali, contest=flag_contest)
+    starter = "x" * 400  # a big starter template on first load is not a jump
+    _snap(ali, flag_contest, flag_problem, starter, now - timezone.timedelta(minutes=5))
+    _snap(ali, flag_contest, flag_problem, starter + "y" * 20, now - timezone.timedelta(minutes=4))
+    _snap(ali, flag_contest, flag_problem, starter + "y" * 20 + "z" * 300, now - timezone.timedelta(minutes=3))
+    ev = contest_evidence(flag_contest)[ali.pk]
+    assert [e.kind for e in ev] == ["jump"] and "300" in ev[0].text
+
+
+def test_evidence_flags_shared_and_second_devices(flag_contest):
+    from .evidence import contest_evidence
+    from .models import DeviceSeen
+
+    a, b, c = (User.objects.create_user(f"dv{i}", password="x") for i in range(3))
+    for u in (a, b, c):
+        Participation.objects.create(user=u, contest=flag_contest)
+    now = timezone.now()
+
+    def seen(user, device, start_min, end_min):
+        d = DeviceSeen.objects.create(contest=flag_contest, user=user, device=device, ip="10.0.0.1")
+        DeviceSeen.objects.filter(pk=d.pk).update(first_at=now + timezone.timedelta(minutes=start_min),
+                                                  last_at=now + timezone.timedelta(minutes=end_min))
+
+    seen(a, "laptop", 0, 30)
+    seen(b, "laptop", 40, 60)   # b later logged in on a's laptop
+    seen(c, "pc-1", 0, 20)
+    seen(c, "pc-2", 10, 30)     # c on two machines at once
+    seen(a, "phone", 31, 35)    # a switched devices without overlap: fine
+    ev = contest_evidence(flag_contest)
+    assert [e.kind for e in ev[a.pk]] == ["shared_device"] and "dv1" in ev[a.pk][0].text
+    assert [e.kind for e in ev[b.pk]] == ["shared_device"] and "dv0" in ev[b.pk][0].text
+    assert [e.kind for e in ev[c.pk]] == ["multi_device"]
+
+
+def test_report_ranks_by_server_evidence_and_shows_it(client, flag_contest, flag_problem, flag_python):
+    now = timezone.now()
+    curl = User.objects.create_user("ev4", password="x")
+    Participation.objects.create(user=curl, contest=flag_contest)
+    _contest_sub(curl, flag_contest, flag_problem, flag_python, LONG_SOURCE, now)
+    client.force_login(User.objects.create_user("boss4", password="x", is_staff=True))
+    r = client.get(reverse("integrity:contest_report", args=[flag_contest.pk]))
+    row = dict(r.context["rows"])[curl]
+    assert row["risk"] >= 14 and [e.kind for e in row["evidence"]] == ["silent", "unseen"]
+    assert "muharrirda yozilmagan" in r.content.decode()
