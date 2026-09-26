@@ -126,6 +126,25 @@ on the contest page.
 submit ("supervised mode") — checked again on every submit, not just at
 registration.
 
+## Learning and classroom
+
+- **Homework** (`/classroom/`): a group's teacher (or staff) gives a problem set with a
+  deadline; the grid shows each student as on time / late / tried, with CSV export.
+  Only public problems can be assigned.
+- **Hints and editorials**: staff add hints on the problem form, each costing a share of
+  the price if opened before the solve (capped at 90 %); the editorial opens after AC.
+  Both are locked while a contest or a duel uses the problem.
+- **Code review**: a group's teacher comments on a student's submission by line; the
+  student sees an unread badge and can reply.
+- **Skill map / next problem**: per-tag progress on the profile; "Keyingi masala" on the
+  problem list picks from the weakest tags at the student's level.
+- **Daily problem**: picked automatically per Tashkent day; solving it on its day keeps
+  the streak and gives +5 practice points.
+- **Virtual contests**: after a contest is published, anyone who didn't take part can
+  replay it on their own clock and see where they would have placed. Unrated.
+- **Duels** (`/classroom/duels/`): 1v1 on a problem neither player tried, 30 minutes,
+  first AC wins, separate duel rating.
+
 ## Problems, moderation, SQL problems
 
 Any logged-in user can submit a problem (`/moderation/submit/`) with its test
