@@ -473,9 +473,14 @@ def test_evidence_flags_shared_and_second_devices(flag_contest):
 
 def test_report_ranks_by_server_evidence_and_shows_it(client, flag_contest, flag_problem, flag_python):
     now = timezone.now()
+    from .models import DeviceSeen
+
     curl = User.objects.create_user("ev4", password="x")
     Participation.objects.create(user=curl, contest=flag_contest)
     _contest_sub(curl, flag_contest, flag_problem, flag_python, LONG_SOURCE, now)
+    honest = User.objects.create_user("ev5", password="x")  # the tracker ran in this contest
+    DeviceSeen.objects.create(contest=flag_contest, user=honest, device="d")
+    _snap(honest, flag_contest, flag_problem, "x = 1\n", now)
     client.force_login(User.objects.create_user("boss4", password="x", is_staff=True))
     r = client.get(reverse("integrity:contest_report", args=[flag_contest.pk]))
     row = dict(r.context["rows"])[curl]
@@ -570,3 +575,14 @@ def test_disqualified_participant_sees_why(client, flag_contest, flag_problem):
                 reverse("problems:detail", args=[flag_problem.slug])):
         page = client.get(url).content.decode()
         assert "diskvalifikatsiya qilingansiz" in page and "Kod #12 bilan bir xil" in page, url
+
+
+def test_evidence_skips_contests_from_before_telemetry(flag_contest, flag_problem, flag_python):
+    """A contest that ran before heartbeats and snapshots existed has none for anyone:
+    that says nothing about its participants."""
+    from .evidence import contest_evidence
+
+    for name in ("old1", "old2"):
+        _contest_sub(User.objects.create_user(name, password="x"), flag_contest, flag_problem, flag_python,
+                     LONG_SOURCE + name, timezone.now())
+    assert contest_evidence(flag_contest) == {}

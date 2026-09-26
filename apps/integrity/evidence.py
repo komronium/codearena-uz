@@ -45,7 +45,16 @@ def contest_evidence(contest) -> dict[int, list[Evidence]]:
     for s in CodeSnapshot.objects.filter(contest=contest).order_by("at", "id"):
         snaps.setdefault((s.user_id, s.problem_id), []).append(s)
 
-    for kind, check in (("silent", _is_silent), ("unseen", _is_unseen)):
+    # A contest from before the heartbeat (or the snapshots) has none for anyone, which
+    # says nothing about its participants.
+    # ponytail: a contest whose every participant blocks the tracker looks the same;
+    # key this on the deploy date if that ever happens.
+    checks = []
+    if any(s.tracker_seen_at for s in subs) or DeviceSeen.objects.filter(contest=contest).exists():
+        checks.append(("silent", _is_silent))
+    if snaps:
+        checks.append(("unseen", _is_unseen))
+    for kind, check in checks:
         hits: dict[tuple[int, int], list[Submission]] = {}
         for sub in subs:
             if check(sub, snaps.get((sub.user_id, sub.problem_id), [])):
