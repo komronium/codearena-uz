@@ -357,3 +357,37 @@ def test_event_and_snapshot_are_rate_limited(client, flag_contest, flag_problem,
     assert client.post(reverse("integrity:snapshot"), snap | {"source": "late"}).status_code == 429
     assert not CodeSnapshot.objects.filter(source="late").exists()
     cache.clear()
+
+
+def test_beat_records_device_and_last_seen(client, contest, user):
+    from django.core.cache import cache
+
+    from .models import DeviceSeen
+    from .views import BEAT_RATE_MAX
+
+    cache.clear()
+    url = reverse("integrity:beat")
+    client.force_login(user)
+    assert client.post(url, {"contest_id": contest.pk, "device": "d1"}).status_code == 400  # not a participant
+    p = Participation.objects.create(user=user, contest=contest)
+    assert client.post(url, {"contest_id": contest.pk, "device": "d1"}, REMOTE_ADDR="10.0.0.7").status_code == 200
+    p.refresh_from_db()
+    first = DeviceSeen.objects.get()
+    assert p.last_seen_at is not None and (first.device, first.ip) == ("d1", "10.0.0.7")
+    client.post(url, {"contest_id": contest.pk, "device": "d1"}, REMOTE_ADDR="10.0.0.8")
+    again = DeviceSeen.objects.get()
+    assert again.ip == "10.0.0.8" and again.last_at >= first.last_at and again.first_at == first.first_at
+    client.post(url, {"contest_id": contest.pk, "device": "x" * 500})  # clipped, not a 500
+    assert DeviceSeen.objects.count() == 2
+    for _ in range(BEAT_RATE_MAX):
+        client.post(url, {"contest_id": contest.pk, "device": "d1"})
+    assert client.post(url, {"contest_id": contest.pk, "device": "d1"}).status_code == 429
+    cache.clear()
+
+
+def test_contest_page_sends_heartbeat_and_device(client, flag_contest):
+    ali = User.objects.create_user("hb1", password="x")
+    Participation.objects.create(user=ali, contest=flag_contest)
+    client.force_login(ali)
+    page = client.get(reverse("contests:detail", args=[flag_contest.pk])).content.decode()
+    assert reverse("integrity:beat") in page and "ca-device" in page

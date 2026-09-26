@@ -24,6 +24,11 @@ class Submission(models.Model):
     contest = models.ForeignKey(Contest, null=True, blank=True, on_delete=models.SET_NULL, related_name="submissions")
     language = models.ForeignKey(Language, on_delete=models.PROTECT)
     source = models.TextField()
+    # Contest telemetry (apps.integrity.evidence): the browser's random device id, the
+    # client IP, and the participant's last tracker heartbeat when this was submitted.
+    device = models.CharField(max_length=64, blank=True, default="")
+    ip = models.GenericIPAddressField(null=True, blank=True)
+    tracker_seen_at = models.DateTimeField(null=True, blank=True)
     verdict = models.CharField(max_length=8, choices=Verdict.choices, default=Verdict.PENDING)
     exec_ms = models.IntegerField(default=0)
     mem_kb = models.IntegerField(default=0)

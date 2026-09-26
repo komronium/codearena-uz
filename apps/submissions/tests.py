@@ -531,3 +531,28 @@ def test_points_are_live_and_skip_own_problems(problem, python, user):
     sync_practice_points()
     user.refresh_from_db()
     assert user.practice_points == 40
+
+
+@patch("apps.submissions.views.django_rq.enqueue")
+def test_contest_submit_records_device_ip_and_tracker_time(enqueue, client, problem, python, user):
+    problem.is_public = False
+    problem.save()
+    contest = Contest.objects.create(
+        title="Sprint", start=timezone.now() - timezone.timedelta(minutes=5),
+        end=timezone.now() + timezone.timedelta(minutes=55))
+    ContestProblem.objects.create(contest=contest, problem=problem, label="A", points=100)
+    seen = timezone.now() - timezone.timedelta(seconds=20)
+    Participation.objects.create(user=user, contest=contest, last_seen_at=seen)
+    client.force_login(user)
+    client.post(reverse("submissions:submit", args=[problem.slug]),
+                {"language": "python", "source": "x", "device": "dev-1"}, REMOTE_ADDR="10.1.2.3")
+    s = Submission.objects.get()
+    assert (s.device, s.ip, s.tracker_seen_at) == ("dev-1", "10.1.2.3", seen)
+
+
+@patch("apps.submissions.views.django_rq.enqueue")
+def test_practice_submit_keeps_no_tracker_time(enqueue, client, problem, python, user):
+    client.force_login(user)
+    client.post(reverse("submissions:submit", args=[problem.slug]), {"language": "python", "source": "x"})
+    s = Submission.objects.get()
+    assert s.tracker_seen_at is None and s.device == ""

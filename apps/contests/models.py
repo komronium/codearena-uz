@@ -85,6 +85,8 @@ class Participation(models.Model):
     # Set by staff for cheating: can't submit, ranked last (so rating drops), shown struck out.
     disqualified = models.BooleanField(default=False)
     disqualified_reason = models.CharField(max_length=200, blank=True)
+    # Last heartbeat from the contest tracker; a submit long after it had no tracker running.
+    last_seen_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         unique_together = ("user", "contest")

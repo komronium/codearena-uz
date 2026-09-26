@@ -50,8 +50,14 @@ def submit(request, slug):
     source = request.POST.get("source", "")
     if not source.strip() or len(source) > MAX_SOURCE:
         return HttpResponseBadRequest("source empty or too large")
+    telemetry = {}
+    if contest is not None:
+        seen = (Participation.objects.filter(user=request.user, contest=contest)
+                .values_list("last_seen_at", flat=True).first())
+        telemetry = {"device": request.POST.get("device", "")[:64], "tracker_seen_at": seen,
+                     "ip": request.META.get("REMOTE_ADDR") or None}
     sub = Submission.objects.create(user=request.user, problem=problem, contest=contest,
-                                    language=language, source=source)
+                                    language=language, source=source, **telemetry)
     django_rq.enqueue(run_submission, sub.pk)
     return redirect("problems:detail", problem.slug)
 

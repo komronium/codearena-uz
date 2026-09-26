@@ -53,3 +53,18 @@ class CodeSnapshot(models.Model):
 
     class Meta:
         indexes: ClassVar[list[models.Index]] = [models.Index(fields=["contest", "user", "problem", "at"])]
+
+
+class DeviceSeen(models.Model):
+    """A browser (random id kept in its localStorage) a participant used during a contest,
+    from the tracker heartbeat. Two users on one device, or one user on two devices at
+    the same time, is evidence for staff."""
+    contest = models.ForeignKey(Contest, on_delete=models.CASCADE, related_name="+")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="+")
+    device = models.CharField(max_length=64)
+    ip = models.GenericIPAddressField(null=True, blank=True)  # the last one seen
+    first_at = models.DateTimeField(auto_now_add=True)
+    last_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ("contest", "user", "device")

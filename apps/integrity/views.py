@@ -4,6 +4,7 @@ from django.core.management import call_command
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from apps.accounts.decorators import staff_required
@@ -13,7 +14,7 @@ from apps.problems.models import Language, Problem
 from apps.submissions.models import Submission
 from apps.submissions.ratelimit import rate_limited
 
-from .models import CodeSnapshot, FocusEvent, SimilarityFlag
+from .models import CodeSnapshot, DeviceSeen, FocusEvent, SimilarityFlag
 from .similarity import MIN_LINES, THRESHOLD, matched_lines
 
 # First-open-to-AC time no genuine read-think-type pass beats, per difficulty (beginner: none).
@@ -31,6 +32,8 @@ _MAX_SNAPSHOT_CHARS = 64_000
 # exit; a flood of events leaves a visible trail before it hits the limit.
 EVENT_RATE_MAX = 60
 SNAPSHOT_RATE_MAX = 20
+BEAT_RATE_MAX = 6  # the tracker beats every 30 s
+DEVICE_MAX = 64
 
 
 def _participant_contest(request):
@@ -60,6 +63,24 @@ def event(request):
     away = request.POST.get("away_ms", "")
     away_ms = min(int(away), _MAX_AWAY_MS) if kind == FocusEvent.Kind.FOCUS and away.isdigit() else None
     FocusEvent.objects.create(user=request.user, contest=contest, kind=kind, problem=problem, away_ms=away_ms)
+    return JsonResponse({"ok": True})
+
+
+@login_required
+@require_POST
+def beat(request):
+    """Tracker heartbeat: proves the tracker was running, and records which device."""
+    if rate_limited(request.user.id, "beat", BEAT_RATE_MAX):
+        return JsonResponse({"error": "too many requests"}, status=429)
+    contest, _, error = _participant_contest(request)
+    if error:
+        return error
+    now = timezone.now()
+    Participation.objects.filter(user=request.user, contest=contest).update(last_seen_at=now)
+    device = request.POST.get("device", "")[:DEVICE_MAX]
+    if device:
+        DeviceSeen.objects.update_or_create(contest=contest, user=request.user, device=device,
+                                            defaults={"ip": request.META.get("REMOTE_ADDR") or None})
     return JsonResponse({"ok": True})
 
 
