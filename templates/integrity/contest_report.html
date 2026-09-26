@@ -91,7 +91,7 @@
 <section>
   <div class="mb-3 flex flex-wrap items-end justify-between gap-2">
     <h2 class="ca-section-title !mb-0">O‘xshash kodlar {% if open_flags %}<span class="ca-chip ca-chip-score ml-1">{{ open_flags }} ko‘rilmagan</span>{% endif %}</h2>
-    <p class="max-w-2xl text-xs text-mute">Bir masala, bir til, kamida {{ min_lines }} qator kod, o‘xshashlik ≥ {{ threshold }}%. O‘zgaruvchi nomlari va izohlar hisobga olinmaydi. <span class="ca-cmp-key"></span> — ikkala kodda ham bor qatorlar.</p>
+    <p class="max-w-2xl text-xs text-mute">Bir masala, bir til, kamida {{ min_lines }} qator kod, o‘xshashlik ≥ {{ threshold }}%. AC yechimlar, AC olmaganlarning oxirgi urinishi, va musobaqadan oldingi yechimlar (amaliyot, oldingi musobaqalar, muallif) solishtiriladi. O‘zgaruvchi nomlari va izohlar hisobga olinmaydi. <span class="ca-cmp-key"></span> — ikkala kodda ham bor qatorlar.</p>
   </div>
   <form method="post" action="{% url 'integrity:flag_run' contest.pk %}" class="ca-panel mb-4 flex flex-wrap items-center gap-x-4 gap-y-3 !py-3">{% csrf_token %}
     <fieldset class="flex flex-wrap items-center gap-1.5">
@@ -112,7 +112,7 @@
         <span class="text-2xl font-bold tabular text-bad">{% widthratio f.score 1 100 %}%</span>
         <div class="min-w-0 flex-1">
           <p class="truncate font-semibold">{% if f.label %}<span class="text-accent">{{ f.label }}.</span> {% endif %}{{ f.problem.title }}</p>
-          <p class="text-xs text-mute">{{ f.sides.0.sub.language.name }} · {{ f.sides.0.n_hit }} / {{ f.sides.0.n_code }} qator mos · ikkinchi kod {% if f.gap_min %}{{ f.gap_min }} daqiqa{% else %}1 daqiqadan kam{% endif %} keyin yuborilgan</p>
+          <p class="text-xs text-mute">{{ f.sides.0.sub.language.name }} · {{ f.sides.0.n_hit }} / {{ f.sides.0.n_code }} qator mos · {% if f.prior %}musobaqadan oldingi yechim bilan{% else %}ikkinchi kod {% if f.gap_min %}{{ f.gap_min }} daqiqa{% else %}1 daqiqadan kam{% endif %} keyin yuborilgan{% endif %}</p>
         </div>
         {% if f.reviewed %}<span class="ca-chip ca-chip-rated"><i data-lucide="check" class="lu mr-1" aria-hidden="true"></i>Ko‘rildi</span>{% else %}<span class="ca-chip ca-chip-score">Ko‘rilmagan</span>{% endif %}
       </header>
@@ -124,12 +124,12 @@
             <div class="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5">
               <div class="flex min-w-0 items-center gap-2">
                 {% include "accounts/_user.html" with u=side.user tier=False %}
-                {% if forloop.first %}<span class="ca-chip" title="Bu kod oldinroq yuborilgan — manba bo‘lishi mumkin">birinchi</span>{% endif %}
+                {% if side.prior %}<span class="ca-chip ca-chip-score" title="Musobaqa boshlanishidan oldin yuborilgan (amaliyot, oldingi musobaqa yoki muallif)">Musobaqadan oldingi yechim</span>{% elif forloop.first %}<span class="ca-chip" title="Bu kod oldinroq yuborilgan — manba bo‘lishi mumkin">birinchi</span>{% endif %}
               </div>
               <div class="flex items-center gap-3 text-xs text-mute">
                 <a class="ca-link tabular" href="{% url 'submissions:detail' side.sub.pk %}">#{{ side.sub.pk|stringformat:"06d" }}</a>
-                <a class="ca-link" href="{% url 'integrity:replay' contest.pk side.user.pk f.problem.pk %}"><i data-lucide="history" class="lu mr-0.5" aria-hidden="true"></i>yozilishi</a>
-                <span class="tabular">{{ side.sub.created|date:"H:i:s" }}</span>
+                {% if not side.prior %}<a class="ca-link" href="{% url 'integrity:replay' contest.pk side.user.pk f.problem.pk %}"><i data-lucide="history" class="lu mr-0.5" aria-hidden="true"></i>yozilishi</a>{% endif %}
+                <span class="tabular">{% if side.prior %}{{ side.sub.created|date:"d.m.Y H:i" }}{% else %}{{ side.sub.created|date:"H:i:s" }}{% endif %}</span>
                 {% if side.paste %}<span class="font-semibold text-bad" title="Muharrirga qo‘yish urinishlari">paste {{ side.paste }}</span>{% endif %}
                 {% if side.blur %}<span class="{% if side.blur > 5 %}font-semibold text-warn{% endif %}" title="Boshqa oynaga o‘tishlar">chiqish {{ side.blur }}</span>{% endif %}
               </div>

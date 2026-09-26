@@ -481,3 +481,46 @@ def test_report_ranks_by_server_evidence_and_shows_it(client, flag_contest, flag
     row = dict(r.context["rows"])[curl]
     assert row["risk"] >= 14 and [e.kind for e in row["evidence"]] == ["silent", "unseen"]
     assert "muharrirda yozilmagan" in r.content.decode()
+
+
+def test_flag_similarity_checks_last_attempt_of_users_without_ac(flag_contest, flag_problem, flag_python):
+    ali = User.objects.create_user("sv1", password="x")
+    bob = User.objects.create_user("sv2", password="x")
+    cat = User.objects.create_user("sv3", password="x")
+    _ac(ali, flag_problem, flag_contest, flag_python, LONG_SOURCE)
+    for verdict, source in (("WA", "print(1)\n" * 5), ("WA", LONG_SOURCE)):  # bob's copy never passed
+        Submission.objects.create(user=bob, problem=flag_problem, contest=flag_contest, language=flag_python,
+                                  source=source, verdict=verdict)
+    # cat has an AC of her own; her earlier failed copy is not a candidate
+    Submission.objects.create(user=cat, problem=flag_problem, contest=flag_contest, language=flag_python,
+                              source=LONG_SOURCE, verdict="WA")
+    _ac(cat, flag_problem, flag_contest, flag_python, "\n".join(f"v{i} = {i} * {i}" for i in range(8)))
+
+    call_command("flag_similarity", flag_contest.pk, stdout=StringIO())
+    pairs = {tuple(sorted((f.submission_a.user.username, f.submission_b.user.username)))
+             for f in SimilarityFlag.objects.all()}
+    assert pairs == {("sv1", "sv2")}
+
+
+def test_flag_similarity_catches_copies_of_prior_solutions(client, flag_contest, flag_problem, flag_python):
+    author = flag_problem.author
+    old = Submission.objects.create(user=author, problem=flag_problem, language=flag_python,
+                                    source=LONG_SOURCE, verdict="AC")
+    Submission.objects.filter(pk=old.pk).update(created=flag_contest.start - timezone.timedelta(days=1))
+    ali = User.objects.create_user("pv1", password="x")
+    Participation.objects.create(user=ali, contest=flag_contest)
+    mine = _ac(ali, flag_problem, flag_contest, flag_python, LONG_SOURCE)
+    own_old = Submission.objects.create(user=ali, problem=flag_problem, language=flag_python,
+                                        source=LONG_SOURCE, verdict="AC")  # own old code: not a copy
+    Submission.objects.filter(pk=own_old.pk).update(created=flag_contest.start - timezone.timedelta(days=2))
+
+    for _ in range(2):  # idempotent
+        call_command("flag_similarity", flag_contest.pk, stdout=StringIO())
+    flag = SimilarityFlag.objects.get()
+    assert (flag.submission_a, flag.submission_b) == (mine, old)
+
+    client.force_login(User.objects.create_user("boss5", password="x", is_staff=True))
+    r = client.get(reverse("integrity:contest_report", args=[flag_contest.pk]))
+    assert "Musobaqadan oldingi yechim" in r.content.decode()
+    ev = dict(r.context["rows"])[ali]["evidence"]
+    assert "similar" in [e.kind for e in ev]

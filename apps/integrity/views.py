@@ -165,7 +165,12 @@ def _flag_cards(contest, counts, parts):
         f.label = labels.get(first.problem_id, "")
         f.problem = f.submission_a.problem
         f.gap_min = int((second.created - first.created).total_seconds() // 60)
+        f.prior = f.submission_b.contest_id != contest.pk  # a copy of a pre-contest solution
         f.sides = [_side(first, hit_first, counts, parts), _side(second, hit_second, counts, parts)]
+        for side in f.sides:
+            side["prior"] = side["sub"].contest_id != contest.pk
+            if side["prior"]:
+                side["participation"] = None  # the source of a copy isn't on trial here
     return flags
 
 
