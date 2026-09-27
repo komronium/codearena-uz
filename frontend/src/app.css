@@ -680,6 +680,10 @@ section.ca-ed-full #editor .cm-editor { height: calc(100vh - 9.5rem); }
 .ca-dropdown-item:hover { background: rgb(var(--ca-ink-rgb) / .05); }
 .ca-dropdown-item svg.lucide { width: 1.1rem; height: 1.1rem; color: rgb(var(--ca-mute-rgb)); }
 .ca-dropdown-item.text-bad svg.lucide { color: currentColor; }
+.ca-dropdown-row { display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding: .4rem .4rem .4rem .75rem; }
+.ca-dropdown-row > span { display: flex; align-items: center; gap: .65rem; font-size: .875rem; font-weight: 500; }
+.ca-dropdown-row > span svg.lucide { width: 1.1rem; height: 1.1rem; color: rgb(var(--ca-mute-rgb)); }
+.ca-dropdown-row .ca-seg-sm button { padding: .35rem .5rem; }
 /* header streak pill: gold once today's daily problem is solved, ochre while the run is at risk */
 .ca-streak {
   display: inline-flex; align-items: center; gap: .3rem; padding: .3rem .6rem .3rem .5rem; border-radius: 9999px;
