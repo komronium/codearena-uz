@@ -4,7 +4,7 @@ from django.shortcuts import render
 from django.utils import timezone
 
 from apps.accounts.models import User
-from apps.accounts.views import _next_tier
+from apps.accounts.tiers import next_tier as _next_tier
 from apps.classroom import duels
 from apps.classroom.models import Assignment, Duel
 from apps.contests.models import Contest, Participation
@@ -13,6 +13,8 @@ from apps.problems.daily import daily_for, streaks, week_strip
 from apps.problems.models import DailySolve, Language, Problem
 from apps.problems.skills import next_problems, open_problems, shared_reason
 from apps.submissions.models import Submission
+
+from .context_processors import live_contest_for
 
 
 _WEEKDAYS = ["Dushanba", "Seshanba", "Chorshanba", "Payshanba", "Juma", "Shanba", "Yakshanba"]
@@ -33,10 +35,13 @@ def _rating_card(user) -> dict:
 
 
 def _live(user, running) -> dict | None:
-    """The first running contest, with the user's place and progress from its standings."""
-    if not running:
+    """The running contest the navigation points at (yours first, else one you may enter), with
+    your place and progress from its standings."""
+    pick = live_contest_for(user)
+    contest = pick and (next((c for c in running if c.pk == pick["pk"]), None)
+                        or Contest.objects.filter(pk=pick["pk"]).first())
+    if not contest:
         return None
-    contest = running[0]
     row = next((r for r in _standings(contest) if r["user"].pk == user.pk), None)
     return {"contest": contest, "joined": row is not None, "rank": row and row["rank"],
             "solved": row and row["solved"], "n_problems": contest.contest_problems.count()}

@@ -23,63 +23,11 @@ from apps.submissions.models import Submission
 from .forms import ProfileEditForm, RegisterForm
 from .models import User
 
-# (floor, ceiling, name, color) — floor None = -inf, ceiling None = +inf.
-_RATING_TIERS = [
-    (None, 1300, "Newbie", "#6B7280"),
-    (1300, 1500, "Pupil", "#16A34A"),
-    (1500, 1700, "Specialist", "#06B6D4"),
-    (1700, 1900, "Expert", "#3B82F6"),
-    (1900, 2100, "Candidate Master", "#8B5CF6"),
-    (2100, 2300, "Master", "#D97706"),
-    (2300, 2400, "International Master", "#EA580C"),
-    (2400, None, "Grandmaster", "#DC2626"),
-]
-
-
-# Profile banner per tier: (CSS modifier, the picture's name). Styles live in app.css (.ca-banner-*).
-_TIER_BANNERS = {
-    "Newbie": ("newbie", "Yulduzli tun"), "Pupil": ("pupil", "Paxta dalasi"), "Specialist": ("specialist", "Daryo"),
-    "Expert": ("expert", "Rishton koshini"), "Candidate Master": ("candidate-master", "Registon girihi"),
-    "Master": ("master", "Quyosh"), "International Master": ("international-master", "Olov"),
-    "Grandmaster": ("grandmaster", "Toj"),
-}
-
-
-# Daily-problem streak badges: (days, name, icon). Earned by the best run ever, kept for good.
-_STREAK_BADGES = [(7, "Chiroq", "lamp"), (30, "Mash’al", "flame"), (100, "Quyosh", "sun")]
-
-
-def _streak_badges(best: int) -> dict:
-    earned = [{"days": d, "name": n, "icon": i} for d, n, i in _STREAK_BADGES if best >= d]
-    nxt = next(({"days": d, "name": n, "icon": i, "left": d - best} for d, n, i in _STREAK_BADGES if best < d), None)
-    return {"best": best, "earned": earned, "next": nxt}
-
-
-def rating_tier(rating: int) -> str:
-    for floor, ceiling, name, _color in _RATING_TIERS:
-        if (floor is None or rating >= floor) and (ceiling is None or rating < ceiling):
-            return name
-    return _RATING_TIERS[-1][2]
-
-
-def _tier_color(rating: int) -> str:
-    for floor, ceiling, _name, color in _RATING_TIERS:
-        if (floor is None or rating >= floor) and (ceiling is None or rating < ceiling):
-            return color
-    return _RATING_TIERS[-1][3]
-
-
-def _next_tier(rating: int) -> dict | None:
-    """The tier above `rating`: its name, colour, the points still needed and the percent
-    of the way through the current tier (the bottom tier counts from 0). None at the top."""
-    for i, (floor, ceiling, _name, _color) in enumerate(_RATING_TIERS):
-        if ceiling is not None and rating < ceiling and (floor is None or rating >= floor):
-            _floor, _ceiling, name, color = _RATING_TIERS[i + 1]
-            floor = floor or 0
-            pct = max(0, round(100 * (rating - floor) / (ceiling - floor)))
-            return {"name": name, "color": color, "need": ceiling - rating, "pct": pct}
-    return None
-
+from .tiers import RATING_TIERS as _RATING_TIERS
+from .tiers import next_tier as _next_tier
+from .tiers import rating_tier
+from .tiers import streak_badges, tier_banner
+from .tiers import tier_color as _tier_color
 
 _CHART_W, _CHART_H = 700, 220
 _CHART_L, _CHART_R = 56, 680
@@ -315,6 +263,7 @@ def profile(request, username):
         if rating_history:
             rating_rank = rated.filter(rating__gt=profile_user.rating).count() + 1
 
+    cur_streak, best_streak = streaks(profile_user)
     return render(request, "accounts/profile.html", {
         "profile_user": profile_user,
         "total_users": total_users,
@@ -331,13 +280,13 @@ def profile(request, username):
         "by_diff": by_diff,
         "problem_map": problem_map,
         "tier": rating_tier(profile_user.rating),
-        "banner": _TIER_BANNERS[rating_tier(profile_user.rating)],
+        "banner": tier_banner(profile_user.rating),
         "next_tier": _next_tier(profile_user.rating),
-        "streak_badges": _streak_badges(streaks(profile_user)[1]),
+        "streak_badges": streak_badges(cur_streak, best_streak),
         "tier_color": _tier_color(profile_user.rating),
         "rating_history": rating_history,
         "rating_chart": _rating_chart(rating_history) if rating_history else None,
         "activity": _activity_calendar(profile_user),
         "skills": skill_map(profile_user),
-        "streak": streaks(profile_user),
+        "streak": (cur_streak, best_streak),
     })

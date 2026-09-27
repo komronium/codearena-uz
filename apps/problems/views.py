@@ -4,7 +4,7 @@ from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.db.models import Avg, Case, Count, F, IntegerField, OuterRef, Q, Subquery, Value, When
 from django.db.models.functions import Length
-from django.http import Http404, HttpResponseBadRequest
+from django.http import Http404, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
@@ -69,6 +69,32 @@ _N_RATINGS = Subquery(ProblemRating.objects.filter(problem=OuterRef("pk")).value
 
 # Leaderboard metric -> ordering of AC submissions (ties go to whoever got there first).
 _LEADER_ORDER = {"time": ("exec_ms", "pk"), "length": ("code_len", "pk")}
+
+
+def suggest(request):
+    """Instant search for the command palette: up to 8 of the problems the list would show,
+    title-prefix and number matches first. Never more than the list reveals."""
+    q = request.GET.get("q", "").strip()[:60]
+    if not q:
+        return JsonResponse({"results": []})
+    visible = Problem.objects.filter(is_public=True).exclude(contests__start__gt=timezone.now()).distinct()
+    match = Q(title__icontains=q) | Q(slug__icontains=q.replace(" ", "-"))
+    if q.lstrip("#").isdigit():
+        match |= Q(pk=int(q.lstrip("#")))
+    rows = list(visible.filter(match).annotate(
+        rank=Case(When(pk=int(q.lstrip("#")) if q.lstrip("#").isdigit() else -1, then=Value(0)),
+                  When(title__istartswith=q, then=Value(1)), default=Value(2), output_field=IntegerField()),
+    ).order_by("rank", "id").values("id", "slug", "title", "difficulty")[:8])
+    solved = set()
+    if request.user.is_authenticated and rows:
+        solved = set(UserProblemSolved.objects.filter(user=request.user, problem_id__in=[r["id"] for r in rows])
+                     .values_list("problem_id", flat=True))
+    labels = dict(Problem.Difficulty.choices)
+    return JsonResponse({"results": [
+        {"title": r["title"], "url": reverse("problems:detail", args=[r["slug"]]), "id": r["id"],
+         "difficulty": r["difficulty"], "difficulty_label": labels.get(r["difficulty"], ""),
+         "solved": r["id"] in solved}
+        for r in rows]})
 
 
 def problem_list(request):

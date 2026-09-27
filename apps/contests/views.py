@@ -43,12 +43,18 @@ def contest_list(request):
     return render(request, "contests/list.html", {"running": running, "upcoming": upcoming, "ended": ended})
 
 
-def _standings(contest):
+def _standings(contest, problems=None):
+    """The standings rows, cached for 30 s (the judge drops the entry on every verdict). The entry
+    remembers which problems its cells are for, so adding, removing or reordering a contest's
+    problems rebuilds it instead of serving cells that no longer line up with the columns."""
     cache_key = f"contest-standings-{contest.pk}"
-    rows = cache.get(cache_key)
-    if rows is None:
-        rows = compute_standings(contest)
-        cache.set(cache_key, rows, 30)
+    layout = ([cp.pk for cp in problems] if problems is not None
+              else list(contest.contest_problems.values_list("pk", flat=True)))
+    hit = cache.get(cache_key)
+    if isinstance(hit, tuple) and hit[0] == layout:
+        return hit[1]
+    rows = compute_standings(contest)
+    cache.set(cache_key, (layout, rows), 30)
     return rows
 
 
@@ -60,7 +66,7 @@ def contest_detail(request, pk):
     registered = me is not None
     my_row, solved_count = None, {}
     if contest.has_started:
-        rows = _standings(contest)
+        rows = _standings(contest, problems)
         for i, cp in enumerate(problems):
             solved_count[cp.id] = sum(1 for r in rows if r["cells"][i]["solved"] and not r["disqualified"])
         if request.user.is_authenticated:
@@ -100,19 +106,22 @@ def register(request, pk):
 
 def standings(request, pk):
     contest = get_object_or_404(Contest, pk=pk)
-    rows = _standings(contest)
     problems = list(contest.contest_problems.select_related("problem"))
-    for i, cp in enumerate(problems):  # column footer-style summary: solved / tried
-        cp.n_solved = sum(1 for r in rows if r["cells"][i]["solved"])
-        cp.n_tried = sum(1 for r in rows if r["cells"][i]["solved"] or r["cells"][i]["wrong"])
-    for cp in problems:
-        cp.solve_pct = round(100 * cp.n_solved / len(rows)) if rows else 0
+    rows = _standings(contest, problems)
+    # per-problem solved / tried, over the rows that count (a DQ row is shown but not counted,
+    # as on the contest page)
+    counted = [r for r in rows if not r["disqualified"]]
+    for i, cp in enumerate(problems):
+        cp.n_solved = sum(1 for r in counted if r["cells"][i]["solved"])
+        cp.n_tried = sum(1 for r in counted if r["cells"][i]["solved"] or r["cells"][i]["wrong"])
+        cp.solve_pct = round(100 * cp.n_solved / len(counted)) if counted else 0
     me = contest.participations.filter(user=request.user).first() if request.user.is_authenticated else None
-    return render(request, "contests/standings.html",
-                  {"contest": contest, "rows": rows, "problems": problems, "registered": me is not None,
-                   "my_participation": me,
-                   "me_in_rows": me is not None and any(r["user"].pk == request.user.pk for r in rows),
-                   "my_row": next((r for r in rows if me is not None and r["user"].pk == request.user.pk), None)})
+    my_row = next((r for r in rows if r["user"].pk == request.user.pk), None) if me is not None else None
+    ctx = {"contest": contest, "rows": rows, "problems": problems, "registered": me is not None,
+           "my_participation": me, "my_row": my_row}
+    # the live refresh asks for the table only: no header, menu or streak queries per poll
+    template = "contests/_standings_live.html" if request.headers.get("HX-Request") else "contests/standings.html"
+    return render(request, template, ctx)
 
 
 @staff_required

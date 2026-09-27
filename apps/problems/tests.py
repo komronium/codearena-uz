@@ -710,3 +710,18 @@ def test_header_streak_pill_shows_the_run_and_whether_today_is_solved(client, ca
     DailySolve.objects.create(user=ali, daily=daily)
     page = client.get(reverse("submissions:mine")).content.decode()
     assert 'class="ca-streak is-done"' in page and '<span class="tabular">2</span>' in page
+
+
+@pytest.mark.django_db
+def test_suggest_finds_what_the_list_shows_and_nothing_hidden(client):
+    from django.contrib.auth import get_user_model
+    from django.urls import reverse
+
+    from apps.problems.models import Problem
+    author = get_user_model().objects.create_user("sugg", password="x")
+    Problem.objects.create(slug="ikki-son", title="Ikki son", statement_md="x", author=author)
+    Problem.objects.create(slug="yashirin", title="Ikki yashirin", statement_md="x", author=author, is_public=False)
+    Problem.objects.create(slug="sonlar-ikki", title="Sonlar ikki marta", statement_md="x", author=author)
+    r = client.get(reverse("problems:suggest"), {"q": "ikki"}).json()["results"]
+    assert [x["title"] for x in r] == ["Ikki son", "Sonlar ikki marta"]  # title-prefix first, hidden never
+    assert client.get(reverse("problems:suggest"), {"q": ""}).json() == {"results": []}

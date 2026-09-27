@@ -25,8 +25,15 @@
   function confetti() {
     const canvas = document.createElement("canvas");
     canvas.setAttribute("aria-hidden", "true");
-    canvas.style.cssText = "position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:9999";
+    canvas.style.cssText = "position:fixed;inset:0;width:100%;height:100%;margin:0;padding:0;border:0;"
+      + "background:transparent;pointer-events:none;z-index:9999;max-width:none;max-height:none";
     document.body.appendChild(canvas);
+    // Over an open modal dialog (the tier-up moment) a plain z-index can't win: the dialog sits
+    // in the top layer. A manual popover joins the top layer after it, so it paints above.
+    if (canvas.showPopover && document.querySelector("dialog[open]")) {
+      canvas.popover = "manual";
+      canvas.showPopover();
+    }
     const dpr = window.devicePixelRatio || 1, g = canvas.getContext("2d");
     const W = (canvas.width = innerWidth * dpr), H = (canvas.height = innerHeight * dpr);
     const bits = Array.from({ length: 160 }, () => ({
@@ -57,9 +64,11 @@
     setTimeout(() => el.remove(), 3200);
   }
 
-  window.caCelebrate = (text) => {
+  // caCelebrate("text") or caCelebrate({ text, toast: false }) — no toast when a dialog already says it.
+  window.caCelebrate = (opts = {}) => {
+    const { text, toast: withToast = true } = typeof opts === "string" ? { text: opts } : opts;
     chime();
-    toast(text);
+    if (withToast) toast(text);
     if (!matchMedia("(prefers-reduced-motion: reduce)").matches) confetti();
   };
 

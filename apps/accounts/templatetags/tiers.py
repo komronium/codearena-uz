@@ -1,6 +1,6 @@
 from django import template
 
-from apps.accounts.views import _tier_color, rating_tier
+from apps.accounts.tiers import rating_tier, tier_banner, tier_color as _tier_color
 
 register = template.Library()
 
@@ -18,5 +18,4 @@ def tier_color(rating: int) -> str:
 @register.filter
 def tier_slug(rating: int) -> str:
     """CSS modifier of the tier's picture: .ca-banner-<slug> / .ca-art-<slug>."""
-    from apps.accounts.views import _TIER_BANNERS
-    return _TIER_BANNERS[rating_tier(rating)][0]
+    return tier_banner(rating)[0]

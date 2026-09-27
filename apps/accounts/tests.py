@@ -332,3 +332,21 @@ def test_tier_up_congratulates_once_and_first_visit_only_records(client):
     assert "ca-tier-up" not in client.get("/").content.decode()  # only once
     U.objects.filter(pk=u.pk).update(rating=1250)
     assert "ca-tier-up" not in client.get("/").content.decode()  # a drop is silent
+
+
+def test_next_streak_badge_counts_from_the_current_run():
+    from apps.accounts.tiers import streak_badges
+    b = streak_badges(current=0, best=6)
+    assert b["earned"] == [] and b["next"]["name"] == "Chiroq" and b["next"]["left"] == 7
+    b = streak_badges(current=3, best=40)
+    assert [x["name"] for x in b["earned"]] == ["Chiroq", "Mash’al"] and b["next"]["left"] == 97
+
+
+@pytest.mark.django_db
+def test_tier_up_is_claimed_once_even_by_two_tabs():
+    from apps.accounts.context_processors import _claim_tier_up
+    from apps.accounts.models import User as U
+    U.objects.create_user("twotabs", password="x", rating=1450, seen_tier="Newbie")
+    tab1, tab2 = U.objects.get(username="twotabs"), U.objects.get(username="twotabs")
+    assert _claim_tier_up(tab1)["name"] == "Pupil"
+    assert _claim_tier_up(tab2) is None  # the other tab read the old tier too, but lost the update

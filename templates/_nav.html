@@ -17,6 +17,7 @@ grouped by what the student is doing. Profile, settings and sign-out live in the
 <p class="ca-sidebar-heading">Musobaqa</p>
 <a href="{% url 'contests:list' %}" class="ca-sidebar-link {% if ns == 'contests' or ns == 'problems' and contest %}is-active{% endif %}"{% if ns == 'contests' or ns == 'problems' and contest %} aria-current="page"{% endif %}>
   <i data-lucide="trophy" class="lu" aria-hidden="true"></i>Musobaqalar
+  {% if nav.live %}<span class="ca-live-badge ml-auto !py-0.5 !text-[11px]"><span class="ca-live-dot" aria-hidden="true"></span>Jonli</span>{% endif %}
 </a>
 <a href="{% url 'rating' %}" class="ca-sidebar-link {% if un == 'rating' %}is-active{% endif %}"{% if un == 'rating' %} aria-current="page"{% endif %}>
   <i data-lucide="chart-column" class="lu" aria-hidden="true"></i>Reyting
@@ -28,6 +29,7 @@ grouped by what the student is doing. Profile, settings and sign-out live in the
 <p class="ca-sidebar-heading">Sinf</p>
 <a href="{% url 'classroom:list' %}" class="ca-sidebar-link {% if ns == 'classroom' and 'duel' not in un %}is-active{% endif %}">
   <i data-lucide="notebook-pen" class="lu" aria-hidden="true"></i>Vazifalar
+  {% if nav.due %}<span class="ca-chip ca-chip-score ml-auto tabular" title="Muddati 2 kun ichida tugaydi">{{ nav.due }}</span>{% endif %}
 </a>
 <a href="{% url 'classroom:duels' %}" class="ca-sidebar-link {% if ns == 'classroom' and 'duel' in un %}is-active{% endif %}">
   <i data-lucide="swords" class="lu" aria-hidden="true"></i>Duellar
@@ -43,6 +45,7 @@ grouped by what the student is doing. Profile, settings and sign-out live in the
 </a>
 <a href="{% url 'moderation:queue' %}" class="ca-sidebar-link {% if ns == 'moderation' and un == 'queue' %}is-active{% endif %}">
   <i data-lucide="inbox" class="lu" aria-hidden="true"></i>Navbat
+  {% if nav.staff.queue %}<span class="ca-chip ca-chip-score ml-auto tabular" title="Ko‘rib chiqishni kutmoqda">{{ nav.staff.queue }}</span>{% endif %}
 </a>
 <a href="{% url 'moderation:contests' %}" class="ca-sidebar-link {% if ns == 'moderation' and un in 'contests,contest_new,contest_edit' %}is-active{% endif %}">
   <i data-lucide="trophy" class="lu" aria-hidden="true"></i>Musobaqalar
@@ -52,6 +55,7 @@ grouped by what the student is doing. Profile, settings and sign-out live in the
 </a>
 <a href="{% url 'moderation:users' %}" class="ca-sidebar-link {% if ns == 'moderation' and un in 'users,user_edit' %}is-active{% endif %}">
   <i data-lucide="users-round" class="lu" aria-hidden="true"></i>Foydalanuvchilar
+  {% if nav.staff.requests %}<span class="ca-chip ca-chip-score ml-auto tabular" title="O‘qituvchi so‘rovlari">{{ nav.staff.requests }}</span>{% endif %}
 </a>
 <a href="{% url 'moderation:groups' %}" class="ca-sidebar-link {% if ns == 'moderation' and un in 'groups,group_new,group_edit' %}is-active{% endif %}">
   <i data-lucide="school" class="lu" aria-hidden="true"></i>Guruhlar

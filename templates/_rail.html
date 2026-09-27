@@ -1,25 +1,43 @@
-{% comment %}The compact icon rail (md and up): the mark, every student destination as an icon with its
-name under it, staff's single "Admin" entry, and the account menu (or sign-in) at the foot.
-Phones get the same places from the bottom bar and the menu sheet (base.html).{% endcomment %}
+{% comment %}The navigation rail (md and up), after Material 3: every destination is an icon in a pill-shaped
+indicator with its name under it, in three groups (learn and compete · your own work · staff). Badges
+sit on the icon: a pulsing dot while a contest runs, the number of homework due within two days, unread
+code reviews, and the staff queue. The account menu (or sign-in) is at the foot. Phones get the same
+places from the bottom bar and the menu sheet (base.html).{% endcomment %}
 {% with ns=request.resolver_match.namespace un=request.resolver_match.url_name %}
 <a href="{% url 'home' %}" class="ca-rail-brand" aria-label="CodeArena bosh sahifa">{% include "_brand_mark.html" %}</a>
-<a href="{% url 'home' %}" class="ca-rail-link{% if un == 'home' %} is-active{% endif %}"{% if un == 'home' %} aria-current="page"{% endif %}><i data-lucide="house" class="lu" aria-hidden="true"></i><span>Bosh sahifa</span></a>
-<a href="{% url 'problems:list' %}" class="ca-rail-link{% if ns == 'problems' and not contest %} is-active{% endif %}"{% if ns == 'problems' and not contest %} aria-current="page"{% endif %}><i data-lucide="list-checks" class="lu" aria-hidden="true"></i><span>Masalalar</span></a>
-<a href="{% url 'contests:list' %}" class="ca-rail-link{% if ns == 'contests' or ns == 'problems' and contest %} is-active{% endif %}"{% if ns == 'contests' or ns == 'problems' and contest %} aria-current="page"{% endif %}><i data-lucide="trophy" class="lu" aria-hidden="true"></i><span>Musobaqa</span></a>
-<a href="{% url 'rating' %}" class="ca-rail-link{% if un == 'rating' or un == 'top' %} is-active{% endif %}"{% if un == 'rating' or un == 'top' %} aria-current="page"{% endif %}><i data-lucide="chart-column" class="lu" aria-hidden="true"></i><span>Reyting</span></a>
+<div class="ca-rail-group">
+  <a href="{% url 'home' %}" class="ca-rail-link{% if un == 'home' %} is-active{% endif %}"{% if un == 'home' %} aria-current="page"{% endif %}>
+    <span class="ca-rail-ind"><i data-lucide="house" class="lu" aria-hidden="true"></i></span><span class="ca-rail-label">Bosh sahifa</span></a>
+  <a href="{% url 'problems:list' %}" class="ca-rail-link{% if ns == 'problems' and not contest %} is-active{% endif %}"{% if ns == 'problems' and not contest %} aria-current="page"{% endif %}>
+    <span class="ca-rail-ind"><i data-lucide="list-checks" class="lu" aria-hidden="true"></i></span><span class="ca-rail-label">Masalalar</span></a>
+  <a href="{% url 'contests:list' %}" class="ca-rail-link{% if ns == 'contests' or ns == 'problems' and contest %} is-active{% endif %}"{% if ns == 'contests' or ns == 'problems' and contest %} aria-current="page"{% endif %}{% if nav.live %} title="Jonli: {{ nav.live.title }}"{% endif %}>
+    <span class="ca-rail-ind"><i data-lucide="trophy" class="lu" aria-hidden="true"></i>{% if nav.live %}<b class="ca-badge-live"><span class="sr-only">, jonli musobaqa bor</span></b>{% endif %}</span><span class="ca-rail-label">Musobaqa</span></a>
+  <a href="{% url 'rating' %}" class="ca-rail-link{% if un == 'rating' or un == 'top' %} is-active{% endif %}"{% if un == 'rating' or un == 'top' %} aria-current="page"{% endif %}>
+    <span class="ca-rail-ind"><i data-lucide="chart-column" class="lu" aria-hidden="true"></i></span><span class="ca-rail-label">Reyting</span></a>
+</div>
 {% if user.is_authenticated %}
-<a href="{% url 'classroom:list' %}" class="ca-rail-link{% if ns == 'classroom' and 'duel' not in un %} is-active{% endif %}"{% if ns == 'classroom' and 'duel' not in un %} aria-current="page"{% endif %}><i data-lucide="notebook-pen" class="lu" aria-hidden="true"></i><span>Vazifalar</span></a>
-<a href="{% url 'classroom:duels' %}" class="ca-rail-link{% if ns == 'classroom' and 'duel' in un %} is-active{% endif %}"{% if ns == 'classroom' and 'duel' in un %} aria-current="page"{% endif %}><i data-lucide="swords" class="lu" aria-hidden="true"></i><span>Duellar</span></a>
-<a href="{% url 'submissions:mine' %}" class="ca-rail-link{% if ns == 'submissions' %} is-active{% endif %}"{% if ns == 'submissions' %} aria-current="page"{% endif %}><i data-lucide="history" class="lu" aria-hidden="true"></i><span>Urinishlar</span>{% if unread_reviews %}<b class="ca-rail-dot" aria-label="{{ unread_reviews }} ta o‘qilmagan sharh"></b>{% endif %}</a>
+<div class="ca-rail-group">
+  <a href="{% url 'classroom:list' %}" class="ca-rail-link{% if ns == 'classroom' and 'duel' not in un %} is-active{% endif %}"{% if ns == 'classroom' and 'duel' not in un %} aria-current="page"{% endif %}{% if nav.due %} title="{{ nav.due }} ta vazifa muddati 2 kun ichida tugaydi"{% endif %}>
+    <span class="ca-rail-ind"><i data-lucide="notebook-pen" class="lu" aria-hidden="true"></i>{% if nav.due %}<b class="ca-badge-n is-warn">{{ nav.due }}<span class="sr-only"> ta vazifa muddati yaqin</span></b>{% endif %}</span><span class="ca-rail-label">Vazifalar</span></a>
+  <a href="{% url 'classroom:duels' %}" class="ca-rail-link{% if ns == 'classroom' and 'duel' in un %} is-active{% endif %}"{% if ns == 'classroom' and 'duel' in un %} aria-current="page"{% endif %}>
+    <span class="ca-rail-ind"><i data-lucide="swords" class="lu" aria-hidden="true"></i></span><span class="ca-rail-label">Duellar</span></a>
+  <a href="{% url 'submissions:mine' %}" class="ca-rail-link{% if ns == 'submissions' %} is-active{% endif %}"{% if ns == 'submissions' %} aria-current="page"{% endif %}{% if unread_reviews %} title="{{ unread_reviews }} ta o‘qilmagan kod sharhi"{% endif %}>
+    <span class="ca-rail-ind"><i data-lucide="history" class="lu" aria-hidden="true"></i>{% if unread_reviews %}<b class="ca-badge-n">{{ unread_reviews }}<span class="sr-only"> ta o‘qilmagan sharh</span></b>{% endif %}</span><span class="ca-rail-label">Urinishlar</span></a>
+</div>
 {% endif %}
 {% if user.is_staff %}
-<a href="{% url 'moderation:dashboard' %}" class="ca-rail-link{% if ns == 'moderation' or ns == 'integrity' %} is-active{% endif %}"{% if ns == 'moderation' or ns == 'integrity' %} aria-current="page"{% endif %}><i data-lucide="shield" class="lu" aria-hidden="true"></i><span>Admin</span></a>
+<div class="ca-rail-group">
+  <a href="{% url 'moderation:dashboard' %}" class="ca-rail-link{% if ns == 'moderation' or ns == 'integrity' %} is-active{% endif %}"{% if ns == 'moderation' or ns == 'integrity' %} aria-current="page"{% endif %}{% if nav.staff.total %} title="{{ nav.staff.total }} ta ish ko‘rib chiqishni kutmoqda"{% endif %}>
+    <span class="ca-rail-ind"><i data-lucide="shield" class="lu" aria-hidden="true"></i>{% if nav.staff.total %}<b class="ca-badge-n is-warn">{{ nav.staff.total }}<span class="sr-only"> ta ish kutmoqda</span></b>{% endif %}</span><span class="ca-rail-label">Admin</span></a>
+</div>
 {% endif %}
 <div class="ca-rail-foot">
+  <button type="button" class="ca-rail-link" data-palette-open title="Qidirish va buyruqlar (Ctrl K)" aria-keyshortcuts="Control+K Meta+K /">
+    <span class="ca-rail-ind"><i data-lucide="search" class="lu" aria-hidden="true"></i></span><span class="ca-rail-label">Qidirish</span></button>
   {% if user.is_authenticated %}{% include "_user_menu.html" %}
   {% else %}
-  <button type="button" id="theme-toggle" class="ca-rail-link" title="Ko‘rinish" aria-label="Ko‘rinishni almashtirish (yorug‘ / qorong‘i)"><i data-lucide="sun-moon" class="lu" aria-hidden="true"></i></button>
-  <a href="{% url 'login' %}" class="ca-rail-link{% if un == 'login' %} is-active{% endif %}"><i data-lucide="log-in" class="lu" aria-hidden="true"></i><span>Kirish</span></a>
+  <button type="button" id="theme-toggle" class="ca-rail-link" title="Ko‘rinish" aria-label="Ko‘rinishni almashtirish (yorug‘ / qorong‘i)"><span class="ca-rail-ind"><i data-lucide="sun-moon" class="lu" aria-hidden="true"></i></span></button>
+  <a href="{% url 'login' %}" class="ca-rail-link{% if un == 'login' %} is-active{% endif %}"><span class="ca-rail-ind"><i data-lucide="log-in" class="lu" aria-hidden="true"></i></span><span class="ca-rail-label">Kirish</span></a>
   {% endif %}
 </div>
 {% endwith %}

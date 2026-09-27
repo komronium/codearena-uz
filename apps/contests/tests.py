@@ -833,3 +833,41 @@ def test_live_contest_shows_your_place_on_the_list_and_at_home(client, contest, 
     home = client.get("/")
     assert home.context["live"]["rank"] == 1 and home.context["live"]["solved"] == 1
     assert "Davom etish" in home.content.decode()
+
+
+def test_standings_live_poll_gets_only_the_table_and_counts_skip_disqualified(client, contest, problem_a, python):
+    cache.clear()
+    ali = User.objects.create_user("ali", password="x")
+    bob = User.objects.create_user("bob", password="x")
+    Participation.objects.create(user=ali, contest=contest)
+    Participation.objects.create(user=bob, contest=contest, disqualified=True)
+    _sub(ali, problem_a, contest, python, "AC", 5)
+    _sub(bob, problem_a, contest, python, "AC", 6)
+    client.force_login(bob)
+    url = reverse("contests:standings", args=[contest.pk])
+
+    page = client.get(url)
+    body = page.content.decode()
+    assert "<html" in body and 'id="st-live"' in body and 'hx-trigger="every 20s' in body
+    a = next(cp for cp in page.context["problems"] if cp.label == "A")
+    assert (a.n_solved, a.n_tried) == (1, 1)  # bob's AC is shown in his row, not counted
+    assert "diskvalifikatsiya" in body  # bob's pinned line says so instead of a plain rank
+
+    poll = client.get(url, HTTP_HX_REQUEST="true").content.decode()
+    assert poll.lstrip().startswith("<div id=\"st-live\"") and "<html" not in poll and "ca-rail" not in poll
+
+
+def test_a_problem_added_mid_contest_gets_its_column_without_waiting_for_the_cache(client, contest, author, python, problem_a):
+    """The standings are cached for 30 s; adding a problem must not serve rows with a cell missing."""
+    ali = User.objects.create_user("ali", password="x")
+    Participation.objects.create(user=ali, contest=contest)
+    _sub(ali, problem_a, contest, python, "AC", 5)
+    client.force_login(ali)
+    assert client.get(reverse("contests:standings", args=[contest.pk])).status_code == 200  # now cached
+    extra = Problem.objects.create(slug="c", title="C", statement_md="x", author=author, is_public=False)
+    ContestProblem.objects.create(contest=contest, problem=extra, label="C", order=2, points=100)
+
+    page = client.get(reverse("contests:detail", args=[contest.pk]))
+    assert page.status_code == 200 and [cp.label for cp in page.context["problems"]] == ["A", "B", "C"]
+    table = client.get(reverse("contests:standings", args=[contest.pk]))
+    assert table.status_code == 200 and len(table.context["rows"][0]["cells"]) == 3

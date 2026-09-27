@@ -124,3 +124,88 @@ def test_rail_offers_admin_to_staff_only(client, world):
     client.force_login(User.objects.create_user("boss", password="x", is_staff=True))
     rail = client.get("/").content.decode().split('class="ca-rail"', 1)[1].split("</nav>", 1)[0]
     assert reverse("moderation:dashboard") in rail
+
+
+@pytest.mark.django_db
+def test_nav_shows_a_running_contest_and_homework_due_soon(client):
+    from datetime import timedelta
+
+    from django.core.cache import cache
+    from django.utils import timezone
+
+    from apps.accounts.models import Group, User
+    from apps.classroom.models import Assignment, AssignmentProblem
+    from apps.contests.models import Contest, Participation
+    from apps.problems.models import Problem
+
+    cache.clear()
+    teacher = User.objects.create_user("navt", password="x")
+    me = User.objects.create_user("navs", password="x")
+    now = timezone.now()
+    live = Contest.objects.create(title="Jonli sinov", start=now - timedelta(hours=1), end=now + timedelta(hours=1))
+    Participation.objects.create(user=me, contest=live)
+    g = Group.objects.create(name="G", teacher=teacher)
+    g.members.add(me)
+    p = Problem.objects.create(slug="navp", title="P", statement_md="x", author=teacher)
+    a = Assignment.objects.create(group=g, title="Uy ishi", start=now - timedelta(days=1), deadline=now + timedelta(hours=20))
+    AssignmentProblem.objects.create(assignment=a, problem=p, order=0)
+    client.force_login(me)
+
+    page = client.get("/problems/").content.decode()
+    assert "ca-live-pill" in page and "Musobaqangiz davom etmoqda" in page  # the clock, from any page
+    assert "ca-badge-live" in page and "1 ta vazifa muddati 2 kun ichida tugaydi" in page
+    assert "ca-live-pill" not in client.get("/").content.decode()  # home has its own live strip
+
+
+@pytest.mark.django_db
+def test_nav_does_not_advertise_a_contest_for_another_group(client):
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    from apps.accounts.models import Group, User
+    from apps.contests.models import Contest
+
+    teacher = User.objects.create_user("gt", password="x")
+    inside, outside = User.objects.create_user("gin", password="x"), User.objects.create_user("gout", password="x")
+    g = Group.objects.create(name="2-kurs", teacher=teacher)
+    g.members.add(inside)
+    now = timezone.now()
+    Contest.objects.create(title="Faqat 2-kurs", start=now - timedelta(hours=1), end=now + timedelta(hours=1), require_group=g)
+
+    client.force_login(outside)
+    assert "ca-live-pill" not in client.get("/problems/").content.decode()
+    client.force_login(inside)
+    page = client.get("/problems/").content.decode()
+    assert "ca-live-pill" in page and "Jonli musobaqa" in page
+
+
+@pytest.mark.django_db
+def test_home_strip_and_nav_point_at_the_contest_you_are_in(client):
+    """Two contests at once: both the home strip and the top-bar pill take yours, not the one ending first."""
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    from unittest.mock import patch
+
+    from apps.accounts.models import User
+    from apps.contests.models import Contest, Participation
+    from apps.home.context_processors import live_contest_for
+
+    me = User.objects.create_user("two", password="x")
+    now = timezone.now()
+    Contest.objects.create(title="Tezroq tugaydi", start=now - timedelta(hours=1), end=now + timedelta(minutes=30))
+    mine = Contest.objects.create(title="Meniki", start=now - timedelta(hours=1), end=now + timedelta(hours=2))
+    Participation.objects.create(user=me, contest=mine)
+    starts_soon = Contest.objects.create(title="Hozir boshlanadi", start=now + timedelta(seconds=5),
+                                         end=now + timedelta(hours=1))
+    client.force_login(me)
+
+    home = client.get("/")
+    assert home.context["live"]["contest"] == mine and home.context["live"]["joined"]
+    assert 'title="Meniki (+1 ta boshqa jonli)"' in client.get("/problems/").content.decode()
+    # the list was cached before the third contest started; it still counts the moment it does
+    assert live_contest_for(me)["count"] == 2
+    with patch("apps.home.context_processors.timezone.now", return_value=starts_soon.start + timedelta(seconds=1)):
+        assert live_contest_for(me)["count"] == 3

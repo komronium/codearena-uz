@@ -37,17 +37,24 @@
       <a href="{% url 'home' %}" class="ca-topbar-brand" aria-label="CodeArena bosh sahifa">{% include "_brand_mark.html" %}</a>
       <div class="ca-topbar-title">{% block page_title %}{% with ns=request.resolver_match.namespace un=request.resolver_match.url_name %}<p class="ca-topbar-section">{% if ns == "problems" %}Masalalar{% elif ns == "contests" %}Musobaqalar{% elif ns == "classroom" and "duel" in un %}Duellar{% elif ns == "classroom" %}Vazifalar{% elif ns == "submissions" %}Urinishlar{% elif ns == "moderation" or ns == "integrity" %}Boshqaruv{% elif un == "profile" or un == "profile_edit" %}Profil{% else %}CodeArena{% endif %}</p>{% endwith %}{% endblock %}</div>
       <div class="ca-topbar-tools">
-        <form method="get" action="{% url 'problems:list' %}" class="ca-search hidden w-72 md:block" role="search" aria-label="Masala qidirish">
-          <i data-lucide="search" class="lu" aria-hidden="true"></i>
-          <input type="search" name="q" id="site-search" placeholder="Masala qidirish" class="ca-input" aria-label="Masala qidirish" aria-keyshortcuts="/">
-          <kbd class="ca-kbd" aria-hidden="true">/</kbd>
-        </form>
-        <a href="{% url 'problems:list' %}" class="ca-icon-btn md:hidden" aria-label="Masala qidirish"><i data-lucide="search" class="lu" aria-hidden="true"></i></a>
+        {% with live=nav.live %}{% if live and not contest and request.resolver_match.namespace != "contests" and request.resolver_match.url_name != "home" %}
+        {# a contest is running: its clock and a way in, from every page #}
+        <a href="{% url 'contests:detail' live.pk %}" class="ca-live-pill" title="{{ live.title }}{% if live.count > 1 %} (+{{ live.count|add:'-1' }} ta boshqa jonli){% endif %}">
+          <span class="ca-live-dot" aria-hidden="true"></span>
+          <span class="hidden lg:inline">{% if live.joined %}Musobaqangiz davom etmoqda{% else %}Jonli musobaqa{% endif %}</span>
+          <span class="tabular font-bold" data-countdown="{{ live.end|date:'c' }}" data-label="" data-suffix="1"></span>
+          <span class="sr-only">— {{ live.title }}</span>
+        </a>
+        {% endif %}{% endwith %}
+        <button type="button" class="ca-search-btn hidden md:flex" data-palette-open aria-keyshortcuts="Control+K Meta+K /">
+          <i data-lucide="search" class="lu" aria-hidden="true"></i><span>Qidirish…</span><kbd class="ca-kbd" aria-hidden="true">Ctrl K</kbd>
+        </button>
+        <button type="button" class="ca-icon-btn md:hidden" data-palette-open aria-label="Qidirish"><i data-lucide="search" class="lu" aria-hidden="true"></i></button>
         {% if user.is_authenticated %}
         {% with s=streak_pill %}{% if s.daily %}
         <a href="{% url 'problems:detail' s.daily.problem.slug %}" class="ca-streak{% if s.done %} is-done{% elif s.current %} is-risk{% endif %}"
            title="{% if s.done %}Bugungi masala yechildi — seriya {{ s.current }} kun{% elif s.current %}Seriya {{ s.current }} kun: bugun kun masalasini yeching, aks holda uziladi{% else %}Kun masalasini yechib, seriyani boshlang{% endif %}">
-          <i data-lucide="flame" class="lu" aria-hidden="true"></i><span class="tabular">{{ s.current }}</span>
+          <i data-lucide="flame" class="lu" aria-hidden="true"></i><span class="tabular">{{ s.current }}</span><span class="hidden sm:inline" aria-hidden="true">kun</span>{% if not s.done %}<b class="ca-streak-todo" aria-hidden="true"></b>{% endif %}
           <span class="sr-only">kunlik seriya{% if s.done %}, bugungi masala yechilgan{% elif s.current %}, bugungi masala hali yechilmagan{% endif %}</span>
         </a>
         {% endif %}{% endwith %}
@@ -74,9 +81,9 @@
   {% with ns=request.resolver_match.namespace un=request.resolver_match.url_name %}
   <a href="{% url 'home' %}"{% if un == 'home' %} class="is-active" aria-current="page"{% endif %}><span class="ca-bn-icon"><i data-lucide="house" class="lu" aria-hidden="true"></i></span><span>Bosh sahifa</span></a>
   <a href="{% url 'problems:list' %}"{% if ns == 'problems' and not contest %} class="is-active" aria-current="page"{% endif %}><span class="ca-bn-icon"><i data-lucide="list-checks" class="lu" aria-hidden="true"></i></span><span>Masalalar</span></a>
-  <a href="{% url 'contests:list' %}"{% if ns == 'contests' or ns == 'problems' and contest %} class="is-active" aria-current="page"{% endif %}><span class="ca-bn-icon"><i data-lucide="trophy" class="lu" aria-hidden="true"></i></span><span>Musobaqa</span></a>
+  <a href="{% url 'contests:list' %}"{% if ns == 'contests' or ns == 'problems' and contest %} class="is-active" aria-current="page"{% endif %}><span class="ca-bn-icon"><i data-lucide="trophy" class="lu" aria-hidden="true"></i>{% if nav.live %}<b class="ca-badge-live"><span class="sr-only">, jonli musobaqa bor</span></b>{% endif %}</span><span>Musobaqa</span></a>
   <a href="{% url 'rating' %}"{% if un == 'rating' or un == 'top' %} class="is-active" aria-current="page"{% endif %}><span class="ca-bn-icon"><i data-lucide="chart-column" class="lu" aria-hidden="true"></i></span><span>Reyting</span></a>
-  <button type="button" data-menu-open aria-haspopup="dialog" aria-controls="ca-menu"><span class="ca-bn-icon">{% if user.is_authenticated %}<i data-lucide="user" class="lu" aria-hidden="true"></i>{% else %}<i data-lucide="menu" class="lu" aria-hidden="true"></i>{% endif %}</span><span>{% if user.is_authenticated %}Men{% else %}Menyu{% endif %}</span>{% if unread_reviews %}<b class="ca-nav-dot" aria-label="{{ unread_reviews }} ta o‘qilmagan sharh"></b>{% endif %}</button>
+  <button type="button" data-menu-open aria-haspopup="dialog" aria-controls="ca-menu"><span class="ca-bn-icon">{% if user.is_authenticated %}<i data-lucide="user" class="lu" aria-hidden="true"></i>{% else %}<i data-lucide="menu" class="lu" aria-hidden="true"></i>{% endif %}</span><span>{% if user.is_authenticated %}Men{% else %}Menyu{% endif %}</span>{% with n=unread_reviews|add:nav.due %}{% if n %}<b class="ca-badge-n ca-bn-badge">{{ n }}<span class="sr-only"> ta yangi: sharh yoki muddati yaqin vazifa</span></b>{% endif %}{% endwith %}</button>
   {% endwith %}
 </nav>
 {% comment %}The phone menu: the account, every destination (staff pages included) and the theme.
@@ -157,7 +164,7 @@ A native dialog gives focus trapping and Esc for free.{% endcomment %}
       if (cur === "system") delete document.documentElement.dataset.theme;
       else document.documentElement.dataset.theme = cur;
       if (btn) {
-        btn.innerHTML = `<i data-lucide="${icons[cur]}" class="lu" aria-hidden="true"></i>`;
+        (btn.querySelector(".ca-rail-ind") || btn).innerHTML = `<i data-lucide="${icons[cur]}" class="lu" aria-hidden="true"></i>`;
         btn.title = labels[cur];
         window.caIcons();
       }
@@ -170,6 +177,7 @@ A native dialog gives focus trapping and Esc for free.{% endcomment %}
       apply();
     };
     apply();
+    window.caSetTheme = set;  // the command palette's "Ko‘rinish" actions
     btn?.addEventListener("click", () => set(order[(order.indexOf(cur) + 1) % order.length]));
     document.querySelectorAll("[data-theme-set]").forEach((b) => b.addEventListener("click", () => set(b.dataset.themeSet)));
   })();
@@ -182,17 +190,78 @@ A native dialog gives focus trapping and Esc for free.{% endcomment %}
       all().forEach((d) => { d.open = false; d.querySelector("summary").focus(); });
     });
   })();
-  (() => {
-    // "/" jumps to the problem search, unless the user is typing somewhere.
-    const box = document.getElementById("site-search");
-    document.addEventListener("keydown", (e) => {
-      if (e.key !== "/" || e.ctrlKey || e.metaKey || e.altKey || !box || !box.offsetParent) return;
-      const t = e.target;
-      if (t.closest("input, textarea, select, [contenteditable], .cm-editor")) return;
-      e.preventDefault(); box.focus();
-    });
-  })();
 </script>
+{% comment %}Command palette (static/js/palette.js): pages and actions for who is signed in, problems
+from /problems/suggest/. "go" is the second key of a "g <key>" shortcut.{% endcomment %}
+<dialog id="ca-palette" class="ca-palette" aria-label="Qidirish va buyruqlar">
+  <div class="ca-palette-head">
+    <i data-lucide="search" class="lu" aria-hidden="true"></i>
+    <input id="ca-palette-q" type="text" role="combobox" aria-expanded="true" aria-controls="ca-palette-list" aria-autocomplete="list"
+           aria-label="Masala, sahifa yoki buyruq qidirish" placeholder="Masala, sahifa yoki buyruq…" autocomplete="off" spellcheck="false">
+    <kbd class="ca-kbd" aria-hidden="true">Esc</kbd>
+  </div>
+  <div id="ca-palette-list" class="ca-palette-list" role="listbox" aria-label="Natijalar"></div>
+  <div class="ca-palette-foot" aria-hidden="true">
+    <span><kbd class="ca-kbd">↑</kbd><kbd class="ca-kbd">↓</kbd> tanlash</span><span><kbd class="ca-kbd">Enter</kbd> ochish</span><span><kbd class="ca-kbd">?</kbd> yorliqlar</span>
+  </div>
+</dialog>
+<script type="application/json" id="ca-palette-data">{"suggest": "{% url 'problems:suggest' %}", "all": "{% url 'problems:list' %}", "items": [
+  {% if nav.live %}{"group": "Tezkor", "quick": true, "icon": "radio", "label": "Jonli: {{ nav.live.title|escapejs }}", "hint": "musobaqa", "url": "{% url 'contests:detail' nav.live.pk %}"},{% endif %}
+  {% if streak_pill.daily %}{"group": "Tezkor", "quick": true, "icon": "calendar-check", "label": "Bugungi masala: {{ streak_pill.daily.problem.title|escapejs }}", "hint": "{% if streak_pill.done %}yechilgan{% else %}+5 ball{% endif %}", "url": "{% url 'problems:detail' streak_pill.daily.problem.slug %}"},{% endif %}
+  {"group": "Sahifalar", "icon": "house", "label": "Bosh sahifa", "words": "home dashboard", "keys": "g h", "go": "h", "url": "{% url 'home' %}"},
+  {"group": "Sahifalar", "icon": "list-checks", "label": "Masalalar", "words": "problems practice mashq", "keys": "g p", "go": "p", "url": "{% url 'problems:list' %}"},
+  {"group": "Sahifalar", "icon": "trophy", "label": "Musobaqalar", "words": "contests olimpiada", "keys": "g c", "go": "c", "url": "{% url 'contests:list' %}"},
+  {"group": "Sahifalar", "icon": "chart-column", "label": "Reyting", "words": "rating leaderboard darajalar", "keys": "g r", "go": "r", "url": "{% url 'rating' %}"},
+  {"group": "Sahifalar", "icon": "users", "label": "Amaliyot ballari", "words": "top points ball", "url": "{% url 'top' %}"},
+  {% if user.is_authenticated %}
+  {"group": "Sahifalar", "icon": "notebook-pen", "label": "Vazifalar", "words": "homework uy vazifasi guruh", "keys": "g v", "go": "v", "url": "{% url 'classroom:list' %}"},
+  {"group": "Sahifalar", "icon": "swords", "label": "Duellar", "words": "duel 1v1 bellashuv", "keys": "g d", "go": "d", "url": "{% url 'classroom:duels' %}"},
+  {"group": "Sahifalar", "icon": "history", "label": "Urinishlarim", "words": "submissions yechimlar natijalar", "keys": "g u", "go": "u", "url": "{% url 'submissions:mine' %}"},
+  {"group": "Sahifalar", "icon": "user", "label": "Profilim", "words": "profile men", "keys": "g m", "go": "m", "url": "{% url 'profile' user.username %}"},
+  {"group": "Sahifalar", "icon": "pencil", "label": "Profilni tahrirlash", "words": "settings sozlamalar rasm avatar", "url": "{% url 'profile_edit' %}"},
+  {"group": "Sahifalar", "icon": "key-round", "label": "Parolni almashtirish", "words": "password", "url": "{% url 'password_change' %}"},
+  {% else %}
+  {"group": "Sahifalar", "icon": "log-in", "label": "Kirish", "words": "login sign in", "url": "{% url 'login' %}"},
+  {"group": "Sahifalar", "icon": "user-plus", "label": "Ro‘yxatdan o‘tish", "words": "register sign up", "url": "{% url 'register' %}"},
+  {% endif %}
+  {% if user.is_staff %}
+  {"group": "Admin", "icon": "layout-dashboard", "label": "Boshqaruv", "words": "admin dashboard", "keys": "g a", "go": "a", "url": "{% url 'moderation:dashboard' %}"},
+  {"group": "Admin", "icon": "inbox", "label": "Navbat", "words": "queue tasdiqlash", "hint": "{% if nav.staff.queue %}{{ nav.staff.queue }} ta kutmoqda{% endif %}", "url": "{% url 'moderation:queue' %}"},
+  {"group": "Admin", "icon": "circle-plus", "label": "Masala qo‘shish", "words": "new problem", "url": "{% url 'moderation:submit' %}"},
+  {"group": "Admin", "icon": "sparkles", "label": "AI bilan masala tuzish", "words": "ai generate", "url": "{% url 'moderation:ai_generate' %}"},
+  {"group": "Admin", "icon": "trophy", "label": "Musobaqa yaratish", "words": "new contest", "url": "{% url 'moderation:contest_new' %}"},
+  {"group": "Admin", "icon": "users-round", "label": "Foydalanuvchilar", "words": "users teacher o‘qituvchi so‘rov", "hint": "{% if nav.staff.requests %}{{ nav.staff.requests }} ta so‘rov{% endif %}", "url": "{% url 'moderation:users' %}"},
+  {"group": "Admin", "icon": "school", "label": "Guruhlar", "words": "groups", "url": "{% url 'moderation:groups' %}"},
+  {"group": "Admin", "icon": "scroll-text", "label": "Amallar jurnali", "words": "audit log", "url": "{% url 'integrity:audit' %}"},
+  {% endif %}
+  {"group": "Amallar", "icon": "sun", "label": "Ko‘rinish: yorug‘", "words": "theme light mavzu", "action": "theme:light"},
+  {"group": "Amallar", "icon": "moon", "label": "Ko‘rinish: qorong‘i", "words": "theme dark tungi", "action": "theme:dark"},
+  {"group": "Amallar", "icon": "monitor", "label": "Ko‘rinish: tizimdagidek", "words": "theme system auto", "action": "theme:system"},
+  {"group": "Amallar", "icon": "keyboard", "label": "Klaviatura yorliqlari", "words": "shortcuts keys hotkeys", "keys": "?", "action": "keys"}
+]}</script>
+<dialog id="ca-keys" class="ca-dialog" aria-labelledby="ca-keys-title">
+  <div class="ca-dialog-head">
+    <h2 id="ca-keys-title">Klaviatura yorliqlari</h2>
+    <form method="dialog"><button class="ca-dialog-x" aria-label="Yopish"><i data-lucide="x" class="lu" aria-hidden="true"></i></button></form>
+  </div>
+  <dl class="ca-keys">
+    <dt><kbd class="ca-kbd">Ctrl</kbd> <kbd class="ca-kbd">K</kbd> yoki <kbd class="ca-kbd">/</kbd></dt><dd>Qidirish va buyruqlar</dd>
+    <dt><kbd class="ca-kbd">g</kbd> <kbd class="ca-kbd">h</kbd></dt><dd>Bosh sahifa</dd>
+    <dt><kbd class="ca-kbd">g</kbd> <kbd class="ca-kbd">p</kbd></dt><dd>Masalalar</dd>
+    <dt><kbd class="ca-kbd">g</kbd> <kbd class="ca-kbd">c</kbd></dt><dd>Musobaqalar</dd>
+    <dt><kbd class="ca-kbd">g</kbd> <kbd class="ca-kbd">r</kbd></dt><dd>Reyting</dd>
+    {% if user.is_authenticated %}
+    <dt><kbd class="ca-kbd">g</kbd> <kbd class="ca-kbd">v</kbd></dt><dd>Vazifalar</dd>
+    <dt><kbd class="ca-kbd">g</kbd> <kbd class="ca-kbd">d</kbd></dt><dd>Duellar</dd>
+    <dt><kbd class="ca-kbd">g</kbd> <kbd class="ca-kbd">u</kbd></dt><dd>Urinishlarim</dd>
+    <dt><kbd class="ca-kbd">g</kbd> <kbd class="ca-kbd">m</kbd></dt><dd>Profilim</dd>
+    {% endif %}
+    {% if user.is_staff %}<dt><kbd class="ca-kbd">g</kbd> <kbd class="ca-kbd">a</kbd></dt><dd>Boshqaruv</dd>{% endif %}
+    <dt><kbd class="ca-kbd">Ctrl</kbd> <kbd class="ca-kbd">Enter</kbd></dt><dd>Masala sahifasida — yechimni yuborish</dd>
+    <dt><kbd class="ca-kbd">?</kbd></dt><dd>Shu oyna</dd>
+  </dl>
+</dialog>
+<script src="{% static 'js/palette.js' %}" defer></script>
 {% if tier_up %}
 {# rating moved the user into a higher tier: once, with the new banner as the picture #}
 <dialog id="ca-tier-up" class="ca-dialog !max-w-md !p-0 overflow-hidden" aria-labelledby="ca-tier-up-title">
@@ -211,8 +280,10 @@ A native dialog gives focus trapping and Esc for free.{% endcomment %}
   window.addEventListener("load", () => {
     const d = document.getElementById("ca-tier-up");
     d.showModal();
-    window.caCelebrate?.("Yangi daraja: {{ tier_up.name }} 🎉");
+    window.caCelebrate?.({ toast: false });  // the dialog says it; confetti and the chime join in
   });
+  // back/forward cache: a restored page must not reopen with the moment still on screen
+  window.addEventListener("pageshow", (e) => { if (e.persisted) document.getElementById("ca-tier-up")?.close(); });
 </script>
 {% endif %}
 </body>

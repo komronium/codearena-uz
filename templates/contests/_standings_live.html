@@ -1,0 +1,99 @@
+{% load tiers %}{% comment %}The live part of the standings: your line, the table and the legend. While the contest
+runs it re-fetches itself every 20 s (the view answers an htmx request with just this block);
+standings.html keeps the sideways scroll and the search across the swap, and skips a refresh
+while the table is being touched.{% endcomment %}
+<div id="st-live"{% if contest.is_running %} hx-get="{% url 'contests:standings' contest.pk %}" hx-trigger="every 20s [window.caStIdle ? caStIdle() : !document.hidden]" hx-swap="outerHTML"{% endif %}>
+{% if my_row %}
+{# your line, always in view: rank, score, penalty and each problem at a glance #}
+<div class="ca-st-mine mb-3{% if my_row.disqualified %} is-dq{% endif %}">
+  {% if my_row.disqualified %}
+  <span class="ca-st-mine-rank">✕<small>diskvalifikatsiya</small></span>
+  {% else %}
+  <span class="ca-st-mine-rank">#{{ my_row.rank }}<small>/ {{ rows|length }}</small></span>
+  {% endif %}
+  <span><b class="tabular">{{ my_row.score }}</b> ball · <span class="text-mute">jarima</span> <b class="tabular">{{ my_row.penalty }}</b></span>
+  <span class="flex flex-wrap gap-1">
+    {% for cell in my_row.cells %}{% with cp=problems|slice:forloop.counter|last %}
+    <span class="ca-st-pill {% if cell.solved %}is-ac{% elif cell.wrong %}is-wa{% endif %}" title="{{ cp.label }}: {% if cell.solved %}yechilgan {{ cell.time }}{% elif cell.wrong %}{{ cell.wrong }} ta noto‘g‘ri urinish{% else %}urinish yo‘q{% endif %}">{{ cp.label }}{% if cell.solved %}✓{% elif cell.wrong %}−{{ cell.wrong }}{% endif %}</span>
+    {% endwith %}{% endfor %}
+  </span>
+</div>
+{% endif %}
+<div class="ca-panel !p-0 overflow-x-auto" id="st-scroll" tabindex="0" aria-label="Natijalar jadvali (gorizontal suriladi)">
+<table class="ca-table ca-standings">
+  <thead>
+    <tr>
+      <th class="ca-sticky ca-sticky-rank !text-center">#</th>
+      <th class="ca-sticky ca-sticky-user">Ishtirokchi</th>
+      <th class="text-right">Ball</th>
+      <th class="text-right" title="AC daqiqasi + 20 × noto‘g‘ri urinish (yechilgan masalalar bo‘yicha)">Jarima</th>
+      {% if contest.is_rated %}<th class="hidden text-right md:table-cell">Reyting</th>{% endif %}
+      {% for cp in problems %}
+      <th class="ca-st-prob">
+        {% if contest.has_started and registered or contest.has_ended or contest.has_started and user.is_staff %}<a class="ca-st-label" href="{% url 'problems:detail' cp.problem.slug %}" title="{{ cp.problem.title }}">{{ cp.label }}</a>{% else %}<span class="ca-st-label">{{ cp.label }}</span>{% endif %}
+        <span class="ca-st-sub tabular">{{ cp.points }} ball</span>
+        <span class="ca-st-sub tabular" title="{{ cp.n_solved }} kishi yechdi, {{ cp.n_tried }} kishi urindi"><b class="text-ok">{{ cp.n_solved }}</b>/{{ cp.n_tried }}</span>
+        <span class="ca-st-rate" aria-hidden="true"><span style="width: {{ cp.solve_pct }}%"></span></span>
+      </th>
+      {% endfor %}
+      {% if user.is_staff %}<th class="w-10"><span class="sr-only">Amal</span></th>{% endif %}
+    </tr>
+  </thead>
+  <tbody>
+  {% for r in rows %}
+  <tr data-name="{{ r.user.username|lower }} {{ r.user.get_full_name|lower }}" class="{% if r.user == user %}ca-row-me{% endif %} {% if r.disqualified %}ca-row-dq{% elif r.rank <= 3 and r.score %}ca-row-top ca-row-top{{ r.rank }}{% endif %}"{% if r.user == user %} id="me"{% endif %}>
+    <td class="ca-sticky ca-sticky-rank text-center">{% include "accounts/_rank.html" with rank=r.rank dq=r.disqualified %}</td>
+    <td class="ca-sticky ca-sticky-user">
+      <div class="flex min-w-0 items-center gap-2">
+        {% include "accounts/_user.html" with u=r.user tier=False %}
+        {% if r.disqualified %}<span class="ca-chip text-bad shrink-0" title="{{ r.participation.disqualified_reason|default:'Diskvalifikatsiya' }}">DQ</span>{% endif %}
+      </div>
+      {% if r.user.get_full_name %}<div class="mt-0.5 truncate pl-9 text-xs text-mute">{{ r.user.get_full_name }}</div>{% endif %}
+    </td>
+    <td class="tabular text-right">
+      <div class="text-base font-bold">{{ r.score }}</div>
+      <div class="text-xs text-mute">{{ r.solved }} ta</div>
+    </td>
+    <td class="tabular text-right text-mute">{{ r.penalty }}</td>
+    {% if contest.is_rated %}
+    <td class="tabular hidden text-right md:table-cell">
+      <div class="ca-tier-ink font-semibold" style="--tier: {{ r.user.rating|tier_color }}">{{ r.participation.rating_after|default:r.user.rating }}</div>
+      {% if r.rating_delta is not None %}<div class="text-xs font-medium {% if r.rating_delta >= 0 %}text-ok{% else %}text-bad{% endif %}">{{ r.rating_delta|stringformat:"+d" }}</div>{% endif %}
+    </td>
+    {% endif %}
+    {% for cell in r.cells %}
+    <td class="ca-cell {% if cell.solved %}ca-cell-ac{% if cell.first %} ca-cell-first{% endif %}{% elif cell.wrong %}ca-cell-wa{% endif %}"{% if cell.first %} title="Birinchi bo‘lib yechdi"{% endif %}>
+      {% if cell.first %}<span class="sr-only">birinchi bo‘lib yechdi,</span>{% endif %}
+      {% if cell.solved %}
+        <div class="font-semibold text-ok">+{% if cell.wrong %}{{ cell.wrong }}{% endif %}</div>
+        <div class="tabular text-xs text-mute">{{ cell.time }}</div>
+      {% elif cell.wrong %}
+        <div class="font-semibold text-bad">−{{ cell.wrong }}</div>
+      {% else %}
+        <span class="text-line" aria-hidden="true">·</span><span class="sr-only">urinish yo‘q</span>
+      {% endif %}
+    </td>
+    {% endfor %}
+    {% if user.is_staff %}
+    <td class="text-right">
+      <form method="post" action="{% url 'contests:disqualify' contest.pk r.user.pk %}" {% if not r.disqualified %}onsubmit="const s=prompt('Diskvalifikatsiya sababi (ixtiyoriy):',''); if(s===null) return false; this.reason.value=s;"{% endif %}>{% csrf_token %}
+        <input type="hidden" name="reason" value=""><input type="hidden" name="disqualified" value="{% if r.disqualified %}0{% else %}1{% endif %}">
+        <button class="ca-st-action" title="{% if r.disqualified %}Diskvalifikatsiyani bekor qilish{% else %}Diskvalifikatsiya qilish{% endif %}" aria-label="{% if r.disqualified %}Diskvalifikatsiyani bekor qilish{% else %}Diskvalifikatsiya qilish{% endif %}: {{ r.user.username }}">
+          <i data-lucide="{% if r.disqualified %}undo-2{% else %}ban{% endif %}" class="lu" aria-hidden="true"></i>
+        </button>
+      </form>
+    </td>
+    {% endif %}
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+<div class="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs text-mute" aria-label="Belgilar izohi">
+  <span><b class="text-ok">+</b> / <b class="text-ok">+2</b> — yechildi (2 noto‘g‘ri urinishdan keyin), ostida vaqt</span>
+  <span><b class="text-bad">−1</b> — 1 noto‘g‘ri urinish</span>
+  <span><span class="ca-legend-swatch ca-cell-ac ca-cell-first" aria-hidden="true"></span> birinchi yechgan</span>
+  <span><b>Jarima</b> = yechish daqiqalari + 20 × noto‘g‘ri urinish</span>
+  {% if contest.is_running %}<span class="ml-auto">Yangilandi: <span class="tabular">{% now "H:i:s" %}</span></span>{% endif %}
+</div>
+</div>{# /st-live #}
