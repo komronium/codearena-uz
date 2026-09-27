@@ -367,3 +367,262 @@ def test_non_solver_cannot_read_others_code(client, problem, py):
     theirs = _ac(User.objects.create_user("vali", password="x"), problem, py, 10, "secret")
     client.force_login(User.objects.create_user("ali", password="x"))
     assert client.get(reverse("submissions:detail", args=[theirs.pk])).status_code == 404
+
+
+# ---- hints and editorials ---------------------------------------------------------------------
+
+def _hints(problem, *costs):
+    from .models import ProblemHint
+
+    return [ProblemHint.objects.create(problem=problem, order=i, body_md=f"Maslahat {i + 1}", cost_pct=c)
+            for i, c in enumerate(costs)]
+
+
+@pytest.mark.django_db
+def test_hints_open_in_order_and_cost_points_only_before_the_solve(client, problem):
+    from apps.submissions.models import Submission, UserProblemSolved
+    from apps.submissions.solves import refresh_solves
+
+    from .models import HintUnlock
+
+    problem.points = 100
+    problem.save()
+    h1, h2, h3 = _hints(problem, 20, 30, 50)
+    ali = User.objects.create_user("ali", password="x")
+    client.force_login(ali)
+    url = lambda h: reverse("problems:hint", args=[problem.slug, h.pk])  # noqa: E731
+
+    assert client.post(url(h2)).status_code == 400  # hint 1 first
+    page = client.get(reverse("problems:detail", args=[problem.slug])).content.decode()
+    assert "Maslahat 1" not in page and "20%" in page  # locked, cost shown up front
+    assert client.post(url(h1)).status_code == 302
+    assert "Maslahat 1" in client.get(reverse("problems:detail", args=[problem.slug])).content.decode()
+    client.post(url(h1))  # opening twice costs once
+    assert HintUnlock.objects.filter(user=ali).count() == 1
+
+    lang = Language.objects.create(code="python", name="Python 3", docker_image="x", run_cmd="x")
+    Submission.objects.create(user=ali, problem=problem, language=lang, source="x", verdict="AC")
+    refresh_solves(problem.pk, [ali.pk])
+    ali.refresh_from_db()
+    assert UserProblemSolved.objects.get(user=ali).hint_pct == 20 and ali.practice_points == 80
+
+    client.post(url(h2))  # after the solve: free
+    client.post(url(h3))
+    refresh_solves(problem.pk, [ali.pk])
+    ali.refresh_from_db()
+    assert ali.practice_points == 80
+
+
+@pytest.mark.django_db
+def test_hint_costs_are_capped(client, problem):
+    from apps.submissions.models import Submission
+    from apps.submissions.solves import refresh_solves
+
+    problem.points = 100
+    problem.save()
+    ali = User.objects.create_user("ali", password="x")
+    client.force_login(ali)
+    for h in _hints(problem, 50, 50):
+        client.post(reverse("problems:hint", args=[problem.slug, h.pk]))
+    lang = Language.objects.create(code="python", name="Python 3", docker_image="x", run_cmd="x")
+    Submission.objects.create(user=ali, problem=problem, language=lang, source="x", verdict="AC")
+    refresh_solves(problem.pk, [ali.pk])
+    ali.refresh_from_db()
+    assert ali.practice_points == 10
+
+
+@pytest.mark.django_db
+def test_hints_are_locked_while_the_problem_is_in_a_contest(client, problem):
+    (h1,) = _hints(problem, 10)
+    c = Contest.objects.create(title="Soon", start=timezone.now() + timezone.timedelta(days=1),
+                               end=timezone.now() + timezone.timedelta(days=2))
+    ContestProblem.objects.create(contest=c, problem=problem, label="A")
+    ali = User.objects.create_user("ali", password="x")
+    client.force_login(ali)
+    assert client.post(reverse("problems:hint", args=[problem.slug, h1.pk])).status_code in (400, 404)
+    Contest.objects.filter(pk=c.pk).update(start=timezone.now() - timezone.timedelta(hours=1),
+                                           end=timezone.now() + timezone.timedelta(hours=1))
+    Participation.objects.create(user=ali, contest=c)
+    assert client.post(reverse("problems:hint", args=[problem.slug, h1.pk])).status_code == 400
+
+
+@pytest.mark.django_db
+def test_editorial_opens_after_the_solve(client, problem):
+    from apps.submissions.models import Submission
+    from apps.submissions.solves import refresh_solves
+
+    problem.editorial_md = "Javob: **a + b**"
+    problem.save()
+    ali = User.objects.create_user("ali", password="x")
+    client.force_login(ali)
+    page = client.get(reverse("problems:detail", args=[problem.slug])).content.decode()
+    assert "<strong>a + b</strong>" not in page and "Yechim tahlili" in page
+    lang = Language.objects.create(code="python", name="Python 3", docker_image="x", run_cmd="x")
+    Submission.objects.create(user=ali, problem=problem, language=lang, source="x", verdict="AC")
+    refresh_solves(problem.pk, [ali.pk])
+    assert "<strong>a + b</strong>" in client.get(reverse("problems:detail", args=[problem.slug])).content.decode()
+    client.force_login(problem.author)
+    assert "<strong>a + b</strong>" in client.get(reverse("problems:detail", args=[problem.slug])).content.decode()
+
+
+@pytest.mark.django_db
+def test_staff_edit_hints_and_editorial_on_the_problem_form(client, problem):
+    staff = User.objects.create_user("boss", password="x", is_staff=True)
+    client.force_login(staff)
+    data = {"title": problem.title, "statement_md": "x", "difficulty": "easy", "kind": "code",
+            "tl_ms": "1000", "ml_mb": "256", "points": "100", "is_public": "on", "editorial_md": "Tahlil",
+            "testcases-TOTAL_FORMS": "2", "testcases-INITIAL_FORMS": "2",
+            "testcases-MIN_NUM_FORMS": "0", "testcases-MAX_NUM_FORMS": "1000",
+            "hints-TOTAL_FORMS": "2", "hints-INITIAL_FORMS": "0", "hints-MIN_NUM_FORMS": "0",
+            "hints-MAX_NUM_FORMS": "1000",
+            "hints-0-order": "0", "hints-0-body_md": "Birinchi", "hints-0-cost_pct": "10",
+            "hints-1-order": "1", "hints-1-body_md": "Ikkinchi", "hints-1-cost_pct": "150"}
+    for i, tc in enumerate(problem.testcases.all()):
+        data |= {f"testcases-{i}-id": str(tc.pk), f"testcases-{i}-input": tc.input,
+                 f"testcases-{i}-expected": tc.expected, f"testcases-{i}-order": str(tc.order)}
+    r = client.post(reverse("moderation:problem_edit", args=[problem.pk]), data)
+    assert r.status_code == 200 and not problem.hints.exists()  # 150% is refused
+    data["hints-1-cost_pct"] = "25"
+    r = client.post(reverse("moderation:problem_edit", args=[problem.pk]), data)
+    problem.refresh_from_db()
+    assert r.status_code == 302 and problem.editorial_md == "Tahlil"
+    assert list(problem.hints.values_list("body_md", "cost_pct")) == [("Birinchi", 10), ("Ikkinchi", 25)]
+
+
+# ---- skill map and next problem -----------------------------------------------------------------
+
+@pytest.fixture
+def catalog(db):
+    """Tags dp (4 problems) and math (3); one hidden and one contest-locked extra."""
+    author = User.objects.create_user("author", password="x")
+    dp, math = Tag.objects.create(name="dp"), Tag.objects.create(name="math")
+    made = {}
+    for slug, tag, diff in [("dp1", dp, "easy"), ("dp2", dp, "easy"), ("dp3", dp, "medium"), ("dp4", dp, "hard"),
+                            ("m1", math, "easy"), ("m2", math, "easy"), ("m3", math, "easy")]:
+        p = Problem.objects.create(slug=slug, title=slug, statement_md="x", author=author, difficulty=diff)
+        p.tags.add(tag)
+        made[slug] = p
+    hidden = Problem.objects.create(slug="h", title="h", statement_md="x", author=author, is_public=False)
+    hidden.tags.add(dp)
+    soon = Problem.objects.create(slug="soon", title="soon", statement_md="x", author=author)
+    soon.tags.add(dp)
+    c = Contest.objects.create(title="C", start=timezone.now() + timezone.timedelta(days=1),
+                               end=timezone.now() + timezone.timedelta(days=2))
+    ContestProblem.objects.create(contest=c, problem=soon, label="A")
+    return made
+
+
+def _solve(user, *problems):
+    from apps.submissions.models import Submission, UserProblemSolved
+
+    lang, _ = Language.objects.get_or_create(code="python", defaults={"name": "Python 3", "docker_image": "x",
+                                                                       "run_cmd": "x"})
+    for p in problems:
+        s = Submission.objects.create(user=user, problem=p, language=lang, source="x", verdict="AC")
+        UserProblemSolved.objects.create(user=user, problem=p, first_ac_submission=s)
+
+
+@pytest.mark.django_db
+def test_skill_map_counts_open_problems_per_tag(catalog):
+    from .skills import skill_map
+
+    ali = User.objects.create_user("ali", password="x")
+    _solve(ali, catalog["m1"], catalog["m2"], catalog["dp1"])
+    got = {row["tag"].name: (row["solved"], row["total"]) for row in skill_map(ali)}
+    assert got == {"dp": (1, 4), "math": (2, 3)}  # hidden and contest-locked don't count
+
+
+@pytest.mark.django_db
+def test_next_problems_come_from_the_weakest_tag_at_the_users_level(catalog):
+    from .skills import next_problems
+
+    ali = User.objects.create_user("ali", password="x")
+    _solve(ali, catalog["m1"], catalog["m2"], catalog["dp1"])  # weakest: dp (1/4); level: easy
+    picks = next_problems(ali)
+    assert [p.slug for p, _ in picks][:2] == ["dp2", "dp3"]  # easy first, then one step up; never dp4 (hard)
+    assert all(reason == "dp" for _, reason in picks[:2])
+    assert {p.slug for p, _ in picks} <= {"dp2", "dp3", "m3"}
+    assert "dp4" not in {p.slug for p, _ in picks}
+
+
+@pytest.mark.django_db
+def test_problem_list_and_profile_show_them(client, catalog):
+    ali = User.objects.create_user("ali", password="x")
+    _solve(ali, catalog["m1"])
+    client.force_login(ali)
+    page = client.get(reverse("problems:list")).content.decode()
+    assert "Keyingi masala" in page
+    assert "Mavzular" in client.get(reverse("profile", args=["ali"])).content.decode()
+
+
+# ---- daily problem and streak -------------------------------------------------------------------
+
+@pytest.mark.django_db
+def test_daily_problem_is_picked_once_a_day_from_fresh_open_problems(catalog):
+    import datetime
+
+    from .daily import daily_for
+    from .models import DailyProblem
+
+    day = datetime.date(2030, 1, 7)  # a Monday: easy
+    first = daily_for(day)
+    assert first is not None and daily_for(day).pk == first.pk and DailyProblem.objects.count() == 1
+    assert first.problem.difficulty == "easy" and first.problem.slug not in ("h", "soon")
+    # the next 60 days never repeat a problem while fresh ones of the day's level remain
+    easy = {p.pk for p in catalog.values() if p.difficulty == "easy"}
+    used = [daily_for(day + datetime.timedelta(days=7 * i)).problem.pk for i in range(len(easy))]
+    assert sorted(used) == sorted(easy)
+
+
+@pytest.mark.django_db
+def test_daily_solves_give_bonus_and_streaks(catalog):
+    import datetime
+
+    from apps.submissions.models import Submission
+    from apps.submissions.solves import refresh_solves
+
+    from .daily import DAILY_BONUS, daily_for, streaks
+    from .models import DailySolve
+
+    ali = User.objects.create_user("ali", password="x")
+    lang = Language.objects.create(code="python", name="Python 3", docker_image="x", run_cmd="x")
+    today = timezone.localdate()
+    for back in (0, 1, 2, 5):  # a 3-day run up to today, and an older single day
+        day = today - datetime.timedelta(days=back)
+        d = daily_for(day)
+        at = timezone.make_aware(datetime.datetime.combine(day, datetime.time(12, 0)))
+        s = Submission.objects.create(user=ali, problem=d.problem, language=lang, source="x", verdict="AC")
+        Submission.objects.filter(pk=s.pk).update(created=at)
+        refresh_solves(d.problem_id, [ali.pk])
+    assert DailySolve.objects.filter(user=ali).count() == 4
+    assert streaks(ali) == (3, 3)
+    ali.refresh_from_db()
+    solved_points = sum(p.points for p in Problem.objects.filter(userproblemsolved__user=ali))
+    assert ali.practice_points == solved_points + 4 * DAILY_BONUS
+
+    # an AC on another day than the problem's day is not a daily solve; a rejudge that
+    # takes the AC away takes the daily solve and its bonus away too
+    Submission.objects.filter(user=ali, problem=daily_for(today).problem).update(verdict="WA")
+    refresh_solves(daily_for(today).problem_id, [ali.pk])
+    assert DailySolve.objects.filter(user=ali).count() == 3
+    assert streaks(ali) == (2, 2)  # yesterday's run is still alive today
+
+
+@pytest.mark.django_db
+def test_problem_list_shows_the_daily_problem(client, catalog):
+    ali = User.objects.create_user("ali", password="x")
+    client.force_login(ali)
+    r = client.get(reverse("problems:list"))
+    assert "Kun masalasi" in r.content.decode()
+    daily = r.context["daily"]
+    assert daily.problem.pk not in [p.pk for p, _ in r.context["next_picks"]]
+
+
+@pytest.mark.django_db
+def test_next_problems_reach_down_a_level_for_the_strongest(catalog):
+    from .skills import next_problems
+
+    ali = User.objects.create_user("ali", password="x")
+    _solve(ali, catalog["dp4"])  # only a hard one solved: nothing is above hard
+    picks = [p.slug for p, _ in next_problems(ali)]
+    assert picks and picks[0] == "dp3" and len(picks) == 1  # dp3 is the only unsolved medium; easy is two down

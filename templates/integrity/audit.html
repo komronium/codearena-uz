@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Amallar jurnali{% endblock %}
+{% block content %}
+<div class="mb-6 flex flex-wrap items-start justify-between gap-3">
+  <div>
+    <h1 class="ca-page-title">Amallar jurnali</h1>
+    <p class="mt-1 text-sm text-mute">Natijaga ta’sir qiluvchi har bir xodim amali: kim, qachon, nima uchun.{% if contest %} · {{ contest.title }}{% endif %}</p>
+  </div>
+  {% if contest %}<a href="{% url 'integrity:audit' %}" class="ca-btn ca-btn-ghost !py-1.5">Hammasi</a>{% endif %}
+</div>
+{% include "integrity/_audit_rows.html" with entries=entries %}
+{% if entries.has_other_pages %}
+<nav class="mt-4 flex justify-between text-sm" aria-label="Sahifalar">
+  {% if entries.has_previous %}<a class="ca-link" href="?{% if contest %}contest={{ contest.pk }}&{% endif %}page={{ entries.previous_page_number }}">← Yangiroq</a>{% else %}<span></span>{% endif %}
+  {% if entries.has_next %}<a class="ca-link" href="?{% if contest %}contest={{ contest.pk }}&{% endif %}page={{ entries.next_page_number }}">Eskiroq →</a>{% endif %}
+</nav>
+{% endif %}
+{% endblock %}

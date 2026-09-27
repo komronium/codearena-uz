@@ -54,6 +54,8 @@ class Problem(models.Model):
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.APPROVED)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="authored_problems")
     tags = models.ManyToManyField(Tag, blank=True)
+    # Shown to a user once they solved it (and to staff and the author).
+    editorial_md = models.TextField(blank=True)
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -100,3 +102,46 @@ class ProblemRating(models.Model):
             models.UniqueConstraint(fields=["user", "problem"], name="one_rating_per_user_problem"),
             models.CheckConstraint(condition=models.Q(stars__gte=1, stars__lte=5), name="stars_1_to_5"),
         ]
+
+
+# A hint's cost is a share of the problem's price, paid only if it was opened before the
+# user's first eligible AC (apps.submissions.solves). Total cost is capped at MAX_HINT_PCT.
+MAX_HINT_PCT = 90
+
+
+class ProblemHint(models.Model):
+    problem = models.ForeignKey(Problem, on_delete=models.CASCADE, related_name="hints")
+    order = models.PositiveIntegerField(default=0)
+    body_md = models.TextField()
+    cost_pct = models.PositiveSmallIntegerField(default=10, validators=[MaxValueValidator(MAX_HINT_PCT)])
+
+    class Meta:
+        ordering = ["order", "id"]
+
+
+class HintUnlock(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="+")
+    hint = models.ForeignKey(ProblemHint, on_delete=models.CASCADE, related_name="unlocks")
+    at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("user", "hint")
+
+
+class DailyProblem(models.Model):
+    """One problem for everyone per (Tashkent) day; see apps.problems.daily."""
+    date = models.DateField(unique=True)
+    problem = models.ForeignKey(Problem, on_delete=models.CASCADE, related_name="+")
+
+    class Meta:
+        ordering = ["-date"]
+
+
+class DailySolve(models.Model):
+    """Derived: a practice AC on the daily problem on its own day. Kept by
+    apps.submissions.solves.refresh_solves like solves; worth a small bonus."""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="+")
+    daily = models.ForeignKey(DailyProblem, on_delete=models.CASCADE, related_name="solves")
+
+    class Meta:
+        unique_together = ("user", "daily")

@@ -1,0 +1,5 @@
+{% comment %}One homework cell; ctx: c (status, tries, at), deadline.{% endcomment %}
+{% if c.status == "ok" %}<span class="ca-verdict ca-verdict-ac" title="Muddatida yechilgan">✓ {{ c.at|date:"d.m H:i" }}</span>
+{% elif c.status == "late" %}<span class="ca-verdict ca-verdict-warn" title="Muddatdan keyin yechilgan">✓ kech</span>
+{% elif c.status == "tried" %}<span class="ca-verdict ca-verdict-bad" title="Yechilmagan">✗ {{ c.tries }}</span>
+{% else %}<span class="text-mute" title="Urinmagan">—</span>{% endif %}

@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     "apps.submissions.apps.SubmissionsConfig",
     "apps.integrity.apps.IntegrityConfig",
     "apps.moderation.apps.ModerationConfig",
+    "apps.classroom.apps.ClassroomConfig",
 ]
 
 MIDDLEWARE = [
@@ -43,6 +44,7 @@ TEMPLATES = [{
         "django.template.context_processors.request",
         "django.contrib.auth.context_processors.auth",
         "django.contrib.messages.context_processors.messages",
+        "apps.classroom.context_processors.unread_reviews",
     ]},
 }]
 
@@ -60,8 +62,8 @@ else:
 AUTH_USER_MODEL = "accounts.User"
 AUTHENTICATION_BACKENDS = ["apps.accounts.backends.EmailOrUsernameBackend"]
 LOGIN_URL = "login"
-LOGIN_REDIRECT_URL = "problems:list"
-LOGOUT_REDIRECT_URL = "problems:list"
+LOGIN_REDIRECT_URL = "home"
+LOGOUT_REDIRECT_URL = "home"
 
 REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
 # "run" = "Sinab ko'rish" trial runs, "rejudge" = staff rejudges; workers listen

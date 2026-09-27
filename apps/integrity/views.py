@@ -1,9 +1,11 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.management import call_command
+from django.core.paginator import Paginator
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from apps.accounts.decorators import staff_required
@@ -13,7 +15,9 @@ from apps.problems.models import Language, Problem
 from apps.submissions.models import Submission
 from apps.submissions.ratelimit import rate_limited
 
-from .models import CodeSnapshot, FocusEvent, SimilarityFlag
+from . import audit
+from .evidence import JUMP_CHARS, contest_evidence
+from .models import AuditEntry, CodeSnapshot, DeviceSeen, FocusEvent, SimilarityFlag
 from .similarity import MIN_LINES, THRESHOLD, matched_lines
 
 # First-open-to-AC time no genuine read-think-type pass beats, per difficulty (beginner: none).
@@ -21,8 +25,6 @@ _SPEED_LIMITS_S = {Problem.Difficulty.EASY: 90, Problem.Difficulty.MEDIUM: 240, 
 # An absence this long, followed by AC this soon after coming back, is the PrtSc -> AI -> retype shape.
 _MIN_AWAY_S = 20
 _QUICK_AFTER_RETURN_S = 180
-# chars that appeared between two consecutive snapshots (~10 s apart) worth pointing at
-_JUMP_CHARS = 150
 
 
 _MAX_AWAY_MS = 6 * 3600 * 1000
@@ -31,6 +33,8 @@ _MAX_SNAPSHOT_CHARS = 64_000
 # exit; a flood of events leaves a visible trail before it hits the limit.
 EVENT_RATE_MAX = 60
 SNAPSHOT_RATE_MAX = 20
+BEAT_RATE_MAX = 6  # the tracker beats every 30 s
+DEVICE_MAX = 64
 
 
 def _participant_contest(request):
@@ -60,6 +64,24 @@ def event(request):
     away = request.POST.get("away_ms", "")
     away_ms = min(int(away), _MAX_AWAY_MS) if kind == FocusEvent.Kind.FOCUS and away.isdigit() else None
     FocusEvent.objects.create(user=request.user, contest=contest, kind=kind, problem=problem, away_ms=away_ms)
+    return JsonResponse({"ok": True})
+
+
+@login_required
+@require_POST
+def beat(request):
+    """Tracker heartbeat: proves the tracker was running, and records which device."""
+    if rate_limited(request.user.id, "beat", BEAT_RATE_MAX):
+        return JsonResponse({"error": "too many requests"}, status=429)
+    contest, _, error = _participant_contest(request)
+    if error:
+        return error
+    now = timezone.now()
+    Participation.objects.filter(user=request.user, contest=contest).update(last_seen_at=now)
+    device = request.POST.get("device", "")[:DEVICE_MAX]
+    if device:
+        DeviceSeen.objects.update_or_create(contest=contest, user=request.user, device=device,
+                                            defaults={"ip": request.META.get("REMOTE_ADDR") or None})
     return JsonResponse({"ok": True})
 
 
@@ -99,12 +121,19 @@ def contest_report(request, pk):
         n_suspicious[r["user"]] = n_suspicious.get(r["user"], 0) + 1
         counts.setdefault(r["user"], _empty_counts())
 
+    evidence = contest_evidence(contest)
+    by_id = {u.pk: u for u in counts}
+    for user in User.objects.filter(pk__in=evidence.keys() - by_id.keys()):
+        counts[user] = _empty_counts()
+
     # ponytail: risk = weighted event count; tune weights once real contests give data
     def _risk(user, c):
         return (c["paste"] * 5 + c["copy"] * 2 + c["blur"] + c["fast"] * 3
-                + c["away_ms"] // 60_000 + n_suspicious.get(user, 0) * 4)
+                + c["away_ms"] // 60_000 + n_suspicious.get(user, 0) * 4
+                + sum(e.weight for e in c["evidence"]))
     parts = {p.user_id: p for p in Participation.objects.filter(contest=contest)}
     for user, c in counts.items():
+        c["evidence"] = evidence.get(user.pk, [])
         c["risk"] = _risk(user, c)
         c["suspicious"] = n_suspicious.get(user, 0)
         c["participation"] = parts.get(user.pk)
@@ -116,6 +145,7 @@ def contest_report(request, pk):
         "suspicious": suspicious, "min_lines": MIN_LINES, "threshold": round(THRESHOLD * 100),
         "quick_after_return_s": _QUICK_AFTER_RETURN_S, "min_away_s": _MIN_AWAY_S,
         "speed_limits": _SPEED_LIMITS_S, "contest_problems": contest.contest_problems.select_related("problem"),
+        "audit": AuditEntry.objects.filter(contest=contest).select_related("actor", "subject")[:20],
     })
 
 
@@ -138,7 +168,12 @@ def _flag_cards(contest, counts, parts):
         f.label = labels.get(first.problem_id, "")
         f.problem = f.submission_a.problem
         f.gap_min = int((second.created - first.created).total_seconds() // 60)
+        f.prior = f.submission_b.contest_id != contest.pk  # a copy of a pre-contest solution
         f.sides = [_side(first, hit_first, counts, parts), _side(second, hit_second, counts, parts)]
+        for side in f.sides:
+            side["prior"] = side["sub"].contest_id != contest.pk
+            if side["prior"]:
+                side["participation"] = None  # the source of a copy isn't on trial here
     return flags
 
 
@@ -207,7 +242,7 @@ def replay(request, pk, user_id, problem_id):
         frames.append({"t": snap.at.isoformat(), "src": snap.source,
                        "lang": snap.language.name if snap.language else ""})
         # a big chunk appearing between two 10-second snapshots is text that wasn't typed here
-        if grew >= _JUMP_CHARS:
+        if grew >= JUMP_CHARS:
             jumps.append({"at": snap.at, "chars": grew, "secs": secs, "frame": len(frames) - 1})
         prev_len, prev_at = len(snap.source), snap.at
     timeline = [
@@ -228,12 +263,25 @@ def replay(request, pk, user_id, problem_id):
 
 
 @staff_required
+def audit_log(request):
+    entries = AuditEntry.objects.select_related("actor", "subject", "contest")
+    contest = None
+    if request.GET.get("contest", "").isdigit():
+        contest = Contest.objects.filter(pk=request.GET["contest"]).first()
+        entries = entries.filter(contest=contest)
+    page = Paginator(entries, 50).get_page(request.GET.get("page"))
+    return render(request, "integrity/audit.html", {"entries": page, "contest": contest})
+
+
+@staff_required
 @require_POST
 def flag_review(request, pk):
     flag = get_object_or_404(SimilarityFlag, pk=pk)
     flag.reviewed = not flag.reviewed
     flag.note = request.POST.get("note", flag.note).strip()
     flag.save(update_fields=["reviewed", "note"])
+    if flag.reviewed:
+        audit.record(request, audit.Action.FLAG_REVIEW, contest=flag.submission_a.contest, note=flag.note)
     return redirect(reverse("integrity:contest_report", args=[flag.submission_a.contest_id]) + f"#flag-{flag.pk}")
 
 

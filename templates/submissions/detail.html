@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base.html" %}{% load static %}
 {% block title %}Urinish #{{ s.pk|stringformat:"06d" }}{% endblock %}
 {% block content %}
 <div class="mb-6 flex flex-wrap items-start justify-between gap-3">
@@ -34,8 +34,32 @@
   <pre class="ca-terminal !rounded-none overflow-x-auto p-4" translate="no"><code class="language-{{ s.language.code }}">{{ s.source }}</code></pre>
 </section>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/styles/github-dark.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/highlight.min.js"></script>
+{% if can_review %}
+<section class="ca-panel mt-6 space-y-4" id="review">
+  <h2 class="ca-section-title !mb-0"><i data-lucide="message-square-code" class="lu mr-1.5" aria-hidden="true"></i>Kod sharhi</h2>
+  {% for r in reviews %}
+  <article class="rounded-[var(--ca-radius)] border border-line px-4 py-3{% if r.author_id == s.user_id %} bg-ink/[.025]{% endif %}">
+    <p class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-mute">
+      <span class="font-semibold text-ink">{% if r.author %}{{ r.author.username }}{% else %}—{% endif %}</span>
+      {% if r.line %}<span class="ca-chip">{{ r.line }}-qator</span>{% else %}<span>umumiy</span>{% endif %}
+      <time datetime="{{ r.created|date:'c' }}">{{ r.created|date:"d.m.Y H:i" }}</time>
+    </p>
+    {% if r.code %}<pre class="ca-terminal mt-2 overflow-x-auto !py-1.5 px-3 text-xs" translate="no">{{ r.code }}</pre>{% endif %}
+    <p class="mt-2 whitespace-pre-line text-sm">{{ r.body }}</p>
+  </article>
+  {% empty %}
+  <p class="text-sm text-mute">Hali sharh yo‘q.{% if s.user_id != user.pk %} Qator raqamini ko‘rsatib izoh qoldiring — o‘quvchi uni kodi yonida ko‘radi.{% endif %}</p>
+  {% endfor %}
+  <form method="post" action="{% url 'classroom:review' s.pk %}" class="grid gap-2 sm:grid-cols-[7rem_1fr_auto] sm:items-end">{% csrf_token %}
+    <div><label class="ca-label" for="review-line">Qator</label><input id="review-line" name="line" type="number" min="1" max="{{ n_lines }}" class="ca-input" placeholder="—"></div>
+    <div><label class="ca-label" for="review-body">{% if s.user_id == user.pk %}Javob{% else %}Izoh{% endif %}</label><textarea id="review-body" name="body" rows="2" maxlength="2000" required class="ca-input"></textarea></div>
+    <button class="ca-btn ca-btn-primary"><i data-lucide="send" class="lu" aria-hidden="true"></i>Yuborish</button>
+  </form>
+</section>
+{% endif %}
+
+<link rel="stylesheet" href="{% static 'vendor/highlight-github-dark.min.css' %}">
+<script src="{% static 'vendor/highlight.min.js' %}"></script>
 <script>
   // language.code "node" -> hljs "javascript"; others match hljs names already
   const code = document.querySelector("pre code");

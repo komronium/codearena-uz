@@ -1,4 +1,5 @@
 from io import StringIO
+from unittest.mock import patch
 
 import pytest
 from django.core.cache import cache
@@ -263,7 +264,7 @@ def test_recalc_rating_rejects_contest_not_ended(python):
 def test_recalc_rating_favorite_win_has_small_delta(ended_rated_contest, problem_a, python):
     """Unequal ratings: 1800 favorite finishing 1st vs 1200 underdog 2nd —
     favorite's gain must be small (performance ≈ seed expectation)."""
-    from apps.contests.management.commands.recalc_rating import _expected_seed
+    from apps.contests.rating import _expected_seed
 
     favorite = User.objects.create_user("fav", password="x", rating=1800)
     underdog = User.objects.create_user("dog", password="x", rating=1200)
@@ -321,7 +322,7 @@ def test_tied_results_share_rank_and_rating_delta(ended_rated_contest, problem_a
 
 def test_rating_gain_scales_with_solved_fraction():
     """Same rank, more solved -> bigger gain (margin of victory); losses are damped."""
-    from apps.contests.management.commands.recalc_rating import rating_delta
+    from apps.contests.rating import rating_delta
     full = rating_delta(seed=8, rank=1, n=15, k=150, solved_frac=1.0)
     partial = rating_delta(seed=8, rank=1, n=15, k=150, solved_frac=0.9)
     assert full > partial > 0
@@ -529,7 +530,7 @@ def test_disqualify_requires_staff(client):
 
 def test_rating_delta_classroom_scale():
     """15 newbies at 1200: full-solve winner +226, 8th +1, last -74 (losses halved)."""
-    from apps.contests.management.commands.recalc_rating import _expected_seed, rating_delta
+    from apps.contests.rating import _expected_seed, rating_delta
 
     ratings = [1200] * 15
     seed = _expected_seed(0, ratings)  # 8.0 for an all-equal field
@@ -663,3 +664,129 @@ def test_disqualify_sets_the_asked_state_so_a_stale_click_changes_nothing(client
     page = client.get(reverse("contests:standings", args=[c.pk])).content.decode()
     assert 'name="disqualified" value="1"' in page
     cache.clear()  # standings are cached by contest pk, and pks repeat across tests
+
+
+def _rated_contest(title, hours_ago, problem, python, users_solving, users_trying=()):
+    """An ended rated contest: users_solving get AC in order, users_trying only WA."""
+    c = Contest.objects.create(title=title, is_rated=True, start=timezone.now() - timezone.timedelta(hours=hours_ago + 2),
+                               end=timezone.now() - timezone.timedelta(hours=hours_ago))
+    ContestProblem.objects.create(contest=c, problem=problem, label="A", points=100)
+    for i, u in enumerate([*users_solving, *users_trying]):
+        Participation.objects.create(user=u, contest=c)
+        s = Submission.objects.create(user=u, problem=problem, contest=c, language=python, source="x",
+                                      verdict="AC" if u in users_solving else "WA")
+        Submission.objects.filter(pk=s.pk).update(created=c.start + timezone.timedelta(minutes=10 + i))
+    return c
+
+
+@pytest.mark.django_db
+def test_dq_after_rating_recomputes_the_latest_contest(client, problem_a, python):
+    from apps.integrity.models import AuditEntry
+
+    from .rating import apply_rating
+
+    staff = User.objects.create_user("boss", password="x", is_staff=True)
+    cheat, ali, bob = (User.objects.create_user(n, password="x") for n in ("cheat", "ali", "bob"))
+    c = _rated_contest("Final", 1, problem_a, python, [cheat, ali], [bob])
+    apply_rating(c)
+    cheat.refresh_from_db()
+    gained = cheat.rating - 1200
+    assert gained > 0
+    User.objects.filter(pk=cheat.pk).update(rating=cheat.rating + 7)  # a manual edit made since stays
+
+    client.force_login(staff)
+    r = client.post(reverse("contests:disqualify", args=[c.pk, cheat.pk]), {"disqualified": "1"}, follow=True)
+    for u in (cheat, ali, bob):
+        u.refresh_from_db()
+    rows = {p.user_id: p for p in Participation.objects.filter(contest=c)}
+    assert rows[cheat.pk].rating_before == 1200 + 7  # the manual edit survives the rollback
+    assert cheat.rating == rows[cheat.pk].rating_after < 1200 + 7  # last place now: a loss
+    assert rows[ali.pk].rank == 1 and ali.rating == rows[ali.pk].rating_after
+    assert "Reyting qayta hisoblandi" in r.content.decode()
+    assert AuditEntry.objects.filter(action="rating_recompute", contest=c).count() == 1
+
+
+@pytest.mark.django_db
+def test_dq_after_rating_leaves_older_contests_alone(client, problem_a, python):
+    from .rating import apply_rating
+
+    staff = User.objects.create_user("boss", password="x", is_staff=True)
+    cheat, ali = (User.objects.create_user(n, password="x") for n in ("cheat", "ali"))
+    old = _rated_contest("Old", 10, problem_a, python, [cheat, ali])
+    apply_rating(old)
+    newer = _rated_contest("Newer", 1, problem_a, python, [ali, cheat])
+    apply_rating(newer)
+    before = dict(User.objects.values_list("username", "rating"))
+
+    client.force_login(staff)
+    r = client.post(reverse("contests:disqualify", args=[old.pk, cheat.pk]), {"disqualified": "1"}, follow=True)
+    assert dict(User.objects.values_list("username", "rating")) == before
+    assert "reyting o‘zgarmadi" in r.content.decode()
+
+
+# ---- virtual contests ---------------------------------------------------------------------------
+
+@pytest.fixture
+def past_contest(problem_a, python):
+    """Published 2-hour contest: ali solved A at 0:30 with one WA, bob at 1:00."""
+    c = Contest.objects.create(title="O‘tgan", start=timezone.now() - timezone.timedelta(days=1),
+                               end=timezone.now() - timezone.timedelta(days=1) + timezone.timedelta(hours=2),
+                               published_at=timezone.now())
+    ContestProblem.objects.create(contest=c, problem=problem_a, label="A", points=100)
+    for name, minutes, wrong in (("ali", 30, 1), ("bob", 60, 0)):
+        u = User.objects.create_user(name, password="x")
+        Participation.objects.create(user=u, contest=c)
+        for i in range(wrong):
+            s = Submission.objects.create(user=u, problem=problem_a, contest=c, language=python, source="x",
+                                          verdict="WA")
+            Submission.objects.filter(pk=s.pk).update(created=c.start + timezone.timedelta(minutes=minutes - 5))
+        s = Submission.objects.create(user=u, problem=problem_a, contest=c, language=python, source="x",
+                                      verdict="AC")
+        Submission.objects.filter(pk=s.pk).update(created=c.start + timezone.timedelta(minutes=minutes))
+    problem_a.is_public = True
+    problem_a.save()
+    return c
+
+
+@pytest.mark.django_db
+def test_virtual_start_rules(client, past_contest):
+    from .models import VirtualParticipation
+
+    url = reverse("contests:virtual", args=[past_contest.pk])
+    client.force_login(User.objects.get(username="ali"))
+    assert client.post(url).status_code == 400  # took part for real
+    vali = User.objects.create_user("vali", password="x")
+    client.force_login(vali)
+    Contest.objects.filter(pk=past_contest.pk).update(published_at=None)
+    assert client.post(url).status_code == 400  # not published: its problems may still be hidden
+    Contest.objects.filter(pk=past_contest.pk).update(published_at=timezone.now())
+    assert client.post(url).status_code == 302
+    assert client.post(url).status_code == 400  # once
+    assert VirtualParticipation.objects.filter(user=vali).count() == 1
+
+
+@pytest.mark.django_db
+@patch("apps.submissions.views.django_rq.enqueue")
+def test_virtual_run_tags_submissions_and_ranks_among_real_participants(enqueue, client, past_contest, problem_a):
+    from .models import VirtualParticipation
+    from .virtual import virtual_result
+
+    vali = User.objects.create_user("vali", password="x")
+    client.force_login(vali)
+    client.post(reverse("contests:virtual", args=[past_contest.pk]))
+    vp = VirtualParticipation.objects.get(user=vali)
+    client.post(reverse("submissions:submit", args=[problem_a.slug]), {"language": "python", "source": "x"})
+    s = Submission.objects.get(user=vali)
+    assert s.virtual == vp and s.contest is None
+    Submission.objects.filter(pk=s.pk).update(verdict="AC", created=vp.start + timezone.timedelta(minutes=45))
+
+    res = virtual_result(vp)
+    # ali: 30 min + 20 for the WA = 50; bob: 60; vali: 45 from the virtual start -> 1st of 2
+    assert (res["score"], res["penalty"], res["rank"], res["field"]) == (100, 45, 1, 2)
+    assert res["cells"][0]["time"] == "45:00"
+    page = client.get(reverse("contests:detail", args=[past_contest.pk])).content.decode()
+    assert "1-o‘rin" in page and "Virtual" in page
+
+    VirtualParticipation.objects.filter(pk=vp.pk).update(start=timezone.now() - timezone.timedelta(hours=3))
+    client.post(reverse("submissions:submit", args=[problem_a.slug]), {"language": "python", "source": "y"})
+    assert Submission.objects.filter(user=vali).latest("id").virtual is None  # the window is over: practice

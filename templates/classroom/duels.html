@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Duellar{% endblock %}
+{% block content %}
+<div class="mb-6 flex flex-wrap items-end justify-between gap-3">
+  <div>
+    <h1 class="ca-page-title">Duellar</h1>
+    <p class="mt-1 text-sm text-mute">Sinfdoshingizni chaqiring: ikkalangiz ham ko‘rmagan bitta masala, 30 daqiqa, birinchi AC g‘olib.</p>
+  </div>
+  <p class="text-sm">Duel reytingi: <b class="tabular text-lg">{{ user.duel_rating }}</b></p>
+</div>
+
+<form method="post" class="ca-panel mb-6 grid gap-3 sm:grid-cols-[1fr_12rem_auto] sm:items-end">{% csrf_token %}
+  <div><label class="ca-label" for="duel-opponent">Raqib (foydalanuvchi nomi)</label><input id="duel-opponent" name="opponent" value="{{ form.opponent|default:'' }}" class="ca-input" required autocomplete="off"{% if classmates %} list="classmates" placeholder="guruhdoshingizni tanlang yoki yozing"{% endif %}>
+    {% if classmates %}<datalist id="classmates">{% for name in classmates %}<option value="{{ name }}">{% endfor %}</datalist>{% endif %}</div>
+  <div><label class="ca-label" for="duel-diff">Qiyinlik</label>
+    <select id="duel-diff" name="difficulty" class="ca-select">{% for v, label in difficulties %}<option value="{{ v }}"{% if form.difficulty == v or not form.difficulty and v == "easy" %} selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+  </div>
+  <button class="ca-btn ca-btn-primary"><i data-lucide="swords" class="lu" aria-hidden="true"></i>Chaqirish</button>
+  {% if error %}<p class="text-sm text-bad sm:col-span-3" role="alert">{{ error }}</p>{% endif %}
+</form>
+
+{% if incoming %}
+<h2 class="ca-section-title">Sizni chaqirishdi</h2>
+<ul class="ca-rows mb-6">
+  {% for d in incoming %}
+  <li class="ca-row">
+    <div class="ca-row-main">
+      <p class="ca-row-title">{{ d.challenger.username }} <span class="font-normal text-mute">({{ d.challenger.duel_rating }})</span></p>
+      <div class="ca-row-meta"><span class="ca-diff ca-diff-{{ d.difficulty }}">{{ d.get_difficulty_display }}</span><span>1 soat ichida javob bering</span></div>
+    </div>
+    <div class="ca-row-side flex gap-2">
+      <form method="post" action="{% url 'classroom:duel_answer' d.pk %}">{% csrf_token %}<input type="hidden" name="accept" value="1"><button class="ca-btn ca-btn-primary !py-1.5 text-xs">Qabul qilish</button></form>
+      <form method="post" action="{% url 'classroom:duel_answer' d.pk %}">{% csrf_token %}<button class="ca-btn ca-btn-ghost !py-1.5 text-xs">Rad etish</button></form>
+    </div>
+  </li>
+  {% endfor %}
+</ul>
+{% endif %}
+
+{% if open %}
+<h2 class="ca-section-title">Ochiq duellar</h2>
+<ul class="ca-rows mb-6">{% for d in open %}{% include "classroom/_duel_row.html" %}{% endfor %}</ul>
+{% endif %}
+
+<h2 class="ca-section-title">Tarix</h2>
+{% if history %}
+<ul class="ca-rows">{% for d in history %}{% include "classroom/_duel_row.html" %}{% endfor %}</ul>
+{% else %}
+<div class="ca-empty">Hali duel bo‘lmagan.</div>
+{% endif %}
+{% endblock %}

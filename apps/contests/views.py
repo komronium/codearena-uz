@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.core.paginator import Paginator
@@ -10,7 +11,10 @@ from django.views.decorators.http import require_POST
 from apps.accounts.decorators import staff_required
 from apps.submissions.solves import refresh_solves
 
-from .models import Clarification, Contest, Participation
+from apps.integrity import audit
+
+from . import rating, virtual
+from .models import Clarification, Contest, Participation, VirtualParticipation
 from .services import access_allowed
 from .standings import compute_standings
 
@@ -43,10 +47,9 @@ def _standings(contest):
 def contest_detail(request, pk):
     contest = get_object_or_404(Contest, pk=pk)
     problems = list(contest.contest_problems.select_related("problem"))
-    registered = (
-        request.user.is_authenticated
-        and Participation.objects.filter(user=request.user, contest=contest).exists()
-    )
+    me = (Participation.objects.filter(user=request.user, contest=contest).first()
+          if request.user.is_authenticated else None)
+    registered = me is not None
     my_row, solved_count = None, {}
     if contest.has_started:
         rows = _standings(contest)
@@ -60,8 +63,19 @@ def contest_detail(request, pk):
         cp.solved_count = solved_count.get(cp.id, 0)
     return render(request, "contests/detail.html", {
         "contest": contest, "problems": problems, "registered": registered, "my_row": my_row,
+        "my_participation": me,
         "n_participants": contest.participations.count(),
+        **_virtual_ctx(request, contest),
     })
+
+
+def _virtual_ctx(request, contest) -> dict:
+    if not (request.user.is_authenticated and contest.has_ended):
+        return {}
+    vp = VirtualParticipation.objects.filter(user=request.user, contest=contest).first()
+    if vp is not None:
+        return {"virtual": virtual.virtual_result(vp), "vp": vp}
+    return {"can_virtual": not virtual.start_refusal(request.user, contest)}
 
 
 @login_required
@@ -108,13 +122,29 @@ def disqualify(request, pk, user_id):
         p.disqualified = want
         p.disqualified_reason = request.POST.get("reason", "").strip()[:200] if want else ""
         p.save(update_fields=["disqualified", "disqualified_reason"])
+        audit.record(request, audit.Action.DISQUALIFY if want else audit.Action.REQUALIFY,
+                     contest=p.contest, subject=p.user, note=p.disqualified_reason)
         if p.contest.published_at is not None:
             for problem_id in p.contest.contest_problems.values_list("problem_id", flat=True):
                 refresh_solves(problem_id, [p.user_id])
+        if p.contest.rating_applied:
+            _rerate_after_dq(request, p.contest)
     cache.delete(f"contest-standings-{pk}")
     if request.POST.get("back") == "report":
         return redirect("integrity:contest_report", pk)
     return redirect("contests:standings", pk=pk)
+
+
+def _rerate_after_dq(request, contest):
+    """A DQ moves the participant to last place, which changes everyone's delta. Only the
+    latest rated contest can be redone without breaking later rating chains."""
+    if rating.is_latest(contest):
+        rating.recompute(contest)
+        audit.record(request, audit.Action.RATING_RECOMPUTE, contest=contest)
+        messages.success(request, "Reyting qayta hisoblandi.")
+    else:
+        messages.warning(request, "Ishtirokchilar keyinroq boshqa reytingli musobaqada qatnashgan — "
+                                  "bu musobaqaning reyting o‘zgarmadi.")
 
 
 @login_required
@@ -164,3 +194,16 @@ def answer_clarification(request, pk, cid):
     clar.answered_at = timezone.now()
     clar.save(update_fields=["answer", "answered_by", "answered_at"])
     return redirect("contests:clarifications", pk=pk)
+
+
+@login_required
+@require_POST
+def virtual_start(request, pk):
+    contest = get_object_or_404(Contest, pk=pk)
+    if not contest.has_ended:
+        return HttpResponseBadRequest("contest has not ended")
+    refusal = virtual.start_refusal(request.user, contest)
+    if refusal:
+        return HttpResponseBadRequest(refusal)
+    VirtualParticipation.objects.create(user=request.user, contest=contest, start=timezone.now())
+    return redirect("contests:detail", pk=pk)

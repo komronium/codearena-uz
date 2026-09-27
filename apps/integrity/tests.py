@@ -357,3 +357,232 @@ def test_event_and_snapshot_are_rate_limited(client, flag_contest, flag_problem,
     assert client.post(reverse("integrity:snapshot"), snap | {"source": "late"}).status_code == 429
     assert not CodeSnapshot.objects.filter(source="late").exists()
     cache.clear()
+
+
+def test_beat_records_device_and_last_seen(client, contest, user):
+    from django.core.cache import cache
+
+    from .models import DeviceSeen
+    from .views import BEAT_RATE_MAX
+
+    cache.clear()
+    url = reverse("integrity:beat")
+    client.force_login(user)
+    assert client.post(url, {"contest_id": contest.pk, "device": "d1"}).status_code == 400  # not a participant
+    p = Participation.objects.create(user=user, contest=contest)
+    assert client.post(url, {"contest_id": contest.pk, "device": "d1"}, REMOTE_ADDR="10.0.0.7").status_code == 200
+    p.refresh_from_db()
+    first = DeviceSeen.objects.get()
+    assert p.last_seen_at is not None and (first.device, first.ip) == ("d1", "10.0.0.7")
+    client.post(url, {"contest_id": contest.pk, "device": "d1"}, REMOTE_ADDR="10.0.0.8")
+    again = DeviceSeen.objects.get()
+    assert again.ip == "10.0.0.8" and again.last_at >= first.last_at and again.first_at == first.first_at
+    client.post(url, {"contest_id": contest.pk, "device": "x" * 500})  # clipped, not a 500
+    assert DeviceSeen.objects.count() == 2
+    for _ in range(BEAT_RATE_MAX):
+        client.post(url, {"contest_id": contest.pk, "device": "d1"})
+    assert client.post(url, {"contest_id": contest.pk, "device": "d1"}).status_code == 429
+    cache.clear()
+
+
+def test_contest_page_sends_heartbeat_and_device(client, flag_contest):
+    ali = User.objects.create_user("hb1", password="x")
+    Participation.objects.create(user=ali, contest=flag_contest)
+    client.force_login(ali)
+    page = client.get(reverse("contests:detail", args=[flag_contest.pk])).content.decode()
+    assert reverse("integrity:beat") in page and "ca-device" in page
+
+
+def _snap(user, contest, problem, source, at):
+    from .models import CodeSnapshot
+
+    s = CodeSnapshot.objects.create(user=user, contest=contest, problem=problem, source=source)
+    CodeSnapshot.objects.filter(pk=s.pk).update(at=at)
+
+
+def _contest_sub(user, contest, problem, lang, source, at, **extra):
+    s = Submission.objects.create(user=user, problem=problem, contest=contest, language=lang, source=source,
+                                  verdict="AC", **extra)
+    Submission.objects.filter(pk=s.pk).update(created=at)
+    s.refresh_from_db()
+    return s
+
+
+def test_evidence_flags_silent_tracker_and_code_never_typed(flag_contest, flag_problem, flag_python):
+    from .evidence import contest_evidence
+
+    now = timezone.now()
+    honest = User.objects.create_user("ev1", password="x")
+    curl = User.objects.create_user("ev2", password="x")
+    for u in (honest, curl):
+        Participation.objects.create(user=u, contest=flag_contest)
+    # honest: typed it (the last snapshot is the code, reformatted), tracker beat 20 s before
+    _snap(honest, flag_contest, flag_problem, "n = int(input())\n", now - timezone.timedelta(minutes=3))
+    _snap(honest, flag_contest, flag_problem, LONG_SOURCE + "\n\n", now - timezone.timedelta(seconds=5))
+    _contest_sub(honest, flag_contest, flag_problem, flag_python, LONG_SOURCE, now,
+                 tracker_seen_at=now - timezone.timedelta(seconds=20))
+    # curl: no heartbeat, no snapshot; two submissions make one piece of evidence of each kind
+    for i in range(2):
+        _contest_sub(curl, flag_contest, flag_problem, flag_python, LONG_SOURCE, now + timezone.timedelta(minutes=i))
+
+    ev = contest_evidence(flag_contest)
+    assert ev.get(honest.pk, []) == []
+    kinds = sorted(e.kind for e in ev[curl.pk])
+    assert kinds == ["silent", "unseen"]
+    assert all("2" in e.text for e in ev[curl.pk])  # "2 ta yuborish"
+
+
+def test_evidence_flags_jumps_but_not_the_first_snapshot(flag_contest, flag_problem, flag_python):
+    from .evidence import contest_evidence
+
+    now = timezone.now()
+    ali = User.objects.create_user("ev3", password="x")
+    Participation.objects.create(user=ali, contest=flag_contest)
+    starter = "x" * 400  # a big starter template on first load is not a jump
+    _snap(ali, flag_contest, flag_problem, starter, now - timezone.timedelta(minutes=5))
+    _snap(ali, flag_contest, flag_problem, starter + "y" * 20, now - timezone.timedelta(minutes=4))
+    _snap(ali, flag_contest, flag_problem, starter + "y" * 20 + "z" * 300, now - timezone.timedelta(minutes=3))
+    ev = contest_evidence(flag_contest)[ali.pk]
+    assert [e.kind for e in ev] == ["jump"] and "300" in ev[0].text
+
+
+def test_evidence_flags_shared_and_second_devices(flag_contest):
+    from .evidence import contest_evidence
+    from .models import DeviceSeen
+
+    a, b, c = (User.objects.create_user(f"dv{i}", password="x") for i in range(3))
+    for u in (a, b, c):
+        Participation.objects.create(user=u, contest=flag_contest)
+    now = timezone.now()
+
+    def seen(user, device, start_min, end_min):
+        d = DeviceSeen.objects.create(contest=flag_contest, user=user, device=device, ip="10.0.0.1")
+        DeviceSeen.objects.filter(pk=d.pk).update(first_at=now + timezone.timedelta(minutes=start_min),
+                                                  last_at=now + timezone.timedelta(minutes=end_min))
+
+    seen(a, "laptop", 0, 30)
+    seen(b, "laptop", 40, 60)   # b later logged in on a's laptop
+    seen(c, "pc-1", 0, 20)
+    seen(c, "pc-2", 10, 30)     # c on two machines at once
+    seen(a, "phone", 31, 35)    # a switched devices without overlap: fine
+    ev = contest_evidence(flag_contest)
+    assert [e.kind for e in ev[a.pk]] == ["shared_device"] and "dv1" in ev[a.pk][0].text
+    assert [e.kind for e in ev[b.pk]] == ["shared_device"] and "dv0" in ev[b.pk][0].text
+    assert [e.kind for e in ev[c.pk]] == ["multi_device"]
+
+
+def test_report_ranks_by_server_evidence_and_shows_it(client, flag_contest, flag_problem, flag_python):
+    now = timezone.now()
+    from .models import DeviceSeen
+
+    curl = User.objects.create_user("ev4", password="x")
+    Participation.objects.create(user=curl, contest=flag_contest)
+    _contest_sub(curl, flag_contest, flag_problem, flag_python, LONG_SOURCE, now)
+    honest = User.objects.create_user("ev5", password="x")  # the tracker ran in this contest
+    DeviceSeen.objects.create(contest=flag_contest, user=honest, device="d")
+    _snap(honest, flag_contest, flag_problem, "x = 1\n", now)
+    client.force_login(User.objects.create_user("boss4", password="x", is_staff=True))
+    r = client.get(reverse("integrity:contest_report", args=[flag_contest.pk]))
+    row = dict(r.context["rows"])[curl]
+    assert row["risk"] >= 14 and [e.kind for e in row["evidence"]] == ["silent", "unseen"]
+    assert "muharrirda yozilmagan" in r.content.decode()
+
+
+def test_flag_similarity_checks_last_attempt_of_users_without_ac(flag_contest, flag_problem, flag_python):
+    ali = User.objects.create_user("sv1", password="x")
+    bob = User.objects.create_user("sv2", password="x")
+    cat = User.objects.create_user("sv3", password="x")
+    _ac(ali, flag_problem, flag_contest, flag_python, LONG_SOURCE)
+    for verdict, source in (("WA", "print(1)\n" * 5), ("WA", LONG_SOURCE)):  # bob's copy never passed
+        Submission.objects.create(user=bob, problem=flag_problem, contest=flag_contest, language=flag_python,
+                                  source=source, verdict=verdict)
+    # cat has an AC of her own; her earlier failed copy is not a candidate
+    Submission.objects.create(user=cat, problem=flag_problem, contest=flag_contest, language=flag_python,
+                              source=LONG_SOURCE, verdict="WA")
+    _ac(cat, flag_problem, flag_contest, flag_python, "\n".join(f"v{i} = {i} * {i}" for i in range(8)))
+
+    call_command("flag_similarity", flag_contest.pk, stdout=StringIO())
+    pairs = {tuple(sorted((f.submission_a.user.username, f.submission_b.user.username)))
+             for f in SimilarityFlag.objects.all()}
+    assert pairs == {("sv1", "sv2")}
+
+
+def test_flag_similarity_catches_copies_of_prior_solutions(client, flag_contest, flag_problem, flag_python):
+    author = flag_problem.author
+    old = Submission.objects.create(user=author, problem=flag_problem, language=flag_python,
+                                    source=LONG_SOURCE, verdict="AC")
+    Submission.objects.filter(pk=old.pk).update(created=flag_contest.start - timezone.timedelta(days=1))
+    ali = User.objects.create_user("pv1", password="x")
+    Participation.objects.create(user=ali, contest=flag_contest)
+    mine = _ac(ali, flag_problem, flag_contest, flag_python, LONG_SOURCE)
+    own_old = Submission.objects.create(user=ali, problem=flag_problem, language=flag_python,
+                                        source=LONG_SOURCE, verdict="AC")  # own old code: not a copy
+    Submission.objects.filter(pk=own_old.pk).update(created=flag_contest.start - timezone.timedelta(days=2))
+
+    for _ in range(2):  # idempotent
+        call_command("flag_similarity", flag_contest.pk, stdout=StringIO())
+    flag = SimilarityFlag.objects.get()
+    assert (flag.submission_a, flag.submission_b) == (mine, old)
+
+    client.force_login(User.objects.create_user("boss5", password="x", is_staff=True))
+    r = client.get(reverse("integrity:contest_report", args=[flag_contest.pk]))
+    assert "Musobaqadan oldingi yechim" in r.content.decode()
+    ev = dict(r.context["rows"])[ali]["evidence"]
+    assert "similar" in [e.kind for e in ev]
+
+
+def test_staff_actions_land_in_the_audit_log(client, flag_contest, flag_problem, flag_python):
+    from unittest.mock import patch
+
+    from .models import AuditEntry
+
+    boss = User.objects.create_user("aud-boss", password="x", is_staff=True)
+    ali = User.objects.create_user("aud-ali", password="x")
+    Participation.objects.create(user=ali, contest=flag_contest)
+    a = _ac(ali, flag_problem, flag_contest, flag_python, LONG_SOURCE)
+    b = _ac(User.objects.create_user("aud-bob", password="x"), flag_problem, flag_contest, flag_python, LONG_SOURCE)
+    flag = SimilarityFlag.objects.create(submission_a=a, submission_b=b, score=1.0)
+    client.force_login(boss)
+    dq = reverse("contests:disqualify", args=[flag_contest.pk, ali.pk])
+    client.post(dq, {"disqualified": "1", "reason": "copy of #2"})
+    client.post(dq, {"disqualified": "1", "reason": "again"})  # no change, no entry
+    client.post(dq, {"disqualified": "0"})
+    client.post(reverse("integrity:flag_review", args=[flag.pk]), {"note": "same code"})
+    with patch("apps.moderation.views.django_rq.get_queue"):
+        client.post(reverse("moderation:problem_rejudge", args=[flag_problem.pk]))
+
+    got = list(AuditEntry.objects.order_by("id").values_list("action", "actor__username", "subject__username",
+                                                              "contest_id", "note"))
+    assert got == [
+        ("disqualify", "aud-boss", "aud-ali", flag_contest.pk, "copy of #2"),
+        ("requalify", "aud-boss", "aud-ali", flag_contest.pk, ""),
+        ("flag_review", "aud-boss", None, flag_contest.pk, "same code"),
+        ("rejudge", "aud-boss", None, None, "A: 2 ta urinish"),
+    ]
+    page = client.get(reverse("integrity:audit")).content.decode()
+    assert "copy of #2" in page and "aud-ali" in page
+    assert "copy of #2" in client.get(reverse("integrity:contest_report", args=[flag_contest.pk])).content.decode()
+    client.force_login(ali)
+    assert client.get(reverse("integrity:audit")).status_code in (302, 403)
+
+
+def test_disqualified_participant_sees_why(client, flag_contest, flag_problem):
+    ali = User.objects.create_user("dqv", password="x")
+    Participation.objects.create(user=ali, contest=flag_contest, disqualified=True,
+                                 disqualified_reason="Kod #12 bilan bir xil")
+    client.force_login(ali)
+    for url in (reverse("contests:detail", args=[flag_contest.pk]),
+                reverse("problems:detail", args=[flag_problem.slug])):
+        page = client.get(url).content.decode()
+        assert "diskvalifikatsiya qilingansiz" in page and "Kod #12 bilan bir xil" in page, url
+
+
+def test_evidence_skips_contests_from_before_telemetry(flag_contest, flag_problem, flag_python):
+    """A contest that ran before heartbeats and snapshots existed has none for anyone:
+    that says nothing about its participants."""
+    from .evidence import contest_evidence
+
+    for name in ("old1", "old2"):
+        _contest_sub(User.objects.create_user(name, password="x"), flag_contest, flag_problem, flag_python,
+                     LONG_SOURCE + name, timezone.now())
+    assert contest_evidence(flag_contest) == {}

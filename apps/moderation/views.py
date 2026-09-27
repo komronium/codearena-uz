@@ -17,6 +17,7 @@ from apps.contests.services import reuse_reason
 from apps.problems.models import Problem, Tag, TestCase
 from apps.submissions.models import Submission, TestResult, UserProblemSolved
 from apps.submissions.solves import refresh_solves
+from apps.integrity import audit
 from judge.runner import run_submission
 
 from .ai import DEFAULT_COUNT, DEFAULT_MODEL, MODEL_CHOICES, AIGenerationError, generate_problems
@@ -24,6 +25,7 @@ from .forms import (
     ContestForm,
     ContestProblemFormSet,
     GroupForm,
+    HintFormSet,
     ProblemForm,
     SQLDatasetForm,
     TagForm,
@@ -104,10 +106,14 @@ def submit(request, pk=None):
     problem = get_object_or_404(Problem, pk=pk) if pk else None
     form = ProblemForm(request.POST or None, request.FILES or None, instance=problem)
     formset = TestCaseFormSet(request.POST or None, instance=form.instance, prefix="testcases")
+    # A client that doesn't send the hints block (older forms, scripts) leaves hints as they are.
+    hint_data = request.POST if "hints-TOTAL_FORMS" in request.POST else None
+    hint_formset = HintFormSet(hint_data, instance=form.instance, prefix="hints")
     sql_form = SQLDatasetForm(request.POST or None, prefix="sql",
                               instance=getattr(problem, "sql_dataset", None) if problem else None)
     error = None
-    if request.method == "POST" and form.is_valid() and formset.is_valid():
+    if (request.method == "POST" and form.is_valid() and formset.is_valid()
+            and (hint_data is None or hint_formset.is_valid())):
         is_sql = form.cleaned_data["kind"] == Problem.Kind.SQL
         zipped = form.cleaned_data["tests_zip"]
         if is_sql and not sql_form.is_valid():
@@ -124,6 +130,9 @@ def submit(request, pk=None):
                 obj.save()
                 form.save_m2m()
                 formset.save()
+                if hint_data is not None:
+                    hint_formset.instance = obj
+                    hint_formset.save()
                 if zipped:
                     start = obj.testcases.count()
                     TestCase.objects.bulk_create([
@@ -137,7 +146,8 @@ def submit(request, pk=None):
             messages.success(request, "Masala saqlandi.")
             return redirect("problems:detail", obj.slug)
     return render(request, "moderation/submit.html",
-                  {"form": form, "formset": formset, "sql_form": sql_form, "error": error, "problem": problem})
+                  {"form": form, "formset": formset, "sql_form": sql_form, "error": error, "problem": problem,
+                   "hint_formset": hint_formset})
 
 
 @staff_required
@@ -177,6 +187,7 @@ def problem_delete(request, pk):
                                     "yuborgan — o‘chirib bo‘lmaydi, yashirib qo‘ying.")
             return redirect("moderation:problems")
         problem.delete()
+        audit.record(request, audit.Action.PROBLEM_DELETE, note=f"{problem.slug} — {problem.title}")
     messages.success(request, f"«{problem.title}» o'chirildi.")
     return redirect("moderation:problems")
 
@@ -205,6 +216,8 @@ def problem_rejudge(request, pk):
             for submission_id in ids:
                 queue.enqueue(run_submission, submission_id)
         transaction.on_commit(enqueue)
+        if ids:
+            audit.record(request, audit.Action.REJUDGE, note=f"{problem.title}: {len(ids)} ta urinish")
     messages.success(request, f"{len(ids)} ta urinish qayta tekshirishga yuborildi.")
     applied = list(problem.contests.filter(rating_applied=True).values_list("title", flat=True))
     if applied:
@@ -301,6 +314,7 @@ def contest_delete(request, pk):
         if contest.submissions.exists():
             messages.error(request, f"«{contest.title}» musobaqasida urinishlar bor — o‘chirib bo‘lmaydi.")
             return redirect("moderation:contests")
+        audit.record(request, audit.Action.CONTEST_DELETE, note=f"#{contest.pk} — {contest.title}")
         contest.delete()
     messages.success(request, f"«{contest.title}» o'chirildi.")
     return redirect("moderation:contests")
@@ -323,6 +337,7 @@ def contest_publish(request, pk):
             contest.save(update_fields=["published_at"])
         for problem_id in contest.contest_problems.values_list("problem_id", flat=True):
             refresh_solves(problem_id)
+        audit.record(request, audit.Action.PUBLISH, contest=contest)
     granted = UserProblemSolved.objects.filter(first_ac_submission__contest=contest).count()
     messages.success(request, f"Masalalar ochildi; {granted} ta yechim amaliyot balliga o'tkazildi.")
     return redirect("moderation:contests")
@@ -333,6 +348,7 @@ def contest_publish(request, pk):
 def contest_apply_rating(request, pk):
     try:
         call_command("recalc_rating", pk)
+        audit.record(request, audit.Action.RATING_APPLY, contest=Contest.objects.get(pk=pk))
         messages.success(request, "Reyting hisoblandi.")
     except CommandError as e:
         messages.error(request, f"Reyting hisoblanmadi: {e}")

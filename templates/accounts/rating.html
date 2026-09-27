@@ -11,7 +11,7 @@
     <div class="ca-panel absolute right-0 z-10 mt-2 w-64 !p-3 text-sm">
       {% for t in tiers reversed %}
       <div class="flex items-center justify-between py-1">
-        <span class="font-semibold" style="color: {{ t.color }}">{{ t.name }}</span>
+        <span class="ca-tier-ink font-semibold" style="--tier: {{ t.color }}">{{ t.name }}</span>
         <span class="tabular text-xs text-mute">{% if t.floor %}{{ t.floor }}{% else %}0{% endif %}{% if t.ceiling %}–{{ t.ceiling|add:"-1" }}{% else %}+{% endif %}</span>
       </div>
       {% endfor %}
@@ -29,7 +29,7 @@
     <span class="text-center">{% include "accounts/_rank.html" with rank=u.rank %}</span>
     <div class="flex min-w-0">{% include "accounts/_user.html" with tier=False %}</div>
     <span class="tabular text-right text-sm text-mute">{{ u.contest_count }}</span>
-    <span class="ca-lb-value" style="color: {{ u.rating|tier_color }}">{{ u.rating }}</span>
+    <span class="ca-tier-ink ca-lb-value" style="--tier: {{ u.rating|tier_color }}">{{ u.rating }}</span>
   </li>
   {% endfor %}
 </ol>

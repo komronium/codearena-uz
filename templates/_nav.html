@@ -1,0 +1,82 @@
+{% comment %}Every destination, for the desktop sidebar and the phone menu sheet (base.html).{% endcomment %}
+<p class="ca-sidebar-heading">Menyu</p>
+<a href="{% url 'home' %}" class="ca-sidebar-link {% if request.resolver_match.url_name == 'home' %}is-active{% endif %}">
+  <i data-lucide="house" class="lu" aria-hidden="true"></i>
+  Bosh sahifa
+</a>
+<a href="{% url 'problems:list' %}" class="ca-sidebar-link {% if request.resolver_match.namespace == 'problems' %}is-active{% endif %}">
+  <i data-lucide="list-checks" class="lu" aria-hidden="true"></i>
+  Masalalar
+</a>
+<a href="{% url 'contests:list' %}" class="ca-sidebar-link {% if request.resolver_match.namespace == 'contests' %}is-active{% endif %}">
+  <i data-lucide="trophy" class="lu" aria-hidden="true"></i>
+  Musobaqalar
+</a>
+<a href="{% url 'rating' %}" class="ca-sidebar-link {% if request.resolver_match.url_name == 'rating' %}is-active{% endif %}">
+  <i data-lucide="chart-column" class="lu" aria-hidden="true"></i>
+  Reyting
+</a>
+<a href="{% url 'top' %}" class="ca-sidebar-link {% if request.resolver_match.url_name == 'top' %}is-active{% endif %}">
+  <i data-lucide="users" class="lu" aria-hidden="true"></i>
+  Foydalanuvchilar
+</a>
+{% if user.is_authenticated %}
+<a href="{% url 'submissions:mine' %}" class="ca-sidebar-link {% if request.resolver_match.namespace == 'submissions' %}is-active{% endif %}">
+  <i data-lucide="history" class="lu" aria-hidden="true"></i>
+  Urinishlar
+  {% if unread_reviews %}<span class="ca-chip ca-chip-score ml-auto tabular" title="O‘qilmagan kod sharhlari">{{ unread_reviews }}</span>{% endif %}
+</a>
+<a href="{% url 'classroom:list' %}" class="ca-sidebar-link {% if request.resolver_match.namespace == 'classroom' and 'duel' not in request.resolver_match.url_name %}is-active{% endif %}">
+  <i data-lucide="notebook-pen" class="lu" aria-hidden="true"></i>
+  Vazifalar
+</a>
+<a href="{% url 'classroom:duels' %}" class="ca-sidebar-link {% if request.resolver_match.namespace == 'classroom' and 'duel' in request.resolver_match.url_name %}is-active{% endif %}">
+  <i data-lucide="swords" class="lu" aria-hidden="true"></i>
+  Duellar
+</a>
+<a href="{% url 'profile' user.username %}" class="ca-sidebar-link {% if request.resolver_match.url_name == 'profile' and profile_user == user %}is-active{% endif %}">
+  <i data-lucide="user" class="lu" aria-hidden="true"></i>
+  Profilim
+</a>
+{% endif %}
+{% if user.is_staff %}
+<p class="ca-sidebar-heading mt-3">Admin</p>
+{% with ns=request.resolver_match.namespace un=request.resolver_match.url_name %}
+<a href="{% url 'moderation:dashboard' %}" class="ca-sidebar-link {% if ns == 'moderation' and un == 'dashboard' %}is-active{% endif %}">
+  <i data-lucide="layout-dashboard" class="lu" aria-hidden="true"></i>
+  Boshqaruv
+</a>
+<a href="{% url 'moderation:problems' %}" class="ca-sidebar-link {% if ns == 'moderation' and un in 'problems,submit,problem_edit,ai_generate' %}is-active{% endif %}">
+  <i data-lucide="file-code-2" class="lu" aria-hidden="true"></i>
+  Masalalar
+</a>
+<a href="{% url 'moderation:queue' %}" class="ca-sidebar-link {% if ns == 'moderation' and un == 'queue' %}is-active{% endif %}">
+  <i data-lucide="inbox" class="lu" aria-hidden="true"></i>
+  Navbat
+</a>
+<a href="{% url 'moderation:contests' %}" class="ca-sidebar-link {% if ns == 'moderation' and un in 'contests,contest_new,contest_edit' %}is-active{% endif %}">
+  <i data-lucide="trophy" class="lu" aria-hidden="true"></i>
+  Musobaqalar
+</a>
+<a href="{% url 'moderation:submissions' %}" class="ca-sidebar-link {% if ns == 'moderation' and un == 'submissions' %}is-active{% endif %}">
+  <i data-lucide="history" class="lu" aria-hidden="true"></i>
+  Barcha urinishlar
+</a>
+<a href="{% url 'moderation:users' %}" class="ca-sidebar-link {% if ns == 'moderation' and un in 'users,user_edit' %}is-active{% endif %}">
+  <i data-lucide="users-round" class="lu" aria-hidden="true"></i>
+  Foydalanuvchilar
+</a>
+<a href="{% url 'moderation:groups' %}" class="ca-sidebar-link {% if ns == 'moderation' and un in 'groups,group_new,group_edit' %}is-active{% endif %}">
+  <i data-lucide="school" class="lu" aria-hidden="true"></i>
+  Guruhlar
+</a>
+<a href="{% url 'moderation:tags' %}" class="ca-sidebar-link {% if ns == 'moderation' and un == 'tags' %}is-active{% endif %}">
+  <i data-lucide="tags" class="lu" aria-hidden="true"></i>
+  Teglar
+</a>
+<a href="{% url 'integrity:audit' %}" class="ca-sidebar-link {% if ns == 'integrity' and un == 'audit' %}is-active{% endif %}">
+  <i data-lucide="scroll-text" class="lu" aria-hidden="true"></i>
+  Amallar jurnali
+</a>
+{% endwith %}
+{% endif %}

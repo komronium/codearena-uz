@@ -10,6 +10,8 @@ from django.utils import timezone
 
 from apps.contests.models import Participation
 from apps.problems.models import Problem
+from apps.problems.daily import streaks
+from apps.problems.skills import skill_map
 from apps.submissions.models import Submission
 
 from .forms import ProfileEditForm, RegisterForm
@@ -150,7 +152,7 @@ def register(request):
     if request.method == "POST" and form.is_valid():
         user = form.save()
         login(request, user)
-        return redirect("problems:list")
+        return redirect("home")
     return render(request, "registration/register.html", {"form": form})
 
 
@@ -221,7 +223,8 @@ def profile(request, username):
     by_diff = []
     for value, label in Problem.Difficulty.choices:
         total = sum(1 for pr, _ in problem_map if pr.difficulty == value)
-        done = sum(1 for pr in solved if pr.difficulty == value)
+        # from the map, like the total: a solved problem an upcoming contest holds is out of both
+        done = sum(1 for pr, st in problem_map if pr.difficulty == value and st == "solved")
         by_diff.append({
             "key": value, "label": label, "solved": done, "total": total,
             "seg": seg_len, "arc": round(seg_len * done / total, 1) if total else 0,
@@ -247,6 +250,7 @@ def profile(request, username):
         "points_rank": points_rank,
         "solved": solved,
         "total_public_problems": len(problem_map),
+        "solved_shown": sum(1 for _, st in problem_map if st == "solved"),
         "attempting": len(attempted_ids),
         "by_diff": by_diff,
         "problem_map": problem_map,
@@ -255,4 +259,6 @@ def profile(request, username):
         "rating_history": rating_history,
         "rating_chart": _rating_chart(rating_history) if rating_history else None,
         "activity": _activity_calendar(profile_user),
+        "skills": skill_map(profile_user),
+        "streak": streaks(profile_user),
     })

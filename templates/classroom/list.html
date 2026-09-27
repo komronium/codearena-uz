@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Vazifalar{% endblock %}
+{% block content %}
+<div class="mb-6 flex flex-wrap items-end justify-between gap-3">
+  <div>
+    <h1 class="ca-page-title">Vazifalar</h1>
+    <p class="mt-1 text-sm text-mute">Guruhingiz o‘qituvchisi bergan uy vazifalari. Muddatgacha yechilgani «o‘z vaqtida» hisoblanadi.</p>
+  </div>
+  {% if can_create %}<a href="{% url 'classroom:new' %}" class="ca-btn ca-btn-primary"><i data-lucide="plus" class="lu" aria-hidden="true"></i>Vazifa berish</a>{% endif %}
+</div>
+
+{% if assignments %}
+<ul class="ca-rows mb-8">
+  {% for a in assignments %}
+  <li class="ca-row">
+    <div class="ca-row-main">
+      <a class="ca-row-title ca-link" href="{% url 'classroom:detail' a.pk %}">{{ a.title }}</a>
+      <div class="ca-row-meta">
+        <span><i data-lucide="users" class="lu" aria-hidden="true"></i>{{ a.group.name }}</span>
+        <span class="tabular {% if a.my_solved == a.my_total %}font-semibold text-ok{% endif %}">{{ a.my_solved }} / {{ a.my_total }} yechilgan</span>
+      </div>
+    </div>
+    <div class="ca-row-side text-sm">
+      {% if a.deadline > now %}<span class="text-mute">Muddatgacha</span> <span class="tabular font-semibold" data-countdown="{{ a.deadline|date:'c' }}" data-label="" data-suffix="1"></span>
+      {% else %}<span class="text-mute">Muddat o‘tgan · {{ a.deadline|date:"d.m.Y H:i" }}</span>{% endif %}
+    </div>
+  </li>
+  {% endfor %}
+</ul>
+{% elif not taught %}
+<div class="ca-empty">Hozircha vazifa yo‘q. O‘qituvchi guruhingizga vazifa berganda shu yerda ko‘rinadi.</div>
+{% endif %}
+
+{% if taught %}
+<h2 class="ca-section-title">Men bergan vazifalar</h2>
+<div class="ca-panel !p-0 overflow-x-auto">
+<table class="ca-table">
+  <thead><tr><th>Vazifa</th><th>Guruh</th><th>Muddat</th><th class="text-right">Amal</th></tr></thead>
+  <tbody>
+  {% for a in taught %}
+  <tr>
+    <td><a class="ca-link font-medium" href="{% url 'classroom:detail' a.pk %}">{{ a.title }}</a></td>
+    <td>{{ a.group.name }}</td>
+    <td class="tabular text-sm">{{ a.deadline|date:"d.m.Y H:i" }}</td>
+    <td class="text-right"><a class="ca-btn ca-btn-ghost !px-2 !py-1.5 text-xs" href="{% url 'classroom:edit' a.pk %}" title="Tahrirlash" aria-label="Tahrirlash: {{ a.title }}"><i data-lucide="pencil" class="lu" aria-hidden="true"></i></a></td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endif %}
+{% endblock %}

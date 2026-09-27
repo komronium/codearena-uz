@@ -74,6 +74,27 @@ for staff replay.
     showCounter(count.get());
     if (problemId) post("view");
 
+    // Heartbeat: proves the tracker runs (a submit with no recent beat is flagged for staff)
+    // and names this browser by a random id, so a shared or second device shows up.
+    let device = null;
+    try {
+      device = localStorage.getItem("ca-device");
+      if (!device) { device = crypto.randomUUID(); localStorage.setItem("ca-device", device); }
+    } catch { device = null; }
+    const beat = () => fetch("{% url 'integrity:beat' %}", {
+      method: "POST", keepalive: true,
+      headers: { "Content-Type": "application/x-www-form-urlencoded", "X-CSRFToken": csrf },
+      body: `contest_id=${contestId}&device=${encodeURIComponent(device || "")}`,
+    });
+    beat();
+    setInterval(beat, 30000);
+    document.addEventListener("submit", (e) => {
+      if (e.target.id !== "submit-form" || !device) return;
+      const input = e.target.querySelector("input[name=device]") || e.target.appendChild(Object.assign(
+        document.createElement("input"), { type: "hidden", name: "device" }));
+      input.value = device;
+    }, true);
+
     // Leaving the page: internal moves are marked just before they happen.
     document.addEventListener("click", (e) => {
       const a = e.target.closest("a[href]");

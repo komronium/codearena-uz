@@ -11,6 +11,7 @@ class User(AbstractUser):
 
     rating = models.IntegerField(default=1200, db_index=True)
     practice_points = models.IntegerField(default=0, db_index=True)
+    duel_rating = models.IntegerField(default=1200)  # 1v1 duels only (apps.classroom.duels)
     role = models.CharField(max_length=10, choices=Role.choices, default=Role.STUDENT)
     avatar = models.ImageField(upload_to="avatars/", blank=True, null=True)
     location = models.CharField(max_length=100, blank=True)

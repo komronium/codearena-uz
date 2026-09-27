@@ -1,7 +1,14 @@
-{% extends "base.html" %}{% load tiers %}
+{% extends "base.html" %}{% load static tiers %}
 {% block title %}{% if contest_problem %}{{ contest_problem.label }}. {% endif %}{{ problem.title }}{% endblock %}
 {% block sidebar %}{% endblock %}
 {% block content %}
+{% include "contests/_dq_banner.html" with participation=my_participation %}
+{% if duel %}
+<a href="{% url 'classroom:duel' duel.pk %}" class="ca-alert ca-alert-warn mb-6 flex flex-wrap items-center justify-between gap-2">
+  <span><i data-lucide="swords" class="lu mr-1.5" aria-hidden="true"></i><b>Duel:</b> {{ duel.challenger.username }} vs {{ duel.opponent.username }} — birinchi AC g‘olib. Maslahatlar yopiq.</span>
+  <span class="tabular font-bold" data-countdown="{{ duel.ends_at|date:'c' }}" data-label="" data-suffix="1"></span>
+</a>
+{% endif %}
 <div class="mb-5 flex flex-wrap items-center justify-between gap-3 text-sm">
   {% if contest %}
   <a class="ca-link text-mute" href="{% url 'contests:detail' contest.pk %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>{{ contest.title }}</a>
@@ -34,8 +41,13 @@
   <form method="post" action="{% url 'contests:register' open_contest.pk %}">{% csrf_token %}<button class="ca-btn ca-btn-primary !py-1.5">Musobaqaga qo‘shilish</button></form>
 </div>
 {% endif %}
-<div class="grid gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:items-start">
-  <section class="relative" aria-label="Masala matni">
+{# phones and tablets: one pane at a time, so the editor isn't a long scroll below the statement #}
+<div class="ca-seg sticky top-[61px] z-30 mb-4 lg:hidden" role="group" aria-label="Ko‘rinish">
+  <button type="button" data-pane-tab="statement" aria-pressed="true" aria-controls="statement-pane"><i data-lucide="file-text" class="lu mr-1.5" aria-hidden="true"></i>Masala</button>
+  <button type="button" data-pane-tab="solve" aria-pressed="false" aria-controls="solve-pane"><i data-lucide="code" class="lu mr-1.5" aria-hidden="true"></i>Yechim</button>
+</div>
+<div id="panes" data-pane="statement" class="grid gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:items-start">
+  <section class="relative" id="statement-pane" aria-label="Masala matni">
   {% if contest and user.is_authenticated %}<div class="ca-watermark" data-wm="{{ user.username }} · {% now 'd.m.Y H:i' %}" aria-hidden="true"></div>{% endif %}
     <div class="ca-panel !p-0 overflow-hidden">
       <div class="border-b border-line px-6 py-5">
@@ -52,7 +64,7 @@
           <button type="button" class="ca-stars-sum" data-dialog="rate-dialog" title="{{ problem.n_ratings }} ta baho"><i data-lucide="star" class="lu" aria-hidden="true"></i><b class="tabular text-ink">{{ problem.avg_stars|floatformat:1 }}</b><span class="sr-only">/5,</span> <span class="tabular">({{ problem.n_ratings }})</span></button>
           {% endif %}
           {% if not contest %}
-          <span><i data-lucide="user" class="lu mr-1.5" aria-hidden="true"></i><a class="font-semibold" href="{% url 'profile' problem.author.username %}" translate="no" style="color: {{ problem.author.rating|tier_color }}">{{ problem.author.username }}</a></span>
+          <span><i data-lucide="user" class="lu mr-1.5" aria-hidden="true"></i><a class="ca-tier-ink font-semibold" href="{% url 'profile' problem.author.username %}" translate="no" style="--tier: {{ problem.author.rating|tier_color }}">{{ problem.author.username }}</a></span>
           {% endif %}
         </div>
         {% if not contest and problem.tags.all %}
@@ -114,6 +126,39 @@
         {% endif %}
       </div>
     </div>
+    {% if hints or editorial_html or problem.editorial_md %}
+    <div class="ca-panel mt-6 space-y-3" id="hints">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <h2 class="text-sm font-semibold"><i data-lucide="lightbulb" class="lu mr-1.5 text-warn" aria-hidden="true"></i>Yordam</h2>
+        {% if help_locked %}<span class="text-xs text-mute">{{ help_locked }}</span>
+        {% elif hints and not solved %}<span class="text-xs text-mute">Maslahat ochilsa, yechganingizda ball shuncha kamayadi</span>{% endif %}
+      </div>
+      {% for h in hints %}
+      <div class="rounded-[var(--ca-radius)] border border-line px-4 py-3" id="hint-{{ h.pk }}">
+        {% if h.opened %}
+        <p class="mb-1 text-xs font-semibold text-mute">{{ forloop.counter }}-maslahat</p>
+        <div class="prose prose-sm max-w-none">{{ h.html|safe }}</div>
+        {% else %}
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <span class="text-sm"><i data-lucide="lock" class="lu mr-1.5 text-mute" aria-hidden="true"></i>{{ forloop.counter }}-maslahat{% if not solved %} · <span class="font-semibold text-warn">−{{ h.cost_pct }}%</span> ball{% else %} · bepul (yechilgan){% endif %}</span>
+          {% if h.can_open and user.is_authenticated %}
+          <form method="post" action="{% url 'problems:hint' problem.slug h.pk %}"{% if not solved %} onsubmit="return confirm('Maslahatni ochasizmi? Masalani yechganingizda ballning {{ h.cost_pct }}% i ayriladi.');"{% endif %}>{% csrf_token %}
+            <button class="ca-btn ca-btn-ghost !py-1 text-xs">Ochish</button>
+          </form>
+          {% endif %}
+        </div>
+        {% endif %}
+      </div>
+      {% endfor %}
+      {% if problem.editorial_md %}
+      <details class="rounded-[var(--ca-radius)] border border-line px-4 py-3"{% if not editorial_html %} aria-disabled="true"{% endif %}>
+        <summary class="cursor-pointer text-sm font-medium"><i data-lucide="book-open-check" class="lu mr-1.5" aria-hidden="true"></i>Yechim tahlili{% if not editorial_html %} <span class="text-xs font-normal text-mute">· masalani yechgach ochiladi</span>{% endif %}</summary>
+        {% if editorial_html %}<div class="prose prose-sm mt-3 max-w-none">{{ editorial_html|safe }}</div>{% endif %}
+      </details>
+      {% endif %}
+    </div>
+    {% endif %}
+
     {% if my_subs %}
     <div class="ca-panel mt-6 !p-0 overflow-hidden">
       <div class="flex items-center justify-between border-b border-line px-4 py-2.5">
@@ -143,7 +188,7 @@
       <div class="flex flex-wrap items-center justify-between gap-2 border-b border-line px-4 py-2.5">
         <label class="flex items-center gap-2 text-sm text-mute">
           <i data-lucide="code" class="lu" aria-hidden="true"></i>
-          <select name="language" id="language" class="ca-select !w-auto !py-1.5 text-sm">
+          <select name="language" id="language" class="ca-select !w-auto !py-1.5 text-sm" aria-label="Dasturlash tili">
             {% for l in languages %}<option value="{{ l.code }}">{{ l.name }}</option>{% endfor %}
           </select>
         </label>
@@ -217,10 +262,25 @@
   </section>
 </div>
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+<link rel="stylesheet" href="{% static 'vendor/katex/katex.min.css' %}">
+<script defer src="{% static 'vendor/katex/katex.min.js' %}"></script>
+<script defer src="{% static 'vendor/katex/auto-render.min.js' %}"
         onload="renderMathInElement(document.querySelector('.ca-statement'), {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}], throwOnError: false})"></script>
+<script>
+  (() => {
+    const panes = document.getElementById("panes"), tabs = document.querySelectorAll("[data-pane-tab]");
+    const key = "ca-pane-{{ problem.pk }}";
+    const show = (name) => {
+      panes.dataset.pane = name;
+      tabs.forEach((t) => t.setAttribute("aria-pressed", String(t.dataset.paneTab === name)));
+      try { sessionStorage.setItem(key, name); } catch {}
+    };
+    tabs.forEach((t) => t.addEventListener("click", () => { show(t.dataset.paneTab); scrollTo({ top: 0 }); }));
+    let saved = null;
+    try { saved = sessionStorage.getItem(key); } catch {}
+    if (location.hash === "#yechim" || saved === "solve") show("solve");  // a reload after submitting stays on the code
+  })();
+</script>
 <script>
   document.querySelectorAll(".ca-copy-btn").forEach((btn) => {
     btn.addEventListener("click", async () => {
@@ -234,61 +294,10 @@
   });
 </script>
 {% if user.is_authenticated %}
-{% comment %}Every CodeMirror package resolves through this map with deps externalised ("*" prefix),
-so @codemirror/state is a singleton — two copies break with "Unrecognized extension value".{% endcomment %}
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap">
-<script type="importmap">
-{
-  "imports": {
-    "codemirror": "https://esm.sh/*codemirror",
-    "@codemirror/state": "https://esm.sh/*@codemirror/state",
-    "@codemirror/view": "https://esm.sh/*@codemirror/view",
-    "@codemirror/language": "https://esm.sh/*@codemirror/language",
-    "@codemirror/commands": "https://esm.sh/*@codemirror/commands",
-    "@codemirror/search": "https://esm.sh/*@codemirror/search",
-    "@codemirror/autocomplete": "https://esm.sh/*@codemirror/autocomplete",
-    "@codemirror/lint": "https://esm.sh/*@codemirror/lint",
-    "@codemirror/theme-one-dark": "https://esm.sh/*@codemirror/theme-one-dark",
-    "@codemirror/lang-python": "https://esm.sh/*@codemirror/lang-python",
-    "@codemirror/lang-cpp": "https://esm.sh/*@codemirror/lang-cpp",
-    "@codemirror/lang-java": "https://esm.sh/*@codemirror/lang-java",
-    "@codemirror/lang-javascript": "https://esm.sh/*@codemirror/lang-javascript",
-    "@codemirror/lang-sql": "https://esm.sh/*@codemirror/lang-sql",
-    "@lezer/common": "https://esm.sh/*@lezer/common",
-    "@lezer/highlight": "https://esm.sh/*@lezer/highlight",
-    "@lezer/lr": "https://esm.sh/*@lezer/lr",
-    "@lezer/python": "https://esm.sh/*@lezer/python",
-    "@lezer/cpp": "https://esm.sh/*@lezer/cpp",
-    "@lezer/java": "https://esm.sh/*@lezer/java",
-    "@lezer/javascript": "https://esm.sh/*@lezer/javascript",
-    "style-mod": "https://esm.sh/*style-mod",
-    "w3c-keyname": "https://esm.sh/*w3c-keyname",
-    "crelt": "https://esm.sh/*crelt",
-    "@marijn/find-cluster-break": "https://esm.sh/*@marijn/find-cluster-break",
-    "@uiw/codemirror-themes": "https://esm.sh/*@uiw/codemirror-themes",
-    "@uiw/codemirror-theme-github": "https://esm.sh/*@uiw/codemirror-theme-github",
-    "@uiw/codemirror-theme-dracula": "https://esm.sh/*@uiw/codemirror-theme-dracula",
-    "@uiw/codemirror-theme-monokai": "https://esm.sh/*@uiw/codemirror-theme-monokai",
-    "@uiw/codemirror-theme-nord": "https://esm.sh/*@uiw/codemirror-theme-nord",
-    "@uiw/codemirror-theme-solarized": "https://esm.sh/*@uiw/codemirror-theme-solarized",
-    "@uiw/codemirror-theme-solarized/": "https://esm.sh/*@uiw/codemirror-theme-solarized/",
-    "@uiw/codemirror-theme-vscode": "https://esm.sh/*@uiw/codemirror-theme-vscode",
-    "@uiw/codemirror-theme-tokyo-night": "https://esm.sh/*@uiw/codemirror-theme-tokyo-night",
-    "@uiw/codemirror-theme-tokyo-night-storm": "https://esm.sh/*@uiw/codemirror-theme-tokyo-night-storm",
-    "@uiw/codemirror-theme-material": "https://esm.sh/*@uiw/codemirror-theme-material",
-    "@uiw/codemirror-theme-gruvbox-dark": "https://esm.sh/*@uiw/codemirror-theme-gruvbox-dark",
-    "@uiw/codemirror-theme-atomone": "https://esm.sh/*@uiw/codemirror-theme-atomone",
-    "@uiw/codemirror-theme-xcode": "https://esm.sh/*@uiw/codemirror-theme-xcode",
-    "@uiw/codemirror-theme-aura": "https://esm.sh/*@uiw/codemirror-theme-aura",
-    "@uiw/codemirror-theme-sublime": "https://esm.sh/*@uiw/codemirror-theme-sublime",
-    "@uiw/codemirror-theme-copilot": "https://esm.sh/*@uiw/codemirror-theme-copilot",
-    "@uiw/codemirror-theme-andromeda": "https://esm.sh/*@uiw/codemirror-theme-andromeda",
-    "@replit/codemirror-vim": "https://esm.sh/*@replit/codemirror-vim",
-    "@replit/codemirror-vim-core": "https://esm.sh/*@replit/codemirror-vim-core",
-    "@babel/runtime/helpers/extends": "https://esm.sh/*@babel/runtime/helpers/extends"
-  }
-}
-</script>
+{% comment %}Every CodeMirror package is its own local module; the map (built by frontend/build.mjs)
+resolves their bare imports so @codemirror/state loads once — two copies break with
+"Unrecognized extension value".{% endcomment %}
+{% include "_importmap.html" %}
 <script type="module">
   import { EditorView, basicSetup } from "codemirror";
   import { Compartment, EditorState, Transaction } from "@codemirror/state";
@@ -312,7 +321,7 @@ so @codemirror/state is a singleton — two copies break with "Unrecognized exte
   const tabC = new Compartment(), wrapC = new Compartment(), vimC = new Compartment();
   const prefKey = "ca-editor";
   const FONTS = {
-    anthropic: '"Anthropic Mono", ui-monospace, monospace',
+    anthropic: '"Anthropic Mono", "JetBrains Mono", ui-monospace, monospace',
     jetbrains: '"JetBrains Mono", ui-monospace, monospace',
     fira: '"Fira Code", ui-monospace, monospace',
     system: "ui-monospace, Menlo, Consolas, monospace",

@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base.html" %}{% load static %}
 {% block title %}{% if problem %}Masalani tahrirlash{% else %}Masala qo‘shish{% endif %}{% endblock %}
 {% block sidebar %}{% endblock %}
 {% block content %}
@@ -104,6 +104,27 @@
       </template>
       <button type="button" id="add-testcase" class="ca-btn ca-btn-ghost"><i data-lucide="plus" class="lu" aria-hidden="true"></i>Yana test</button>
     </section>
+
+    <section class="ca-panel space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <h2 class="ca-section-title !mb-0">Maslahatlar va tahlil</h2>
+        <span class="text-xs text-mute">Maslahat narxi — masala ballining foizi (yechishdan oldin ochilsa). Jami ko‘pi bilan 90%.</span>
+      </div>
+      {{ hint_formset.management_form }}
+      {% if hint_formset.non_form_errors %}<div class="text-sm text-bad">{{ hint_formset.non_form_errors }}</div>{% endif %}
+      {% for f in hint_formset %}
+      <div class="flex flex-wrap items-start gap-2 rounded-[var(--ca-radius)] border border-line p-2">
+        {{ f.id }}
+        <div><label class="ca-label" for="{{ f.order.id_for_label }}">Tartib</label>{{ f.order }}</div>
+        <div class="min-w-[14rem] flex-1"><label class="ca-label" for="{{ f.body_md.id_for_label }}">Maslahat (Markdown)</label>{{ f.body_md }}</div>
+        <div><label class="ca-label" for="{{ f.cost_pct.id_for_label }}">Narx, %</label>{{ f.cost_pct }}</div>
+        {% if f.instance.pk %}<label class="flex items-center gap-1.5 pt-7 text-sm text-bad">{{ f.DELETE }} O‘chirish</label>{% endif %}
+        {% if f.errors %}<div class="w-full text-sm text-bad">{{ f.errors }}</div>{% endif %}
+      </div>
+      {% endfor %}
+      <p class="text-xs text-mute">Yana maslahat qo‘shish uchun saqlang — bo‘sh qator qo‘shiladi.</p>
+      <div><label class="ca-label" for="{{ form.editorial_md.id_for_label }}">Yechim tahlili (Markdown) — masalani yechganlarga ko‘rinadi</label>{{ form.editorial_md }}{{ form.editorial_md.errors }}</div>
+    </section>
   </div>
 
   <aside class="space-y-6 lg:sticky lg:top-20">
@@ -142,14 +163,15 @@
   </aside>
 </form>
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde@2.20.0/dist/easymde.min.css">
+<link rel="stylesheet" href="{% static 'vendor/easymde/easymde.min.css' %}">
 {# EasyMDE toolbar icons come from Font Awesome; loaded only on this staff page #}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
-<script src="https://cdn.jsdelivr.net/npm/easymde@2.20.0/dist/easymde.min.js"></script>
+<link rel="stylesheet" href="{% static 'vendor/fontawesome/css/all.min.css' %}">
+<script src="{% static 'vendor/easymde/easymde.min.js' %}"></script>
 <script>
 (function () {
   document.querySelectorAll("textarea.ca-md").forEach((el) => {
-    new EasyMDE({ element: el, spellChecker: false, status: false, minHeight: el.rows > 4 ? "220px" : "90px",
+    // autoDownloadFontAwesome: false, or it fetches its own copy from a CDN
+    new EasyMDE({ element: el, spellChecker: false, status: false, autoDownloadFontAwesome: false, minHeight: el.rows > 4 ? "220px" : "90px",
       toolbar: ["bold", "italic", "heading", "|", "code", "quote", "unordered-list", "ordered-list", "table", "|", "preview", "guide"] });
   });
 

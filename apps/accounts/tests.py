@@ -264,3 +264,29 @@ def test_unrated_profile_says_reytingsiz(client):
     assert "Reytingsiz" in r.content.decode()
     r = client.get(reverse("profile", args=["vet"]))
     assert r.context["rating_rank"] == 1 and "Reytingsiz" not in r.content.decode()
+
+
+@pytest.mark.django_db
+def test_profile_gauge_counts_solves_from_the_same_catalog_as_the_totals(client):
+    """A public problem held by an upcoming contest is out of the catalog, so its old
+    solve must not make "Easy" read 2/1."""
+    from django.utils import timezone
+
+    from apps.contests.models import Contest, ContestProblem
+
+    author = User.objects.create_user("author", password="x")
+    ali = User.objects.create_user("ali", password="x")
+    lang = Language.objects.create(code="python", name="Python 3", docker_image="x", run_cmd="x")
+    shown = Problem.objects.create(slug="a", title="A", statement_md="x", author=author, difficulty="easy")
+    held = Problem.objects.create(slug="b", title="B", statement_md="x", author=author, difficulty="easy")
+    c = Contest.objects.create(title="Soon", start=timezone.now() + timezone.timedelta(days=1),
+                               end=timezone.now() + timezone.timedelta(days=2))
+    ContestProblem.objects.create(contest=c, problem=held, label="A")
+    for p in (shown, held):
+        s = Submission.objects.create(user=ali, problem=p, language=lang, source="x", verdict="AC")
+        UserProblemSolved.objects.create(user=ali, problem=p, first_ac_submission=s)
+
+    r = client.get(reverse("profile", args=["ali"]))
+    easy = next(d for d in r.context["by_diff"] if d["key"] == "easy")
+    assert (easy["solved"], easy["total"]) == (1, 1)
+    assert r.context["solved_shown"] == 1 and r.context["total_public_problems"] == 1

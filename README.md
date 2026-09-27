@@ -25,6 +25,23 @@ with a real `compile_cmd` (C++, Java — both seeded).
 
 Languages: Python 3, C++ (g++ -O2), Java, JavaScript (Node 20).
 
+## Front end
+
+Everything the browser loads is served from `static/`: no CDN, so the site works
+where a CDN is slow or blocked. `frontend/build.mjs` makes it from the versions
+pinned in `frontend/package.json` — Tailwind CSS (scanning `templates/` and
+`apps/`), the open fonts (Inter, JetBrains Mono, Fira Code; SIL OFL — fallbacks behind the
+Anthropic Sans/Mono files kept in `static/fonts`, and editor options), htmx, the Lucide
+icons the templates use, highlight.js, KaTeX, EasyMDE and the CodeMirror modules
+behind `templates/_importmap.html`. The outputs are committed, so deploys need no
+Node. After adding a Tailwind class or an icon to a template:
+
+    cd frontend && npm ci && npm run build   # then commit static/ and templates/_importmap.html
+
+`tests/test_frontend.py` fails when the committed build is stale (it runs where
+Node and `frontend/node_modules` exist) and when a template loads a third-party
+script or stylesheet.
+
 ## Docker compose (dev)
 
     cp .env.example .env
@@ -108,13 +125,42 @@ RQ queue, and verdicts, solves, points and standings follow the new results.
 Ratings already applied do not change.
 
 `recalc_rating` requires `Contest.is_rated=True` and `Contest.has_ended`; it's
-a no-op if `rating_applied` is already set. Teacher-only per-contest report
-(focus events + similarity flags) is at `/integrity/contest/<id>/`
-(`is_staff` required).
+a no-op if `rating_applied` is already set. Disqualifying or re-qualifying
+someone after that recomputes the contest's rating when it is still the latest
+rated contest of its participants; otherwise ratings stay and staff get a warning.
+
+Teacher-only per-contest report is at `/integrity/contest/<id>/` (`is_staff`
+required): browser events, plus server-side evidence the browser can't hide —
+submits with no tracker heartbeat, code that never appeared in the editor
+snapshots, code jumps, one device shared by two participants, one participant on
+two devices at once — and similarity flags (contest ACs, the last attempt of
+those without AC, and solutions from before the contest). Every staff action
+that changes a result (DQ, rejudge, publish, rating, flag review, deletes) is in
+the audit log at `/integrity/audit/`; a disqualified participant sees the reason
+on the contest page.
 
 `Contest.require_group` / `allowed_ip_prefix` restrict who can register and
 submit ("supervised mode") — checked again on every submit, not just at
 registration.
+
+## Learning and classroom
+
+- **Homework** (`/classroom/`): a group's teacher (or staff) gives a problem set with a
+  deadline; the grid shows each student as on time / late / tried, with CSV export.
+  Only public problems can be assigned.
+- **Hints and editorials**: staff add hints on the problem form, each costing a share of
+  the price if opened before the solve (capped at 90 %); the editorial opens after AC.
+  Both are locked while a contest or a duel uses the problem.
+- **Code review**: a group's teacher comments on a student's submission by line; the
+  student sees an unread badge and can reply.
+- **Skill map / next problem**: per-tag progress on the profile; "Keyingi masala" on the
+  problem list picks from the weakest tags at the student's level.
+- **Daily problem**: picked automatically per Tashkent day; solving it on its day keeps
+  the streak and gives +5 practice points.
+- **Virtual contests**: after a contest is published, anyone who didn't take part can
+  replay it on their own clock and see where they would have placed. Unrated.
+- **Duels** (`/classroom/duels/`): 1v1 on a problem neither player tried, 30 minutes,
+  first AC wins, separate duel rating.
 
 ## Problems, moderation, SQL problems
 

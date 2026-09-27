@@ -4,22 +4,27 @@ from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.db.models import Avg, Case, Count, F, IntegerField, OuterRef, Q, Subquery, Value, When
 from django.db.models.functions import Length
-from django.http import Http404
+from django.http import Http404, HttpResponseBadRequest
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 from django.utils import timezone
 
+from apps.classroom.duels import active_duel_for
 from apps.contests.models import ContestProblem
 from apps.contests.services import active_contest_for, in_running_contest, in_upcoming_contest
 from apps.submissions.models import Submission, UserProblemSolved
 
+from .daily import daily_for, streaks
 from .models import (
+    DailySolve,
+    HintUnlock,
     Language,
     Problem,
     ProblemRating,
     Tag,
 )
+from .skills import next_problems
 
 # Markdown itself passes raw HTML straight through; sanitize the rendered
 # output before any template marks it |safe, since statement_md is authored
@@ -103,8 +108,19 @@ def problem_list(request):
             UserProblemSolved.objects.filter(user=request.user, problem__in=page.object_list)
             .values_list("problem_id", flat=True)
         )
+    # Only on the plain first page: with a search or filter the user already knows what they want.
+    browsing = not (q or tag or difficulty or status) and page.number == 1
+    daily = daily_for() if browsing else None
+    daily_done = streak = None
+    if daily and request.user.is_authenticated:
+        daily_done = DailySolve.objects.filter(user=request.user, daily=daily).exists()
+        streak = streaks(request.user)[0]
+    next_picks = (next_problems(request.user, exclude=(daily.problem_id,) if daily else ())
+                  if request.user.is_authenticated and browsing else [])
     return render(request, "problems/list.html", {
         "problems": page,
+        "next_picks": next_picks,
+        "daily": daily, "daily_done": daily_done, "streak": streak,
         "sort": sort, "dir": "desc" if desc else "asc",
         "solved_ids": solved_ids,
         "all_tags": Tag.objects.order_by("name"),
@@ -173,6 +189,21 @@ def problem_detail(request, slug):
     solved = request.user.is_authenticated and UserProblemSolved.objects.filter(
         user=request.user, problem=problem).exists()
     show_leaders = contest is None and not in_running_contest(problem)
+    # Hints and the editorial stay shut while a contest uses the problem.
+    duel = active_duel_for(request.user, problem)
+    help_locked = ("Duel davomida yopiq" if duel is not None
+                   else "Musobaqa davomida yopiq" if not show_leaders else "")
+    hints = list(problem.hints.all())
+    opened = set()
+    if request.user.is_authenticated and hints:
+        opened = set(HintUnlock.objects.filter(user=request.user, hint__problem=problem)
+                     .values_list("hint_id", flat=True))
+    for i, h in enumerate(hints):
+        h.opened = h.pk in opened and not help_locked
+        h.html = _render_statement(h.body_md) if h.opened else ""
+        h.can_open = not help_locked and not h.opened and all(x.pk in opened for x in hints[:i])
+    editorial_open = bool(problem.editorial_md) and not help_locked and (
+        solved or (request.user.is_authenticated and (request.user.is_staff or problem.author_id == request.user.id)))
     my_stars = (ProblemRating.objects.filter(user=request.user, problem=problem).values_list("stars", flat=True).first()
                 if solved else None)
     return render(request, "problems/detail.html", {
@@ -182,6 +213,10 @@ def problem_detail(request, slug):
         "fastest": leaders(problem, "time", limit=3) if show_leaders else [],
         "shortest": leaders(problem, "length", limit=3) if show_leaders else [],
         "show_leaders": show_leaders,
+        "hints": hints,
+        "duel": duel,
+        "help_locked": help_locked,
+        "editorial_html": _render_statement(problem.editorial_md) if editorial_open else "",
         "open_contest": open_contest,
         "problem": problem,
         "my_subs": my_subs,
@@ -194,6 +229,8 @@ def problem_detail(request, slug):
         "languages": languages,
         "sql_dataset": getattr(problem, "sql_dataset", None),
         "contest": contest,
+        "my_participation": (contest.participations.filter(user=request.user).first()
+                             if contest and request.user.is_authenticated else None),
     })
 
 
@@ -229,3 +266,24 @@ def rate_problem(request, slug):
     if 1 <= stars <= 5:
         ProblemRating.objects.update_or_create(user=request.user, problem=problem, defaults={"stars": stars})
     return redirect(reverse("problems:detail", args=[problem.slug]) + "#baho")
+
+
+@login_required
+@require_POST
+def hint_unlock(request, slug, hint_id):
+    """Open one hint, in order. Its cost is settled when the user's AC lands
+    (apps.submissions.solves): a hint opened after solving is free."""
+    problem, contest = _visible_problem(request, slug)
+    if contest is not None or in_running_contest(problem) or in_upcoming_contest(problem):
+        return HttpResponseBadRequest("hints are locked while a contest uses this problem")
+    if active_duel_for(request.user, problem) is not None:
+        return HttpResponseBadRequest("hints are locked during your duel on this problem")
+    hints = list(problem.hints.all())
+    hint = next((h for h in hints if h.pk == hint_id), None)
+    if hint is None:
+        raise Http404
+    opened = set(HintUnlock.objects.filter(user=request.user, hint__problem=problem).values_list("hint_id", flat=True))
+    if any(h.pk not in opened for h in hints[:hints.index(hint)]):
+        return HttpResponseBadRequest("open the earlier hints first")
+    HintUnlock.objects.get_or_create(user=request.user, hint=hint)
+    return redirect(reverse("problems:detail", args=[problem.slug]) + f"#hint-{hint.pk}")

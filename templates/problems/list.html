@@ -15,6 +15,39 @@
   {% endif %}
 </div>
 
+{% if daily %}
+<a href="{% url 'problems:detail' daily.problem.slug %}" class="ca-panel mb-4 flex flex-wrap items-center justify-between gap-3 !py-3.5 transition hover:border-accent">
+  <div class="min-w-0">
+    <p class="text-xs font-semibold uppercase tracking-wide text-warn"><i data-lucide="calendar-check" class="lu mr-1" aria-hidden="true"></i>Kun masalasi · {{ daily.date|date:"d.m" }}</p>
+    <p class="mt-1 truncate text-lg font-semibold">{{ daily.problem.title }}</p>
+    <p class="mt-1 flex flex-wrap items-center gap-2 text-xs text-mute"><span class="ca-diff ca-diff-{{ daily.problem.difficulty }}">{{ daily.problem.get_difficulty_display }}</span>Bugun yechsangiz — seriya davom etadi va +5 ball</p>
+  </div>
+  {% if user.is_authenticated %}
+  <div class="text-right text-sm">
+    {% if daily_done %}<span class="ca-verdict ca-verdict-ac">✓ Bugun yechildi</span>{% endif %}
+    {% if streak %}<p class="mt-1 text-mute"><i data-lucide="flame" class="lu mr-1 text-warn" aria-hidden="true"></i><b class="tabular text-ink">{{ streak }}</b> kunlik seriya</p>{% endif %}
+  </div>
+  {% endif %}
+</a>
+{% endif %}
+
+{% if next_picks %}
+<section class="mb-6" aria-labelledby="next-title">
+  <h2 id="next-title" class="mb-2 text-sm font-semibold"><i data-lucide="compass" class="lu mr-1.5 text-accent" aria-hidden="true"></i>Keyingi masala</h2>
+  <div class="grid gap-3 sm:grid-cols-3">
+    {% for p, reason in next_picks %}
+    <a href="{% url 'problems:detail' p.slug %}" class="ca-panel block !py-3 transition hover:border-accent">
+      <p class="truncate font-semibold">{{ p.title }}</p>
+      <p class="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-mute">
+        <span class="ca-diff ca-diff-{{ p.difficulty }}">{{ p.get_difficulty_display }}</span>
+        {% if reason %}<span>zaif mavzu: <b class="text-ink">{{ reason }}</b></span>{% else %}<span>darajangizga mos</span>{% endif %}
+      </p>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
 <form method="get" class="mb-4 flex flex-wrap gap-3">
   <div class="relative max-w-xs flex-1">
     <i data-lucide="search" class="lu pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-mute" aria-hidden="true"></i>
@@ -48,8 +81,8 @@
 <table class="ca-table">
   <thead>
     <tr>
-      <th class="w-10"></th>
-      <th class="w-20">{% include "problems/_sort_th.html" with key="id" label="#" %}</th>
+      <th class="w-10"><span class="sr-only">Holat</span></th>
+      <th class="hidden w-20 sm:table-cell">{% include "problems/_sort_th.html" with key="id" label="#" %}</th>
       <th class="w-full">{% include "problems/_sort_th.html" with key="title" label="Nomi" %}</th>
       <th>{% include "problems/_sort_th.html" with key="difficulty" label="Qiyinlik" %}</th>
       <th class="hidden lg:table-cell text-right">{% include "problems/_sort_th.html" with key="rating" label="Baho" %}</th>
@@ -61,13 +94,14 @@
   {% for p in problems %}
   <tr{% if p.id in solved_ids %} class="ca-row-solved"{% endif %}>
     <td class="text-center">{% if p.id in solved_ids %}<span class="inline-grid h-5 w-5 place-items-center rounded-full bg-ok-soft text-ok" title="Yechilgan"><i data-lucide="check" class="lu text-[.7rem]" aria-hidden="true"></i><span class="sr-only">Yechilgan</span></span>{% endif %}</td>
-    <td class="tabular text-xs text-mute">{{ p.id|stringformat:"04d" }}</td>
+    <td class="hidden tabular text-xs text-mute sm:table-cell">{{ p.id|stringformat:"04d" }}</td>
     {% comment %}Tags share the title cell, right-aligned (a separate column squeezed long titles into 3 lines).
        The tag row is one chip tall: chips that don't fit wrap onto a hidden second row, so rows stay one line.
        The empty first span lets even the first chip wrap away instead of being clipped.{% endcomment %}
-    <td class="min-w-[12rem]">
+    <td class="sm:min-w-[12rem]">
       <div class="flex items-center gap-3">
-        <a class="ca-link shrink-0 font-medium" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a>
+        {# the title only refuses to shrink where the tags beside it (md+) are the ones that give way #}
+        <a class="ca-link font-medium md:shrink-0" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a>
         {% with tags=p.tags.all %}{% if tags %}
         <div class="hidden h-[1.375rem] min-w-0 flex-1 flex-wrap justify-end gap-1 overflow-hidden md:flex" title="{% for t in tags %}{{ t.name }}{% if not forloop.last %}, {% endif %}{% endfor %}"><span class="h-full w-0" aria-hidden="true"></span>{% for t in tags %}<a class="ca-chip shrink-0" href="?tag={{ t.name|urlencode }}">{{ t.name }}</a>{% endfor %}</div>
         {% endif %}{% endwith %}
@@ -80,7 +114,7 @@
     <td class="hidden md:table-cell tabular text-right text-mute">{{ p.attempts }}</td>
     <td class="whitespace-nowrap text-right">
       <div class="inline-flex items-center gap-2" title="{{ p.ac_count }} / {{ p.attempts }} urinish muvaffaqiyatli">
-        <span class="ca-progress ca-progress-ok w-14"><span style="width: {{ p.pass_rate }}%"></span></span>
+        <span class="ca-progress ca-progress-ok hidden w-14 sm:block"><span style="width: {{ p.pass_rate }}%"></span></span>
         <span class="tabular w-9 text-right text-mute">{{ p.pass_rate }}%</span>
       </div>
     </td>
