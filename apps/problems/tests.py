@@ -725,3 +725,31 @@ def test_suggest_finds_what_the_list_shows_and_nothing_hidden(client):
     r = client.get(reverse("problems:suggest"), {"q": "ikki"}).json()["results"]
     assert [x["title"] for x in r] == ["Ikki son", "Sonlar ikki marta"]  # title-prefix first, hidden never
     assert client.get(reverse("problems:suggest"), {"q": ""}).json() == {"results": []}
+
+
+@pytest.mark.django_db
+def test_practice_pack_adds_25_open_problems_once_and_repeats_nothing_on_the_portal():
+    from io import StringIO
+
+    from django.core.management import call_command
+
+    from apps.accounts.models import User
+    from apps.problems.management.commands import add_practice_pack_1, seed_problems, seed_story_problems
+    from apps.problems.models import Problem
+
+    User.objects.create_superuser("admin", password="x")
+    call_command("add_practice_pack_1", "--dry-run", stdout=StringIO())
+    assert not Problem.objects.filter(slug__startswith="p1-").exists()
+
+    call_command("add_practice_pack_1", stdout=StringIO())
+    pack = Problem.objects.filter(slug__startswith="p1-")
+    assert pack.count() == 25 and not pack.exclude(is_public=True, status=Problem.Status.APPROVED).exists()
+    assert set(pack.values_list("difficulty", flat=True)) == {"beginner", "easy"}
+    assert all(p.testcases.count() >= 20 and p.testcases.filter(is_sample=True).count() == 2 for p in pack)
+
+    call_command("add_practice_pack_1", stdout=StringIO())  # re-run: nothing new
+    assert Problem.objects.filter(slug__startswith="p1-").count() == 25
+
+    seeded = {s.title for mod in (seed_problems, seed_story_problems) for v in vars(mod).values()
+              if isinstance(v, list) for s in v if hasattr(s, "title")}
+    assert not seeded & {s["title"] for s in add_practice_pack_1.PROBLEMS}
