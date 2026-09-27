@@ -1,42 +1,83 @@
-{% comment %}Duel state, polled every 5 s while open; ctx: duel, players, user.{% endcomment %}
+{% comment %}The duel board, polled every 5 s while open; ctx: duel, players, best, beat_by,
+my_running, expires, user.{% endcomment %}
 <div class="grid items-stretch gap-3 sm:grid-cols-[1fr_auto_1fr]">
   {% for p in players %}
-  <div class="rounded-[var(--ca-radius)] border px-4 py-4 text-center {% if p.winner %}border-ok bg-ok-soft{% else %}border-line{% endif %}{% if not forloop.first %} sm:order-3{% endif %}">
-    <span class="ca-avatar mx-auto h-11 w-11 text-lg" aria-hidden="true">{{ p.user.username|first }}</span>
-    <p class="mt-2 truncate font-semibold">{{ p.user.username }}{% if p.user == user %} <span class="text-xs font-normal text-mute">(siz)</span>{% endif %}</p>
-    <p class="text-xs text-mute">Duel reytingi <b class="text-ink">{{ p.user.duel_rating }}</b>{% if p.delta is not None %} <span class="font-semibold {% if p.delta > 0 %}text-ok{% elif p.delta < 0 %}text-bad{% endif %}">{{ p.delta|stringformat:"+d" }}</span>{% endif %}</p>
-    {% if duel.status == "active" or duel.status == "finished" %}
-    <p class="mt-2 text-sm">
-      {% if p.solved_in %}<span class="ca-verdict ca-verdict-ac">✓ {{ p.solved_in }} da yechdi</span>
-      {% else %}<span class="text-mute">{{ p.attempts }} ta urinish</span>{% endif %}
-    </p>
-    {% endif %}
+  {% if p.user %}
+  <div class="ca-duelist{% if p.winner %} is-winner{% endif %}{% if not forloop.first %} sm:order-3{% endif %}">
+    <span class="ca-avatar h-11 w-11 shrink-0 text-lg" aria-hidden="true">{{ p.user.username|first }}</span>
+    <div class="min-w-0">
+      <p class="truncate font-semibold">{{ p.user.username }}{% if p.user == user %} <span class="text-xs font-normal text-mute">(siz)</span>{% endif %}</p>
+      <p class="text-xs text-mute">Duel reytingi <b class="text-ink">{{ p.user.duel_rating }}</b>{% if p.delta is not None %} <span class="font-semibold {% if p.delta > 0 %}text-ok{% elif p.delta < 0 %}text-bad{% endif %}">{{ p.delta|stringformat:"+d" }}</span>{% endif %}</p>
+      <p class="mt-1.5 text-sm">
+        {% if p.solved_in %}<span class="ca-verdict ca-verdict-ac"><i data-lucide="check" class="lu" aria-hidden="true"></i>{{ p.solved_in }} da yechdi</span>
+        {% elif p.running %}<span class="tabular font-semibold text-ok" data-countdown="{{ p.run.end|date:'c' }}" data-label="qoldi" data-suffix="1"></span>
+        {% elif p.run %}<span class="text-mute">Vaqtida yecha olmadi</span>
+        {% else %}<span class="text-mute">Hali qabul qilmadi</span>{% endif %}
+        {% if p.run %}<span class="text-xs text-mute"> · {{ p.attempts }} ta urinish</span>{% endif %}
+      </p>
+    </div>
   </div>
-  {% if forloop.first %}
-  <div class="flex flex-col items-center justify-center px-2 text-center sm:order-2">
-    <span class="text-sm font-bold tracking-widest text-mute">VS</span>
-    {% if duel.status == "active" %}<span class="mt-1 tabular text-2xl font-bold text-ok" data-countdown="{{ duel.ends_at|date:'c' }}" data-label="" data-suffix="1"></span><span class="text-xs text-mute">qoldi</span>{% endif %}
+  {% else %}
+  <div class="ca-duelist is-empty sm:order-3">
+    <span class="ca-avatar h-11 w-11 shrink-0 text-lg" aria-hidden="true">?</span>
+    <div class="min-w-0">
+      <p class="font-semibold">Raqib kutilmoqda</p>
+      <p class="text-xs text-mute">{{ duel.get_difficulty_display }} darajasida duel boshlagan keyingi o‘yinchi</p>
+    </div>
   </div>
   {% endif %}
+  {% if forloop.first %}<div class="flex items-center justify-center text-sm font-bold tracking-widest text-mute sm:order-2" aria-hidden="true">VS</div>{% endif %}
   {% endfor %}
 </div>
 
-<div class="mt-4 flex flex-wrap items-center justify-center gap-2 text-center">
+{% comment %}Both runs on one 0–30 min track, each from its own start: the text above says the same.{% endcomment %}
+<div class="ca-race mt-6" aria-hidden="true">
+  <div class="ca-race-names">{% for p in players %}<span>{{ p.user.username|default:"?" }}</span>{% endfor %}</div>
+  <div class="ca-race-field">
+    {% for p in players %}
+    <div class="ca-lane">
+      {% if p.running %}<i class="ca-lane-fill" data-race-start="{{ p.run.start|date:'c' }}"></i>
+      {% elif p.solved_in %}<i class="ca-lane-fill" style="width: {{ p.solved_at }}%"></i>
+      {% elif p.run %}<i class="ca-lane-fill is-over"></i>{% endif %}
+      {% for m in p.marks %}<i class="ca-mark ca-mark-{% if m.verdict == 'AC' %}ac{% elif m.verdict == 'PENDING' or m.verdict == 'RUNNING' %}wait{% else %}bad{% endif %}" style="left: {{ m.at }}%" title="{{ m.time }}"></i>{% endfor %}
+    </div>
+    {% endfor %}
+    {% if best %}<i class="ca-race-best" style="left: {{ best.at }}%"><span>{{ best.time }}</span></i>{% endif %}
+    <div class="ca-race-axis"><span>0</span><span>15</span><span>30 daq</span></div>
+  </div>
+</div>
+
+<div class="mt-5 flex flex-wrap items-center justify-center gap-2 text-center">
   <span class="ca-diff ca-diff-{{ duel.difficulty }}">{{ duel.get_difficulty_display }}</span>
   <b>{{ duel.get_status_display }}</b>
 </div>
-{% if duel.status == "pending" %}
-<p class="mt-3 text-center text-sm text-mute">{% if duel.opponent_id == user.pk %}Sizni chaqirishdi.{% else %}{{ duel.opponent.username }} javobini kutyapmiz…{% endif %} Masala boshlanganda tanlanadi — ikkalangiz ham ko‘rmagan bo‘ladi.</p>
-<div class="mt-3 flex justify-center gap-2">
-  {% if duel.opponent_id == user.pk %}<form method="post" action="{% url 'classroom:duel_answer' duel.pk %}">{% csrf_token %}<input type="hidden" name="accept" value="1"><button class="ca-btn ca-btn-primary">Qabul qilish</button></form>{% endif %}
-  <form method="post" action="{% url 'classroom:duel_answer' duel.pk %}">{% csrf_token %}<button class="ca-btn ca-btn-ghost">{% if duel.opponent_id == user.pk %}Rad etish{% else %}Bekor qilish{% endif %}</button></form>
-</div>
-{% elif duel.status == "active" %}
+
+{% if my_running %}
 <div class="mt-4 text-center">
   <a class="ca-btn ca-btn-primary" href="{% url 'problems:detail' duel.problem.slug %}#yechim"><i data-lucide="swords" class="lu" aria-hidden="true"></i>Masala: {{ duel.problem.title }}</a>
-  <p class="mt-2 text-xs text-mute">Birinchi AC g‘olib. Maslahatlar duel davomida yopiq.</p>
+  <p class="mt-2 text-sm text-mute">{% if beat_by %}Yutish uchun <b class="tabular text-ink" data-countdown="{{ beat_by|date:'c' }}" data-label="ichida yeching" data-suffix="1"></b>.{% else %}Tezroq yechgan g‘olib.{% endif %} Maslahatlar duel davomida yopiq.</p>
 </div>
+{% endif %}
+
+{% if duel.status == "pending" %}
+  {% if not duel.opponent_id %}
+  <p class="mx-auto mt-3 max-w-md text-center text-sm text-mute">Ochiq duel: shu darajada duel boshlagan keyingi o‘yinchi aynan shu masalani oladi va o‘zining 30 daqiqasida yechadi. Kim tezroq yechsa, o‘sha g‘olib. Raqib {{ expires|date:"d.m H:i" }} gacha kutiladi.</p>
+  {% elif duel.opponent_id == user.pk %}
+  <p class="mx-auto mt-3 max-w-md text-center text-sm text-mute"><b class="text-ink">{{ duel.challenger.username }}</b> sizni chaqirdi. Qabul qilsangiz, o‘sha masala ochiladi va sizning 30 daqiqangiz boshlanadi.</p>
+  <div class="mt-3 flex justify-center gap-2">
+    <form method="post" action="{% url 'classroom:duel_answer' duel.pk %}">{% csrf_token %}<input type="hidden" name="accept" value="1"><button class="ca-btn ca-btn-primary">Qabul qilish</button></form>
+    <form method="post" action="{% url 'classroom:duel_answer' duel.pk %}">{% csrf_token %}<button class="ca-btn ca-btn-ghost">Rad etish</button></form>
+  </div>
+  {% else %}
+  <p class="mx-auto mt-3 max-w-md text-center text-sm text-mute"><b class="text-ink">{{ duel.opponent.username }}</b> qabul qilganda o‘sha masala unga beriladi. {{ expires|date:"d.m H:i" }} gacha kutiladi.</p>
+  {% endif %}
 {% elif duel.status == "finished" %}
-<p class="mt-3 text-center text-lg">{% if duel.winner %}<b>{{ duel.winner.username }}</b> g‘olib!{% else %}Durang — hech kim vaqtida yecha olmadi.{% endif %}</p>
+<p class="mt-3 text-center text-lg">{% if duel.winner %}<b>{{ duel.winner.username }}</b> g‘olib!{% else %}Durang.{% endif %}</p>
 {% if duel.problem %}<p class="mt-1 text-center text-sm text-mute">Masala: <a class="ca-link" href="{% url 'problems:detail' duel.problem.slug %}">{{ duel.problem.title }}</a></p>{% endif %}
+{% elif duel.status == "expired" or duel.status == "declined" %}
+<p class="mt-3 text-center text-sm text-mute">{% if duel.status == "declined" %}Chaqiriq rad etildi{% elif duel.opponent_id %}Chaqiriq muddati o‘tdi{% else %}Hech kim qo‘shilmadi{% endif %} — duel reytingi o‘zgarmadi.</p>
+<form method="post" action="{% url 'classroom:duels' %}" class="mt-3 flex justify-center">{% csrf_token %}
+  <input type="hidden" name="difficulty" value="{{ duel.difficulty }}">
+  <button name="find" value="1" class="ca-btn ca-btn-primary"><i data-lucide="swords" class="lu" aria-hidden="true"></i>Yangi duel</button>
+</form>
 {% endif %}

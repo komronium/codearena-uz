@@ -49,23 +49,28 @@ class ReviewComment(models.Model):
 
 
 class Duel(models.Model):
-    """1v1: the same unseen problem for both, first AC in the window wins
-    (apps.classroom.duels)."""
+    """1v1 on one problem neither player tried, each on their own clock: the challenger's
+    starts when they open the duel, the opponent's when they join. The faster AC wins
+    (apps.classroom.duels). No opponent yet = an open duel: the next player who asks for
+    a match at that level gets the same problem."""
     class Status(models.TextChoices):
-        PENDING = "pending", "Kutilmoqda"
+        PENDING = "pending", "Raqib kutilmoqda"
         ACTIVE = "active", "Davom etmoqda"
         FINISHED = "finished", "Tugagan"
         DECLINED = "declined", "Rad etilgan"
         EXPIRED = "expired", "Muddati o‘tgan"
 
     challenger = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="+")
-    opponent = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="+")
+    opponent = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.CASCADE,
+                                 related_name="+")
     difficulty = models.CharField(max_length=10, choices=Problem.Difficulty.choices)
     problem = models.ForeignKey(Problem, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDING)
     created = models.DateTimeField(auto_now_add=True)
-    started_at = models.DateTimeField(null=True, blank=True)
+    started_at = models.DateTimeField(null=True, blank=True)  # the challenger's clock
     ends_at = models.DateTimeField(null=True, blank=True)
+    opponent_started_at = models.DateTimeField(null=True, blank=True)
+    opponent_ends_at = models.DateTimeField(null=True, blank=True)
     winner = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
                                related_name="+")
     challenger_delta = models.IntegerField(null=True, blank=True)
@@ -73,6 +78,14 @@ class Duel(models.Model):
 
     class Meta:
         ordering = ["-created", "-id"]
+
+    def clock(self, user_id):
+        """(start, end) of that player's own time; None before it starts."""
+        if user_id == self.challenger_id and self.started_at:
+            return self.started_at, self.ends_at
+        if user_id is not None and user_id == self.opponent_id and self.opponent_started_at:
+            return self.opponent_started_at, self.opponent_ends_at
+        return None
 
     def players(self):
         return (self.challenger_id, self.opponent_id)

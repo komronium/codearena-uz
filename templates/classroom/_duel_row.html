@@ -1,7 +1,7 @@
 {% comment %}One duel in a list; ctx: d, user.{% endcomment %}
 <li class="ca-row">
   <div class="ca-row-main">
-    <a class="ca-row-title ca-link" href="{% url 'classroom:duel' d.pk %}">{{ d.challenger.username }} <span class="text-mute">vs</span> {{ d.opponent.username }}</a>
+    <a class="ca-row-title ca-link" href="{% url 'classroom:duel' d.pk %}">{% if d.opponent %}{{ d.challenger.username }} <span class="text-mute">vs</span> {{ d.opponent.username }}{% else %}Ochiq duel{% endif %}</a>
     <div class="ca-row-meta">
       <span class="ca-diff ca-diff-{{ d.difficulty }}">{{ d.get_difficulty_display }}</span>
       <span>{{ d.get_status_display }}</span>

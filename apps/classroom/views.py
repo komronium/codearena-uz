@@ -130,18 +130,25 @@ def duel_list(request):
     duels.settle_open(request.user)
     error = ""
     if request.method == "POST":
-        duel, error = duels.challenge(request.user, request.POST.get("opponent", ""),
-                                      request.POST.get("difficulty", ""))
+        if "find" in request.POST:
+            duel, error = duels.find_opponent(request.user, request.POST.get("difficulty", ""))
+        else:
+            duel, error = duels.challenge(request.user, request.POST.get("opponent", ""),
+                                          request.POST.get("difficulty", ""))
         if duel is not None:
             return redirect("classroom:duel", duel.pk)
     mine = (Duel.objects.filter(Q(challenger=request.user) | Q(opponent=request.user))
             .select_related("challenger", "opponent", "winner", "problem"))
+    joinable = duels.joinable_counts(request.user)
     return render(request, "classroom/duels.html", {
         "incoming": [d for d in mine if d.status == Duel.Status.PENDING and d.opponent_id == request.user.pk],
         "open": [d for d in mine if d.status in duels.OPEN
                  and not (d.status == Duel.Status.PENDING and d.opponent_id == request.user.pk)],
-        "history": [d for d in mine if d.status not in duels.OPEN][:30],
+        # an open duel nobody joined was never a duel: it stays out of the record
+        "history": [d for d in mine if d.status not in duels.OPEN and d.opponent_id][:30],
         "error": error, "difficulties": Duel._meta.get_field("difficulty").choices,
+        "levels": [{"value": v, "label": lbl, "joinable": joinable.get(v, 0)}
+                   for v, lbl in Duel._meta.get_field("difficulty").choices],
         "form": request.POST if error else {},
         # usernames are hard to remember: offer the people from your groups
         "classmates": sorted(set(User.objects.filter(student_groups__in=request.user.student_groups.all(),
@@ -177,22 +184,53 @@ def duel_detail(request, pk):
     duel = _my_duel(request, pk)
     duels.settle(duel)
     duel.refresh_from_db()
-    template = "classroom/_duel_status.html" if request.headers.get("HX-Request") else "classroom/duel.html"
-    return render(request, template, {"duel": duel, "players": _duel_players(duel)})
+    state = f"{duel.status}.{duel.opponent_id or 0}"
+    if request.headers.get("HX-Request"):
+        seen = request.GET.get("seen")
+        if seen and seen != state:  # someone joined, or it ended: the whole page changes
+            return HttpResponse(headers={"HX-Refresh": "true"})
+        template = "classroom/_duel_status.html"
+    else:
+        template = "classroom/duel.html"
+    return render(request, template, {"duel": duel, "state": state, **_duel_board(duel, request.user)})
 
 
-def _duel_players(duel) -> list[dict]:
-    """Each player's attempts in the window and how long their AC took; open to both
-    players, like a live standings row."""
+def _mmss(t) -> str:
+    s = int(t.total_seconds())
+    return f"{s // 60:02d}:{s % 60:02d}"
+
+
+def _pct(t) -> str:
+    """Where `t` falls on the duel track, as a CSS percentage (a string, so the
+    template's number localisation can't turn the dot into a comma)."""
+    return f"{min(t / duels.DURATION, 1) * 100:.2f}"
+
+
+def _duel_board(duel, viewer) -> dict:
+    """Both players' own runs on one 0..DURATION track, open to both like a live
+    standings row: every attempt, the AC and how long it took, a clock still running."""
+    now = timezone.now()
     rows = []
     for u, delta in ((duel.challenger, duel.challenger_delta), (duel.opponent, duel.opponent_delta)):
-        subs = []
-        if duel.started_at and duel.problem_id:
-            subs = list(Submission.objects.filter(user=u, problem_id=duel.problem_id, contest__isnull=True,
-                                                  created__gte=duel.started_at, created__lt=duel.ends_at)
-                        .order_by("created", "id").only("verdict", "created"))
-        ac = next((s for s in subs if s.verdict == Submission.Verdict.AC), None)
-        took = int((ac.created - duel.started_at).total_seconds()) if ac else None
-        rows.append({"user": u, "attempts": len(subs), "delta": delta, "winner": duel.winner_id == u.pk,
-                     "solved_in": f"{took // 60:02d}:{took % 60:02d}" if ac else None})
-    return rows
+        r = duels.run(duel, u.pk) if u else None
+        rows.append({
+            "user": u, "run": r, "delta": delta, "winner": u is not None and duel.winner_id == u.pk,
+            "attempts": len(r.subs) if r else 0,
+            "solved_in": _mmss(r.solved_in) if r and r.solved_in is not None else None,
+            "solved_at": _pct(r.solved_in) if r and r.solved_in is not None else None,
+            "running": r is not None and r.solved_in is None and now < r.end,
+            "marks": [{"at": _pct(t), "time": _mmss(t), "verdict": v}
+                      for t, v in r.subs] if r else [],
+        })
+    solved = [row["run"].solved_in for row in rows if row["run"] and row["run"].solved_in is not None]
+    best = min(solved, default=None)
+    me = next((row for row in rows if row["user"] and row["user"].pk == viewer.pk), None)
+    return {
+        "players": rows,
+        # the time to beat: the faster AC so far, marked across both lanes
+        "best": {"at": _pct(best), "time": _mmss(best)} if best is not None else None,
+        # a running clock of yours races the other player's AC: this is when it's out of reach
+        "beat_by": me["run"].start + best if me and me["running"] and best is not None else None,
+        "my_run": me["run"] if me else None, "my_running": bool(me and me["running"]),
+        "duration_s": int(duels.DURATION.total_seconds()), "expires": duel.created + duels.WAIT_FOR,
+    }

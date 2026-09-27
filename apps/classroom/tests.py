@@ -177,8 +177,25 @@ def _players():
     return User.objects.create_user("p1", password="x"), User.objects.create_user("p2", password="x")
 
 
+def _age(duel, *, challenger=None, opponent=None, created=None):
+    """Move a duel's clocks into the past, as if that much time had gone by."""
+    from .models import Duel
+
+    duel = Duel.objects.get(pk=duel.pk)
+    fields = {}
+    if challenger:
+        fields.update(started_at=duel.started_at - challenger, ends_at=duel.ends_at - challenger)
+    if opponent:
+        fields.update(opponent_started_at=duel.opponent_started_at - opponent,
+                      opponent_ends_at=duel.opponent_ends_at - opponent)
+    if created:
+        fields.update(created=duel.created - created)
+    Duel.objects.filter(pk=duel.pk).update(**fields)
+    return Duel.objects.get(pk=duel.pk)
+
+
 @pytest.mark.django_db
-def test_challenge_accept_picks_a_problem_neither_player_tried(client, duel_pool, python):
+def test_a_challenge_starts_the_challengers_clock_and_accepting_starts_the_opponents(client, duel_pool, python):
     from .models import Duel
 
     p1, p2 = _players()
@@ -189,114 +206,188 @@ def test_challenge_accept_picks_a_problem_neither_player_tried(client, duel_pool
     assert client.post(url, {"opponent": "p1", "difficulty": "easy"}).status_code == 200  # not yourself
     assert client.post(url, {"opponent": "nobody", "difficulty": "easy"}).status_code == 200
     assert client.post(url, {"opponent": "p2", "difficulty": "easy"}).status_code == 302
-    assert client.post(url, {"opponent": "p2", "difficulty": "easy"}).status_code == 200  # one open duel per pair
     duel = Duel.objects.get()
-    assert duel.status == "pending" and duel.problem is None  # nobody sees the problem before the start
+    # nobody waits for anybody: the challenger's 30 minutes run from the challenge, on a
+    # problem neither player ever tried
+    assert duel.status == "pending" and duel.problem.slug == "e3" and duel.opponent_started_at is None
+    assert duel.ends_at - duel.started_at == timezone.timedelta(minutes=30)
+    assert client.post(url, {"opponent": "p2", "difficulty": "easy"}).status_code == 200  # one clock at a time
+    assert Duel.objects.count() == 1
 
     assert client.post(reverse("classroom:duel_answer", args=[duel.pk]), {"accept": "1"}).status_code == 404
+    client.post(reverse("classroom:duel_answer", args=[duel.pk]))  # the challenger can't take it back
+    assert Duel.objects.get().status == "pending"
     client.force_login(p2)
     assert client.post(reverse("classroom:duel_answer", args=[duel.pk]), {"accept": "1"}).status_code == 302
     duel.refresh_from_db()
     assert duel.status == "active" and duel.problem.slug == "e3"
-    assert duel.ends_at - duel.started_at == timezone.timedelta(minutes=30)
+    assert duel.opponent_ends_at - duel.opponent_started_at == timezone.timedelta(minutes=30)
 
-    page = client.get(reverse("classroom:duels")).content.decode()
+    page = client.get(url).content.decode()
     assert "Ochiq duellar" in page and "p1" in page
     page = client.get(reverse("classroom:duel", args=[duel.pk])).content.decode()
-    assert "E3" in page and 'hx-trigger="every 5s"' in page
-    partial = client.get(reverse("classroom:duel", args=[duel.pk]), HTTP_HX_REQUEST="true").content.decode()
-    assert "<html" not in partial and "E3" in partial
+    assert "E3" in page and 'hx-trigger="every 5s"' in page and "?seen=active." in page
+    partial = client.get(reverse("classroom:duel", args=[duel.pk]), {"seen": f"active.{p2.pk}"},
+                         HTTP_HX_REQUEST="true")
+    assert "<html" not in partial.content.decode() and "E3" in partial.content.decode()
+    stale = client.get(reverse("classroom:duel", args=[duel.pk]), {"seen": "pending.0"}, HTTP_HX_REQUEST="true")
+    assert stale.headers["HX-Refresh"] == "true"  # the page was drawn before p2 joined
     client.force_login(User.objects.create_user("spy", password="x"))
     assert client.get(reverse("classroom:duel", args=[duel.pk])).status_code == 404
 
 
 @pytest.mark.django_db
-def test_first_ac_wins_and_moves_duel_elo_once(duel_pool, python):
+def test_a_friend_who_declines_or_already_tried_the_problem_gets_no_duel(duel_pool, python):
+    from .duels import accept, challenge, decline
+
+    p1, p2 = _players()
+    duel, _ = challenge(p1, "p2", "easy")
+    decline(duel, p1)
+    duel.refresh_from_db()
+    assert duel.status == "pending"
+    decline(duel, p2)
+    duel.refresh_from_db()
+    assert duel.status == "declined"
+
+    p3 = User.objects.create_user("p3", password="x")
+    _age(duel, challenger=timezone.timedelta(minutes=31))  # p1's clock ran out: free to challenge again
+    duel, _ = challenge(p1, "p3", "easy")
+    Submission.objects.create(user=p3, problem=duel.problem, language=python, source="x", verdict="WA")
+    assert "urinib ko‘rgansiz" in accept(duel, p3)
+    duel.refresh_from_db()
+    assert duel.status == "expired"
+
+
+@pytest.mark.django_db
+def test_quick_match_joins_the_closest_rated_open_duel_on_a_problem_you_never_tried(duel_pool, python):
+    from .duels import BUSY, _open, find_opponent, joinable_counts
+
+    low, high = User.objects.create_user("low", password="x"), User.objects.create_user("high", password="x")
+    User.objects.filter(pk=high.pk).update(duel_rating=1500)
+    d_low = _open(low, "easy", duel_pool["e1"].pk)
+    d_high = _open(User.objects.get(pk=high.pk), "easy", duel_pool["e2"].pk)
+    near_high = User.objects.create_user("near", password="x", duel_rating=1450)
+    fresh = User.objects.create_user("fresh", password="x", duel_rating=1450)
+    assert joinable_counts(near_high) == {"easy": 2}
+
+    # the closer duel is on a problem near_high already tried: it's never handed to them
+    Submission.objects.create(user=near_high, problem=duel_pool["e2"], language=python, source="x", verdict="WA")
+    duel, error = find_opponent(near_high, "easy")
+    assert error == "" and duel.pk == d_low.pk
+    duel.refresh_from_db()
+    assert duel.opponent == near_high and duel.status == "active" and duel.opponent_started_at is not None
+
+    duel, _ = find_opponent(fresh, "easy")
+    assert duel.pk == d_high.pk  # 50 points apart, where low is 250
+
+    # nobody left to join: the next player opens a duel of their own, clock running
+    late = User.objects.create_user("late", password="x")
+    duel, _ = find_opponent(late, "easy")
+    assert duel.challenger == late and duel.opponent is None and duel.status == "pending"
+    assert duel.started_at is not None and duel.problem.difficulty == "easy"
+    assert find_opponent(late, "easy") == (None, BUSY)
+    assert find_opponent(late, "nope")[1] == "Qiyinlikni tanlang."
+
+
+@pytest.mark.django_db
+def test_the_faster_solve_wins_once_the_other_clock_cant_beat_it(duel_pool, python):
     from judge.runner import run_submission
 
-    from .duels import accept, challenge
+    from .duels import accept, challenge, settle
     from .models import Duel
 
     for slug in ("e1", "e2", "e3"):
         duel_pool[slug].testcases.create(input="1\n", expected="1\n")
     p1, p2 = _players()
     duel, _ = challenge(p1, "p2", "easy")
-    accept(duel, p2)
-    duel.refresh_from_db()
-    before = Submission.objects.create(user=p2, problem=duel.problem, language=python, source="x", verdict="AC")
-    Submission.objects.filter(pk=before.pk).update(created=duel.started_at - timezone.timedelta(seconds=1))
     s = Submission.objects.create(user=p1, problem=duel.problem, language=python, source="print(1)")
+    Submission.objects.filter(pk=s.pk).update(created=duel.started_at + timezone.timedelta(minutes=2))
     with (patch("judge.runner.sandbox.compile", return_value=(True, "")),
           patch("judge.runner.sandbox.run_tests", return_value=[("1\n", "OK", 10, 1024)])):
         run_submission(s.pk)
+    assert Duel.objects.get(pk=duel.pk).status == "pending"  # solved in 2:00, waiting for p2
+
+    accept(duel, p2)
+    settle(duel)
+    assert Duel.objects.get(pk=duel.pk).status == "active"  # p2 has 2:00 to beat it
+    # 3 minutes on p2's clock, but their 1:30 submission is still being judged: it may be an AC
+    duel = _age(duel, opponent=timezone.timedelta(minutes=3))
+    pending = Submission.objects.create(user=p2, problem=duel.problem, language=python, source="x")
+    Submission.objects.filter(pk=pending.pk).update(created=duel.opponent_started_at + timezone.timedelta(seconds=90))
+    settle(duel)
+    assert Duel.objects.get(pk=duel.pk).status == "active"
+    Submission.objects.filter(pk=pending.pk).update(verdict="WA")
+    settle(duel)
     duel.refresh_from_db()
     p1.refresh_from_db()
     p2.refresh_from_db()
     assert duel.status == "finished" and duel.winner == p1
     assert (p1.duel_rating, p2.duel_rating) == (1216, 1184)
-    from .duels import settle
-
     settle(Duel.objects.get(pk=duel.pk))  # settling again changes nothing
     p1.refresh_from_db()
     assert p1.duel_rating == 1216
 
 
 @pytest.mark.django_db
-def test_no_ac_in_time_is_a_draw_and_unanswered_challenges_expire(duel_pool):
-    from .duels import accept, challenge, settle
+def test_no_ac_from_either_is_a_draw_and_an_open_duel_nobody_joins_expires(duel_pool):
+    from .duels import accept, challenge, find_opponent, settle
     from .models import Duel
 
     p1, p2 = _players()
     User.objects.filter(pk=p2.pk).update(duel_rating=1400)
     duel, _ = challenge(p1, "p2", "easy")
     accept(duel, User.objects.get(pk=p2.pk))
-    Duel.objects.filter(pk=duel.pk).update(ends_at=timezone.now() - timezone.timedelta(seconds=1))
-    settle(Duel.objects.get(pk=duel.pk))
+    duel = _age(duel, challenger=timezone.timedelta(minutes=40), opponent=timezone.timedelta(minutes=29))
+    settle(duel)
+    assert Duel.objects.get(pk=duel.pk).status == "active"  # p2 still has a minute
+    duel = _age(duel, opponent=timezone.timedelta(minutes=2))
+    settle(duel)
     duel.refresh_from_db()
     p1.refresh_from_db()
     assert duel.status == "finished" and duel.winner is None and p1.duel_rating > 1200  # a draw lifts the lower one
 
-    late, _ = challenge(p1, "p2", "easy")
-    Duel.objects.filter(pk=late.pk).update(created=timezone.now() - timezone.timedelta(hours=2))
-    settle(Duel.objects.get(pk=late.pk))
-    assert Duel.objects.get(pk=late.pk).status == "expired"
+    lonely, _ = find_opponent(User.objects.create_user("lonely", password="x"), "easy")
+    lonely = _age(lonely, challenger=timezone.timedelta(days=4), created=timezone.timedelta(days=4))
+    settle(lonely)
+    assert Duel.objects.get(pk=lonely.pk).status == "expired"
 
 
 @pytest.mark.django_db
-def test_hints_are_locked_for_the_players_of_an_active_duel(client, duel_pool):
+def test_hints_are_locked_while_your_duel_clock_runs(client, duel_pool):
     from apps.problems.models import ProblemHint
 
-    from .duels import accept, challenge
+    from .duels import challenge
 
     p1, p2 = _players()
     duel, _ = challenge(p1, "p2", "easy")
-    accept(duel, p2)
-    duel.refresh_from_db()
     hint = ProblemHint.objects.create(problem=duel.problem, body_md="sir", cost_pct=10)
     client.force_login(p1)
     assert client.post(reverse("problems:hint", args=[duel.problem.slug, hint.pk])).status_code == 400
     page = client.get(reverse("problems:detail", args=[duel.problem.slug])).content.decode()
     assert "Duel" in page
+    client.force_login(p2)  # hasn't accepted: no clock of theirs runs
+    assert client.post(reverse("problems:hint", args=[duel.problem.slug, hint.pk])).status_code != 400
 
 
 @pytest.mark.django_db
-def test_duel_page_shows_both_players_attempts_and_solve_time(client, duel_pool, python):
+def test_duel_page_shows_each_run_from_its_own_start(client, duel_pool, python):
     from .duels import accept, challenge
 
     p1, p2 = _players()
     duel, _ = challenge(p1, "p2", "easy")
+    for verdict, minutes in (("WA", 3), ("AC", 7)):
+        _sub(p1, duel.problem, python, verdict, duel.started_at + timezone.timedelta(minutes=minutes))
     accept(duel, p2)
     duel.refresh_from_db()
-    for verdict, minutes in (("WA", 3), ("AC", 7)):
-        s = Submission.objects.create(user=p1, problem=duel.problem, language=python, source="x", verdict=verdict)
-        Submission.objects.filter(pk=s.pk).update(created=duel.started_at + timezone.timedelta(minutes=minutes))
-    Submission.objects.create(user=p2, problem=duel.problem, language=python, source="x", verdict="WA")
+    _sub(p2, duel.problem, python, "WA", duel.opponent_started_at + timezone.timedelta(seconds=5))
     client.force_login(p2)
     r = client.get(reverse("classroom:duel", args=[duel.pk]))
     players = {p["user"].username: p for p in r.context["players"]}
     assert (players["p1"]["attempts"], players["p1"]["solved_in"]) == (2, "07:00")
-    assert (players["p2"]["attempts"], players["p2"]["solved_in"]) == (1, None)
-    assert players["p1"]["winner"] and "07:00" in r.content.decode()
+    assert (players["p2"]["attempts"], players["p2"]["solved_in"], players["p2"]["running"]) == (1, None, True)
+    assert r.context["best"] == {"at": "23.33", "time": "07:00"}  # the time to beat, on both lanes
+    assert r.context["beat_by"] == duel.opponent_started_at + timezone.timedelta(minutes=7)
+    assert "07:00" in r.content.decode()
 
 
 @pytest.mark.django_db

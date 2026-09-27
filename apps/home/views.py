@@ -4,6 +4,7 @@ from django.shortcuts import render
 from django.utils import timezone
 
 from apps.accounts.models import User
+from apps.classroom import duels
 from apps.classroom.models import Assignment, Duel
 from apps.contests.models import Contest
 from apps.contests.views import _standings  # cached, the standings page's own numbers
@@ -39,7 +40,12 @@ def home(request):
     for a in homework:
         ids = [ap.problem_id for ap in a.assignment_problems.all()]
         a.my_total, a.my_solved = len(ids), sum(1 for i in ids if i in solved)
+    duels.settle_open(user)
     mine = Duel.objects.filter(Q(challenger=user) | Q(opponent=user)).select_related("challenger", "opponent", "problem")
+    live = list(mine.filter(status__in=duels.OPEN).exclude(status=Duel.Status.PENDING, opponent=user)[:3])
+    for d in live:  # your own clock, if it still runs
+        clock = d.clock(user.pk)
+        d.my_end = clock[1] if clock and clock[1] > now else None
     current, best = streaks(user)
     next_picks = next_problems(user, exclude=(daily.problem_id,) if daily else ())
     return render(request, "home/dashboard.html", {
@@ -50,7 +56,7 @@ def home(request):
         "solved_count": Problem.objects.filter(userproblemsolved__user=user, is_public=True).count(),
         "homework": homework,
         "challenges": list(mine.filter(status=Duel.Status.PENDING, opponent=user)[:3]),
-        "active_duels": [d for d in mine.filter(status=Duel.Status.ACTIVE) if d.ends_at and d.ends_at > now],
+        "active_duels": live,
         "running": running, "upcoming": upcoming,
         "next_picks": next_picks, "picks_reason": shared_reason(next_picks),
         "recent": list(Submission.objects.filter(user=user).select_related("problem", "language")[:5]),
