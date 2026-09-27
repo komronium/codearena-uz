@@ -373,13 +373,18 @@ a.ca-st-label:hover { text-decoration: underline; text-underline-offset: 3px; }
 .ca-tier-strip { display: flex; gap: 2px; height: .5rem; border-radius: 9999px; overflow: hidden; }
 .ca-sub { display: grid; grid-template-columns: 4.75rem minmax(0, 1fr) auto; align-items: center; gap: .9rem; padding: .7rem 1rem; }
 .ca-sub .ca-verdict { justify-content: center; width: 100%; }
-/* profile banner: the user's tier as a quiet wash, the abr strip along its foot */
+/* profile banner: a night-indigo Xon-atlas cloth — an ikat diamond lattice, the user's tier as a glow
+   from the top right, the abr strip along its foot (the avatar sits over it) */
 .ca-banner {
-  position: relative; height: 3.75rem;
-  background: color-mix(in srgb, var(--tier) 14%, rgb(var(--ca-surface-rgb)));
+  position: relative; height: 6.5rem; overflow: hidden;
+  background:
+    radial-gradient(90% 160% at 92% -20%, color-mix(in srgb, var(--tier) 70%, transparent) 0%, transparent 60%),
+    radial-gradient(60% 120% at 8% 120%, rgb(200 29 90 / .35) 0%, transparent 60%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Cpath d='M28 8L48 28L28 48L8 28Z' fill='none' stroke='%23ffffff' stroke-opacity='.09' stroke-width='2'/%3E%3Cpath d='M28 19L37 28L28 37L19 28Z' fill='%23F2A900' fill-opacity='.22'/%3E%3Cpath d='M28 25L31 28L28 31L25 28Z' fill='%23ffffff' fill-opacity='.35'/%3E%3Cg fill='%23C81D5A' fill-opacity='.45'%3E%3Ccircle cx='0' cy='0' r='3'/%3E%3Ccircle cx='56' cy='0' r='3'/%3E%3Ccircle cx='0' cy='56' r='3'/%3E%3Ccircle cx='56' cy='56' r='3'/%3E%3C/g%3E%3C/svg%3E") 0 0 / 56px 56px,
+    linear-gradient(120deg, #17123F 0%, #231C66 50%, #3B30C4 100%);
 }
-.ca-banner .ca-abr { position: absolute; left: 0; right: 0; top: 0; }
-@media (min-width: 640px) { .ca-banner { height: 5rem; } }
+.ca-banner .ca-abr { position: absolute; left: 0; right: 0; bottom: 0; }
+@media (min-width: 640px) { .ca-banner { height: 8rem; } }
 /* a scroll box must hold its absolutely positioned children (the .sr-only labels in table cells),
    or they escape it and widen the whole page on phones */
 .overflow-x-auto { position: relative; }
