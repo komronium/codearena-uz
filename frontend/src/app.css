@@ -1110,6 +1110,18 @@ section.ca-ed-full #editor .cm-editor { height: calc(100vh - 9.5rem); }
 }
 @media (max-width: 767px) { .ca-lines > li.ca-ended > :nth-child(3) { display: none; } .ca-lines > li.ca-ended { grid-template-columns: 3.25rem minmax(0, 1fr) 4.75rem 3.25rem 1rem; } }
 
+/* the AC toast (static/js/celebrate.js): a green pill over the page's foot, above the phone bar */
+.ca-ac-toast {
+  position: fixed; left: 50%; bottom: 5.5rem; z-index: 10000; transform: translateX(-50%);
+  padding: .7rem 1.25rem; border-radius: 9999px; font-weight: 700; white-space: nowrap;
+  background: #087F5B; color: #fff; box-shadow: 0 10px 30px rgb(0 0 0 / .18);
+  animation: ca-ac-in .35s cubic-bezier(.2, .9, .3, 1.3); transition: opacity .5s, transform .5s;
+}
+.ca-ac-toast.is-out { opacity: 0; transform: translate(-50%, 1rem); }
+@keyframes ca-ac-in { from { opacity: 0; transform: translate(-50%, 1.5rem) scale(.9); } }
+@media (min-width: 768px) { .ca-ac-toast { bottom: 2rem; } }
+@media (prefers-reduced-motion: reduce) { .ca-ac-toast { animation: none; } }
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

@@ -1,5 +1,5 @@
 {% comment %}compact=True: verdict line only (problem page sidebar); the poll keeps it compact.{% endcomment %}
-<div {% if not s.is_terminal %}hx-get="{% url 'submissions:status' s.pk %}{% if compact %}?compact=1{% endif %}" hx-trigger="every 1s" hx-swap="outerHTML"{% endif %}
+<div data-verdict="{{ s.verdict }}" {% if not s.is_terminal %}hx-get="{% url 'submissions:status' s.pk %}{% if compact %}?compact=1{% endif %}" hx-trigger="every 1s" hx-swap="outerHTML"{% endif %}
      role="status" aria-live="polite" aria-busy="{% if not s.is_terminal %}true{% else %}false{% endif %}">
   <div class="flex flex-wrap items-center gap-3">
     {% include "submissions/_verdict.html" with v=s.verdict %}
