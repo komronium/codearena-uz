@@ -23,9 +23,9 @@
     {% if show_leaders %}
     <button type="button" class="ca-btn ca-btn-ghost !py-1.5" data-dialog="rate-dialog" aria-haspopup="dialog">
       <i data-lucide="star" class="lu text-warn {% if problem.n_ratings %}fill-current{% endif %}" aria-hidden="true"></i>
-      {% if problem.n_ratings %}<b class="tabular">{{ problem.avg_stars|floatformat:1 }}</b><span class="tabular font-normal text-mute">({{ problem.n_ratings }})</span>{% else %}Baholash{% endif %}
+      {% if problem.n_ratings %}<b class="tabular">{{ problem.avg_stars|floatformat:1 }}</b><span class="tabular font-normal text-mute">({{ problem.n_ratings }})</span>{% else %}<span class="hidden sm:inline">Baholash</span><span class="sr-only sm:hidden">Baholash</span>{% endif %}
     </button>
-    <button type="button" class="ca-btn ca-btn-ghost !py-1.5" data-dialog="leaders-dialog" aria-haspopup="dialog"><i data-lucide="trophy" class="lu text-accent" aria-hidden="true"></i>Eng yaxshi yechimlar</button>
+    <button type="button" class="ca-btn ca-btn-ghost !py-1.5" data-dialog="leaders-dialog" aria-haspopup="dialog" title="Eng yaxshi yechimlar"><i data-lucide="trophy" class="lu text-accent" aria-hidden="true"></i><span class="hidden sm:inline">Eng yaxshi yechimlar</span><span class="sr-only sm:hidden">Eng yaxshi yechimlar</span></button>
     <span class="mx-1.5 h-5 w-px bg-line" aria-hidden="true"></span>
     {% endif %}
     {% if prev_problem %}<a class="ca-btn ca-btn-ghost !px-2.5 !py-1.5" href="{% url 'problems:detail' prev_problem.slug %}" title="{{ prev_problem.title }}" aria-label="Oldingi masala"><i data-lucide="chevron-left" class="lu" aria-hidden="true"></i></a>{% endif %}
@@ -237,10 +237,10 @@
         <textarea name="source" id="source" class="ca-editor-fallback" spellcheck="false" aria-label="Kod muharriri" placeholder="Kodni shu yerga yozing…"></textarea>
       </div>
       <div class="flex flex-wrap items-center justify-between gap-3 border-t border-line px-4 py-3">
-        <span class="text-xs text-mute"><kbd class="ca-kbd">Ctrl</kbd> + <kbd class="ca-kbd">Enter</kbd> — yuborish{% if problem.kind != "sql" %} · <kbd class="ca-kbd">Ctrl</kbd> + <kbd class="ca-kbd">'</kbd> — sinash{% endif %}</span>
+        <span class="hidden text-xs text-mute sm:inline"><kbd class="ca-kbd">Ctrl</kbd> + <kbd class="ca-kbd">Enter</kbd> — yuborish{% if problem.kind != "sql" %} · <kbd class="ca-kbd">Ctrl</kbd> + <kbd class="ca-kbd">'</kbd> — sinash{% endif %}</span>
         <div class="ml-auto flex items-center gap-2">
           {% if problem.kind != "sql" %}<button type="button" id="trial-btn" class="ca-btn ca-btn-ghost" title="Namunaviy testlarda sinash — urinish hisoblanmaydi"><i data-lucide="play" class="lu" aria-hidden="true"></i>Sinab ko‘rish</button>{% endif %}
-          <button type="submit" id="submit-btn" class="ca-btn ca-btn-success"><i data-lucide="rocket" class="lu" aria-hidden="true"></i>Yuborish</button>
+          <button type="submit" id="submit-btn" class="ca-btn ca-btn-primary"><i data-lucide="rocket" class="lu" aria-hidden="true"></i>Yuborish</button>
         </div>
       </div>
       {% if problem.kind != "sql" %}

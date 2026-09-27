@@ -11,6 +11,8 @@ module.exports = {
         mute: "rgb(var(--ca-mute-rgb) / <alpha-value>)",
         line: "rgb(var(--ca-line-rgb) / <alpha-value>)",
         surface: "rgb(var(--ca-surface-rgb) / <alpha-value>)",
+        sunk: "rgb(var(--ca-sunk-rgb) / <alpha-value>)",
+        gold: "rgb(var(--ca-gold-rgb) / <alpha-value>)",
         accent: {
           DEFAULT: "rgb(var(--ca-accent-rgb) / <alpha-value>)",
           hover: "rgb(var(--ca-accent-hover-rgb) / <alpha-value>)",

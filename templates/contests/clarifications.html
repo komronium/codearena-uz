@@ -25,7 +25,7 @@
     <label class="ca-label" for="clar-question">Savol</label>
     <textarea id="clar-question" name="question" required maxlength="2000" rows="3" class="ca-input w-full"></textarea>
   </div>
-  <button type="submit" class="ca-btn ca-btn-success text-sm">Yuborish</button>
+  <button type="submit" class="ca-btn ca-btn-primary text-sm">Yuborish</button>
 </form>
 {% endif %}
 
@@ -49,7 +49,7 @@
   <form method="post" action="{% url 'contests:answer_clarification' contest.pk c.pk %}" class="clar-answer-form flex gap-2">
     {% csrf_token %}
     <textarea name="answer" required rows="2" class="ca-input flex-1" placeholder="Javob yozing…"></textarea>
-    <button type="submit" class="ca-btn ca-btn-success self-end text-sm">Javob berish</button>
+    <button type="submit" class="ca-btn ca-btn-primary self-end text-sm">Javob berish</button>
   </form>
   {% else %}
   <p class="text-sm text-mute">Hali javob berilmagan.</p>

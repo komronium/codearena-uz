@@ -73,3 +73,25 @@ def test_compact_counts(n, shown):
     from apps.problems.templatetags.numbers import compact
 
     assert compact(n) == shown
+
+
+@pytest.mark.django_db
+def test_landing_podium_is_the_last_rated_contests_real_standings(client, world):
+    from apps.contests.models import ContestProblem, Participation
+
+    now = timezone.now()
+    c = Contest.objects.create(title="1-raund", is_rated=True, start=now - timezone.timedelta(hours=3),
+                               end=now - timezone.timedelta(hours=1))
+    ContestProblem.objects.create(contest=c, problem=world[0], label="A")
+    lang = Language.objects.create(code="python", name="Python 3", docker_image="x", run_cmd="x")
+    users = {n: User.objects.create_user(n, password="x") for n in ("a1", "a2", "a3", "a4")}
+    for i, u in enumerate(users.values()):  # stored rank/score deliberately stale: standings decide
+        Participation.objects.create(user=u, contest=c, rating_before=1200, rating_after=1200, rank=4 - i, score=999)
+    for name, minutes in (("a3", 10), ("a2", 20)):
+        s = Submission.objects.create(user=users[name], problem=world[0], contest=c, language=lang,
+                                      source="x", verdict="AC")
+        Submission.objects.filter(pk=s.pk).update(created=c.start + timezone.timedelta(minutes=minutes))
+    r = client.get("/")
+    assert r.context["last_rated"] == c and len(r.context["podium"]) == 3
+    assert [row["user"].username for row in r.context["podium"][:2]] == ["a3", "a2"]
+    assert "1-raund" in r.content.decode()

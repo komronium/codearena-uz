@@ -6,27 +6,11 @@ from django.utils import timezone
 from apps.accounts.models import User
 from apps.classroom.models import Assignment, Duel
 from apps.contests.models import Contest
-from apps.problems.daily import daily_for, streaks
-from apps.problems.models import DailySolve
+from apps.contests.views import _standings  # cached, the standings page's own numbers
+from apps.problems.daily import daily_for, streaks, week_strip
+from apps.problems.models import DailySolve, Language, Problem
 from apps.problems.skills import next_problems, open_problems
 from apps.submissions.models import Submission
-
-
-# (icon, title, text) for the guest landing page
-FEATURES = [
-    ("list-checks", "Masalalar va 4 til",
-     "Boshlang‘ichdan qiyingacha. Python, C++, Java, JavaScript — har bir yechim darhol testlanadi."),
-    ("trophy", "Reytingli musobaqalar",
-     "Jonli natijalar jadvali va Elo reyting. Reytingli musobaqada faqat hech kim ko‘rmagan masalalar."),
-    ("notebook-pen", "Uy vazifalari",
-     "O‘qituvchi guruhga muddatli vazifa beradi va kim qachon yechganini jadvalda ko‘radi."),
-    ("swords", "Duellar",
-     "Sinfdoshingizni chaqiring: ikkalangiz ham ko‘rmagan masala, 30 daqiqa, birinchi AC g‘olib."),
-    ("flame", "Kun masalasi",
-     "Har kuni bitta masala. Ketma-ket yechsangiz seriya o‘sadi va bonus ball olasiz."),
-    ("shield-check", "Halol natijalar",
-     "Ko‘chirilgan kod, begona qurilma va o‘chirilgan kuzatuv aniqlanadi; har bir qaror jurnalga yoziladi."),
-]
 
 
 def home(request):
@@ -36,8 +20,14 @@ def home(request):
     running = list(contests.filter(start__lte=now, end__gt=now).order_by("end")[:3])
     upcoming = list(contests.filter(start__gt=now).order_by("start")[:3])
     if not request.user.is_authenticated:
+        # the latest rated contest whose ratings are applied: its real top three, not a mock-up
+        last_rated = (Contest.objects.filter(is_rated=True, end__lte=now, participations__rating_after__isnull=False)
+                      .order_by("-end").distinct().first())
+        podium = [r for r in _standings(last_rated) if not r["disqualified"]][:3] if last_rated else []
         return render(request, "home/landing.html", {
-            "daily": daily, "running": running, "upcoming": upcoming, "features": FEATURES,
+            "daily": daily, "running": running, "upcoming": upcoming,
+            "last_rated": last_rated, "podium": podium,
+            "languages": list(Language.objects.filter(is_active=True).order_by("id").values_list("name", flat=True)),
             "stats": {"problems": open_problems().count(), "users": User.objects.filter(is_active=True).count(),
                       "contests": Contest.objects.count(), "submissions": Submission.objects.count()},
         })
@@ -54,7 +44,9 @@ def home(request):
     return render(request, "home/dashboard.html", {
         "daily": daily,
         "daily_done": bool(daily) and DailySolve.objects.filter(user=user, daily=daily).exists(),
-        "streak": current, "best_streak": best,
+        "streak": current, "best_streak": best, "week": week_strip(user),
+        # the profile's count: public problems solved (what the practice points are made of)
+        "solved_count": Problem.objects.filter(userproblemsolved__user=user, is_public=True).count(),
         "homework": homework,
         "challenges": list(mine.filter(status=Duel.Status.PENDING, opponent=user)[:3]),
         "active_duels": [d for d in mine.filter(status=Duel.Status.ACTIVE) if d.ends_at and d.ends_at > now],
