@@ -191,6 +191,28 @@ def test_list_and_detail_render(client):
 
 
 @pytest.mark.django_db
+def test_list_groups_ended_contests_by_month_and_shows_your_rating_change(client):
+    ali = User.objects.create_user("ali", password="x")
+    now = timezone.now()
+    live = Contest.objects.create(title="Live", start=now - timezone.timedelta(minutes=30),
+                                  end=now + timezone.timedelta(minutes=90))
+    old = Contest.objects.create(title="Old", is_rated=True, start=now - timezone.timedelta(days=40),
+                                 end=now - timezone.timedelta(days=40) + timezone.timedelta(hours=2))
+    Contest.objects.create(title="Skipped", start=now - timezone.timedelta(days=2),
+                           end=now - timezone.timedelta(days=2) + timezone.timedelta(hours=2))
+    Participation.objects.create(user=ali, contest=live)
+    Participation.objects.create(user=ali, contest=old, rating_before=1200, rating_after=1180)
+    client.force_login(ali)
+    r = client.get(reverse("contests:list"))
+    page = r.content.decode()
+    assert r.context["running"][0].elapsed_pct == 25
+    assert r.context["running"][0].me is not None and "Davom etish" in page
+    ended = {c.title: c for c in r.context["ended"]}
+    assert ended["Old"].my_delta == -20 and ended["Skipped"].me is None
+    assert ended["Old"].start_month in page and "-20" in page
+
+
+@pytest.mark.django_db
 def test_standings_view_renders(client, contest):
     r = client.get(reverse("contests:standings", args=[contest.pk]))
     assert r.status_code == 200

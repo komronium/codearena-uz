@@ -1,28 +1,67 @@
 {% extends "base.html" %}
 {% block title %}Musobaqalar{% endblock %}
 {% block content %}
-<div class="mb-6 flex flex-wrap items-end justify-between gap-3">
-  <div>
-    <h1 class="ca-page-title">Musobaqalar</h1>
-    <p class="mt-1 text-sm text-mute">Ballar yig‘indisi ko‘p bo‘lgan yutadi; teng bo‘lsa jarima vaqti kam bo‘lgan yuqori turadi</p>
-  </div>
+<div class="mb-6">
+  <h1 class="ca-page-title">Musobaqalar</h1>
+  <p class="mt-1 text-sm text-mute">Ko‘p ball to‘plagan yutadi; ball teng bo‘lsa, jarimasi kam bo‘lgan yuqorida turadi</p>
 </div>
 
 {% if not running and not upcoming and not ended.paginator.count %}
 <div class="ca-empty">Hali musobaqa yo‘q.</div>
 {% endif %}
 
-{% for section in sections %}{% if section.items %}
-<div class="mb-8">
-  <h2 class="ca-section-title flex items-center gap-2">
-    <span class="inline-block h-2 w-2 rounded-full {{ section.dot }}" aria-hidden="true"></span>
-    {{ section.title }}
-    <span class="ca-rank-n text-xs font-normal">{% if section.page %}{{ section.page.paginator.count }}{% else %}{{ section.items|length }}{% endif %}</span>
-  </h2>
+{% for c in running %}
+<article class="ca-panel relative mb-8">
+  <div class="flex flex-wrap items-start justify-between gap-4">
+    <div class="min-w-0">
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="ca-diff ca-diff-easy"><span class="ca-live-dot" aria-hidden="true"></span>Jonli</span>
+        {% if c.is_rated %}<span class="ca-chip ca-chip-rated" title="Natija reytingga ta‘sir qiladi"><i data-lucide="trending-up" class="lu mr-1" aria-hidden="true"></i>Reytingli</span>{% endif %}
+        {% if c.me %}<span class="ca-chip"><i data-lucide="check" class="lu mr-1" aria-hidden="true"></i>Ro‘yxatdan o‘tgansiz</span>{% endif %}
+      </div>
+      <h2 class="mt-3 text-xl font-bold leading-tight"><a class="ca-stretch hover:text-accent" href="{% url 'contests:detail' c.pk %}">{{ c.title }}</a></h2>
+      <div class="ca-row-meta !mt-1.5">
+        <span class="tabular"><i data-lucide="clock" class="lu" aria-hidden="true"></i>{{ c.start|date:"H:i" }}–{{ c.end|date:"H:i" }}</span>
+        <span><i data-lucide="hourglass" class="lu" aria-hidden="true"></i>{{ c.duration_label }}</span>
+        <span><i data-lucide="users" class="lu" aria-hidden="true"></i>{{ c.n_participants }} ishtirokchi</span>
+      </div>
+    </div>
+    <span class="ca-btn ca-btn-primary" aria-hidden="true">{% if c.me %}Davom etish{% else %}Qatnashish{% endif %}<i data-lucide="arrow-right" class="lu" aria-hidden="true"></i></span>
+  </div>
+  <div class="mt-5">
+    <div class="ca-progress ca-progress-ok" role="progressbar" aria-label="O‘tgan vaqt" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ c.elapsed_pct }}"><span style="width: {{ c.elapsed_pct }}%"></span></div>
+    <div class="mt-1.5 flex justify-between gap-3 text-xs text-mute">
+      <span class="tabular">{{ c.elapsed_pct }}% o‘tdi</span>
+      <b class="tabular text-ink" data-countdown="{{ c.end|date:'c' }}" data-label="qoldi" data-suffix="1"></b>
+    </div>
+  </div>
+</article>
+{% endfor %}
+
+{% if upcoming %}
+<section class="mb-8">
+  <h2 class="ca-section-title flex items-center gap-2"><span class="inline-block h-2 w-2 rounded-full bg-warn" aria-hidden="true"></span>Kutilmoqda <span class="ca-rank-n text-xs font-normal">{{ upcoming|length }}</span></h2>
   <ul class="ca-rows">
-    {% for c in section.items %}{% include "contests/_row.html" with state=section.key %}{% endfor %}
+    {% for c in upcoming %}{% include "contests/_row.html" with state="upcoming" %}{% endfor %}
   </ul>
-  {% if section.page %}{% include "_pagination.html" with page=section.page %}{% endif %}
-</div>
-{% endif %}{% endfor %}
+</section>
+{% endif %}
+
+{% if ended.paginator.count %}
+<section>
+  <h2 class="ca-section-title flex items-center gap-2"><span class="inline-block h-2 w-2 rounded-full bg-mute" aria-hidden="true"></span>Tugaganlar <span class="ca-rank-n text-xs font-normal">{{ ended.paginator.count }}</span></h2>
+  {% regroup ended by start_month as months %}
+  <ol class="ca-timeline">
+    {% for m in months %}
+    <li>
+      <h3 class="ca-tl-month">{{ m.grouper }}</h3>
+      <ul class="ca-rows">
+        {% for c in m.list %}{% include "contests/_row.html" with state="ended" %}{% endfor %}
+      </ul>
+    </li>
+    {% endfor %}
+  </ol>
+  {% include "_pagination.html" with page=ended %}
+</section>
+{% endif %}
 {% endblock %}

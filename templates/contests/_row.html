@@ -1,10 +1,12 @@
-{% comment %}One contest row; ctx: c, state ("running"|"upcoming"|"ended"){% endcomment %}
+{% comment %}One contest row; ctx: c, state ("running"|"upcoming"|"ended").
+c.me / c.my_delta (the viewer's participation and rating change) are set only by the contests page.{% endcomment %}
 <li class="ca-row relative">
   <div class="ca-date ca-st-{{ state }}" aria-hidden="true"><b>{{ c.start|date:"d" }}</b><span>{{ c.start_month_short }}</span></div>
   <div class="ca-row-main">
     <div class="ca-row-title">
       <a class="ca-link ca-stretch !text-ink" href="{% url 'contests:detail' c.pk %}">{{ c.title }}</a>
       {% if c.is_rated %}<span class="ca-chip ca-chip-rated shrink-0" title="Natija reytingga ta‘sir qiladi"><i data-lucide="trending-up" class="lu mr-1" aria-hidden="true"></i>Reytingli</span>{% endif %}
+      {% if c.me and state != "ended" %}<span class="ca-chip shrink-0"><i data-lucide="check" class="lu mr-1" aria-hidden="true"></i>Ro‘yxatdan o‘tgansiz</span>{% endif %}
     </div>
     <div class="ca-row-meta">
       <span class="tabular"><i data-lucide="clock" class="lu" aria-hidden="true"></i>{{ c.start|date:"d.m.Y H:i" }}</span>
@@ -18,6 +20,8 @@
     {% elif state == "upcoming" %}
       <span class="ca-count ca-st-upcoming"><i data-lucide="hourglass" class="lu" aria-hidden="true"></i><b data-countdown="{{ c.start|date:'c' }}" data-label="" data-suffix="1"></b><small>keyin</small></span>
     {% else %}
+      {% if c.my_delta is not None %}<span class="ca-row-stat"><b class="{% if c.my_delta >= 0 %}!text-ok{% else %}!text-bad{% endif %}">{{ c.my_delta|stringformat:"+d" }}</b>reyting</span>
+      {% elif c.me %}<span class="ca-chip"><i data-lucide="check" class="lu mr-1" aria-hidden="true"></i>Qatnashdingiz</span>{% endif %}
       <a class="ca-btn ca-btn-ghost relative z-[1] !py-1.5 text-xs" href="{% url 'contests:standings' c.pk %}"><i data-lucide="medal" class="lu" aria-hidden="true"></i>Natijalar</a>
     {% endif %}
     <i data-lucide="chevron-right" class="lu text-mute" aria-hidden="true"></i>

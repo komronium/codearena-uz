@@ -7,6 +7,7 @@ from apps.problems.models import Problem
 
 
 _UZ_MONTHS_SHORT = "Yan Fev Mar Apr May Iyn Iyl Avg Sen Okt Noy Dek".split()
+_UZ_MONTHS = "Yanvar Fevral Mart Aprel May Iyun Iyul Avgust Sentabr Oktabr Noyabr Dekabr".split()
 
 
 class Contest(models.Model):
@@ -48,6 +49,12 @@ class Contest(models.Model):
     @property
     def start_month_short(self) -> str:
         return _UZ_MONTHS_SHORT[timezone.localtime(self.start).month - 1]
+
+    @property
+    def start_month(self) -> str:
+        """Month and year of the start, like "Sentabr 2026"; the contests page groups ended contests by it."""
+        start = timezone.localtime(self.start)
+        return f"{_UZ_MONTHS[start.month - 1]} {start.year}"
 
     @property
     def has_ended(self) -> bool:

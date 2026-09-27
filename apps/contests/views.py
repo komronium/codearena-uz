@@ -25,14 +25,18 @@ def contest_list(request):
     running = [c for c in contests if c.start <= now < c.end]
     upcoming = sorted((c for c in contests if c.start > now), key=lambda c: c.start)
     ended = Paginator([c for c in contests if c.end <= now], 20).get_page(request.GET.get("page"))
-    return render(request, "contests/list.html", {
-        "running": running, "upcoming": upcoming, "ended": ended,
-        "sections": [
-            {"key": "running", "title": "Faol", "dot": "bg-ok", "last_col": "Tugashiga", "items": running},
-            {"key": "upcoming", "title": "Kutilmoqda", "dot": "bg-warn", "last_col": "Boshlanishiga", "items": upcoming},
-            {"key": "ended", "title": "Tugagan", "dot": "bg-mute", "last_col": "Natijalar", "items": ended, "page": ended},
-        ],
-    })
+    shown = [*running, *upcoming, *ended]
+    mine = {}
+    if request.user.is_authenticated:
+        mine = {p.contest_id: p for p in Participation.objects.filter(
+            user=request.user, contest_id__in=[c.pk for c in shown])}
+    for c in shown:
+        c.me = mine.get(c.pk)
+        c.my_delta = (c.me.rating_after - c.me.rating_before
+                      if c.me and c.me.rating_after is not None and c.me.rating_before is not None else None)
+    for c in running:
+        c.elapsed_pct = round(100 * (now - c.start) / (c.end - c.start))
+    return render(request, "contests/list.html", {"running": running, "upcoming": upcoming, "ended": ended})
 
 
 def _standings(contest):
