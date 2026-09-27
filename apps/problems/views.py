@@ -136,7 +136,7 @@ def problem_list(request):
         "daily": daily, "daily_done": daily_done, "streak": streak,
         "sort": sort, "dir": "desc" if desc else "asc",
         "solved_ids": solved_ids,
-        "all_tags": Tag.objects.order_by("name"),
+        "all_tags": Tag.objects.filter(problem__in=visible).distinct().order_by("name"),
         "q": q,
         "selected_tag": tag,
         "selected_difficulty": difficulty,

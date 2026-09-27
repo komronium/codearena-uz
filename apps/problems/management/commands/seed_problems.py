@@ -32,7 +32,7 @@ class Spec:
     solve: Callable[[str], str]              # stdin text -> expected stdout
     samples: list[str]                       # fixed inputs shown to students
     difficulty: str = Problem.Difficulty.BEGINNER
-    tags: list[str] = field(default_factory=lambda: ["if-else"])
+    tags: list[str] = field(default_factory=lambda: ["conditionals"])
     is_public: bool = True
     tests: int = TESTS_PER_PROBLEM
 
@@ -231,7 +231,7 @@ SPECS: list[Spec] = [
          "`Unli` yoki `Undosh`.",
          lambda r: _lines("".join(r.choice("abcdefghijklmnopqrstuvwxyz") for _ in range(r.randint(1, 20)))),
          lambda s: _lines("Unli" if s[0] in "aeiou" else "Undosh"),
-         ["olma\n", "kitob\n"], tags=["if-else", "strings"]),
+         ["olma\n", "kitob\n"], tags=["conditionals", "strings"]),
 
     Spec("discount", "Chegirma",
          "Xarid summasi berilgan. $100\\,000$ va undan yuqori bo'lsa $10\\%$, $50\\,000$ va undan yuqori bo'lsa $5\\%$ "
@@ -240,7 +240,7 @@ SPECS: list[Spec] = [
          "To'lanadigan summa.",
          lambda r: _lines(r.randint(0, 2000) * 100),
          lambda s: _lines(int(s) - int(s) // 10 if int(s) >= 100_000 else int(s) - int(s) // 20 if int(s) >= 50_000 else int(s)),
-         ["120000\n", "60000\n", "1000\n"], difficulty=Problem.Difficulty.EASY, tags=["if-else", "math"]),
+         ["120000\n", "60000\n", "1000\n"], difficulty=Problem.Difficulty.EASY, tags=["conditionals", "math"]),
 
     Spec("sort-three", "Uchta sonni tartiblash",
          "Uchta butun son berilgan. Ularni o'sish tartibida chiqaring. `sort` va `sorted` ishlatmang — faqat `if` bilan.",
@@ -285,7 +285,7 @@ CONTEST_SPECS: list[Spec] = [
          "Yo'l uzunligi.",
          lambda r: _lines(*(r.randint(-10**6, 10**6) for _ in range(4))),
          lambda s: _lines(abs(_ints(s)[0] - _ints(s)[2]) + abs(_ints(s)[1] - _ints(s)[3])),
-         ["1\n1\n4\n5\n", "-2\n3\n-2\n3\n"], tags=["math", "if-else"], is_public=False),
+         ["1\n1\n4\n5\n", "-2\n3\n-2\n3\n"], tags=["math", "conditionals"], is_public=False),
 
     Spec("c-time-of-day", "Kun qismi",
          "Soat va daqiqa berilgan. Soat $5$–$11$ bo'lsa — `Tong`, $12$–$16$ — `Kun`, $17$–$21$ — `Kech`, aks holda `Tun`. "
@@ -327,7 +327,7 @@ CONTEST_SPECS: list[Spec] = [
          lambda r: _lines(*(lambda a, b, c, d: (a, b, c, d) if (a, b) != (c, d) else (a, b, c % 8 + 1, d))(
              *(r.randint(1, 8) for _ in range(4)))),
          lambda s: _lines(YES if (lambda a, b, c, d: a == c or b == d or abs(a - c) == abs(b - d))(*_ints(s)) else NO),
-         ["1\n1\n8\n8\n", "2\n3\n5\n7\n"], difficulty=Problem.Difficulty.MEDIUM, tags=["if-else", "math"], is_public=False),
+         ["1\n1\n8\n8\n", "2\n3\n5\n7\n"], difficulty=Problem.Difficulty.MEDIUM, tags=["conditionals", "math"], is_public=False),
 ]
 
 

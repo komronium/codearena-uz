@@ -382,6 +382,17 @@ def test_ai_generate_creates_pending_problems_for_review(client):
 
 
 @pytest.mark.django_db
+def test_new_topic_needs_a_standard_english_name(client):
+    from apps.problems.models import Tag
+
+    client.force_login(User.objects.create_user("teacher", password="x", is_staff=True))
+    r = client.post(reverse("moderation:tags"), {"name": "Yig‘indi"})
+    assert r.status_code == 200 and not Tag.objects.filter(name__icontains="yig").exists()
+    assert client.post(reverse("moderation:tags"), {"name": " Game-Theory "}).status_code == 302
+    assert Tag.objects.filter(name="game-theory").exists()
+
+
+@pytest.mark.django_db
 def test_ai_generate_requires_prompt(client):
     staff = User.objects.create_user("teacher", password="x", is_staff=True)
     client.force_login(staff)

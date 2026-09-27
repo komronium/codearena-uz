@@ -135,7 +135,7 @@ STORY_SPECS: list[Spec] = [
          "Birinchi qatorda masofa $d$ km ($1 \\le d \\le 200$), ikkinchi qatorda safar boshlangan soat $h$ ($0 \\le h \\le 23$).",
          "Safar narxi so'mda.",
          **_story(lambda r: _lines(r.randint(1, 200), r.randint(0, 23)), _taxi, "10\n14\n", "4\n23\n"),
-         tags=["if-else", "real-life"]),
+         tags=["conditionals", "implementation"]),
 
     Spec("electricity-bill", "Elektr to'lovi",
          "Oila bir oyda $n$ kVt·soat elektr ishlatdi. 200 dan oshmasa har kVt·soat 450 so'm, "
@@ -143,21 +143,21 @@ STORY_SPECS: list[Spec] = [
          "Yagona butun son $n$ ($0 \\le n \\le 1000$).",
          "To'lov summasi so'mda.",
          **_story(lambda r: _lines(r.randint(0, 1000)), _electricity, "150\n", "300\n"),
-         tags=["if-else", "real-life", "math"]),
+         tags=["conditionals", "implementation", "math"]),
 
     Spec("walk-or-taxi", "Piyoda yoki taksi",
          "Aziz maktabga piyoda $a$ daqiqada, taksida $t$ daqiqada yetib boradi. Qaysi biri tezroq?",
          "Birinchi qatorda piyoda vaqti $a$, ikkinchi qatorda taksi vaqti $t$ (daqiqalarda, $1 \\le a, t \\le 60$).",
          "`Piyoda`, `Taksi` yoki vaqt teng bo'lsa `Farqi yo'q`.",
          **_story(_taxi_gen, _walk_or_taxi, "20\n15\n", "12\n18\n", "15\n15\n"),
-         tags=["if-else", "real-life"]),
+         tags=["conditionals", "implementation"]),
 
     Spec("exam-pass", "Imtihon",
          "Imtihondan o'tish uchun kamida 55 ball kerak. Talaba $b$ ball oldi. U o'tdimi?",
          "Yagona butun son $b$ ($0 \\le b \\le 100$).",
          "`O'tdi` yoki `O'tmadi`.",
          **_story(lambda r: _lines(r.randint(0, 100)), _exam, "70\n", "54\n", "55\n"),
-         tags=["if-else", "real-life"]),
+         tags=["conditionals", "implementation"]),
 
     Spec("password-check", "Parolni tasdiqlash",
          "Ro'yxatdan o'tishda foydalanuvchi parolni ikki marta kiritadi. Ikkalasi bir xil bo'lsa `Mos`, "
@@ -165,7 +165,7 @@ STORY_SPECS: list[Spec] = [
          "Ikki qatorda ikkita parol (faqat harf va raqamlar, uzunligi 1 dan 30 gacha).",
          "`Mos` yoki `Mos emas`.",
          **_story(_pw_gen, _password, "python2024\npython2024\n", "toshkent99\ntoshkent98\n"),
-         tags=["if-else", "strings"]),
+         tags=["conditionals", "strings"]),
 
     Spec("parking-fee", "Avtoturargoh",
          "Savdo markazi avtoturargohida birinchi soat bepul, keyingi har bir soat 5000 so'm. "
@@ -173,7 +173,7 @@ STORY_SPECS: list[Spec] = [
          "Yagona butun son $h$ ($1 \\le h \\le 100$).",
          "To'lov so'mda.",
          **_story(lambda r: _lines(r.randint(1, 100)), _parking, "1\n", "3\n", "6\n"),
-         tags=["if-else", "real-life"]),
+         tags=["conditionals", "implementation"]),
 
     Spec("ideal-weight", "Ideal vazn",
          "Oddiy qoida: ideal vazn = bo'y (sm) − 100. Vazn ideal vazndan kam bo'lsa — `Kam vazn`, "
@@ -181,7 +181,7 @@ STORY_SPECS: list[Spec] = [
          "Birinchi qatorda vazn $w$ kg, ikkinchi qatorda bo'y $h$ sm ($150 \\le h \\le 200$).",
          "Xulosa so'zi.",
          **_story(_weight_gen, _weight, "75\n175\n", "95\n170\n", "60\n180\n"),
-         tags=["if-else", "real-life"]),
+         tags=["conditionals", "implementation"]),
 
     Spec("weather-advice", "Nima kiyay?",
          "Ob-havo ilovasi maslahat beradi: harorat 0 dan past bo'lsa — `Palto`, 15 dan past bo'lsa — `Kurtka`, "
@@ -189,7 +189,7 @@ STORY_SPECS: list[Spec] = [
          "Yagona butun son — harorat $t$ ($-30 \\le t \\le 45$).",
          "Maslahat so'zi.",
          **_story(lambda r: _lines(r.randint(-30, 45)), _weather, "12\n", "25\n", "-5\n"),
-         tags=["if-else", "real-life"]),
+         tags=["conditionals", "implementation"]),
 ]
 
 STORY_CONTEST_SPECS: list[Spec] = [
@@ -199,7 +199,7 @@ STORY_CONTEST_SPECS: list[Spec] = [
          "Birinchi qatorda narx $p$, ikkinchi qatorda berilgan pul $m$ ($1 \\le p, m \\le 10^7$).",
          "Qaytim yoki `Yetarli emas`.",
          **_story(lambda r: _lines(r.randint(1, 10**7), r.randint(1, 10**7)), _change, "15000\n20000\n", "50000\n45000\n"),
-         tags=["if-else", "real-life"], is_public=False),
+         tags=["conditionals", "implementation"], is_public=False),
 
     Spec("c2-late", "Darsga kechikish",
          "Dars 08:30 da boshlanadi. Malika maktabga soat 8 dan $m$ daqiqa o'tganda keldi. Kechikmagan bo'lsa "
@@ -207,7 +207,7 @@ STORY_CONTEST_SPECS: list[Spec] = [
          "Yagona butun son $m$ ($0 \\le m \\le 59$).",
          "`Vaqtida` yoki kechikish daqiqalari.",
          **_story(lambda r: _lines(r.randint(0, 59)), _late, "20\n", "45\n", "30\n"),
-         tags=["if-else", "real-life"], is_public=False),
+         tags=["conditionals", "implementation"], is_public=False),
 
     Spec("c2-delivery", "Yetkazib berish",
          "Onlayn do'kon 200 000 so'mdan boshlab bepul yetkazadi. Undan kam buyurtmaga 15 000 so'm yetkazish "
@@ -215,7 +215,7 @@ STORY_CONTEST_SPECS: list[Spec] = [
          "Yagona butun son — buyurtma summasi $s$ ($1000 \\le s \\le 10^6$).",
          "Jami to'lov.",
          **_story(lambda r: _lines(r.randint(1, 1000) * 1000), _delivery, "150000\n", "250000\n"),
-         tags=["if-else", "real-life"], is_public=False),
+         tags=["conditionals", "implementation"], is_public=False),
 
     Spec("c2-phone-plan", "Tarif rejasi",
          "Oylik tarif 30 000 so'm, unga 500 daqiqa kiradi. 500 dan oshgan har daqiqa 200 so'm. "
@@ -223,7 +223,7 @@ STORY_CONTEST_SPECS: list[Spec] = [
          "Yagona butun son $u$ ($0 \\le u \\le 3000$).",
          "To'lov so'mda.",
          **_story(lambda r: _lines(r.randint(0, 3000)), _phone, "250\n", "650\n"),
-         tags=["if-else", "real-life"], is_public=False),
+         tags=["conditionals", "implementation"], is_public=False),
 
     Spec("c2-shop-discount", "Ulgurji chegirma",
          "Do'kon 10 dona va undan ko'p olganda umumiy summadan 10% chegirma beradi. Xaridor qancha to'laydi?",
@@ -231,7 +231,7 @@ STORY_CONTEST_SPECS: list[Spec] = [
          "To'lov summasi.",
          **_story(lambda r: _lines(r.randint(1, 10**4) * 100, r.randint(1, 100)), _shop,
                   "12000\n10\n", "12000\n3\n"),
-         tags=["if-else", "real-life", "math"], is_public=False),
+         tags=["conditionals", "implementation", "math"], is_public=False),
 
     Spec("c2-elevator", "Lift",
          "Lift $a$-qavatda turibdi, $b$-qavatga chaqirildi. Qavatlar bir xil bo'lsa `Joyida`. Aks holda yo'nalish "
@@ -239,7 +239,7 @@ STORY_CONTEST_SPECS: list[Spec] = [
          "Birinchi qatorda hozirgi qavat $a$, ikkinchi qatorda boriladigan qavat $b$ ($1 \\le a, b \\le 30$).",
          "Yuqoridagi uch variantdan biri.",
          **_story(_elevator_gen, _elevator, "3\n8\n", "10\n10\n", "5\n2\n"),
-         difficulty=Problem.Difficulty.EASY, tags=["if-else", "real-life"], is_public=False),
+         difficulty=Problem.Difficulty.EASY, tags=["conditionals", "implementation"], is_public=False),
 
     Spec("c2-two-legs", "Ikki o'yin",
          "Kubok bosqichida A va B jamoalari ikki marta o'ynaydi. Ikki o'yinda jami ko'proq gol urgan jamoa "
@@ -249,7 +249,7 @@ STORY_CONTEST_SPECS: list[Spec] = [
          "`A`, `B` yoki `Penalti`.",
          **_story(lambda r: _lines(*(r.randint(0, 4) for _ in range(4))), _two_legs,
                   "2\n1\n1\n1\n", "1\n1\n2\n2\n", "0\n2\n1\n0\n"),
-         difficulty=Problem.Difficulty.EASY, tags=["if-else", "real-life"], is_public=False),
+         difficulty=Problem.Difficulty.EASY, tags=["conditionals", "implementation"], is_public=False),
 ]
 
 

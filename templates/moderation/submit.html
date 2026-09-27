@@ -153,11 +153,10 @@
         {{ form.points }}
       </div>
       <label class="flex items-center gap-2 text-sm">{{ form.is_public }} Ochiq (masalalar ro‘yxatida ko‘rinadi)</label>
-      <div>
-        <label class="ca-label" for="{{ form.tags.id_for_label }}">Mavzular</label>
-        {{ form.tags }}
-        <p class="mt-1 text-xs text-mute">Bir nechtasini tanlash: Ctrl (Mac’da ⌘) ni bosib turing.</p>
-      </div>
+      <fieldset>
+        <legend class="ca-label">Mavzular</legend>
+        <div class="mt-1 flex flex-wrap gap-1.5">{% for cb in form.tags %}<label class="ca-pick ca-pick-sm">{{ cb.tag }}<span>{{ cb.choice_label }}</span></label>{% endfor %}</div>
+      </fieldset>
     </section>
     <button type="submit" class="ca-btn ca-btn-primary w-full"><i data-lucide="check" class="lu" aria-hidden="true"></i>Masalani saqlash</button>
   </aside>

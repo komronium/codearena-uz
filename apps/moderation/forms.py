@@ -35,7 +35,7 @@ class ProblemForm(ModelForm):
             "output_md": forms.Textarea(attrs={**_MD, "rows": 3}),
             "editorial_md": forms.Textarea(attrs={**_MD, "rows": 5}),
             "difficulty": forms.Select(attrs={"class": "ca-select"}),
-            "tags": forms.SelectMultiple(attrs={"class": "ca-select", "size": 5}),
+            "tags": forms.CheckboxSelectMultiple,
             "tl_ms": forms.NumberInput(attrs=_CA_INPUT),
             "ml_mb": forms.NumberInput(attrs=_CA_INPUT),
             "points": forms.NumberInput(attrs=_CA_INPUT),
@@ -222,4 +222,11 @@ class TagForm(ModelForm):
     class Meta:
         model = Tag
         fields = ["name"]
-        widgets = {"name": forms.TextInput(attrs={**_CA_INPUT, "placeholder": "yangi mavzu (inglizcha)"})}
+        widgets = {"name": forms.TextInput(attrs={**_CA_INPUT, "placeholder": "masalan: two-pointers"})}
+
+    def clean_name(self):
+        # One standard English spelling per topic; free text is how "sikl", "cikl" and "loop" piled up.
+        name = self.cleaned_data["name"].strip().lower()
+        if not re.fullmatch(r"[a-z0-9]+(-[a-z0-9]+)*", name):
+            raise ValidationError("Inglizcha nom, kichik harflar va chiziqcha bilan: masalan, two-pointers.")
+        return name

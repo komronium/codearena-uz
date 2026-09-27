@@ -13,8 +13,8 @@ from apps.problems.models import Language, Problem, Tag, TestCase
 from apps.submissions.models import Submission, UserProblemSolved
 from apps.submissions.solves import sync_practice_points
 
-TAGS = ["arrays", "graphs", "dp", "math", "strings",
-        "search", "greedy", "sorting", "recursion", "binary search"]
+TAGS = ["arrays", "graphs", "dynamic-programming", "math", "strings",
+        "brute-force", "greedy", "sorting", "recursion", "binary-search"]
 
 USERNAMES = ["aziz", "dilnoza", "javlon", "malika", "sardor", "nodira", "bekzod",
              "zarina", "umid", "gulnora", "sherzod", "kamola", "otabek", "madina", "farrux"]

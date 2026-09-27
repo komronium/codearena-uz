@@ -495,7 +495,7 @@ def test_staff_edit_hints_and_editorial_on_the_problem_form(client, problem):
 def catalog(db):
     """Tags dp (4 problems) and math (3); one hidden and one contest-locked extra."""
     author = User.objects.create_user("author", password="x")
-    dp, math = Tag.objects.create(name="dp"), Tag.objects.create(name="math")
+    dp, math = Tag.objects.create(name="dp"), Tag.objects.get(name="math")
     made = {}
     for slug, tag, diff in [("dp1", dp, "easy"), ("dp2", dp, "easy"), ("dp3", dp, "medium"), ("dp4", dp, "hard"),
                             ("m1", math, "easy"), ("m2", math, "easy"), ("m3", math, "easy")]:
@@ -670,3 +670,22 @@ def test_profile_explains_solves_an_upcoming_contest_hides(client, catalog):
     r = client.get(reverse("profile", args=["ali"]))
     assert r.context["solved_shown"] == 1 and r.context["solved_hidden"] == 1
     assert "2 ta masala yechilgan" in r.content.decode() and "kelgusi musobaqada" in r.content.decode()
+
+
+def test_standard_topics_migration_merges_variants_and_drops_the_rest(db):
+    import importlib
+
+    from django.apps import apps as django_apps
+
+    migration = importlib.import_module("apps.problems.migrations.0013_standard_topics")
+    author = User.objects.create_user("author", password="x")
+    p1 = Problem.objects.create(slug="p1", title="p1", statement_md="x", author=author)
+    p2 = Problem.objects.create(slug="p2", title="p2", statement_md="x", author=author)
+    p1.tags.add(*(Tag.objects.create(name=n) for n in ["sikl", "beginner", "Yig‘indi"]))
+    p2.tags.add(Tag.objects.get(name="loops"), *(Tag.objects.create(name=n) for n in ["For", "Binary Search"]))
+
+    migration.standardize(django_apps, None)
+
+    assert set(Tag.objects.values_list("name", flat=True)) == set(migration.TOPICS)
+    assert set(p1.tags.values_list("name", flat=True)) == {"loops", "math"}  # "beginner" is a level, not a topic
+    assert set(p2.tags.values_list("name", flat=True)) == {"loops", "binary-search"}
