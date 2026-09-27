@@ -187,22 +187,23 @@ svg.lucide { width: 1.2em; height: 1.2em; display: inline-block; vertical-align:
 .ca-table tbody tr:hover td { background: rgb(var(--ca-accent-rgb) / .045); }
 .ca-table tbody tr:hover td:first-child { box-shadow: inset 3px 0 0 rgb(var(--ca-accent-rgb)); }
 .ca-standings th, .ca-standings td { padding-left: .75rem; padding-right: .75rem; }
-/* standings cells: solved = light green, first solve = stronger green + border, wrong-only = light red */
+.ca-standings td { padding-top: .55rem; padding-bottom: .55rem; }
+/* footer row: solved / tried per problem */
+.ca-standings tfoot td { font-size: .75rem; font-weight: 500; color: rgb(var(--ca-mute-rgb)); background: rgb(var(--ca-sunk-rgb) / .6); border-top: 1px solid rgb(var(--ca-line-rgb)); }
+.ca-standings tfoot td.ca-sticky { background: rgb(var(--ca-paper-rgb)); }
+/* standings cells: solved = light green (first solve adds a gold corner), wrong-only = light red */
 .ca-st-prob { text-align: center !important; min-width: 4.25rem; }
 .ca-st-label { display: block; font-size: .9rem; font-weight: 700; color: rgb(var(--ca-accent-rgb)); }
 a.ca-st-label:hover { text-decoration: underline; text-underline-offset: 3px; }
 .ca-st-sub { display: block; margin-top: .1rem; font-size: .68rem; font-weight: 500; color: rgb(var(--ca-mute-rgb)); }
 .ca-cell { text-align: center; min-width: 4.25rem; line-height: 1.25; }
 .ca-cell-ac { background: rgb(var(--ca-ok-rgb) / .07); }
-.ca-cell-first { background: rgb(var(--ca-ok-rgb) / .18); box-shadow: inset 0 0 0 1px rgb(var(--ca-ok-rgb) / .35); }
 .ca-cell-wa { background: rgb(var(--ca-bad-rgb) / .06); }
 .ca-table tbody tr:hover td.ca-cell-ac { background: rgb(var(--ca-ok-rgb) / .1); }
-.ca-table tbody tr:hover td.ca-cell-first { background: rgb(var(--ca-ok-rgb) / .22); }
 .ca-table tbody tr:hover td.ca-cell-wa { background: rgb(var(--ca-bad-rgb) / .09); }
-/* first solve: a corner flag too, so it isn't told by colour alone */
+/* first solve: a gold corner flag, like a medal */
 .ca-cell-first { position: relative; }
-.ca-cell-first .text-mute { color: rgb(var(--ca-ink-rgb) / .75); }  /* muted grey is too faint on the 18% green */
-.ca-cell-first::after { content: ""; position: absolute; top: 0; right: 0; border-style: solid; border-width: 0 .55rem .55rem 0; border-color: transparent rgb(var(--ca-ok-rgb)) transparent transparent; }
+.ca-cell-first::after { content: ""; position: absolute; top: 0; right: 0; border-style: solid; border-width: 0 .7rem .7rem 0; border-color: transparent rgb(var(--ca-gold-rgb)) transparent transparent; }
 .ca-st-rate { display: block; width: 2.6rem; height: 3px; margin: .3rem auto .15rem; border-radius: 9999px; background: rgb(var(--ca-ink-rgb) / .1); overflow: hidden; }
 .ca-st-rate span { display: block; height: 100%; background: rgb(var(--ca-ok-rgb)); }
 /* rank + name stay put while the problem columns scroll sideways; opaque so cells don't show through */
@@ -348,6 +349,9 @@ a.ca-st-label:hover { text-decoration: underline; text-underline-offset: 3px; }
   background: linear-gradient(100deg, color-mix(in srgb, var(--tier) 22%, transparent), color-mix(in srgb, rgb(var(--ca-accent-rgb)) 10%, transparent));
 }
 .ca-banner .ca-girih { background: color-mix(in srgb, var(--tier) 55%, transparent); }
+/* a scroll box must hold its absolutely positioned children (the .sr-only labels in table cells),
+   or they escape it and widen the whole page on phones */
+.overflow-x-auto { position: relative; }
 .ca-scroll-end { direction: rtl; }
 .ca-scroll-end > * { direction: ltr; }
 .ca-table tr.ca-row-me td { background: rgb(var(--ca-accent-rgb) / .07); }

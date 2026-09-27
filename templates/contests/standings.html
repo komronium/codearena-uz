@@ -32,8 +32,6 @@
       <th class="ca-st-prob">
         {% if contest.has_started and registered or contest.has_ended or contest.has_started and user.is_staff %}<a class="ca-st-label" href="{% url 'problems:detail' cp.problem.slug %}" title="{{ cp.problem.title }}">{{ cp.label }}</a>{% else %}<span class="ca-st-label">{{ cp.label }}</span>{% endif %}
         <span class="ca-st-sub tabular">{{ cp.points }} ball</span>
-        <span class="ca-st-rate" title="{{ cp.n_solved }} kishi yechdi, {{ cp.n_tried }} kishi urindi"><span style="width: {{ cp.solve_pct }}%"></span></span>
-        <span class="ca-st-sub tabular">{{ cp.n_solved }}/{{ cp.n_tried }}</span>
       </th>
       {% endfor %}
       {% if user.is_staff %}<th class="w-10"><span class="sr-only">Amal</span></th>{% endif %}
@@ -87,6 +85,21 @@
   </tr>
   {% endfor %}
   </tbody>
+  <tfoot>
+    <tr>
+      <td class="ca-sticky ca-sticky-rank"></td>
+      <td class="ca-sticky ca-sticky-user">Yechdi / urindi</td>
+      <td></td><td></td>
+      {% if contest.is_rated %}<td class="hidden md:table-cell"></td>{% endif %}
+      {% for cp in problems %}
+      <td class="ca-cell" title="{{ cp.n_solved }} kishi yechdi, {{ cp.n_tried }} kishi urindi">
+        <span class="tabular font-semibold text-ink">{{ cp.n_solved }}</span><span class="tabular">/{{ cp.n_tried }}</span>
+        <span class="ca-st-rate" aria-hidden="true"><span style="width: {{ cp.solve_pct }}%"></span></span>
+      </td>
+      {% endfor %}
+      {% if user.is_staff %}<td></td>{% endif %}
+    </tr>
+  </tfoot>
 </table>
 </div>
 <details class="mt-3 text-xs text-mute">
@@ -95,9 +108,9 @@
   <span><b class="text-ok">+</b> birinchi urinishda yechildi</span>
   <span><b class="text-ok">+2</b> 2 noto‘g‘ri urinishdan so‘ng yechildi</span>
   <span><b class="text-bad">−1</b> 1 noto‘g‘ri urinish, yechilmagan</span>
-  <span><span class="ca-legend-swatch ca-cell-first" aria-hidden="true"></span> birinchi bo‘lib yechgan</span>
+  <span><span class="ca-legend-swatch ca-cell-ac ca-cell-first" aria-hidden="true"></span> birinchi bo‘lib yechgan</span>
   <span>vaqt — boshlanishdan <b>daq:son</b></span>
-  <span>ustun sarlavhasida — <b>ball</b>, chiziq va <b>yechdi/urindi</b></span>
+  <span>ustun sarlavhasida — masala <b>bali</b>, oxirgi qatorda — <b>yechdi/urindi</b></span>
   <span><b>jarima</b> — AC daqiqalari + 20 × noto‘g‘ri urinish</span>
   <span><b class="text-bad">DQ</b> — diskvalifikatsiya, oxirgi o‘rin</span>
 </div>
