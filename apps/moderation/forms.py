@@ -13,6 +13,8 @@ from apps.contests.models import Contest, ContestProblem
 from apps.contests.services import reuse_reason
 from apps.problems.models import MAX_HINT_PCT, Problem, ProblemHint, SQLDataset, Tag, TestCase
 
+from .ai import DEFAULT_LEVELS, DEFAULT_MODEL, MAX_COUNT, MODEL_CHOICES
+
 _CA_INPUT = {"class": "ca-input"}
 _MD = {"class": "ca-input ca-md", "rows": 6}
 
@@ -230,3 +232,34 @@ class TagForm(ModelForm):
         if not re.fullmatch(r"[a-z0-9]+(-[a-z0-9]+)*", name):
             raise ValidationError("Inglizcha nom, kichik harflar va chiziqcha bilan: masalan, two-pointers.")
         return name
+
+
+class AIGenerateForm(forms.Form):
+    """What the AI drafts: how many problems per level, on which topics, and optionally
+    one precise theme."""
+    topics = forms.ModelMultipleChoiceField(Tag.objects.order_by("name"), to_field_name="name", required=False,
+                                            widget=forms.CheckboxSelectMultiple)
+    focus = forms.CharField(required=False, max_length=500, widget=forms.Textarea(attrs={
+        "class": "ca-input", "rows": 3,
+        "placeholder": "Masalan: bozordagi narxlar, Fibonachchi sonlari, 1 ≤ n ≤ 10⁵"}))
+    model = forms.ChoiceField(choices=MODEL_CHOICES, initial=DEFAULT_MODEL,
+                              widget=forms.Select(attrs={"class": "ca-select"}))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for value, label in Problem.Difficulty.choices:
+            self.fields[f"n_{value}"] = forms.IntegerField(
+                label=label, min_value=0, max_value=MAX_COUNT, required=False, initial=DEFAULT_LEVELS.get(value, 0),
+                widget=forms.NumberInput(attrs={"class": "ca-input tabular", "data-level-count": ""}))
+
+    def count_fields(self):
+        return [(value, self[f"n_{value}"]) for value in Problem.Difficulty.values]
+
+    def levels(self) -> dict[str, int]:
+        return {value: self.cleaned_data.get(f"n_{value}") or 0 for value in Problem.Difficulty.values}
+
+    def clean(self):
+        cleaned = super().clean()
+        if not 1 <= sum(self.levels().values()) <= MAX_COUNT:
+            raise ValidationError(f"Jami 1 dan {MAX_COUNT} tagacha masala so‘rang.")
+        return cleaned

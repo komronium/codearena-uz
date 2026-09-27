@@ -20,8 +20,9 @@ from apps.submissions.solves import refresh_solves
 from apps.integrity import audit
 from judge.runner import run_submission
 
-from .ai import DEFAULT_COUNT, DEFAULT_MODEL, MODEL_CHOICES, AIGenerationError, generate_problems
+from .ai import MAX_COUNT, AIGenerationError, generate_problems
 from .forms import (
+    AIGenerateForm,
     ContestForm,
     ContestProblemFormSet,
     GroupForm,
@@ -62,43 +63,34 @@ def dashboard(request):
 
 @staff_required
 def ai_generate(request):
-    if request.method == "POST":
-        prompt = request.POST.get("prompt", "").strip()
-        model = request.POST.get("model", DEFAULT_MODEL)
-        if model not in dict(MODEL_CHOICES):
-            model = DEFAULT_MODEL
+    form = AIGenerateForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
         try:
-            count = int(request.POST.get("count", DEFAULT_COUNT))
-        except ValueError:
-            count = DEFAULT_COUNT
-        if not prompt:
-            messages.error(request, "Promt kiriting.")
-            return redirect("moderation:ai_generate")
-        try:
-            drafts = generate_problems(prompt, model, count)
+            drafts = generate_problems(
+                form.levels(), topics=[t.name for t in form.cleaned_data["topics"]],
+                focus=form.cleaned_data["focus"].strip(), model=form.cleaned_data["model"],
+                allowed_tags=list(Tag.objects.order_by("name").values_list("name", flat=True)))
         except AIGenerationError as e:
-            messages.error(request, f"AI xato: {e}")
-            return redirect("moderation:ai_generate")
-        with transaction.atomic():
-            for draft in drafts:
-                tags = [Tag.objects.get_or_create(name=name.strip())[0]
-                        for name in draft.get("tags", []) if name.strip()]
-                obj = Problem.objects.create(
-                    title=draft["title"], slug=_unique_slug(draft["title"]), kind=Problem.Kind.CODE,
-                    statement_md=draft["statement_md"], input_md=draft["input_md"], output_md=draft["output_md"],
-                    difficulty=draft["difficulty"], tl_ms=draft["tl_ms"], ml_mb=draft["ml_mb"], points=draft["points"],
-                    is_public=False, status=Problem.Status.PENDING, author=request.user,
-                )
-                obj.tags.set(tags)
-                TestCase.objects.bulk_create([
-                    TestCase(problem=obj, input=tc["input"], expected=tc["expected"],
-                              is_sample=tc["is_sample"], order=i)
-                    for i, tc in enumerate(draft["testcases"])
-                ])
-        messages.success(request, f"{len(drafts)} ta masala tuzildi — Navbat bo'limida ko'rib chiqing va tasdiqlang.")
-        return redirect("moderation:queue")
-    return render(request, "moderation/ai_generate.html",
-                  {"models": MODEL_CHOICES, "default_model": DEFAULT_MODEL, "default_count": DEFAULT_COUNT})
+            messages.error(request, f"AI xato: {e}")  # the form stays filled in: try again as is
+        else:
+            with transaction.atomic():
+                for draft in drafts:
+                    tags = Tag.objects.filter(name__in=draft.get("tags", []))  # never a new topic
+                    obj = Problem.objects.create(
+                        title=draft["title"], slug=_unique_slug(draft["title"]), kind=Problem.Kind.CODE,
+                        statement_md=draft["statement_md"], input_md=draft["input_md"], output_md=draft["output_md"],
+                        difficulty=draft["difficulty"], tl_ms=draft["tl_ms"], ml_mb=draft["ml_mb"],
+                        points=draft["points"], is_public=False, status=Problem.Status.PENDING, author=request.user,
+                    )
+                    obj.tags.set(tags)
+                    TestCase.objects.bulk_create([
+                        TestCase(problem=obj, input=tc["input"], expected=tc["expected"],
+                                 is_sample=tc["is_sample"], order=i)
+                        for i, tc in enumerate(draft["testcases"])
+                    ])
+            messages.success(request, f"{len(drafts)} ta masala tuzildi — Navbat bo'limida ko'rib chiqing va tasdiqlang.")
+            return redirect("moderation:queue")
+    return render(request, "moderation/ai_generate.html", {"form": form, "max_count": MAX_COUNT})
 
 
 @staff_required

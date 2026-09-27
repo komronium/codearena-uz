@@ -321,12 +321,26 @@ def _fake_client(payload: dict):
     return SimpleNamespace(messages=SimpleNamespace(stream=lambda **kw: _FakeStream(response)))
 
 
-def test_generate_problems_parses_structured_response():
+def _capture(fake):
+    """Wrap a fake client so the request it gets is kept."""
+    sent, stream = {}, fake.messages.stream
+    fake.messages.stream = lambda **kw: (sent.update(kw), stream(**kw))[1]
+    return sent
+
+
+def test_generate_problems_asks_for_each_problem_by_its_level():
     from apps.moderation.ai import generate_problems
 
-    payload = {"problems": [_ai_problem("A"), _ai_problem("B")]}
-    result = generate_problems("ikki masala", count=2, client=_fake_client(payload))
-    assert [p["title"] for p in result] == ["A", "B"]
+    fake = _fake_client({"beginner_1": _ai_problem("A"), "medium_1": _ai_problem("B"), "medium_2": _ai_problem("C")})
+    sent = _capture(fake)
+    result = generate_problems({"medium": 2, "beginner": 1, "hard": 0}, focus="bozor narxlari", client=fake)
+    schema = sent["output_config"]["format"]["schema"]
+    # one required key per problem: the reply can't hold more, fewer, or other levels
+    assert schema["required"] == ["beginner_1", "medium_1", "medium_2"]
+    assert "difficulty" not in schema["properties"]["medium_1"]["properties"]
+    assert [(p["title"], p["difficulty"]) for p in result] == [("A", "beginner"), ("B", "medium"), ("C", "medium")]
+    prompt = sent["messages"][0]["content"]
+    assert "medium_1, medium_2: Medium" in prompt and "bozor narxlari" in prompt
 
 
 def test_generate_problems_wraps_bad_json():
@@ -336,23 +350,34 @@ def test_generate_problems_wraps_bad_json():
         stream=lambda **kw: _FakeStream(SimpleNamespace(content=[SimpleNamespace(type="text", text="not json")]))
     ))
     with pytest.raises(AIGenerationError):
-        generate_problems("x", client=client)
+        generate_problems({"easy": 1}, client=client)
 
 
-def test_generate_problems_rejects_too_few_testcases():
+def test_generate_problems_rejects_too_few_testcases_a_missing_problem_or_a_bad_count():
     from apps.moderation.ai import AIGenerationError, generate_problems
 
-    payload = {"problems": [_ai_problem("Kam testli", n_tests=5)]}
     with pytest.raises(AIGenerationError):
-        generate_problems("x", count=1, client=_fake_client(payload))
-
-
-def test_generate_problems_rejects_count_mismatch():
-    from apps.moderation.ai import AIGenerationError, generate_problems
-
-    payload = {"problems": [_ai_problem("A")]}
+        generate_problems({"easy": 1}, client=_fake_client({"easy_1": _ai_problem("Kam testli", n_tests=5)}))
     with pytest.raises(AIGenerationError):
-        generate_problems("x", count=2, client=_fake_client(payload))
+        generate_problems({"easy": 2}, client=_fake_client({"easy_1": _ai_problem("A")}))
+    for levels in ({}, {"easy": 11}):
+        with pytest.raises(AIGenerationError):
+            generate_problems(levels, client=_fake_client({}))
+
+
+def test_generate_problems_limits_tags_to_the_chosen_topics_else_the_sites():
+    from apps.moderation.ai import generate_problems
+
+    fake = _fake_client({"easy_1": _ai_problem("A")})
+    sent = _capture(fake)
+    generate_problems({"easy": 1}, topics=["loops", "math"], client=fake, allowed_tags=["arrays", "loops", "math"])
+    assert sent["output_config"]["format"]["schema"]["properties"]["easy_1"]["properties"]["tags"]["items"]["enum"] \
+        == ["loops", "math"]
+    assert "Mavzular: loops, math" in sent["messages"][0]["content"]
+    generate_problems({"easy": 1}, client=fake, allowed_tags=["arrays", "loops"])
+    assert sent["output_config"]["format"]["schema"]["properties"]["easy_1"]["properties"]["tags"]["items"]["enum"] \
+        == ["arrays", "loops"]
+    assert "Mavzular" not in sent["messages"][0]["content"]
 
 
 @pytest.mark.django_db
@@ -362,11 +387,14 @@ def test_ai_generate_creates_pending_problems_for_review(client):
     staff = User.objects.create_user("teacher", password="x", is_staff=True)
     client.force_login(staff)
 
-    drafts = [_ai_problem("Birinchi masala"), _ai_problem("Ikkinchi masala")]
-    with patch("apps.moderation.views.generate_problems", return_value=drafts):
+    drafts = [_ai_problem("Birinchi masala"), {**_ai_problem("Ikkinchi masala"), "difficulty": "medium"}]
+    with patch("apps.moderation.views.generate_problems", return_value=drafts) as gen:
         r = client.post(reverse("moderation:ai_generate"),
-                         {"prompt": "arifmetika", "model": "claude-sonnet-5", "count": "2"})
+                        {"n_easy": "1", "n_medium": "1", "focus": " arifmetika ", "model": "claude-sonnet-5"})
     assert r.status_code == 302 and r.url == reverse("moderation:queue")
+    assert gen.call_args.args[0] == {"beginner": 0, "easy": 1, "medium": 1, "hard": 0}
+    assert gen.call_args.kwargs["focus"] == "arifmetika" and gen.call_args.kwargs["topics"] == []
+    assert Problem.objects.get(title="Ikkinchi masala").difficulty == "medium"
 
     problems = Problem.objects.filter(title__in=["Birinchi masala", "Ikkinchi masala"])
     assert problems.count() == 2
@@ -382,6 +410,19 @@ def test_ai_generate_creates_pending_problems_for_review(client):
 
 
 @pytest.mark.django_db
+def test_ai_generate_never_invents_a_topic(client):
+    from apps.problems.models import Tag
+
+    client.force_login(User.objects.create_user("teacher", password="x", is_staff=True))
+    draft = {**_ai_problem("Mavzuli masala"), "tags": ["math", "sikl"]}
+    with patch("apps.moderation.views.generate_problems", return_value=[draft]) as gen:
+        client.post(reverse("moderation:ai_generate"), {"n_easy": "1", "topics": ["math"], "model": "claude-sonnet-5"})
+    assert gen.call_args.kwargs["topics"] == ["math"] and "loops" in gen.call_args.kwargs["allowed_tags"]
+    assert list(Problem.objects.get(title="Mavzuli masala").tags.values_list("name", flat=True)) == ["math"]
+    assert not Tag.objects.filter(name="sikl").exists()
+
+
+@pytest.mark.django_db
 def test_new_topic_needs_a_standard_english_name(client):
     from apps.problems.models import Tag
 
@@ -393,12 +434,16 @@ def test_new_topic_needs_a_standard_english_name(client):
 
 
 @pytest.mark.django_db
-def test_ai_generate_requires_prompt(client):
+def test_ai_generate_needs_one_to_ten_problems(client):
     staff = User.objects.create_user("teacher", password="x", is_staff=True)
     client.force_login(staff)
-    r = client.post(reverse("moderation:ai_generate"), {"prompt": "", "model": "claude-sonnet-5", "count": "2"})
-    assert r.status_code == 302 and r.url == reverse("moderation:ai_generate")
-    assert Problem.objects.count() == 0
+    with patch("apps.moderation.views.generate_problems") as gen:
+        for counts in ({"n_easy": "0"}, {"n_easy": "6", "n_hard": "5"}):
+            r = client.post(reverse("moderation:ai_generate"), {**counts, "model": "claude-sonnet-5"})
+            assert r.status_code == 200 and "1 dan 10 tagacha" in r.content.decode()
+    assert not gen.called and Problem.objects.count() == 0
+    page = client.get(reverse("moderation:ai_generate")).content.decode()
+    assert 'name="n_easy"' in page and 'value="2"' in page and 'name="topics"' in page
 
 
 @pytest.mark.django_db
