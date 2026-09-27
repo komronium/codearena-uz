@@ -185,7 +185,7 @@
     {% if user.is_authenticated %}
     <form method="post" action="{% url 'submissions:submit' problem.slug %}" id="submit-form" class="ca-panel !p-0">
       {% csrf_token %}
-      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-line px-4 py-2.5">
+      <div class="relative flex flex-wrap items-center justify-between gap-2 border-b border-line px-4 py-2.5">
         <label class="flex items-center gap-2 text-sm text-mute">
           <i data-lucide="code" class="lu" aria-hidden="true"></i>
           <select name="language" id="language" class="ca-select !w-auto !py-1.5 text-sm" aria-label="Dasturlash tili">
@@ -195,11 +195,12 @@
         <div class="flex items-center gap-1">
           <button type="button" id="editor-reset" class="ca-btn ca-btn-ghost !px-2.5 !py-1.5 text-xs" title="Tozalash"><i data-lucide="undo-2" class="lu" aria-hidden="true"></i>Tozalash</button>
           <button type="button" id="editor-full" class="ca-btn ca-btn-ghost !px-2.5 !py-1.5 text-xs" title="To‘liq ekran" aria-label="To‘liq ekran" aria-pressed="false"><i data-lucide="maximize-2" class="lu" aria-hidden="true"></i></button>
-          <details class="relative" id="editor-prefs">
+          <details class="sm:relative" id="editor-prefs" data-dropdown>
             <summary class="ca-btn ca-btn-ghost !px-2.5 !py-1.5 cursor-pointer list-none text-xs" title="Muharrir sozlamalari"><i data-lucide="settings-2" class="lu" aria-hidden="true"></i></summary>
-            <div class="ca-panel absolute right-0 z-20 mt-2 w-60 !p-3 text-sm">
-              <label class="mb-2 block text-xs text-mute">Mavzu
-                <select data-pref="theme" class="ca-select mt-1 !py-1.5 text-sm">
+            {# phones: the toolbar wraps, so the panel spans the toolbar instead of hanging off the button #}
+            <div class="ca-panel ca-prefs absolute inset-x-2 top-full z-20 mt-1 !p-0 text-sm sm:inset-x-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-72">
+              <label class="ca-pref"><span>Mavzu</span>
+                <select data-pref="theme" class="ca-select !w-40 !py-1 text-sm">
                   <option value="auto">Sayt bilan</option>
                   <optgroup label="Qorong‘i">
                     <option value="dark">One Dark</option><option value="vscode-dark">VS Code Dark</option><option value="github-dark">GitHub Dark</option>
@@ -215,20 +216,23 @@
                     <option value="gruvbox-light">Gruvbox Light</option><option value="solarized-light">Solarized Light</option>
                   </optgroup>
                 </select></label>
-              <label class="mb-2 block text-xs text-mute">Shrift
-                <select data-pref="font" class="ca-select mt-1 !py-1.5 text-sm">
+              <label class="ca-pref"><span>Shrift</span>
+                <select data-pref="font" class="ca-select !w-40 !py-1 text-sm">
                   <option value="anthropic">Anthropic Mono</option><option value="jetbrains">JetBrains Mono</option><option value="fira">Fira Code</option><option value="system">Tizim</option>
                 </select></label>
-              <label class="mb-2 block text-xs text-mute">O‘lcham — <span id="pref-size-val">14</span>px
-                <input type="range" data-pref="size" min="12" max="22" step="1" class="mt-1 w-full">
-              </label>
-              <label class="mb-3 block text-xs text-mute">Chekinish
-                <select data-pref="tab" class="ca-select mt-1 !py-1.5 text-sm">
-                  <option value="4">4 bo‘sh joy</option><option value="2">2 bo‘sh joy</option>
-                </select></label>
-              <label class="mb-2 flex items-center gap-2 text-sm"><input type="checkbox" data-pref="wrap"> Uzun qatorlarni o‘rash</label>
-              <label class="mb-2 flex items-center gap-2 text-sm"><input type="checkbox" data-pref="vim"> Vim rejimi</label>
-              <label class="flex items-center gap-2 text-sm"><input type="checkbox" data-pref="starter"> Til shabloni (bo‘sh muharrirda)</label>
+              <label class="ca-pref"><span>O‘lcham</span>
+                <input type="range" data-pref="size" min="12" max="22" step="1" class="min-w-0 flex-1">
+                <span class="w-9 text-right text-mute tabular"><span id="pref-size-val">14</span>px</span></label>
+              <div class="ca-pref"><span id="pref-tab-label">Chekinish<small class="block text-xs font-normal text-mute">bo‘sh joy soni</small></span>
+                <div class="ca-seg ca-seg-sm w-40" role="radiogroup" aria-labelledby="pref-tab-label">
+                  <label><input type="radio" name="pref-tab" value="2" data-pref="tab" class="sr-only"><span>2</span></label>
+                  <label><input type="radio" name="pref-tab" value="4" data-pref="tab" class="sr-only"><span>4</span></label>
+                </div></div>
+              <div class="mt-1 border-t border-line pt-1">
+                <label class="ca-pref"><span>Uzun qatorlarni o‘rash</span><input type="checkbox" role="switch" class="ca-switch" data-pref="wrap"></label>
+                <label class="ca-pref"><span>Vim rejimi</span><input type="checkbox" role="switch" class="ca-switch" data-pref="vim"></label>
+                <label class="ca-pref"><span>Til shabloni<small class="block text-xs font-normal text-mute">Muharrir bo‘sh bo‘lsa qo‘yiladi</small></span><input type="checkbox" role="switch" class="ca-switch" data-pref="starter"></label>
+              </div>
             </div>
           </details>
         </div>
@@ -468,7 +472,9 @@ resolves their bare imports so @codemirror/state loads once — two copies break
   if (prefs.vim) syncVim();
   document.querySelectorAll("#editor-prefs [data-pref]").forEach((el) => {
     const key = el.dataset.pref;
-    if (el.type === "checkbox") el.checked = !!prefs[key]; else el.value = prefs[key];
+    if (el.type === "checkbox") el.checked = !!prefs[key];
+    else if (el.type === "radio") el.checked = el.value === String(prefs[key]);
+    else el.value = prefs[key];
     el.addEventListener("input", () => {
       prefs[key] = el.type === "checkbox" ? el.checked : el.type === "range" ? Number(el.value) : el.value;
       applyPrefs();

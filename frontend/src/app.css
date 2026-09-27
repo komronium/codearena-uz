@@ -425,16 +425,35 @@ a.ca-st-label:hover { text-decoration: underline; text-underline-offset: 3px; }
   display: flex; gap: .25rem; padding: .25rem; border-radius: 9999px;
   background: rgb(var(--ca-paper-rgb) / .92); box-shadow: inset 0 0 0 1px rgb(var(--ca-line-rgb)); backdrop-filter: blur(8px);
 }
-.ca-seg button, .ca-seg a {
+.ca-seg button, .ca-seg a, .ca-seg label > span {
   flex: 1; display: inline-flex; align-items: center; justify-content: center; padding: .5rem .9rem; border-radius: 9999px;
   font-size: .875rem; font-weight: 600; color: rgb(var(--ca-mute-rgb)); transition: background-color .15s ease, color .15s ease;
 }
-.ca-seg button[aria-pressed="true"], .ca-seg a[aria-current] { color: rgb(var(--ca-ink-rgb)); background: rgb(var(--ca-surface-rgb)); box-shadow: var(--ca-shadow); }
-.ca-seg a:hover:not([aria-current]) { color: rgb(var(--ca-ink-rgb)); }
+.ca-seg button[aria-pressed="true"], .ca-seg a[aria-current], .ca-seg :checked + span { color: rgb(var(--ca-ink-rgb)); background: rgb(var(--ca-surface-rgb)); box-shadow: var(--ca-shadow); }
+.ca-seg a:hover:not([aria-current]), .ca-seg label:hover > span { color: rgb(var(--ca-ink-rgb)); }
+/* radios drawn as segments: the input is visually hidden, its span is the segment */
+.ca-seg label { flex: 1; display: flex; cursor: pointer; }
+.ca-seg :focus-visible + span { outline: 2px solid rgb(var(--ca-accent-rgb)); outline-offset: 2px; }
 .ca-seg-sm { border-radius: var(--ca-radius-sm); background: rgb(var(--ca-sunk-rgb)); backdrop-filter: none; }
-.ca-seg-sm button, .ca-seg-sm a { gap: .3rem; padding: .35rem .6rem; border-radius: 7px; font-size: .75rem; }
+.ca-seg-sm button, .ca-seg-sm a, .ca-seg-sm label > span { gap: .3rem; padding: .35rem .6rem; border-radius: 7px; font-size: .75rem; }
 .ca-seg-sm button svg.lucide { width: .9rem; height: .9rem; }
-.ca-seg-sm button[aria-pressed="true"], .ca-seg-sm a[aria-current] { box-shadow: 0 1px 2px rgb(20 24 31 / .12); }
+.ca-seg-sm button[aria-pressed="true"], .ca-seg-sm a[aria-current], .ca-seg-sm :checked + span { box-shadow: 0 1px 2px rgb(20 24 31 / .12); }
+/* editor settings popover (problems/detail.html): one setting per row */
+.ca-prefs { padding: .3rem 0; }
+.ca-pref { display: flex; align-items: center; justify-content: space-between; gap: .75rem; min-height: 2.6rem; padding: .3rem .9rem; }
+.ca-pref > span:first-child { font-weight: 500; line-height: 1.25; }
+.ca-pref input[type="range"] { accent-color: rgb(var(--ca-accent-fill-rgb)); cursor: pointer; }
+/* on/off setting: a checkbox with role="switch" */
+.ca-switch {
+  position: relative; flex: none; width: 2.1rem; height: 1.25rem; border-radius: 9999px; cursor: pointer;
+  appearance: none; background: rgb(var(--ca-mute-rgb) / .7); transition: background-color .15s ease;
+}
+.ca-switch::before {
+  content: ""; position: absolute; top: .15rem; left: .15rem; width: .95rem; height: .95rem; border-radius: 9999px;
+  background: #fff; box-shadow: 0 1px 2px rgb(0 0 0 / .3); transition: transform .15s ease, background-color .15s ease;
+}
+.ca-switch:checked { background: rgb(var(--ca-accent-fill-rgb)); }
+.ca-switch:checked::before { transform: translateX(.85rem); background: rgb(var(--ca-on-fill-rgb)); }
 @media (max-width: 1023px) {
   #panes[data-pane="statement"] > #solve-pane, #panes[data-pane="solve"] > #statement-pane { display: none; }
 }
