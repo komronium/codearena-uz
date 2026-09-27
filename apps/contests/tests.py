@@ -812,3 +812,24 @@ def test_virtual_run_tags_submissions_and_ranks_among_real_participants(enqueue,
     VirtualParticipation.objects.filter(pk=vp.pk).update(start=timezone.now() - timezone.timedelta(hours=3))
     client.post(reverse("submissions:submit", args=[problem_a.slug]), {"language": "python", "source": "y"})
     assert Submission.objects.filter(user=vali).latest("id").virtual is None  # the window is over: practice
+
+
+@pytest.mark.django_db
+def test_live_contest_shows_your_place_on_the_list_and_at_home(client, contest, python, problem_a):
+    """The live hero and the home strip read the place and progress from the standings."""
+    cache.clear()  # standings are cached per contest id, and ids repeat between tests
+    ali, bob = User.objects.create_user("ali", password="x"), User.objects.create_user("bob", password="x")
+    for u in (ali, bob):
+        Participation.objects.create(user=u, contest=contest)
+    _sub(bob, problem_a, contest, python, "AC", 5)
+    client.force_login(ali)
+    live = client.get(reverse("contests:list")).context["running"][0]
+    assert (live.my_rank, live.my_solved, live.n_problems) == (2, 0, 2)
+    _sub(ali, problem_a, contest, python, "AC", 3)  # faster than bob: first
+    cache.delete(f"contest-standings-{contest.pk}")
+    r = client.get(reverse("contests:list"))
+    assert (r.context["running"][0].my_rank, r.context["running"][0].my_solved) == (1, 1)
+    assert "1-o‘rin" in r.content.decode()
+    home = client.get("/")
+    assert home.context["live"]["rank"] == 1 and home.context["live"]["solved"] == 1
+    assert "Davom etish" in home.content.decode()

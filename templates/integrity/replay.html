@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ participant.username }} · {{ cp.label }} — yozilish tarixi{% endblock %}
-{% block sidebar %}{% endblock %}
+
 {% block content %}
 <a class="ca-link mb-4 inline-flex text-sm text-mute" href="{% url 'integrity:contest_report' contest.pk %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>Nazorat hisoboti</a>
 <div class="mb-5 flex flex-wrap items-end justify-between gap-3">

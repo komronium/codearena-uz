@@ -95,3 +95,32 @@ def test_landing_podium_is_the_last_rated_contests_real_standings(client, world)
     assert r.context["last_rated"] == c and len(r.context["podium"]) == 3
     assert [row["user"].username for row in r.context["podium"][:2]] == ["a3", "a2"]
     assert "1-raund" in r.content.decode()
+
+
+@pytest.mark.django_db
+def test_home_rating_card_and_date(client, world):
+    from apps.contests.models import Participation
+
+    ali = User.objects.create_user("ali", password="x", rating=1180)
+    rated = Contest.objects.create(title="R", is_rated=True, start=timezone.now() - timezone.timedelta(days=3),
+                                   end=timezone.now() - timezone.timedelta(days=3) + timezone.timedelta(hours=2))
+    Participation.objects.create(user=ali, contest=rated, rating_before=1200, rating_after=1180)
+    client.force_login(ali)
+    r = client.get("/")
+    card = r.context["rating_card"]
+    assert card["delta"] == -20 and card["rank"] == 1 and card["total"] == 1
+    assert card["next"]["name"] == "Pupil" and card["next"]["need"] == 120
+    weekday, day_month = r.context["today_label"].split(", ")
+    assert weekday in {"Dushanba", "Seshanba", "Chorshanba", "Payshanba", "Juma", "Shanba", "Yakshanba"}
+    assert day_month == f"{timezone.localdate().day}-" + day_month.split("-", 1)[1]
+    assert "Pupil</span> darajasigacha" in r.content.decode()
+
+
+@pytest.mark.django_db
+def test_rail_offers_admin_to_staff_only(client, world):
+    client.force_login(User.objects.create_user("ali", password="x"))
+    rail = client.get("/").content.decode().split('class="ca-rail"', 1)[1].split("</nav>", 1)[0]
+    assert reverse("problems:list") in rail and reverse("moderation:dashboard") not in rail
+    client.force_login(User.objects.create_user("boss", password="x", is_staff=True))
+    rail = client.get("/").content.decode().split('class="ca-rail"', 1)[1].split("</nav>", 1)[0]
+    assert reverse("moderation:dashboard") in rail

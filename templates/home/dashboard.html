@@ -1,100 +1,92 @@
 {% extends "base.html" %}{% load tiers %}
 {% block title %}Bosh sahifa — CodeArena{% endblock %}
+{% block page_title %}<h1>Salom, {{ user.first_name|default:user.username }}!</h1><span class="ca-topbar-sub">{{ today_label }}</span>{% endblock %}
 {% block content %}
-<div class="mb-6">
-  <h1 class="ca-page-title">Salom, {{ user.first_name|default:user.username }}!</h1>
-  <p class="mt-1 text-sm text-mute">{% if daily and not daily_done %}Bugungi masala sizni kutyapti.{% elif streak %}Seriya davom etyapti — ertaga ham qayting.{% else %}Bugun nima qilishni shu yerdan boshlang.{% endif %}</p>
-</div>
-
-<div class="grid gap-4 lg:grid-cols-3">
+<div class="grid gap-5 lg:grid-cols-3">
   {% if daily %}
-  <section class="ca-today lg:col-span-2" aria-labelledby="daily-title">
-    <div class="ca-girih" aria-hidden="true"></div>
-    <div class="relative flex flex-wrap items-end justify-between gap-x-8 gap-y-6">
-      <div class="min-w-0 flex-1 basis-64">
-        <p class="ca-eyebrow !text-warn"><i data-lucide="calendar-check" class="lu" aria-hidden="true"></i>Kun masalasi · {{ daily.date|date:"d.m" }}</p>
-        <h2 id="daily-title" class="mt-2 text-2xl font-bold tracking-tight">{{ daily.problem.title }}</h2>
-        <p class="mt-2 flex flex-wrap items-center gap-2 text-sm text-mute"><span class="ca-diff ca-diff-{{ daily.problem.difficulty }}">{{ daily.problem.get_difficulty_display }}</span>Kunida yechsangiz +5 ball, seriya davom etadi</p>
+  <section class="ca-card ca-card-lg lg:col-span-2" aria-labelledby="daily-title">
+    <div class="flex flex-wrap items-end justify-between gap-x-8 gap-y-6">
+      <div class="min-w-0 flex-1 basis-72">
+        <p class="ca-eyebrow !text-warn">Bugungi masala · {{ daily.date|date:"d.m" }}</p>
+        <h2 id="daily-title" class="mt-2 text-[1.75rem] font-bold leading-tight tracking-tight"><a class="hover:text-accent" href="{% url 'problems:detail' daily.problem.slug %}">{{ daily.problem.title }}</a></h2>
+        <p class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-mute"><span class="ca-diff ca-diff-{{ daily.problem.difficulty }}">{{ daily.problem.get_difficulty_display }}</span><span>+5 ball</span>{% if not daily_done %}<span>{% if streak %}Yechsangiz seriya {{ streak|add:1 }} kunga yetadi{% else %}Yechsangiz seriya boshlanadi{% endif %}</span>{% endif %}</p>
         <div class="mt-5">
           {% if daily_done %}<span class="ca-verdict ca-verdict-ac"><i data-lucide="check" class="lu" aria-hidden="true"></i>Bugun yechildi</span>
           {% else %}<a class="ca-btn ca-btn-primary !px-5" href="{% url 'problems:detail' daily.problem.slug %}"><i data-lucide="play" class="lu" aria-hidden="true"></i>Yechish</a>{% endif %}
         </div>
       </div>
-      <div>
-        <p class="flex items-center gap-2"><i data-lucide="flame" class="lu text-xl text-gold" aria-hidden="true"></i><b class="text-2xl tabular leading-none">{{ streak }}</b><span class="text-sm text-mute">kunlik seriya · eng uzuni {{ best_streak }}</span></p>
-        <div class="mt-3">{% include "home/_week.html" %}</div>
+      <div class="flex flex-col gap-3 sm:items-end">
+        <p class="flex items-center gap-2 text-sm text-mute"><i data-lucide="flame" class="lu text-lg text-gold" aria-hidden="true"></i><b class="text-xl tabular text-ink">{{ streak }}</b> kunlik seriya · eng uzuni {{ best_streak }}</p>
+        {% include "home/_week.html" %}
       </div>
     </div>
   </section>
   {% endif %}
 
-  <section class="ca-panel flex flex-col {% if not daily %} lg:col-span-3 {% endif %}" aria-label="Ko‘rsatkichlaringiz" style="--tier: {{ user.rating|tier_color }}">
+  <section class="ca-card flex flex-col {% if not daily %} lg:col-span-3 {% endif %}" aria-label="Reyting" style="--tier: {{ user.rating|tier_color }}">
     <div class="flex items-center justify-between gap-2">
-      <span class="ca-kpi-label">Reyting</span>
+      <span class="text-sm text-mute">Reyting</span>
       <span class="ca-tier">{{ user.rating|tier_name }}</span>
     </div>
-    <p class="ca-kpi-value ca-tier-ink mt-1 tabular">{{ user.rating }}</p>
-    <dl class="mt-4 grid grid-cols-2 gap-3 border-t border-line pt-4">
-      <div><dt class="ca-kpi-label">Ball</dt><dd class="mt-0.5 text-xl font-bold tabular">{{ user.practice_points }}</dd></div>
-      <div><dt class="ca-kpi-label">Yechilgan</dt><dd class="mt-0.5 text-xl font-bold tabular">{{ solved_count }}</dd></div>
+    <p class="mt-2 flex items-baseline gap-3"><span class="text-[2.5rem] font-bold leading-none tracking-tight tabular">{{ user.rating }}</span>
+      {% if rating_card.delta is not None %}<span class="text-sm font-bold tabular {% if rating_card.delta > 0 %}text-ok{% elif rating_card.delta < 0 %}text-bad{% else %}text-mute{% endif %}" title="Oxirgi reytingli musobaqada">{{ rating_card.delta|stringformat:"+d" }}</span>{% endif %}</p>
+    {% if rating_card.next %}
+    <div class="mt-3">
+      <span class="ca-progress block" aria-hidden="true"><span style="width: {{ rating_card.next.pct }}%"></span></span>
+      <p class="mt-1.5 text-xs text-mute"><span class="ca-tier-ink font-semibold" style="--tier: {{ rating_card.next.color }}">{{ rating_card.next.name }}</span> darajasigacha <b class="tabular text-ink">{{ rating_card.next.need }}</b> ball</p>
+    </div>
+    {% endif %}
+    <dl class="mt-auto grid grid-cols-3 gap-2 border-t border-line pt-3 text-sm">
+      <div><dt class="text-xs text-mute">O‘rin</dt><dd class="font-semibold tabular">{% if rating_card.rank %}{{ rating_card.rank }}<span class="font-normal text-mute"> / {{ rating_card.total }}</span>{% else %}—{% endif %}</dd></div>
+      <div><dt class="text-xs text-mute">Ball</dt><dd class="font-semibold tabular">{{ user.practice_points }}</dd></div>
+      <div><dt class="text-xs text-mute">Yechilgan</dt><dd class="font-semibold tabular">{{ solved_count }}</dd></div>
     </dl>
-    <a class="ca-link mt-auto inline-flex items-center gap-1 pt-4 text-sm" href="{% url 'profile' user.username %}">Profilim<i data-lucide="arrow-right" class="lu" aria-hidden="true"></i></a>
   </section>
 </div>
 
-<div class="mt-8 grid items-start gap-8 lg:grid-cols-3">
+{% if live %}
+<a class="ca-live-strip" href="{% url 'contests:detail' live.contest.pk %}">
+  <span class="ca-live-badge"><span class="ca-live-dot" aria-hidden="true"></span>Jonli</span>
+  <span class="min-w-0 truncate font-semibold">{{ live.contest.title }}</span>
+  <span class="hidden text-sm text-mute md:inline">{% if live.joined %}Siz: {{ live.rank }}-o‘rin · {{ live.solved }} / {{ live.n_problems }} yechilgan{% else %}{{ live.n_problems }} ta masala · hali qatnashmagansiz{% endif %}</span>
+  <span class="ml-auto font-mono text-lg tabular" data-countdown="{{ live.contest.end|date:'c' }}" data-label="" data-suffix="1"></span>
+  <span class="ca-btn ca-btn-primary !py-2">{% if live.joined %}Davom etish{% else %}Qatnashish{% endif %}<i data-lucide="arrow-right" class="lu" aria-hidden="true"></i></span>
+</a>
+{% endif %}
+
+<div class="mt-8 grid items-start gap-x-12 gap-y-8 lg:grid-cols-3">
   <div class="min-w-0 space-y-8 lg:col-span-2">
     {% if homework %}
     <section aria-labelledby="hw-title">
-      <div class="mb-3 flex items-end justify-between gap-2">
-        <h2 id="hw-title" class="ca-section-title !mb-0">Vazifalar</h2>
-        <a class="ca-link text-sm" href="{% url 'classroom:list' %}">Hammasi →</a>
-      </div>
-      <ul class="ca-rows">
+      <div class="ca-sec-head"><h2 id="hw-title">Vazifalar</h2><a href="{% url 'classroom:list' %}">Hammasi</a></div>
+      <ul class="ca-lines">
         {% for a in homework %}
-        <li class="ca-row">
-          <div class="ca-row-main">
-            <a class="ca-row-title ca-link" href="{% url 'classroom:detail' a.pk %}">{{ a.title }}</a>
-            <div class="ca-row-meta">
-              <span><i data-lucide="users" class="lu" aria-hidden="true"></i>{{ a.group.name }}</span>
-              <span class="tabular {% if a.my_solved == a.my_total %}font-semibold text-ok{% endif %}">{{ a.my_solved }} / {{ a.my_total }} yechilgan</span>
-            </div>
-            <span class="ca-progress ca-progress-ok mt-2 block max-w-xs" aria-hidden="true"><span style="width: {% widthratio a.my_solved a.my_total 100 %}%"></span></span>
+        <li>
+          <div class="min-w-0">
+            <a class="ca-line-title" href="{% url 'classroom:detail' a.pk %}">{{ a.title }}</a>
+            <p class="ca-line-meta">{{ a.group.name }} · {{ a.my_total }} ta masala</p>
           </div>
-          <div class="ca-row-side text-sm"><span class="text-mute">Muddatgacha</span> <span class="tabular font-semibold" data-countdown="{{ a.deadline|date:'c' }}" data-label="" data-suffix="1"></span></div>
+          <div class="flex items-center gap-5 text-sm">
+            <span class="hidden items-center gap-2 text-mute sm:flex"><span class="ca-progress ca-progress-ok block w-24" aria-hidden="true"><span style="width: {% widthratio a.my_solved a.my_total 100 %}%"></span></span><span class="tabular {% if a.my_solved == a.my_total %}font-semibold text-ok{% endif %}">{{ a.my_solved }} / {{ a.my_total }}</span></span>
+            <span class="text-mute">Muddat: <b class="tabular text-ink" data-countdown="{{ a.deadline|date:'c' }}" data-label="" data-suffix="1"></b></span>
+          </div>
         </li>
         {% endfor %}
       </ul>
     </section>
     {% endif %}
 
-    {% if running or upcoming %}
-    <section aria-labelledby="contests-title">
-      <div class="mb-3 flex items-end justify-between gap-2">
-        <h2 id="contests-title" class="ca-section-title !mb-0">Musobaqalar</h2>
-        <a class="ca-link text-sm" href="{% url 'contests:list' %}">Hammasi →</a>
-      </div>
-      <ul class="ca-rows">
-        {% for c in running %}{% include "contests/_row.html" with state="running" %}{% endfor %}
-        {% for c in upcoming %}{% include "contests/_row.html" with state="upcoming" %}{% endfor %}
-      </ul>
-    </section>
-    {% endif %}
-
     {% if taught %}
     <section aria-labelledby="taught-title">
-      <div class="mb-3 flex items-end justify-between gap-2">
-        <h2 id="taught-title" class="ca-section-title !mb-0">Men bergan vazifalar</h2>
-        <a class="ca-link text-sm" href="{% url 'classroom:new' %}">+ Yangi vazifa</a>
-      </div>
-      <ul class="ca-rows">
+      <div class="ca-sec-head"><h2 id="taught-title">Men bergan vazifalar</h2><a href="{% url 'classroom:new' %}">+ Yangi vazifa</a></div>
+      <ul class="ca-lines">
         {% for a in taught %}
-        <li class="ca-row">
-          <div class="ca-row-main">
-            <a class="ca-row-title ca-link" href="{% url 'classroom:detail' a.pk %}">{{ a.title }}</a>
-            <div class="ca-row-meta"><span><i data-lucide="users" class="lu" aria-hidden="true"></i>{{ a.group.name }}</span><span class="tabular">Muddat: {{ a.deadline|date:"d.m.Y H:i" }}</span></div>
+        <li>
+          <div class="min-w-0">
+            <a class="ca-line-title" href="{% url 'classroom:detail' a.pk %}">{{ a.title }}</a>
+            <p class="ca-line-meta">{{ a.group.name }} · muddat {{ a.deadline|date:"d.m.Y H:i" }}</p>
           </div>
-          <div class="ca-row-side"><a class="ca-btn ca-btn-ghost !py-1.5 text-xs" href="{% url 'classroom:detail' a.pk %}"><i data-lucide="table" class="lu" aria-hidden="true"></i>Natijalar</a></div>
+          <a class="ca-link text-sm" href="{% url 'classroom:detail' a.pk %}">Natijalar</a>
         </li>
         {% endfor %}
       </ul>
@@ -102,19 +94,16 @@
     {% endif %}
 
     <section aria-labelledby="recent-title">
-      <div class="mb-3 flex items-end justify-between gap-2">
-        <h2 id="recent-title" class="ca-section-title !mb-0">So‘nggi urinishlar</h2>
-        {% if recent %}<a class="ca-link text-sm" href="{% url 'submissions:mine' %}">Hammasi →</a>{% endif %}
-      </div>
+      <div class="ca-sec-head"><h2 id="recent-title">So‘nggi urinishlar</h2>{% if recent %}<a href="{% url 'submissions:mine' %}">Hammasi</a>{% endif %}</div>
       {% if recent %}
-      <ul class="ca-rows">
+      <ul class="ca-lines">
         {% for s in recent %}
-        <li class="ca-row relative">
-          <div class="ca-row-main">
-            <a class="ca-row-title ca-link ca-stretch" href="{% url 'submissions:detail' s.pk %}">{{ s.problem.title }}</a>
-            <div class="ca-row-meta"><span>{{ s.language.name }}</span><time datetime="{{ s.created|date:'c' }}">{{ s.created|date:"d.m H:i" }}</time></div>
+        <li class="relative">
+          <div class="min-w-0">
+            <a class="ca-line-title ca-stretch" href="{% url 'submissions:detail' s.pk %}">{{ s.problem.title }}</a>
+            <p class="ca-line-meta">{{ s.language.name }} · <time datetime="{{ s.created|date:'c' }}">{{ s.created|date:"d.m H:i" }}</time></p>
           </div>
-          <div class="ca-row-side">{% include "submissions/_verdict.html" with v=s.verdict %}</div>
+          {% include "submissions/_verdict.html" with v=s.verdict %}
         </li>
         {% endfor %}
       </ul>
@@ -125,16 +114,51 @@
   </div>
 
   <aside class="min-w-0 space-y-8" aria-label="Qo‘shimcha">
-    <section class="ca-panel" aria-labelledby="duel-title">
-      <h2 id="duel-title" class="flex items-center gap-2 font-semibold"><i data-lucide="swords" class="lu text-accent" aria-hidden="true"></i>Duellar</h2>
+    {% if next_picks %}
+    <section aria-labelledby="next-title">
+      <div class="ca-sec-head"><h2 id="next-title">Keyingi masalalar</h2><a href="{% url 'problems:list' %}">Barchasi</a></div>
+      {% if picks_reason %}<p class="-mt-1 mb-2 text-sm text-mute">Eng kam yechgan mavzuingizdan: <a class="ca-link" href="{% url 'problems:list' %}?tag={{ picks_reason|urlencode }}">#{{ picks_reason }}</a></p>{% endif %}
+      <ul class="ca-lines">
+        {% for p, reason in next_picks %}
+        <li class="relative">
+          <div class="min-w-0">
+            <a class="ca-line-title ca-stretch" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a>
+            <p class="ca-line-meta flex items-center gap-3"><span class="ca-diff ca-diff-{{ p.difficulty }}">{{ p.get_difficulty_display }}</span>{% if not picks_reason and reason %}<span>#{{ reason }}</span>{% endif %}</p>
+          </div>
+          <i data-lucide="chevron-right" class="lu text-mute" aria-hidden="true"></i>
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
+
+    {% if upcoming %}
+    <section aria-labelledby="up-title">
+      <div class="ca-sec-head"><h2 id="up-title">Kelgusi musobaqa</h2><a href="{% url 'contests:list' %}">Hammasi</a></div>
+      <ul class="ca-lines">
+        {% for c in upcoming %}
+        <li class="relative">
+          <div class="min-w-0">
+            <a class="ca-line-title ca-stretch" href="{% url 'contests:detail' c.pk %}">{{ c.title }}</a>
+            <p class="ca-line-meta">{{ c.start|date:"d.m H:i" }} · {{ c.duration_label }}{% if c.is_rated %} · reytingli{% endif %}</p>
+          </div>
+          <span class="shrink-0 text-right text-xs text-mute"><b class="block tabular text-sm text-ink" data-countdown="{{ c.start|date:'c' }}" data-label="" data-suffix="1"></b>qoldi</span>
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
+
+    <section class="ca-card ca-card-sunk" aria-labelledby="duel-title">
+      <h2 id="duel-title" class="flex items-center gap-2 font-semibold"><i data-lucide="swords" class="lu text-accent" aria-hidden="true"></i>Duel</h2>
       {% for d in active_duels %}
-      <a class="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-[var(--ca-radius-sm)] border border-line px-3 py-2.5 hover:border-accent" href="{% url 'classroom:duel' d.pk %}">
+      <a class="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-[var(--ca-radius-sm)] bg-surface px-3 py-2.5 hover:text-accent" href="{% url 'classroom:duel' d.pk %}">
         <span class="font-medium">{% if d.opponent %}{{ d.challenger.username }} <span class="text-mute">vs</span> {{ d.opponent.username }}{% else %}Ochiq duel <span class="text-sm font-normal text-mute">· raqib kutilmoqda</span>{% endif %}</span>
         {% if d.my_end %}<span class="tabular text-sm font-bold text-ok" data-countdown="{{ d.my_end|date:'c' }}" data-label="" data-suffix="1"></span>{% endif %}
       </a>
       {% endfor %}
       {% for d in challenges %}
-      <div class="mt-3 rounded-[var(--ca-radius-sm)] border border-line px-3 py-2.5">
+      <div class="mt-3 rounded-[var(--ca-radius-sm)] bg-surface px-3 py-2.5">
         <p><b>{{ d.challenger.username }}</b> <span class="text-sm text-mute">sizni chaqirdi · {{ d.get_difficulty_display }}</span></p>
         <div class="mt-2 flex gap-2">
           <form method="post" action="{% url 'classroom:duel_answer' d.pk %}">{% csrf_token %}<input type="hidden" name="accept" value="1"><button class="ca-btn ca-btn-primary !py-1.5 text-xs">Qabul qilish</button></form>
@@ -143,34 +167,10 @@
       </div>
       {% endfor %}
       {% if not active_duels and not challenges %}
-      <p class="mt-2 text-sm text-mute">Bitta masala, har kimga 30 daqiqa. Hoziroq yechasiz, keyingi raqib o‘sha masalani oladi — tezroq yechgan g‘olib.</p>
+      <p class="mt-2 text-sm text-mute">Bitta masala, har kimga 30 daqiqa. Tezroq yechgan g‘olib.</p>
       <a class="ca-btn ca-btn-ghost mt-4 w-full" href="{% url 'classroom:duels' %}"><i data-lucide="swords" class="lu" aria-hidden="true"></i>Duel boshlash</a>
       {% endif %}
     </section>
-
-    {% if next_picks %}
-    <section aria-labelledby="next-title">
-      <div class="mb-3 flex items-end justify-between gap-2">
-        <h2 id="next-title" class="ca-section-title !mb-0">Keyingi masalalar</h2>
-        <a class="ca-link text-sm" href="{% url 'problems:list' %}">Barchasi →</a>
-      </div>
-      {% if picks_reason %}<p class="-mt-1 mb-3 text-sm text-mute">Eng kam yechgan mavzuingizdan: <a class="ca-link" href="{% url 'problems:list' %}?tag={{ picks_reason|urlencode }}">#{{ picks_reason }}</a></p>{% endif %}
-      <ul class="ca-rows">
-        {% for p, reason in next_picks %}
-        <li class="ca-row relative !flex-nowrap">
-          <div class="ca-row-main !basis-auto">
-            <a class="ca-row-title ca-link ca-stretch" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a>
-            <div class="ca-row-meta">
-              <span class="ca-diff ca-diff-{{ p.difficulty }}">{{ p.get_difficulty_display }}</span>
-              {% if picks_reason %}{% elif reason %}<span>#{{ reason }}</span>{% else %}<span>darajangizga mos</span>{% endif %}
-            </div>
-          </div>
-          <i data-lucide="chevron-right" class="lu text-mute" aria-hidden="true"></i>
-        </li>
-        {% endfor %}
-      </ul>
-    </section>
-    {% endif %}
   </aside>
 </div>
 {% endblock %}

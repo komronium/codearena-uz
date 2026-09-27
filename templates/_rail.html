@@ -1,0 +1,25 @@
+{% comment %}The compact icon rail (md and up): the mark, every student destination as an icon with its
+name under it, staff's single "Admin" entry, and the account menu (or sign-in) at the foot.
+Phones get the same places from the bottom bar and the menu sheet (base.html).{% endcomment %}
+{% with ns=request.resolver_match.namespace un=request.resolver_match.url_name %}
+<a href="{% url 'home' %}" class="ca-rail-brand" aria-label="CodeArena bosh sahifa">{% include "_brand_mark.html" %}</a>
+<a href="{% url 'home' %}" class="ca-rail-link{% if un == 'home' %} is-active{% endif %}"{% if un == 'home' %} aria-current="page"{% endif %}><i data-lucide="house" class="lu" aria-hidden="true"></i><span>Bosh sahifa</span></a>
+<a href="{% url 'problems:list' %}" class="ca-rail-link{% if ns == 'problems' %} is-active{% endif %}"{% if ns == 'problems' %} aria-current="page"{% endif %}><i data-lucide="list-checks" class="lu" aria-hidden="true"></i><span>Masalalar</span></a>
+<a href="{% url 'contests:list' %}" class="ca-rail-link{% if ns == 'contests' %} is-active{% endif %}"{% if ns == 'contests' %} aria-current="page"{% endif %}><i data-lucide="trophy" class="lu" aria-hidden="true"></i><span>Musobaqa</span></a>
+<a href="{% url 'rating' %}" class="ca-rail-link{% if un == 'rating' or un == 'top' %} is-active{% endif %}"{% if un == 'rating' or un == 'top' %} aria-current="page"{% endif %}><i data-lucide="chart-column" class="lu" aria-hidden="true"></i><span>Reyting</span></a>
+{% if user.is_authenticated %}
+<a href="{% url 'classroom:list' %}" class="ca-rail-link{% if ns == 'classroom' and 'duel' not in un %} is-active{% endif %}"{% if ns == 'classroom' and 'duel' not in un %} aria-current="page"{% endif %}><i data-lucide="notebook-pen" class="lu" aria-hidden="true"></i><span>Vazifalar</span></a>
+<a href="{% url 'classroom:duels' %}" class="ca-rail-link{% if ns == 'classroom' and 'duel' in un %} is-active{% endif %}"{% if ns == 'classroom' and 'duel' in un %} aria-current="page"{% endif %}><i data-lucide="swords" class="lu" aria-hidden="true"></i><span>Duellar</span></a>
+<a href="{% url 'submissions:mine' %}" class="ca-rail-link{% if ns == 'submissions' %} is-active{% endif %}"{% if ns == 'submissions' %} aria-current="page"{% endif %}><i data-lucide="history" class="lu" aria-hidden="true"></i><span>Urinishlar</span>{% if unread_reviews %}<b class="ca-rail-dot" aria-label="{{ unread_reviews }} ta o‘qilmagan sharh"></b>{% endif %}</a>
+{% endif %}
+{% if user.is_staff %}
+<a href="{% url 'moderation:dashboard' %}" class="ca-rail-link{% if ns == 'moderation' or ns == 'integrity' %} is-active{% endif %}"{% if ns == 'moderation' or ns == 'integrity' %} aria-current="page"{% endif %}><i data-lucide="shield" class="lu" aria-hidden="true"></i><span>Admin</span></a>
+{% endif %}
+<div class="ca-rail-foot">
+  {% if user.is_authenticated %}{% include "_user_menu.html" %}
+  {% else %}
+  <button type="button" id="theme-toggle" class="ca-rail-link" title="Mavzu" aria-label="Mavzuni almashtirish"><i data-lucide="sun-moon" class="lu" aria-hidden="true"></i></button>
+  <a href="{% url 'login' %}" class="ca-rail-link{% if un == 'login' %} is-active{% endif %}"><i data-lucide="log-in" class="lu" aria-hidden="true"></i><span>Kirish</span></a>
+  {% endif %}
+</div>
+{% endwith %}

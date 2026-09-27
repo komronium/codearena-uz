@@ -1,6 +1,6 @@
 {% extends "base.html" %}{% load static tiers %}
 {% block title %}{% if contest_problem %}{{ contest_problem.label }}. {% endif %}{{ problem.title }}{% endblock %}
-{% block sidebar %}{% endblock %}
+
 {% block content %}
 {% include "contests/_dq_banner.html" with participation=my_participation %}
 {% if duel %}

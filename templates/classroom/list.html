@@ -1,11 +1,9 @@
 {% extends "base.html" %}
 {% block title %}Vazifalar{% endblock %}
+{% block page_title %}<h1>Vazifalar</h1>{% endblock %}
 {% block content %}
-<div class="mb-6 flex flex-wrap items-end justify-between gap-3">
-  <div>
-    <h1 class="ca-page-title">Vazifalar</h1>
-    <p class="mt-1 text-sm text-mute">Guruhingiz o‘qituvchisi bergan uy vazifalari. Muddatgacha yechilgani «o‘z vaqtida» hisoblanadi.</p>
-  </div>
+<div class="mb-5 flex flex-wrap items-center justify-between gap-3">
+  <p class="text-sm text-mute">Guruhingiz o‘qituvchisi bergan uy vazifalari. Muddatgacha yechilgani «o‘z vaqtida» hisoblanadi.</p>
   {% if can_create %}<a href="{% url 'classroom:new' %}" class="ca-btn ca-btn-primary"><i data-lucide="plus" class="lu" aria-hidden="true"></i>Vazifa berish</a>{% endif %}
 </div>
 

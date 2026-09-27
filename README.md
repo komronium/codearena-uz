@@ -38,10 +38,12 @@ Node. After adding a Tailwind class or an icon to a template:
 
     cd frontend && npm ci && npm run build   # then commit static/ and templates/_importmap.html
 
-The look lives in `frontend/src/app.css`: colours are CSS variables at the top (warm
-ivory paper, firuza for actions, lapis, ochre; a matching dark set), every text pairing
-at 4.5:1 or more. The star mark is `templates/_brand_mark.html`; `.ca-girih` lays the
-girih lattice behind heroes and banners.
+The look (Xon-atlas) lives in `frontend/src/app.css`: colours are CSS variables at the top —
+white paper, nil for actions, tun nili for the menu rail, and the atlas colours only where
+they mean something (zumrad easy/accepted/live, za’faron medium/medal/streak, malina
+hard/wrong, osmon beginner/info) — with a matching dark set; every text pairing at 4.5:1 or
+more. The ikat mark is `templates/_brand_mark.html`, the rail `templates/_rail.html`;
+`.ca-abr` is the atlas strip used on the landing hero and the profile banner only.
 
 `tests/test_frontend.py` fails when the committed build is stale (it runs where
 Node and `frontend/node_modules` exist) and when a template loads a third-party

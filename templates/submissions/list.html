@@ -1,10 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Urinishlar{% endblock %}
+{% block page_title %}<h1>Urinishlar</h1><span class="ca-topbar-sub">Yuborgan yechimlaringiz, eng yangisi tepada</span>{% endblock %}
 {% block content %}
-<div class="mb-6">
-  <h1 class="ca-page-title">Urinishlar</h1>
-  <p class="mt-1 text-sm text-mute">Yuborgan yechimlaringiz, eng yangisi tepada</p>
-</div>
 <div class="mb-4 flex flex-wrap gap-1.5" role="group" aria-label="Holat bo‘yicha filtr">
   <a href="{% url 'submissions:mine' %}" class="ca-filter {% if not verdict %}is-active{% endif %}"{% if not verdict %} aria-current="true"{% endif %}>Hammasi</a>
   {% for v, label in verdicts %}

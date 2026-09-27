@@ -5,8 +5,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
-  <meta name="theme-color" content="#F6F4EF" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#0B1014" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#110F26" media="(prefers-color-scheme: dark)">
   <link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
   <title>{% block title %}CodeArena{% endblock %}</title>
   <script>
@@ -29,72 +29,92 @@
 </head>
 <body class="min-h-full bg-paper text-ink antialiased" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
 <a class="ca-skip" href="#main">Asosiy tarkibga o‘tish</a>
-<header class="sticky top-0 z-40 border-b border-line bg-surface/85 backdrop-blur">
-  <nav class="mx-auto flex max-w-7xl items-center gap-2 px-4 py-2" aria-label="Asosiy">
-    <a href="{% url 'home' %}" class="ca-brand mr-3 shrink-0">{% include "_brand_mark.html" %}CodeArena</a>
-    <form method="get" action="{% url 'problems:list' %}" class="ca-search ml-auto hidden w-64 md:block" role="search" aria-label="Masala qidirish">
-      <i data-lucide="search" class="lu" aria-hidden="true"></i>
-      <input type="search" name="q" id="site-search" placeholder="Masala qidirish" class="ca-input" aria-label="Masala qidirish" aria-keyshortcuts="/">
-      <kbd class="ca-kbd" aria-hidden="true">/</kbd>
-    </form>
-    <div class="ml-auto flex shrink-0 items-center gap-1.5 md:ml-2">
-    {% if user.is_authenticated %}
-      {% with s=streak_pill %}{% if s.daily %}
-      <a href="{% url 'problems:detail' s.daily.problem.slug %}" class="ca-streak{% if s.done %} is-done{% elif s.current %} is-risk{% endif %}"
-         title="{% if s.done %}Bugungi masala yechildi — seriya {{ s.current }} kun{% elif s.current %}Seriya {{ s.current }} kun: bugun kun masalasini yeching, aks holda uziladi{% else %}Kun masalasini yechib, seriyani boshlang{% endif %}">
-        <i data-lucide="flame" class="lu" aria-hidden="true"></i><span class="tabular">{{ s.current }}</span>
-        <span class="sr-only">kunlik seriya{% if s.done %}, bugungi masala yechilgan{% elif s.current %}, bugungi masala hali yechilmagan{% endif %}</span>
-      </a>
-      {% endif %}{% endwith %}
-      {% include "_user_menu.html" %}
-    {% else %}
-      <button type="button" id="theme-toggle" class="ca-btn ca-btn-ghost !px-2.5 !py-1.5" title="Mavzu" aria-label="Mavzuni almashtirish">
-        <i data-lucide="sun-moon" class="lu" aria-hidden="true"></i>
-      </button>
-      <a href="{% url 'login' %}" class="ca-btn ca-btn-ghost !py-1.5">Kirish</a>
-      <a href="{% url 'register' %}" class="ca-btn ca-btn-primary hidden !py-1.5 sm:inline-flex">Ro‘yxatdan o‘tish</a>
-    {% endif %}
-    </div>
-  </nav>
-</header>
-<div class="mx-auto flex max-w-7xl items-start gap-8 px-4">
-  {% block sidebar %}<aside class="ca-sidebar sticky top-[53px] hidden w-52 shrink-0 flex-col gap-0.5 py-6 md:flex" aria-label="Yon menyu">
-    {% include "_nav.html" %}
-  </aside>{% endblock %}
-  <main id="main" class="min-w-0 flex-1 py-7">
-    {% if messages %}
-    <div class="mb-6 space-y-2" role="status" aria-live="polite">
-      {% for m in messages %}
-      <div class="ca-alert{% if m.level_tag == 'error' %} ca-alert-bad{% elif m.level_tag == 'warning' %} ca-alert-warn{% endif %}">{{ m }}</div>
-      {% endfor %}
-    </div>
-    {% endif %}
-    {% block content %}{% endblock %}
-  </main>
+<div class="ca-shell">
+  <nav class="ca-rail" aria-label="Asosiy menyu">{% include "_rail.html" %}</nav>
+  <div class="ca-col">
+    <header class="ca-topbar">
+      <a href="{% url 'home' %}" class="ca-topbar-brand" aria-label="CodeArena bosh sahifa">{% include "_brand_mark.html" %}</a>
+      <div class="ca-topbar-title">{% block page_title %}{% with ns=request.resolver_match.namespace un=request.resolver_match.url_name %}<p class="ca-topbar-section">{% if ns == "problems" %}Masalalar{% elif ns == "contests" %}Musobaqalar{% elif ns == "classroom" and "duel" in un %}Duellar{% elif ns == "classroom" %}Vazifalar{% elif ns == "submissions" %}Urinishlar{% elif ns == "moderation" or ns == "integrity" %}Boshqaruv{% elif un == "profile" or un == "profile_edit" %}Profil{% else %}CodeArena{% endif %}</p>{% endwith %}{% endblock %}</div>
+      <div class="ca-topbar-tools">
+        <form method="get" action="{% url 'problems:list' %}" class="ca-search hidden w-72 md:block" role="search" aria-label="Masala qidirish">
+          <i data-lucide="search" class="lu" aria-hidden="true"></i>
+          <input type="search" name="q" id="site-search" placeholder="Masala qidirish" class="ca-input" aria-label="Masala qidirish" aria-keyshortcuts="/">
+          <kbd class="ca-kbd" aria-hidden="true">/</kbd>
+        </form>
+        <a href="{% url 'problems:list' %}" class="ca-icon-btn md:hidden" aria-label="Masala qidirish"><i data-lucide="search" class="lu" aria-hidden="true"></i></a>
+        {% if user.is_authenticated %}
+        {% with s=streak_pill %}{% if s.daily %}
+        <a href="{% url 'problems:detail' s.daily.problem.slug %}" class="ca-streak{% if s.done %} is-done{% elif s.current %} is-risk{% endif %}"
+           title="{% if s.done %}Bugungi masala yechildi — seriya {{ s.current }} kun{% elif s.current %}Seriya {{ s.current }} kun: bugun kun masalasini yeching, aks holda uziladi{% else %}Kun masalasini yechib, seriyani boshlang{% endif %}">
+          <i data-lucide="flame" class="lu" aria-hidden="true"></i><span class="tabular">{{ s.current }}</span>
+          <span class="sr-only">kunlik seriya{% if s.done %}, bugungi masala yechilgan{% elif s.current %}, bugungi masala hali yechilmagan{% endif %}</span>
+        </a>
+        {% endif %}{% endwith %}
+        {% else %}
+        <a href="{% url 'login' %}" class="ca-btn ca-btn-ghost !py-1.5">Kirish</a>
+        <a href="{% url 'register' %}" class="ca-btn ca-btn-primary hidden !py-1.5 sm:inline-flex">Ro‘yxatdan o‘tish</a>
+        {% endif %}
+      </div>
+    </header>
+    <main id="main" class="ca-main">
+      {% if user.is_staff and request.resolver_match.namespace == "moderation" or user.is_staff and request.resolver_match.url_name == "audit" %}{% include "_mod_tabs.html" %}{% endif %}
+      {% if messages %}
+      <div class="mb-6 space-y-2" role="status" aria-live="polite">
+        {% for m in messages %}
+        <div class="ca-alert{% if m.level_tag == 'error' %} ca-alert-bad{% elif m.level_tag == 'warning' %} ca-alert-warn{% endif %}">{{ m }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
 </div>
 <nav class="ca-bottom-nav md:hidden" aria-label="Mobil menyu">
   {% with ns=request.resolver_match.namespace un=request.resolver_match.url_name %}
-  <a href="{% url 'home' %}" class="{% if un == 'home' %}is-active{% endif %}"><i data-lucide="house" class="lu" aria-hidden="true"></i><span>Bosh sahifa</span></a>
-  <a href="{% url 'problems:list' %}" class="{% if ns == 'problems' %}is-active{% endif %}"><i data-lucide="list-checks" class="lu" aria-hidden="true"></i><span>Masalalar</span></a>
-  <a href="{% url 'contests:list' %}" class="{% if ns == 'contests' %}is-active{% endif %}"><i data-lucide="trophy" class="lu" aria-hidden="true"></i><span>Musobaqalar</span></a>
-  {% if user.is_authenticated %}
-  <a href="{% url 'submissions:mine' %}" class="{% if ns == 'submissions' %}is-active{% endif %}"><i data-lucide="history" class="lu" aria-hidden="true"></i><span>Urinishlar</span>{% if unread_reviews %}<b class="ca-nav-dot" aria-label="{{ unread_reviews }} ta o‘qilmagan sharh"></b>{% endif %}</a>
-  {% else %}
-  <a href="{% url 'login' %}" class="{% if un == 'login' %}is-active{% endif %}"><i data-lucide="log-in" class="lu" aria-hidden="true"></i><span>Kirish</span></a>
-  {% endif %}
-  <button type="button" data-menu-open aria-haspopup="dialog" aria-controls="ca-menu"><i data-lucide="menu" class="lu" aria-hidden="true"></i><span>Menyu</span></button>
+  <a href="{% url 'home' %}"{% if un == 'home' %} class="is-active" aria-current="page"{% endif %}><span class="ca-bn-icon"><i data-lucide="house" class="lu" aria-hidden="true"></i></span><span>Bosh sahifa</span></a>
+  <a href="{% url 'problems:list' %}"{% if ns == 'problems' %} class="is-active" aria-current="page"{% endif %}><span class="ca-bn-icon"><i data-lucide="list-checks" class="lu" aria-hidden="true"></i></span><span>Masalalar</span></a>
+  <a href="{% url 'contests:list' %}"{% if ns == 'contests' %} class="is-active" aria-current="page"{% endif %}><span class="ca-bn-icon"><i data-lucide="trophy" class="lu" aria-hidden="true"></i></span><span>Musobaqa</span></a>
+  <a href="{% url 'rating' %}"{% if un == 'rating' or un == 'top' %} class="is-active" aria-current="page"{% endif %}><span class="ca-bn-icon"><i data-lucide="chart-column" class="lu" aria-hidden="true"></i></span><span>Reyting</span></a>
+  <button type="button" data-menu-open aria-haspopup="dialog" aria-controls="ca-menu"><span class="ca-bn-icon">{% if user.is_authenticated %}<i data-lucide="user" class="lu" aria-hidden="true"></i>{% else %}<i data-lucide="menu" class="lu" aria-hidden="true"></i>{% endif %}</span><span>{% if user.is_authenticated %}Men{% else %}Menyu{% endif %}</span>{% if unread_reviews %}<b class="ca-nav-dot" aria-label="{{ unread_reviews }} ta o‘qilmagan sharh"></b>{% endif %}</button>
   {% endwith %}
 </nav>
-{% comment %}The phone menu: every destination the desktop sidebar has, staff pages included.
+{% comment %}The phone menu: the account, every destination (staff pages included) and the theme.
 A native dialog gives focus trapping and Esc for free.{% endcomment %}
 <dialog id="ca-menu" class="ca-sheet md:hidden" aria-labelledby="ca-menu-title">
   <div class="ca-dialog-head">
-    <h2 id="ca-menu-title">Menyu</h2>
+    <h2 id="ca-menu-title">{% if user.is_authenticated %}Hisob va menyu{% else %}Menyu{% endif %}</h2>
     <button type="button" class="ca-dialog-x" data-menu-close aria-label="Yopish"><i data-lucide="x" class="lu" aria-hidden="true"></i></button>
   </div>
-  <nav class="grid grid-cols-2 gap-1 overflow-y-auto p-3" aria-label="Barcha sahifalar">
-    {% include "_nav.html" %}
-  </nav>
+  <div class="overflow-y-auto p-3">
+    {% if user.is_authenticated %}
+    <a href="{% url 'profile' user.username %}" class="mb-2 flex items-center gap-3 rounded-[var(--ca-radius-sm)] bg-sunk px-3 py-3" style="--tier: {{ user.rating|tier_color }}" translate="no">
+      <span class="ca-avatar ca-user-avatar h-10 w-10 text-base">{% if user.avatar %}<img src="{{ user.avatar.url }}" alt="" width="40" height="40">{% else %}{{ user.username|first }}{% endif %}</span>
+      <span class="min-w-0"><span class="ca-tier-ink block truncate font-semibold">{{ user.get_full_name|default:user.username }}</span><span class="block text-xs text-mute tabular">{{ user.rating|tier_name }} · {{ user.rating }} · {{ user.practice_points }} ball</span></span>
+      <i data-lucide="chevron-right" class="lu ml-auto text-mute" aria-hidden="true"></i>
+    </a>
+    {% endif %}
+    <nav class="grid grid-cols-2 gap-1" aria-label="Barcha sahifalar">
+      {% include "_nav.html" %}
+    </nav>
+    <div class="mt-3 flex items-center justify-between gap-3 border-t border-line px-1 pt-3">
+      <span id="sheet-theme-label" class="text-sm font-medium text-mute">Mavzu</span>
+      <div class="ca-seg ca-seg-sm" role="group" aria-labelledby="sheet-theme-label">
+        <button type="button" data-theme-set="system" aria-pressed="false" aria-label="Tizimdagidek"><i data-lucide="monitor" class="lu" aria-hidden="true"></i></button>
+        <button type="button" data-theme-set="light" aria-pressed="false" aria-label="Yorug‘"><i data-lucide="sun" class="lu" aria-hidden="true"></i></button>
+        <button type="button" data-theme-set="dark" aria-pressed="false" aria-label="Qorong‘i"><i data-lucide="moon" class="lu" aria-hidden="true"></i></button>
+      </div>
+    </div>
+    {% if user.is_authenticated %}
+    <form method="post" action="{% url 'logout' %}" class="mt-3 border-t border-line pt-2">{% csrf_token %}
+      <button type="submit" class="ca-sidebar-link w-full !text-bad"><i data-lucide="log-out" class="lu" aria-hidden="true"></i>Chiqish</button>
+    </form>
+    {% else %}
+    <div class="mt-3 grid grid-cols-2 gap-2 border-t border-line pt-3">
+      <a href="{% url 'login' %}" class="ca-btn ca-btn-ghost">Kirish</a>
+      <a href="{% url 'register' %}" class="ca-btn ca-btn-primary">Ro‘yxatdan o‘tish</a>
+    </div>
+    {% endif %}
+  </div>
 </dialog>
 <script>
   (() => {

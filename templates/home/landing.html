@@ -1,9 +1,9 @@
 {% extends "base.html" %}{% load numbers tiers %}
 {% block title %}CodeArena — dasturlashni musobaqada o‘rganing{% endblock %}
-{% block sidebar %}{% endblock %}
+
 {% block content %}
 <section class="ca-hero" aria-labelledby="hero-title">
-  <div class="ca-girih" aria-hidden="true"></div>
+  <div class="ca-abr ca-hero-abr" aria-hidden="true"></div>
   <div class="relative grid items-center gap-12 lg:grid-cols-[1.1fr_1fr]">
     <div class="min-w-0">
       <p class="ca-eyebrow">Talabalar uchun dasturlash platformasi</p>
@@ -121,7 +121,6 @@
       </ul>
     </article>
     <article class="ca-tile ca-tile-honest lg:col-span-3">
-      <div class="ca-girih" aria-hidden="true"></div>
       <div class="relative grid gap-6 md:grid-cols-[1fr_1.1fr] md:items-center">
         <div>
           <span class="ca-tile-icon"><i data-lucide="shield-check" class="lu" aria-hidden="true"></i></span>
@@ -165,7 +164,6 @@
 </section>
 
 <section class="ca-cta mt-20" aria-labelledby="cta-title">
-  <div class="ca-girih" aria-hidden="true"></div>
   <div class="relative flex flex-wrap items-center justify-between gap-6">
     <div>
       <h2 id="cta-title" class="text-2xl font-bold tracking-tight">Bugun boshlang</h2>

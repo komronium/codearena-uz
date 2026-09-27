@@ -4,14 +4,42 @@ from django.shortcuts import render
 from django.utils import timezone
 
 from apps.accounts.models import User
+from apps.accounts.views import _next_tier
 from apps.classroom import duels
 from apps.classroom.models import Assignment, Duel
-from apps.contests.models import Contest
+from apps.contests.models import Contest, Participation
 from apps.contests.views import _standings  # cached, the standings page's own numbers
 from apps.problems.daily import daily_for, streaks, week_strip
 from apps.problems.models import DailySolve, Language, Problem
 from apps.problems.skills import next_problems, open_problems, shared_reason
 from apps.submissions.models import Submission
+
+
+_WEEKDAYS = ["Dushanba", "Seshanba", "Chorshanba", "Payshanba", "Juma", "Shanba", "Yakshanba"]
+_MONTHS = ["yanvar", "fevral", "mart", "aprel", "may", "iyun", "iyul", "avgust", "sentabr", "oktabr", "noyabr", "dekabr"]
+
+
+def _rating_card(user) -> dict:
+    """The rating block: the last rated change, the place among rated users, the next tier."""
+    rated = Participation.objects.filter(rating_after__isnull=False)
+    last = rated.filter(user=user).order_by("-contest__end").first()
+    rated_users = User.objects.filter(is_active=True, participations__rating_after__isnull=False).distinct()
+    return {
+        "delta": last.rating_after - last.rating_before if last else None,
+        "rank": rated_users.filter(rating__gt=user.rating).count() + 1 if last else None,
+        "total": rated_users.count(),
+        "next": _next_tier(user.rating),
+    }
+
+
+def _live(user, running) -> dict | None:
+    """The first running contest, with the user's place and progress from its standings."""
+    if not running:
+        return None
+    contest = running[0]
+    row = next((r for r in _standings(contest) if r["user"].pk == user.pk), None)
+    return {"contest": contest, "joined": row is not None, "rank": row and row["rank"],
+            "solved": row and row["solved"], "n_problems": contest.contest_problems.count()}
 
 
 def home(request):
@@ -48,6 +76,7 @@ def home(request):
         d.my_end = clock[1] if clock and clock[1] > now else None
     current, best = streaks(user)
     next_picks = next_problems(user, exclude=(daily.problem_id,) if daily else ())
+    today = timezone.localdate()
     return render(request, "home/dashboard.html", {
         "daily": daily,
         "daily_done": bool(daily) and DailySolve.objects.filter(user=user, daily=daily).exists(),
@@ -57,7 +86,9 @@ def home(request):
         "homework": homework,
         "challenges": list(mine.filter(status=Duel.Status.PENDING, opponent=user)[:3]),
         "active_duels": live,
-        "running": running, "upcoming": upcoming,
+        "running": running, "upcoming": upcoming, "live": _live(user, running),
+        "today_label": f"{_WEEKDAYS[today.weekday()]}, {today.day}-{_MONTHS[today.month - 1]}",
+        "rating_card": _rating_card(user),
         "next_picks": next_picks, "picks_reason": shared_reason(next_picks),
         "recent": list(Submission.objects.filter(user=user).select_related("problem", "language")[:5]),
         "taught": list(Assignment.objects.filter(group__teacher=user).select_related("group")

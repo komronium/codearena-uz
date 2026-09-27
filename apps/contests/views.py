@@ -36,6 +36,10 @@ def contest_list(request):
                       if c.me and c.me.rating_after is not None and c.me.rating_before is not None else None)
     for c in running:
         c.elapsed_pct = round(100 * (now - c.start) / (c.end - c.start))
+        c.n_problems = c.contest_problems.count()
+        # your place and progress so far, from the same standings the table shows
+        row = c.me and next((r for r in _standings(c) if r["user"].pk == request.user.pk), None)
+        c.my_rank, c.my_solved = (row["rank"], row["solved"]) if row else (None, None)
     return render(request, "contests/list.html", {"running": running, "upcoming": upcoming, "ended": ended})
 
 
