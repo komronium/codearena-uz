@@ -346,6 +346,9 @@ a.ca-st-label:hover { text-decoration: underline; text-underline-offset: 3px; }
 /* leaderboard + submission rows: fixed grid so columns line up without a table */
 .ca-lb { display: grid; grid-template-columns: 2.25rem minmax(0, 1fr) auto 4.5rem; align-items: center; gap: .9rem; padding: .7rem 1rem; }
 .ca-lb-value { text-align: right; font-size: 1.05rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+/* rating list: adds the last contest's change; phones drop the contest count */
+.ca-lb-rating { grid-template-columns: 2.25rem minmax(0, 1fr) auto 3rem 4.5rem; }
+@media (max-width: 639px) { .ca-lb-rating { grid-template-columns: 2.25rem minmax(0, 1fr) 3rem 4.5rem; } }
 /* homework problem picker (classroom/form.html): search hits, then the chosen problems in order */
 .ca-picker-hits {
   margin-top: .35rem; max-height: 18rem; overflow-y: auto; list-style: none; padding: .25rem;
@@ -356,6 +359,8 @@ a.ca-st-label:hover { text-decoration: underline; text-underline-offset: 3px; }
 .ca-picker-hit svg.lucide { flex: none; width: 1rem; height: 1rem; color: rgb(var(--ca-accent-rgb)); }
 .ca-picked > li { display: flex; align-items: center; gap: .5rem; padding: .55rem .75rem; }
 .ca-picked-n { flex: none; display: grid; place-items: center; width: 1.6rem; height: 1.6rem; margin-right: .25rem; border-radius: 9999px; font-size: .75rem; font-weight: 600; background: rgb(var(--ca-sunk-rgb)); }
+/* how the rated users split across tiers: one segment per tier, as wide as its head count */
+.ca-tier-strip { display: flex; gap: 2px; height: .5rem; border-radius: 9999px; overflow: hidden; }
 .ca-sub { display: grid; grid-template-columns: 4.75rem minmax(0, 1fr) auto; align-items: center; gap: .9rem; padding: .7rem 1rem; }
 .ca-sub .ca-verdict { justify-content: center; width: 100%; }
 /* profile banner: the girih lattice in the user's tier colour */

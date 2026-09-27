@@ -4,7 +4,7 @@ import math
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.db.models import Count, Q
+from django.db.models import Count, F, OuterRef, Q, Subquery
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
@@ -42,6 +42,18 @@ def _tier_color(rating: int) -> str:
         if (floor is None or rating >= floor) and (ceiling is None or rating < ceiling):
             return color
     return _RATING_TIERS[-1][3]
+
+
+def _next_tier(rating: int) -> dict | None:
+    """The tier above `rating`: its name, colour, the points still needed and the percent
+    of the way through the current tier (the bottom tier counts from 0). None at the top."""
+    for i, (floor, ceiling, _name, _color) in enumerate(_RATING_TIERS):
+        if ceiling is not None and rating < ceiling and (floor is None or rating >= floor):
+            _floor, _ceiling, name, color = _RATING_TIERS[i + 1]
+            floor = floor or 0
+            pct = max(0, round(100 * (rating - floor) / (ceiling - floor)))
+            return {"name": name, "color": color, "need": ceiling - rating, "pct": pct}
+    return None
 
 
 _CHART_W, _CHART_H = 700, 220
@@ -181,13 +193,25 @@ def top(request):
 
 def rating(request):
     # Only users who finished a rated contest; a default 1200 says nothing about anyone.
+    rated = Participation.objects.filter(rating_after__isnull=False)
+    last = rated.filter(user=OuterRef("pk")).order_by("-contest__end").annotate(d=F("rating_after") - F("rating_before"))
     qs = (User.objects.filter(is_active=True)
-          .annotate(contest_count=Count("participations", filter=Q(participations__rating_after__isnull=False)))
+          .annotate(contest_count=Count("participations", filter=Q(participations__rating_after__isnull=False)),
+                    last_delta=Subquery(last.values("d")[:1]))
           .filter(contest_count__gt=0).order_by("-rating", "username"))
     page = Paginator(qs, 50).get_page(request.GET.get("page"))
-    tiers = [{"name": n, "color": c, "floor": f, "ceiling": ce} for f, ce, n, c in _RATING_TIERS]
+    ratings = list(qs.values_list("rating", flat=True))
+    tiers = [{"name": n, "color": c, "floor": f, "ceiling": ce,
+              "count": sum(1 for r in ratings if (f is None or r >= f) and (ce is None or r < ce))}
+             for f, ce, n, c in _RATING_TIERS]
+    me = None
+    if request.user.is_authenticated:
+        mine = rated.filter(user=request.user).order_by("-contest__end").first()
+        if mine is not None:
+            me = {"rank": sum(1 for r in ratings if r > request.user.rating) + 1,
+                  "delta": mine.rating_after - mine.rating_before, "next": _next_tier(request.user.rating)}
     return render(request, "accounts/rating.html",
-                  {"users": page, "total": qs.count(), "tiers": tiers, **_podium_split(page)})
+                  {"users": page, "total": len(ratings), "tiers": tiers, "me": me, **_podium_split(page)})
 
 
 def profile(request, username):

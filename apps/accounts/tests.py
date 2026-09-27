@@ -121,6 +121,26 @@ def test_rating_lists_users_by_rating_desc(client):
 
 
 @pytest.mark.django_db
+def test_rating_shows_your_place_the_next_tier_and_everyones_last_change(client):
+    from .views import _next_tier
+
+    low = User.objects.create_user("low", password="x", rating=1250)
+    high = User.objects.create_user("high", password="x", rating=1650)
+    _rated(low, high)  # both from 1200: +50 and +450
+    client.force_login(low)
+    r = client.get(reverse("rating"))
+    assert r.context["me"] == {"rank": 2, "delta": 50,
+                               "next": {"name": "Pupil", "color": "#16A34A", "need": 50, "pct": 96}}
+    assert {t["name"]: t["count"] for t in r.context["tiers"] if t["count"]} == {"Newbie": 1, "Specialist": 1}
+    assert [u.last_delta for u in r.context["users"]] == [450, 50]
+    assert _next_tier(1500)["name"] == "Expert" and _next_tier(1500)["pct"] == 0
+    assert _next_tier(2400) is None  # Grandmaster has nothing above it
+
+    client.force_login(User.objects.create_user("fresh", password="x"))
+    assert client.get(reverse("rating")).context["me"] is None  # no rated contest yet: no place
+
+
+@pytest.mark.django_db
 def test_blocked_users_get_no_place_on_boards(client):
     ok = User.objects.create_user("ok", password="x", rating=1400, practice_points=5)
     banned = User.objects.create_user("banned", password="x", rating=1800, practice_points=50, is_active=False)
