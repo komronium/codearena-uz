@@ -5,8 +5,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
-  <meta name="theme-color" content="#F5F6FA" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#0B0D12" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#F6F4EF" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0B1014" media="(prefers-color-scheme: dark)">
+  <link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
   <title>{% block title %}CodeArena{% endblock %}</title>
   <script>
     try { const t = localStorage.getItem("ca-theme"); if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch {}
@@ -29,38 +30,31 @@
 <body class="min-h-full bg-paper text-ink antialiased" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
 <a class="ca-skip" href="#main">Asosiy tarkibga o‘tish</a>
 <header class="sticky top-0 z-40 border-b border-line bg-surface/85 backdrop-blur">
-  <nav class="mx-auto flex max-w-6xl items-center gap-1 px-4 py-2.5" aria-label="Asosiy">
-    <a href="{% url 'home' %}" class="ca-brand mr-3 shrink-0">
-      <span class="ca-brand-mark" aria-hidden="true"><i data-lucide="code" class="lu"></i></span>CodeArena
-    </a>
-    <form method="get" action="{% url 'problems:list' %}" class="relative ml-auto hidden w-56 md:block" role="search" aria-label="Masala qidirish">
-      <i data-lucide="search" class="lu pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-mute" aria-hidden="true"></i>
-      <input type="search" name="q" placeholder="Masala qidirish…" class="ca-input !py-1.5 pl-8 text-sm" aria-label="Masala qidirish">
+  <nav class="mx-auto flex max-w-7xl items-center gap-2 px-4 py-2" aria-label="Asosiy">
+    <a href="{% url 'home' %}" class="ca-brand mr-3 shrink-0">{% include "_brand_mark.html" %}CodeArena</a>
+    <form method="get" action="{% url 'problems:list' %}" class="ca-search ml-auto hidden w-64 md:block" role="search" aria-label="Masala qidirish">
+      <i data-lucide="search" class="lu" aria-hidden="true"></i>
+      <input type="search" name="q" id="site-search" placeholder="Masala qidirish" class="ca-input" aria-label="Masala qidirish" aria-keyshortcuts="/">
+      <kbd class="ca-kbd" aria-hidden="true">/</kbd>
     </form>
-    <div class="flex shrink-0 items-center gap-1 md:ml-2 ml-auto">
-    <button type="button" id="theme-toggle" class="ca-btn ca-btn-ghost !px-2.5 !py-1.5" title="Tema" aria-label="Temani almashtirish">
-      <i data-lucide="sun-moon" class="lu" aria-hidden="true"></i>
-    </button>
+    <div class="ml-auto flex shrink-0 items-center gap-1.5 md:ml-2">
     {% if user.is_authenticated %}
-        <a href="{% url 'profile' user.username %}" class="ca-nav-link min-w-0 gap-2 max-w-[11rem] !px-1.5 sm:!px-3" title="{{ user.username }}" aria-label="Profil: {{ user.username }}" translate="no" style="--tier: {{ user.rating|tier_color }}">
-          <span class="ca-avatar h-7 w-7 text-xs sm:h-6 sm:w-6 sm:text-[.65rem]" style="background: color-mix(in srgb, var(--tier) 14%, transparent); color: color-mix(in oklab, var(--tier) 62%, rgb(var(--ca-ink-rgb)))">{% if user.avatar %}<img src="{{ user.avatar.url }}" alt="" width="28" height="28">{% else %}{{ user.username|first }}{% endif %}</span>
-          <span class="ca-tier-ink hidden truncate font-semibold sm:inline">{{ user.username }}</span>
-        </a>
-        <form method="post" action="{% url 'logout' %}">{% csrf_token %}
-          <button type="submit" class="ca-btn ca-btn-ghost !px-2.5 !py-1.5 text-sm sm:!px-3" aria-label="Chiqish" title="Chiqish"><i data-lucide="log-out" class="lu sm:!hidden" aria-hidden="true"></i><span class="hidden sm:inline">Chiqish</span></button>
-        </form>
+      {% include "_user_menu.html" %}
     {% else %}
-        <a href="{% url 'login' %}" class="ca-btn ca-btn-ghost">Kirish</a>
-        <a href="{% url 'register' %}" class="ca-btn ca-btn-primary hidden sm:inline-flex">Ro‘yxatdan o‘tish</a>
+      <button type="button" id="theme-toggle" class="ca-btn ca-btn-ghost !px-2.5 !py-1.5" title="Mavzu" aria-label="Mavzuni almashtirish">
+        <i data-lucide="sun-moon" class="lu" aria-hidden="true"></i>
+      </button>
+      <a href="{% url 'login' %}" class="ca-btn ca-btn-ghost !py-1.5">Kirish</a>
+      <a href="{% url 'register' %}" class="ca-btn ca-btn-primary hidden !py-1.5 sm:inline-flex">Ro‘yxatdan o‘tish</a>
     {% endif %}
     </div>
   </nav>
 </header>
-<div class="mx-auto flex max-w-6xl items-start gap-6 px-4">
-  {% block sidebar %}<aside class="sticky top-[57px] hidden w-56 shrink-0 flex-col gap-1.5 py-8 md:flex" aria-label="Yon menyu">
+<div class="mx-auto flex max-w-7xl items-start gap-8 px-4">
+  {% block sidebar %}<aside class="ca-sidebar sticky top-[53px] hidden w-52 shrink-0 flex-col gap-0.5 py-6 md:flex" aria-label="Yon menyu">
     {% include "_nav.html" %}
   </aside>{% endblock %}
-  <main id="main" class="min-w-0 flex-1 py-8">
+  <main id="main" class="min-w-0 flex-1 py-7">
     {% if messages %}
     <div class="mb-6 space-y-2" role="status" aria-live="polite">
       {% for m in messages %}
@@ -123,25 +117,51 @@ A native dialog gives focus trapping and Esc for free.{% endcomment %}
     menu.addEventListener("click", (e) => { if (e.target === menu) menu.close(); });  // tap on the backdrop
   })();
   (() => {
-    const btn = document.getElementById("theme-toggle");
+    // Theme: "system" follows the OS. Guests cycle it with the header button; signed-in
+    // users pick it in the account menu.
     const order = ["system", "light", "dark"];
     const icons = { system: "sun-moon", light: "sun", dark: "moon" };
-    const labels = { system: "Tema: tizim", light: "Tema: yorug‘", dark: "Tema: qorong‘i" };
+    const labels = { system: "Mavzu: tizim", light: "Mavzu: yorug‘", dark: "Mavzu: qorong‘i" };
+    const btn = document.getElementById("theme-toggle");
     let cur = "system";
     try { cur = localStorage.getItem("ca-theme") || "system"; } catch {}
     const apply = () => {
       if (cur === "system") delete document.documentElement.dataset.theme;
       else document.documentElement.dataset.theme = cur;
-      btn.innerHTML = `<i data-lucide="${icons[cur]}" class="lu" aria-hidden="true"></i>`;
-      window.caIcons();
-      btn.title = labels[cur];
+      if (btn) {
+        btn.innerHTML = `<i data-lucide="${icons[cur]}" class="lu" aria-hidden="true"></i>`;
+        btn.title = labels[cur];
+        window.caIcons();
+      }
+      document.querySelectorAll("[data-theme-set]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.themeSet === cur)));
       window.dispatchEvent(new CustomEvent("ca-theme"));
     };
-    apply();
-    btn.addEventListener("click", () => {
-      cur = order[(order.indexOf(cur) + 1) % order.length];
+    const set = (mode) => {
+      cur = mode;
       try { cur === "system" ? localStorage.removeItem("ca-theme") : localStorage.setItem("ca-theme", cur); } catch {}
       apply();
+    };
+    apply();
+    btn?.addEventListener("click", () => set(order[(order.indexOf(cur) + 1) % order.length]));
+    document.querySelectorAll("[data-theme-set]").forEach((b) => b.addEventListener("click", () => set(b.dataset.themeSet)));
+  })();
+  (() => {
+    // Dropdowns (<details data-dropdown>): one open at a time, closed by an outside click or Esc.
+    const all = () => document.querySelectorAll("details[data-dropdown][open]");
+    document.addEventListener("click", (e) => all().forEach((d) => { if (!d.contains(e.target)) d.open = false; }));
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      all().forEach((d) => { d.open = false; d.querySelector("summary").focus(); });
+    });
+  })();
+  (() => {
+    // "/" jumps to the problem search, unless the user is typing somewhere.
+    const box = document.getElementById("site-search");
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "/" || e.ctrlKey || e.metaKey || e.altKey || !box || !box.offsetParent) return;
+      const t = e.target;
+      if (t.closest("input, textarea, select, [contenteditable], .cm-editor")) return;
+      e.preventDefault(); box.focus();
     });
   })();
 </script>

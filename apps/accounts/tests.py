@@ -290,3 +290,11 @@ def test_profile_gauge_counts_solves_from_the_same_catalog_as_the_totals(client)
     easy = next(d for d in r.context["by_diff"] if d["key"] == "easy")
     assert (easy["solved"], easy["total"]) == (1, 1)
     assert r.context["solved_shown"] == 1 and r.context["total_public_problems"] == 1
+
+
+@pytest.mark.django_db
+def test_activity_calendar_tells_june_from_july():
+    from .views import _activity_calendar
+
+    names = [m["name"] for m in _activity_calendar(User.objects.create_user("ali", password="x"))["month_labels"]]
+    assert "Iyn" in names and "Iyl" in names and "Iyu" not in names

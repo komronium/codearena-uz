@@ -76,3 +76,17 @@ def streaks(user) -> tuple[int, int]:
     while d in days:
         cur, d = cur + 1, d - datetime.timedelta(days=1)
     return cur, best
+
+
+WEEKDAYS_SHORT = ["Du", "Se", "Ch", "Pa", "Ju", "Sh", "Ya"]
+
+
+def week_strip(user) -> list[dict]:
+    """This week, Monday to Sunday: which days' daily problem the user solved on its day."""
+    today = timezone.localdate()
+    monday = today - datetime.timedelta(days=today.weekday())
+    days = [monday + datetime.timedelta(days=i) for i in range(7)]
+    done = set(DailySolve.objects.filter(user=user, daily__date__range=(days[0], days[-1]))
+               .values_list("daily__date", flat=True))
+    return [{"label": WEEKDAYS_SHORT[i], "date": d, "done": d in done, "today": d == today, "future": d > today}
+            for i, d in enumerate(days)]

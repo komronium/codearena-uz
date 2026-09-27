@@ -72,20 +72,25 @@ _LEADER_ORDER = {"time": ("exec_ms", "pk"), "length": ("code_len", "pk")}
 
 
 def problem_list(request):
-    problems = Problem.objects.filter(is_public=True).exclude(contests__start__gt=timezone.now())
+    visible = Problem.objects.filter(is_public=True).exclude(contests__start__gt=timezone.now())
+    problems = visible
     q = request.GET.get("q", "").strip()
     if q:
         problems = problems.filter(title__icontains=q)
     tag = request.GET.get("tag", "").strip()
     if tag:
         problems = problems.filter(tags__name=tag)
-    difficulty = request.GET.get("difficulty", "").strip()
-    if difficulty in Problem.Difficulty.values:
-        problems = problems.filter(difficulty=difficulty)
     status = request.GET.get("status", "").strip()
     if status in ("solved", "unsolved") and request.user.is_authenticated:
         solved_q = Q(userproblemsolved__user=request.user)
         problems = problems.filter(solved_q) if status == "solved" else problems.exclude(solved_q)
+    # the difficulty chips count what the other filters leave, so each number is what a click shows
+    by_level = dict(problems.order_by().values("difficulty").annotate(n=Count("id", distinct=True))
+                    .values_list("difficulty", "n"))
+    level_chips = [{"value": v, "label": lbl, "n": by_level.get(v, 0)} for v, lbl in Problem.Difficulty.choices]
+    difficulty = request.GET.get("difficulty", "").strip()
+    if difficulty in Problem.Difficulty.values:
+        problems = problems.filter(difficulty=difficulty)
     problems = problems.prefetch_related("tags").annotate(
         attempts=Count("submissions", distinct=True),
         ac_count=Count("submissions", filter=Q(submissions__verdict="AC"), distinct=True),
@@ -117,8 +122,16 @@ def problem_list(request):
         streak = streaks(request.user)[0]
     next_picks = (next_problems(request.user, exclude=(daily.problem_id,) if daily else ())
                   if request.user.is_authenticated and browsing else [])
+    total = visible.distinct().count()
+    progress = None
+    if request.user.is_authenticated:
+        progress = {"done": UserProblemSolved.objects.filter(user=request.user, problem__in=visible).count(),
+                    "total": total}
     return render(request, "problems/list.html", {
         "problems": page,
+        "progress": progress, "total": total,
+        "level_chips": level_chips, "level_total": sum(by_level.values()),
+        "any_rated": any(p.avg_stars for p in page),
         "next_picks": next_picks,
         "daily": daily, "daily_done": daily_done, "streak": streak,
         "sort": sort, "dir": "desc" if desc else "asc",

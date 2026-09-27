@@ -2,7 +2,7 @@
 {% block title %}{{ profile_user.username }}{% endblock %}
 {% block content %}
 <div class="ca-panel mb-6 !p-0 overflow-hidden">
-  <div class="ca-banner" style="--tier: {{ tier_color }}" aria-hidden="true"></div>
+  <div class="ca-banner" style="--tier: {{ tier_color }}" aria-hidden="true"><div class="ca-girih"></div></div>
   <div class="flex flex-wrap items-end justify-between gap-4 px-6 pb-5">
     <div class="flex flex-wrap items-start gap-4">
       {% if profile_user.avatar %}
@@ -92,6 +92,7 @@
           {% endfor %}
         </div>
         {% if attempting %}<p class="mt-3 text-xs text-mute"><span class="font-semibold text-warn tabular">{{ attempting }}</span> ta masala urinilgan, hali yechilmagan</p>{% endif %}
+        {% if solved_hidden > 0 %}<p class="mt-1.5 text-xs text-mute">Yana <b class="tabular text-ink">{{ solved_hidden }}</b> ta yechilgan masala hozir kelgusi musobaqada, shuning uchun yashirin.</p>{% endif %}
       </div>
     </div>
 
@@ -159,7 +160,8 @@
         <span>Eng uzun seriya: <b class="text-ink tabular">{{ activity.max_streak }}</b></span>
       </p>
     </div>
-    <div class="-mx-1 overflow-x-auto px-1 pb-1">
+    {# rtl scroller: a phone shows the latest weeks first; the map itself stays left-to-right #}
+    <div class="ca-scroll-end -mx-1 overflow-x-auto px-1 pb-1" tabindex="0" role="region" aria-label="Faollik xaritasi (yon tomonga suriladi)">
     <div class="min-w-[36rem]" role="img" aria-label="Faollik xaritasi: so‘nggi bir yilda {{ activity.total }} ta urinish, {{ activity.active_days }} faol kun">
       <div class="flex gap-[3px]" aria-hidden="true">
         {% for w in activity.weeks %}
@@ -180,7 +182,7 @@
 <section class="mb-8">
   <h2 class="ca-section-title">Reyting tarixi</h2>
   {% if rating_history|length > 1 %}
-  <div class="ca-panel mb-3 overflow-x-auto">
+  <div class="ca-panel ca-scroll-end mb-3 overflow-x-auto" tabindex="0" role="region" aria-label="Reyting grafigi (yon tomonga suriladi)">
     <svg viewBox="0 0 {{ rating_chart.w }} {{ rating_chart.h }}" class="w-full" style="min-width: 480px"
          role="img" aria-label="Reyting tarixi grafigi, {{ rating_history|length }} ta musobaqa">
       {% for b in rating_chart.bands %}

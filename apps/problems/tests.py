@@ -626,3 +626,47 @@ def test_next_problems_reach_down_a_level_for_the_strongest(catalog):
     _solve(ali, catalog["dp4"])  # only a hard one solved: nothing is above hard
     picks = [p.slug for p, _ in next_problems(ali)]
     assert picks and picks[0] == "dp3" and len(picks) == 1  # dp3 is the only unsolved medium; easy is two down
+
+
+# ---- redesign: week strip, list filters, profile honesty ---------------------------------------
+
+@pytest.mark.django_db
+def test_week_strip_marks_this_weeks_daily_solves(catalog):
+    from apps.submissions.models import Submission
+    from apps.submissions.solves import refresh_solves
+
+    from .daily import daily_for, week_strip
+
+    ali = User.objects.create_user("ali", password="x")
+    lang = Language.objects.create(code="python", name="Python 3", docker_image="x", run_cmd="x")
+    d = daily_for()
+    Submission.objects.create(user=ali, problem=d.problem, language=lang, source="x", verdict="AC")
+    refresh_solves(d.problem_id, [ali.pk])
+    week, today = week_strip(ali), timezone.localdate().weekday()
+    assert [w["label"] for w in week] == ["Du", "Se", "Ch", "Pa", "Ju", "Sh", "Ya"]
+    assert week[today]["today"] and week[today]["done"] and sum(w["done"] for w in week) == 1
+    assert all(w["future"] for w in week[today + 1:]) and not any(w["future"] for w in week[:today + 1])
+
+
+@pytest.mark.django_db
+def test_difficulty_chips_count_what_a_click_would_show(client, catalog):
+    from .models import ProblemRating
+
+    r = client.get(reverse("problems:list"), {"tag": "dp", "difficulty": "easy"})
+    chips = {c["value"]: c["n"] for c in r.context["level_chips"]}
+    # the hidden and the contest-locked dp problems are not counted; other levels still are
+    assert chips == {"beginner": 0, "easy": 2, "medium": 1, "hard": 1} and r.context["level_total"] == 4
+    assert len(r.context["problems"].object_list) == 2
+    # nobody rated anything yet: no column of dashes
+    assert r.context["any_rated"] is False and ">Baho<" not in r.content.decode()
+    ProblemRating.objects.create(user=User.objects.get(username="author"), problem=catalog["dp1"], stars=4)
+    assert ">Baho<" in client.get(reverse("problems:list")).content.decode()
+
+
+@pytest.mark.django_db
+def test_profile_explains_solves_an_upcoming_contest_hides(client, catalog):
+    ali = User.objects.create_user("ali", password="x")
+    _solve(ali, catalog["m1"], Problem.objects.get(slug="soon"))
+    r = client.get(reverse("profile", args=["ali"]))
+    assert r.context["solved_shown"] == 1 and r.context["solved_hidden"] == 1
+    assert "2 ta masala yechilgan" in r.content.decode() and "kelgusi musobaqada" in r.content.decode()

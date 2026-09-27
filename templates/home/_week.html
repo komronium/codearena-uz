@@ -1,0 +1,8 @@
+{% comment %}This week's daily-problem dots; ctx: week (apps.problems.daily.week_strip).{% endcomment %}
+<ol class="ca-week" aria-label="Bu hafta">
+  {% for d in week %}
+  <li class="ca-week-day{% if d.done %} is-done{% endif %}{% if d.today %} is-today{% endif %}{% if d.future %} is-future{% endif %}" title="{{ d.date|date:'d.m' }}">
+    <span class="ca-week-dot" aria-hidden="true">{% if d.done %}<i data-lucide="check" class="lu"></i>{% endif %}</span>{{ d.label }}<span class="sr-only">{% if d.done %}: yechilgan{% elif d.today %}: bugun{% endif %}</span>
+  </li>
+  {% endfor %}
+</ol>
