@@ -5,6 +5,7 @@
 <div class="ca-auth">
   {% include "registration/_auth_brand.html" %}
   <form method="post" novalidate class="ca-panel ca-auth-card space-y-3">{% csrf_token %}
+    {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
     <div>
       <h1 class="text-xl font-bold">Ro‘yxatdan o‘tish</h1>
       <p class="mt-1 text-sm text-mute">Bir daqiqa — va masalalar sizniki.</p>
@@ -20,10 +21,14 @@
     {% include "registration/_auth_field.html" with name="email" label="Email" type="email" icon="mail" autocomplete="email" value=form.email.value errors=form.email.errors %}
     {% include "registration/_auth_field.html" with name="password1" label="Parol" type="password" icon="lock" autocomplete="new-password" errors=form.password1.errors hint="Kamida 8 ta belgi." %}
     {% include "registration/_auth_field.html" with name="password2" label="Parolni takrorlang" type="password" icon="lock-keyhole" autocomplete="new-password" errors=form.password2.errors %}
+    <label class="flex items-start gap-2.5 rounded-[var(--ca-radius)] border border-line px-3 py-2.5 text-sm">
+      <input type="checkbox" name="is_teacher" class="mt-0.5"{% if form.is_teacher.value %} checked{% endif %}>
+      <span><b class="font-semibold">Men o‘qituvchiman</b><span class="block text-xs text-mute">Admin tasdiqlagach, o‘z guruhingizni ochib, o‘quvchilarga vazifa berasiz.</span></span>
+    </label>
     <button type="submit" class="ca-btn ca-btn-primary w-full !py-2.5"><i data-lucide="user-plus" class="lu" aria-hidden="true"></i>Hisob yaratish</button>
   </form>
   <p class="mt-4 text-center text-sm text-mute">
-    Allaqachon hisobingiz bormi? <a class="ca-link font-medium" href="{% url 'login' %}">Kirish</a>
+    Allaqachon hisobingiz bormi? <a class="ca-link font-medium" href="{% url 'login' %}{% if next %}?next={{ next|urlencode }}{% endif %}">Kirish</a>
   </p>
 </div>
 {% include "registration/_auth_script.html" %}

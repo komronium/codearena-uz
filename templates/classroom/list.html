@@ -1,11 +1,60 @@
 {% extends "base.html" %}
-{% block title %}Vazifalar{% endblock %}
+{% block title %}Vazifalar<script>
+  document.querySelectorAll("[data-copy-code]").forEach((b) => b.addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(b.dataset.copyCode); b.classList.add("text-ok"); setTimeout(() => b.classList.remove("text-ok"), 900); } catch {}
+  }));
+</script>
+{% endblock %}
 {% block page_title %}<h1>Vazifalar</h1>{% endblock %}
 {% block content %}
 <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
-  <p class="text-sm text-mute">Guruhingiz o‘qituvchisi bergan uy vazifalari. Muddatgacha yechilgani «o‘z vaqtida» hisoblanadi.</p>
+  <p class="text-sm text-mute">{% if can_teach %}Guruh oching, kodini o‘quvchilarga bering va vazifa bering. Muddatgacha yechilgani «o‘z vaqtida» hisoblanadi.{% else %}Guruhingiz o‘qituvchisi bergan uy vazifalari. Muddatgacha yechilgani «o‘z vaqtida» hisoblanadi.{% endif %}</p>
   {% if can_create %}<a href="{% url 'classroom:new' %}" class="ca-btn ca-btn-primary"><i data-lucide="plus" class="lu" aria-hidden="true"></i>Vazifa berish</a>{% endif %}
 </div>
+
+{% if can_teach %}
+<section class="mb-8" aria-labelledby="my-groups-title">
+  <div class="ca-sec-head"><h2 id="my-groups-title" class="ca-section-title !mb-0">Guruhlarim</h2></div>
+  <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    {% for g in my_groups %}
+    <div class="ca-panel !p-4">
+      <div class="flex items-start justify-between gap-2">
+        <div class="min-w-0">
+          <p class="truncate font-semibold">{{ g.name }}</p>
+          <p class="text-xs text-mute tabular">{{ g.members.all|length }} ta o‘quvchi</p>
+        </div>
+        <div class="text-right">
+          <p class="text-[11px] uppercase tracking-wide text-mute">Qo‘shilish kodi</p>
+          <button type="button" class="font-mono text-lg font-bold tracking-widest text-accent" data-copy-code="{{ g.join_code }}" title="Nusxalash" translate="no">{{ g.join_code }}</button>
+        </div>
+      </div>
+      {% if g.members.all %}
+      <details class="mt-3 text-sm">
+        <summary class="cursor-pointer text-mute">O‘quvchilar</summary>
+        <ul class="mt-2 divide-y divide-line">
+          {% for m in g.members.all %}
+          <li class="flex items-center justify-between gap-2 py-1.5">
+            {% include "accounts/_user.html" with u=m tier=False %}
+            <form method="post" action="{% url 'classroom:group_remove' g.pk m.pk %}">{% csrf_token %}<button class="ca-link text-xs text-mute" title="Guruhdan chiqarish" aria-label="{{ m.username }} ni guruhdan chiqarish">Chiqarish</button></form>
+          </li>
+          {% endfor %}
+        </ul>
+      </details>
+      {% else %}
+      <p class="mt-3 text-xs text-mute">Hali o‘quvchi yo‘q. Kodni sinfga ayting — ular «Vazifalar» sahifasida kiritadi.</p>
+      {% endif %}
+    </div>
+    {% endfor %}
+    <form method="post" action="{% url 'classroom:group_new' %}" class="ca-panel flex flex-col justify-center gap-2 border-dashed !p-4">{% csrf_token %}
+      <label class="ca-label !mb-0" for="new-group-name">Yangi guruh</label>
+      <div class="flex gap-2">
+        <input id="new-group-name" name="name" maxlength="100" required class="ca-input !py-1.5 text-sm" placeholder="Masalan: 201-guruh">
+        <button class="ca-btn ca-btn-primary !py-1.5 shrink-0"><i data-lucide="plus" class="lu" aria-hidden="true"></i>Ochish</button>
+      </div>
+    </form>
+  </div>
+</section>
+{% endif %}
 
 {% if assignments %}
 <ul class="ca-rows mb-8">
@@ -25,8 +74,21 @@
   </li>
   {% endfor %}
 </ul>
-{% elif not taught %}
+{% elif not taught and not can_teach %}
 <div class="ca-empty">Hozircha vazifa yo‘q. O‘qituvchi guruhingizga vazifa berganda shu yerda ko‘rinadi.</div>
+{% endif %}
+
+{% if not can_teach %}
+<form method="post" action="{% url 'classroom:group_join' %}" class="ca-panel mb-8 flex flex-wrap items-end justify-between gap-3">{% csrf_token %}
+  <div class="min-w-0">
+    <label class="font-semibold" for="join-code">Guruhga qo‘shilish</label>
+    <p class="text-sm text-mute">{% if joined_groups %}Guruhlaringiz: {% for g in joined_groups %}<b class="font-medium text-ink">{{ g.name }}</b>{% if not forloop.last %}, {% endif %}{% endfor %}. {% endif %}O‘qituvchi bergan 6 belgili kodni kiriting.</p>
+  </div>
+  <div class="flex gap-2">
+    <input id="join-code" name="code" maxlength="8" required autocomplete="off" spellcheck="false" class="ca-input !w-36 !py-1.5 font-mono uppercase tracking-widest" placeholder="AB3K9P">
+    <button class="ca-btn ca-btn-primary !py-1.5 shrink-0"><i data-lucide="log-in" class="lu" aria-hidden="true"></i>Qo‘shilish</button>
+  </div>
+</form>
 {% endif %}
 
 {% if taught %}

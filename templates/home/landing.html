@@ -31,7 +31,7 @@
 <span class="text-white/40">2</span>  a = <span class="ca-tk-fn">list</span>(<span class="ca-tk-fn">map</span>(<span class="ca-tk-fn">int</span>, <span class="ca-tk-fn">input</span>().split()))
 <span class="text-white/40">3</span>  <span class="ca-tk-fn">print</span>(<span class="ca-tk-fn">max</span>(a) - <span class="ca-tk-fn">min</span>(a))</pre>
         <div class="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-white/10 px-5 py-3 text-sm">
-          <span class="font-semibold text-emerald-300">✓ Accepted</span>
+          <span class="font-semibold text-emerald-300">✓ To‘g‘ri</span>
           <span class="text-white/60">12/12 test · 38 ms</span>
           <span class="ml-auto text-white/60">+100 ball</span>
         </div>
@@ -143,7 +143,7 @@
   <a href="{% url 'problems:detail' daily.problem.slug %}" class="ca-panel group flex flex-col transition hover:border-accent">
     <p class="ca-eyebrow !text-warn"><i data-lucide="calendar-check" class="lu" aria-hidden="true"></i>Kun masalasi · {{ daily.date|date:"d.m" }}</p>
     <p class="mt-2 text-xl font-semibold">{{ daily.problem.title }}</p>
-    <p class="mt-2 flex flex-wrap items-center gap-2 text-sm text-mute"><span class="ca-diff ca-diff-{{ daily.problem.difficulty }}">{{ daily.problem.get_difficulty_display }}</span>Hoziroq yechib ko‘ring — ro‘yxatdan o‘tish shart emas</p>
+    <p class="mt-2 flex flex-wrap items-center gap-2 text-sm text-mute"><span class="ca-diff ca-diff-{{ daily.problem.difficulty }}">{{ daily.problem.get_difficulty_display }}</span>Masalani o‘qing va kodni hoziroq yozing — yuborish uchun bir daqiqalik ro‘yxat kifoya</p>
     <span class="ca-link mt-auto inline-flex items-center gap-1 pt-5 text-sm">Masalani ochish<i data-lucide="arrow-right" class="lu transition group-hover:translate-x-0.5" aria-hidden="true"></i></span>
   </a>
   {% endif %}
@@ -167,7 +167,7 @@
   <div class="relative flex flex-wrap items-center justify-between gap-6">
     <div>
       <h2 id="cta-title" class="text-2xl font-bold tracking-tight">Bugun boshlang</h2>
-      <p class="mt-1.5 max-w-xl">Ro‘yxatdan o‘tish bir daqiqa oladi. O‘qituvchi bo‘lsangiz, guruhingizga vazifa berishingiz mumkin.</p>
+      <p class="mt-1.5 max-w-xl">Ro‘yxatdan o‘tish bir daqiqa oladi. O‘qituvchimisiz? Ro‘yxatda belgilang — admin tasdiqlagach, o‘z guruhingizni ochib vazifa berasiz.</p>
     </div>
     <a class="ca-btn ca-btn-ghost !px-5 !py-3 text-base" href="{% url 'register' %}">Ro‘yxatdan o‘tish<i data-lucide="arrow-right" class="lu" aria-hidden="true"></i></a>
   </div>

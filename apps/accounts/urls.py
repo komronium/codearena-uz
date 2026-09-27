@@ -10,6 +10,8 @@ urlpatterns = [
     path("top/", views.top, name="top"),
     path("rating/", views.rating, name="rating"),
     path("profile/edit/", views.profile_edit, name="profile_edit"),
+    path("teacher-request/", views.teacher_request, name="teacher_request"),
+    path("password-change/", views.PasswordChange.as_view(), name="password_change"),
     path("profile/<str:username>/", views.profile, name="profile"),
     path("password-reset/", auth_views.PasswordResetView.as_view(
         success_url=reverse_lazy("password_reset_done")), name="password_reset"),

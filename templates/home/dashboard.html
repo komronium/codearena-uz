@@ -25,7 +25,7 @@
 
   <section class="ca-card flex flex-col {% if not daily %} lg:col-span-3 {% endif %}" aria-label="Reyting" style="--tier: {{ user.rating|tier_color }}">
     <div class="flex items-center justify-between gap-2">
-      <span class="text-sm text-mute">Reyting</span>
+      <span class="text-sm text-mute">Musobaqa reytingi</span>
       <span class="ca-tier">{{ user.rating|tier_name }}</span>
     </div>
     <p class="mt-2 flex items-baseline gap-3"><span class="text-[2.5rem] font-bold leading-none tracking-tight tabular">{{ user.rating }}</span>
@@ -33,14 +33,15 @@
     {% if rating_card.next %}
     <div class="mt-3">
       <span class="ca-progress block" aria-hidden="true"><span style="width: {{ rating_card.next.pct }}%"></span></span>
-      <p class="mt-1.5 text-xs text-mute"><span class="ca-tier-ink font-semibold" style="--tier: {{ rating_card.next.color }}">{{ rating_card.next.name }}</span> darajasigacha <b class="tabular text-ink">{{ rating_card.next.need }}</b> ball</p>
+      <p class="mt-1.5 text-xs text-mute"><span class="ca-tier-ink font-semibold" style="--tier: {{ rating_card.next.color }}">{{ rating_card.next.name }}</span> darajasigacha yana <b class="tabular text-ink">{{ rating_card.next.need }}</b></p>
     </div>
     {% endif %}
     <dl class="mt-auto grid grid-cols-3 gap-2 border-t border-line pt-3 text-sm">
-      <div><dt class="text-xs text-mute">O‘rin</dt><dd class="font-semibold tabular">{% if rating_card.rank %}{{ rating_card.rank }}<span class="font-normal text-mute"> / {{ rating_card.total }}</span>{% else %}—{% endif %}</dd></div>
-      <div><dt class="text-xs text-mute">Ball</dt><dd class="font-semibold tabular">{{ user.practice_points }}</dd></div>
+      <div><dt class="text-xs text-mute">Reytingda o‘rin</dt><dd class="font-semibold tabular">{% if rating_card.rank %}{{ rating_card.rank }}<span class="font-normal text-mute"> / {{ rating_card.total }}</span>{% else %}—{% endif %}</dd></div>
+      <div><dt class="text-xs text-mute">Amaliyot ball</dt><dd class="font-semibold tabular">{{ user.practice_points }}</dd></div>
       <div><dt class="text-xs text-mute">Yechilgan</dt><dd class="font-semibold tabular">{{ solved_count }}</dd></div>
     </dl>
+    <p class="mt-2 text-xs text-mute">Reyting reytingli musobaqalardagi o‘rningizdan, amaliyot ball esa yechgan masalalaringizdan hisoblanadi.</p>
   </section>
 </div>
 

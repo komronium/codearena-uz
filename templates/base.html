@@ -72,8 +72,8 @@
 <nav class="ca-bottom-nav md:hidden" aria-label="Mobil menyu">
   {% with ns=request.resolver_match.namespace un=request.resolver_match.url_name %}
   <a href="{% url 'home' %}"{% if un == 'home' %} class="is-active" aria-current="page"{% endif %}><span class="ca-bn-icon"><i data-lucide="house" class="lu" aria-hidden="true"></i></span><span>Bosh sahifa</span></a>
-  <a href="{% url 'problems:list' %}"{% if ns == 'problems' %} class="is-active" aria-current="page"{% endif %}><span class="ca-bn-icon"><i data-lucide="list-checks" class="lu" aria-hidden="true"></i></span><span>Masalalar</span></a>
-  <a href="{% url 'contests:list' %}"{% if ns == 'contests' %} class="is-active" aria-current="page"{% endif %}><span class="ca-bn-icon"><i data-lucide="trophy" class="lu" aria-hidden="true"></i></span><span>Musobaqa</span></a>
+  <a href="{% url 'problems:list' %}"{% if ns == 'problems' and not contest %} class="is-active" aria-current="page"{% endif %}><span class="ca-bn-icon"><i data-lucide="list-checks" class="lu" aria-hidden="true"></i></span><span>Masalalar</span></a>
+  <a href="{% url 'contests:list' %}"{% if ns == 'contests' or ns == 'problems' and contest %} class="is-active" aria-current="page"{% endif %}><span class="ca-bn-icon"><i data-lucide="trophy" class="lu" aria-hidden="true"></i></span><span>Musobaqa</span></a>
   <a href="{% url 'rating' %}"{% if un == 'rating' or un == 'top' %} class="is-active" aria-current="page"{% endif %}><span class="ca-bn-icon"><i data-lucide="chart-column" class="lu" aria-hidden="true"></i></span><span>Reyting</span></a>
   <button type="button" data-menu-open aria-haspopup="dialog" aria-controls="ca-menu"><span class="ca-bn-icon">{% if user.is_authenticated %}<i data-lucide="user" class="lu" aria-hidden="true"></i>{% else %}<i data-lucide="menu" class="lu" aria-hidden="true"></i>{% endif %}</span><span>{% if user.is_authenticated %}Men{% else %}Menyu{% endif %}</span>{% if unread_reviews %}<b class="ca-nav-dot" aria-label="{{ unread_reviews }} ta o‘qilmagan sharh"></b>{% endif %}</button>
   {% endwith %}
@@ -97,7 +97,7 @@ A native dialog gives focus trapping and Esc for free.{% endcomment %}
       {% include "_nav.html" %}
     </nav>
     <div class="mt-3 flex items-center justify-between gap-3 border-t border-line px-1 pt-3">
-      <span id="sheet-theme-label" class="text-sm font-medium text-mute">Mavzu</span>
+      <span id="sheet-theme-label" class="text-sm font-medium text-mute">Ko‘rinish</span>
       <div class="ca-seg ca-seg-sm" role="group" aria-labelledby="sheet-theme-label">
         <button type="button" data-theme-set="system" aria-pressed="false" aria-label="Tizimdagidek"><i data-lucide="monitor" class="lu" aria-hidden="true"></i></button>
         <button type="button" data-theme-set="light" aria-pressed="false" aria-label="Yorug‘"><i data-lucide="sun" class="lu" aria-hidden="true"></i></button>
@@ -148,7 +148,7 @@ A native dialog gives focus trapping and Esc for free.{% endcomment %}
     // users pick it in the account menu.
     const order = ["system", "light", "dark"];
     const icons = { system: "sun-moon", light: "sun", dark: "moon" };
-    const labels = { system: "Mavzu: tizim", light: "Mavzu: yorug‘", dark: "Mavzu: qorong‘i" };
+    const labels = { system: "Ko‘rinish: tizim", light: "Ko‘rinish: yorug‘", dark: "Ko‘rinish: qorong‘i" };
     const btn = document.getElementById("theme-toggle");
     let cur = "system";
     try { cur = localStorage.getItem("ca-theme") || "system"; } catch {}

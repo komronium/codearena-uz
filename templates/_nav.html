@@ -5,7 +5,7 @@ grouped by what the student is doing. Profile, settings and sign-out live in the
   <i data-lucide="house" class="lu" aria-hidden="true"></i>Bosh sahifa
 </a>
 <p class="ca-sidebar-heading">Mashq</p>
-<a href="{% url 'problems:list' %}" class="ca-sidebar-link {% if ns == 'problems' %}is-active{% endif %}"{% if ns == 'problems' %} aria-current="page"{% endif %}>
+<a href="{% url 'problems:list' %}" class="ca-sidebar-link {% if ns == 'problems' and not contest %}is-active{% endif %}"{% if ns == 'problems' and not contest %} aria-current="page"{% endif %}>
   <i data-lucide="list-checks" class="lu" aria-hidden="true"></i>Masalalar
 </a>
 {% if user.is_authenticated %}
@@ -15,14 +15,14 @@ grouped by what the student is doing. Profile, settings and sign-out live in the
 </a>
 {% endif %}
 <p class="ca-sidebar-heading">Musobaqa</p>
-<a href="{% url 'contests:list' %}" class="ca-sidebar-link {% if ns == 'contests' %}is-active{% endif %}"{% if ns == 'contests' %} aria-current="page"{% endif %}>
+<a href="{% url 'contests:list' %}" class="ca-sidebar-link {% if ns == 'contests' or ns == 'problems' and contest %}is-active{% endif %}"{% if ns == 'contests' or ns == 'problems' and contest %} aria-current="page"{% endif %}>
   <i data-lucide="trophy" class="lu" aria-hidden="true"></i>Musobaqalar
 </a>
 <a href="{% url 'rating' %}" class="ca-sidebar-link {% if un == 'rating' %}is-active{% endif %}"{% if un == 'rating' %} aria-current="page"{% endif %}>
   <i data-lucide="chart-column" class="lu" aria-hidden="true"></i>Reyting
 </a>
 <a href="{% url 'top' %}" class="ca-sidebar-link {% if un == 'top' %}is-active{% endif %}"{% if un == 'top' %} aria-current="page"{% endif %}>
-  <i data-lucide="users" class="lu" aria-hidden="true"></i>Foydalanuvchilar
+  <i data-lucide="users" class="lu" aria-hidden="true"></i>Amaliyot ballari
 </a>
 {% if user.is_authenticated %}
 <p class="ca-sidebar-heading">Sinf</p>

@@ -669,7 +669,7 @@ def test_profile_explains_solves_an_upcoming_contest_hides(client, catalog):
     _solve(ali, catalog["m1"], Problem.objects.get(slug="soon"))
     r = client.get(reverse("profile", args=["ali"]))
     assert r.context["solved_shown"] == 1 and r.context["solved_hidden"] == 1
-    assert "2 ta masala yechilgan" in r.content.decode() and "kelgusi musobaqada" in r.content.decode()
+    assert "yechilgan 2 ta masala" in r.content.decode() and "kelgusi musobaqada" in r.content.decode()
 
 
 def test_standard_topics_migration_merges_variants_and_drops_the_rest(db):

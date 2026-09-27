@@ -26,7 +26,7 @@
       <div class="ca-row-meta">
         <span class="truncate" translate="no">{{ p.slug }}</span>
         <span>{{ p.get_kind_display }}</span>
-        <span class="tabular">{{ p.n_tests }} test</span>
+        {% if p.kind == 'code' and not p.n_tests %}<span class="font-semibold text-bad"><i data-lucide="triangle-alert" class="lu" aria-hidden="true"></i>Testsiz — yechimlar tekshirilmaydi</span>{% else %}<span class="tabular">{{ p.n_tests }} test</span>{% endif %}
         <span translate="no"><i data-lucide="user" class="lu" aria-hidden="true"></i>{{ p.author.username }}</span>
       </div>
     </div>

@@ -21,7 +21,7 @@
     {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
   </form>
   <p class="mt-5 text-center text-sm text-mute">
-    Hisob yo‘qmi? <a class="ca-link font-medium" href="{% url 'register' %}">Ro‘yxatdan o‘ting</a>
+    Hisob yo‘qmi? <a class="ca-link font-medium" href="{% url 'register' %}{% if next %}?next={{ next|urlencode }}{% endif %}">Ro‘yxatdan o‘ting</a>
   </p>
 </div>
 {% include "registration/_auth_script.html" %}

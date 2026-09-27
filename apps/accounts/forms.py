@@ -17,6 +17,7 @@ class RegisterForm(UserCreationForm):
     email = forms.EmailField(required=True)
     first_name = forms.CharField(max_length=150, label="Ism")
     last_name = forms.CharField(max_length=150, label="Familiya", required=False)
+    is_teacher = forms.BooleanField(required=False, label="Men o‘qituvchiman")
 
     class Meta(UserCreationForm.Meta):
         model = User
@@ -24,6 +25,13 @@ class RegisterForm(UserCreationForm):
 
     def clean_username(self):
         return validate_public_username(super().clean_username())
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.teacher_requested = self.cleaned_data.get("is_teacher", False)
+        if commit:
+            user.save()
+        return user
 
     def clean_email(self):
         email = self.cleaned_data["email"]

@@ -5,7 +5,7 @@
 <div class="mb-6 flex items-start justify-between gap-3">
   <div>
     <h1 class="ca-page-title">{% if problem %}Masalani tahrirlash{% else %}Masala qo‘shish{% endif %}</h1>
-    <p class="mt-1 text-sm text-mute">{% if problem %}#{{ problem.pk|stringformat:"04d" }} · {{ problem.slug }}{% else %}Musobaqa masalasini «Ochiq» belgisini olib tashlab saqlang, keyin musobaqaga ulang.{% endif %}</p>
+    <p class="mt-1 text-sm text-mute">{% if problem %}#{{ problem.pk|stringformat:"04d" }} · {{ problem.slug }}{% else %}Yangi masala yopiq holda saqlanadi. Amaliyot uchun bo‘lsa «Ochiq»ni belgilang; musobaqa masalasini yopiq qoldirib, musobaqaga ulang.{% endif %}</p>
   </div>
   <a href="{% url 'moderation:problems' %}" class="ca-btn ca-btn-ghost !py-1.5">Barcha masalalar</a>
 </div>

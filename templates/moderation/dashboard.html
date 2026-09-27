@@ -4,6 +4,15 @@
 <h1 class="ca-page-title mb-6">Boshqaruv</h1>
 
 <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+  {# things waiting for a decision come first #}
+  <a href="{% url 'moderation:queue' %}" class="ca-panel ca-stat-card {% if counts.pending %}ca-stat-card-warn{% endif %}">
+    <i data-lucide="shield-check" class="lu" aria-hidden="true"></i>
+    <div><div class="ca-stat-value !text-2xl">{{ counts.pending }}</div><div class="ca-stat-label">Masala tasdiq kutmoqda</div></div>
+  </a>
+  <a href="{% url 'moderation:users' %}?requests=1" class="ca-panel ca-stat-card {% if counts.teacher_requests %}ca-stat-card-warn{% endif %}">
+    <i data-lucide="graduation-cap" class="lu" aria-hidden="true"></i>
+    <div><div class="ca-stat-value !text-2xl">{{ counts.teacher_requests }}</div><div class="ca-stat-label">O‘qituvchi so‘rovi</div></div>
+  </a>
   <a href="{% url 'moderation:problems' %}" class="ca-panel ca-stat-card">
     <i data-lucide="list-checks" class="lu" aria-hidden="true"></i>
     <div><div class="ca-stat-value !text-2xl">{{ counts.problems }}</div><div class="ca-stat-label">Masalalar</div></div>
@@ -23,10 +32,6 @@
   <a href="{% url 'moderation:submissions' %}" class="ca-panel ca-stat-card">
     <i data-lucide="history" class="lu" aria-hidden="true"></i>
     <div><div class="ca-stat-value !text-2xl">{{ counts.submissions }}</div><div class="ca-stat-label">Barcha urinishlar</div></div>
-  </a>
-  <a href="{% url 'moderation:queue' %}" class="ca-panel ca-stat-card {% if counts.pending %}ca-stat-card-warn{% endif %}">
-    <i data-lucide="shield-check" class="lu" aria-hidden="true"></i>
-    <div><div class="ca-stat-value !text-2xl">{{ counts.pending }}</div><div class="ca-stat-label">Tasdiq kutmoqda</div></div>
   </a>
   <a href="{% url 'moderation:tags' %}" class="ca-panel ca-stat-card">
     <i data-lucide="tags" class="lu" aria-hidden="true"></i>

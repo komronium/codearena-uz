@@ -14,7 +14,7 @@
       <div class="ca-row-title">
         <span class="tabular shrink-0 text-xs font-normal text-mute">{{ c.pk|stringformat:"03d" }}</span>
         <a class="ca-link" href="{% url 'contests:detail' c.pk %}">{{ c.title }}</a>
-        {% if c.is_running %}<span class="ca-diff ca-diff-easy shrink-0"><span class="ca-live-dot" aria-hidden="true"></span>Faol</span>
+        {% if c.is_running %}<span class="ca-diff ca-diff-easy shrink-0"><span class="ca-live-dot" aria-hidden="true"></span>Jonli</span>
         {% elif c.has_ended %}<span class="ca-chip shrink-0 !bg-ink/5 text-mute">Tugagan</span>
         {% else %}<span class="ca-chip ca-chip-score shrink-0">Kutilmoqda</span>{% endif %}
       </div>

@@ -1,6 +1,8 @@
 {% extends "base.html" %}{% load static tiers %}
 {% block title %}{% if contest_problem %}{{ contest_problem.label }}. {% endif %}{{ problem.title }}{% endblock %}
 
+{% block page_title %}{% if contest %}<p class="ca-topbar-section">Musobaqa</p>{% else %}{{ block.super }}{% endif %}{% endblock %}
+
 {% block content %}
 {% include "contests/_dq_banner.html" with participation=my_participation %}
 {% if duel %}
@@ -17,6 +19,13 @@
     <span data-leaves-wrap class="!hidden font-semibold text-bad">· chiqishlar: <b class="tabular" data-leaves>0</b></span>
     <span class="tabular font-semibold" data-countdown="{{ contest.end|date:'c' }}" data-label="Tugashiga"></span>
   </span>
+  {% if contest_problems|length > 1 %}
+  <nav class="flex w-full flex-wrap gap-1.5 sm:order-last" aria-label="Musobaqa masalalari">
+    {% for cp in contest_problems %}
+    <a href="{% url 'problems:detail' cp.problem.slug %}" class="ca-filter{% if cp.problem_id == problem.pk %} is-active{% endif %}"{% if cp.problem_id == problem.pk %} aria-current="page"{% endif %} title="{{ cp.problem.title }}"><b>{{ cp.label }}</b><span class="hidden sm:inline">. {{ cp.problem.title|truncatechars:22 }}</span></a>
+    {% endfor %}
+  </nav>
+  {% endif %}
   {% else %}
   <a class="ca-link text-mute" href="{% url 'problems:list' %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>Masalalar</a>
   <div class="flex flex-wrap items-center gap-1">
@@ -185,10 +194,15 @@
     {% if user.is_authenticated %}
     <form method="post" action="{% url 'submissions:submit' problem.slug %}" id="submit-form" class="ca-panel !p-0">
       {% csrf_token %}
+    {% else %}
+    {# guests write here too; the code stays in this browser and "send" goes through sign-up and back #}
+    <form method="get" action="{% url 'register' %}" id="submit-form" class="ca-panel !p-0">
+      <input type="hidden" name="next" value="{{ request.path }}#yechim">
+    {% endif %}
       <div class="relative flex flex-wrap items-center justify-between gap-2 border-b border-line px-4 py-2.5">
         <label class="flex items-center gap-2 text-sm text-mute">
           <i data-lucide="code" class="lu" aria-hidden="true"></i>
-          <select name="language" id="language" class="ca-select !w-auto !py-1.5 text-sm" aria-label="Dasturlash tili">
+          <select {% if user.is_authenticated %}name="language" {% endif %}id="language" class="ca-select !w-auto !py-1.5 text-sm" aria-label="Dasturlash tili">
             {% for l in languages %}<option value="{{ l.code }}">{{ l.name }}</option>{% endfor %}
           </select>
         </label>
@@ -199,7 +213,7 @@
             <summary class="ca-btn ca-btn-ghost !px-2.5 !py-1.5 cursor-pointer list-none text-xs" title="Muharrir sozlamalari"><i data-lucide="settings-2" class="lu" aria-hidden="true"></i></summary>
             {# phones: the toolbar wraps, so the panel spans the toolbar instead of hanging off the button #}
             <div class="ca-panel ca-prefs absolute inset-x-2 top-full z-20 mt-1 !p-0 text-sm sm:inset-x-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-72">
-              <label class="ca-pref"><span>Mavzu</span>
+              <label class="ca-pref"><span>Ranglar</span>
                 <select data-pref="theme" class="ca-select !w-40 !py-1 text-sm">
                   <option value="auto">Sayt bilan</option>
                   <optgroup label="Qorong‘i">
@@ -238,8 +252,17 @@
         </div>
       </div>
       <div id="editor">
-        <textarea name="source" id="source" class="ca-editor-fallback" spellcheck="false" aria-label="Kod muharriri" placeholder="Kodni shu yerga yozing…"></textarea>
+        <textarea {% if user.is_authenticated %}name="source" {% endif %}id="source" class="ca-editor-fallback" spellcheck="false" aria-label="Kod muharriri" placeholder="Kodni shu yerga yozing…"></textarea>
       </div>
+      {% if not user.is_authenticated %}
+      <div class="flex flex-wrap items-center justify-between gap-3 border-t border-line px-4 py-3">
+        <span class="text-xs text-mute"><i data-lucide="save" class="lu mr-1" aria-hidden="true"></i>Kodingiz shu brauzerda saqlanadi.</span>
+        <div class="ml-auto flex items-center gap-2">
+          <a class="ca-btn ca-btn-ghost" href="{% url 'login' %}?next={{ request.path|urlencode }}%23yechim"><i data-lucide="log-in" class="lu" aria-hidden="true"></i>Kirish</a>
+          <button type="submit" id="submit-btn" class="ca-btn ca-btn-primary"><i data-lucide="user-plus" class="lu" aria-hidden="true"></i>Ro‘yxatdan o‘tib yuborish</button>
+        </div>
+      </div>
+      {% else %}
       <div class="flex flex-wrap items-center justify-between gap-3 border-t border-line px-4 py-3">
         <span class="hidden text-xs text-mute sm:inline"><kbd class="ca-kbd">Ctrl</kbd> + <kbd class="ca-kbd">Enter</kbd> — yuborish{% if problem.kind != "sql" %} · <kbd class="ca-kbd">Ctrl</kbd> + <kbd class="ca-kbd">'</kbd> — sinash{% endif %}</span>
         <div class="ml-auto flex items-center gap-2">
@@ -247,7 +270,8 @@
           <button type="submit" id="submit-btn" class="ca-btn ca-btn-primary"><i data-lucide="rocket" class="lu" aria-hidden="true"></i>Yuborish</button>
         </div>
       </div>
-      {% if problem.kind != "sql" %}
+      {% endif %}
+      {% if problem.kind != "sql" and user.is_authenticated %}
       <details id="trial-custom" class="border-t border-line">
         <summary class="flex cursor-pointer list-none items-center gap-2 px-4 py-2 text-xs text-mute"><i data-lucide="terminal" class="lu" aria-hidden="true"></i>O‘z inputim bilan sinash</summary>
         <div class="px-4 pb-3">
@@ -257,12 +281,6 @@
       <div id="trial-out" class="border-t border-line px-4 py-3 text-sm" aria-live="polite" hidden></div>
       {% endif %}
     </form>
-
-    {% else %}
-    <div class="ca-panel text-sm text-mute">
-      Yechim yuborish uchun <a class="ca-link" href="{% url 'login' %}?next={{ request.path }}">tizimga kiring</a>.
-    </div>
-    {% endif %}
   </section>
 </div>
 
@@ -297,7 +315,6 @@
     });
   });
 </script>
-{% if user.is_authenticated %}
 {% comment %}Every CodeMirror package is its own local module; the map (built by frontend/build.mjs)
 resolves their bare imports so @codemirror/state loads once — two copies break with
 "Unrecognized extension value".{% endcomment %}
@@ -507,7 +524,7 @@ resolves their bare imports so @codemirror/state loads once — two copies break
   form.addEventListener("submit", () => {
     source.value = view.state.doc.toString();
     btn.disabled = true;
-    btn.textContent = "Yuborilmoqda…";
+    btn.textContent = {% if user.is_authenticated %}"Yuborilmoqda…"{% else %}"Ochilmoqda…"{% endif %};
   });
   document.addEventListener("keydown", (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key === "Enter" && !btn.disabled) {
@@ -525,9 +542,9 @@ resolves their bare imports so @codemirror/state loads once — two copies break
   if (trialBtn) {
     const out = document.getElementById("trial-out"), stdinEl = document.getElementById("trial-stdin");
     const esc = (t) => (t ?? "").replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
-    const V = { AC: ["ac", "check", "AC"], OK: ["ac", "check", "Bajarildi"], WA: ["bad", "x", "WA"],
-                TLE: ["warn", "clock", "TL"], MLE: ["warn", "cpu", "ML"], OLE: ["warn", "scissors", "OL"],
-                RE: ["bad", "triangle-alert", "RE"], CE: ["mute", "code", "CE"], IE: ["mute", "circle-alert", "Xato"] };
+    const V = { AC: ["ac", "check", "To‘g‘ri"], OK: ["ac", "check", "Bajarildi"], WA: ["bad", "x", "Noto‘g‘ri javob"],
+                TLE: ["warn", "clock", "Vaqt oshdi"], MLE: ["warn", "cpu", "Xotira oshdi"], OLE: ["warn", "scissors", "Chiqish juda katta"],
+                RE: ["bad", "triangle-alert", "Dastur xatosi"], CE: ["mute", "code", "Kompilyatsiya xatosi"], IE: ["mute", "circle-alert", "Xato"] };
     const chip = (v) => { const [c, i, t] = V[v] || V.IE; return `<span class="ca-verdict ca-verdict-${c}"><i data-lucide="${i}" class="lu" aria-hidden="true"></i>${t}</span>`; };
     const box = (label, text) => `<div class="ca-sample"><div class="ca-sample-head"><span>${label}</span></div><pre class="max-h-48">${text ? esc(text) : '<span class="text-mute">(bo‘sh)</span>'}</pre></div>`;
     const show = (html) => { out.hidden = false; out.innerHTML = html; window.caIcons?.(); };
@@ -578,20 +595,18 @@ resolves their bare imports so @codemirror/state loads once — two copies break
     });
   }
 </script>
+{% if contest %}
 <div id="ca-guard" class="ca-guard !hidden" role="status" aria-live="polite"></div>
-{% if contest %}{% include "integrity/_tracker.html" with problem_id=problem.pk %}{% endif %}
+{% include "integrity/_tracker.html" with problem_id=problem.pk %}
 <script>
-  // Anti-cheat / anti-AI-copy: active on every problem page, not just contests — pasting
-  // an AI answer into practice mode is the same shortcut, it just doesn't affect a rank.
-  // Contest mode additionally reports each event to staff (integrity:event, needs Participation);
-  // practice mode blocks/warns client-side only, nothing is sent to the server.
+  // Contest only: practice is for learning, so there the editor behaves like any editor.
+  // Here paste, drag-drop, cut/copy out of the editor and the context menu are blocked, and
+  // each attempt is reported to staff (integrity:event, needs Participation).
   (function () {
-    const contestId = {% if contest %}{{ contest.pk }}{% else %}null{% endif %};
+    const contestId = {{ contest.pk }};
     const editor = document.getElementById("editor");
     const guard = document.getElementById("ca-guard");
-    const stamp = contestId
-      ? "— CodeArena, musobaqa #{{ contest.pk|default:0|stringformat:'03d' }}, {{ user.username }}. Bu matnni AI yordamchisiga yoki boshqa ishtirokchiga yuborish — qoidabuzarlik, nusxa qayd etiladi."
-      : "— CodeArena ({{ user.username|default:'mehmon' }}). Shart matnini AI yordamchisiga tashlab, javobni ko‘chirib qo‘yish o‘qishga yordam bermaydi — o‘zingiz yeching.";
+    const stamp = "— CodeArena, musobaqa #{{ contest.pk|stringformat:'03d' }}, {{ user.username }}. Bu matnni AI yordamchisiga yoki boshqa ishtirokchiga yuborish — qoidabuzarlik, nusxa qayd etiladi.";
     let hideTimer;
 
     function notify(msg) {
@@ -601,7 +616,6 @@ resolves their bare imports so @codemirror/state loads once — two copies break
       hideTimer = setTimeout(() => guard.classList.add("!hidden"), 4000);
     }
     function report(kind) {
-      if (!contestId) return;
       fetch("{% url 'integrity:event' %}", {
         method: "POST", keepalive: true,
         headers: { "Content-Type": "application/x-www-form-urlencoded", "X-CSRFToken": "{{ csrf_token }}" },
@@ -609,18 +623,17 @@ resolves their bare imports so @codemirror/state loads once — two copies break
       });
     }
 
-    // Editor: no paste/drop/cut, no context menu, contest or not.
     editor.addEventListener("paste", (e) => {
       e.preventDefault(); e.stopPropagation();
-      report("paste"); notify("Kodni qo‘yish (paste) taqiqlangan" + (contestId ? " — urinish qayd etildi." : ". O‘zingiz yozing."));
+      report("paste"); notify("Musobaqada kod qo‘yish (paste) taqiqlangan — urinish qayd etildi.");
     }, true);
     ["copy", "cut", "contextmenu"].forEach((evt) => editor.addEventListener(evt, (e) => e.preventDefault(), true));
     // Drag-and-drop of selected text is just paste with extra steps: kill it page-wide.
     ["dragstart", "drop"].forEach((evt) => document.addEventListener(evt, (e) => {
       e.preventDefault(); e.stopPropagation();
-      if (evt === "drop" && editor.contains(e.target)) { report("paste"); notify("Matnni sudrab tashlash taqiqlangan" + (contestId ? " — qayd etildi." : ".")); }
+      if (evt === "drop" && editor.contains(e.target)) { report("paste"); notify("Matnni sudrab tashlash taqiqlangan — qayd etildi."); }
     }, true));
-    window.addEventListener("ca-bulk-insert", () => { report("paste"); notify("Katta hajmdagi matn kiritildi" + (contestId ? " — qayd etildi." : " — bu paste’ga o‘xshaydi.")); });
+    window.addEventListener("ca-bulk-insert", () => { report("paste"); notify("Katta hajmdagi matn kiritildi — qayd etildi."); });
 
     // Sustained fast typing (many sub-threshold inserts in a row) can be the same paste,
     // done in chunks to dodge the single-insert size check above.
@@ -632,12 +645,11 @@ resolves their bare imports so @codemirror/state loads once — two copies break
       const sum = typedWindow.reduce((a, [, n]) => a + n, 0);
       if (sum > 200 && now - fastReportedAt > 5000) {
         fastReportedAt = now;
-        report("fast"); notify("G‘ayrioddiy tez matn kiritish aniqlandi" + (contestId ? " — qayd etildi." : "."));
+        report("fast"); notify("G‘ayrioddiy tez matn kiritish aniqlandi — qayd etildi.");
       }
     });
 
-    // Statement: copying works, but the clipboard gets a traceable warning stamp (and,
-    // in a contest, the event is logged for staff).
+    // Statement: copying works, but the clipboard gets a traceable warning stamp and the event is logged.
     document.addEventListener("copy", (e) => {
       if (editor.contains(e.target)) return;
       const text = String(window.getSelection() || "");
@@ -646,7 +658,6 @@ resolves their bare imports so @codemirror/state loads once — two copies break
       e.preventDefault();
       report("copy"); notify("Nusxa olindi. Matnga ogohlantiruvchi belgi qo‘shildi.");
     });
-
   })();
 </script>
 {% endif %}

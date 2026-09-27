@@ -10,12 +10,13 @@
 {% if groups %}
 <div class="ca-panel !p-0 overflow-x-auto">
 <table class="ca-table">
-  <thead><tr><th>Guruh</th><th>O‘qituvchi</th><th class="text-right">A‘zolar</th><th class="text-right">Amal</th></tr></thead>
+  <thead><tr><th>Guruh</th><th>O‘qituvchi</th><th>Qo‘shilish kodi</th><th class="text-right">A‘zolar</th><th class="text-right">Amal</th></tr></thead>
   <tbody>
   {% for g in groups %}
   <tr>
     <td class="font-medium">{{ g.name }}</td>
     <td>{% include "accounts/_user.html" with u=g.teacher tier=False %}</td>
+    <td class="font-mono tabular tracking-wider" translate="no">{{ g.join_code }}</td>
     <td class="tabular text-right text-mute">{{ g.n }}</td>
     <td class="text-right">
       <div class="flex justify-end gap-1 whitespace-nowrap">

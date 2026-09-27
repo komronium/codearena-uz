@@ -5,6 +5,13 @@ from apps.contests.models import Contest
 from apps.problems.models import Language, Problem, TestCase
 
 
+# What a learner reads instead of the judge's code (the code stays in the chip's tooltip).
+VERDICT_LABELS = {
+    "AC": "To‘g‘ri", "WA": "Noto‘g‘ri javob", "TLE": "Vaqt oshdi", "MLE": "Xotira oshdi",
+    "OLE": "Chiqish juda katta", "RE": "Dastur xatosi", "CE": "Kompilyatsiya xatosi",
+}
+
+
 class Submission(models.Model):
     class Verdict(models.TextChoices):
         PENDING = "PENDING"

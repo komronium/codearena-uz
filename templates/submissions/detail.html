@@ -19,7 +19,7 @@
       {% if s.contest %}<a class="ca-link" href="{% url 'contests:standings' s.contest.pk %}"><i data-lucide="trophy" class="lu mr-1" aria-hidden="true"></i>{{ s.contest.title }}</a>{% endif %}
     </p>
   </div>
-  {% if s.user_id == user.pk %}<a class="ca-btn ca-btn-primary" href="{% url 'problems:detail' s.problem.slug %}"><i data-lucide="refresh-cw" class="lu" aria-hidden="true"></i>Qayta yuborish</a>{% endif %}
+  {% if s.user_id == user.pk %}<a class="ca-btn ca-btn-primary" href="{% url 'problems:detail' s.problem.slug %}"><i data-lucide="arrow-left" class="lu" aria-hidden="true"></i>Masalaga qaytish</a>{% endif %}
 </div>
 
 <div class="ca-panel mb-6" id="status" hx-get="{% url 'submissions:status' s.pk %}" hx-trigger="load">

@@ -16,7 +16,7 @@
     <label class="ca-label" for="f-verdict">Holat</label>
     <select id="f-verdict" name="verdict" class="ca-select !w-auto !py-1.5 text-sm">
       <option value="">Hammasi</option>
-      {% for v in verdicts %}<option value="{{ v }}" {% if v == f.verdict %}selected{% endif %}>{{ v }}</option>{% endfor %}
+      {% for v, label in verdicts %}<option value="{{ v }}" {% if v == f.verdict %}selected{% endif %}>{{ label }}</option>{% endfor %}
     </select>
   </div>
   <div>

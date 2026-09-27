@@ -43,6 +43,12 @@ class ProblemForm(ModelForm):
             "points": forms.NumberInput(attrs=_CA_INPUT),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.instance.pk:
+            # a new problem starts hidden: publishing is a choice, a contest problem must never leak by default
+            self.fields["is_public"].initial = False
+
     def clean_tests_zip(self):
         f = self.cleaned_data.get("tests_zip")
         if not f:

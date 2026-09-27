@@ -1,3 +1,5 @@
+import secrets
+
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
@@ -19,12 +21,31 @@ class User(AbstractUser):
     invited_by = models.ForeignKey(
         "self", null=True, blank=True, on_delete=models.SET_NULL, related_name="invited_users",
     )
+    # "I'm a teacher" at sign-up or from the profile; staff approve it by giving the teacher role
+    teacher_requested = models.BooleanField(default=False, db_index=True)
+
+
+_CODE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"
+
+
+def new_join_code() -> str:
+    while True:
+        code = "".join(secrets.choice(_CODE_ALPHABET) for _ in range(6))
+        if not Group.objects.filter(join_code=code).exists():
+            return code
 
 
 class Group(models.Model):
     name = models.CharField(max_length=100)
     teacher = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="taught_groups")
     members = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name="student_groups")
+    # students join with this code; no ambiguous letters (0/O, 1/I/L) so it reads out loud in class
+    join_code = models.CharField(max_length=8, unique=True, null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if not self.join_code:
+            self.join_code = new_join_code()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name

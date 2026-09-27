@@ -12,7 +12,7 @@ from apps.problems.models import Language, Problem
 from apps.classroom.access import can_review, teaches
 from judge.runner import run_submission, run_trial
 
-from .models import Submission, UserProblemSolved
+from .models import VERDICT_LABELS, Submission, UserProblemSolved
 from .ratelimit import rate_limited
 
 MAX_SOURCE = 64 * 1024
@@ -159,5 +159,5 @@ def mine(request):
     if verdict in Submission.TERMINAL:
         qs = qs.filter(verdict=verdict)
     page = Paginator(qs, 50).get_page(request.GET.get("page"))
-    verdicts = [("AC", "AC"), ("WA", "WA"), ("TLE", "TL"), ("MLE", "ML"), ("OLE", "OL"), ("RE", "RE"), ("CE", "CE")]
+    verdicts = list(VERDICT_LABELS.items())
     return render(request, "submissions/list.html", {"subs": page, "verdict": verdict, "verdicts": verdicts})

@@ -48,10 +48,25 @@
       </div>
     </div>
     <div class="flex items-center justify-between gap-3 border-t border-line bg-paper/60 px-6 py-4">
-      <a class="ca-link text-sm text-mute" href="{% url 'password_reset' %}"><i data-lucide="key-round" class="lu mr-1" aria-hidden="true"></i>Parolni almashtirish</a>
+      <a class="ca-link text-sm text-mute" href="{% url 'password_change' %}"><i data-lucide="key-round" class="lu mr-1" aria-hidden="true"></i>Parolni almashtirish</a>
       <button type="submit" class="ca-btn ca-btn-primary"><i data-lucide="check" class="lu" aria-hidden="true"></i>Saqlash</button>
     </div>
   </form>
+  {% if user.role == "student" and not user.is_staff %}
+  <section class="ca-panel mt-6 flex flex-wrap items-center justify-between gap-3" aria-labelledby="teacher-title">
+    <div class="min-w-0">
+      <h2 id="teacher-title" class="font-semibold"><i data-lucide="graduation-cap" class="lu mr-1.5 text-accent" aria-hidden="true"></i>O‘qituvchimisiz?</h2>
+      {% if user.teacher_requested %}
+      <p class="mt-1 text-sm text-mute">So‘rovingiz yuborilgan — admin ko‘rib chiqmoqda. Tasdiqlangach, «Vazifalar» bo‘limida guruh ochasiz.</p>
+      {% else %}
+      <p class="mt-1 text-sm text-mute">So‘rov yuboring: admin tasdiqlagach, o‘z guruhingizni ochib, o‘quvchilarga vazifa berasiz.</p>
+      {% endif %}
+    </div>
+    {% if not user.teacher_requested %}
+    <form method="post" action="{% url 'teacher_request' %}">{% csrf_token %}<button class="ca-btn ca-btn-ghost"><i data-lucide="send" class="lu" aria-hidden="true"></i>So‘rov yuborish</button></form>
+    {% endif %}
+  </section>
+  {% endif %}
 </div>
 <script>
   document.getElementById("id_avatar").addEventListener("change", (e) => {

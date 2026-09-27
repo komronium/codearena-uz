@@ -9,6 +9,11 @@
   </form>
 </div>
 
+<nav class="mb-4 flex flex-wrap gap-2" aria-label="Filtr">
+  <a href="{% url 'moderation:users' %}" class="ca-filter {% if not requests_only %}is-active{% endif %}"{% if not requests_only %} aria-current="true"{% endif %}>Hammasi</a>
+  <a href="?requests=1" class="ca-filter {% if requests_only %}is-active{% endif %}"{% if requests_only %} aria-current="true"{% endif %}>O‘qituvchi so‘rovlari{% if n_requests %} <b class="tabular">{{ n_requests }}</b>{% endif %}</a>
+</nav>
+
 {% if page.object_list %}
 <ul class="ca-rows">
   {% for u in page %}
@@ -18,6 +23,7 @@
         {% include "accounts/_user.html" with tier=False %}
         {% if u.is_staff %}<span class="ca-chip shrink-0"><i data-lucide="shield" class="lu mr-1" aria-hidden="true"></i>Admin</span>{% else %}<span class="ca-chip shrink-0 !bg-ink/5 text-mute">{{ u.get_role_display }}</span>{% endif %}
         {% if not u.is_active %}<span class="ca-chip shrink-0 text-bad">Bloklangan</span>{% endif %}
+        {% if u.teacher_requested %}<span class="ca-chip ca-chip-score shrink-0"><i data-lucide="graduation-cap" class="lu mr-1" aria-hidden="true"></i>O‘qituvchi so‘rovi</span>{% endif %}
       </div>
       <div class="ca-row-meta pl-9">
         <span class="truncate" translate="no">{{ u.email|default:"email yo‘q" }}</span>
@@ -26,6 +32,12 @@
       </div>
     </div>
     <div class="ca-row-side">
+      {% if u.teacher_requested %}
+      <form method="post" action="{% url 'moderation:teacher_decide' u.pk %}" class="flex gap-1.5">{% csrf_token %}
+        <button name="decision" value="approve" class="ca-btn ca-btn-primary !py-1.5 text-sm"><i data-lucide="check" class="lu" aria-hidden="true"></i>O‘qituvchi qilish</button>
+        <button name="decision" value="decline" class="ca-btn ca-btn-ghost !py-1.5 text-sm">Rad etish</button>
+      </form>
+      {% endif %}
       <div class="ca-row-stat"><b style="--tier: {{ u.rating|tier_color }}" class="ca-tier-ink">{{ u.rating }}</b>reyting</div>
       <div class="ca-row-stat"><b>{{ u.n_subs }}</b>urinish</div>
       <a href="{% url 'moderation:submissions' %}?user={{ u.username|urlencode }}" class="ca-btn ca-btn-ghost !px-2 !py-1.5" title="Urinishlari" aria-label="Urinishlari: {{ u.username }}"><i data-lucide="history" class="lu" aria-hidden="true"></i></a>

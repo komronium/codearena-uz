@@ -1,12 +1,18 @@
 import datetime
 import math
 
+from django.contrib import messages
 from django.contrib.auth import login
+from django.contrib.auth import views as auth_views
+from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Count, F, OuterRef, Q, Subquery
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse_lazy
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
+from django.views.decorators.http import require_POST
 
 from apps.contests.models import _UZ_MONTHS_SHORT, Participation
 from apps.problems.models import Problem
@@ -157,13 +163,39 @@ def _activity_calendar(user: User) -> dict:
     }
 
 
+def _safe_next(request):
+    nxt = request.POST.get("next") or request.GET.get("next") or ""
+    ok = url_has_allowed_host_and_scheme(nxt, allowed_hosts={request.get_host()}, require_https=request.is_secure())
+    return nxt if ok else ""
+
+
 def register(request):
     form = RegisterForm(request.POST or None)
+    nxt = _safe_next(request)
     if request.method == "POST" and form.is_valid():
         user = form.save()
         login(request, user)
-        return redirect("home")
-    return render(request, "registration/register.html", {"form": form})
+        if user.teacher_requested:
+            messages.success(request, "Xush kelibsiz! O‘qituvchi so‘rovingiz adminga yuborildi — tasdiqlangach, «Vazifalar» bo‘limida guruh ochasiz.")
+        return redirect(nxt or "home")
+    return render(request, "registration/register.html", {"form": form, "next": nxt})
+
+
+class PasswordChange(SuccessMessageMixin, auth_views.PasswordChangeView):
+    """Knowing the old password is enough — no email round trip."""
+    success_url = reverse_lazy("profile_edit")
+    success_message = "Parol almashtirildi."
+
+
+@login_required
+@require_POST
+def teacher_request(request):
+    user = request.user
+    if user.role == User.Role.STUDENT and not user.is_staff and not user.teacher_requested:
+        user.teacher_requested = True
+        user.save(update_fields=["teacher_requested"])
+        messages.success(request, "So‘rov yuborildi. Admin tasdiqlagach, «Vazifalar» bo‘limida guruh ochasiz.")
+    return redirect("profile_edit")
 
 
 @login_required

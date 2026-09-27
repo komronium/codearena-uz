@@ -188,8 +188,10 @@ def problem_detail(request, slug):
         languages = Language.objects.filter(is_active=True).exclude(code="sql")
     my_subs = []
     if request.user.is_authenticated:
-        my_subs = list(Submission.objects.filter(user=request.user, problem=problem)
-                       .select_related("language")[:5])
+        subs = Submission.objects.filter(user=request.user, problem=problem)
+        if contest is not None:
+            subs = subs.filter(contest=contest)  # in a contest, only what counts for it
+        my_subs = list(subs.select_related("language")[:5])
     # Running contest that has this problem but the user hasn't joined: solving now
     # would count as practice, not for the standings — tell them before they submit.
     open_contest = None
@@ -239,6 +241,8 @@ def problem_detail(request, slug):
         "input_html": _render_statement(problem.input_md) if problem.input_md else "",
         "output_html": _render_statement(problem.output_md) if problem.output_md else "",
         "contest_problem": contest.contest_problems.filter(problem=problem).first() if contest else None,
+        "contest_problems": (list(contest.contest_problems.select_related("problem").order_by("label"))
+                             if contest else []),
         "languages": languages,
         "sql_dataset": getattr(problem, "sql_dataset", None),
         "contest": contest,

@@ -6,6 +6,7 @@ from django.db import transaction
 from django.db.models import Count, OuterRef, Q, Subquery
 from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
 from django.views.decorators.http import require_POST
@@ -15,7 +16,7 @@ from apps.accounts.models import Group, User
 from apps.contests.models import Contest
 from apps.contests.services import reuse_reason
 from apps.problems.models import Problem, Tag, TestCase
-from apps.submissions.models import Submission, TestResult, UserProblemSolved
+from apps.submissions.models import VERDICT_LABELS, Submission, TestResult, UserProblemSolved
 from apps.submissions.solves import refresh_solves
 from apps.integrity import audit
 from judge.runner import run_submission
@@ -55,6 +56,7 @@ def dashboard(request):
             "submissions": Submission.objects.count(),
             "tags": Tag.objects.count(),
             "groups": Group.objects.count(),
+            "teacher_requests": User.objects.filter(teacher_requested=True).count(),
         },
     })
 
@@ -364,7 +366,7 @@ def submissions(request):
         qs = qs.filter(contest_id=int(f["contest"]))
     page = Paginator(qs.order_by("-pk"), 50).get_page(request.GET.get("page"))
     return render(request, "moderation/submissions.html", {
-        "page": page, "f": f, "verdicts": Submission.Verdict.values,
+        "page": page, "f": f, "verdicts": list(VERDICT_LABELS.items()),
         "contests": Contest.objects.order_by("-start").only("id", "title")[:50],
     })
 
@@ -372,12 +374,34 @@ def submissions(request):
 @staff_required
 def users(request):
     q = request.GET.get("q", "").strip()
-    qs = User.objects.annotate(n_subs=Count("submissions")).order_by("-date_joined")
+    requests_only = request.GET.get("requests") == "1"
+    qs = User.objects.annotate(n_subs=Count("submissions")).order_by("-teacher_requested", "-date_joined")
+    if requests_only:
+        qs = qs.filter(teacher_requested=True)
     if q:
         qs = qs.filter(Q(username__icontains=q) | Q(email__icontains=q) | Q(first_name__icontains=q)
                        | Q(last_name__icontains=q) | Q(school__icontains=q))
     page = Paginator(qs, 30).get_page(request.GET.get("page"))
-    return render(request, "moderation/users.html", {"page": page, "q": q})
+    return render(request, "moderation/users.html", {
+        "page": page, "q": q, "requests_only": requests_only,
+        "n_requests": User.objects.filter(teacher_requested=True).count(),
+    })
+
+
+@staff_required
+@require_POST
+def teacher_decide(request, pk):
+    """Approve gives the teacher role (they then open their own groups); decline just clears the request."""
+    user = get_object_or_404(User, pk=pk, teacher_requested=True)
+    user.teacher_requested = False
+    if request.POST.get("decision") == "approve":
+        user.role = User.Role.TEACHER
+        messages.success(request, f"{user.username} endi o‘qituvchi.")
+    else:
+        messages.info(request, f"{user.username} so‘rovi rad etildi.")
+    user.save(update_fields=["teacher_requested", "role"])
+    left = User.objects.filter(teacher_requested=True).exists()
+    return redirect(reverse("moderation:users") + ("?requests=1" if left else ""))
 
 
 @staff_required

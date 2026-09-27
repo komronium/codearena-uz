@@ -6,9 +6,9 @@
   <div class="flex flex-wrap items-end justify-between gap-4 px-6 pb-5">
     <div class="flex flex-wrap items-start gap-4">
       {% if profile_user.avatar %}
-      <img src="{{ profile_user.avatar.url }}" alt="" class="-mt-10 h-24 w-24 shrink-0 rounded-full border-4 border-surface object-cover shadow">
+      <img src="{{ profile_user.avatar.url }}" alt="" class="relative z-10 -mt-10 h-24 w-24 shrink-0 rounded-full border-4 border-surface object-cover shadow">
       {% else %}
-      <div class="ca-avatar -mt-10 h-24 w-24 shrink-0 border-4 border-surface text-4xl shadow" style="background: color-mix(in srgb, {{ tier_color }} 18%, rgb(var(--ca-surface-rgb))); --tier: {{ tier_color }}; color: color-mix(in oklab, var(--tier) 62%, rgb(var(--ca-ink-rgb)))" aria-hidden="true">{{ profile_user.username|slice:":1" }}</div>
+      <div class="ca-avatar relative z-10 -mt-10 h-24 w-24 shrink-0 border-4 border-surface text-4xl shadow" style="background: color-mix(in srgb, {{ tier_color }} 18%, rgb(var(--ca-surface-rgb))); --tier: {{ tier_color }}; color: color-mix(in oklab, var(--tier) 62%, rgb(var(--ca-ink-rgb)))" aria-hidden="true">{{ profile_user.username|slice:":1" }}</div>
       {% endif %}
       {# text stays below the banner so it never sits on the gradient #}
       <div class="pt-3">
@@ -37,27 +37,27 @@
   </div>
   <div class="grid grid-cols-2 divide-line border-t border-line sm:grid-cols-4 sm:divide-x">
     <div class="px-6 py-4">
-      <p class="ca-stat-label">Reyting</p>
+      <p class="ca-stat-label">Musobaqa reytingi</p>
       {% if rating_history %}
       <p class="ca-stat-value mt-1">{{ profile_user.rating }}</p>
-      <p class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1"><span class="ca-tier" style="--tier: {{ tier_color }}">{{ tier }}</span><span class="text-xs text-mute">{{ rating_history|length }} ta musobaqa</span></p>
+      <p class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1"><span class="ca-tier" style="--tier: {{ tier_color }}">{{ tier }}</span><span class="text-xs text-mute">{{ rating_history|length }} ta reytingli musobaqadan</span></p>
       {% else %}
       <p class="ca-stat-value mt-1">—</p>
       <p class="mt-1.5"><span class="ca-tier" style="--tier: #6B7280">Reytingsiz</span></p>
       {% endif %}
     </div>
     <div class="px-6 py-4">
-      <p class="ca-stat-label">Reyting o‘rni</p>
+      <p class="ca-stat-label">Reytingda o‘rni</p>
       <p class="ca-stat-value mt-1">{% if rating_rank %}#{{ rating_rank }}{% else %}—{% endif %}</p>
       <p class="mt-1 text-xs text-mute">{{ total_rated }} ishtirokchidan</p>
     </div>
     <div class="px-6 py-4">
       <p class="ca-stat-label">Amaliyot ball</p>
       <p class="ca-stat-value mt-1">{{ profile_user.practice_points }}</p>
-      <p class="mt-1 text-xs text-mute">{{ solved|length }} ta masala yechilgan</p>
+      <p class="mt-1 text-xs text-mute">yechilgan {{ solved|length }} ta masala uchun</p>
     </div>
     <div class="px-6 py-4">
-      <p class="ca-stat-label">Ball o‘rni</p>
+      <p class="ca-stat-label">Amaliyot ballida o‘rni</p>
       <p class="ca-stat-value mt-1">{% if points_rank %}#{{ points_rank }}{% else %}—{% endif %}</p>
       <p class="mt-1 text-xs text-mute">{{ total_users }} ishtirokchidan</p>
     </div>

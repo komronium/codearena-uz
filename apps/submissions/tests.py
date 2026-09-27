@@ -132,9 +132,9 @@ def test_ole_verdict_shows_as_output_limit(client, problem, python, user):
     status = client.get(reverse("submissions:status", args=[s.pk])).content
     assert b"ca-verdict-warn" in status and b"Output Limit" in status and b"ca-test-OLE" in status
     mine = client.get(reverse("submissions:mine") + "?verdict=OLE")
-    assert list(mine.context["subs"]) == [s] and ("OLE", "OL") in mine.context["verdicts"]
+    assert list(mine.context["subs"]) == [s] and ("OLE", "Chiqish juda katta") in mine.context["verdicts"]
     detail = client.get(reverse("problems:detail", args=[problem.slug])).content
-    assert b'OLE: ["warn", "scissors", "OL"]' in detail and b"Chiqish hajmi chegarasi oshdi." in detail
+    assert b'OLE: ["warn", "scissors", "Chiqish juda katta"]' in detail and b"Chiqish hajmi chegarasi oshdi." in detail
 
 
 @patch("apps.submissions.views.django_rq.get_queue")

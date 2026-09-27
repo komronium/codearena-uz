@@ -11,7 +11,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
-from apps.accounts.models import User
+from apps.accounts.models import Group, User
 from apps.submissions.models import Submission
 
 from . import duels
@@ -23,6 +23,10 @@ from .progress import cell, grid
 
 def can_manage(user, group) -> bool:
     return user.is_staff or group.teacher_id == user.id
+
+
+def can_teach(user) -> bool:
+    return user.is_staff or user.role == User.Role.TEACHER
 
 
 @login_required
@@ -43,8 +47,51 @@ def assignment_list(request):
         "assignments": mine,
         "taught": taught.select_related("group"),
         "can_create": request.user.is_staff or request.user.taught_groups.exists(),
+        "can_teach": can_teach(request.user),
+        "my_groups": request.user.taught_groups.prefetch_related("members").order_by("name"),
+        "joined_groups": request.user.student_groups.select_related("teacher").order_by("name"),
         "now": timezone.now(),
     })
+
+
+@login_required
+@require_POST
+def group_create(request):
+    if not can_teach(request.user):
+        raise PermissionDenied
+    name = request.POST.get("name", "").strip()[:100]
+    if not name:
+        messages.error(request, "Guruh nomini yozing.")
+    else:
+        g = Group.objects.create(name=name, teacher=request.user)
+        messages.success(request, f"«{g.name}» guruhi ochildi. O‘quvchilarga kodni bering: {g.join_code}")
+    return redirect("classroom:list")
+
+
+@login_required
+@require_POST
+def group_join(request):
+    code = request.POST.get("code", "").strip().upper().replace(" ", "")
+    group = Group.objects.filter(join_code=code).first() if code else None
+    if group is None:
+        messages.error(request, "Bunday kodli guruh topilmadi. Kodni o‘qituvchingizdan qayta so‘rang.")
+    elif group.teacher_id == request.user.id:
+        messages.info(request, "Bu sizning guruhingiz.")
+    else:
+        group.members.add(request.user)
+        messages.success(request, f"«{group.name}» guruhiga qo‘shildingiz. Vazifalar shu yerda ko‘rinadi.")
+    return redirect("classroom:list")
+
+
+@login_required
+@require_POST
+def group_remove_member(request, pk, user_id):
+    group = get_object_or_404(Group, pk=pk)
+    if not can_manage(request.user, group):
+        raise PermissionDenied
+    group.members.remove(user_id)
+    messages.info(request, "O‘quvchi guruhdan chiqarildi.")
+    return redirect("classroom:list")
 
 
 @login_required
