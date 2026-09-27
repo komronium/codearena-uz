@@ -2,7 +2,7 @@
 {% block title %}{{ profile_user.username }}{% endblock %}
 {% block content %}
 <div class="ca-panel mb-6 !p-0 overflow-hidden">
-  <div class="ca-banner ca-banner-{{ banner.0 }}{% if banner.0 == 'newbie' %} ca-banner-dark-text{% endif %}" title="{{ tier }} darajasi banneri — «{{ banner.1 }}»"><span class="ca-banner-tag" aria-hidden="true">{{ tier }} · {{ banner.1 }}</span></div>
+  <div class="ca-banner ca-banner-{{ banner.0 }}" title="{{ tier }} darajasi banneri — «{{ banner.1 }}»"><span class="ca-banner-tag" aria-hidden="true">{{ tier }} · {{ banner.1 }}</span></div>
   <div class="flex flex-wrap items-end justify-between gap-4 px-6 pb-5">
     <div class="flex flex-wrap items-start gap-4">
       {% if profile_user.avatar %}

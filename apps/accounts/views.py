@@ -38,7 +38,7 @@ _RATING_TIERS = [
 
 # Profile banner per tier: (CSS modifier, the picture's name). Styles live in app.css (.ca-banner-*).
 _TIER_BANNERS = {
-    "Newbie": ("newbie", "Daftar varag‘i"), "Pupil": ("pupil", "Bog‘"), "Specialist": ("specialist", "Daryo"),
+    "Newbie": ("newbie", "Yulduzli tun"), "Pupil": ("pupil", "Chimyon tog‘lari"), "Specialist": ("specialist", "Daryo"),
     "Expert": ("expert", "Rishton koshini"), "Candidate Master": ("candidate-master", "Registon girihi"),
     "Master": ("master", "Quyosh"), "International Master": ("international-master", "Olov"),
     "Grandmaster": ("grandmaster", "Toj"),
