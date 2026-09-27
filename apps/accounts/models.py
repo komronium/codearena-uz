@@ -23,6 +23,8 @@ class User(AbstractUser):
     )
     # "I'm a teacher" at sign-up or from the profile; staff approve it by giving the teacher role
     teacher_requested = models.BooleanField(default=False, db_index=True)
+    # the tier the user was last shown; a higher one on the next page view gets a congratulation
+    seen_tier = models.CharField(max_length=30, blank=True)
 
 
 _CODE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"

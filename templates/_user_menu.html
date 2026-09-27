@@ -2,12 +2,12 @@
 (a <details> needs no script to open; base.html closes it on outside click and Esc).{% endcomment %}
 <details class="ca-dropdown" data-dropdown style="--tier: {{ user.rating|tier_color }}">
   <summary class="ca-dropdown-trigger" aria-label="Hisob: {{ user.username }}" title="{{ user.username }}" translate="no">
-    <span class="ca-avatar ca-user-avatar h-9 w-9 text-sm">{% if user.avatar %}<img src="{{ user.avatar.url }}" alt="" width="36" height="36">{% else %}{{ user.username|first }}{% endif %}</span>
+    <span class="ca-avatar ca-user-avatar h-9 w-9 text-sm{% if not user.avatar %} ca-art-{{ user.rating|tier_slug }}{% endif %}">{% if user.avatar %}<img src="{{ user.avatar.url }}" alt="" width="36" height="36">{% else %}{{ user.username|first }}{% endif %}</span>
     {% if unread_reviews %}<b class="ca-dropdown-dot" aria-label="{{ unread_reviews }} ta o‘qilmagan sharh"></b>{% endif %}
   </summary>
   <div class="ca-dropdown-panel">
     <div class="flex items-center gap-3 border-b border-line px-3 pb-3 pt-2">
-      <span class="ca-avatar ca-user-avatar h-10 w-10 text-base">{% if user.avatar %}<img src="{{ user.avatar.url }}" alt="" width="40" height="40">{% else %}{{ user.username|first }}{% endif %}</span>
+      <span class="ca-avatar ca-user-avatar h-10 w-10 text-base{% if not user.avatar %} ca-art-{{ user.rating|tier_slug }}{% endif %}">{% if user.avatar %}<img src="{{ user.avatar.url }}" alt="" width="40" height="40">{% else %}{{ user.username|first }}{% endif %}</span>
       <span class="min-w-0">
         <span class="ca-tier-ink block truncate font-semibold" translate="no">{{ user.get_full_name|default:user.username }}</span>
         <span class="mt-1 flex items-center gap-2"><span class="ca-tier">{{ user.rating|tier_name }}</span><span class="text-xs text-mute tabular">{{ user.rating }} · {{ user.practice_points }} ball</span></span>

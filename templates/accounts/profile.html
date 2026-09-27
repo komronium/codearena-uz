@@ -5,11 +5,15 @@
   <div class="ca-banner ca-banner-{{ banner.0 }}" title="{{ tier }} darajasi banneri — «{{ banner.1 }}»"><span class="ca-banner-tag" aria-hidden="true">{{ tier }} · {{ banner.1 }}</span></div>
   <div class="flex flex-wrap items-end justify-between gap-4 px-6 pb-5">
     <div class="flex flex-wrap items-start gap-4">
-      {% if profile_user.avatar %}
-      <img src="{{ profile_user.avatar.url }}" alt="" class="relative z-10 -mt-10 h-24 w-24 shrink-0 rounded-full border-4 border-surface object-cover shadow">
-      {% else %}
-      <div class="ca-avatar relative z-10 -mt-10 h-24 w-24 shrink-0 border-4 border-surface text-4xl shadow" style="background: color-mix(in srgb, {{ tier_color }} 18%, rgb(var(--ca-surface-rgb))); --tier: {{ tier_color }}; color: color-mix(in oklab, var(--tier) 62%, rgb(var(--ca-ink-rgb)))" aria-hidden="true">{{ profile_user.username|slice:":1" }}</div>
-      {% endif %}
+      {# the ring fills toward the next tier; at the top it turns into a slowly turning gold crown #}
+      <span class="ca-avatar-ring relative z-10 -mt-10 shrink-0{% if not next_tier %} is-top{% endif %}" style="--tier: {{ tier_color }}; --pct: {% if next_tier %}{{ next_tier.pct }}{% else %}100{% endif %}"
+            title="{% if next_tier %}{{ next_tier.name }} darajasigacha yana {{ next_tier.need }} reyting{% else %}Eng yuqori daraja{% endif %}">
+        {% if profile_user.avatar %}
+        <img src="{{ profile_user.avatar.url }}" alt="" class="h-24 w-24 rounded-full border-4 border-surface object-cover">
+        {% else %}
+        <span class="ca-avatar ca-art-{{ banner.0 }} h-24 w-24 border-4 border-surface text-4xl" aria-hidden="true">{{ profile_user.username|slice:":1" }}</span>
+        {% endif %}
+      </span>
       {# text stays below the banner so it never sits on the gradient #}
       <div class="pt-3">
         {% if profile_user.get_full_name %}
@@ -17,6 +21,12 @@
         <p class="ca-tier-ink mt-0.5 text-base font-semibold" translate="no" style="--tier: {{ tier_color }}">@{{ profile_user.username }}</p>
         {% else %}
         <h1 class="ca-tier-ink text-2xl font-bold leading-tight" translate="no" style="--tier: {{ tier_color }}">{{ profile_user.username }}</h1>
+        {% endif %}
+        {% if streak_badges.earned or streak_badges.next and user == profile_user %}
+        <p class="mt-1.5 flex flex-wrap items-center gap-1.5">
+          {% for b in streak_badges.earned %}<span class="ca-badge ca-badge-{{ b.icon }}" title="Kun masalasini {{ b.days }} kun ketma-ket yechgan"><i data-lucide="{{ b.icon }}" class="lu" aria-hidden="true"></i>{{ b.name }} · {{ b.days }} kun</span>{% endfor %}
+          {% if streak_badges.next and user == profile_user %}<span class="ca-badge ca-badge-locked" title="Kun masalasini {{ streak_badges.next.days }} kun ketma-ket yeching"><i data-lucide="lock" class="lu" aria-hidden="true"></i>{{ streak_badges.next.name }} — yana {{ streak_badges.next.left }} kun</span>{% endif %}
+        </p>
         {% endif %}
         {% if profile_user.is_staff %}<p class="mt-1.5"><span class="ca-chip"><i data-lucide="shield-check" class="lu mr-1" aria-hidden="true"></i>Moderator</span></p>{% endif %}
         <p class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-mute">

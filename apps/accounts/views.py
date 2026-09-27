@@ -45,6 +45,16 @@ _TIER_BANNERS = {
 }
 
 
+# Daily-problem streak badges: (days, name, icon). Earned by the best run ever, kept for good.
+_STREAK_BADGES = [(7, "Chiroq", "lamp"), (30, "Mash’al", "flame"), (100, "Quyosh", "sun")]
+
+
+def _streak_badges(best: int) -> dict:
+    earned = [{"days": d, "name": n, "icon": i} for d, n, i in _STREAK_BADGES if best >= d]
+    nxt = next(({"days": d, "name": n, "icon": i, "left": d - best} for d, n, i in _STREAK_BADGES if best < d), None)
+    return {"best": best, "earned": earned, "next": nxt}
+
+
 def rating_tier(rating: int) -> str:
     for floor, ceiling, name, _color in _RATING_TIERS:
         if (floor is None or rating >= floor) and (ceiling is None or rating < ceiling):
@@ -322,6 +332,8 @@ def profile(request, username):
         "problem_map": problem_map,
         "tier": rating_tier(profile_user.rating),
         "banner": _TIER_BANNERS[rating_tier(profile_user.rating)],
+        "next_tier": _next_tier(profile_user.rating),
+        "streak_badges": _streak_badges(streaks(profile_user)[1]),
         "tier_color": _tier_color(profile_user.rating),
         "rating_history": rating_history,
         "rating_chart": _rating_chart(rating_history) if rating_history else None,

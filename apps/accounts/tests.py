@@ -318,3 +318,17 @@ def test_activity_calendar_tells_june_from_july():
 
     names = [m["name"] for m in _activity_calendar(User.objects.create_user("ali", password="x"))["month_labels"]]
     assert "Iyn" in names and "Iyl" in names and "Iyu" not in names
+
+
+@pytest.mark.django_db
+def test_tier_up_congratulates_once_and_first_visit_only_records(client):
+    from apps.accounts.models import User as U
+    u = U.objects.create_user("tiery", password="x", rating=1100)
+    client.force_login(u)
+    assert "ca-tier-up" not in client.get("/").content.decode()  # first visit: just remembered
+    assert U.objects.get(pk=u.pk).seen_tier == "Newbie"
+    U.objects.filter(pk=u.pk).update(rating=1450)
+    assert "Tabriklaymiz! Siz endi Pupil" in client.get("/").content.decode()
+    assert "ca-tier-up" not in client.get("/").content.decode()  # only once
+    U.objects.filter(pk=u.pk).update(rating=1250)
+    assert "ca-tier-up" not in client.get("/").content.decode()  # a drop is silent

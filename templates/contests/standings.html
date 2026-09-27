@@ -39,7 +39,7 @@
   </thead>
   <tbody>
   {% for r in rows %}
-  <tr class="{% if r.user == user %}ca-row-me{% endif %} {% if r.disqualified %}ca-row-dq{% endif %}"{% if r.user == user %} id="me"{% endif %}>
+  <tr class="{% if r.user == user %}ca-row-me{% endif %} {% if r.disqualified %}ca-row-dq{% elif r.rank <= 3 and r.score %}ca-row-top ca-row-top{{ r.rank }}{% endif %}"{% if r.user == user %} id="me"{% endif %}>
     <td class="ca-sticky ca-sticky-rank text-center">{% include "accounts/_rank.html" with rank=r.rank dq=r.disqualified %}</td>
     <td class="ca-sticky ca-sticky-user">
       <div class="flex min-w-0 items-center gap-2">

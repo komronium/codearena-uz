@@ -47,19 +47,19 @@
     })(t0);
   }
 
-  function toast() {
+  function toast(text) {
     const el = document.createElement("div");
     el.setAttribute("role", "status");
     el.className = "ca-ac-toast";
-    el.textContent = "To‘g‘ri! Masala yechildi 🎉";
+    el.textContent = text || "To‘g‘ri! Masala yechildi 🎉";
     document.body.appendChild(el);
     setTimeout(() => el.classList.add("is-out"), 2600);
     setTimeout(() => el.remove(), 3200);
   }
 
-  window.caCelebrate = () => {
+  window.caCelebrate = (text) => {
     chime();
-    toast();
+    toast(text);
     if (!matchMedia("(prefers-reduced-motion: reduce)").matches) confetti();
   };
 
@@ -68,7 +68,7 @@
     const old = e.detail.target;
     const was = old && old.dataset ? old.dataset.verdict : "";
     if ((was === "PENDING" || was === "RUNNING") && /data-verdict="AC"/.test(e.detail.xhr.responseText || "")) {
-      setTimeout(window.caCelebrate, 60);
+      setTimeout(() => window.caCelebrate(), 60);
     }
   });
 })();

@@ -11,7 +11,7 @@
         {% if user.avatar %}
         <img id="avatar-preview" src="{{ user.avatar.url }}" alt="" class="h-20 w-20 rounded-full object-cover">
         {% else %}
-        <div class="ca-avatar h-20 w-20 text-3xl" style="--tier: {{ user.rating|tier_color }}; background: color-mix(in srgb, var(--tier) 14%, transparent); color: color-mix(in oklab, var(--tier) 62%, rgb(var(--ca-ink-rgb)))"><span id="avatar-letter">{{ user.username|first }}</span><img id="avatar-preview" src="" alt="" class="hidden h-20 w-20 rounded-full object-cover"></div>
+        <div class="ca-avatar ca-art-{{ user.rating|tier_slug }} h-20 w-20 text-3xl" style="--tier: {{ user.rating|tier_color }}"><span id="avatar-letter">{{ user.username|first }}</span><img id="avatar-preview" src="" alt="" class="hidden h-20 w-20 rounded-full object-cover"></div>
         {% endif %}
       </div>
       <div class="min-w-0">

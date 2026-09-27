@@ -89,7 +89,7 @@ A native dialog gives focus trapping and Esc for free.{% endcomment %}
   <div class="overflow-y-auto p-3">
     {% if user.is_authenticated %}
     <a href="{% url 'profile' user.username %}" class="mb-2 flex items-center gap-3 rounded-[var(--ca-radius-sm)] bg-sunk px-3 py-3" style="--tier: {{ user.rating|tier_color }}" translate="no">
-      <span class="ca-avatar ca-user-avatar h-10 w-10 text-base">{% if user.avatar %}<img src="{{ user.avatar.url }}" alt="" width="40" height="40">{% else %}{{ user.username|first }}{% endif %}</span>
+      <span class="ca-avatar ca-user-avatar h-10 w-10 text-base{% if not user.avatar %} ca-art-{{ user.rating|tier_slug }}{% endif %}">{% if user.avatar %}<img src="{{ user.avatar.url }}" alt="" width="40" height="40">{% else %}{{ user.username|first }}{% endif %}</span>
       <span class="min-w-0"><span class="ca-tier-ink block truncate font-semibold">{{ user.get_full_name|default:user.username }}</span><span class="block text-xs text-mute tabular">{{ user.rating|tier_name }} · {{ user.rating }} · {{ user.practice_points }} ball</span></span>
       <i data-lucide="chevron-right" class="lu ml-auto text-mute" aria-hidden="true"></i>
     </a>
@@ -193,5 +193,27 @@ A native dialog gives focus trapping and Esc for free.{% endcomment %}
     });
   })();
 </script>
+{% if tier_up %}
+{# rating moved the user into a higher tier: once, with the new banner as the picture #}
+<dialog id="ca-tier-up" class="ca-dialog !max-w-md !p-0 overflow-hidden" aria-labelledby="ca-tier-up-title">
+  <div class="ca-banner ca-banner-{{ tier_up.slug }}"><span class="ca-banner-tag">{{ tier_up.name }} · {{ tier_up.picture }}</span></div>
+  <div class="px-6 pb-6 pt-5 text-center">
+    <p class="text-sm text-mute">{{ tier_up.was }} → {{ tier_up.name }}</p>
+    <h2 id="ca-tier-up-title" class="mt-1 text-xl font-bold">Tabriklaymiz! Siz endi {{ tier_up.name }}</h2>
+    <p class="mt-2 text-sm text-mute">Yangi banneringiz — «{{ tier_up.picture }}». Profilingizda va avataringizda ko‘rinadi.</p>
+    <div class="mt-5 flex justify-center gap-2">
+      <form method="dialog"><button class="ca-btn ca-btn-ghost">Yopish</button></form>
+      <a class="ca-btn ca-btn-primary" href="{% url 'profile' user.username %}"><i data-lucide="user" class="lu" aria-hidden="true"></i>Profilni ko‘rish</a>
+    </div>
+  </div>
+</dialog>
+<script>
+  window.addEventListener("load", () => {
+    const d = document.getElementById("ca-tier-up");
+    d.showModal();
+    window.caCelebrate?.("Yangi daraja: {{ tier_up.name }} 🎉");
+  });
+</script>
+{% endif %}
 </body>
 </html>

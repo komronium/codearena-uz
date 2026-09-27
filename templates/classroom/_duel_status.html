@@ -1,10 +1,10 @@
-{% comment %}The duel board, polled every 5 s while open; ctx: duel, players, best, beat_by,
+{% load tiers %}{% comment %}The duel board, polled every 5 s while open; ctx: duel, players, best, beat_by,
 my_running, expires, user.{% endcomment %}
 <div class="grid items-stretch gap-3 sm:grid-cols-[1fr_auto_1fr]">
   {% for p in players %}
   {% if p.user %}
   <div class="ca-duelist{% if p.winner %} is-winner{% endif %}{% if not forloop.first %} sm:order-3{% endif %}">
-    <span class="ca-avatar h-11 w-11 shrink-0 text-lg" aria-hidden="true">{{ p.user.username|first }}</span>
+    <span class="ca-avatar h-11 w-11 shrink-0 text-lg ca-art-{{ p.user.rating|tier_slug }}" aria-hidden="true">{{ p.user.username|first }}</span>
     <div class="min-w-0">
       <p class="truncate font-semibold">{{ p.user.username }}{% if p.user == user %} <span class="text-xs font-normal text-mute">(siz)</span>{% endif %}</p>
       <p class="text-xs text-mute">Duel reytingi <b class="text-ink">{{ p.user.duel_rating }}</b>{% if p.delta is not None %} <span class="font-semibold {% if p.delta > 0 %}text-ok{% elif p.delta < 0 %}text-bad{% endif %}">{{ p.delta|stringformat:"+d" }}</span>{% endif %}</p>

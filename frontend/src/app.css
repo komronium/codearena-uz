@@ -1132,6 +1132,42 @@ section.ca-ed-full #editor .cm-editor { height: calc(100vh - 9.5rem); }
 @media (min-width: 768px) { .ca-ac-toast { bottom: 2rem; } }
 @media (prefers-reduced-motion: reduce) { .ca-ac-toast { animation: none; } }
 
+/* letter avatars wear their tier's picture (the profile banner, small); a thin tier ring on every avatar */
+.ca-avatar[class*='ca-art-'] { color: #fff !important; text-shadow: 0 1px 2px rgb(0 0 0 / .55); }
+.ca-user .ca-avatar, .ca-avatar[class*='ca-art-'] { box-shadow: 0 0 0 2px color-mix(in srgb, var(--tier, #6B7280) 75%, transparent); }
+.ca-avatar.ca-art-newbie, .ca-user .ca-avatar.ca-art-newbie { background: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27120%27 height=%2770%27%3E%3Cg fill=%27%23fff%27%3E%3Ccircle cx=%278%27 cy=%2712%27 r=%271%27 fill-opacity=%27.8%27/%3E%3Ccircle cx=%2737%27 cy=%2740%27 r=%27.7%27 fill-opacity=%27.5%27/%3E%3Ccircle cx=%2761%27 cy=%279%27 r=%271.3%27 fill-opacity=%27.9%27/%3E%3Ccircle cx=%2788%27 cy=%2731%27 r=%27.8%27 fill-opacity=%27.6%27/%3E%3Ccircle cx=%27104%27 cy=%2758%27 r=%271%27 fill-opacity=%27.7%27/%3E%3Ccircle cx=%2720%27 cy=%2760%27 r=%27.6%27 fill-opacity=%27.4%27/%3E%3Cpath d=%27M75 50l1 3 3 1-3 1-1 3-1-3-3-1 3-1z%27 fill-opacity=%27.8%27/%3E%3C/g%3E%3C/svg%3E") 0 0 / 120px 70px, radial-gradient(60% 120% at 80% 0%, rgb(148 163 184 / .35), transparent 60%), linear-gradient(180deg, #0B1020, #1E293B 70%, #334155); }
+.ca-avatar.ca-art-pupil, .ca-user .ca-avatar.ca-art-pupil { background: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 1200 160%27 preserveAspectRatio=%27none%27%3E%3Cpath d=%27M0 90 L140 30 L230 75 L360 18 L470 70 L600 26 L720 80 L860 22 L980 66 L1100 30 L1200 60 V160 H0Z%27 fill=%27%236EE7B7%27/%3E%3Cpath d=%27M360 18 L385 30 L372 34 L350 28Z M860 22 L884 34 L866 37 L848 30Z M140 30 L160 40 L146 43 L128 38Z%27 fill=%27%23fff%27 fill-opacity=%27.9%27/%3E%3Cpath d=%27M0 115 L110 70 L250 110 L400 62 L540 108 L700 66 L840 112 L1000 70 L1200 104 V160 H0Z%27 fill=%27%2310B981%27/%3E%3Cpath d=%27M0 145 L180 108 L360 140 L560 104 L760 142 L960 110 L1200 138 V160 H0Z%27 fill=%27%23047857%27/%3E%3C/svg%3E") no-repeat left bottom / 100% 78%, radial-gradient(40% 90% at 78% 20%, rgb(254 243 199 / .9), transparent 70%), linear-gradient(180deg, #CFFAFE, #A7F3D0 70%); }
+.ca-avatar.ca-art-specialist, .ca-user .ca-avatar.ca-art-specialist { background: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2780%27 height=%2724%27%3E%3Cpath d=%27M0 12 Q10 2 20 12 T40 12 T60 12 T80 12%27 fill=%27none%27 stroke=%27%23ffffff%27 stroke-opacity=%27.2%27 stroke-width=%272%27/%3E%3C/svg%3E") 0 0 / 80px 24px, radial-gradient(70% 140% at 85% 0%, rgb(165 243 252 / .35), transparent 60%), linear-gradient(120deg, #083344, #0E7490 55%, #06B6D4); }
+.ca-avatar.ca-art-expert, .ca-user .ca-avatar.ca-art-expert { background: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2748%27 height=%2748%27%3E%3Cpath d=%27M24 10 L28 18 L37 15 L34 24 L37 33 L28 30 L24 38 L20 30 L11 33 L14 24 L11 15 L20 18 Z%27 fill=%27%23ffffff%27 fill-opacity=%27.16%27/%3E%3Ccircle cx=%2724%27 cy=%2724%27 r=%273%27 fill=%27%23ffffff%27 fill-opacity=%27.45%27/%3E%3Cg fill=%27%2393C5FD%27 fill-opacity=%27.35%27%3E%3Ccircle cx=%270%27 cy=%270%27 r=%273%27/%3E%3Ccircle cx=%2748%27 cy=%270%27 r=%273%27/%3E%3Ccircle cx=%270%27 cy=%2748%27 r=%273%27/%3E%3Ccircle cx=%2748%27 cy=%2748%27 r=%273%27/%3E%3C/g%3E%3C/svg%3E") 0 0 / 48px 48px, radial-gradient(80% 150% at 90% -20%, rgb(191 219 254 / .35), transparent 60%), linear-gradient(120deg, #0B1B4D, #1D4ED8 60%, #3B82F6); }
+.ca-avatar.ca-art-candidate-master, .ca-user .ca-avatar.ca-art-candidate-master { background: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2760%27 height=%2760%27%3E%3Cg fill=%27none%27 stroke=%27%23FCD34D%27 stroke-opacity=%27.4%27 stroke-width=%271.2%27%3E%3Cpath d=%27M30 6 L36 22 L54 30 L36 38 L30 54 L24 38 L6 30 L24 22 Z%27/%3E%3Cpath d=%27M30 0 V6 M30 54 V60 M0 30 H6 M54 30 H60%27/%3E%3Crect x=%2721%27 y=%2721%27 width=%2718%27 height=%2718%27 transform=%27rotate(45 30 30)%27/%3E%3C/g%3E%3C/svg%3E") 0 0 / 60px 60px, radial-gradient(80% 150% at 90% -20%, rgb(233 213 255 / .35), transparent 60%), linear-gradient(120deg, #1E0B3F, #5B21B6 55%, #8B5CF6); }
+.ca-avatar.ca-art-master, .ca-user .ca-avatar.ca-art-master { background: repeating-conic-gradient(from 0deg at 88% 110%, rgb(255 255 255 / .12) 0 5deg, transparent 5deg 11deg), repeating-radial-gradient(circle at 88% 110%, transparent 0 22px, rgb(255 255 255 / .10) 22px 24px), linear-gradient(120deg, #451A03, #B45309 55%, #F59E0B); }
+.ca-avatar.ca-art-international-master, .ca-user .ca-avatar.ca-art-international-master { background: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2740%27 height=%2728%27%3E%3Cpath d=%27M0 24 L10 8 L20 24 L30 8 L40 24%27 fill=%27none%27 stroke=%27%23FED7AA%27 stroke-opacity=%27.3%27 stroke-width=%272%27/%3E%3C/svg%3E") 0 0 / 40px 28px, radial-gradient(70% 160% at 90% 110%, rgb(254 215 170 / .45), transparent 60%), linear-gradient(120deg, #431407, #C2410C 55%, #F97316); }
+.ca-avatar.ca-art-grandmaster, .ca-user .ca-avatar.ca-art-grandmaster { background: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2764%27 height=%2764%27%3E%3Cg fill=%27%23FDE68A%27%3E%3Cpath d=%27M16 8 L18 14 L24 16 L18 18 L16 24 L14 18 L8 16 L14 14 Z%27 fill-opacity=%27.7%27/%3E%3Cpath d=%27M46 38 L47.5 42.5 L52 44 L47.5 45.5 L46 50 L44.5 45.5 L40 44 L44.5 42.5 Z%27 fill-opacity=%27.5%27/%3E%3Ccircle cx=%2750%27 cy=%2712%27 r=%271.5%27 fill-opacity=%27.6%27/%3E%3Ccircle cx=%2712%27 cy=%2748%27 r=%271.2%27 fill-opacity=%27.5%27/%3E%3C/g%3E%3Cpath d=%27M0 32 L32 0 M32 64 L64 32%27 stroke=%27%23FDE68A%27 stroke-opacity=%27.12%27/%3E%3C/svg%3E") 0 0 / 64px 64px, radial-gradient(80% 160% at 90% -20%, rgb(253 230 138 / .45), transparent 60%), linear-gradient(120deg, #1C0306, #7F1D1D 50%, #DC2626); }
+
+/* profile avatar ring: tier colour filled to the share of the way to the next tier */
+.ca-avatar-ring { display: inline-grid; place-items: center; padding: 4px; border-radius: 9999px;
+  background: conic-gradient(var(--tier) calc(var(--pct) * 1%), rgb(var(--ca-line-rgb)) 0); box-shadow: 0 4px 14px rgb(0 0 0 / .12); }
+.ca-avatar-ring .ca-avatar { box-shadow: none; }
+.ca-avatar-ring.is-top { position: relative; background: none; }
+.ca-avatar-ring.is-top::before { content: ""; position: absolute; inset: 0; border-radius: 9999px; z-index: -1;
+  background: conic-gradient(#FDE68A, #F59E0B, #FEF3C7, #D97706, #FDE68A); animation: ca-spin-slow 6s linear infinite; }
+@keyframes ca-spin-slow { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .ca-avatar-ring.is-top::before { animation: none; } }
+
+/* standings: the top three wear their medal's metal as a glow across the name cell */
+.ca-standings tr.ca-row-top td.ca-sticky-user { background: linear-gradient(90deg, rgb(var(--medal) / .22), rgb(var(--medal) / 0) 75%), rgb(var(--ca-surface-rgb)); }
+.ca-standings tr.ca-row-top1 { --medal: 242 169 0; }
+.ca-standings tr.ca-row-top2 { --medal: 148 163 184; }
+.ca-standings tr.ca-row-top3 { --medal: 180 83 9; }
+
+/* daily-streak badges on the profile: Chiroq 7, Mash'al 30, Quyosh 100 days */
+.ca-badge { display: inline-flex; align-items: center; gap: .3rem; padding: .2rem .6rem; border-radius: 9999px; font-size: .75rem; font-weight: 600; }
+.ca-badge svg.lucide { width: .9rem; height: .9rem; }
+.ca-badge-lamp { background: #FEF3C7; color: #92400E; }
+.ca-badge-flame { background: #FFEDD5; color: #9A3412; }
+.ca-badge-sun { background: linear-gradient(90deg, #FDE68A, #F59E0B); color: #451A03; }
+.ca-badge-locked { background: rgb(var(--ca-sunk-rgb)); color: rgb(var(--ca-mute-rgb)); font-weight: 500; }
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
