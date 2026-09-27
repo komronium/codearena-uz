@@ -1,6 +1,7 @@
 import re
 
 from django import forms
+from django.utils import timezone
 
 from apps.accounts.models import Group
 from apps.contests.services import in_upcoming_contest
@@ -30,9 +31,20 @@ class AssignmentForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         groups = Group.objects.order_by("name")
         self.fields["group"].queryset = groups if user.is_staff else groups.filter(teacher=user)
+        self.fields["group"].empty_label = "Guruhni tanlang"
         if self.instance.pk and not self.is_bound:
             self.initial["problems"] = ", ".join(
                 ap.problem.slug for ap in self.instance.assignment_problems.select_related("problem"))
+
+    def picker_problems(self) -> list[dict]:
+        """Every problem clean_problems accepts, for the search-and-order picker on the page."""
+        # ponytail: the whole open catalog goes into the page; fine for a few thousand problems,
+        # past that the picker needs a search endpoint.
+        labels = dict(Problem.Difficulty.choices)
+        rows = (Problem.objects.filter(is_public=True, status=Problem.Status.APPROVED)
+                .exclude(contests__start__gt=timezone.now()).order_by("title")
+                .values("slug", "title", "difficulty"))
+        return [{**r, "level": labels.get(r["difficulty"], r["difficulty"])} for r in rows]
 
     def clean_problems(self):
         slugs = list(dict.fromkeys(s for s in re.split(r"[\s,]+", self.cleaned_data["problems"]) if s))

@@ -16,9 +16,118 @@
     <div><label class="ca-label" for="{{ form.deadline.id_for_label }}">Muddat</label>{{ form.deadline }}{{ form.deadline.errors }}</div>
   </div>
   <div>
-    <label class="ca-label" for="{{ form.problems.id_for_label }}">Masalalar</label>{{ form.problems }}
-    <p class="mt-1 text-xs text-mute">{{ form.problems.help_text }}</p>{{ form.problems.errors }}
+    <label class="ca-label" for="{{ form.problems.id_for_label }}" id="problems-label">Masalalar</label>{{ form.problems }}
+    <p class="mt-1 text-xs text-mute" data-picker-hint>{{ form.problems.help_text }}</p>
+    {# With JS the slug box becomes a picker (search to add, arrows to order); it still posts the same slugs. #}
+    <div id="picker" hidden>
+      <div class="relative">
+        <i data-lucide="search" class="lu pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-mute" aria-hidden="true"></i>
+        <input type="search" id="picker-q" class="ca-input !pl-9" placeholder="Masala nomi yoki slug’i" autocomplete="off" aria-describedby="picker-help">
+      </div>
+      <ul id="picker-hits" class="ca-picker-hits" aria-label="Topilgan masalalar" hidden></ul>
+      <p id="picker-help" class="mt-1 text-xs text-mute">Enter birinchi topilganini qo‘shadi. O‘quvchilar masalalarni shu tartibda ko‘radi.</p>
+      <ol id="picker-list" class="ca-rows ca-picked mt-3" aria-labelledby="problems-label"></ol>
+      <p id="picker-empty" class="ca-empty mt-3 !py-6">Hali masala tanlanmagan: yuqorida qidirib qo‘shing.</p>
+    </div>
+    {{ form.problems.errors }}
   </div>
   <button class="ca-btn ca-btn-primary"><i data-lucide="check" class="lu" aria-hidden="true"></i>Saqlash</button>
 </form>
+{{ form.picker_problems|json_script:"picker-data" }}
+<script>
+(() => {
+  const input = document.getElementById("{{ form.problems.id_for_label }}");
+  const q = document.getElementById("picker-q"), hits = document.getElementById("picker-hits");
+  const list = document.getElementById("picker-list"), empty = document.getElementById("picker-empty");
+  const all = JSON.parse(document.getElementById("picker-data").textContent);
+  const bySlug = new Map(all.map((p) => [p.slug, p]));
+  // a slug that isn't open (typed earlier, or kept after a failed save) stays listed so it can be removed
+  const picked = [...new Set(input.value.split(/[\s,]+/).filter(Boolean))].map((s) => bySlug.get(s) || { slug: s, title: s });
+  input.hidden = true;
+  document.querySelector("[data-picker-hint]").hidden = true;
+  document.getElementById("problems-label").htmlFor = "picker-q";
+  document.getElementById("picker").hidden = false;
+
+  // titles come from users: text only, never innerHTML
+  const el = (tag, cls, text) => {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text !== undefined) e.textContent = text;
+    return e;
+  };
+  const icon = (name) => { const i = el("i", "lu"); i.dataset.lucide = name; i.setAttribute("aria-hidden", "true"); return i; };
+  const level = (p) => p.level ? el("span", `ca-diff ca-diff-${p.difficulty} shrink-0`, p.level) : el("span", "ca-chip shrink-0 text-bad", "ochiq emas");
+  const button = (name, label, onClick) => {
+    const b = el("button", "ca-btn ca-btn-ghost !p-1.5");
+    b.type = "button"; b.title = label; b.setAttribute("aria-label", label);
+    b.append(icon(name)); b.addEventListener("click", onClick);
+    return b;
+  };
+  // after a re-render, put focus back on the same control of row i (or any enabled one, or the search box)
+  const focusRow = (i, sel) => {
+    const row = list.children[Math.min(i, list.children.length - 1)];
+    const b = row && (row.querySelector(`${sel}:not(:disabled)`) || row.querySelector("button:not(:disabled)"));
+    (b || q).focus();
+  };
+
+  const matches = () => {
+    const term = q.value.trim().toLowerCase();
+    if (!term) return [];
+    const taken = new Set(picked.map((p) => p.slug));
+    return all.filter((p) => !taken.has(p.slug) && (p.title.toLowerCase().includes(term) || p.slug.includes(term))).slice(0, 8);
+  };
+  const showHits = () => {
+    const found = matches();
+    hits.replaceChildren(...found.map((p) => {
+      const b = el("button", "ca-picker-hit");
+      b.type = "button";
+      b.append(el("span", "min-w-0 flex-1 truncate", p.title), el("span", "hidden font-mono text-xs text-mute sm:inline", p.slug), level(p), icon("plus"));
+      b.addEventListener("click", () => add(p));
+      const li = el("li"); li.append(b);
+      return li;
+    }));
+    if (q.value.trim() && !found.length) hits.append(el("li", "px-3 py-2 text-sm text-mute", "Mos ochiq masala topilmadi"));
+    hits.hidden = !hits.children.length;
+    caIcons();
+  };
+  const render = () => {
+    input.value = picked.map((p) => p.slug).join(", ");
+    list.replaceChildren(...picked.map((p, i) => {
+      const li = el("li");
+      const main = el("div", "min-w-0 flex-1"), meta = el("div", "mt-0.5 flex items-center gap-2 text-xs text-mute");
+      meta.append(el("span", "truncate font-mono", p.slug), level(p));
+      main.append(el("div", "truncate font-medium", p.title), meta);
+      const up = button("arrow-up", `Yuqoriga: ${p.title}`, () => move(i, -1));
+      const down = button("arrow-down", `Pastga: ${p.title}`, () => move(i, 1));
+      up.disabled = i === 0; down.disabled = i === picked.length - 1;
+      up.dataset.dir = "up"; down.dataset.dir = "down";
+      const remove = button("x", `Olib tashlash: ${p.title}`, () => { picked.splice(i, 1); render(); focusRow(i, "[data-remove]"); });
+      remove.dataset.remove = "";
+      li.append(el("span", "ca-picked-n tabular", String(i + 1)), main, up, down, remove);
+      return li;
+    }));
+    list.hidden = !picked.length;
+    empty.hidden = !!picked.length;
+    showHits();
+  };
+  const add = (p) => { picked.push(p); q.value = ""; render(); q.focus(); };
+  const move = (i, d) => {
+    [picked[i], picked[i + d]] = [picked[i + d], picked[i]];
+    render();
+    focusRow(i + d, `[data-dir="${d < 0 ? "up" : "down"}"]`);
+  };
+
+  q.addEventListener("input", showHits);
+  q.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {  // never submit the form from the search box
+      e.preventDefault();
+      const [first] = matches();
+      if (first) add(first);
+    } else if (e.key === "Escape" && q.value) {
+      e.preventDefault(); q.value = ""; showHits();
+    }
+  });
+  render();
+})();
+</script>
 {% endblock %}

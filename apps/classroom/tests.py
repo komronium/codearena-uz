@@ -73,6 +73,28 @@ def test_teacher_creates_an_assignment_for_own_group_only(client, teacher, klass
 
 
 @pytest.mark.django_db
+def test_the_problem_picker_offers_exactly_what_the_form_accepts(client, teacher, klass):
+    from apps.contests.models import Contest, ContestProblem
+
+    _problem("open", teacher)
+    _problem("secret", teacher, is_public=False)
+    _problem("queued", teacher, status=Problem.Status.PENDING)
+    soon = _problem("soon", teacher)
+    c = Contest.objects.create(title="Soon", start=timezone.now() + timezone.timedelta(days=1),
+                               end=timezone.now() + timezone.timedelta(days=1, hours=2))
+    ContestProblem.objects.create(contest=c, problem=soon, label="A")
+    client.force_login(teacher)
+    r = client.get(reverse("classroom:new"))
+    assert [p["slug"] for p in r.context["form"].picker_problems()] == ["open"]
+    assert 'id="picker-data"' in r.content.decode()
+    data = {"group": klass.pk, "title": "T", "description_md": "", "start": "2030-01-01T09:00",
+            "deadline": "2030-01-08T23:59"}
+    for slug in ("secret", "queued", "soon"):  # what the picker leaves out, the form refuses
+        assert client.post(reverse("classroom:new"), data | {"problems": slug}).status_code == 200
+    assert not Assignment.objects.exists()
+
+
+@pytest.mark.django_db
 def test_progress_grid_and_csv(client, teacher, klass, python):
     p1, p2 = _problem("p1", teacher), _problem("p2", teacher)
     deadline = timezone.now() - timezone.timedelta(hours=1)
