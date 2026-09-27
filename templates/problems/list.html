@@ -2,79 +2,89 @@
 {% load pagination %}
 {% block title %}Masalalar{% endblock %}
 {% block content %}
-<div class="mb-6 flex flex-wrap items-end justify-between gap-3">
+<div class="mb-6 flex flex-wrap items-end justify-between gap-4">
   <div>
     <h1 class="ca-page-title">Masalalar</h1>
-    <p class="mt-1 text-sm text-mute">{{ problems.paginator.count }} ta ochiq masala — yeching, ball to‘plang</p>
+    <p class="mt-1 text-sm text-mute">{{ total }} ta ochiq masala — yeching, ball to‘plang</p>
   </div>
-  {% if user.is_staff %}
-  <a href="{% url 'moderation:submit' %}" class="ca-btn ca-btn-primary">
-    <i data-lucide="circle-plus" class="lu" aria-hidden="true"></i>
-    Masala qo‘shish
-  </a>
-  {% endif %}
+  <div class="flex flex-wrap items-end gap-4">
+    {% if progress %}
+    <div class="min-w-[10rem]" title="Ochiq masalalardan yechganlaringiz">
+      <p class="text-xs text-mute">Yechganingiz</p>
+      <p class="tabular"><b class="text-xl">{{ progress.done }}</b><span class="text-sm text-mute"> / {{ progress.total }}</span></p>
+      <span class="ca-progress ca-progress-ok mt-1 block" aria-hidden="true"><span style="width: {% widthratio progress.done progress.total 100 %}%"></span></span>
+    </div>
+    {% endif %}
+    {% if user.is_staff %}
+    <a href="{% url 'moderation:submit' %}" class="ca-btn ca-btn-primary"><i data-lucide="circle-plus" class="lu" aria-hidden="true"></i>Masala qo‘shish</a>
+    {% endif %}
+  </div>
 </div>
 
-{% if daily %}
-<a href="{% url 'problems:detail' daily.problem.slug %}" class="ca-panel mb-4 flex flex-wrap items-center justify-between gap-3 !py-3.5 transition hover:border-accent">
-  <div class="min-w-0">
-    <p class="text-xs font-semibold uppercase tracking-wide text-warn"><i data-lucide="calendar-check" class="lu mr-1" aria-hidden="true"></i>Kun masalasi · {{ daily.date|date:"d.m" }}</p>
-    <p class="mt-1 truncate text-lg font-semibold">{{ daily.problem.title }}</p>
-    <p class="mt-1 flex flex-wrap items-center gap-2 text-xs text-mute"><span class="ca-diff ca-diff-{{ daily.problem.difficulty }}">{{ daily.problem.get_difficulty_display }}</span>Bugun yechsangiz — seriya davom etadi va +5 ball</p>
-  </div>
-  {% if user.is_authenticated %}
-  <div class="text-right text-sm">
-    {% if daily_done %}<span class="ca-verdict ca-verdict-ac">✓ Bugun yechildi</span>{% endif %}
-    {% if streak %}<p class="mt-1 text-mute"><i data-lucide="flame" class="lu mr-1 text-warn" aria-hidden="true"></i><b class="tabular text-ink">{{ streak }}</b> kunlik seriya</p>{% endif %}
-  </div>
-  {% endif %}
-</a>
-{% endif %}
-
-{% if next_picks %}
-<section class="mb-6" aria-labelledby="next-title">
-  <h2 id="next-title" class="mb-2 text-sm font-semibold"><i data-lucide="compass" class="lu mr-1.5 text-accent" aria-hidden="true"></i>Keyingi masala</h2>
-  <div class="grid gap-3 sm:grid-cols-3">
-    {% for p, reason in next_picks %}
-    <a href="{% url 'problems:detail' p.slug %}" class="ca-panel block !py-3 transition hover:border-accent">
-      <p class="truncate font-semibold">{{ p.title }}</p>
+{% if daily or next_picks %}
+<div class="mb-6 grid gap-3 {% if daily and next_picks %} lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] {% endif %}">
+  {% if daily %}
+  <a href="{% url 'problems:detail' daily.problem.slug %}" class="ca-today group block !py-4 transition hover:border-accent">
+    <div class="ca-girih" aria-hidden="true"></div>
+    <div class="relative">
+      <p class="ca-eyebrow !text-warn"><i data-lucide="calendar-check" class="lu" aria-hidden="true"></i>Kun masalasi · {{ daily.date|date:"d.m" }}</p>
+      <p class="mt-1.5 flex items-center gap-2"><span class="truncate text-lg font-semibold">{{ daily.problem.title }}</span>{% if daily_done %}<span class="ca-verdict ca-verdict-ac shrink-0 !py-0"><i data-lucide="check" class="lu" aria-hidden="true"></i>yechildi</span>{% endif %}</p>
       <p class="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-mute">
-        <span class="ca-diff ca-diff-{{ p.difficulty }}">{{ p.get_difficulty_display }}</span>
-        {% if reason %}<span>zaif mavzu: <b class="text-ink">{{ reason }}</b></span>{% else %}<span>darajangizga mos</span>{% endif %}
+        <span class="ca-diff ca-diff-{{ daily.problem.difficulty }}">{{ daily.problem.get_difficulty_display }}</span>
+        {% if streak %}<span><i data-lucide="flame" class="lu text-gold" aria-hidden="true"></i> <b class="tabular text-ink">{{ streak }}</b> kunlik seriya</span>{% else %}<span>Kunida yechsangiz +5 ball</span>{% endif %}
       </p>
-    </a>
-    {% endfor %}
-  </div>
-</section>
+    </div>
+  </a>
+  {% endif %}
+  {% if next_picks %}
+  <section class="ca-panel !p-0" aria-labelledby="next-title">
+    <h2 id="next-title" class="ca-eyebrow !text-mute px-4 pt-3.5"><i data-lucide="compass" class="lu" aria-hidden="true"></i>Keyingi masala</h2>
+    <ul class="ca-picks">
+      {% for p, reason in next_picks %}
+      <li><a href="{% url 'problems:detail' p.slug %}">
+        <span class="block truncate font-medium">{{ p.title }}</span>
+        <span class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-mute"><span class="ca-diff ca-diff-{{ p.difficulty }}">{{ p.get_difficulty_display }}</span>{% if reason %}<span>zaif: <b class="text-ink">{{ reason }}</b></span>{% endif %}</span>
+      </a></li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+</div>
 {% endif %}
 
-<form method="get" class="mb-4 flex flex-wrap gap-3">
-  <div class="relative max-w-xs flex-1">
-    <i data-lucide="search" class="lu pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-mute" aria-hidden="true"></i>
-    <input type="search" name="q" value="{{ q }}" placeholder="Nomi bo‘yicha qidirish…"
-           class="ca-input pl-9" aria-label="Qidirish">
+<div class="mb-4 space-y-3">
+  <form method="get" class="flex flex-wrap gap-2" role="search" aria-label="Masalalarni saralash">
+    {% if selected_difficulty %}<input type="hidden" name="difficulty" value="{{ selected_difficulty }}">{% endif %}
+    {% if selected_status %}<input type="hidden" name="status" value="{{ selected_status }}">{% endif %}
+    {% if sort != "id" or dir == "desc" %}<input type="hidden" name="sort" value="{{ sort }}"><input type="hidden" name="dir" value="{{ dir }}">{% endif %}
+    <div class="relative min-w-[12rem] flex-1 sm:max-w-sm">
+      <i data-lucide="search" class="lu pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-mute" aria-hidden="true"></i>
+      <input type="search" name="q" value="{{ q }}" placeholder="Nomi bo‘yicha qidirish" class="ca-input pl-9" aria-label="Nomi bo‘yicha qidirish">
+    </div>
+    <select name="tag" class="ca-select w-auto max-w-[12rem]" aria-label="Mavzu" onchange="this.form.submit()">
+      <option value="">Barcha mavzular</option>
+      {% for t in all_tags %}
+      <option value="{{ t.name }}" {% if t.name == selected_tag %}selected{% endif %}>{{ t.name }}</option>
+      {% endfor %}
+    </select>
+    {% if q or selected_tag or selected_difficulty or selected_status %}<a href="{% url 'problems:list' %}" class="ca-btn ca-btn-ghost"><i data-lucide="x" class="lu" aria-hidden="true"></i>Tozalash</a>{% endif %}
+  </form>
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <nav class="flex flex-wrap gap-1.5" aria-label="Qiyinlik">
+      <a class="ca-filter {% if not selected_difficulty %}is-active{% endif %}" href="{% querystring difficulty=None page=None %}"{% if not selected_difficulty %} aria-current="true"{% endif %}>Hammasi<span class="ca-filter-n">{{ level_total }}</span></a>
+      {% for c in level_chips %}
+      <a class="ca-filter {% if c.value == selected_difficulty %}is-active{% endif %}" href="{% querystring difficulty=c.value page=None %}"{% if c.value == selected_difficulty %} aria-current="true"{% endif %}><span class="ca-level-dot ca-level-{{ c.value }}" aria-hidden="true"></span>{{ c.label }}<span class="ca-filter-n">{{ c.n }}</span></a>
+      {% endfor %}
+    </nav>
+    {% if user.is_authenticated %}
+    <nav class="ca-seg ca-seg-sm" aria-label="Holat">
+      <a href="{% querystring status=None page=None %}"{% if not selected_status %} aria-current="true"{% endif %}>Hammasi</a>
+      <a href="{% querystring status='unsolved' page=None %}"{% if selected_status == "unsolved" %} aria-current="true"{% endif %}>Yechilmagan</a>
+      <a href="{% querystring status='solved' page=None %}"{% if selected_status == "solved" %} aria-current="true"{% endif %}>Yechilgan</a>
+    </nav>
+    {% endif %}
   </div>
-  <select name="tag" class="ca-select max-w-[10rem]" aria-label="Teg" onchange="this.form.submit()">
-    <option value="">Barcha teglar</option>
-    {% for t in all_tags %}
-    <option value="{{ t.name }}" {% if t.name == selected_tag %}selected{% endif %}>{{ t.name }}</option>
-    {% endfor %}
-  </select>
-  <select name="difficulty" class="ca-select max-w-[9rem]" aria-label="Qiyinlik" onchange="this.form.submit()">
-    <option value="">Barcha qiyinlik</option>
-    {% for value, label in difficulties %}
-    <option value="{{ value }}" {% if value == selected_difficulty %}selected{% endif %}>{{ label }}</option>
-    {% endfor %}
-  </select>
-  {% if user.is_authenticated %}
-  <select name="status" class="ca-select max-w-[10rem]" aria-label="Holat" onchange="this.form.submit()">
-    <option value="">Hammasi</option>
-    <option value="solved" {% if selected_status == "solved" %}selected{% endif %}>Yechilgan</option>
-    <option value="unsolved" {% if selected_status == "unsolved" %}selected{% endif %}>Yechilmagan</option>
-  </select>
-  {% endif %}
-  {% if q or selected_tag or selected_difficulty or selected_status %}<a href="{% url 'problems:list' %}" class="ca-btn ca-btn-ghost"><i data-lucide="x" class="lu" aria-hidden="true"></i>Tozalash</a>{% endif %}
-</form>
+</div>
 
 {% if problems %}
 <div class="overflow-x-auto">
@@ -85,7 +95,7 @@
       <th class="hidden w-20 sm:table-cell">{% include "problems/_sort_th.html" with key="id" label="#" %}</th>
       <th class="w-full">{% include "problems/_sort_th.html" with key="title" label="Nomi" %}</th>
       <th>{% include "problems/_sort_th.html" with key="difficulty" label="Qiyinlik" %}</th>
-      <th class="hidden lg:table-cell text-right">{% include "problems/_sort_th.html" with key="rating" label="Baho" %}</th>
+      {% if any_rated %}<th class="hidden lg:table-cell text-right">{% include "problems/_sort_th.html" with key="rating" label="Baho" %}</th>{% endif %}
       <th class="hidden md:table-cell text-right">{% include "problems/_sort_th.html" with key="attempts" label="Urinishlar" %}</th>
       <th class="text-right">{% include "problems/_sort_th.html" with key="pass_rate" label="Yechilish" %}</th>
     </tr>
@@ -95,22 +105,12 @@
   <tr{% if p.id in solved_ids %} class="ca-row-solved"{% endif %}>
     <td class="text-center">{% if p.id in solved_ids %}<span class="inline-grid h-5 w-5 place-items-center rounded-full bg-ok-soft text-ok" title="Yechilgan"><i data-lucide="check" class="lu text-[.7rem]" aria-hidden="true"></i><span class="sr-only">Yechilgan</span></span>{% endif %}</td>
     <td class="hidden tabular text-xs text-mute sm:table-cell">{{ p.id|stringformat:"04d" }}</td>
-    {% comment %}Tags share the title cell, right-aligned (a separate column squeezed long titles into 3 lines).
-       The tag row is one chip tall: chips that don't fit wrap onto a hidden second row, so rows stay one line.
-       The empty first span lets even the first chip wrap away instead of being clipped.{% endcomment %}
     <td class="sm:min-w-[12rem]">
-      <div class="flex items-center gap-3">
-        {# the title only refuses to shrink where the tags beside it (md+) are the ones that give way #}
-        <a class="ca-link font-medium md:shrink-0" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a>
-        {% with tags=p.tags.all %}{% if tags %}
-        <div class="hidden h-[1.375rem] min-w-0 flex-1 flex-wrap justify-end gap-1 overflow-hidden md:flex" title="{% for t in tags %}{{ t.name }}{% if not forloop.last %}, {% endif %}{% endfor %}"><span class="h-full w-0" aria-hidden="true"></span>{% for t in tags %}<a class="ca-chip shrink-0" href="?tag={{ t.name|urlencode }}">{{ t.name }}</a>{% endfor %}</div>
-        {% endif %}{% endwith %}
-      </div>
+      <a class="ca-link font-medium" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a>
+      {% with tags=p.tags.all %}{% if tags %}<div class="ca-tags">{% for t in tags %}<a href="{% querystring tag=t.name page=None %}">{{ t.name }}</a>{% endfor %}</div>{% endif %}{% endwith %}
     </td>
-    <td class="whitespace-nowrap">
-      <span class="ca-diff ca-diff-{{ p.difficulty }}">{{ p.get_difficulty_display }}</span>
-    </td>
-    <td class="hidden lg:table-cell tabular text-right text-mute">{% if p.avg_stars %}<span class="ca-stars-sum justify-end" title="O‘rtacha baho"><i data-lucide="star" class="lu" aria-hidden="true"></i>{{ p.avg_stars|floatformat:1 }}</span>{% else %}<span aria-label="baho yo‘q">—</span>{% endif %}</td>
+    <td class="whitespace-nowrap"><span class="ca-diff ca-diff-{{ p.difficulty }}">{{ p.get_difficulty_display }}</span></td>
+    {% if any_rated %}<td class="hidden lg:table-cell tabular text-right text-mute">{% if p.avg_stars %}<span class="ca-stars-sum justify-end" title="O‘rtacha baho"><i data-lucide="star" class="lu" aria-hidden="true"></i>{{ p.avg_stars|floatformat:1 }}</span>{% else %}<span aria-label="baho yo‘q">—</span>{% endif %}</td>{% endif %}
     <td class="hidden md:table-cell tabular text-right text-mute">{{ p.attempts }}</td>
     <td class="whitespace-nowrap text-right">
       <div class="inline-flex items-center gap-2" title="{{ p.ac_count }} / {{ p.attempts }} urinish muvaffaqiyatli">

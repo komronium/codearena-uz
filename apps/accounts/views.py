@@ -8,7 +8,7 @@ from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
-from apps.contests.models import Participation
+from apps.contests.models import _UZ_MONTHS_SHORT, Participation
 from apps.problems.models import Problem
 from apps.problems.daily import streaks
 from apps.problems.skills import skill_map
@@ -16,9 +16,6 @@ from apps.submissions.models import Submission
 
 from .forms import ProfileEditForm, RegisterForm
 from .models import User
-
-_UZ_MONTHS = ["Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun",
-              "Iyul", "Avgust", "Sentabr", "Oktabr", "Noyabr", "Dekabr"]
 
 # (floor, ceiling, name, color) — floor None = -inf, ceiling None = +inf.
 _RATING_TIERS = [
@@ -132,7 +129,8 @@ def _activity_calendar(user: User) -> dict:
         if day.weekday() == 0:
             weeks.append([])
             if day.day <= 7:
-                month_labels.append({"week": len(weeks) - 1, "name": _UZ_MONTHS[day.month - 1][:3]})
+                # the contest tiles' abbreviations: Iyun and Iyul both cut to "Iyu" otherwise
+                month_labels.append({"week": len(weeks) - 1, "name": _UZ_MONTHS_SHORT[day.month - 1]})
         n = counts.get(day, 0)
         streak = streak + 1 if n else 0
         max_streak = max(max_streak, streak)
@@ -251,6 +249,9 @@ def profile(request, username):
         "solved": solved,
         "total_public_problems": len(problem_map),
         "solved_shown": sum(1 for _, st in problem_map if st == "solved"),
+        # solved problems an upcoming contest holds: in the points (and the count beside them),
+        # hidden from the map until the contest starts
+        "solved_hidden": len(solved) - sum(1 for _, st in problem_map if st == "solved"),
         "attempting": len(attempted_ids),
         "by_diff": by_diff,
         "problem_map": problem_map,

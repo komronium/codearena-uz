@@ -38,6 +38,11 @@ Node. After adding a Tailwind class or an icon to a template:
 
     cd frontend && npm ci && npm run build   # then commit static/ and templates/_importmap.html
 
+The look lives in `frontend/src/app.css`: colours are CSS variables at the top (warm
+ivory paper, firuza for actions, lapis, ochre; a matching dark set), every text pairing
+at 4.5:1 or more. The star mark is `templates/_brand_mark.html`; `.ca-girih` lays the
+girih lattice behind heroes and banners.
+
 `tests/test_frontend.py` fails when the committed build is stale (it runs where
 Node and `frontend/node_modules` exist) and when a template loads a third-party
 script or stylesheet.
