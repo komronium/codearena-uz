@@ -36,6 +36,15 @@ _RATING_TIERS = [
 ]
 
 
+# Profile banner per tier: (CSS modifier, the picture's name). Styles live in app.css (.ca-banner-*).
+_TIER_BANNERS = {
+    "Newbie": ("newbie", "Daftar varag‘i"), "Pupil": ("pupil", "Bog‘"), "Specialist": ("specialist", "Daryo"),
+    "Expert": ("expert", "Rishton koshini"), "Candidate Master": ("candidate-master", "Registon girihi"),
+    "Master": ("master", "Quyosh"), "International Master": ("international-master", "Olov"),
+    "Grandmaster": ("grandmaster", "Toj"),
+}
+
+
 def rating_tier(rating: int) -> str:
     for floor, ceiling, name, _color in _RATING_TIERS:
         if (floor is None or rating >= floor) and (ceiling is None or rating < ceiling):
@@ -312,6 +321,7 @@ def profile(request, username):
         "by_diff": by_diff,
         "problem_map": problem_map,
         "tier": rating_tier(profile_user.rating),
+        "banner": _TIER_BANNERS[rating_tier(profile_user.rating)],
         "tier_color": _tier_color(profile_user.rating),
         "rating_history": rating_history,
         "rating_chart": _rating_chart(rating_history) if rating_history else None,
