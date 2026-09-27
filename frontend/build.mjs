@@ -1,7 +1,8 @@
 // Builds CodeArena's static assets from the versions pinned in package.json. The outputs
 // are committed, so the Django image never needs Node:
 //   static/css/app.css         Tailwind (scans templates + apps) + src/app.css + @font-face
-//   static/fonts/*.woff2       Inter, JetBrains Mono, Fira Code (SIL Open Font License)
+//   static/fonts/*.woff2       Inter, JetBrains Mono, Fira Code (SIL Open Font License); the
+//                              project's own .otf fonts there are not built and are left alone
 //   static/vendor/*            htmx, Lucide icons, highlight.js
 //   static/vendor/esm/*.js     one ES module per CodeMirror package; every bare import stays
 //                              external and resolves through the import map, so each
@@ -227,6 +228,7 @@ function check() {
   for (const dir of ["static/vendor", "static/fonts"]) {
     for (const f of walk(path.join(ROOT, dir))) {
       const rel = path.relative(ROOT, f);
+      if (dir === "static/fonts" && !rel.endsWith(".woff2")) continue;  // the project's own fonts
       if (!built.has(rel)) stale.push(`${rel} (no longer built)`);
     }
   }

@@ -29,14 +29,15 @@ place that tells a student what to do next.
 | 8 | Problem page on a phone: the editor is below the whole statement | UX |
 | 9 | Duel page is a bare status box; the challenge form needs an exact username | UX |
 | 10 | Homework grid columns are just numbers | UX |
-| 11 | The fonts were Anthropic's proprietary brand fonts, committed to a public repo | licensing |
+| 11 | The fonts are Anthropic's brand fonts, committed to a public repo; flagged as a licensing risk | licensing |
 
 ## Decisions
 
 1. **Self-hosted front end** (done): `frontend/build.mjs` builds Tailwind ahead of time and
    vendors everything at pinned versions; outputs are committed so deploys need no
-   Node. Inter, JetBrains Mono and Fira Code (SIL OFL) replace the proprietary fonts. A
-   test fails on a stale build or a third-party script/stylesheet.
+   Node. A test fails on a stale build or a third-party script/stylesheet. Fonts: the
+   owner chose (2026-09-27) to keep Anthropic Sans/Mono as the primary fonts; Inter,
+   JetBrains Mono and Fira Code (SIL OFL) ship as fallbacks and editor options.
 2. **Mobile navigation**: the bottom bar keeps four destinations (Bosh sahifa,
    Masalalar, Musobaqalar, Urinishlar) and a fifth "Menyu" button opens a sheet with
    every sidebar link, staff links included, and the unread-review badge.
