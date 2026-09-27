@@ -689,3 +689,24 @@ def test_standard_topics_migration_merges_variants_and_drops_the_rest(db):
     assert set(Tag.objects.values_list("name", flat=True)) == set(migration.TOPICS)
     assert set(p1.tags.values_list("name", flat=True)) == {"loops", "math"}  # "beginner" is a level, not a topic
     assert set(p2.tags.values_list("name", flat=True)) == {"loops", "binary-search"}
+
+
+@pytest.mark.django_db
+def test_header_streak_pill_shows_the_run_and_whether_today_is_solved(client, catalog):
+    import datetime
+
+    from .daily import daily_for
+    from .models import DailySolve
+
+    assert b"ca-streak" not in client.get(reverse("problems:list")).content  # guests get no pill
+    ali = User.objects.create_user("ali", password="x")
+    client.force_login(ali)
+    today = timezone.localdate()
+    DailySolve.objects.create(user=ali, daily=daily_for(today - datetime.timedelta(days=1)))
+    daily = daily_for(today)
+    page = client.get(reverse("submissions:mine")).content.decode()  # any page with the header
+    assert 'class="ca-streak is-risk"' in page and '<span class="tabular">1</span>' in page
+    assert reverse("problems:detail", args=[daily.problem.slug]) in page
+    DailySolve.objects.create(user=ali, daily=daily)
+    page = client.get(reverse("submissions:mine")).content.decode()
+    assert 'class="ca-streak is-done"' in page and '<span class="tabular">2</span>' in page

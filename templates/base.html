@@ -39,6 +39,13 @@
     </form>
     <div class="ml-auto flex shrink-0 items-center gap-1.5 md:ml-2">
     {% if user.is_authenticated %}
+      {% with s=streak_pill %}{% if s.daily %}
+      <a href="{% url 'problems:detail' s.daily.problem.slug %}" class="ca-streak{% if s.done %} is-done{% elif s.current %} is-risk{% endif %}"
+         title="{% if s.done %}Bugungi masala yechildi — seriya {{ s.current }} kun{% elif s.current %}Seriya {{ s.current }} kun: bugun kun masalasini yeching, aks holda uziladi{% else %}Kun masalasini yechib, seriyani boshlang{% endif %}">
+        <i data-lucide="flame" class="lu" aria-hidden="true"></i><span class="tabular">{{ s.current }}</span>
+        <span class="sr-only">kunlik seriya{% if s.done %}, bugungi masala yechilgan{% elif s.current %}, bugungi masala hali yechilmagan{% endif %}</span>
+      </a>
+      {% endif %}{% endwith %}
       {% include "_user_menu.html" %}
     {% else %}
       <button type="button" id="theme-toggle" class="ca-btn ca-btn-ghost !px-2.5 !py-1.5" title="Mavzu" aria-label="Mavzuni almashtirish">

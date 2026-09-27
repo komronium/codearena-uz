@@ -45,6 +45,7 @@ TEMPLATES = [{
         "django.contrib.auth.context_processors.auth",
         "django.contrib.messages.context_processors.messages",
         "apps.classroom.context_processors.unread_reviews",
+        "apps.problems.context_processors.streak",
     ]},
 }]
 

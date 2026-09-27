@@ -680,6 +680,17 @@ section.ca-ed-full #editor .cm-editor { height: calc(100vh - 9.5rem); }
 .ca-dropdown-item:hover { background: rgb(var(--ca-ink-rgb) / .05); }
 .ca-dropdown-item svg.lucide { width: 1.1rem; height: 1.1rem; color: rgb(var(--ca-mute-rgb)); }
 .ca-dropdown-item.text-bad svg.lucide { color: currentColor; }
+/* header streak pill: gold once today's daily problem is solved, ochre while the run is at risk */
+.ca-streak {
+  display: inline-flex; align-items: center; gap: .3rem; padding: .3rem .6rem .3rem .5rem; border-radius: 9999px;
+  font-size: .8rem; font-weight: 700; color: rgb(var(--ca-mute-rgb)); border: 1px solid rgb(var(--ca-line-rgb));
+  transition: border-color .15s ease, background-color .15s ease;
+}
+.ca-streak svg.lucide { width: 1rem; height: 1rem; }
+.ca-streak:hover { border-color: rgb(var(--ca-mute-rgb) / .5); }
+.ca-streak.is-done { color: rgb(var(--ca-ink-rgb)); background: rgb(var(--ca-gold-rgb) / .16); border-color: rgb(var(--ca-gold-rgb) / .45); }
+.ca-streak.is-done svg.lucide { color: rgb(var(--ca-gold-rgb)); fill: rgb(var(--ca-gold-rgb) / .35); }
+.ca-streak.is-risk { color: rgb(var(--ca-warn-rgb)); border-color: rgb(var(--ca-warn-rgb) / .45); border-style: dashed; }
 .ca-user-avatar { background: color-mix(in srgb, var(--tier) 16%, rgb(var(--ca-surface-rgb))); color: color-mix(in oklab, var(--tier) 62%, rgb(var(--ca-ink-rgb))); box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--tier) 45%, transparent); }
 /* eyebrow: the small label above a title */
 .ca-eyebrow { display: inline-flex; align-items: center; gap: .4rem; font-size: .72rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: rgb(var(--ca-accent-rgb)); }
