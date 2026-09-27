@@ -1,4 +1,5 @@
 import json
+import threading
 from types import SimpleNamespace
 from unittest.mock import patch
 
@@ -316,67 +317,67 @@ class _FakeStream:
         return self._response
 
 
-def _fake_client(payload: dict):
-    response = SimpleNamespace(content=[SimpleNamespace(type="text", text=json.dumps(payload))])
-    return SimpleNamespace(messages=SimpleNamespace(stream=lambda **kw: _FakeStream(response)))
+def _fake_client(*payloads):
+    """A client that answers each request with the next payload (the last one repeats)."""
+    replies = [SimpleNamespace(content=[SimpleNamespace(type="text", text=p if isinstance(p, str) else json.dumps(p))])
+               for p in payloads]
+    lock, calls = threading.Lock(), []
 
-
-def _capture(fake):
-    """Wrap a fake client so the request it gets is kept."""
-    sent, stream = {}, fake.messages.stream
-    fake.messages.stream = lambda **kw: (sent.update(kw), stream(**kw))[1]
-    return sent
+    def stream(**kw):
+        with lock:
+            calls.append(kw)
+            reply = replies[min(len(calls), len(replies)) - 1]
+        return _FakeStream(reply)
+    return SimpleNamespace(messages=SimpleNamespace(stream=stream), calls=calls)
 
 
 def test_generate_problems_asks_for_each_problem_by_its_level():
     from apps.moderation.ai import generate_problems
 
-    fake = _fake_client({"beginner_1": _ai_problem("A"), "medium_1": _ai_problem("B"), "medium_2": _ai_problem("C")})
-    sent = _capture(fake)
+    fake = _fake_client(_ai_problem("A"))
     result = generate_problems({"medium": 2, "beginner": 1, "hard": 0}, focus="bozor narxlari", client=fake)
-    schema = sent["output_config"]["format"]["schema"]
-    # one required key per problem: the reply can't hold more, fewer, or other levels
-    assert schema["required"] == ["beginner_1", "medium_1", "medium_2"]
-    assert "difficulty" not in schema["properties"]["medium_1"]["properties"]
-    assert [(p["title"], p["difficulty"]) for p in result] == [("A", "beginner"), ("B", "medium"), ("C", "medium")]
-    prompt = sent["messages"][0]["content"]
-    assert "medium_1, medium_2: Medium" in prompt and "bozor narxlari" in prompt
+    # one small request per problem: a single schema holding them all compiles to a grammar the API rejects
+    assert len(fake.calls) == 3
+    for kw in fake.calls:
+        schema = kw["output_config"]["format"]["schema"]
+        assert "testcases" in schema["properties"] and "difficulty" not in schema["properties"]
+    assert [p["difficulty"] for p in result] == ["beginner", "medium", "medium"]
+    prompts = sorted(kw["messages"][0]["content"] for kw in fake.calls)
+    assert all("bozor narxlari" in p for p in prompts)
+    assert sum("Beginner" in p for p in prompts) == 1 and sum("Medium" in p for p in prompts) == 2
+    assert any("2-si, jami 2 ta" in p for p in prompts)
 
 
 def test_generate_problems_wraps_bad_json():
     from apps.moderation.ai import AIGenerationError, generate_problems
 
-    client = SimpleNamespace(messages=SimpleNamespace(
-        stream=lambda **kw: _FakeStream(SimpleNamespace(content=[SimpleNamespace(type="text", text="not json")]))
-    ))
     with pytest.raises(AIGenerationError):
-        generate_problems({"easy": 1}, client=client)
+        generate_problems({"easy": 1}, client=_fake_client("not json"))
 
 
-def test_generate_problems_rejects_too_few_testcases_a_missing_problem_or_a_bad_count():
+def test_generate_problems_rejects_too_few_testcases_or_a_bad_count():
     from apps.moderation.ai import AIGenerationError, generate_problems
 
     with pytest.raises(AIGenerationError):
-        generate_problems({"easy": 1}, client=_fake_client({"easy_1": _ai_problem("Kam testli", n_tests=5)}))
+        generate_problems({"easy": 1}, client=_fake_client(_ai_problem("Kam testli", n_tests=5)))
     with pytest.raises(AIGenerationError):
-        generate_problems({"easy": 2}, client=_fake_client({"easy_1": _ai_problem("A")}))
+        generate_problems({"easy": 2}, client=_fake_client(_ai_problem("A"), _ai_problem("B", n_tests=3)))
     for levels in ({}, {"easy": 11}):
         with pytest.raises(AIGenerationError):
-            generate_problems(levels, client=_fake_client({}))
+            generate_problems(levels, client=_fake_client(_ai_problem()))
 
 
 def test_generate_problems_limits_tags_to_the_chosen_topics_else_the_sites():
     from apps.moderation.ai import generate_problems
 
-    fake = _fake_client({"easy_1": _ai_problem("A")})
-    sent = _capture(fake)
+    fake = _fake_client(_ai_problem("A"))
     generate_problems({"easy": 1}, topics=["loops", "math"], client=fake, allowed_tags=["arrays", "loops", "math"])
-    assert sent["output_config"]["format"]["schema"]["properties"]["easy_1"]["properties"]["tags"]["items"]["enum"] \
-        == ["loops", "math"]
+    sent = fake.calls[-1]
+    assert sent["output_config"]["format"]["schema"]["properties"]["tags"]["items"]["enum"] == ["loops", "math"]
     assert "Mavzular: loops, math" in sent["messages"][0]["content"]
     generate_problems({"easy": 1}, client=fake, allowed_tags=["arrays", "loops"])
-    assert sent["output_config"]["format"]["schema"]["properties"]["easy_1"]["properties"]["tags"]["items"]["enum"] \
-        == ["arrays", "loops"]
+    sent = fake.calls[-1]
+    assert sent["output_config"]["format"]["schema"]["properties"]["tags"]["items"]["enum"] == ["arrays", "loops"]
     assert "Mavzular" not in sent["messages"][0]["content"]
 
 
