@@ -13,13 +13,35 @@
     </p>
   </div>
   <div class="flex flex-wrap items-center gap-2">
-    {% if contest.is_running %}<span class="ca-diff ca-diff-easy"><span class="ca-live-dot" aria-hidden="true"></span>Jonli</span>{% endif %}
-    {% if me_in_rows %}<a class="ca-btn ca-btn-ghost !py-1.5 text-sm" href="#me"><i data-lucide="locate-fixed" class="lu" aria-hidden="true"></i>Mening o‘rnim</a>{% endif %}
+    {% if contest.is_running %}<span class="ca-live-badge"><span class="ca-live-dot" aria-hidden="true"></span>Jonli · har 20 soniyada yangilanadi</span>{% endif %}
   </div>
 </div>
 
 {% if rows %}
-<div class="ca-panel !p-0 overflow-x-auto" tabindex="0" aria-label="Natijalar jadvali (gorizontal suriladi)">
+<div class="mb-3 flex flex-wrap items-center gap-2">
+  <label class="relative w-full max-w-xs">
+    <span class="sr-only">Ishtirokchini qidirish</span>
+    <i data-lucide="search" class="lu pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-mute" aria-hidden="true"></i>
+    <input type="search" id="st-search" class="ca-input !py-1.5 pl-8 text-sm" placeholder="Ism yoki login…" autocomplete="off">
+  </label>
+  {% if me_in_rows %}<button type="button" class="ca-btn ca-btn-ghost !py-1.5 text-sm" data-goto-me><i data-lucide="locate-fixed" class="lu" aria-hidden="true"></i>Mening o‘rnim</button>{% endif %}
+  <span class="ml-auto hidden text-xs text-mute" id="st-scroll-hint"><i data-lucide="move-horizontal" class="lu mr-1" aria-hidden="true"></i>Jadvalni yonga suring</span>
+</div>
+
+<div id="st-live"{% if contest.is_running %} hx-get="{{ request.path }}" hx-trigger="every 20s [!document.hidden]" hx-select="#st-live" hx-swap="outerHTML"{% endif %}>
+{% if my_row %}
+{# your line, always in view: rank, score, penalty and each problem at a glance #}
+<div class="ca-st-mine mb-3" role="status">
+  <span class="ca-st-mine-rank">#{{ my_row.rank }}<small>/ {{ rows|length }}</small></span>
+  <span><b class="tabular">{{ my_row.score }}</b> ball · <span class="text-mute">jarima</span> <b class="tabular">{{ my_row.penalty }}</b></span>
+  <span class="flex flex-wrap gap-1">
+    {% for cell in my_row.cells %}{% with cp=problems|slice:forloop.counter|last %}
+    <span class="ca-st-pill {% if cell.solved %}is-ac{% elif cell.wrong %}is-wa{% endif %}" title="{{ cp.label }}: {% if cell.solved %}yechilgan {{ cell.time }}{% elif cell.wrong %}{{ cell.wrong }} ta noto‘g‘ri urinish{% else %}urinish yo‘q{% endif %}">{{ cp.label }}{% if cell.solved %}✓{% elif cell.wrong %}−{{ cell.wrong }}{% endif %}</span>
+    {% endwith %}{% endfor %}
+  </span>
+</div>
+{% endif %}
+<div class="ca-panel !p-0 overflow-x-auto" id="st-scroll" tabindex="0" aria-label="Natijalar jadvali (gorizontal suriladi)">
 <table class="ca-table ca-standings">
   <thead>
     <tr>
@@ -32,6 +54,8 @@
       <th class="ca-st-prob">
         {% if contest.has_started and registered or contest.has_ended or contest.has_started and user.is_staff %}<a class="ca-st-label" href="{% url 'problems:detail' cp.problem.slug %}" title="{{ cp.problem.title }}">{{ cp.label }}</a>{% else %}<span class="ca-st-label">{{ cp.label }}</span>{% endif %}
         <span class="ca-st-sub tabular">{{ cp.points }} ball</span>
+        <span class="ca-st-sub tabular" title="{{ cp.n_solved }} kishi yechdi, {{ cp.n_tried }} kishi urindi"><b class="text-ok">{{ cp.n_solved }}</b>/{{ cp.n_tried }}</span>
+        <span class="ca-st-rate" aria-hidden="true"><span style="width: {{ cp.solve_pct }}%"></span></span>
       </th>
       {% endfor %}
       {% if user.is_staff %}<th class="w-10"><span class="sr-only">Amal</span></th>{% endif %}
@@ -39,7 +63,7 @@
   </thead>
   <tbody>
   {% for r in rows %}
-  <tr class="{% if r.user == user %}ca-row-me{% endif %} {% if r.disqualified %}ca-row-dq{% elif r.rank <= 3 and r.score %}ca-row-top ca-row-top{{ r.rank }}{% endif %}"{% if r.user == user %} id="me"{% endif %}>
+  <tr data-name="{{ r.user.username|lower }} {{ r.user.get_full_name|lower }}" class="{% if r.user == user %}ca-row-me{% endif %} {% if r.disqualified %}ca-row-dq{% elif r.rank <= 3 and r.score %}ca-row-top ca-row-top{{ r.rank }}{% endif %}"{% if r.user == user %} id="me"{% endif %}>
     <td class="ca-sticky ca-sticky-rank text-center">{% include "accounts/_rank.html" with rank=r.rank dq=r.disqualified %}</td>
     <td class="ca-sticky ca-sticky-user">
       <div class="flex min-w-0 items-center gap-2">
@@ -85,36 +109,37 @@
   </tr>
   {% endfor %}
   </tbody>
-  <tfoot>
-    <tr>
-      <td class="ca-sticky ca-sticky-rank"></td>
-      <td class="ca-sticky ca-sticky-user">Yechdi / urindi</td>
-      <td></td><td></td>
-      {% if contest.is_rated %}<td class="hidden md:table-cell"></td>{% endif %}
-      {% for cp in problems %}
-      <td class="ca-cell" title="{{ cp.n_solved }} kishi yechdi, {{ cp.n_tried }} kishi urindi">
-        <span class="tabular font-semibold text-ink">{{ cp.n_solved }}</span><span class="tabular">/{{ cp.n_tried }}</span>
-        <span class="ca-st-rate" aria-hidden="true"><span style="width: {{ cp.solve_pct }}%"></span></span>
-      </td>
-      {% endfor %}
-      {% if user.is_staff %}<td></td>{% endif %}
-    </tr>
-  </tfoot>
 </table>
 </div>
-<details class="mt-3 text-xs text-mute">
-<summary class="inline-flex cursor-pointer items-center gap-1.5 rounded-md py-1 font-medium hover:text-ink"><i data-lucide="info" class="lu" aria-hidden="true"></i>Belgilar izohi</summary>
-<div class="mt-2 flex flex-wrap items-center gap-x-5 gap-y-2">
-  <span><b class="text-ok">+</b> birinchi urinishda yechildi</span>
-  <span><b class="text-ok">+2</b> 2 noto‘g‘ri urinishdan so‘ng yechildi</span>
-  <span><b class="text-bad">−1</b> 1 noto‘g‘ri urinish, yechilmagan</span>
-  <span><span class="ca-legend-swatch ca-cell-ac ca-cell-first" aria-hidden="true"></span> birinchi bo‘lib yechgan</span>
-  <span>vaqt — boshlanishdan <b>daq:son</b></span>
-  <span>ustun sarlavhasida — masala <b>bali</b>, oxirgi qatorda — <b>yechdi/urindi</b></span>
-  <span><b>jarima</b> — AC daqiqalari + 20 × noto‘g‘ri urinish</span>
-  <span><b class="text-bad">DQ</b> — diskvalifikatsiya, oxirgi o‘rin</span>
+<div class="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs text-mute" aria-label="Belgilar izohi">
+  <span><b class="text-ok">+</b> / <b class="text-ok">+2</b> — yechildi (2 noto‘g‘ri urinishdan keyin), ostida vaqt</span>
+  <span><b class="text-bad">−1</b> — 1 noto‘g‘ri urinish</span>
+  <span><span class="ca-legend-swatch ca-cell-ac ca-cell-first" aria-hidden="true"></span> birinchi yechgan</span>
+  <span><b>Jarima</b> = yechish daqiqalari + 20 × noto‘g‘ri urinish</span>
+  {% if contest.is_running %}<span class="ml-auto">Yangilandi: <span class="tabular">{% now "H:i:s" %}</span></span>{% endif %}
 </div>
-</details>
+</div>{# /st-live #}
+<script>
+  (() => {
+    const apply = () => {
+      const q = (document.getElementById("st-search")?.value || "").trim().toLowerCase();
+      document.querySelectorAll("#st-live tbody tr[data-name]").forEach((tr) => { tr.hidden = !!q && !tr.dataset.name.includes(q); });
+      const box = document.getElementById("st-scroll"), hint = document.getElementById("st-scroll-hint");
+      if (box && hint) hint.classList.toggle("hidden", box.scrollWidth <= box.clientWidth + 2);
+    };
+    document.getElementById("st-search")?.addEventListener("input", apply);
+    document.querySelector("[data-goto-me]")?.addEventListener("click", () => {
+      const me = document.getElementById("me");
+      if (!me) return;
+      document.getElementById("st-search").value = ""; apply();
+      me.scrollIntoView({ block: "center", behavior: "smooth" });
+      me.classList.add("ca-row-flash"); setTimeout(() => me.classList.remove("ca-row-flash"), 1600);
+    });
+    document.addEventListener("htmx:afterSettle", apply);  // a live refresh keeps the filter
+    addEventListener("resize", apply);
+    apply();
+  })();
+</script>
 {% else %}
 <div class="ca-empty">Hali ishtirokchi yo‘q.</div>
 {% endif %}

@@ -111,7 +111,8 @@ def standings(request, pk):
     return render(request, "contests/standings.html",
                   {"contest": contest, "rows": rows, "problems": problems, "registered": me is not None,
                    "my_participation": me,
-                   "me_in_rows": me is not None and any(r["user"].pk == request.user.pk for r in rows)})
+                   "me_in_rows": me is not None and any(r["user"].pk == request.user.pk for r in rows),
+                   "my_row": next((r for r in rows if me is not None and r["user"].pk == request.user.pk), None)})
 
 
 @staff_required
