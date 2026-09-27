@@ -154,6 +154,7 @@
         <h2 id="next-title" class="ca-section-title !mb-0">Keyingi masalalar</h2>
         <a class="ca-link text-sm" href="{% url 'problems:list' %}">Barchasi →</a>
       </div>
+      {% if picks_reason %}<p class="-mt-1 mb-3 text-sm text-mute">Eng kam yechgan mavzuingizdan: <a class="ca-link" href="{% url 'problems:list' %}?tag={{ picks_reason|urlencode }}">#{{ picks_reason }}</a></p>{% endif %}
       <ul class="ca-rows">
         {% for p, reason in next_picks %}
         <li class="ca-row relative !flex-nowrap">
@@ -161,7 +162,7 @@
             <a class="ca-row-title ca-link ca-stretch" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a>
             <div class="ca-row-meta">
               <span class="ca-diff ca-diff-{{ p.difficulty }}">{{ p.get_difficulty_display }}</span>
-              {% if reason %}<span>zaif mavzu: <b class="text-ink">{{ reason }}</b></span>{% else %}<span>darajangizga mos</span>{% endif %}
+              {% if picks_reason %}{% elif reason %}<span>#{{ reason }}</span>{% else %}<span>darajangizga mos</span>{% endif %}
             </div>
           </div>
           <i data-lucide="chevron-right" class="lu text-mute" aria-hidden="true"></i>

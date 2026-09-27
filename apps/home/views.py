@@ -9,7 +9,7 @@ from apps.contests.models import Contest
 from apps.contests.views import _standings  # cached, the standings page's own numbers
 from apps.problems.daily import daily_for, streaks, week_strip
 from apps.problems.models import DailySolve, Language, Problem
-from apps.problems.skills import next_problems, open_problems
+from apps.problems.skills import next_problems, open_problems, shared_reason
 from apps.submissions.models import Submission
 
 
@@ -41,6 +41,7 @@ def home(request):
         a.my_total, a.my_solved = len(ids), sum(1 for i in ids if i in solved)
     mine = Duel.objects.filter(Q(challenger=user) | Q(opponent=user)).select_related("challenger", "opponent", "problem")
     current, best = streaks(user)
+    next_picks = next_problems(user, exclude=(daily.problem_id,) if daily else ())
     return render(request, "home/dashboard.html", {
         "daily": daily,
         "daily_done": bool(daily) and DailySolve.objects.filter(user=user, daily=daily).exists(),
@@ -51,7 +52,7 @@ def home(request):
         "challenges": list(mine.filter(status=Duel.Status.PENDING, opponent=user)[:3]),
         "active_duels": [d for d in mine.filter(status=Duel.Status.ACTIVE) if d.ends_at and d.ends_at > now],
         "running": running, "upcoming": upcoming,
-        "next_picks": next_problems(user, exclude=(daily.problem_id,) if daily else ()),
+        "next_picks": next_picks, "picks_reason": shared_reason(next_picks),
         "recent": list(Submission.objects.filter(user=user).select_related("problem", "language")[:5]),
         "taught": list(Assignment.objects.filter(group__teacher=user).select_related("group")
                        .order_by("-deadline")[:3]),

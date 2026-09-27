@@ -33,6 +33,12 @@ def skill_map(user) -> list[dict]:
     return rows
 
 
+def shared_reason(picks) -> str:
+    """The weak topic all the picks came from, if it's one: then it's said once, not per pick."""
+    reasons = {reason for _, reason in picks}
+    return reasons.pop() if len(reasons) == 1 else ""
+
+
 def next_problems(user, n: int = 3, exclude: tuple[int, ...] = ()) -> list[tuple[Problem, str]]:
     """(problem, reason) picks: unsolved problems of the weakest tags first, at the
     difficulty the user solves most, then one step up, then one step down (so a user at

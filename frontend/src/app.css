@@ -447,13 +447,13 @@ a.ca-st-label:hover { text-decoration: underline; text-underline-offset: 3px; }
 @media (min-width: 768px) { .ca-tags { display: flex; } }
 .ca-tags a::before { content: "#"; opacity: .6; }
 .ca-tags a:hover { color: rgb(var(--ca-accent-rgb)); }
-/* "Keyingi masala" picks: three columns that stack on phones */
-.ca-picks { display: grid; }
-@media (min-width: 640px) { .ca-picks { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-.ca-picks a { display: block; height: 100%; padding: .6rem 1rem .85rem; border-radius: var(--ca-radius-sm); transition: background-color .12s ease; }
-.ca-picks a:hover { background: rgb(var(--ca-accent-rgb) / .05); }
-.ca-picks a:hover > span:first-child { color: rgb(var(--ca-accent-rgb)); }
-/* checkbox chip: native input kept (keyboard, form), the span wears the ca-filter look */
+/* "Keyingi masala": a short list of rows, the title first */
+.ca-next { display: grid; padding: .35rem .4rem .45rem; }
+.ca-next a { display: flex; align-items: center; gap: .75rem; padding: .5rem .6rem; border-radius: var(--ca-radius-sm); transition: background-color .12s ease; }
+.ca-next a:hover { background: rgb(var(--ca-accent-rgb) / .05); }
+.ca-next-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+.ca-next a:hover .ca-next-title { color: rgb(var(--ca-accent-rgb)); }
+/* checkbox/radio chip: native input kept (keyboard, form), the span wears the ca-filter look */
 .ca-pick { position: relative; }
 .ca-pick input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 .ca-pick span {

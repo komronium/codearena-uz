@@ -24,7 +24,7 @@ from .models import (
     ProblemRating,
     Tag,
 )
-from .skills import next_problems
+from .skills import next_problems, shared_reason
 
 # Markdown itself passes raw HTML straight through; sanitize the rendered
 # output before any template marks it |safe, since statement_md is authored
@@ -132,7 +132,7 @@ def problem_list(request):
         "progress": progress, "total": total,
         "level_chips": level_chips, "level_total": sum(by_level.values()),
         "any_rated": any(p.avg_stars for p in page),
-        "next_picks": next_picks,
+        "next_picks": next_picks, "picks_reason": shared_reason(next_picks),
         "daily": daily, "daily_done": daily_done, "streak": streak,
         "sort": sort, "dir": "desc" if desc else "asc",
         "solved_ids": solved_ids,
