@@ -6,10 +6,11 @@ from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
 from apps.accounts.decorators import staff_required
-from apps.accounts.models import User
+from apps.accounts.models import Group, User
 from apps.contests.models import Contest, Participation
 from apps.problems.models import Language, Problem
 from apps.submissions.models import Submission
@@ -17,7 +18,8 @@ from apps.submissions.ratelimit import rate_limited
 
 from . import audit
 from .evidence import JUMP_CHARS, contest_evidence
-from .models import AuditEntry, CodeSnapshot, DeviceSeen, FocusEvent, SimilarityFlag
+from .models import AuditEntry, CodeSnapshot, DeviceSeen, FocusEvent, PracticeEvent, PracticeReview, SimilarityFlag
+from .practice import suspicious_solves
 from .similarity import MIN_LINES, THRESHOLD, matched_lines
 
 # First-open-to-AC time no genuine read-think-type pass beats, per difficulty (beginner: none).
@@ -296,3 +298,73 @@ def flag_run(request, pk):
     call_command("flag_similarity", contest.pk, problems=",".join(labels))
     messages.success(request, f"O‘xshashlik tekshirildi: {', '.join(labels)}.")
     return redirect("integrity:contest_report", contest.pk)
+
+
+@login_required
+@require_POST
+def practice_event(request):
+    """From the practice editor (problems/detail.html): feeds practice_report, nothing else."""
+    if rate_limited(request.user.id, "practice-event", EVENT_RATE_MAX):
+        return JsonResponse({"error": "too many requests"}, status=429)
+    kind = request.POST.get("kind")
+    if kind not in PracticeEvent.Kind.values:
+        return HttpResponseBadRequest("bad kind")
+    problem = Problem.objects.filter(pk=request.POST.get("problem_id", "") or 0).first()
+    if problem is None:
+        return HttpResponseBadRequest("no such problem")
+    away = request.POST.get("away_ms", "")
+    away_ms = min(int(away), _MAX_AWAY_MS) if kind == PracticeEvent.Kind.AWAY and away.isdigit() else None
+    PracticeEvent.objects.create(user=request.user, problem=problem, kind=kind, away_ms=away_ms)
+    return JsonResponse({"ok": True})
+
+
+def _practice_students(user):
+    """Whose practice this user may review: staff everyone, a teacher the students of their groups."""
+    if user.is_staff:
+        return User.objects.filter(is_staff=False, is_active=True)
+    if user.role == User.Role.TEACHER:
+        return User.objects.filter(student_groups__teacher=user, is_active=True).distinct()
+    return None
+
+
+@login_required
+def practice_report(request):
+    students = _practice_students(request.user)
+    if students is None:
+        return HttpResponseBadRequest("teachers and staff only")
+    groups = (Group.objects.all() if request.user.is_staff else request.user.taught_groups.all()).order_by("name")
+    group = request.GET.get("group", "")
+    if group.isdigit():
+        students = students.filter(student_groups__pk=int(group))
+    days = int(request.GET.get("days", "30")) if request.GET.get("days", "30") in {"7", "30", "90"} else 30
+    rows = suspicious_solves(students, days)
+    return render(request, "integrity/practice_report.html", {
+        "rows": rows, "groups": groups, "group": group, "days": days,
+        "open": sum(r["review"] is None for r in rows),
+    })
+
+
+@login_required
+@require_POST
+def practice_decide(request, user_id, problem_id):
+    students = _practice_students(request.user)
+    if students is None or not students.filter(pk=user_id).exists():
+        return HttpResponseBadRequest("not your student")
+    problem = get_object_or_404(Problem, pk=problem_id)
+    decision = request.POST.get("decision")
+    if decision == "undo":
+        PracticeReview.objects.filter(user_id=user_id, problem=problem).delete()
+    elif decision in ("confirm", "clear"):
+        PracticeReview.objects.update_or_create(user_id=user_id, problem=problem, defaults={
+            "confirmed": decision == "confirm", "reviewer": request.user})
+    else:
+        return HttpResponseBadRequest("bad decision")
+    from apps.submissions.solves import sync_practice_points
+
+    sync_practice_points([user_id])
+    messages.success(request, {"confirm": "Tasdiqlandi — bu yechim uchun ball berilmaydi.",
+                               "clear": "Belgilandi: shubha yo‘q.", "undo": "Qaror bekor qilindi."}[decision])
+    back = request.POST.get("back", "")
+    if not url_has_allowed_host_and_scheme(back, allowed_hosts={request.get_host()}):
+        back = reverse("integrity:practice_report")
+    return redirect(back)

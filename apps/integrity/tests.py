@@ -586,3 +586,74 @@ def test_evidence_skips_contests_from_before_telemetry(flag_contest, flag_proble
         _contest_sub(User.objects.create_user(name, password="x"), flag_contest, flag_problem, flag_python,
                      LONG_SOURCE + name, timezone.now())
     assert contest_evidence(flag_contest) == {}
+
+
+# ---------- practice: paste lock, signals, the teacher's report ----------
+
+def _practice_world():
+    from apps.accounts.models import Group
+    from apps.submissions.models import UserProblemSolved
+    from apps.submissions.solves import sync_practice_points
+
+    teacher = User.objects.create_user("ustoz1", password="x", role=User.Role.TEACHER)
+    mine = User.objects.create_user("talaba1", password="x")
+    other = User.objects.create_user("begona1", password="x")
+    Group.objects.create(name="2-kurs", teacher=teacher).members.add(mine)
+    admin = User.objects.create_user("adm", password="x", is_staff=True)
+    p = Problem.objects.create(slug="pr-easy", title="Oson masala", statement_md="x", author=admin, difficulty="easy")
+    py = Language.objects.create(code="python", name="Python 3", docker_image="x", run_cmd="x")
+    now = timezone.now()
+    for u in (mine, other):
+        s = Submission.objects.create(user=u, problem=p, language=py, source="print(1)", verdict="AC")
+        Submission.objects.filter(pk=s.pk).update(created=now)
+        s.refresh_from_db()
+        UserProblemSolved.objects.create(user=u, problem=p, first_ac_submission=s)
+    sync_practice_points()
+    return teacher, mine, other, p, now
+
+
+@pytest.mark.django_db
+def test_practice_signals_flag_the_ai_shaped_solve_and_a_teacher_can_void_its_points(client):
+    from .models import PracticeEvent
+
+    teacher, mine, other, p, ac_at = _practice_world()
+    client.force_login(mine)
+    assert client.post(reverse("integrity:practice_event"), {"problem_id": p.pk, "kind": "hack"}).status_code == 400
+    assert client.post(reverse("integrity:practice_event"), {"problem_id": p.pk, "kind": "away", "away_ms": "95000"}).status_code == 200
+    client.post(reverse("integrity:practice_event"), {"problem_id": p.pk, "kind": "paste"})
+    # 95 s in another window, back 40 s before the AC; plus a blocked long paste
+    PracticeEvent.objects.filter(user=mine).update(at=ac_at - timezone.timedelta(seconds=40))
+    mine.refresh_from_db()
+    assert mine.practice_points == p.points > 0
+
+    assert client.get(reverse("integrity:practice_report")).status_code == 400  # students can't see it
+    client.force_login(teacher)
+    page = client.get(reverse("integrity:practice_report"))
+    body = page.content.decode()
+    assert [r["solve"].user for r in page.context["rows"]] == [mine]  # not the clean solve, not another group
+    assert "boshqa oynada" in body and "uzun kod" in body
+
+    url = reverse("integrity:practice_decide", args=[mine.pk, p.pk])
+    assert client.post(reverse("integrity:practice_decide", args=[other.pk, p.pk]), {"decision": "confirm"}).status_code == 400
+    client.post(url, {"decision": "confirm", "back": "https://evil.example/"})
+    mine.refresh_from_db()
+    assert mine.practice_points == 0
+    client.force_login(mine)
+    assert "Ball berilmadi" in client.get(reverse("problems:detail", args=[p.slug])).content.decode()
+
+    client.force_login(teacher)
+    client.post(url, {"decision": "undo"})
+    mine.refresh_from_db()
+    assert mine.practice_points == p.points
+
+
+@pytest.mark.django_db
+def test_practice_editor_locks_long_paste_on_easy_only_and_says_so(client):
+    teacher, mine, other, p, _ = _practice_world()
+    hard = Problem.objects.create(slug="pr-hard", title="Qiyin", statement_md="x", author=teacher, difficulty="hard")
+    client.force_login(mine)
+    easy_page = client.get(reverse("problems:detail", args=[p.slug])).content.decode()
+    assert "const locked = true" in easy_page and "uzun kod qo‘yish yopiq" in easy_page
+    hard_page = client.get(reverse("problems:detail", args=[hard.slug])).content.decode()
+    assert "const locked = false" in hard_page and "o‘qituvchi ko‘radi" in hard_page
+    assert "<title>Vazifalar</title>" in client.get(reverse("classroom:list")).content.decode()

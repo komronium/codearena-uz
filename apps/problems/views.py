@@ -247,8 +247,12 @@ def problem_detail(request, slug):
         solved or (request.user.is_authenticated and (request.user.is_staff or problem.author_id == request.user.id)))
     my_stars = (ProblemRating.objects.filter(user=request.user, problem=problem).values_list("stars", flat=True).first()
                 if solved else None)
+    from apps.integrity.models import PracticeReview
+
+    voided = bool(solved) and PracticeReview.objects.filter(user=request.user, problem=problem, confirmed=True).exists()
     return render(request, "problems/detail.html", {
         "solved": solved,
+        "voided": voided,
         "my_stars": my_stars,
         "star_range": range(1, 6),
         "fastest": leaders(problem, "time", limit=3) if show_leaders else [],

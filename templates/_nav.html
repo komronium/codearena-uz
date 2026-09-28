@@ -63,6 +63,9 @@ grouped by what the student is doing. Profile, settings and sign-out live in the
 <a href="{% url 'moderation:tags' %}" class="ca-sidebar-link {% if ns == 'moderation' and un == 'tags' %}is-active{% endif %}">
   <i data-lucide="tags" class="lu" aria-hidden="true"></i>Teglar
 </a>
+<a href="{% url 'integrity:practice_report' %}" class="ca-sidebar-link {% if ns == 'integrity' and un == 'practice_report' %}is-active{% endif %}">
+  <i data-lucide="shield-alert" class="lu" aria-hidden="true"></i>Mashq nazorati
+</a>
 <a href="{% url 'integrity:audit' %}" class="ca-sidebar-link {% if ns == 'integrity' and un == 'audit' %}is-active{% endif %}">
   <i data-lucide="scroll-text" class="lu" aria-hidden="true"></i>Amallar jurnali
 </a>

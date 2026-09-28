@@ -66,7 +66,11 @@
           <span><i data-lucide="star" class="lu mr-1.5 text-warn" aria-hidden="true"></i><b class="tabular text-ink">{{ contest_problem.points }}</b> ball</span>
           {% else %}
           <span class="ca-diff ca-diff-{{ problem.difficulty }}">{{ problem.get_difficulty_display }}</span>
+          {% if voided %}
+          <span class="font-medium text-bad" title="O‘qituvchi bu yechimni ko‘chirilgan deb belgiladi, shuning uchun amaliyot baliga qo‘shilmadi. Savol bo‘lsa, o‘qituvchingizga murojaat qiling."><i data-lucide="shield-alert" class="lu mr-1.5" aria-hidden="true"></i>Ball berilmadi</span>
+          {% else %}
           <span title="Yechsangiz amaliyot balingizga qo‘shiladi. Ko‘p odam yechgan masala biroz arzonlashadi."><i data-lucide="star" class="lu mr-1.5 text-warn" aria-hidden="true"></i><b class="tabular text-ink">{{ problem.points }}</b> ball</span>
+          {% endif %}
           {% endif %}
           <span><i data-lucide="clock" class="lu mr-1.5" aria-hidden="true"></i><b class="tabular text-ink">{{ problem.tl_ms }}</b> ms</span>
           <span><i data-lucide="cpu" class="lu mr-1.5" aria-hidden="true"></i><b class="tabular text-ink">{{ problem.ml_mb }}</b> MB</span>
@@ -265,7 +269,7 @@
       </div>
       {% else %}
       <div class="flex flex-wrap items-center justify-between gap-3 border-t border-line px-4 py-3">
-        <span class="hidden text-xs text-mute sm:inline"><kbd class="ca-kbd">Ctrl</kbd> + <kbd class="ca-kbd">Enter</kbd> — yuborish{% if problem.kind != "sql" %} · <kbd class="ca-kbd">Ctrl</kbd> + <kbd class="ca-kbd">'</kbd> — sinash{% endif %}</span>
+        <span class="hidden text-xs text-mute sm:inline"><kbd class="ca-kbd">Ctrl</kbd> + <kbd class="ca-kbd">Enter</kbd> — yuborish{% if problem.kind != "sql" %} · <kbd class="ca-kbd">Ctrl</kbd> + <kbd class="ca-kbd">'</kbd> — sinash{% endif %}{% if not contest and user.is_authenticated %}<span title="Mashqda kod qanday yozilgani (uzun kod qo‘yish, boshqa oynaga o‘tish) o‘qituvchingizga ko‘rinadi. Ko‘chirilgan yechim uchun ball berilmaydi."> · {% if problem.difficulty == "beginner" or problem.difficulty == "easy" %}uzun kod qo‘yish yopiq{% else %}o‘qituvchi ko‘radi{% endif %} <i data-lucide="info" class="lu" aria-hidden="true"></i></span>{% endif %}</span>
         <div class="ml-auto flex items-center gap-2">
           {% if problem.kind != "sql" %}<button type="button" id="trial-btn" class="ca-btn ca-btn-ghost" title="Namunaviy testlarda sinash — urinish hisoblanmaydi"><i data-lucide="play" class="lu" aria-hidden="true"></i>Sinab ko‘rish</button>{% endif %}
           <button type="submit" id="submit-btn" class="ca-btn ca-btn-primary"><i data-lucide="rocket" class="lu" aria-hidden="true"></i>Yuborish</button>
@@ -659,6 +663,74 @@ resolves their bare imports so @codemirror/state loads once — two copies break
       e.preventDefault();
       report("copy"); notify("Nusxa olindi. Matnga ogohlantiruvchi belgi qo‘shildi.");
     });
+  })();
+</script>
+{% elif user.is_authenticated %}
+<div id="ca-guard" class="ca-guard !hidden" role="status" aria-live="polite"></div>
+<script>
+  // Practice: not policed like a contest, but copying an AI's answer teaches nothing. On Beginner
+  // and Easy a long paste or drop into the editor is refused (a short one, like a sample line, is
+  // fine); on every level what the editor sees is sent to integrity:practice_event, which only
+  // feeds the teacher's "Mashq nazorati" report.
+  (function () {
+    const editor = document.getElementById("editor");
+    const guard = document.getElementById("ca-guard");
+    if (!editor || !guard) return;
+    const locked = {% if problem.difficulty == "beginner" or problem.difficulty == "easy" %}true{% else %}false{% endif %};
+    const SHORT = 40;
+    let hideTimer;
+    function notify(msg) {
+      guard.textContent = msg;
+      guard.classList.remove("!hidden");
+      clearTimeout(hideTimer);
+      hideTimer = setTimeout(() => guard.classList.add("!hidden"), 5000);
+    }
+    function report(kind, extra = "") {
+      fetch("{% url 'integrity:practice_event' %}", {
+        method: "POST", keepalive: true,
+        headers: { "Content-Type": "application/x-www-form-urlencoded", "X-CSRFToken": "{{ csrf_token }}" },
+        body: `problem_id={{ problem.pk }}&kind=${kind}${extra}`,
+      }).catch(() => {});
+    }
+    report("view");
+
+    const LOCK_MSG = "Mashqda uzun kodni qo‘yib bo‘lmaydi — o‘zingiz yozing, shunda o‘rganasiz. Qisqa qator (40 belgigacha) qo‘yish mumkin.";
+    editor.addEventListener("paste", (e) => {
+      const text = e.clipboardData?.getData("text") || "";
+      if (text.length <= SHORT) return;
+      report("paste");
+      if (locked) { e.preventDefault(); e.stopPropagation(); notify(LOCK_MSG); }
+    }, true);
+    editor.addEventListener("drop", (e) => {
+      const text = e.dataTransfer?.getData("text") || "";
+      if (text.length <= SHORT) return;
+      report("paste");
+      if (locked) { e.preventDefault(); e.stopPropagation(); notify(LOCK_MSG); }
+    }, true);
+    // Code that appears in one go without a paste event (extensions, auto-typers), or typing
+    // faster than anyone types, is the same thing.
+    let bulkAt = 0, typed = [];
+    const bulk = () => { const now = Date.now(); if (now - bulkAt > 10000) { bulkAt = now; report("bulk"); } };
+    window.addEventListener("ca-bulk-insert", bulk);
+    window.addEventListener("ca-typed", (e) => {
+      const now = Date.now();
+      typed.push([now, e.detail]);
+      typed = typed.filter(([t]) => now - t < 3000);
+      if (typed.reduce((a, [, n]) => a + n, 0) > 200) bulk();
+    });
+
+    // Time in another window or tab, reported on the way back.
+    let leftAt = 0;
+    const leave = () => { if (!leftAt) leftAt = Date.now(); };
+    const back = () => {
+      if (!leftAt) return;
+      const ms = Date.now() - leftAt;
+      leftAt = 0;
+      if (ms >= 20000) report("away", `&away_ms=${ms}`);
+    };
+    document.addEventListener("visibilitychange", () => (document.hidden ? leave() : back()));
+    window.addEventListener("blur", leave);
+    window.addEventListener("focus", back);
   })();
 </script>
 {% endif %}

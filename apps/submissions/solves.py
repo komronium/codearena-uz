@@ -67,11 +67,17 @@ def refresh_solves(problem_id: int, user_ids: Iterable[int] | None = None) -> No
 
 def sync_practice_points(user_ids: Iterable[int] | None = None) -> None:
     """practice_points = current price of each solved problem the user did not author,
-    less the share paid for hints. One UPDATE; None = every user."""
+    less the share paid for hints. A solve a teacher confirmed as not the student's own work
+    (integrity.PracticeReview) earns nothing, daily bonus included. One UPDATE; None = every user."""
+    from apps.integrity.models import PracticeReview
+
+    voided = PracticeReview.objects.filter(user_id=OuterRef("user_id"), confirmed=True)
     bonus = (DailySolve.objects.filter(user_id=OuterRef("pk")).exclude(daily__problem__author_id=OuterRef("pk"))
+             .exclude(Exists(voided.filter(problem_id=OuterRef("daily__problem_id"))))
              .values("user_id").annotate(n=Count("pk")).values("n"))
     total = (UserProblemSolved.objects.filter(user_id=OuterRef("pk"))
              .exclude(problem__author_id=OuterRef("pk"))
+             .exclude(Exists(voided.filter(problem_id=OuterRef("problem_id"))))
              .values("user_id")
              .annotate(total=Sum(F("problem__points") * (100 - F("hint_pct")) / 100)).values("total"))
     users = User.objects.all() if user_ids is None else User.objects.filter(pk__in=list(user_ids))

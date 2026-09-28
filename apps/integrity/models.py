@@ -93,3 +93,36 @@ class AuditEntry(models.Model):
 
     class Meta:
         ordering = ["-at", "-id"]
+
+
+class PracticeEvent(models.Model):
+    """What the practice editor saw, for spotting solves copied from an AI: a paste attempt, code
+    that appeared at once, the page opened, time spent in another window. Practice is not
+    policed like a contest; these only feed the teacher's report (practice_report)."""
+    class Kind(models.TextChoices):
+        VIEW = "view"    # the problem page was opened
+        PASTE = "paste"  # a long paste or drop into the editor (blocked on Beginner/Easy)
+        BULK = "bulk"    # a large block of code appeared in one go, or typing too fast to be typing
+        AWAY = "away"    # back from another window or tab; away_ms says how long
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="+")
+    problem = models.ForeignKey(Problem, on_delete=models.CASCADE, related_name="+")
+    kind = models.CharField(max_length=10, choices=Kind.choices)
+    away_ms = models.PositiveIntegerField(null=True, blank=True)
+    at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes: ClassVar[list[models.Index]] = [models.Index(fields=["user", "problem", "at"])]
+
+
+class PracticeReview(models.Model):
+    """A teacher's decision on a practice solve the report flagged. Confirmed: it was not the
+    student's own work, so it earns no practice points (sync_practice_points leaves it out)."""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="+")
+    problem = models.ForeignKey(Problem, on_delete=models.CASCADE, related_name="+")
+    confirmed = models.BooleanField()  # False: looked at, nothing wrong
+    reviewer = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="+")
+    at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ("user", "problem")

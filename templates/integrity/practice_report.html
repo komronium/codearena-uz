@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Mashq nazorati{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex flex-wrap items-start justify-between gap-3">
+  <div>
+    <h1 class="ca-page-title">Mashq nazorati</h1>
+    <p class="mt-1 max-w-2xl text-sm text-mute">AI yoki boshqa joydan ko‘chirilganga o‘xshagan mashq yechimlari. Bu dalil emas — kodni ochib ko‘ring va o‘zingiz qaror qiling. Tasdiqlangan yechim uchun amaliyot bali berilmaydi; qarorni istalgan payt bekor qilish mumkin.</p>
+  </div>
+  <form method="get" class="flex flex-wrap items-center gap-2">
+    {% if groups %}
+    <label class="sr-only" for="pr-group">Guruh</label>
+    <select id="pr-group" name="group" class="ca-select !py-1.5" onchange="this.form.submit()">
+      <option value="">Barcha {% if user.is_staff %}talabalar{% else %}guruhlarim{% endif %}</option>
+      {% for g in groups %}<option value="{{ g.pk }}"{% if group == g.pk|stringformat:"d" %} selected{% endif %}>{{ g.name }}</option>{% endfor %}
+    </select>
+    {% endif %}
+    <label class="sr-only" for="pr-days">Davr</label>
+    <select id="pr-days" name="days" class="ca-select !py-1.5" onchange="this.form.submit()">
+      <option value="7"{% if days == 7 %} selected{% endif %}>Oxirgi 7 kun</option>
+      <option value="30"{% if days == 30 %} selected{% endif %}>Oxirgi 30 kun</option>
+      <option value="90"{% if days == 90 %} selected{% endif %}>Oxirgi 90 kun</option>
+    </select>
+    <noscript><button class="ca-btn ca-btn-ghost !py-1.5">Ko‘rsatish</button></noscript>
+  </form>
+</div>
+
+<p class="mb-3 text-xs text-mute">Belgilar: uzun kod qo‘yishga urinish · kod bir zumda paydo bo‘lishi · 20 soniyadan ko‘p boshqa oynada bo‘lib, qaytgach 3 daqiqa ichida yechish · sahifa ochilgach juda tez yechish (Easy 1,5 daq, Medium 4 daq, Hard 7 daq).</p>
+
+{% if rows %}
+<p class="mb-3 text-sm"><b class="tabular">{{ rows|length }}</b> ta shubhali yechim{% if open %}, <b class="tabular text-warn">{{ open }}</b> tasi ko‘rib chiqilmagan{% endif %}.</p>
+<div class="ca-panel !p-0 overflow-x-auto">
+<table class="ca-table">
+  <thead><tr><th>Talaba</th><th>Masala</th><th>Nima ko‘rindi</th><th class="text-right">Xavf</th><th class="hidden md:table-cell">Yechilgan</th><th class="text-right">Qaror</th></tr></thead>
+  <tbody>
+  {% for r in rows %}{% with s=r.solve %}
+  <tr{% if r.review %} class="opacity-70"{% endif %}>
+    <td>{% include "accounts/_user.html" with u=s.user tier=False %}</td>
+    <td class="min-w-40"><a class="ca-link" href="{% url 'problems:detail' s.problem.slug %}">{{ s.problem.title }}</a>
+      <span class="ca-diff ca-diff-{{ s.problem.difficulty }} ml-1 text-xs">{{ s.problem.get_difficulty_display }}</span></td>
+    <td class="min-w-56 text-xs">{% for w in r.why %}<p class="leading-5">{{ w }}</p>{% endfor %}
+      <a class="ca-link text-xs" href="{% url 'submissions:detail' s.first_ac_submission_id %}">Kodni ko‘rish →</a></td>
+    <td class="text-right"><span class="ca-chip {% if r.score >= 8 %}text-bad{% else %}text-warn{% endif %} tabular font-semibold">{{ r.score }}</span></td>
+    <td class="hidden md:table-cell tabular text-xs text-mute whitespace-nowrap">{{ s.first_ac_submission.created|date:"d.m H:i" }}</td>
+    <td class="text-right whitespace-nowrap">
+      <form method="post" action="{% url 'integrity:practice_decide' s.user_id s.problem_id %}" class="inline-flex flex-wrap justify-end gap-1.5">{% csrf_token %}
+        <input type="hidden" name="back" value="{{ request.get_full_path }}">
+        {% if r.review %}
+          <span class="text-xs font-semibold {% if r.review.confirmed %}text-bad{% else %}text-ok{% endif %}">{% if r.review.confirmed %}Tasdiqlangan · ball yo‘q{% else %}Shubha yo‘q{% endif %}</span>
+          <button name="decision" value="undo" class="ca-btn ca-btn-ghost !px-2 !py-1 text-xs">Bekor qilish</button>
+        {% else %}
+          <button name="decision" value="confirm" class="ca-btn ca-btn-ghost !px-2 !py-1 text-xs text-bad" title="Yechim talabaning o‘z ishi emas: amaliyot bali olib tashlanadi">Ko‘chirilgan</button>
+          <button name="decision" value="clear" class="ca-btn ca-btn-ghost !px-2 !py-1 text-xs" title="Kodni ko‘rdim, muammo yo‘q">Shubha yo‘q</button>
+        {% endif %}
+      </form>
+    </td>
+  </tr>
+  {% endwith %}{% endfor %}
+  </tbody>
+</table>
+</div>
+{% else %}
+<div class="ca-panel text-center text-sm text-mute">Bu davrda shubhali mashq yechimi topilmadi.</div>
+{% endif %}
+{% endblock %}

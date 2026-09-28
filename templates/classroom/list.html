@@ -1,15 +1,13 @@
 {% extends "base.html" %}
-{% block title %}Vazifalar<script>
-  document.querySelectorAll("[data-copy-code]").forEach((b) => b.addEventListener("click", async () => {
-    try { await navigator.clipboard.writeText(b.dataset.copyCode); b.classList.add("text-ok"); setTimeout(() => b.classList.remove("text-ok"), 900); } catch {}
-  }));
-</script>
-{% endblock %}
+{% block title %}Vazifalar{% endblock %}
 {% block page_title %}<h1>Vazifalar</h1>{% endblock %}
 {% block content %}
 <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
   <p class="text-sm text-mute">{% if can_teach %}Guruh oching, kodini o‘quvchilarga bering va vazifa bering. Muddatgacha yechilgani «o‘z vaqtida» hisoblanadi.{% else %}Guruhingiz o‘qituvchisi bergan uy vazifalari. Muddatgacha yechilgani «o‘z vaqtida» hisoblanadi.{% endif %}</p>
+  <div class="flex flex-wrap gap-2">
+  {% if can_teach %}<a href="{% url 'integrity:practice_report' %}" class="ca-btn ca-btn-ghost"><i data-lucide="shield-alert" class="lu" aria-hidden="true"></i>Mashq nazorati</a>{% endif %}
   {% if can_create %}<a href="{% url 'classroom:new' %}" class="ca-btn ca-btn-primary"><i data-lucide="plus" class="lu" aria-hidden="true"></i>Vazifa berish</a>{% endif %}
+  </div>
 </div>
 
 {% if can_teach %}
@@ -109,4 +107,9 @@
 </table>
 </div>
 {% endif %}
+<script>
+  document.querySelectorAll("[data-copy-code]").forEach((b) => b.addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(b.dataset.copyCode); b.classList.add("text-ok"); setTimeout(() => b.classList.remove("text-ok"), 900); } catch {}
+  }));
+</script>
 {% endblock %}
