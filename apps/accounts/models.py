@@ -25,6 +25,8 @@ class User(AbstractUser):
     teacher_requested = models.BooleanField(default=False, db_index=True)
     # the tier the user was last shown; a higher one on the next page view gets a congratulation
     seen_tier = models.CharField(max_length=30, blank=True)
+    # when the user promised to submit only their own work (accounts:honor); asked once
+    honor_pledged_at = models.DateTimeField(null=True, blank=True)
 
 
 _CODE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"

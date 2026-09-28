@@ -3,8 +3,10 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.http import Http404, HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.views.decorators.http import require_POST
 
+from apps.accounts.models import User
 from apps.contests.models import Participation
 from apps.contests.services import access_allowed, active_contest_for, in_running_contest, in_upcoming_contest
 from apps.contests.virtual import active_virtual_for
@@ -52,6 +54,8 @@ def submit(request, slug):
     source = request.POST.get("source", "")
     if not source.strip() or len(source) > MAX_SOURCE:
         return HttpResponseBadRequest("source empty or too large")
+    if request.POST.get("pledge") == "1" and not request.user.honor_pledged_at:  # accepted in the dialog
+        User.objects.filter(pk=request.user.pk).update(honor_pledged_at=timezone.now())
     telemetry = {}
     if contest is not None:
         seen = (Participation.objects.filter(user=request.user, contest=contest)

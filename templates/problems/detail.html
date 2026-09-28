@@ -719,6 +719,21 @@ resolves their bare imports so @codemirror/state loads once — two copies break
       if (typed.reduce((a, [, n]) => a + n, 0) > 200) bulk();
     });
 
+    // The editor's code every 10 s when it changed and at each submit: lets the server tell code
+    // written here from code that arrived some other way.
+    let sent = null;
+    const snap = () => {
+      if (!window.caCode) return;
+      const { source } = window.caCode();
+      if (source === sent) return;
+      sent = source;
+      fetch("{% url 'integrity:practice_snapshot' %}", { method: "POST", keepalive: true, headers: { "X-CSRFToken": "{{ csrf_token }}" },
+        body: new URLSearchParams({ problem_id: "{{ problem.pk }}", source }) }).catch(() => {});
+    };
+    setInterval(snap, 10000);
+    window.addEventListener("pagehide", snap);
+    document.addEventListener("submit", (e) => { if (e.target.id === "submit-form") snap(); }, true);
+
     // Time in another window or tab, reported on the way back.
     let leftAt = 0;
     const leave = () => { if (!leftAt) leftAt = Date.now(); };
@@ -731,6 +746,46 @@ resolves their bare imports so @codemirror/state loads once — two copies break
     document.addEventListener("visibilitychange", () => (document.hidden ? leave() : back()));
     window.addEventListener("blur", leave);
     window.addEventListener("focus", back);
+  })();
+</script>
+{% endif %}
+{% if user.is_authenticated and not user.honor_pledged_at %}
+<dialog id="ca-honor" class="ca-dialog" aria-labelledby="ca-honor-title">
+  <form method="dialog" class="px-6 pb-6 pt-6">
+    <span class="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-full bg-accent-soft text-accent"><i data-lucide="handshake" class="lu !h-6 !w-6" aria-hidden="true"></i></span>
+    <h2 id="ca-honor-title" class="text-center text-lg font-semibold">Birinchi yechimingiz oldidan</h2>
+    <ul class="mt-4 list-disc space-y-1.5 pl-5 text-sm text-mute">
+      <li>Kodni <b class="text-ink">o‘zingiz yozasiz</b>. AI'ga masalani berib kod yozdirish yoki birovning yechimini ko‘chirish mumkin emas.</li>
+      <li>Hujjatlar, maslahatlar (hint) va AI'dan mavzuni tushuntirishni so‘rash mumkin.</li>
+      <li>Kod qanday yozilgani qayd etiladi va o‘qituvchingizga ko‘rinadi. Ko‘chirilgan yechim uchun ball berilmaydi, musobaqada esa diskvalifikatsiya qilinadi.</li>
+    </ul>
+    <a class="ca-link mt-2 inline-block text-sm" href="{% url 'honor' %}" target="_blank" rel="noopener">Batafsil: halollik qoidalari</a>
+    <label class="mt-4 flex items-start gap-2 text-sm"><input type="checkbox" id="ca-honor-ok" class="mt-1"> <span>Men yechimlarimni o‘zim yozaman va qoidalarga amal qilaman.</span></label>
+    <div class="mt-5 flex justify-end gap-2">
+      <button value="cancel" class="ca-btn ca-btn-ghost">Bekor qilish</button>
+      <button value="ok" id="ca-honor-go" class="ca-btn ca-btn-primary" disabled>Qabul qilaman va yuborish</button>
+    </div>
+  </form>
+</dialog>
+<script>
+  // Asked once, before the first submission; the submission itself records the promise (pledge=1).
+  (() => {
+    const dlg = document.getElementById("ca-honor"), form = document.getElementById("submit-form");
+    const ok = document.getElementById("ca-honor-ok"), go = document.getElementById("ca-honor-go");
+    if (!dlg || !form || form.method.toLowerCase() !== "post") return;
+    let pledged = false;
+    ok.addEventListener("change", () => { go.disabled = !ok.checked; });
+    form.addEventListener("submit", (e) => {
+      if (pledged) return;
+      e.preventDefault(); e.stopImmediatePropagation();
+      dlg.showModal();
+    }, true);
+    dlg.addEventListener("close", () => {
+      if (dlg.returnValue !== "ok" || !ok.checked) return;
+      pledged = true;
+      form.insertAdjacentHTML("beforeend", '<input type="hidden" name="pledge" value="1">');
+      form.requestSubmit();
+    });
   })();
 </script>
 {% endif %}

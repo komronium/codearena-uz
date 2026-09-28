@@ -612,11 +612,24 @@ def _practice_world():
     return teacher, mine, other, p, now
 
 
+def _clean_trail(client, user, p, ac_at):
+    """What an honest solve leaves: the page opened a while ago, the code written in the editor."""
+    from .models import PracticeEvent, PracticeSnapshot
+
+    client.force_login(user)
+    client.post(reverse("integrity:practice_event"), {"problem_id": p.pk, "kind": "view"})
+    for code in ("print(", "print(1)"):
+        client.post(reverse("integrity:practice_snapshot"), {"problem_id": p.pk, "source": code})
+    PracticeEvent.objects.filter(user=user).update(at=ac_at - timezone.timedelta(minutes=9))
+    PracticeSnapshot.objects.filter(user=user).update(at=ac_at - timezone.timedelta(seconds=30))
+
+
 @pytest.mark.django_db
 def test_practice_signals_flag_the_ai_shaped_solve_and_a_teacher_can_void_its_points(client):
     from .models import PracticeEvent
 
     teacher, mine, other, p, ac_at = _practice_world()
+    _clean_trail(client, other, p, ac_at)
     client.force_login(mine)
     assert client.post(reverse("integrity:practice_event"), {"problem_id": p.pk, "kind": "hack"}).status_code == 400
     assert client.post(reverse("integrity:practice_event"), {"problem_id": p.pk, "kind": "away", "away_ms": "95000"}).status_code == 200
@@ -657,3 +670,75 @@ def test_practice_editor_locks_long_paste_on_easy_only_and_says_so(client):
     hard_page = client.get(reverse("problems:detail", args=[hard.slug])).content.decode()
     assert "const locked = false" in hard_page and "o‘qituvchi ko‘radi" in hard_page
     assert "<title>Vazifalar</title>" in client.get(reverse("classroom:list")).content.decode()
+
+
+@pytest.mark.django_db
+def test_server_side_checks_catch_what_blocking_the_script_hides(client):
+    from apps.submissions.models import UserProblemSolved
+
+    from .models import PracticeEvent, PracticeSnapshot
+    from .practice import suspicious_solves
+
+    teacher, mine, other, p, ac_at = _practice_world()
+    _clean_trail(client, other, p, ac_at)
+    # mine opened the page, but the accepted code never was in the editor
+    client.force_login(mine)
+    client.post(reverse("integrity:practice_event"), {"problem_id": p.pk, "kind": "view"})
+    client.post(reverse("integrity:practice_snapshot"), {"problem_id": p.pk, "source": "# boshladim"})
+    PracticeEvent.objects.filter(user=mine).update(at=ac_at - timezone.timedelta(minutes=8))
+    PracticeSnapshot.objects.filter(user=mine).update(at=ac_at - timezone.timedelta(minutes=5))
+    rows = {r["solve"].user: r for r in suspicious_solves(User.objects.filter(pk__in=[mine.pk, other.pk]))}
+    assert list(rows) == [mine] and "muharrirda yozilmagan" in " ".join(rows[mine]["why"])
+
+    # a third student with no trail at all after tracking began: the script was blocked
+    ghost = User.objects.create_user("ghost", password="x")
+    sub = Submission.objects.create(user=ghost, problem=p, language=Language.objects.get(code="python"),
+                                    source="print(1)", verdict="AC")
+    UserProblemSolved.objects.create(user=ghost, problem=p, first_ac_submission=sub)
+    rows = {r["solve"].user: r for r in suspicious_solves(User.objects.filter(pk=ghost.pk))}
+    assert "kuzatuv ishlamagan" in " ".join(rows[ghost]["why"])
+
+
+@pytest.mark.django_db
+def test_alike_practice_solutions_of_two_students_are_flagged(client):
+    from apps.submissions.models import UserProblemSolved
+
+    from .practice import suspicious_solves
+
+    admin = User.objects.create_user("adm2", password="x", is_staff=True)
+    p = Problem.objects.create(slug="pr-med", title="O'rta", statement_md="x", author=admin, difficulty="medium")
+    py = Language.objects.create(code="python", name="Python 3", docker_image="x", run_cmd="x")
+    code = "n = int(input())\ns = 0\nfor i in range(1, n + 1):\n    if n % i == 0:\n        s += i\nprint(s)\n"
+    users = [User.objects.create_user(f"u{i}", password="x") for i in range(2)]
+    for u, src in zip(users, (code, code.replace("s", "total"))):
+        sub = Submission.objects.create(user=u, problem=p, language=py, source=src, verdict="AC")
+        UserProblemSolved.objects.create(user=u, problem=p, first_ac_submission=sub)
+    rows = suspicious_solves(User.objects.filter(pk__in=[u.pk for u in users]))
+    assert len(rows) == 2 and all("bir xil" in " ".join(r["why"]) for r in rows)
+
+
+@pytest.mark.django_db
+def test_snapshots_keep_only_the_latest(client, monkeypatch):
+    from .models import PracticeSnapshot
+
+    monkeypatch.setattr(PracticeSnapshot, "KEEP", 5)
+    teacher, mine, other, p, _ = _practice_world()
+    client.force_login(mine)
+    for i in range(8):
+        client.post(reverse("integrity:practice_snapshot"), {"problem_id": p.pk, "source": f"x = {i}"})
+    client.post(reverse("integrity:practice_snapshot"), {"problem_id": p.pk, "source": "x = 7"})  # unchanged: not saved
+    kept = PracticeSnapshot.objects.filter(user=mine, problem=p).order_by("id")
+    assert [k.source for k in kept] == [f"x = {i}" for i in range(3, 8)]
+
+
+@pytest.mark.django_db
+def test_honesty_pledge_is_asked_once_and_recorded(client):
+    teacher, mine, other, p, _ = _practice_world()
+    client.force_login(mine)
+    page = client.get(reverse("problems:detail", args=[p.slug])).content.decode()
+    assert 'id="ca-honor"' in page
+    assert "Mumkin emas" in client.get(reverse("honor")).content.decode()
+    client.post(reverse("honor"), {"next": "https://evil.example/"})
+    mine.refresh_from_db()
+    assert mine.honor_pledged_at is not None
+    assert 'id="ca-honor"' not in client.get(reverse("problems:detail", args=[p.slug])).content.decode()

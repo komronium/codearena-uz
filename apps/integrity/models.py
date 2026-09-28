@@ -126,3 +126,18 @@ class PracticeReview(models.Model):
 
     class Meta:
         unique_together = ("user", "problem")
+
+
+class PracticeSnapshot(models.Model):
+    """The practice editor's contents every few seconds and at each submit (the last KEEP per
+    student and problem), so the server can tell code written in the editor from code that
+    arrived some other way — which blocking the browser script can't hide."""
+    KEEP = 60
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="+")
+    problem = models.ForeignKey(Problem, on_delete=models.CASCADE, related_name="+")
+    source = models.TextField()
+    at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes: ClassVar[list[models.Index]] = [models.Index(fields=["user", "problem", "at"])]

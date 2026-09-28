@@ -290,3 +290,17 @@ def profile(request, username):
         "skills": skill_map(profile_user),
         "streak": (cur_streak, best_streak),
     })
+
+
+def honor(request):
+    """The honesty rules; a signed-in user accepts them once (POST), and the problem page asks
+    before the first submission until they have."""
+    if request.method == "POST" and request.user.is_authenticated:
+        if not request.user.honor_pledged_at:
+            User.objects.filter(pk=request.user.pk).update(honor_pledged_at=timezone.now())
+        messages.success(request, "Rahmat! Halol ishlash — eng katta yutuq.")
+        nxt = request.POST.get("next", "")
+        if not url_has_allowed_host_and_scheme(nxt, allowed_hosts={request.get_host()}):
+            nxt = "/"
+        return redirect(nxt)
+    return render(request, "accounts/honor.html", {"next": request.GET.get("next", "")})

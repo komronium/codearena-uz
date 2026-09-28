@@ -18,7 +18,8 @@ from apps.submissions.ratelimit import rate_limited
 
 from . import audit
 from .evidence import JUMP_CHARS, contest_evidence
-from .models import AuditEntry, CodeSnapshot, DeviceSeen, FocusEvent, PracticeEvent, PracticeReview, SimilarityFlag
+from .models import (AuditEntry, CodeSnapshot, DeviceSeen, FocusEvent, PracticeEvent, PracticeReview,
+                     PracticeSnapshot, SimilarityFlag)
 from .practice import suspicious_solves
 from .similarity import MIN_LINES, THRESHOLD, matched_lines
 
@@ -315,6 +316,24 @@ def practice_event(request):
     away = request.POST.get("away_ms", "")
     away_ms = min(int(away), _MAX_AWAY_MS) if kind == PracticeEvent.Kind.AWAY and away.isdigit() else None
     PracticeEvent.objects.create(user=request.user, problem=problem, kind=kind, away_ms=away_ms)
+    return JsonResponse({"ok": True})
+
+
+@login_required
+@require_POST
+def practice_snapshot(request):
+    """The practice editor's code: every 10 s when it changed, and at each submit."""
+    if rate_limited(request.user.id, "practice-snapshot", SNAPSHOT_RATE_MAX):
+        return JsonResponse({"error": "too many requests"}, status=429)
+    problem = Problem.objects.filter(pk=request.POST.get("problem_id", "") or 0).first()
+    if problem is None:
+        return HttpResponseBadRequest("no such problem")
+    source = request.POST.get("source", "")[:_MAX_SNAPSHOT_CHARS]
+    mine = PracticeSnapshot.objects.filter(user=request.user, problem=problem).order_by("-at")
+    if source != mine.values_list("source", flat=True).first():
+        PracticeSnapshot.objects.create(user=request.user, problem=problem, source=source)
+        old = mine.values_list("pk", flat=True)[PracticeSnapshot.KEEP:]
+        PracticeSnapshot.objects.filter(pk__in=list(old)).delete()
     return JsonResponse({"ok": True})
 
 

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Halollik qoidalari{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-3xl">
+  <h1 class="ca-page-title">Halollik qoidalari</h1>
+  <p class="mt-2 text-mute">CodeArena'dagi har bir ball va har bir o‘rin — egasining o‘z mehnati. Shu qoidalar buni kafolatlaydi.</p>
+
+  <div class="mt-6 grid gap-4 sm:grid-cols-2">
+    <section class="ca-panel">
+      <h2 class="flex items-center gap-2 font-semibold text-ok"><i data-lucide="circle-check" class="lu" aria-hidden="true"></i>Mumkin</h2>
+      <ul class="mt-3 list-disc space-y-1.5 pl-5 text-sm">
+        <li>Dars materiallari, kitob, dasturlash tilining hujjatlari (docs).</li>
+        <li>Sintaksisni qidirish: «Pythonda ro‘yxat qanday saralanadi?»</li>
+        <li>Masaladagi maslahatlar (hint) — ular ballning bir qismini oladi.</li>
+        <li>O‘qituvchidan yoki do‘stdan <b>g‘oyani</b> so‘rash (kodni emas).</li>
+        <li>AI'dan mavzuni tushuntirib berishni so‘rash — masalaning o‘zini emas.</li>
+        <li>O‘rta va qiyin masalalarda kodni o‘z muharriringizda yozib, keyin qo‘yish.</li>
+      </ul>
+    </section>
+    <section class="ca-panel">
+      <h2 class="flex items-center gap-2 font-semibold text-bad"><i data-lucide="circle-x" class="lu" aria-hidden="true"></i>Mumkin emas</h2>
+      <ul class="mt-3 list-disc space-y-1.5 pl-5 text-sm">
+        <li>Masala shartini AI'ga (ChatGPT, Gemini, Copilot va boshqalar) berib, kod yozdirish.</li>
+        <li>Boshqa odamning yoki internetdagi tayyor yechimni ko‘chirish, «biroz o‘zgartirib» bo‘lsa ham.</li>
+        <li>O‘z yechimingizni boshqalarga berish.</li>
+        <li>Birovning akkauntidan yoki birov bilan bitta akkauntdan ishlash.</li>
+        <li>Musobaqada: har qanday tashqi yordam — AI, boshqa oyna, telefon, maslahatchi.</li>
+      </ul>
+    </section>
+  </div>
+
+  <section class="ca-panel mt-4">
+    <h2 class="font-semibold">Nima kuzatiladi</h2>
+    <p class="mt-2 text-sm text-mute">Mashq va musobaqada muharrir kod qanday yozilganini qayd etadi: uzun kod qo‘yish, boshqa oynaga o‘tish, kodning har 10 soniyadagi holati. Server qabul qilingan kodni shu yozuvlar bilan solishtiradi, talabalar yechimlarini bir-biri bilan ham solishtiradi. Bularni o‘qituvchingiz va hakamlar ko‘radi, boshqa hech kim emas.</p>
+    <h2 class="mt-5 font-semibold">Oqibati</h2>
+    <ul class="mt-2 list-disc space-y-1.5 pl-5 text-sm text-mute">
+      <li><b class="text-ink">Mashqda</b> — ko‘chirilgan deb topilgan yechim uchun amaliyot bali berilmaydi.</li>
+      <li><b class="text-ink">Musobaqada</b> — diskvalifikatsiya: natija oxirgi o‘ringa tushadi, reyting pasayadi.</li>
+    </ul>
+    <h2 class="mt-5 font-semibold">Adolat</h2>
+    <p class="mt-2 text-sm text-mute">Tizim hech kimni o‘zi jazolamaydi: belgilar faqat shubha. Qarorni o‘qituvchi yoki hakam kodni ko‘rib chiqib qabul qiladi, e’tirozingiz bo‘lsa, unga murojaat qiling. Qaror bekor qilinishi mumkin.</p>
+  </section>
+
+  {% if user.is_authenticated %}
+    {% if user.honor_pledged_at %}
+    <p class="mt-6 flex items-center gap-2 text-sm text-ok"><i data-lucide="badge-check" class="lu" aria-hidden="true"></i>Siz bu qoidalarni {{ user.honor_pledged_at|date:"d.m.Y" }} da qabul qilgansiz.</p>
+    {% else %}
+    <form method="post" class="ca-panel mt-6 flex flex-wrap items-center justify-between gap-3">{% csrf_token %}
+      <input type="hidden" name="next" value="{{ next }}">
+      <label class="flex items-start gap-2 text-sm"><input type="checkbox" required class="mt-1"> <span>Men yechimlarimni o‘zim yozaman va bu qoidalarga amal qilaman.</span></label>
+      <button class="ca-btn ca-btn-primary">Qabul qilaman</button>
+    </form>
+    {% endif %}
+  {% endif %}
+</div>
+{% endblock %}
