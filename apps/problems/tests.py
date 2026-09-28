@@ -240,6 +240,25 @@ def test_sql_problem_page_draws_the_tables_and_the_expected_result(client, probl
     assert "MB</span>" not in page  # no memory limit on a query
 
 
+def test_seed_commands_create_the_sql_and_algorithm_problems(db):
+    from django.core.management import call_command
+
+    User.objects.create_user("admin", password="x", is_staff=True)
+    call_command("seed_sql_problems", stdout=open("/dev/null", "w"))
+    sql = Problem.objects.filter(kind=Problem.Kind.SQL)
+    assert sql.count() == 28
+    assert {d: sql.filter(difficulty=d).count() for d in ("beginner", "easy", "medium", "hard")} == {
+        "beginner": 10, "easy": 10, "medium": 5, "hard": 3}
+    assert all(p.sql_dataset.check_seed_sql and p.sql_dataset.check_expected_result for p in sql)
+    assert not Tag.objects.filter(problem__kind=Problem.Kind.SQL).exclude(kind=Tag.Kind.SQL).exists()
+    call_command("seed_algo_problems", stdout=open("/dev/null", "w"))
+    algo = Problem.objects.filter(kind=Problem.Kind.CODE)
+    assert {d: algo.filter(difficulty=d).count() for d in ("medium", "hard")} == {"medium": 5, "hard": 5}
+    assert all(p.testcases.filter(is_sample=True).exists() and p.testcases.count() >= 18 for p in algo)
+    call_command("seed_sql_problems", stdout=open("/dev/null", "w"))  # a re-run refreshes, never duplicates
+    assert Problem.objects.count() == 38
+
+
 @pytest.mark.django_db
 def test_problem_page_offers_to_join_running_contest(client):
     from django.utils import timezone
