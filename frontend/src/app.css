@@ -41,6 +41,7 @@
     --ca-rail-rgb: 31 26 85;           /* tun nili: the menu rail */
     --ca-rail-ink-rgb: 201 198 236;
     --ca-lvl-beginner: #0A7A9A; --ca-lvl-easy: #087F5B; --ca-lvl-medium: #F2A900; --ca-lvl-hard: #C81D5A;
+    --ca-sql-rgb: 123 47 190;          /* binafsha: SQL problems and their topics */
     --ca-shadow: 0 1px 2px rgb(26 24 56 / .05);
     --ca-shadow-lift: 0 12px 32px -10px rgb(26 24 56 / .22), 0 2px 6px rgb(26 24 56 / .08);
 }
@@ -67,6 +68,7 @@
     --ca-rail-rgb: 10 9 26;
     --ca-rail-ink-rgb: 201 198 236;
     --ca-lvl-beginner: #3FB6D6; --ca-lvl-easy: #40D69E; --ca-lvl-medium: #F2A900; --ca-lvl-hard: #FF5A8C;
+    --ca-sql-rgb: 201 162 255;
     --ca-shadow: 0 1px 2px rgb(0 0 0 / .35);
     --ca-shadow-lift: 0 14px 34px -10px rgb(0 0 0 / .7), 0 2px 6px rgb(0 0 0 / .4);
   }
@@ -93,6 +95,7 @@
     --ca-rail-rgb: 10 9 26;
     --ca-rail-ink-rgb: 201 198 236;
     --ca-lvl-beginner: #3FB6D6; --ca-lvl-easy: #40D69E; --ca-lvl-medium: #F2A900; --ca-lvl-hard: #FF5A8C;
+    --ca-sql-rgb: 201 162 255;
     --ca-shadow: 0 1px 2px rgb(0 0 0 / .35);
     --ca-shadow-lift: 0 14px 34px -10px rgb(0 0 0 / .7), 0 2px 6px rgb(0 0 0 / .4);
 }
@@ -880,6 +883,25 @@ section.ca-ed-full #editor .cm-editor { height: calc(100vh - 9.5rem); }
 }
 .ca-chip-score { background: color-mix(in srgb, rgb(var(--ca-warn-rgb)) 13%, rgb(var(--ca-surface-rgb))); color: rgb(var(--ca-warn-rgb)); }
 .ca-chip-rated { background: color-mix(in srgb, rgb(var(--ca-ok-rgb)) 12%, rgb(var(--ca-surface-rgb))); color: rgb(var(--ca-ok-rgb)); }
+/* SQL problems: their own colour, so a query task never passes for a program in a list */
+.ca-chip-sql { background: color-mix(in srgb, rgb(var(--ca-sql-rgb)) 12%, rgb(var(--ca-surface-rgb))); color: rgb(var(--ca-sql-rgb)); }
+.ca-kind-sql {
+  display: inline-flex; align-items: center; gap: .3rem; border-radius: 6px; padding: .1rem .45rem;
+  font-size: .7rem; font-weight: 600; letter-spacing: .02em; white-space: nowrap;
+  background: color-mix(in srgb, rgb(var(--ca-sql-rgb)) 12%, rgb(var(--ca-surface-rgb))); color: rgb(var(--ca-sql-rgb));
+}
+.ca-kind-sql svg.lucide { width: .8rem; height: .8rem; }
+.ca-topics a.is-sql { color: rgb(var(--ca-sql-rgb)); }
+.ca-sql-table { margin-top: .75rem; border: 1px solid rgb(var(--ca-line-rgb)); border-radius: var(--ca-radius); overflow: hidden; }
+.ca-sql-table figcaption {
+  display: flex; align-items: center; gap: .4rem; padding: .45rem .75rem; font-size: .8rem; font-weight: 600;
+  font-family: "Anthropic Mono", "JetBrains Mono", ui-monospace, monospace; color: rgb(var(--ca-sql-rgb));
+  border-bottom: 1px solid rgb(var(--ca-line-rgb)); background: rgb(var(--ca-sunk-rgb));
+}
+.ca-sql-table figcaption .text-mute { font-family: inherit; font-weight: 400; }
+.ca-sql-table .ca-table { font-size: .8rem; }
+.ca-sql-table .ca-table th, .ca-sql-table .ca-table td { padding: .35rem .75rem; white-space: nowrap; }
+.ca-sql-type { font-weight: 400; font-size: .68rem; color: rgb(var(--ca-mute-rgb)); }
 /* difficulty: a short bar in the level's atlas colour and the name in ink (colour alone never
    carries the meaning, and no tinted pill competes with the title beside it) */
 .ca-diff {

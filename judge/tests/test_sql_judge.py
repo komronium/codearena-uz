@@ -1,6 +1,7 @@
 import pytest
 
-from judge.sql_judge import SQLJudgeError, rows_match, run_query
+from judge.sql_judge import (SQLJudgeError, format_rows, parse_rows, rows_match, run_query, run_query_table,
+                              tables)
 
 SCHEMA = "CREATE TABLE users(id INTEGER, name TEXT, age INTEGER);"
 SEED = "INSERT INTO users VALUES (1,'ali',20),(2,'vali',25),(3,'guli',22);"
@@ -63,3 +64,27 @@ def test_rows_match_normalizes_none_to_empty_string():
 
 def test_rows_match_fails_on_extra_row():
     assert not rows_match([("a",), ("b",)], "a\n")
+
+
+def test_rows_match_keeps_order_when_asked():
+    assert rows_match([("a",), ("b",)], "a\nb\n", ordered=True)
+    assert not rows_match([("b",), ("a",)], "a\nb\n", ordered=True)
+
+
+def test_run_query_table_names_the_columns():
+    query = "SELECT name, age * 2 AS twice FROM users WHERE id = 1"
+    verdict, columns, rows = run_query_table(SCHEMA, SEED, query, 1000)
+    assert (verdict, columns, rows) == ("OK", ["name", "twice"], [("ali", 40)])
+
+
+def test_tables_lists_each_table_with_its_columns_and_rows():
+    [users] = tables(SCHEMA, SEED)
+    assert users["name"] == "users"
+    assert users["columns"] == [("id", "INTEGER"), ("name", "TEXT"), ("age", "INTEGER")]
+    assert users["rows"][0] == (1, "ali", 20)
+
+
+def test_format_and_parse_rows_round_trip():
+    text = format_rows([("a", None, 1.5)])
+    assert text == "a\t\t1.5\n" and parse_rows(text) == [["a", "", "1.5"]]
+    assert rows_match([("a", None, 1.5)], text)

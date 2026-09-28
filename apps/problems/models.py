@@ -4,7 +4,12 @@ from django.db import models
 
 
 class Tag(models.Model):
+    class Kind(models.TextChoices):  # same values as Problem.Kind: SQL topics get their own list and colour
+        CODE = "code", "Dasturlash"
+        SQL = "sql", "SQL"
+
     name = models.CharField(max_length=50, unique=True)
+    kind = models.CharField(max_length=10, choices=Kind.choices, default=Kind.CODE)
 
     def __str__(self):
         return self.name
@@ -48,7 +53,7 @@ class Problem(models.Model):
     difficulty = models.CharField(max_length=10, choices=Difficulty.choices, default=Difficulty.EASY)
     kind = models.CharField(max_length=10, choices=Kind.choices, default=Kind.CODE)
     tl_ms = models.IntegerField(default=1000)
-    ml_mb = models.IntegerField(default=256, validators=[MinValueValidator(6)])  # Docker's hard memory-limit floor
+    ml_mb = models.IntegerField(default=64, validators=[MinValueValidator(6)])  # Docker's hard memory-limit floor
     points = models.IntegerField(default=100)
     is_public = models.BooleanField(default=True)
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.APPROVED)
@@ -102,15 +107,18 @@ class TestCase(models.Model):
 
 
 class SQLDataset(models.Model):
-    """Fixture DB for a Problem.Kind.SQL problem. One dataset per problem — the
-    submitted query runs once against it (see judge.sql_judge), so there's no
-    per-testcase input/expected the way Kind.CODE problems have."""
+    """Fixture DB for a Problem.Kind.SQL problem (see judge.sql_judge). The sample data is
+    shown on the problem page with its expected result; the check data, when given, stays
+    hidden and is judged too, so a query that just spells out the shown answer fails."""
     problem = models.OneToOneField(Problem, on_delete=models.CASCADE, related_name="sql_dataset")
     schema_sql = models.TextField(help_text="CREATE TABLE statements, run once per submission.")
-    seed_sql = models.TextField(help_text="INSERT statements, run once per submission.")
+    seed_sql = models.TextField(help_text="INSERT statements of the sample data, shown to students.")
     expected_result = models.TextField(
-        help_text="Correct query's result, one row per line, tab-separated values, no header. "
-                   "Row order doesn't matter (compared as a sorted set); column order does.")
+        help_text="Correct query's result on the sample data, one row per line, tab-separated values, "
+                  "no header. Column order always matters; row order only when `ordered`.")
+    check_seed_sql = models.TextField(blank=True, help_text="INSERT statements of the hidden check data.")
+    check_expected_result = models.TextField(blank=True, help_text="Correct query's result on the check data.")
+    ordered = models.BooleanField(default=False, help_text="The task asks for an ORDER BY: rows must come in order.")
 
 
 class ProblemRating(models.Model):

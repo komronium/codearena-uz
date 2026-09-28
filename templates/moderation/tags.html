@@ -10,7 +10,7 @@
       <tbody>
       {% for t in tags %}
       <tr>
-        <td><a class="ca-link font-medium" href="{% url 'problems:list' %}?tag={{ t.name|urlencode }}">{{ t.name }}</a></td>
+        <td><a class="ca-link font-medium" href="{% url 'problems:list' %}?tag={{ t.name|urlencode }}">{{ t.name }}</a>{% if t.kind == "sql" %} <span class="ca-kind-sql">SQL</span>{% endif %}</td>
         <td class="tabular text-right text-mute">{{ t.n }}</td>
         <td class="text-right">
           <form method="post" action="{% url 'moderation:tag_delete' t.pk %}" onsubmit="return confirm('«{{ t.name|escapejs }}» mavzusini o‘chirasizmi? Masalalar o‘chmaydi.');">{% csrf_token %}
@@ -26,6 +26,8 @@
     {% csrf_token %}
     <h2 class="ca-section-title !mb-0"><label for="{{ form.name.id_for_label }}">Yangi mavzu</label></h2>
     {{ form.name }}{{ form.name.errors }}
+    <label class="ca-label" for="{{ form.kind.id_for_label }}">Turi</label>
+    {{ form.kind }}
     <button class="ca-btn ca-btn-primary w-full"><i data-lucide="plus" class="lu" aria-hidden="true"></i>Qo‘shish</button>
   </form>
 </div>

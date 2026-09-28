@@ -32,10 +32,16 @@
     {% if sort != "id" or dir == "desc" %}<input type="hidden" name="sort" value="{{ sort }}"><input type="hidden" name="dir" value="{{ dir }}">{% endif %}
     {# phones: the top bar has no search box, so the list keeps its own; on wider screens it stays hidden but still carries the query #}
     <label class="ca-picker ca-picker-search md:hidden"><i data-lucide="search" class="lu" aria-hidden="true"></i><input type="search" name="q" value="{{ q }}" placeholder="Qidirish" aria-label="Nomi bo‘yicha qidirish"></label>
+    <label class="ca-picker"><span>Turi</span>
+      <select name="kind" onchange="this.form.tag.value = ''; this.form.submit()">
+        <option value="">hammasi</option>
+        {% for value, label in kinds %}<option value="{{ value }}" {% if value == selected_kind %}selected{% endif %}>{{ label }}</option>{% endfor %}
+      </select>
+    </label>
     <label class="ca-picker"><span>Mavzu</span>
       <select name="tag" onchange="this.form.submit()">
         <option value="">hammasi</option>
-        {% for t in all_tags %}<option value="{{ t.name }}" {% if t.name == selected_tag %}selected{% endif %}>{{ t.name }}</option>{% endfor %}
+        {% for label, tags in tag_groups %}{% if tags %}<optgroup label="{{ label }}">{% for t in tags %}<option value="{{ t.name }}" {% if t.name == selected_tag %}selected{% endif %}>{{ t.name }}</option>{% endfor %}</optgroup>{% endif %}{% endfor %}
       </select>
     </label>
     {% if user.is_authenticated %}
@@ -47,7 +53,7 @@
       </select>
     </label>
     {% endif %}
-    {% if q or selected_tag or selected_difficulty or selected_status %}<a href="{% url 'problems:list' %}" class="ca-btn ca-btn-ghost !px-2.5 !py-1.5 text-sm" title="Filtrni tozalash"><i data-lucide="x" class="lu" aria-hidden="true"></i><span class="hidden sm:inline">Tozalash</span></a>{% endif %}
+    {% if q or selected_tag or selected_difficulty or selected_status or selected_kind %}<a href="{% url 'problems:list' %}" class="ca-btn ca-btn-ghost !px-2.5 !py-1.5 text-sm" title="Filtrni tozalash"><i data-lucide="x" class="lu" aria-hidden="true"></i><span class="hidden sm:inline">Tozalash</span></a>{% endif %}
     {% if user.is_staff %}<a href="{% url 'moderation:submit' %}" class="ca-btn ca-btn-ghost !px-2.5 !py-1.5 text-sm"><i data-lucide="plus" class="lu" aria-hidden="true"></i><span class="hidden sm:inline">Masala</span></a>{% endif %}
   </form>
 </div>
@@ -74,7 +80,8 @@
     <td>
       <span class="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-0.5">
         <a class="ca-link font-medium" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a>
-        {% with tags=p.tags.all %}{% if tags %}<span class="ca-topics">{% for t in tags|slice:":3" %}<a href="{% querystring tag=t.name page=None %}">{{ t.name }}</a>{% if not forloop.last %} · {% endif %}{% endfor %}</span>{% endif %}{% endwith %}
+        {% if p.kind == "sql" %}<span class="ca-kind-sql" title="SQL so‘rov masalasi"><i data-lucide="database" class="lu" aria-hidden="true"></i>SQL</span>{% endif %}
+        {% with tags=p.tags.all %}{% if tags %}<span class="ca-topics">{% for t in tags|slice:":3" %}<a{% if t.kind == "sql" %} class="is-sql"{% endif %} href="{% querystring tag=t.name page=None %}">{{ t.name }}</a>{% if not forloop.last %} · {% endif %}{% endfor %}</span>{% endif %}{% endwith %}
       </span>
     </td>
     <td class="whitespace-nowrap"><span class="ca-diff ca-diff-{{ p.difficulty }}">{{ p.get_difficulty_display }}</span></td>
@@ -89,7 +96,7 @@
 {% else %}
 <div class="ca-empty">
   <i data-lucide="folder-open" class="lu mb-2 block text-2xl" aria-hidden="true"></i>
-  {% if q or selected_tag or selected_difficulty or selected_status %}
+  {% if q or selected_tag or selected_difficulty or selected_status or selected_kind %}
   Bu filtr bo‘yicha masala topilmadi. <a class="ca-link" href="{% url 'problems:list' %}">Filtrni tozalash</a>
   {% else %}Hali ochiq masala yo‘q.{% if user.is_staff %} <a class="ca-link" href="{% url 'moderation:submit' %}">Birinchi masalani qo‘shing</a>{% endif %}{% endif %}
 </div>

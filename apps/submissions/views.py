@@ -15,6 +15,7 @@ from apps.contests.virtual import active_virtual_for
 from apps.integrity.practice import written_in_editor
 from apps.problems.models import Language, Problem
 from apps.classroom.access import can_review, teaches
+from judge import sql_judge
 from judge.runner import run_submission, run_trial
 
 from .models import VERDICT_LABELS, Submission, UserProblemSolved
@@ -24,6 +25,7 @@ MAX_SOURCE = 64 * 1024
 RATE_LIMIT_MAX = 10       # submissions per minute
 TRIAL_RATE_MAX = 20       # "Sinab ko'rish" runs per minute: cheaper than a submit, but still a container
 MAX_TRIAL_INPUT = 64 * 1024
+TRIAL_SQL_ROWS = 100      # rows of a SQL trial result sent back to draw
 
 
 def _gate(request, slug):
@@ -85,14 +87,14 @@ def trial(request, slug):
     problem, _, error = _gate(request, slug)
     if error:
         return JsonResponse({"error": error.content.decode()}, status=400)
-    if problem.kind == Problem.Kind.SQL:
-        return JsonResponse({"error": "SQL masalalarda sinov yo‘q"}, status=400)
-    language = get_object_or_404(Language, code=request.POST.get("language"), is_active=True)
     source, stdin = request.POST.get("source", ""), request.POST.get("stdin", "")
     if not source.strip() or len(source) > MAX_SOURCE or len(stdin) > MAX_TRIAL_INPUT:
         return JsonResponse({"error": "Kod bo‘sh yoki juda katta"}, status=400)
     if rate_limited(request.user.id, "trial", TRIAL_RATE_MAX):
         return JsonResponse({"error": "Juda tez-tez — bir daqiqadan keyin urinib ko‘ring"}, status=429)
+    if problem.kind == Problem.Kind.SQL:
+        return _sql_trial(problem, source)
+    language = get_object_or_404(Language, code=request.POST.get("language"), is_active=True)
     if stdin.strip():
         inputs, expected = [stdin], None
     else:
@@ -104,6 +106,24 @@ def trial(request, slug):
         run_trial, language.code, source, inputs, expected, problem.tl_ms, problem.ml_mb,
         result_ttl=300, failure_ttl=300, meta={"user_id": request.user.pk})
     return JsonResponse({"id": job.id})
+
+
+def _sql_trial(problem, source):
+    """The query on the sample data, answered right away: sqlite in memory, read-only and
+    stopped at the time limit (judge.sql_judge), so no queue is needed."""
+    dataset = getattr(problem, "sql_dataset", None)
+    if dataset is None:
+        return JsonResponse({"error": "Masalada ma‘lumotlar bazasi yo‘q"}, status=400)
+    try:
+        verdict, columns, rows = sql_judge.run_query_table(dataset.schema_sql, dataset.seed_sql, source,
+                                                           problem.tl_ms)
+    except sql_judge.SQLJudgeError:
+        verdict, columns, rows = "RE", [], []
+    if verdict == "OK":
+        verdict = "AC" if sql_judge.rows_match(rows, dataset.expected_result, ordered=dataset.ordered) else "WA"
+    return JsonResponse({"done": True, "sql": True, "verdict": verdict, "columns": columns,
+                         "rows": [["NULL" if v is None else str(v) for v in row] for row in rows[:TRIAL_SQL_ROWS]],
+                         "n_rows": len(rows), "expected": sql_judge.parse_rows(dataset.expected_result)})
 
 
 @login_required

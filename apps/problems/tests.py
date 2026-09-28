@@ -201,6 +201,45 @@ def test_list_filter_by_tag(client, problem):
     assert b"A + B" not in r.content
 
 
+def _sql_problem(author, **dataset):
+    from .models import SQLDataset
+
+    p = Problem.objects.create(slug="sql-older", title="Kattalar", statement_md="x", author=author,
+                               kind=Problem.Kind.SQL, output_md="Bitta ustun: `name`.")
+    SQLDataset.objects.create(problem=p, schema_sql="CREATE TABLE users(id INTEGER, name TEXT, age INTEGER);",
+                              seed_sql="INSERT INTO users VALUES (1,'ali',20),(2,'vali',25);",
+                              expected_result="vali\n", **dataset)
+    return p
+
+
+def test_list_filters_by_kind_and_marks_sql_problems(client, problem):
+    sql = _sql_problem(problem.author)
+    sql.tags.add(Tag.objects.create(name="where", kind=Tag.Kind.SQL))
+    problem.tags.add(Tag.objects.get_or_create(name="math")[0])
+    everything = client.get(reverse("problems:list")).content.decode()
+    assert "A + B" in everything and "Kattalar" in everything and everything.count('class="ca-kind-sql"') == 1
+    assert 'class="is-sql"' in everything and '<optgroup label="SQL">' in everything
+    only_sql = client.get(reverse("problems:list"), {"kind": "sql"})
+    assert [p.slug for p in only_sql.context["problems"]] == ["sql-older"]
+    assert [(label, [t.name for t in tags]) for label, tags in only_sql.context["tag_groups"]] == [("SQL", ["where"])]
+    only_code = client.get(reverse("problems:list"), {"kind": "code"})
+    assert [p.slug for p in only_code.context["problems"]] == ["a-plus-b"]
+
+
+def test_sql_problem_page_draws_the_tables_and_the_expected_result(client, problem):
+    sql = _sql_problem(problem.author, check_seed_sql="INSERT INTO users VALUES (3,'guli',30);",
+                       check_expected_result="guli\n", ordered=True)
+    client.force_login(User.objects.create_user("student", password="x"))
+    page = client.get(reverse("problems:detail", args=[sql.slug])).content.decode()
+    assert '<span translate="no">users</span>' in page
+    assert '<th translate="no">age <span class="ca-sql-type">integer</span></th>' in page
+    assert '<td class="font-mono">vali</td>' in page  # sample row and expected result
+    assert "guli" not in page  # the hidden check data stays hidden
+    assert "aynan shu tartibda" in page and "yashirin, kattaroq" in page
+    assert 'id="trial-btn"' in page and 'id="trial-stdin"' not in page
+    assert "MB</span>" not in page  # no memory limit on a query
+
+
 @pytest.mark.django_db
 def test_problem_page_offers_to_join_running_contest(client):
     from django.utils import timezone

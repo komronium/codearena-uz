@@ -74,8 +74,9 @@
           <span title="Yechsangiz amaliyot balingizga qo‘shiladi. Ko‘p odam yechgan masala biroz arzonlashadi."><i data-lucide="star" class="lu mr-1.5 text-warn" aria-hidden="true"></i><b class="tabular text-ink">{{ problem.points }}</b> ball</span>
           {% endif %}
           {% endif %}
+          {% if problem.kind == "sql" %}<span class="ca-kind-sql"><i data-lucide="database" class="lu" aria-hidden="true"></i>SQL</span>{% endif %}
           <span><i data-lucide="clock" class="lu mr-1.5" aria-hidden="true"></i><b class="tabular text-ink">{{ problem.tl_ms }}</b> ms</span>
-          <span><i data-lucide="cpu" class="lu mr-1.5" aria-hidden="true"></i><b class="tabular text-ink">{{ problem.ml_mb }}</b> MB</span>
+          {% if problem.kind != "sql" %}<span><i data-lucide="cpu" class="lu mr-1.5" aria-hidden="true"></i><b class="tabular text-ink">{{ problem.ml_mb }}</b> MB</span>{% endif %}
           {% if not contest and problem.n_ratings %}
           <button type="button" class="ca-stars-sum" data-dialog="rate-dialog" title="{{ problem.n_ratings }} ta baho"><i data-lucide="star" class="lu" aria-hidden="true"></i><b class="tabular text-ink">{{ problem.avg_stars|floatformat:1 }}</b><span class="sr-only">/5,</span> <span class="tabular">({{ problem.n_ratings }})</span></button>
           {% endif %}
@@ -84,7 +85,7 @@
           {% endif %}
         </div>
         {% if not contest and problem.tags.all %}
-        <div class="mt-2.5 flex flex-wrap gap-1.5">{% for t in problem.tags.all|slice:":3" %}<a class="ca-chip" href="{% url 'problems:list' %}?tag={{ t.name|urlencode }}">{{ t.name }}</a>{% endfor %}</div>
+        <div class="mt-2.5 flex flex-wrap gap-1.5">{% for t in problem.tags.all|slice:":3" %}<a class="ca-chip{% if t.kind == 'sql' %} ca-chip-sql{% endif %}" href="{% url 'problems:list' %}?tag={{ t.name|urlencode }}">{{ t.name }}</a>{% endfor %}</div>
         {% endif %}
       </div>
 
@@ -96,12 +97,39 @@
 
         {% if problem.kind == "sql" %}
         <div>
-          <h2 class="ca-statement-h">Jadval tuzilishi</h2>
-          <pre class="ca-pre">{{ sql_dataset.schema_sql }}</pre>
+          <h2 class="ca-statement-h">Namunaviy ma‘lumotlar</h2>
+          {% for t in sql_tables %}
+          <figure class="ca-sql-table">
+            <figcaption><i data-lucide="table-2" class="lu" aria-hidden="true"></i><span translate="no">{{ t.name }}</span><span class="text-mute">· {{ t.rows|length }} qator</span></figcaption>
+            <div class="overflow-x-auto">
+              <table class="ca-table">
+                <thead><tr>{% for name, type in t.columns %}<th translate="no">{{ name }}{% if type %} <span class="ca-sql-type">{{ type|lower }}</span>{% endif %}</th>{% endfor %}</tr></thead>
+                <tbody>{% for row in t.rows %}<tr>{% for v in row %}<td class="font-mono">{% if v is None %}<span class="text-mute">NULL</span>{% else %}{{ v }}{% endif %}</td>{% endfor %}</tr>{% endfor %}</tbody>
+              </table>
+            </div>
+          </figure>
+          {% endfor %}
+          <details class="mt-2">
+            <summary class="cursor-pointer text-xs text-mute">Jadval tuzilishi (CREATE TABLE)</summary>
+            <pre class="ca-pre mt-2 text-xs">{{ sql_dataset.schema_sql }}</pre>
+          </details>
         </div>
+        {% if output_html %}
         <div>
-          <h2 class="ca-statement-h">Namuna ma‘lumotlar</h2>
-          <pre class="ca-pre">{{ sql_dataset.seed_sql }}</pre>
+          <h2 class="ca-statement-h">Natija</h2>
+          <div class="prose max-w-none">{{ output_html|safe }}</div>
+        </div>
+        {% endif %}
+        <div>
+          <h2 class="ca-statement-h">Namunaviy ma‘lumotlarda kutilgan natija</h2>
+          <figure class="ca-sql-table">
+            <div class="overflow-x-auto">
+              <table class="ca-table">
+                <tbody>{% for row in sql_expected %}<tr>{% for v in row %}<td class="font-mono">{{ v|default:"NULL" }}</td>{% endfor %}</tr>{% empty %}<tr><td class="text-mute">(bo‘sh natija)</td></tr>{% endfor %}</tbody>
+              </table>
+            </div>
+          </figure>
+          <p class="mt-2 text-xs text-mute">{% if sql_dataset.ordered %}Qatorlar aynan shu tartibda bo‘lishi kerak.{% else %}Qatorlar tartibi ahamiyatsiz, ustunlar tartibi muhim.{% endif %}{% if sql_dataset.check_seed_sql %} Yechim yashirin, kattaroq ma‘lumotlarda ham tekshiriladi.{% endif %}</p>
         </div>
         {% else %}
         {% if input_html %}
@@ -271,9 +299,9 @@
       </div>
       {% else %}
       <div class="flex flex-wrap items-center justify-between gap-3 border-t border-line px-4 py-3">
-        <span class="hidden text-xs text-mute sm:inline"><kbd class="ca-kbd">Ctrl</kbd> + <kbd class="ca-kbd">Enter</kbd> — yuborish{% if problem.kind != "sql" %} · <kbd class="ca-kbd">Ctrl</kbd> + <kbd class="ca-kbd">'</kbd> — sinash{% endif %}{% if not contest and user.is_authenticated %}<span title="Mashqda kod qanday yozilgani (uzun kod qo‘yish, boshqa oynaga o‘tish) o‘qituvchingizga ko‘rinadi. Ko‘chirilgan yechim uchun ball berilmaydi."> · {% if problem.difficulty == "beginner" or problem.difficulty == "easy" %}uzun kod qo‘yish yopiq{% else %}o‘qituvchi ko‘radi{% endif %} <i data-lucide="info" class="lu" aria-hidden="true"></i></span>{% endif %}</span>
+        <span class="hidden text-xs text-mute sm:inline"><kbd class="ca-kbd">Ctrl</kbd> + <kbd class="ca-kbd">Enter</kbd> — yuborish · <kbd class="ca-kbd">Ctrl</kbd> + <kbd class="ca-kbd">'</kbd> — sinash{% if not contest and user.is_authenticated %}<span title="Mashqda kod qanday yozilgani (uzun kod qo‘yish, boshqa oynaga o‘tish) o‘qituvchingizga ko‘rinadi. Ko‘chirilgan yechim uchun ball berilmaydi."> · {% if problem.difficulty == "beginner" or problem.difficulty == "easy" %}uzun kod qo‘yish yopiq{% else %}o‘qituvchi ko‘radi{% endif %} <i data-lucide="info" class="lu" aria-hidden="true"></i></span>{% endif %}</span>
         <div class="ml-auto flex items-center gap-2">
-          {% if problem.kind != "sql" %}<button type="button" id="trial-btn" class="ca-btn ca-btn-ghost" title="Namunaviy testlarda sinash — urinish hisoblanmaydi"><i data-lucide="play" class="lu" aria-hidden="true"></i>Sinab ko‘rish</button>{% endif %}
+          <button type="button" id="trial-btn" class="ca-btn ca-btn-ghost" title="{% if problem.kind == 'sql' %}So‘rovni namunaviy ma‘lumotlarda ishga tushirish{% else %}Namunaviy testlarda sinash{% endif %} — urinish hisoblanmaydi"><i data-lucide="play" class="lu" aria-hidden="true"></i>Sinab ko‘rish</button>
           <button type="submit" id="submit-btn" class="ca-btn ca-btn-primary"><i data-lucide="rocket" class="lu" aria-hidden="true"></i>Yuborish</button>
         </div>
       </div>
@@ -285,8 +313,8 @@
           <textarea id="trial-stdin" rows="4" class="ca-input w-full font-mono text-sm" spellcheck="false" aria-label="Sinov uchun kirish ma’lumoti" placeholder="Bo‘sh qoldirilsa — namunaviy testlarda sinaladi"></textarea>
         </div>
       </details>
-      <div id="trial-out" class="border-t border-line px-4 py-3 text-sm" aria-live="polite" hidden></div>
       {% endif %}
+      <div id="trial-out" class="border-t border-line px-4 py-3 text-sm" aria-live="polite" hidden></div>
     </form>
   </section>
 </div>
@@ -547,7 +575,7 @@ resolves their bare imports so @codemirror/state loads once — two copies break
   // "Sinab ko'rish": samples (or the custom stdin) in the judge's "run" queue; nothing is saved.
   const trialBtn = document.getElementById("trial-btn");
   if (trialBtn) {
-    const out = document.getElementById("trial-out"), stdinEl = document.getElementById("trial-stdin");
+    const out = document.getElementById("trial-out"), stdinEl = document.getElementById("trial-stdin");  // no stdin box on SQL problems
     const esc = (t) => (t ?? "").replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
     const V = { AC: ["ac", "check", "To‘g‘ri"], OK: ["ac", "check", "Bajarildi"], WA: ["bad", "x", "Noto‘g‘ri javob"],
                 TLE: ["warn", "clock", "Vaqt oshdi"], MLE: ["warn", "cpu", "Xotira oshdi"], OLE: ["warn", "scissors", "Chiqish juda katta"],
@@ -557,7 +585,22 @@ resolves their bare imports so @codemirror/state loads once — two copies break
     const show = (html) => { out.hidden = false; out.innerHTML = html; window.caIcons?.(); };
     const HINT = { TLE: "Vaqt chegarasi oshdi.", MLE: "Xotira chegarasi oshdi.", OLE: "Chiqish hajmi chegarasi oshdi.",
                    RE: "Dastur xato bilan tugadi." };
+    const grid = (cols, rows) => `<div class="ca-sql-table overflow-x-auto"><table class="ca-table">${cols.length ? `<thead><tr>${cols.map((c) => `<th>${esc(c)}</th>`).join("")}</tr></thead>` : ""}<tbody>${
+      rows.length ? rows.map((row) => `<tr>${row.map((v) => `<td class="font-mono">${esc(v)}</td>`).join("")}</tr>`).join("") : '<tr><td class="text-mute">(bo‘sh natija)</td></tr>'}</tbody></table></div>`;
+    function renderSql(r) {
+      if (r.verdict === "RE" || r.verdict === "TLE") {
+        return show(`<p class="flex items-center gap-2">${chip(r.verdict)}${r.verdict === "TLE" ? "So‘rov vaqt chegarasidan oshdi." : "So‘rov bajarilmadi: sintaksisni tekshiring. Faqat bitta SELECT (yoki WITH … SELECT) ruxsat etiladi."}</p>`);
+      }
+      const more = r.n_rows > r.rows.length ? `<p class="mt-1 text-xs text-mute">Jami ${r.n_rows} qator, birinchi ${r.rows.length} tasi ko‘rsatildi.</p>` : "";
+      show(`<p class="flex items-center gap-2 font-medium">${chip(r.verdict)}${r.verdict === "AC" ? "Namunaviy ma‘lumotlarda natija to‘g‘ri" : "Natija kutilganidan farq qiladi"}</p>
+        <div class="mt-2 grid gap-3 lg:grid-cols-2">
+          <div><p class="mb-1 text-xs font-medium text-mute">Sizning natijangiz</p>${grid(r.columns, r.rows)}${more}</div>
+          <div><p class="mb-1 text-xs font-medium text-mute">Kutilgan</p>${grid([], r.expected)}</div>
+        </div>
+        <p class="mt-2 text-xs text-mute">Sinov urinish hisoblanmaydi. Yuborilganda yashirin ma‘lumotlarda ham tekshiriladi.</p>`);
+    }
     function render(r) {
+      if (r.sql) return renderSql(r);
       if (r.verdict === "CE") return show(`<p class="mb-2 flex items-center gap-2">${chip("CE")} Kompilyatsiya xatosi</p><pre class="ca-pre max-h-60 text-xs">${esc(r.log)}</pre>`);
       if (!r.cases.length) return show(`<p class="flex items-center gap-2">${chip(r.verdict)} Sinovni ishga tushirib bo‘lmadi — qayta urinib ko‘ring.</p>`);
       const custom = r.cases[0].expected === null;
@@ -583,10 +626,11 @@ resolves their bare imports so @codemirror/state loads once — two copies break
       busy(true);
       show('<p class="text-mute">Navbatda…</p>');
       try {
-        const body = new URLSearchParams({ source: view.state.doc.toString(), language: langSel.value, stdin: stdinEl.value });
+        const body = new URLSearchParams({ source: view.state.doc.toString(), language: langSel.value, stdin: stdinEl?.value ?? "" });
         const res = await fetch("{% url 'submissions:trial' problem.slug %}", { method: "POST", headers: { "X-CSRFToken": "{{ csrf_token }}" }, body });
         const data = await res.json().catch(() => ({ error: "Server javob bermadi" }));
         if (!res.ok) return show(`<p class="text-bad">${esc(data.error)}</p>`);
+        if (data.done) return render(data);  // SQL: answered right away, no queue
         for (let t = 0; t < 90; t++) {  // ~60 s: queue wait + compile + run
           await new Promise((r) => setTimeout(r, t < 10 ? 400 : 800));
           const st = await (await fetch(`{% url 'submissions:trial_status' 'JOB' %}`.replace("JOB", data.id))).json();

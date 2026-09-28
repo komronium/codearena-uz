@@ -12,6 +12,7 @@ from apps.accounts.models import Group, User
 from apps.contests.models import Contest, ContestProblem
 from apps.contests.services import reuse_reason
 from apps.problems.models import MAX_HINT_PCT, Problem, ProblemHint, SQLDataset, Tag, TestCase
+from judge import sql_judge
 
 from .ai import DEFAULT_LEVELS, DEFAULT_MODEL, MAX_COUNT, MODEL_CHOICES
 
@@ -64,8 +65,22 @@ class ProblemForm(ModelForm):
 class SQLDatasetForm(ModelForm):
     class Meta:
         model = SQLDataset
-        fields = ["schema_sql", "seed_sql", "expected_result"]
-        widgets = {k: forms.Textarea(attrs={"class": "ca-input font-mono", "rows": 5}) for k in fields}
+        fields = ["schema_sql", "seed_sql", "expected_result", "check_seed_sql", "check_expected_result", "ordered"]
+        widgets = {k: forms.Textarea(attrs={"class": "ca-input font-mono", "rows": 5}) for k in fields[:-1]}
+
+    def clean(self):
+        data = super().clean()
+        schema = data.get("schema_sql", "")
+        # Load both data sets here, so a typo in them is the author's error now, not every student's RE later.
+        for field in ("seed_sql", "check_seed_sql"):
+            if data.get(field, "").strip():
+                try:
+                    sql_judge.tables(schema, data[field])
+                except sql_judge.SQLJudgeError as exc:
+                    self.add_error(field, f"SQL xatosi: {exc}")
+        if data.get("check_seed_sql", "").strip() and not data.get("check_expected_result", "").strip():
+            self.add_error("check_expected_result", "Yashirin ma‘lumotlar uchun kutilgan natija kerak.")
+        return data
 
 
 _IN_EXT = (".in", ".txt")
@@ -228,8 +243,16 @@ class GroupForm(ModelForm):
 class TagForm(ModelForm):
     class Meta:
         model = Tag
-        fields = ["name"]
-        widgets = {"name": forms.TextInput(attrs={**_CA_INPUT, "placeholder": "masalan: two-pointers"})}
+        fields = ["name", "kind"]
+        widgets = {"name": forms.TextInput(attrs={**_CA_INPUT, "placeholder": "masalan: two-pointers"}),
+                   "kind": forms.Select(attrs={"class": "ca-select"})}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["kind"].required = False  # left out: a programming topic
+
+    def clean_kind(self):
+        return self.cleaned_data.get("kind") or Tag.Kind.CODE
 
     def clean_name(self):
         # One standard English spelling per topic; free text is how "sikl", "cikl" and "loop" piled up.
@@ -242,7 +265,8 @@ class TagForm(ModelForm):
 class AIGenerateForm(forms.Form):
     """What the AI drafts: how many problems per level, on which topics, and optionally
     one precise theme."""
-    topics = forms.ModelMultipleChoiceField(Tag.objects.order_by("name"), to_field_name="name", required=False,
+    topics = forms.ModelMultipleChoiceField(Tag.objects.filter(kind=Tag.Kind.CODE).order_by("name"),
+                                            to_field_name="name", required=False,
                                             widget=forms.CheckboxSelectMultiple)
     focus = forms.CharField(required=False, max_length=500, widget=forms.Textarea(attrs={
         "class": "ca-input", "rows": 3,

@@ -14,6 +14,7 @@ from apps.classroom.duels import active_duel_for
 from apps.contests.models import ContestProblem
 from apps.contests.services import active_contest_for, in_running_contest, in_upcoming_contest
 from apps.submissions.models import Submission, UserProblemSolved
+from judge import sql_judge
 
 from .daily import daily_for, streaks
 from .models import (
@@ -106,6 +107,11 @@ def problem_list(request):
     tag = request.GET.get("tag", "").strip()
     if tag:
         problems = problems.filter(tags__name=tag)
+    kind = request.GET.get("kind", "").strip()
+    if kind in Problem.Kind.values:
+        problems = problems.filter(kind=kind)
+    else:
+        kind = ""
     status = request.GET.get("status", "").strip()
     if status in ("solved", "unsolved") and request.user.is_authenticated:
         solved_q = Q(userproblemsolved__user=request.user)
@@ -140,7 +146,7 @@ def problem_list(request):
             .values_list("problem_id", flat=True)
         )
     # Only on the plain first page: with a search or filter the user already knows what they want.
-    browsing = not (q or tag or difficulty or status) and page.number == 1
+    browsing = not (q or tag or difficulty or status or kind) and page.number == 1
     daily = daily_for() if browsing else None
     daily_done = streak = None
     if daily and request.user.is_authenticated:
@@ -149,6 +155,7 @@ def problem_list(request):
     next_picks = (next_problems(request.user, exclude=(daily.problem_id,) if daily else ())
                   if request.user.is_authenticated and browsing else [])
     total = visible.distinct().count()
+    all_tags = list(Tag.objects.filter(problem__in=visible).distinct().order_by("name"))
     progress = None
     if request.user.is_authenticated:
         progress = {"done": UserProblemSolved.objects.filter(user=request.user, problem__in=visible).count(),
@@ -162,11 +169,15 @@ def problem_list(request):
         "daily": daily, "daily_done": daily_done, "streak": streak,
         "sort": sort, "dir": "desc" if desc else "asc",
         "solved_ids": solved_ids,
-        "all_tags": Tag.objects.filter(problem__in=visible).distinct().order_by("name"),
+        # each kind's topics in its own group; with a kind picked, only that kind's
+        "tag_groups": [(label, [t for t in all_tags if t.kind == value]) for value, label in Tag.Kind.choices
+                       if not kind or value == kind],
         "q": q,
         "selected_tag": tag,
         "selected_difficulty": difficulty,
         "selected_status": status,
+        "selected_kind": kind,
+        "kinds": Problem.Kind.choices,
         "difficulties": Problem.Difficulty.choices,
     })
 
@@ -204,6 +215,19 @@ def leaders(problem, by: str, lang: str = "", limit: int = 20) -> list:
         if len(best) == limit:
             break
     return best
+
+
+def _sql_context(problem) -> dict:
+    """A SQL problem's sample tables and expected result, drawn as tables on its page."""
+    dataset = getattr(problem, "sql_dataset", None) if problem.kind == Problem.Kind.SQL else None
+    if dataset is None:
+        return {}
+    try:
+        tables = sql_judge.tables(dataset.schema_sql, dataset.seed_sql)
+    except sql_judge.SQLJudgeError:
+        tables = []  # an authoring bug; the raw schema below still shows what's there
+    return {"sql_dataset": dataset, "sql_tables": tables,
+            "sql_expected": sql_judge.parse_rows(dataset.expected_result)}
 
 
 def problem_detail(request, slug):
@@ -277,7 +301,7 @@ def problem_detail(request, slug):
         "contest_problems": (list(contest.contest_problems.select_related("problem").order_by("label"))
                              if contest else []),
         "languages": languages,
-        "sql_dataset": getattr(problem, "sql_dataset", None),
+        **_sql_context(problem),
         "contest": contest,
         "my_participation": (contest.participations.filter(user=request.user).first()
                              if contest and request.user.is_authenticated else None),

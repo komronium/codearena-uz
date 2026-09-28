@@ -121,23 +121,26 @@ def _run_sql_submission(sub: Submission) -> None:
         sub.save(update_fields=["verdict", "total"])
         return
 
-    try:
-        status, rows = sql_judge.run_query(dataset.schema_sql, dataset.seed_sql, sub.source, problem.tl_ms)
-    except sql_judge.SQLJudgeError:
-        sub.verdict, sub.total = Submission.Verdict.RE, 1
-        sub.save(update_fields=["verdict", "total"])
-        return
+    # The shown sample data first, then the hidden check data: each is one "test".
+    runs = [(dataset.seed_sql, dataset.expected_result)]
+    if dataset.check_seed_sql.strip():
+        runs.append((dataset.check_seed_sql, dataset.check_expected_result))
+    final, passed = Submission.Verdict.AC, 0
+    for seed_sql, expected in runs:
+        try:
+            status, rows = sql_judge.run_query(dataset.schema_sql, seed_sql, sub.source, problem.tl_ms)
+        except sql_judge.SQLJudgeError:
+            final = Submission.Verdict.RE
+            break
+        if status != "OK":
+            final = Submission.Verdict.TLE if status == "TLE" else Submission.Verdict.RE
+            break
+        if not sql_judge.rows_match(rows, expected, ordered=dataset.ordered):
+            final = Submission.Verdict.WA
+            break
+        passed += 1
 
-    if status == "TLE":
-        final = Submission.Verdict.TLE
-    elif status == "RE":
-        final = Submission.Verdict.RE
-    else:
-        final = Submission.Verdict.AC if sql_judge.rows_match(rows, dataset.expected_result) else Submission.Verdict.WA
-
-    sub.verdict = final
-    sub.passed = 1 if final == Submission.Verdict.AC else 0
-    sub.total = 1
+    sub.verdict, sub.passed, sub.total = final, passed, len(runs)
     sub.save(update_fields=["verdict", "passed", "total"])
 
 

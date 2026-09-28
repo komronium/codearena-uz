@@ -71,7 +71,8 @@ def ai_generate(request):
             drafts = generate_problems(
                 form.levels(), topics=[t.name for t in form.cleaned_data["topics"]],
                 focus=form.cleaned_data["focus"].strip(), model=form.cleaned_data["model"],
-                allowed_tags=list(Tag.objects.order_by("name").values_list("name", flat=True)))
+                allowed_tags=list(Tag.objects.filter(kind=Tag.Kind.CODE).order_by("name")
+                                  .values_list("name", flat=True)))
         except AIGenerationError as e:
             messages.error(request, f"AI xato: {e}")  # the form stays filled in: try again as is
         else:

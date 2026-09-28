@@ -411,6 +411,52 @@ def test_runner_sql_wa(sql_problem, sql_lang, user):
     assert s.verdict == "WA"
 
 
+def test_runner_sql_hidden_check_data_fails_a_hardcoded_answer(sql_problem, sql_lang, user):
+    from judge.runner import run_submission
+    ds = sql_problem.sql_dataset
+    ds.check_seed_sql = "INSERT INTO users VALUES (1,'sobir',30),(2,'nodir',18);"
+    ds.check_expected_result = "sobir\n"
+    ds.save()
+    hardcoded = Submission.objects.create(user=user, problem=sql_problem, language=sql_lang,
+                                          source="SELECT 'guli' UNION SELECT 'vali'")
+    honest = Submission.objects.create(user=user, problem=sql_problem, language=sql_lang,
+                                       source="SELECT name FROM users WHERE age > 21")
+    run_submission(hardcoded.pk)
+    run_submission(honest.pk)
+    hardcoded.refresh_from_db()
+    honest.refresh_from_db()
+    assert (hardcoded.verdict, hardcoded.passed, hardcoded.total) == ("WA", 1, 2)
+    assert (honest.verdict, honest.passed, honest.total) == ("AC", 2, 2)
+
+
+def test_runner_sql_ordered_problem_needs_the_order(sql_problem, sql_lang, user):
+    from judge.runner import run_submission
+    ds = sql_problem.sql_dataset
+    ds.ordered = True
+    ds.save()
+    wrong = Submission.objects.create(user=user, problem=sql_problem, language=sql_lang,
+                                      source="SELECT name FROM users WHERE age > 21 ORDER BY name DESC")
+    right = Submission.objects.create(user=user, problem=sql_problem, language=sql_lang,
+                                      source="SELECT name FROM users WHERE age > 21 ORDER BY name")
+    run_submission(wrong.pk)
+    run_submission(right.pk)
+    assert Submission.objects.get(pk=wrong.pk).verdict == "WA"
+    assert Submission.objects.get(pk=right.pk).verdict == "AC"
+
+
+def test_sql_trial_answers_with_the_result_table(client, sql_problem, sql_lang, user):
+    client.force_login(user)
+    url = reverse("submissions:trial", args=[sql_problem.slug])
+    r = client.post(url, {"language": "sql", "source": "SELECT name, age FROM users WHERE age > 21"})
+    body = r.json()
+    assert body["done"] and body["sql"] and body["verdict"] == "WA"  # two columns, one expected
+    assert body["columns"] == ["name", "age"] and sorted(body["rows"]) == [["guli", "22"], ["vali", "25"]]
+    assert body["expected"] == [["guli"], ["vali"]]
+    assert client.post(url, {"source": "SELECT name FROM users WHERE age > 21"}).json()["verdict"] == "AC"
+    assert client.post(url, {"source": "DELETE FROM users"}).json()["verdict"] == "RE"
+    assert not Submission.objects.exists()
+
+
 def test_runner_sql_denies_write_query(sql_problem, sql_lang, user):
     from judge.runner import run_submission
     s = Submission.objects.create(user=user, problem=sql_problem, language=sql_lang,

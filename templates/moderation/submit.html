@@ -51,7 +51,17 @@
       <div>
         <label class="ca-label" for="{{ sql_form.expected_result.id_for_label }}">Kutilgan natija</label>
         {{ sql_form.expected_result }}{{ sql_form.expected_result.errors }}
-        <p class="mt-1 text-xs text-mute">Har qator — bitta natija qatori, ustunlar TAB bilan ajratilgan, sarlavhasiz.</p>
+        <p class="mt-1 text-xs text-mute">Har qator — bitta natija qatori, ustunlar TAB bilan ajratilgan, sarlavhasiz. Namunaviy ma‘lumot va shu natija masala sahifasida jadval bo‘lib ko‘rinadi.</p>
+      </div>
+      <label class="flex items-center gap-2 text-sm">{{ sql_form.ordered }} Qatorlar tartibi muhim (shart ORDER BY talab qiladi)</label>
+      <div>
+        <label class="ca-label" for="{{ sql_form.check_seed_sql.id_for_label }}">Yashirin ma‘lumotlar (INSERT …, ixtiyoriy)</label>
+        {{ sql_form.check_seed_sql }}{{ sql_form.check_seed_sql.errors }}
+        <p class="mt-1 text-xs text-mute">Talabaga ko‘rinmaydi. So‘rov bu ma‘lumotlarda ham tekshiriladi — ko‘rsatilgan javobni qo‘lda yozib qo‘yish o‘tmaydi.</p>
+      </div>
+      <div>
+        <label class="ca-label" for="{{ sql_form.check_expected_result.id_for_label }}">Yashirin ma‘lumotlarda kutilgan natija</label>
+        {{ sql_form.check_expected_result }}{{ sql_form.check_expected_result.errors }}
       </div>
     </section>
 
