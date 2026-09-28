@@ -248,7 +248,7 @@ SPECS: list[Spec] = [
          "Bir qatorda uchta son o'sish tartibida.",
          lambda r: _lines(*(r.randint(-100, 100) for _ in range(3))),
          lambda s: _line(*sorted(_ints(s))),
-         ["3\n1\n2\n", "7\n7\n1\n"], difficulty=Problem.Difficulty.MEDIUM),
+         ["3\n1\n2\n", "7\n7\n1\n"], difficulty=Problem.Difficulty.EASY),
 
     Spec("closest-to-zero", "Nolga eng yaqin",
          "Ikkita butun son berilgan. Qaysi biri nolga yaqinroq bo'lsa, shuni chiqaring. Masofalar teng bo'lsa kattasini chiqaring.",
@@ -256,7 +256,7 @@ SPECS: list[Spec] = [
          "Nolga eng yaqin son.",
          lambda r: _lines(r.randint(-100, 100), r.randint(-100, 100)),
          lambda s: _lines(max(_ints(s), key=lambda x: (-abs(x), x))),
-         ["-3\n5\n", "-4\n4\n"], difficulty=Problem.Difficulty.MEDIUM),
+         ["-3\n5\n", "-4\n4\n"], difficulty=Problem.Difficulty.EASY),
 ]
 
 
@@ -327,7 +327,7 @@ CONTEST_SPECS: list[Spec] = [
          lambda r: _lines(*(lambda a, b, c, d: (a, b, c, d) if (a, b) != (c, d) else (a, b, c % 8 + 1, d))(
              *(r.randint(1, 8) for _ in range(4)))),
          lambda s: _lines(YES if (lambda a, b, c, d: a == c or b == d or abs(a - c) == abs(b - d))(*_ints(s)) else NO),
-         ["1\n1\n8\n8\n", "2\n3\n5\n7\n"], difficulty=Problem.Difficulty.MEDIUM, tags=["conditionals", "math"], is_public=False),
+         ["1\n1\n8\n8\n", "2\n3\n5\n7\n"], difficulty=Problem.Difficulty.EASY, tags=["conditionals", "math"], is_public=False),
 ]
 
 

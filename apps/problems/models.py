@@ -61,6 +61,29 @@ class Problem(models.Model):
     def __str__(self):
         return self.title
 
+    def save(self, *args, **kwargs):
+        """Points follow the difficulty (scoring.BANDS): a new problem, or one whose difficulty
+        changed, is priced right away rather than at the next recalc_points sweep, and the
+        people who solved it get the new price at once."""
+        fields = kwargs.get("update_fields")
+        repriced = False
+        if fields is None or "difficulty" in fields:
+            from .scoring import price
+
+            if self._state.adding:  # priced unless the caller set points itself
+                was = None if self.points == self._meta.get_field("points").default else self.difficulty
+            else:
+                was = Problem.objects.filter(pk=self.pk).values_list("difficulty", flat=True).first()
+            if was != self.difficulty:
+                self.points, repriced = price(self), was is not None
+                if fields is not None:
+                    kwargs["update_fields"] = {*fields, "points"}
+        super().save(*args, **kwargs)
+        if repriced:
+            from apps.submissions.solves import sync_practice_points
+
+            sync_practice_points(self.userproblemsolved_set.values_list("user_id", flat=True))
+
     @property
     def samples(self):
         return self.testcases.filter(is_sample=True)

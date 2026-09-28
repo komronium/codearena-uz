@@ -66,6 +66,7 @@
           <span><i data-lucide="star" class="lu mr-1.5 text-warn" aria-hidden="true"></i><b class="tabular text-ink">{{ contest_problem.points }}</b> ball</span>
           {% else %}
           <span class="ca-diff ca-diff-{{ problem.difficulty }}">{{ problem.get_difficulty_display }}</span>
+          <span title="Yechsangiz amaliyot balingizga qo‘shiladi. Ko‘p odam yechgan masala biroz arzonlashadi."><i data-lucide="star" class="lu mr-1.5 text-warn" aria-hidden="true"></i><b class="tabular text-ink">{{ problem.points }}</b> ball</span>
           {% endif %}
           <span><i data-lucide="clock" class="lu mr-1.5" aria-hidden="true"></i><b class="tabular text-ink">{{ problem.tl_ms }}</b> ms</span>
           <span><i data-lucide="cpu" class="lu mr-1.5" aria-hidden="true"></i><b class="tabular text-ink">{{ problem.ml_mb }}</b> MB</span>

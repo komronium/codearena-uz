@@ -82,7 +82,7 @@ def ai_generate(request):
                         title=draft["title"], slug=_unique_slug(draft["title"]), kind=Problem.Kind.CODE,
                         statement_md=draft["statement_md"], input_md=draft["input_md"], output_md=draft["output_md"],
                         difficulty=draft["difficulty"], tl_ms=draft["tl_ms"], ml_mb=draft["ml_mb"],
-                        points=draft["points"], is_public=False, status=Problem.Status.PENDING, author=request.user,
+                        is_public=False, status=Problem.Status.PENDING, author=request.user,
                     )
                     obj.tags.set(tags)
                     TestCase.objects.bulk_create([

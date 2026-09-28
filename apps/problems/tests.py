@@ -753,3 +753,63 @@ def test_practice_pack_adds_25_open_problems_once_and_repeats_nothing_on_the_por
     seeded = {s.title for mod in (seed_problems, seed_story_problems) for v in vars(mod).values()
               if isinstance(v, list) for s in v if hasattr(s, "title")}
     assert not seeded & {s["title"] for s in add_practice_pack_1.PROBLEMS}
+
+
+def _solve_history(problem, tried, solved, prefix="s"):
+    """`tried` students submitted to `problem`, the first `solved` of them with an AC."""
+    from apps.submissions.models import Submission, UserProblemSolved
+
+    py = Language.objects.get_or_create(code="python", defaults=dict(name="Python 3", docker_image="x", run_cmd="x"))[0]
+    users = []
+    for i in range(tried):
+        u = User.objects.create_user(f"{prefix}{i}", password="x")
+        s = Submission.objects.create(user=u, problem=problem, language=py, source="x",
+                                      verdict="AC" if i < solved else "WA")
+        if i < solved:
+            UserProblemSolved.objects.create(user=u, problem=problem, first_ac_submission=s)
+        users.append(u)
+    return users
+
+
+@pytest.mark.django_db
+def test_points_follow_the_difficulty_at_once():
+    from apps.submissions.solves import sync_practice_points
+
+    author = User.objects.create_user("pa", password="x")
+    p = Problem.objects.create(slug="pp", title="P", statement_md="x", author=author, difficulty="beginner")
+    assert p.points == BANDS["beginner"][1]  # not the old flat 100
+    solver = _solve_history(p, 1, 1)[0]
+    sync_practice_points([solver.pk])
+    p.difficulty = "medium"
+    p.save(update_fields=["difficulty"])
+    p.refresh_from_db()
+    solver.refresh_from_db()
+    assert p.points == BANDS["medium"][1] and solver.practice_points == BANDS["medium"][1]
+
+
+@pytest.mark.django_db
+def test_review_difficulty_moves_a_label_one_step_towards_how_students_did():
+    from io import StringIO
+
+    from django.core.management import call_command
+
+    author = User.objects.create_user("ra", password="x")
+    too_easy = Problem.objects.create(slug="looks-hard", title="Aslida oson", statement_md="x", author=author, difficulty="hard")
+    _solve_history(too_easy, 10, 9, "a")  # 90%: the data says beginner
+    fine = Problem.objects.create(slug="fair", title="Mos", statement_md="x", author=author, difficulty="medium")
+    _solve_history(fine, 10, 4, "b")      # 40%: medium
+    thin = Problem.objects.create(slug="new", title="Yangi", statement_md="x", author=author, difficulty="hard")
+    _solve_history(thin, 3, 3, "c")       # too few to judge
+    staff = User.objects.create_user("st", password="x", is_staff=True)
+    read = Problem.objects.create(slug="sort-three", title="Uchta son", statement_md="x", author=staff, difficulty="medium")
+
+    out = StringIO()
+    call_command("review_difficulty", stdout=out)
+    report = out.getvalue()
+    assert "Aslida oson" in report and "Uchta son" in report and "Mos" not in report.split("mos emas:")[1]
+    assert Problem.objects.get(pk=too_easy.pk).difficulty == "hard"  # only a report without --apply
+
+    call_command("review_difficulty", "--apply", stdout=StringIO())
+    assert Problem.objects.get(pk=too_easy.pk).difficulty == "medium"  # one step, not straight to beginner
+    assert Problem.objects.get(pk=read.pk).difficulty == "easy"
+    assert Problem.objects.get(pk=fine.pk).difficulty == "medium" and Problem.objects.get(pk=thin.pk).difficulty == "hard"

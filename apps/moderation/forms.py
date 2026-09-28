@@ -28,7 +28,7 @@ class ProblemForm(ModelForm):
     class Meta:
         model = Problem
         fields = ["title", "kind", "statement_md", "input_md", "output_md", "difficulty", "tags",
-                  "tl_ms", "ml_mb", "points", "is_public", "editorial_md"]
+                  "tl_ms", "ml_mb", "is_public", "editorial_md"]
         widgets = {
             "title": forms.TextInput(attrs=_CA_INPUT),
             "kind": forms.Select(attrs={"class": "ca-select"}),
@@ -40,7 +40,6 @@ class ProblemForm(ModelForm):
             "tags": forms.CheckboxSelectMultiple,
             "tl_ms": forms.NumberInput(attrs=_CA_INPUT),
             "ml_mb": forms.NumberInput(attrs=_CA_INPUT),
-            "points": forms.NumberInput(attrs=_CA_INPUT),
         }
 
     def __init__(self, *args, **kwargs):
