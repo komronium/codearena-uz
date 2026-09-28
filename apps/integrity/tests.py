@@ -742,3 +742,56 @@ def test_honesty_pledge_is_asked_once_and_recorded(client):
     mine.refresh_from_db()
     assert mine.honor_pledged_at is not None
     assert 'id="ca-honor"' not in client.get(reverse("problems:detail", args=[p.slug])).content.decode()
+
+
+@pytest.mark.django_db
+def test_practice_submission_must_come_from_the_editor(client, settings):
+    from unittest.mock import patch
+
+    settings.PRACTICE_REQUIRE_EDITOR = True
+    teacher, mine, other, p, _ = _practice_world()
+    client.force_login(mine)
+    url, code = reverse("submissions:submit", args=[p.slug]), "a = int(input())\r\nprint(a)\r\n"
+    before = Submission.objects.count()
+    with patch("apps.submissions.views.django_rq.enqueue"):
+        r = client.post(url, {"language": "python", "source": code}, follow=True)
+        assert Submission.objects.count() == before and "muharrirda yozilishi kerak" in r.content.decode()
+        # the page saves the code first (textarea newlines may differ): now it goes through
+        client.post(reverse("integrity:practice_snapshot"), {"problem_id": p.pk, "source": "a = int(input())\nprint(a)"})
+        client.post(url, {"language": "python", "source": code})
+    assert Submission.objects.count() == before + 1
+
+
+@pytest.mark.django_db
+def test_a_strongly_flagged_new_solve_is_held_until_a_teacher_clears_it(client):
+    from apps.accounts.models import Group
+    from apps.submissions.solves import refresh_solves
+
+    from .models import PracticeEvent, PracticeReview, PracticeSnapshot
+
+    teacher = User.objects.create_user("ustoz9", password="x", role=User.Role.TEACHER)
+    kid = User.objects.create_user("bola9", password="x")
+    Group.objects.create(name="G9", teacher=teacher).members.add(kid)
+    p = Problem.objects.create(slug="pr-held", title="Ushlangan", statement_md="x", author=teacher, difficulty="easy")
+    py = Language.objects.create(code="python", name="Python 3", docker_image="x", run_cmd="x")
+    # page open, a long paste tried, and the accepted code never in the editor
+    for kind in ("view", "paste"):
+        PracticeEvent.objects.create(user=kid, problem=p, kind=kind)
+    PracticeSnapshot.objects.create(user=kid, problem=p, source="# ...")
+    past = timezone.now() - timezone.timedelta(minutes=2)
+    PracticeEvent.objects.update(at=past)
+    PracticeSnapshot.objects.update(at=past)
+    Submission.objects.create(user=kid, problem=p, language=py, source="print(sum(map(int, input().split())))", verdict="AC")
+    refresh_solves(p.pk, [kid.pk])
+
+    kid.refresh_from_db()
+    held = PracticeReview.objects.get(user=kid, problem=p)
+    assert held.confirmed and held.reviewer is None and kid.practice_points == 0
+    client.force_login(kid)
+    assert "Ball tekshiruvda" in client.get(reverse("problems:detail", args=[p.slug])).content.decode()
+    client.force_login(teacher)
+    report = client.get(reverse("integrity:practice_report"))
+    assert report.context["open"] == 1 and "Avtomatik" in report.content.decode()
+    client.post(reverse("integrity:practice_decide", args=[kid.pk, p.pk]), {"decision": "clear"})
+    kid.refresh_from_db()
+    assert kid.practice_points == p.points

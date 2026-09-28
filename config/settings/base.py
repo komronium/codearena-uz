@@ -102,3 +102,6 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 PASSWORD_HASHERS = ["apps.accounts.hashers.PBKDF2Hasher300k",
                     "django.contrib.auth.hashers.PBKDF2PasswordHasher"]
+
+# A practice submission is accepted only if its code was in the site's editor (apps.integrity.practice).
+PRACTICE_REQUIRE_EDITOR = True

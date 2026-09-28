@@ -249,7 +249,10 @@ def problem_detail(request, slug):
                 if solved else None)
     from apps.integrity.models import PracticeReview
 
-    voided = bool(solved) and PracticeReview.objects.filter(user=request.user, problem=problem, confirmed=True).exists()
+    # "void": a teacher found it copied; "held": flagged strongly, points wait for a teacher
+    review = (PracticeReview.objects.filter(user=request.user, problem=problem, confirmed=True).first()
+              if solved else None)
+    voided = review and ("void" if review.reviewer_id else "held")
     return render(request, "problems/detail.html", {
         "solved": solved,
         "voided": voided,

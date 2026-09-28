@@ -1,4 +1,6 @@
 import django_rq
+from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.http import Http404, HttpResponse, HttpResponseBadRequest, JsonResponse
@@ -10,6 +12,7 @@ from apps.accounts.models import User
 from apps.contests.models import Participation
 from apps.contests.services import access_allowed, active_contest_for, in_running_contest, in_upcoming_contest
 from apps.contests.virtual import active_virtual_for
+from apps.integrity.practice import written_in_editor
 from apps.problems.models import Language, Problem
 from apps.classroom.access import can_review, teaches
 from judge.runner import run_submission, run_trial
@@ -54,6 +57,11 @@ def submit(request, slug):
     source = request.POST.get("source", "")
     if not source.strip() or len(source) > MAX_SOURCE:
         return HttpResponseBadRequest("source empty or too large")
+    if (contest is None and settings.PRACTICE_REQUIRE_EDITOR and not request.user.is_staff
+            and not written_in_editor(request.user, problem, source)):
+        messages.error(request, "Yechim qabul qilinmadi: kod shu sahifadagi muharrirda yozilishi kerak. "
+                                "Sahifani yangilab, muharrirdan qayta yuboring (JavaScript yoqilgan bo‘lsin).")
+        return redirect("problems:detail", problem.slug)
     if request.POST.get("pledge") == "1" and not request.user.honor_pledged_at:  # accepted in the dialog
         User.objects.filter(pk=request.user.pk).update(honor_pledged_at=timezone.now())
     telemetry = {}

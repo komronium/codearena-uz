@@ -359,7 +359,7 @@ def practice_report(request):
     rows = suspicious_solves(students, days)
     return render(request, "integrity/practice_report.html", {
         "rows": rows, "groups": groups, "group": group, "days": days,
-        "open": sum(r["review"] is None for r in rows),
+        "open": sum(r["waiting"] for r in rows),
     })
 
 

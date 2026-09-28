@@ -66,7 +66,9 @@
           <span><i data-lucide="star" class="lu mr-1.5 text-warn" aria-hidden="true"></i><b class="tabular text-ink">{{ contest_problem.points }}</b> ball</span>
           {% else %}
           <span class="ca-diff ca-diff-{{ problem.difficulty }}">{{ problem.get_difficulty_display }}</span>
-          {% if voided %}
+          {% if voided == "held" %}
+          <span class="font-medium text-warn" title="Yechim qanday yozilgani shubhali ko‘rindi, shuning uchun ball o‘qituvchi ko‘rib chiqquncha ushlab turilibdi. O‘zingiz yozgan bo‘lsangiz, ball qaytariladi."><i data-lucide="hourglass" class="lu mr-1.5" aria-hidden="true"></i>Ball tekshiruvda</span>
+          {% elif voided %}
           <span class="font-medium text-bad" title="O‘qituvchi bu yechimni ko‘chirilgan deb belgiladi, shuning uchun amaliyot baliga qo‘shilmadi. Savol bo‘lsa, o‘qituvchingizga murojaat qiling."><i data-lucide="shield-alert" class="lu mr-1.5" aria-hidden="true"></i>Ball berilmadi</span>
           {% else %}
           <span title="Yechsangiz amaliyot balingizga qo‘shiladi. Ko‘p odam yechgan masala biroz arzonlashadi."><i data-lucide="star" class="lu mr-1.5 text-warn" aria-hidden="true"></i><b class="tabular text-ink">{{ problem.points }}</b> ball</span>
@@ -723,16 +725,25 @@ resolves their bare imports so @codemirror/state loads once — two copies break
     // written here from code that arrived some other way.
     let sent = null;
     const snap = () => {
-      if (!window.caCode) return;
+      if (!window.caCode) return Promise.resolve();
       const { source } = window.caCode();
-      if (source === sent) return;
-      sent = source;
-      fetch("{% url 'integrity:practice_snapshot' %}", { method: "POST", keepalive: true, headers: { "X-CSRFToken": "{{ csrf_token }}" },
-        body: new URLSearchParams({ problem_id: "{{ problem.pk }}", source }) }).catch(() => {});
+      if (source === sent) return Promise.resolve();
+      return fetch("{% url 'integrity:practice_snapshot' %}", { method: "POST", keepalive: true, headers: { "X-CSRFToken": "{{ csrf_token }}" },
+        body: new URLSearchParams({ problem_id: "{{ problem.pk }}", source }), signal: AbortSignal.timeout(5000) })
+        .then((r) => { if (r.ok) sent = source; }).catch(() => {});
     };
     setInterval(snap, 10000);
     window.addEventListener("pagehide", snap);
-    document.addEventListener("submit", (e) => { if (e.target.id === "submit-form") snap(); }, true);
+    // The server accepts a practice submission only if its code reached it from this editor:
+    // save it first, then let the submit go on.
+    let passing = false;
+    document.addEventListener("submit", (e) => {
+      if (e.target.id !== "submit-form") return;
+      if (passing) { passing = false; return; }
+      e.preventDefault(); e.stopImmediatePropagation();
+      const form = e.target, by = e.submitter;
+      snap().finally(() => { passing = true; form.requestSubmit(by || undefined); });
+    }, true);
 
     // Time in another window or tab, reported on the way back.
     let leftAt = 0;

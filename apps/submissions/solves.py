@@ -51,6 +51,7 @@ def refresh_solves(problem_id: int, user_ids: Iterable[int] | None = None) -> No
         current = {u: (sub_id, pct) for u, sub_id, pct in
                    rows.values_list("user_id", "first_ac_submission_id", "hint_pct")}
         users = user_ids if user_ids is not None else current.keys() | wanted.keys()
+        new = [u for u in users if wanted.get(u) and u not in current]
         for user_id in users:
             want = wanted.get(user_id)
             if want == current.get(user_id):
@@ -61,6 +62,10 @@ def refresh_solves(problem_id: int, user_ids: Iterable[int] | None = None) -> No
                 UserProblemSolved.objects.update_or_create(
                     user_id=user_id, problem_id=problem_id,
                     defaults={"first_ac_submission_id": want[0], "hint_pct": want[1]})
+    if new:  # a fresh practice solve that looks copied earns nothing until a teacher clears it
+        from apps.integrity.practice import auto_hold
+
+        auto_hold(problem_id, new)
     refresh_daily(problem_id, None if user_ids is None else users)
     sync_practice_points(users)
 

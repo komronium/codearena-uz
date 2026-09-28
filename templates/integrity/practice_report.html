@@ -5,7 +5,7 @@
 <div class="mb-6 flex flex-wrap items-start justify-between gap-3">
   <div>
     <h1 class="ca-page-title">Mashq nazorati</h1>
-    <p class="mt-1 max-w-2xl text-sm text-mute">AI yoki boshqa joydan ko‘chirilganga o‘xshagan mashq yechimlari. Bu dalil emas — kodni ochib ko‘ring va o‘zingiz qaror qiling. Tasdiqlangan yechim uchun amaliyot bali berilmaydi; qarorni istalgan payt bekor qilish mumkin.</p>
+    <p class="mt-1 max-w-2xl text-sm text-mute">AI yoki boshqa joydan ko‘chirilganga o‘xshagan mashq yechimlari. Bu dalil emas — kodni ochib ko‘ring va o‘zingiz qaror qiling. Tasdiqlangan yechim uchun amaliyot bali berilmaydi; qarorni istalgan payt bekor qilish mumkin. Belgilari juda kuchli yechimlarning bali siz ko‘rib chiqquningizcha avtomatik ushlab turiladi.</p>
   </div>
   <form method="get" class="flex flex-wrap items-center gap-2">
     {% if groups %}
@@ -34,7 +34,7 @@
   <thead><tr><th>Talaba</th><th>Masala</th><th>Nima ko‘rindi</th><th class="text-right">Xavf</th><th class="hidden md:table-cell">Yechilgan</th><th class="text-right">Qaror</th></tr></thead>
   <tbody>
   {% for r in rows %}{% with s=r.solve %}
-  <tr{% if r.review %} class="opacity-70"{% endif %}>
+  <tr{% if not r.waiting %} class="opacity-70"{% endif %}>
     <td>{% include "accounts/_user.html" with u=s.user tier=False %}</td>
     <td class="min-w-40"><a class="ca-link" href="{% url 'problems:detail' s.problem.slug %}">{{ s.problem.title }}</a>
       <span class="ca-diff ca-diff-{{ s.problem.difficulty }} ml-1 text-xs">{{ s.problem.get_difficulty_display }}</span></td>
@@ -45,12 +45,13 @@
     <td class="text-right whitespace-nowrap">
       <form method="post" action="{% url 'integrity:practice_decide' s.user_id s.problem_id %}" class="inline-flex flex-wrap justify-end gap-1.5">{% csrf_token %}
         <input type="hidden" name="back" value="{{ request.get_full_path }}">
-        {% if r.review %}
+        {% if r.review and not r.waiting %}
           <span class="text-xs font-semibold {% if r.review.confirmed %}text-bad{% else %}text-ok{% endif %}">{% if r.review.confirmed %}Tasdiqlangan · ball yo‘q{% else %}Shubha yo‘q{% endif %}</span>
           <button name="decision" value="undo" class="ca-btn ca-btn-ghost !px-2 !py-1 text-xs">Bekor qilish</button>
         {% else %}
+          {% if r.review %}<span class="w-full text-right text-xs font-semibold text-warn" title="Belgilar kuchli bo‘lgani uchun tizim ballni siz qaror qilguncha ushlab turibdi">Avtomatik: ball ushlab turilibdi</span>{% endif %}
           <button name="decision" value="confirm" class="ca-btn ca-btn-ghost !px-2 !py-1 text-xs text-bad" title="Yechim talabaning o‘z ishi emas: amaliyot bali olib tashlanadi">Ko‘chirilgan</button>
-          <button name="decision" value="clear" class="ca-btn ca-btn-ghost !px-2 !py-1 text-xs" title="Kodni ko‘rdim, muammo yo‘q">Shubha yo‘q</button>
+          <button name="decision" value="clear" class="ca-btn ca-btn-ghost !px-2 !py-1 text-xs" title="Kodni ko‘rdim, muammo yo‘q{% if r.review %} — ball qaytariladi{% endif %}">Shubha yo‘q</button>
         {% endif %}
       </form>
     </td>
