@@ -609,8 +609,24 @@ def test_problem_list_and_profile_show_them(client, catalog):
     _solve(ali, catalog["m1"])
     client.force_login(ali)
     page = client.get(reverse("problems:list")).content.decode()
-    assert "Keyingi masala" in page
-    assert "Mavzular" in client.get(reverse("profile", args=["ali"])).content.decode()
+    assert "Siz uchun" in page
+    profile = client.get(reverse("profile", args=["ali"])).content.decode()
+    assert "Mavzular" in profile and "ca-skill is-started" in profile  # math: 1 of 3 solved
+
+
+@pytest.mark.django_db
+def test_random_problem_keeps_the_filters_and_skips_solved(client, catalog):
+    ali = User.objects.create_user("ali", password="x")
+    _solve(ali, catalog["m1"], catalog["m2"])
+    client.force_login(ali)
+    url = reverse("problems:list")
+    for _ in range(5):
+        assert client.get(url, {"tag": "math", "random": 1}).url == reverse("problems:detail", args=["m3"])
+    _solve(ali, catalog["m3"])
+    res = client.get(url, {"tag": "math", "random": 1})  # nothing left: back to the list, filters kept
+    assert res.url == f"{url}?tag=math"
+    anon = client.__class__()
+    assert anon.get(url, {"difficulty": "hard", "random": 1}).url == reverse("problems:detail", args=["dp4"])
 
 
 # ---- daily problem and streak -------------------------------------------------------------------

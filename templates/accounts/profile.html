@@ -136,18 +136,20 @@
   </div>
 </section>
 
-{% if skills %}
+{% if skill_groups %}
 <section class="mb-8">
   <h2 class="ca-section-title">Mavzular</h2>
-  <div class="ca-panel grid gap-x-8 gap-y-3 sm:grid-cols-2">
-    {% for r in skills %}
+  <div class="ca-panel space-y-4">
+    {% for kind, label, rows in skill_groups %}
     <div>
-      <div class="mb-1 flex items-baseline justify-between gap-2 text-sm">
-        <a class="ca-link truncate font-medium" href="{% url 'problems:list' %}?tag={{ r.tag.name|urlencode }}">{{ r.tag.name }}</a>
-        <span class="tabular text-xs text-mute">{{ r.solved }} / {{ r.total }}</span>
-      </div>
-      <div class="h-2 overflow-hidden rounded-full bg-ink/10" role="progressbar" aria-label="{{ r.tag.name }}" aria-valuemin="0" aria-valuemax="{{ r.total }}" aria-valuenow="{{ r.solved }}">
-        <div class="h-full rounded-full bg-accent" style="width: {{ r.pct }}%"></div>
+      <p class="mb-2 flex items-center gap-1.5 text-xs font-medium text-mute"><i data-lucide="{% if kind == 'sql' %}database{% else %}code{% endif %}" class="lu" aria-hidden="true"></i>{{ label }}</p>
+      {# a pill per topic, filled as far as it is solved; untouched ones stay quiet #}
+      <div class="ca-skills">
+        {% for r in rows %}
+        <a class="ca-skill{% if kind == 'sql' %} is-sql{% endif %}{% if r.solved == r.total %} is-done{% elif r.solved %} is-started{% endif %}" style="--p: {{ r.pct }}%" href="{% url 'problems:list' %}?tag={{ r.tag.name|urlencode }}" title="{{ r.tag.name }}: {{ r.total }} tadan {{ r.solved }} tasi yechilgan">
+          {% if r.solved == r.total %}<i data-lucide="check" class="lu" aria-hidden="true"></i>{% endif %}{{ r.tag.name }}<span class="ca-skill-n tabular">{{ r.solved }}/{{ r.total }}</span>
+        </a>
+        {% endfor %}
       </div>
     </div>
     {% endfor %}

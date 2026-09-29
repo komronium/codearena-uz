@@ -1,5 +1,6 @@
 import bleach
 import mistune
+from django.contrib import messages
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.db.models import Avg, Case, Count, F, IntegerField, OuterRef, Q, Subquery, Value, When
@@ -98,6 +99,21 @@ def suggest(request):
         for r in rows]})
 
 
+def _random_pick(request, problems, status):
+    """"Tasodifiy masala": one from what the filters leave, not yet solved (unless the
+    solved ones were asked for), outside a running contest."""
+    pool = problems.exclude(contests__end__gt=timezone.now())
+    if request.user.is_authenticated and status != "solved":
+        pool = pool.exclude(userproblemsolved__user=request.user)
+    slug = pool.order_by("?").values_list("slug", flat=True).first()
+    if slug:
+        return redirect("problems:detail", slug)
+    messages.info(request, "Bu filtrda yechilmagan masala qolmadi.")
+    params = request.GET.copy()
+    params.pop("random")
+    return redirect(f"{reverse('problems:list')}?{params.urlencode()}")
+
+
 def problem_list(request):
     visible = Problem.objects.filter(is_public=True).exclude(contests__start__gt=timezone.now())
     problems = visible
@@ -123,6 +139,8 @@ def problem_list(request):
     difficulty = request.GET.get("difficulty", "").strip()
     if difficulty in Problem.Difficulty.values:
         problems = problems.filter(difficulty=difficulty)
+    if "random" in request.GET:
+        return _random_pick(request, problems, status)
     problems = problems.prefetch_related("tags").annotate(
         attempts=Count("submissions", distinct=True),
         ac_count=Count("submissions", filter=Q(submissions__verdict="AC"), distinct=True),

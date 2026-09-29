@@ -15,7 +15,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
 from apps.contests.models import _UZ_MONTHS_SHORT, Participation
-from apps.problems.models import Problem
+from apps.problems.models import Problem, Tag
 from apps.problems.daily import streaks
 from apps.problems.skills import skill_map
 from apps.submissions.models import Submission
@@ -287,9 +287,16 @@ def profile(request, username):
         "rating_history": rating_history,
         "rating_chart": _rating_chart(rating_history) if rating_history else None,
         "activity": _activity_calendar(profile_user),
-        "skills": skill_map(profile_user),
+        "skill_groups": _skill_groups(profile_user),
         "streak": (cur_streak, best_streak),
     })
+
+
+def _skill_groups(user) -> list[tuple[str, str, list[dict]]]:
+    """skill_map split by topic kind (programming, SQL), empty kinds left out."""
+    rows = skill_map(user)
+    return [(kind, label, group) for kind, label in Tag.Kind.choices
+            if (group := [r for r in rows if r["tag"].kind == kind])]
 
 
 def honor(request):

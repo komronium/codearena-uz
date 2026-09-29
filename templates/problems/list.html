@@ -16,8 +16,12 @@
 </section>
 {% endif %}
 {% if next_picks %}
-<p class="ca-next-line"><span class="font-semibold text-ink">Keyingi masala</span>{% if picks_reason %} <a class="text-mute" href="{% querystring tag=picks_reason page=None %}">#{{ picks_reason }}</a>{% endif %}:
-  {% for p, reason in next_picks %}<a href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a>{% if not forloop.last %}<span aria-hidden="true"> · </span>{% endif %}{% endfor %}</p>
+<section class="ca-next-row" aria-label="Siz uchun keyingi masalalar">
+  <p class="ca-next-label"><i data-lucide="sparkles" class="lu" aria-hidden="true"></i>Siz uchun{% if picks_reason %} <a class="ca-chip" href="{% querystring tag=picks_reason page=None %}" title="Eng kam yechgan mavzuingiz">{{ picks_reason }}</a>{% endif %}</p>
+  <div class="ca-next-picks">
+    {% for p, reason in next_picks %}<a class="ca-next-pick" href="{% url 'problems:detail' p.slug %}" title="{{ p.get_difficulty_display }}"><span class="ca-level-dot ca-level-{{ p.difficulty }}" aria-hidden="true"></span>{{ p.title }}</a>{% endfor %}
+  </div>
+</section>
 {% endif %}
 
 <div class="ca-filterbar">
@@ -54,6 +58,7 @@
     </label>
     {% endif %}
     {% if q or selected_tag or selected_difficulty or selected_status or selected_kind %}<a href="{% url 'problems:list' %}" class="ca-btn ca-btn-ghost !px-2.5 !py-1.5 text-sm" title="Filtrni tozalash"><i data-lucide="x" class="lu" aria-hidden="true"></i><span class="hidden sm:inline">Tozalash</span></a>{% endif %}
+    <a href="{% querystring random=1 page=None %}" class="ca-btn ca-btn-ghost !px-2.5 !py-1.5 text-sm" title="Shu filtrdan tasodifiy {% if user.is_authenticated %}yechilmagan {% endif %}masala" rel="nofollow"><i data-lucide="shuffle" class="lu" aria-hidden="true"></i><span class="hidden sm:inline">Tasodifiy</span></a>
     {% if user.is_staff %}<a href="{% url 'moderation:submit' %}" class="ca-btn ca-btn-ghost !px-2.5 !py-1.5 text-sm"><i data-lucide="plus" class="lu" aria-hidden="true"></i><span class="hidden sm:inline">Masala</span></a>{% endif %}
   </form>
 </div>
