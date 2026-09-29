@@ -512,6 +512,8 @@ PROBLEMS = [
 
 class Command(BaseCommand):
     help = "Adds 25 Beginner/Easy practice problems (input/output, if-else, loops)."
+    problems = PROBLEMS  # later packs subclass this command with their own list
+    ml_mb = 256
 
     def add_arguments(self, parser):
         parser.add_argument("--author", default=None, help="Author username (default: first superuser)")
@@ -527,7 +529,7 @@ class Command(BaseCommand):
 
         created = 0
         with transaction.atomic():
-            for spec in PROBLEMS:
+            for spec in self.problems:
                 created += self._add(spec, author, public=not opts["hidden"])
             if opts["dry_run"]:
                 transaction.set_rollback(True)
@@ -547,7 +549,7 @@ class Command(BaseCommand):
         problem = Problem.objects.create(
             slug=spec["slug"], title=spec["title"], statement_md=spec["statement"],
             input_md=spec["input"], output_md=spec["output"], difficulty=spec["difficulty"],
-            tl_ms=1000, ml_mb=256, is_public=public, status=Problem.Status.APPROVED, author=author,
+            tl_ms=1000, ml_mb=self.ml_mb, is_public=public, status=Problem.Status.APPROVED, author=author,
         )
         problem.tags.set([Tag.objects.get_or_create(name=name)[0] for name in spec["tags"]])
         TestCase.objects.bulk_create(

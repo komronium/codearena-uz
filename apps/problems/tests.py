@@ -829,6 +829,28 @@ def test_practice_pack_adds_25_open_problems_once_and_repeats_nothing_on_the_por
     assert not seeded & {s["title"] for s in add_practice_pack_1.PROBLEMS}
 
 
+@pytest.mark.django_db
+def test_practice_pack_2_adds_30_classics_once_with_no_title_on_the_portal_twice():
+    from io import StringIO
+
+    from django.core.management import call_command
+
+    from apps.accounts.models import User
+    from apps.problems.management.commands import add_practice_pack_1, add_practice_pack_2
+    from apps.problems.models import Problem
+
+    User.objects.create_superuser("admin", password="x")
+    call_command("add_practice_pack_2", stdout=StringIO())
+    pack = Problem.objects.filter(slug__startswith="p2-")
+    assert pack.count() == 30 and not pack.exclude(is_public=True, ml_mb=64).exists()
+    assert sorted(pack.values_list("difficulty", flat=True)).count("beginner") == 10
+    assert all(p.testcases.count() >= 20 and p.testcases.filter(is_sample=True).count() == 2 for p in pack)
+    call_command("add_practice_pack_2", stdout=StringIO())  # re-run: nothing new
+    assert Problem.objects.filter(slug__startswith="p2-").count() == 30
+    titles = [s["title"] for s in add_practice_pack_2.PROBLEMS]
+    assert len(set(titles)) == 30 and not set(titles) & {s["title"] for s in add_practice_pack_1.PROBLEMS}
+
+
 def _solve_history(problem, tried, solved, prefix="s"):
     """`tried` students submitted to `problem`, the first `solved` of them with an AC."""
     from apps.submissions.models import Submission, UserProblemSolved
