@@ -871,3 +871,20 @@ def test_a_problem_added_mid_contest_gets_its_column_without_waiting_for_the_cac
     assert page.status_code == 200 and [cp.label for cp in page.context["problems"]] == ["A", "B", "C"]
     table = client.get(reverse("contests:standings", args=[contest.pk]))
     assert table.status_code == 200 and len(table.context["rows"][0]["cells"]) == 3
+
+
+@pytest.mark.django_db
+def test_add_class_contests_creates_two_contests_with_hidden_problems_once():
+    User.objects.create_superuser("admin", password="x")
+    call_command("add_class_contests", stdout=StringIO())
+    call_command("add_class_contests", stdout=StringIO())  # re-run: nothing new
+    assert Contest.objects.count() == 2
+    ca4, mini = Contest.objects.get(title="CodeArena #4"), Contest.objects.get(title="Mini Contest #1")
+    assert (timezone.localtime(ca4.start).strftime("%H:%M"), ca4.duration_label) == ("11:45", "1 soat")
+    assert timezone.localtime(mini.start).strftime("%H:%M") == "15:10"
+    assert [cp.points for cp in ca4.contest_problems.all()] == [100, 100, 100, 200, 200, 200, 300, 300]
+    assert [cp.label for cp in mini.contest_problems.all()] == list("ABCD")
+    problems = Problem.objects.filter(contests__in=[ca4, mini])
+    assert problems.count() == 12 and not problems.exclude(is_public=False, ml_mb=64).exists()
+    assert all(p.testcases.filter(is_sample=True).count() == 2 for p in problems)
+    assert all(p.testcases.count() >= 20 for p in problems.filter(slug__startswith="ca4-"))

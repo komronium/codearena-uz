@@ -258,6 +258,8 @@ PROBLEMS = [
 
 class Command(BaseCommand):
     help = "Adds the 10 Weekend Contest #1 problems (hidden) and attaches them to the contest as A..J."
+    ml_mb = 256
+    min_tests = 20
 
     def add_arguments(self, parser):
         parser.add_argument("--contest", default="Weekend Contest #1", help="Existing contest title")
@@ -314,13 +316,13 @@ class Command(BaseCommand):
             problem = Problem.objects.create(
                 slug=spec["slug"], title=spec["title"], statement_md=spec["statement"],
                 input_md=spec["input"], output_md=spec["output"], difficulty=spec["difficulty"],
-                tl_ms=spec.get("tl_ms", 1000), ml_mb=256, points=POINTS[spec["difficulty"]],
+                tl_ms=spec.get("tl_ms", 1000), ml_mb=self.ml_mb, points=POINTS[spec["difficulty"]],
                 is_public=False, status=Problem.Status.APPROVED, author=author,
             )
             for name in spec["tags"]:
                 problem.tags.add(Tag.objects.get_or_create(name=name)[0])
             inputs = spec["tests"](rng)
-            assert len(inputs) >= 20, spec["slug"]
+            assert len(inputs) >= self.min_tests, spec["slug"]
             TestCase.objects.bulk_create(
                 TestCase(problem=problem, input=inp.rstrip("\n") + "\n", expected=spec["solve"](inp),
                          is_sample=k < spec["samples"], order=k)
