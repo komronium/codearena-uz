@@ -19,6 +19,7 @@ STORAGES = {
 # or every login silently fails.
 if os.environ.get("USE_HTTPS", "0") == "1":
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    MIDDLEWARE.insert(0, "config.middleware.real_client_ip")
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
 
