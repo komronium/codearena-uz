@@ -5,6 +5,7 @@ from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Count, OuterRef, Q, Subquery
 from django.db.models.functions import Coalesce
+from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -13,7 +14,8 @@ from django.views.decorators.http import require_POST
 
 from apps.accounts.decorators import staff_required
 from apps.accounts.models import Group, User
-from apps.contests.models import Contest
+from apps.contests.models import Contest, Participation
+from apps.contests.rating import recalc_official, review_queue
 from apps.contests.services import reuse_reason
 from apps.problems.models import Problem, Tag, TestCase
 from apps.submissions.models import VERDICT_LABELS, Submission, TestResult, UserProblemSolved
@@ -403,6 +405,54 @@ def contest_apply_rating(request, pk):
     except CommandError as e:
         messages.error(request, f"Reyting hisoblanmadi: {e}")
     return redirect("moderation:contests")
+
+
+@staff_required
+def contest_official(request, pk):
+    """Official rating for one contest: the online top-N code check, then the apply button."""
+    contest = get_object_or_404(Contest, pk=pk)
+    queue = review_queue(contest)
+    return render(request, "moderation/contest_official.html", {
+        "contest": contest, "queue": queue,
+        "pending": sum(1 for r in queue if not r["participation"].reviewed_at),
+    })
+
+
+@staff_required
+@require_POST
+def contest_review(request, pk, user_id):
+    """Mark that a finisher explained their code (an explicit state, like disqualify)."""
+    want = {"1": True, "0": False}.get(request.POST.get("reviewed"))
+    if want is None:
+        return HttpResponseBadRequest("reviewed must be 0 or 1")
+    p = get_object_or_404(Participation.objects.select_related("contest", "user"), contest_id=pk, user_id=user_id)
+    if bool(p.reviewed_at) != want:
+        p.reviewed_at = timezone.now() if want else None
+        p.save(update_fields=["reviewed_at"])
+        if want:
+            audit.record(request, audit.Action.OFFICIAL_REVIEW, contest=p.contest, subject=p.user)
+    return redirect("moderation:contest_official", pk)
+
+
+@staff_required
+@require_POST
+def contest_apply_official(request, pk):
+    contest = get_object_or_404(Contest, pk=pk)
+    if not contest.is_official or not contest.has_ended:
+        messages.error(request, "Faqat tugagan rasmiy musobaqa uchun.")
+        return redirect("moderation:contest_official", pk)
+    pending = sum(1 for r in review_queue(contest) if not r["participation"].reviewed_at)
+    if pending:
+        messages.error(request, f"{pending} ta ishtirokchi hali tekshirilmagan.")
+        return redirect("moderation:contest_official", pk)
+    with transaction.atomic():
+        if contest.official_applied_at is None:
+            contest.official_applied_at = timezone.now()
+            contest.save(update_fields=["official_applied_at"])
+        recalc_official()
+        audit.record(request, audit.Action.OFFICIAL_APPLY, contest=contest)
+    messages.success(request, "Rasmiy reyting qo‘llandi.")
+    return redirect("moderation:contest_official", pk)
 
 
 # ---- users -------------------------------------------------------------------

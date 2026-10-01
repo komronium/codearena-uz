@@ -147,9 +147,15 @@ def disqualify(request, pk, user_id):
                 refresh_solves(problem_id, [p.user_id])
         if p.contest.rating_applied:
             _rerate_after_dq(request, p.contest)
+        if p.contest.official_applied_at:
+            rating.recalc_official()
+            audit.record(request, audit.Action.RATING_RECOMPUTE, contest=p.contest, note="rasmiy")
+            messages.success(request, "Rasmiy reyting qayta hisoblandi.")
     cache.delete(f"contest-standings-{pk}")
     if request.POST.get("back") == "report":
         return redirect("integrity:contest_report", pk)
+    if request.POST.get("back") == "official":
+        return redirect("moderation:contest_official", pk)
     return redirect("contests:standings", pk=pk)
 
 

@@ -25,6 +25,13 @@ class Contest(models.Model):
     allowed_ip_prefix = models.CharField(max_length=50, blank=True)
     require_group = models.ForeignKey(Group, null=True, blank=True, on_delete=models.SET_NULL)
     rating_applied = models.BooleanField(default=False)
+    # Supervised (lab, or online with a top-N code check): counts toward the official rating
+    # once staff apply it (apps.contests.rating.recalc_official).
+    is_official = models.BooleanField(default=False)
+    official_applied_at = models.DateTimeField(null=True, blank=True)
+    # Online official contests: this many top verified finishers must explain their code to staff
+    # before the official rating is applied. Ignored for lab contests (allowed_ip_prefix); 0 = no check.
+    review_top_n = models.PositiveSmallIntegerField(default=10)
     # Set by staff publishing the ended contest; from then on participants' contest ACs
     # count as practice solves (apps.submissions.solves).
     published_at = models.DateTimeField(null=True, blank=True)
@@ -88,6 +95,10 @@ class Participation(models.Model):
     rank = models.IntegerField(null=True, blank=True)
     rating_before = models.IntegerField(null=True, blank=True)
     rating_after = models.IntegerField(null=True, blank=True)
+    official_before = models.IntegerField(null=True, blank=True)
+    official_after = models.IntegerField(null=True, blank=True)
+    # Staff saw this finisher explain their code (online official contests, apps.contests.rating.review_queue)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
     registered_at = models.DateTimeField(auto_now_add=True)
     # Set by staff for cheating: can't submit, ranked last (so rating drops), shown struck out.
     disqualified = models.BooleanField(default=False)

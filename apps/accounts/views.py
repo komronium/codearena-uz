@@ -321,3 +321,36 @@ def honor(request):
             nxt = "/"
         return redirect(nxt)
     return render(request, "accounts/honor.html", {"next": request.GET.get("next", "")})
+
+
+@login_required
+@require_POST
+def verify_user(request, user_id):
+    """A teacher (of one of the student's groups) or staff confirms this is the real student.
+    Only verified users get an official rating, so it is rebuilt either way."""
+    from django.core.exceptions import PermissionDenied
+    from django.db import transaction
+    from django.http import HttpResponseBadRequest
+
+    from apps.classroom.access import teaches
+    from apps.contests.rating import recalc_official
+    from apps.integrity import audit
+
+    student = get_object_or_404(User, pk=user_id)
+    if not (request.user.is_staff or teaches(request.user, student.pk)):
+        raise PermissionDenied
+    want = {"1": True, "0": False}.get(request.POST.get("verified"))
+    if want is None:
+        return HttpResponseBadRequest("verified must be 0 or 1")
+    if bool(student.verified_at) != want:
+        with transaction.atomic():
+            student.verified_at = timezone.now() if want else None
+            student.verified_by = request.user if want else None
+            student.verified_note = request.POST.get("note", "").strip()[:200] if want else ""
+            student.save(update_fields=["verified_at", "verified_by", "verified_note"])
+            recalc_official()
+            audit.record(request, audit.Action.VERIFY if want else audit.Action.UNVERIFY,
+                         subject=student, note=student.verified_note)
+        messages.success(request, f"{student.username}: shaxs {'tasdiqlandi' if want else 'tasdig‘i bekor qilindi'}.")
+    nxt = _safe_next(request)
+    return redirect(nxt) if nxt else redirect("profile", student.username)

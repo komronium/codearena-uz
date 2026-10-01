@@ -31,6 +31,9 @@ urlpatterns = [
     path("contests/<int:pk>/delete/", views.contest_delete, name="contest_delete"),
     path("contests/<int:pk>/apply-rating/", views.contest_apply_rating, name="contest_apply_rating"),
     path("contests/<int:pk>/publish/", views.contest_publish, name="contest_publish"),
+    path("contests/<int:pk>/official/", views.contest_official, name="contest_official"),
+    path("contests/<int:pk>/official/apply/", views.contest_apply_official, name="contest_apply_official"),
+    path("contests/<int:pk>/official/review/<int:user_id>/", views.contest_review, name="contest_review"),
 
     path("submissions/", views.submissions, name="submissions"),
     path("users/", views.users, name="users"),

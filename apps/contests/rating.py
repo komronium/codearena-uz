@@ -4,7 +4,7 @@ from django.db.models import F
 
 from apps.accounts.models import User
 
-from .models import Participation
+from .models import Contest, Participation
 from .standings import compute_standings
 
 # Tuned for a classroom pool where everyone starts at 1200. Rank-based Elo (as on
@@ -38,33 +38,46 @@ def rating_delta(seed: float, rank: float, n: int, k: int, solved_frac: float = 
     return round(elo * factor) + PARTICIPATION_BONUS
 
 
+def _rated_rows(contest) -> list:
+    # Registered but never submitted = didn't take part; rated only if you played
+    # (Codeforces/AtCoder rule). Disqualified stays in: ranking last is the penalty.
+    return [r for r in compute_standings(contest) if r["attempted"] or r["disqualified"]]
+
+
+def _new_ratings(contest, rows, ratings, past_rated) -> list[int]:
+    """Elo over `rows` (standings order), each starting from `ratings[i]` with `past_rated[i]`
+    earlier rated contests behind it."""
+    # Ranks are recounted inside `rows`, which may be a subset of the standings (official
+    # rating skips unverified users). Tied rows get the tie group's mean position
+    # (AtCoder convention) so a group at 3rd-6th is rated as 4.5, not all as 3.
+    first, size = {}, {}
+    for i, r in enumerate(rows):
+        first.setdefault(r["rank"], i + 1)
+        size[r["rank"]] = size.get(r["rank"], 0) + 1
+    max_score = sum(cp.points for cp in contest.contest_problems.all()) or 1
+    out = []
+    for i, row in enumerate(rows):
+        k = K_NEW if past_rated[i] < 10 else K_ESTABLISHED
+        position = first[row["rank"]] + (size[row["rank"]] - 1) / 2
+        out.append(ratings[i] + rating_delta(_expected_seed(i, ratings), position, len(rows), k,
+                                             row["score"] / max_score))
+    return out
+
+
 def apply_rating(contest) -> bool:
     """Rate a finished contest once; False if it was already applied."""
     if contest.rating_applied:
         return False
-    # Registered but never submitted = didn't take part; rated only if you played
-    # (Codeforces/AtCoder rule). Disqualified stays in: ranking last is the penalty.
-    rows = [r for r in compute_standings(contest) if r["attempted"] or r["disqualified"]]
+    rows = _rated_rows(contest)
     users = [r["user"] for r in rows]
     for u in users:
         u.refresh_from_db(fields=["rating"])  # standings may come from an older read
     ratings = [u.rating for u in users]
-    # Tied rows share a rank in standings; for Elo use the tie group's mean position
-    # (AtCoder convention) so a group at 3rd-6th is rated as 4.5, not all as 3.
-    tie_size = {}
-    for r in rows:
-        tie_size[r["rank"]] = tie_size.get(r["rank"], 0) + 1
-    elo_rank = {rank: rank + (size - 1) / 2 for rank, size in tie_size.items()}
-    max_score = sum(cp.points for cp in contest.contest_problems.all()) or 1
+    past = [Participation.objects.filter(user=u, rating_after__isnull=False).count() for u in users]
+    new = _new_ratings(contest, rows, ratings, past)
 
     with transaction.atomic():
-        for i, (row, user) in enumerate(zip(rows, users)):
-            seed = _expected_seed(i, ratings)
-            past_rated = Participation.objects.filter(user=user, rating_after__isnull=False).count()
-            k = K_NEW if past_rated < 10 else K_ESTABLISHED
-            new_rating = user.rating + rating_delta(seed, elo_rank[row["rank"]], len(rows), k,
-                                                    row["score"] / max_score)
-
+        for row, user, new_rating in zip(rows, users, new):
             p = row["participation"]
             p.rank, p.score, p.penalty = row["rank"], row["score"], row["penalty"]
             p.rating_before, p.rating_after = user.rating, new_rating
@@ -76,6 +89,41 @@ def apply_rating(contest) -> bool:
         contest.rating_applied = True
         contest.save(update_fields=["rating_applied"])
     return True
+
+
+OFFICIAL_START = 1200
+
+
+def review_queue(contest) -> list:
+    """Standings rows an online official contest must check before its official rating applies:
+    the top `review_top_n` verified, not disqualified finishers. A DQ pulls the next one in."""
+    if contest.allowed_ip_prefix or not contest.review_top_n:
+        return []
+    rows = [r for r in _rated_rows(contest) if r["user"].verified_at and not r["disqualified"]]
+    return rows[:contest.review_top_n]
+
+
+def recalc_official() -> None:
+    """Rebuild every official rating from scratch: applied official contests in end order,
+    verified users only. A full replay, so a late DQ, a late verification or un-marking a
+    contest all come out right with no rollback bookkeeping."""
+    current: dict[int, int] = {}
+    played: dict[int, int] = {}
+    with transaction.atomic():
+        Participation.objects.filter(official_after__isnull=False).update(official_before=None, official_after=None)
+        contests = Contest.objects.filter(is_official=True, official_applied_at__isnull=False).order_by("end", "pk")
+        for contest in contests:
+            rows = [r for r in _rated_rows(contest) if r["user"].verified_at]
+            ratings = [current.get(r["user"].pk, OFFICIAL_START) for r in rows]
+            new = _new_ratings(contest, rows, ratings, [played.get(r["user"].pk, 0) for r in rows])
+            for row, before, after in zip(rows, ratings, new):
+                p = row["participation"]
+                p.official_before, p.official_after = before, after
+                p.save(update_fields=["official_before", "official_after"])
+                current[p.user_id] = after
+                played[p.user_id] = played.get(p.user_id, 0) + 1
+        User.objects.exclude(pk__in=current).filter(official_rating__isnull=False).update(official_rating=None)
+        User.objects.bulk_update([User(pk=pk, official_rating=r) for pk, r in current.items()], ["official_rating"])
 
 
 def is_latest(contest) -> bool:

@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}{{ contest.title }} — rasmiy reyting{% endblock %}
+{% block content %}
+<div class="mb-6">
+  <a class="ca-link mb-2 inline-block text-sm text-mute" href="{% url 'moderation:contests' %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>Musobaqalar</a>
+  <h1 class="ca-page-title">{{ contest.title }} — rasmiy reyting</h1>
+</div>
+
+{% if not contest.is_official %}
+<div class="ca-alert mb-4">Bu musobaqa rasmiy emas. <a class="ca-link" href="{% url 'moderation:contest_edit' contest.pk %}">Tahrirlashda</a> «Rasmiy musobaqa» belgisini qo‘ying.</div>
+{% elif contest.allowed_ip_prefix %}
+<p class="mb-4 text-sm text-mute">Auditoriya musobaqasi (IP {{ contest.allowed_ip_prefix }}…): kod tekshiruvi shart emas. Cheaterlarni diskvalifikatsiya qilib, reytingni qo‘llang.</p>
+{% elif not contest.review_top_n %}
+<p class="mb-4 text-sm text-mute">Kod tekshiruvi o‘chirilgan (top-N = 0).</p>
+{% else %}
+<p class="mb-4 text-sm text-mute">Tasdiqlangan ishtirokchilardan eng yuqori {{ contest.review_top_n }} tasi o‘z kodini tushuntirishi kerak. Tushuntira olmasa — diskvalifikatsiya, keyingisi ro‘yxatga kiradi.</p>
+<ul class="ca-rows mb-6">
+  {% for r in queue %}
+  <li class="ca-row">
+    <div class="ca-row-main">
+      <div class="ca-row-title"><span class="tabular text-xs text-mute">#{{ r.rank }}</span>{% include "accounts/_user.html" with u=r.user tier=False %}</div>
+      <div class="ca-row-meta"><span class="tabular">{{ r.score }} ball</span>
+        <a class="ca-link" href="{% url 'moderation:submissions' %}?user={{ r.user.username|urlencode }}&contest={{ contest.pk }}">Kodlari</a>
+        {% if r.participation.reviewed_at %}<span class="text-ok"><i data-lucide="check" class="lu" aria-hidden="true"></i>Tushuntirdi · {{ r.participation.reviewed_at|date:"d.m H:i" }}</span>{% else %}<span class="text-warn">Tekshirilmagan</span>{% endif %}
+      </div>
+    </div>
+    <div class="ca-row-side">
+      <form method="post" action="{% url 'moderation:contest_review' contest.pk r.user.pk %}">{% csrf_token %}
+        <input type="hidden" name="reviewed" value="{% if r.participation.reviewed_at %}0{% else %}1{% endif %}">
+        <button class="ca-btn {% if r.participation.reviewed_at %}ca-btn-ghost{% else %}ca-btn-primary{% endif %} !py-1.5 text-xs">{% if r.participation.reviewed_at %}Bekor qilish{% else %}<i data-lucide="check" class="lu" aria-hidden="true"></i>Tushuntirdi{% endif %}</button>
+      </form>
+      <form method="post" action="{% url 'contests:disqualify' contest.pk r.user.pk %}" onsubmit="return confirm('{{ r.user.username|escapejs }} diskvalifikatsiya qilinadi. Davom etasizmi?');">{% csrf_token %}
+        <input type="hidden" name="disqualified" value="1"><input type="hidden" name="back" value="official">
+        <input type="hidden" name="reason" value="Kodini tushuntira olmadi">
+        <button class="ca-btn ca-btn-ghost !py-1.5 text-xs text-bad"><i data-lucide="ban" class="lu" aria-hidden="true"></i>Diskvalifikatsiya</button>
+      </form>
+    </div>
+  </li>
+  {% empty %}
+  <li class="ca-empty">Rasmiy hisobga kiradigan (tasdiqlangan) ishtirokchi yo‘q.</li>
+  {% endfor %}
+</ul>
+{% endif %}
+
+{% if contest.is_official %}
+<form method="post" action="{% url 'moderation:contest_apply_official' contest.pk %}" class="flex flex-wrap items-center gap-3">{% csrf_token %}
+  <button class="ca-btn ca-btn-primary"{% if pending or not contest.has_ended %} disabled{% endif %}><i data-lucide="trending-up" class="lu" aria-hidden="true"></i>{% if contest.official_applied_at %}Qayta hisoblash{% else %}Rasmiy reytingni qo‘llash{% endif %}</button>
+  <span class="text-sm text-mute">{% if not contest.has_ended %}Musobaqa hali tugamagan.{% elif pending %}{{ pending }} ta ishtirokchi hali tekshirilmagan.{% elif contest.official_applied_at %}Qo‘llangan: {{ contest.official_applied_at|date:"d.m.Y H:i" }}{% endif %}</span>
+</form>
+{% endif %}
+{% endblock %}

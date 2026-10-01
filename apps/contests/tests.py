@@ -888,3 +888,180 @@ def test_add_class_contests_creates_two_contests_with_hidden_problems_once():
     assert problems.count() == 12 and not problems.exclude(is_public=False, ml_mb=64).exists()
     assert all(p.testcases.filter(is_sample=True).count() == 2 for p in problems)
     assert all(p.testcases.count() >= 20 for p in problems.filter(slug__startswith="ca4-"))
+
+
+# ---- official rating ------------------------------------------------------------------------------
+
+def _official(title, hours_ago, problem, python, users_solving, users_trying=()):
+    c = _rated_contest(title, hours_ago, problem, python, users_solving, users_trying)
+    Contest.objects.filter(pk=c.pk).update(is_official=True, official_applied_at=timezone.now())
+    return c
+
+
+def _verified(*names):
+    return [User.objects.create_user(n, password="x", verified_at=timezone.now()) for n in names]
+
+
+@pytest.mark.django_db
+def test_recalc_official_rates_only_verified_users_and_reranks_without_the_rest(problem_a, python):
+    from .rating import recalc_official
+
+    ali, bob = _verified("ali", "bob")
+    anon = User.objects.create_user("anon", password="x")  # not verified: open rating only
+    c = _official("Lab", 1, problem_a, python, [anon, ali], [bob])
+    recalc_official()
+
+    for u in (ali, bob, anon):
+        u.refresh_from_db()
+    assert anon.official_rating is None and anon.rating == 1200
+    rows = {p.user_id: p for p in Participation.objects.filter(contest=c)}
+    assert rows[anon.pk].official_after is None
+    # ali was 2nd overall but 1st of the verified pair: a 2-person win, not a mid-table result
+    assert rows[ali.pk].official_before == 1200 and ali.official_rating == rows[ali.pk].official_after > 1200
+    assert bob.official_rating < 1200
+
+
+@pytest.mark.django_db
+def test_recalc_official_replays_in_end_order_and_is_repeatable(problem_a, python):
+    from .rating import recalc_official
+
+    ali, bob = _verified("ali", "bob")
+    first = _official("First", 10, problem_a, python, [ali], [bob])
+    second = _official("Second", 1, problem_a, python, [bob], [ali])
+    Contest.objects.create(title="Not applied", is_official=True, start=first.start, end=first.end)
+    recalc_official()
+    once = dict(User.objects.values_list("username", "official_rating"))
+    recalc_official()
+
+    assert dict(User.objects.values_list("username", "official_rating")) == once
+    p1 = Participation.objects.get(contest=first, user=ali)
+    p2 = Participation.objects.get(contest=second, user=ali)
+    assert p2.official_before == p1.official_after  # the chain carries from the older contest
+
+
+@pytest.mark.django_db
+def test_recalc_official_drops_a_contest_that_is_no_longer_official(problem_a, python):
+    from .rating import recalc_official
+
+    ali, bob = _verified("ali", "bob")
+    c = _official("Lab", 1, problem_a, python, [ali], [bob])
+    recalc_official()
+    Contest.objects.filter(pk=c.pk).update(is_official=False)
+    call_command("recalc_official", stdout=StringIO())
+
+    ali.refresh_from_db()
+    assert ali.official_rating is None
+    assert Participation.objects.get(contest=c, user=ali).official_after is None
+
+
+@pytest.fixture
+def staff_client(client, db):
+    client.force_login(User.objects.create_user("boss", password="x", is_staff=True))
+    return client
+
+
+def _online_official(problem, python, solving, trying=(), top_n=2):
+    c = _rated_contest("Online", 1, problem, python, solving, trying)
+    Contest.objects.filter(pk=c.pk).update(is_official=True, review_top_n=top_n)
+    c.refresh_from_db()
+    return c
+
+
+@pytest.mark.django_db
+def test_online_official_needs_top_n_explained_before_apply(staff_client, problem_a, python):
+    from apps.integrity.models import AuditEntry
+
+    ali, bob, zarina = _verified("ali", "bob", "zarina")
+    anon = User.objects.create_user("anon", password="x")
+    c = _online_official(problem_a, python, [anon, ali, bob], [zarina])
+    page = reverse("moderation:contest_official", args=[c.pk])
+    apply = reverse("moderation:contest_apply_official", args=[c.pk])
+
+    body = staff_client.get(page).content.decode()
+    assert "ali" in body and "bob" in body and "zarina" not in body  # top 2 of the verified, anon skipped
+    r = staff_client.post(apply, follow=True)
+    assert "2 ta ishtirokchi hali tekshirilmagan" in r.content.decode()
+    c.refresh_from_db()
+    assert c.official_applied_at is None
+
+    staff_client.post(reverse("moderation:contest_review", args=[c.pk, ali.pk]), {"reviewed": "1"})
+    # bob can't explain his code: DQ pulls zarina into the top 2, who must be checked too
+    staff_client.post(reverse("contests:disqualify", args=[c.pk, bob.pk]), {"disqualified": "1", "back": "official"})
+    assert "zarina" in staff_client.get(page).content.decode()
+    staff_client.post(apply)
+    c.refresh_from_db()
+    assert c.official_applied_at is None
+
+    staff_client.post(reverse("moderation:contest_review", args=[c.pk, zarina.pk]), {"reviewed": "1"})
+    staff_client.post(apply)
+    c.refresh_from_db()
+    ali.refresh_from_db()
+    assert c.official_applied_at is not None and ali.official_rating > 1200
+    assert AuditEntry.objects.filter(contest=c, action="official_review").count() == 2
+    assert AuditEntry.objects.filter(contest=c, action="official_apply").exists()
+
+
+@pytest.mark.django_db
+def test_lab_contest_and_top_n_zero_apply_without_review(staff_client, problem_a, python):
+    ali, bob = _verified("ali", "bob")
+    lab = _online_official(problem_a, python, [ali], [bob])
+    Contest.objects.filter(pk=lab.pk).update(allowed_ip_prefix="10.0.")
+    staff_client.post(reverse("moderation:contest_apply_official", args=[lab.pk]))
+    lab.refresh_from_db()
+    assert lab.official_applied_at is not None
+
+    old = _online_official(problem_a, python, [bob], [ali], top_n=0)  # a past contest marked afterwards
+    staff_client.post(reverse("moderation:contest_apply_official", args=[old.pk]))
+    old.refresh_from_db()
+    assert old.official_applied_at is not None
+
+
+@pytest.mark.django_db
+def test_apply_official_refuses_unofficial_or_running_contest(staff_client, contest):
+    staff_client.post(reverse("moderation:contest_apply_official", args=[contest.pk]))
+    Contest.objects.filter(pk=contest.pk).update(is_official=True)
+    staff_client.post(reverse("moderation:contest_apply_official", args=[contest.pk]))
+    contest.refresh_from_db()
+    assert contest.official_applied_at is None
+
+
+@pytest.mark.django_db
+def test_dq_after_official_apply_rebuilds_official_rating(staff_client, problem_a, python):
+    cheat, ali = _verified("cheat", "ali")
+    c = _official("Lab", 1, problem_a, python, [cheat, ali])
+    from .rating import recalc_official
+    recalc_official()
+    cheat.refresh_from_db()
+    assert cheat.official_rating > 1200
+
+    r = staff_client.post(reverse("contests:disqualify", args=[c.pk, cheat.pk]), {"disqualified": "1"}, follow=True)
+    cheat.refresh_from_db()
+    assert cheat.official_rating < 1200
+    assert "Rasmiy reyting qayta hisoblandi" in r.content.decode()
+
+
+@pytest.mark.django_db
+def test_teacher_verifies_own_student_and_past_official_contest_counts(client, problem_a, python):
+    from apps.accounts.models import Group
+    from apps.integrity.models import AuditEntry
+
+    teacher = User.objects.create_user("ustoz", password="x", role="teacher")
+    stranger = User.objects.create_user("begona", password="x", role="teacher")
+    (ali,) = _verified("ali")
+    student = User.objects.create_user("talaba", password="x")
+    Group.objects.create(name="CS-1", teacher=teacher).members.add(student)
+    _official("Lab", 1, problem_a, python, [student], [ali])
+    url = reverse("verify_user", args=[student.pk])
+
+    client.force_login(stranger)
+    assert client.post(url, {"verified": "1"}).status_code == 403
+    client.force_login(teacher)
+    client.post(url, {"verified": "1", "note": "Pasport ko‘rildi"})
+    student.refresh_from_db()
+    assert student.verified_by == teacher and student.verified_note == "Pasport ko‘rildi"
+    assert student.official_rating > 1200  # the lab contest before verification now counts
+    assert AuditEntry.objects.filter(action="verify", subject=student, actor=teacher).exists()
+
+    client.post(url, {"verified": "0"})
+    student.refresh_from_db()
+    assert student.verified_at is None and student.official_rating is None

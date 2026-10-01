@@ -83,6 +83,10 @@ class AuditEntry(models.Model):
         PROBLEM_DELETE = "problem_delete", "Masala o‘chirildi"
         CONTEST_DELETE = "contest_delete", "Musobaqa o‘chirildi"
         USER_DELETE = "user_delete", "Foydalanuvchi o‘chirildi"
+        VERIFY = "verify", "Shaxsi tasdiqlandi"
+        UNVERIFY = "unverify", "Shaxs tasdig‘i bekor"
+        OFFICIAL_REVIEW = "official_review", "Kodini tushuntirdi"
+        OFFICIAL_APPLY = "official_apply", "Rasmiy reyting qo‘llandi"
 
     actor = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="+")
     action = models.CharField(max_length=20, choices=Action.choices)

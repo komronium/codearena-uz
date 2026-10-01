@@ -14,6 +14,8 @@ class User(AbstractUser):
     rating = models.IntegerField(default=1200, db_index=True)
     practice_points = models.IntegerField(default=0, db_index=True)
     duel_rating = models.IntegerField(default=1200)  # 1v1 duels only (apps.classroom.duels)
+    # From supervised contests only (apps.contests.rating.recalc_official); None until the first one.
+    official_rating = models.IntegerField(null=True, blank=True, db_index=True)
     role = models.CharField(max_length=10, choices=Role.choices, default=Role.STUDENT)
     avatar = models.ImageField(upload_to="avatars/", blank=True, null=True)
     location = models.CharField(max_length=100, blank=True)
@@ -27,6 +29,12 @@ class User(AbstractUser):
     seen_tier = models.CharField(max_length=30, blank=True)
     # when the user promised to submit only their own work (accounts:honor); asked once
     honor_pledged_at = models.DateTimeField(null=True, blank=True)
+    # A teacher or admin confirmed this is the real student; only verified users get an official rating
+    verified_at = models.DateTimeField(null=True, blank=True)
+    verified_by = models.ForeignKey(
+        "self", null=True, blank=True, on_delete=models.SET_NULL, related_name="verified_users",
+    )
+    verified_note = models.CharField(max_length=200, blank=True)
 
 
 _CODE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"

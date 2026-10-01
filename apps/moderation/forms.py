@@ -146,15 +146,21 @@ class _DateTimeLocal(forms.DateTimeInput):
 class ContestForm(ModelForm):
     class Meta:
         model = Contest
-        fields = ["title", "description_md", "start", "end", "is_rated", "allowed_ip_prefix", "require_group"]
+        fields = ["title", "description_md", "start", "end", "is_rated", "is_official", "review_top_n",
+                  "allowed_ip_prefix", "require_group"]
         widgets = {
             "title": forms.TextInput(attrs=_CA_INPUT),
             "description_md": forms.Textarea(attrs={**_MD, "rows": 4}),
             "start": _DateTimeLocal(),
             "end": _DateTimeLocal(),
             "allowed_ip_prefix": forms.TextInput(attrs={**_CA_INPUT, "placeholder": "masalan 10.0."}),
+            "review_top_n": forms.NumberInput(attrs={**_CA_INPUT, "min": 0, "max": 100}),
             "require_group": forms.Select(attrs={"class": "ca-select"}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["review_top_n"].required = False
 
     def clean(self):
         data = super().clean()
@@ -163,6 +169,11 @@ class ContestForm(ModelForm):
         elif self.instance.pk is None and data.get("end") and data["end"] <= timezone.now():
             self.add_error("end", "Tugash vaqti allaqachon o'tib ketgan — sana va yilni tekshiring.")
         return data
+
+    def clean_review_top_n(self):
+        # left empty = the model default, not a validation error on an otherwise filled form
+        value = self.cleaned_data.get("review_top_n")
+        return 10 if value is None else value
 
 
 class BaseContestProblemFormSet(BaseInlineFormSet):
