@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}{{ plan.title }} — o‘quv reja{% endblock %}
+{% block content %}
+<header class="mb-8">
+  <a class="ca-link mb-3 inline-block text-sm text-mute" href="{% url 'learn:hub' %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>O‘rganish</a>
+  <div class="flex flex-wrap items-start gap-4">
+    <span class="ca-tile-icon !h-12 !w-12 shrink-0"><i data-lucide="{{ plan.icon }}" class="lu" aria-hidden="true"></i></span>
+    <div class="min-w-0 flex-1">
+      <h1 class="ca-page-title">{{ plan.title }}</h1>
+      <p class="mt-2 flex flex-wrap items-center gap-2 text-sm text-mute">
+        <span class="ca-diff ca-diff-{{ plan.level }}">{{ plan.get_level_display }}</span>
+        <span>{{ progress.total }} ta masala · {{ sections|length }} bo‘lim</span>
+        {% if plan.in_quest %}<span class="ca-chip"><i data-lucide="map" class="lu mr-1" aria-hidden="true"></i>Yo‘l bosqichi</span>{% endif %}
+        {% if not plan.is_public %}<span class="ca-chip text-mute">Yashirin</span>{% endif %}
+        {% if user.is_staff %}<a class="ca-link" href="{% url 'moderation:plan_edit' plan.pk %}"><i data-lucide="pencil" class="lu mr-1" aria-hidden="true"></i>Tahrirlash</a>{% endif %}
+      </p>
+    </div>
+  </div>
+  {% if description_html %}<div class="prose mt-4 max-w-3xl">{{ description_html|safe }}</div>{% endif %}
+  {% if user.is_authenticated %}
+  <div class="mt-5 flex max-w-xl items-center gap-3">
+    <div class="ca-progress flex-1{% if progress.completed %} ca-progress-ok{% endif %}" role="progressbar" aria-valuenow="{{ progress.pct }}" aria-valuemin="0" aria-valuemax="100" aria-label="Reja bajarilishi"><span style="width: {{ progress.pct }}%"></span></div>
+    <span class="tabular text-sm"><b>{{ progress.done }}/{{ progress.total }}</b>{% if progress.completed %} · <span class="text-ok">tugatildi</span>{% endif %}</span>
+  </div>
+  {% endif %}
+</header>
+
+{% for s in sections %}
+<section class="mb-8" aria-labelledby="sec-{{ forloop.counter }}">
+  <div class="mb-3 flex items-baseline justify-between gap-3">
+    <h2 id="sec-{{ forloop.counter }}" class="ca-section-title !mb-0"><span class="mr-2 font-mono text-sm text-accent">{{ forloop.counter|stringformat:"02d" }}</span>{{ s.section.title }}</h2>
+    {% if user.is_authenticated %}<span class="tabular text-xs text-mute">{{ s.done }}/{{ s.problems|length }}</span>{% endif %}
+  </div>
+  {% if s.intro_html %}<div class="prose mb-3 max-w-3xl text-sm">{{ s.intro_html|safe }}</div>{% endif %}
+  {% include "learn/_problem_rows.html" with rows=s.problems %}
+</section>
+{% empty %}
+<div class="ca-empty">Bu rejada hozircha ochiq masala yo‘q.</div>
+{% endfor %}
+{% endblock %}

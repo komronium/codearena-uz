@@ -28,6 +28,11 @@
           {% if streak_badges.next and user == profile_user %}<span class="ca-badge ca-badge-locked" title="Kun masalasini {{ streak_badges.next.days }} kun ketma-ket yeching"><i data-lucide="lock" class="lu" aria-hidden="true"></i>{{ streak_badges.next.name }} — yana {{ streak_badges.next.left }} kun</span>{% endif %}
         </p>
         {% endif %}
+        {% if plan_badges %}
+        <p class="ca-badges mt-1.5" aria-label="Tugatilgan o‘quv rejalar">
+          {% for p in plan_badges %}<a class="ca-badge-plan" href="{% url 'learn:plan' p.slug %}" title="{% if p.in_quest %}Yo‘l bosqichi{% else %}O‘quv reja{% endif %} tugatilgan"><span><i data-lucide="{{ p.icon }}" class="lu" aria-hidden="true"></i></span>{{ p.title }}</a>{% endfor %}
+        </p>
+        {% endif %}
         {% if profile_user.is_staff %}<p class="mt-1.5"><span class="ca-chip"><i data-lucide="shield-check" class="lu mr-1" aria-hidden="true"></i>Moderator</span></p>{% endif %}
         <p class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-mute">
           {% if profile_user.location %}<span><i data-lucide="map-pin" class="lu mr-1.5" aria-hidden="true"></i>{{ profile_user.location }}</span>{% endif %}

@@ -1,0 +1,14 @@
+{# Problem rows with a solved mark. Needs `rows` (problems with .solved); `plan` adds ?plan= to links. #}
+<ul class="ca-rows">
+  {% for p in rows %}
+  <li class="ca-row relative">
+    {% if p.solved %}<span class="ca-status ca-status-ok" title="Yechilgan"><i data-lucide="check" class="lu" aria-hidden="true"></i><span class="sr-only">Yechilgan</span></span>{% else %}<span class="ca-status" aria-hidden="true"></span>{% endif %}
+    <div class="ca-row-main">
+      <div class="ca-row-title"><a class="ca-stretch" href="{% url 'problems:detail' p.slug %}{% if plan %}?plan={{ plan.slug }}{% endif %}">{{ p.title }}</a>
+        {% if p.kind == "sql" %}<span class="ca-kind-sql"><i data-lucide="database" class="lu" aria-hidden="true"></i>SQL</span>{% endif %}</div>
+      {% with tags=p.tags.all %}{% if tags %}<div class="ca-row-meta"><span class="ca-topics">{% for t in tags|slice:":3" %}{{ t.name }}{% if not forloop.last %} · {% endif %}{% endfor %}</span></div>{% endif %}{% endwith %}
+    </div>
+    <span class="ca-diff ca-diff-{{ p.difficulty }}">{{ p.get_difficulty_display }}</span>
+  </li>
+  {% endfor %}
+</ul>

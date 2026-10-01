@@ -19,6 +19,8 @@ from apps.problems.models import Problem, Tag, TestCase
 from apps.submissions.models import VERDICT_LABELS, Submission, TestResult, UserProblemSolved
 from apps.submissions.solves import refresh_solves
 from apps.integrity import audit
+from apps.learn.models import PlanItem, StudyPlan
+from apps.learn.progress import plan_problem_ids
 from judge.runner import run_submission
 
 from .ai import MAX_COUNT, AIGenerationError, generate_problems
@@ -28,8 +30,10 @@ from .forms import (
     ContestProblemFormSet,
     GroupForm,
     HintFormSet,
+    PlanSectionFormSet,
     ProblemForm,
     SQLDatasetForm,
+    StudyPlanForm,
     TagForm,
     TestCaseFormSet,
     UserForm,
@@ -260,10 +264,61 @@ def tags(request):
 
 
 @staff_required
+def tag_edit(request, pk):
+    tag = get_object_or_404(Tag, pk=pk)
+    form = TagForm(request.POST or None, instance=tag)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, f"«{tag.name}» saqlandi.")
+        return redirect("learn:topic", tag.name) if tag.problem_set.exists() else redirect("moderation:tags")
+    return render(request, "moderation/tag_form.html", {"form": form, "tag": tag})
+
+
+@staff_required
 @require_POST
 def tag_delete(request, pk):
     get_object_or_404(Tag, pk=pk).delete()
     return redirect("moderation:tags")
+
+
+# ---- study plans -------------------------------------------------------------
+
+@staff_required
+def plans(request):
+    qs = StudyPlan.objects.annotate(n_sections=Count("sections", distinct=True),
+                                    n_items=Count("sections__items", distinct=True)).order_by("order", "id")
+    open_counts = {k: len(v) for k, v in plan_problem_ids(qs).items()}
+    for p in qs:
+        p.n_open = open_counts[p.pk]
+    return render(request, "moderation/plans.html", {"plans": qs})
+
+
+@staff_required
+def plan_edit(request, pk=None):
+    plan = get_object_or_404(StudyPlan, pk=pk) if pk else None
+    form = StudyPlanForm(request.POST or None, instance=plan)
+    formset = PlanSectionFormSet(request.POST or None, instance=form.instance, prefix="sections")
+    if request.method == "POST" and form.is_valid() and formset.is_valid():
+        with transaction.atomic():
+            plan = form.save()
+            formset.instance = plan
+            formset.save()
+        messages.success(request, "Reja saqlandi.")
+        total = PlanItem.objects.filter(section__plan=plan).count()
+        closed = total - len(plan_problem_ids([plan])[plan.pk])
+        if closed:
+            messages.warning(request, f"{closed} ta masala hozir yopiq — ochilgunicha rejada ko‘rinmaydi.")
+        return redirect("learn:plan", plan.slug)
+    return render(request, "moderation/plan_form.html", {"form": form, "formset": formset, "plan": plan})
+
+
+@staff_required
+@require_POST
+def plan_delete(request, pk):
+    plan = get_object_or_404(StudyPlan, pk=pk)
+    plan.delete()  # problems stay; only the plan, its sections and their links go
+    messages.success(request, f"«{plan.title}» o‘chirildi.")
+    return redirect("moderation:plans")
 
 
 # ---- contests ----------------------------------------------------------------

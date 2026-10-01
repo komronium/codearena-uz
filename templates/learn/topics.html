@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Mavzular{% endblock %}
+{% block page_title %}<h1>Mavzular</h1><span class="ca-topbar-sub">Nazariya va mavzu bo‘yicha masalalar</span>{% endblock %}
+{% block content %}
+<a class="ca-link mb-4 inline-block text-sm text-mute" href="{% url 'learn:hub' %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>O‘rganish</a>
+{% for label, rows in groups %}{% if rows %}
+<section class="mb-8" aria-labelledby="g-{{ forloop.counter }}">
+  <h2 id="g-{{ forloop.counter }}" class="ca-section-title">{{ label }}</h2>
+  <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    {% for r in rows %}
+    <article class="ca-quest-card !p-4">
+      <div class="min-w-0 flex-1">
+        <p class="flex items-center gap-2">
+          <a class="ca-stretch truncate font-semibold" href="{% url 'learn:topic' r.tag.name %}">{{ r.tag.name }}</a>
+          {% if r.tag.about_md %}<span class="ca-chip shrink-0" title="Nazariya bor"><i data-lucide="book-open" class="lu mr-1" aria-hidden="true"></i>Nazariya</span>{% endif %}
+        </p>
+        <div class="mt-2 flex items-center gap-3">
+          {% if user.is_authenticated %}<div class="ca-progress flex-1{% if r.solved == r.total %} ca-progress-ok{% endif %}" aria-hidden="true"><span style="width: {{ r.pct }}%"></span></div>
+          <span class="tabular text-xs text-mute">{{ r.solved }}/{{ r.total }}</span>
+          {% else %}<span class="text-xs text-mute">{{ r.total }} ta masala</span>{% endif %}
+        </div>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}{% empty %}<div class="ca-empty">Hali mavzu yo‘q.</div>{% endfor %}
+{% endblock %}

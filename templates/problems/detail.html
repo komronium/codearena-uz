@@ -27,8 +27,10 @@
   </nav>
   {% endif %}
   {% else %}
-  <a class="ca-link text-mute" href="{% url 'problems:list' %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>Masalalar</a>
+  {% if plan_nav %}{% include "learn/_plan_strip.html" with nav=plan_nav %}
+  {% else %}<a class="ca-link text-mute" href="{% url 'problems:list' %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>Masalalar</a>{% endif %}
   <div class="flex flex-wrap items-center gap-1">
+    {% if save_lists is not None %}{% include "learn/_save_menu.html" %}{% endif %}
     {% if show_leaders %}
     <button type="button" class="ca-btn ca-btn-ghost !py-1.5" data-dialog="rate-dialog" aria-haspopup="dialog">
       <i data-lucide="star" class="lu text-warn {% if problem.n_ratings %}fill-current{% endif %}" aria-hidden="true"></i>
@@ -37,9 +39,17 @@
     <button type="button" class="ca-btn ca-btn-ghost !py-1.5" data-dialog="leaders-dialog" aria-haspopup="dialog" title="Eng yaxshi yechimlar"><i data-lucide="trophy" class="lu text-accent" aria-hidden="true"></i><span class="hidden sm:inline">Eng yaxshi yechimlar</span><span class="sr-only sm:hidden">Eng yaxshi yechimlar</span></button>
     <span class="mx-1.5 h-5 w-px bg-line" aria-hidden="true"></span>
     {% endif %}
+    {% if plan_nav %}
+    {% with p=plan_nav.plan %}
+    {% if plan_nav.prev %}<a class="ca-btn ca-btn-ghost !px-2.5 !py-1.5" href="{% url 'problems:detail' plan_nav.prev.slug %}?plan={{ p.slug }}" title="{{ plan_nav.prev.title }}" aria-label="Rejadagi oldingi masala"><i data-lucide="chevron-left" class="lu" aria-hidden="true"></i></a>{% endif %}
+    <span class="tabular text-xs text-mute" title="Rejadagi o‘rni">{{ plan_nav.position }} / {{ plan_nav.total }}</span>
+    {% if plan_nav.next %}<a class="ca-btn ca-btn-ghost !px-2.5 !py-1.5" href="{% url 'problems:detail' plan_nav.next.slug %}?plan={{ p.slug }}" title="{{ plan_nav.next.title }}" aria-label="Rejadagi keyingi masala"><i data-lucide="chevron-right" class="lu" aria-hidden="true"></i></a>{% endif %}
+    {% endwith %}
+    {% else %}
     {% if prev_problem %}<a class="ca-btn ca-btn-ghost !px-2.5 !py-1.5" href="{% url 'problems:detail' prev_problem.slug %}" title="{{ prev_problem.title }}" aria-label="Oldingi masala"><i data-lucide="chevron-left" class="lu" aria-hidden="true"></i></a>{% endif %}
     <span class="tabular text-xs text-mute">{{ problem.id|stringformat:"04d" }}</span>
     {% if next_problem %}<a class="ca-btn ca-btn-ghost !px-2.5 !py-1.5" href="{% url 'problems:detail' next_problem.slug %}" title="{{ next_problem.title }}" aria-label="Keyingi masala"><i data-lucide="chevron-right" class="lu" aria-hidden="true"></i></a>{% endif %}
+    {% endif %}
   </div>
   {% endif %}
 </div>

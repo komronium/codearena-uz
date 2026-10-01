@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Ro‘yxatlarim{% endblock %}
+{% block page_title %}<h1>Ro‘yxatlarim</h1><span class="ca-topbar-sub">Saqlangan masalalar</span>{% endblock %}
+{% block content %}
+<a class="ca-link mb-4 inline-block text-sm text-mute" href="{% url 'learn:hub' %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>O‘rganish</a>
+<div class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:items-start">
+  <section aria-label="Ro‘yxatlar">
+    {% if lists %}
+    <ul class="ca-rows">
+      {% for l in lists %}
+      <li class="ca-row relative">
+        <span class="ca-tile-icon ca-tile-icon-gold !h-9 !w-9"><i data-lucide="bookmark" class="lu" aria-hidden="true"></i></span>
+        <div class="ca-row-main">
+          <div class="ca-row-title"><a class="ca-stretch" href="{% url 'learn:list' l.pk %}">{{ l.name }}</a>{% if l.is_public %}<span class="ca-chip shrink-0"><i data-lucide="globe" class="lu mr-1" aria-hidden="true"></i>Ochiq</span>{% endif %}</div>
+          <div class="ca-row-meta"><span class="tabular">{{ l.created|date:"d.m.Y" }}</span></div>
+        </div>
+        <div class="ca-row-stat"><b>{{ l.n }}</b>masala</div>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <div class="ca-empty"><i data-lucide="bookmark" class="lu mb-2 block text-2xl" aria-hidden="true"></i>Hali ro‘yxat yo‘q. Masala sahifasidagi <b>Saqlash</b> tugmasi bilan yoki shu yerda yarating.</div>
+    {% endif %}
+  </section>
+  <form method="post" class="ca-panel space-y-3" aria-labelledby="new-list">{% csrf_token %}
+    <h2 id="new-list" class="ca-section-title !mb-0">Yangi ro‘yxat</h2>
+    {% if form.non_field_errors %}<div class="ca-alert ca-alert-bad" role="alert">{{ form.non_field_errors.0 }}</div>{% endif %}
+    <div><label class="ca-label" for="{{ form.name.id_for_label }}">Nomi</label>{{ form.name }}{{ form.name.errors }}</div>
+    <label class="flex items-center gap-2 text-sm">{{ form.is_public }} Havola orqali hamma ko‘ra oladi</label>
+    <button class="ca-btn ca-btn-primary w-full"><i data-lucide="plus" class="lu" aria-hidden="true"></i>Yaratish</button>
+  </form>
+</div>
+{% endblock %}

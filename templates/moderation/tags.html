@@ -12,8 +12,9 @@
       <tr>
         <td><a class="ca-link font-medium" href="{% url 'problems:list' %}?tag={{ t.name|urlencode }}">{{ t.name }}</a>{% if t.kind == "sql" %} <span class="ca-kind-sql">SQL</span>{% endif %}</td>
         <td class="tabular text-right text-mute">{{ t.n }}</td>
-        <td class="text-right">
-          <form method="post" action="{% url 'moderation:tag_delete' t.pk %}" onsubmit="return confirm('«{{ t.name|escapejs }}» mavzusini o‘chirasizmi? Masalalar o‘chmaydi.');">{% csrf_token %}
+        <td class="text-right whitespace-nowrap">
+          <a href="{% url 'moderation:tag_edit' t.pk %}" class="ca-btn ca-btn-ghost !px-2 !py-1.5 text-xs{% if t.about_md %} text-accent{% endif %}" title="{% if t.about_md %}Nazariyani tahrirlash{% else %}Nazariya yozish{% endif %}" aria-label="Tahrirlash: {{ t.name }}"><i data-lucide="{% if t.about_md %}book-open{% else %}pencil{% endif %}" class="lu" aria-hidden="true"></i></a>
+          <form method="post" class="inline" action="{% url 'moderation:tag_delete' t.pk %}" onsubmit="return confirm('«{{ t.name|escapejs }}» mavzusini o‘chirasizmi? Masalalar o‘chmaydi.');">{% csrf_token %}
             <button class="ca-btn ca-btn-ghost !px-2 !py-1.5 text-xs text-bad" title="O‘chirish"><i data-lucide="trash-2" class="lu" aria-hidden="true"></i></button>
           </form>
         </td>

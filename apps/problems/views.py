@@ -14,6 +14,7 @@ from django.utils import timezone
 from apps.classroom.duels import active_duel_for
 from apps.contests.models import ContestProblem
 from apps.contests.services import active_contest_for, in_running_contest, in_upcoming_contest
+from apps.learn.progress import plan_nav, save_menu
 from apps.submissions.models import Submission, UserProblemSolved
 from judge import sql_judge
 
@@ -296,6 +297,8 @@ def problem_detail(request, slug):
               if solved else None)
     voided = review and ("void" if review.reviewer_id else "held")
     return render(request, "problems/detail.html", {
+        "plan_nav": plan_nav(request.user, request.GET.get("plan", "")[:50], problem.pk) if contest is None else None,
+        "save_lists": save_menu(request.user, problem) if contest is None and duel is None else None,
         "solved": solved,
         "voided": voided,
         "my_stars": my_stars,

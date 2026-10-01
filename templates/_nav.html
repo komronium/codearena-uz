@@ -8,6 +8,9 @@ grouped by what the student is doing. Profile, settings and sign-out live in the
 <a href="{% url 'problems:list' %}" class="ca-sidebar-link {% if ns == 'problems' and not contest %}is-active{% endif %}"{% if ns == 'problems' and not contest %} aria-current="page"{% endif %}>
   <i data-lucide="list-checks" class="lu" aria-hidden="true"></i>Masalalar
 </a>
+<a href="{% url 'learn:hub' %}" class="ca-sidebar-link {% if ns == 'learn' %}is-active{% endif %}"{% if ns == 'learn' %} aria-current="page"{% endif %}>
+  <i data-lucide="graduation-cap" class="lu" aria-hidden="true"></i>O‘rganish
+</a>
 {% if user.is_authenticated %}
 <a href="{% url 'submissions:mine' %}" class="ca-sidebar-link {% if ns == 'submissions' %}is-active{% endif %}"{% if ns == 'submissions' %} aria-current="page"{% endif %}>
   <i data-lucide="history" class="lu" aria-hidden="true"></i>Urinishlar
@@ -60,7 +63,10 @@ grouped by what the student is doing. Profile, settings and sign-out live in the
 <a href="{% url 'moderation:groups' %}" class="ca-sidebar-link {% if ns == 'moderation' and un in 'groups,group_new,group_edit' %}is-active{% endif %}">
   <i data-lucide="school" class="lu" aria-hidden="true"></i>Guruhlar
 </a>
-<a href="{% url 'moderation:tags' %}" class="ca-sidebar-link {% if ns == 'moderation' and un == 'tags' %}is-active{% endif %}">
+<a href="{% url 'moderation:plans' %}" class="ca-sidebar-link {% if ns == 'moderation' and un in 'plans,plan_new,plan_edit' %}is-active{% endif %}">
+  <i data-lucide="graduation-cap" class="lu" aria-hidden="true"></i>O‘quv rejalar
+</a>
+<a href="{% url 'moderation:tags' %}" class="ca-sidebar-link {% if ns == 'moderation' and un in 'tags,tag_edit' %}is-active{% endif %}">
   <i data-lucide="tags" class="lu" aria-hidden="true"></i>Teglar
 </a>
 <a href="{% url 'integrity:practice_report' %}" class="ca-sidebar-link {% if ns == 'integrity' and un == 'practice_report' %}is-active{% endif %}">

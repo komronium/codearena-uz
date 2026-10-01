@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}O‘quv rejalar — boshqaruv{% endblock %}
+{% block content %}
+<div class="mb-6 flex flex-wrap items-end justify-between gap-3">
+  <div>{% include "moderation/_header.html" with title="O‘quv rejalar" subtitle="Yo‘l bosqichlari va mavzuli rejalar" %}</div>
+  <a href="{% url 'moderation:plan_new' %}" class="ca-btn ca-btn-primary"><i data-lucide="plus" class="lu" aria-hidden="true"></i>Reja tuzish</a>
+</div>
+{% if plans %}
+<ul class="ca-rows">
+  {% for p in plans %}
+  <li class="ca-row">
+    <span class="ca-tile-icon !h-9 !w-9 shrink-0"><i data-lucide="{{ p.icon }}" class="lu" aria-hidden="true"></i></span>
+    <div class="ca-row-main">
+      <div class="ca-row-title">
+        <span class="tabular shrink-0 text-xs font-normal text-mute">{{ p.order }}</span>
+        <a class="ca-link" href="{% url 'learn:plan' p.slug %}">{{ p.title }}</a>
+        {% if p.in_quest %}<span class="ca-chip shrink-0"><i data-lucide="map" class="lu mr-1" aria-hidden="true"></i>Yo‘l</span>{% endif %}
+        {% if not p.is_public %}<span class="ca-chip shrink-0 !bg-ink/5 text-mute">Yashirin</span>{% endif %}
+      </div>
+      <div class="ca-row-meta">
+        <span class="ca-diff ca-diff-{{ p.level }}">{{ p.get_level_display }}</span>
+        <span>{{ p.n_sections }} bo‘lim · {{ p.n_items }} masala{% if p.n_items != p.n_open %} · <span class="text-warn">{{ p.n_open }} tasi ochiq</span>{% endif %}</span>
+      </div>
+    </div>
+    <div class="ca-row-side">
+      <a href="{% url 'moderation:plan_edit' p.pk %}" class="ca-btn ca-btn-ghost !px-2 !py-1.5" title="Tahrirlash" aria-label="Tahrirlash: {{ p.title }}"><i data-lucide="pencil" class="lu" aria-hidden="true"></i></a>
+      <form method="post" action="{% url 'moderation:plan_delete' p.pk %}" onsubmit="return confirm('«{{ p.title|escapejs }}» rejasi o‘chiriladi. Masalalar o‘chmaydi. Davom etasizmi?');">{% csrf_token %}
+        <button class="ca-btn ca-btn-ghost !px-2 !py-1.5 text-bad" title="O‘chirish" aria-label="O‘chirish: {{ p.title }}"><i data-lucide="trash-2" class="lu" aria-hidden="true"></i></button>
+      </form>
+    </div>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<div class="ca-empty">Hali reja yo‘q. <a class="ca-link" href="{% url 'moderation:plan_new' %}">Birinchisini tuzing</a> yoki <code>python manage.py add_study_plans</code> buyrug‘ini ishga tushiring.</div>
+{% endif %}
+{% endblock %}

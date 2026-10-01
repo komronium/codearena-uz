@@ -10,6 +10,7 @@ class Tag(models.Model):
 
     name = models.CharField(max_length=50, unique=True)
     kind = models.CharField(max_length=10, choices=Kind.choices, default=Kind.CODE)
+    about_md = models.TextField(blank=True)  # the topic's theory, on /learn/topics/<name>/
 
     def __str__(self):
         return self.name

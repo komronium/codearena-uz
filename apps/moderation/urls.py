@@ -17,7 +17,13 @@ urlpatterns = [
     path("problems/<int:pk>/delete/", views.problem_delete, name="problem_delete"),
     path("problems/<int:pk>/rejudge/", views.problem_rejudge, name="problem_rejudge"),
     path("tags/", views.tags, name="tags"),
+    path("tags/<int:pk>/edit/", views.tag_edit, name="tag_edit"),
     path("tags/<int:pk>/delete/", views.tag_delete, name="tag_delete"),
+
+    path("plans/", views.plans, name="plans"),
+    path("plans/new/", views.plan_edit, name="plan_new"),
+    path("plans/<int:pk>/edit/", views.plan_edit, name="plan_edit"),
+    path("plans/<int:pk>/delete/", views.plan_delete, name="plan_delete"),
 
     path("contests/", views.contests, name="contests"),
     path("contests/new/", views.contest_edit, name="contest_new"),

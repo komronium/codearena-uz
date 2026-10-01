@@ -1,0 +1,20 @@
+{# "Saqlash" on the problem page: toggle the problem in each of the user's lists, or start a new one. #}
+<details class="ca-save-menu relative">
+  <summary class="ca-btn ca-btn-ghost !py-1.5" title="Ro‘yxatga saqlash">
+    <i data-lucide="bookmark" class="lu{% for l in save_lists %}{% if l.has %} fill-current text-warn{% endif %}{% endfor %}" aria-hidden="true"></i><span class="hidden sm:inline">Saqlash</span><span class="sr-only sm:hidden">Saqlash</span>
+  </summary>
+  <div class="ca-save-pop">
+    {% for l in save_lists %}
+    <form method="post" action="{% url 'learn:save' problem.slug %}">{% csrf_token %}
+      <input type="hidden" name="list" value="{{ l.pk }}"><input type="hidden" name="next" value="{{ request.get_full_path }}">
+      <button class="ca-save-row" aria-pressed="{% if l.has %}true{% else %}false{% endif %}"><i data-lucide="{% if l.has %}square-check{% else %}square{% endif %}" class="lu" aria-hidden="true"></i><span class="truncate">{{ l.name }}</span></button>
+    </form>
+    {% endfor %}
+    <form method="post" action="{% url 'learn:save' problem.slug %}" class="flex gap-1.5 border-t border-line pt-2{% if not save_lists %} border-t-0 pt-0{% endif %}">{% csrf_token %}
+      <input type="hidden" name="list" value="new"><input type="hidden" name="next" value="{{ request.get_full_path }}">
+      <input name="name" maxlength="80" required class="ca-input !py-1 text-sm" placeholder="{% if save_lists %}Yangi ro‘yxat{% else %}Keyinroq yechaman{% endif %}" aria-label="Yangi ro‘yxat nomi" value="{% if not save_lists %}Keyinroq yechaman{% endif %}">
+      <button class="ca-btn ca-btn-primary !px-2.5 !py-1" aria-label="Yangi ro‘yxatga saqlash"><i data-lucide="plus" class="lu" aria-hidden="true"></i></button>
+    </form>
+    <a class="ca-link block pt-1 text-xs text-mute" href="{% url 'learn:lists' %}">Barcha ro‘yxatlar</a>
+  </div>
+</details>

@@ -15,6 +15,8 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
 from apps.contests.models import _UZ_MONTHS_SHORT, Participation
+from apps.learn.models import StudyPlan
+from apps.learn.progress import plan_progress
 from apps.problems.models import Problem, Tag
 from apps.problems.daily import streaks
 from apps.problems.skills import skill_map
@@ -213,6 +215,13 @@ def rating(request):
                   {"users": page, "total": len(ratings), "tiers": tiers, "me": me, **_podium_split(page)})
 
 
+def _plan_badges(user) -> list:
+    """Public study plans the user finished: the quest's earned stages and other plans."""
+    plans = list(StudyPlan.objects.filter(is_public=True))
+    done = plan_progress(user, plans)
+    return [p for p in plans if done[p.pk]["completed"]]
+
+
 def profile(request, username):
     profile_user = get_object_or_404(User, username=username)
     solved = Problem.objects.filter(userproblemsolved__user=profile_user, is_public=True).order_by("title")
@@ -283,6 +292,7 @@ def profile(request, username):
         "banner": tier_banner(profile_user.rating),
         "next_tier": _next_tier(profile_user.rating),
         "streak_badges": streak_badges(cur_streak, best_streak),
+        "plan_badges": _plan_badges(profile_user),
         "tier_color": _tier_color(profile_user.rating),
         "rating_history": rating_history,
         "rating_chart": _rating_chart(rating_history) if rating_history else None,

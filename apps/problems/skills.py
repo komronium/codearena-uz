@@ -20,7 +20,8 @@ def open_problems():
 
 
 def skill_map(user) -> list[dict]:
-    solved = set(UserProblemSolved.objects.filter(user=user).values_list("problem_id", flat=True))
+    solved = (set(UserProblemSolved.objects.filter(user=user).values_list("problem_id", flat=True))
+              if user.is_authenticated else set())
     rows = []
     tags = (Tag.objects.filter(problem__in=open_problems()).distinct()
             .prefetch_related("problem_set").order_by("name"))
