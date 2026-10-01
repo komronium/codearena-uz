@@ -419,6 +419,29 @@ def user_edit(request, pk):
     return render(request, "moderation/user_form.html", {"form": form, "obj": user})
 
 
+@staff_required
+@require_POST
+def user_delete(request, pk):
+    """Delete for good: submissions, solves, participations and the rest cascade with the
+    account. Ratings already given from a contest stay as they are for everyone else."""
+    with transaction.atomic():
+        user = get_object_or_404(User.objects.select_for_update(), pk=pk)
+        if user == request.user or user.is_staff or user.is_superuser:
+            reason = "admin hisobini o‘chirib bo‘lmaydi — avval admin huquqini oling"
+        # Problem.author is PROTECT and Group.teacher would cascade other people's group.
+        elif user.authored_problems.exists() or user.taught_groups.exists():
+            reason = "uning masalalari yoki guruhlari bor — avval boshqasiga o‘tkazing yoki bloklang"
+        else:
+            reason = None
+        if reason:
+            messages.error(request, f"{user.username}: {reason}.")
+            return redirect("moderation:user_edit", pk)
+        audit.record(request, audit.Action.USER_DELETE, note=f"#{user.pk} — {user.username} ({user.email})")
+        user.delete()
+    messages.success(request, f"{user.username} o‘chirildi.")
+    return redirect("moderation:users")
+
+
 # ---- groups ------------------------------------------------------------------
 
 @staff_required

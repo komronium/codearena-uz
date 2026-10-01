@@ -40,6 +40,12 @@
       <label class="flex items-center gap-2 text-sm">{{ form.is_active }} Faol (o‘chirilsa — kira olmaydi)</label>
     </section>
     <button type="submit" class="ca-btn ca-btn-primary w-full"><i data-lucide="check" class="lu" aria-hidden="true"></i>Saqlash</button>
+    {% if obj != request.user and not obj.is_staff %}
+    <button type="submit" form="user-delete" class="ca-btn ca-btn-ghost w-full text-bad"><i data-lucide="trash-2" class="lu" aria-hidden="true"></i>Butunlay o‘chirish</button>
+    {% endif %}
   </aside>
 </form>
+{% if obj != request.user and not obj.is_staff %}
+<form id="user-delete" method="post" action="{% url 'moderation:user_delete' obj.pk %}" onsubmit="return confirm('«{{ obj.username|escapejs }}» va uning barcha urinishlari, natijalari butunlay o‘chiriladi. Qaytarib bo‘lmaydi. Davom etasizmi?');">{% csrf_token %}</form>
+{% endif %}
 {% endblock %}

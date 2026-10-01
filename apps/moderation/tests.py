@@ -700,3 +700,28 @@ def test_rated_freshness_check_follows_the_stored_contest_not_the_posted_dates(c
     assert post(rated, end=reopened).status_code == 200
     rated.refresh_from_db()
     assert rated.end < now
+
+
+@pytest.mark.django_db
+def test_user_delete_removes_account_but_not_admins_or_authors(client):
+    from apps.integrity.models import AuditEntry
+    from apps.problems.models import Language
+    from apps.submissions.models import Submission
+
+    staff = User.objects.create_user("teacher", password="x", is_staff=True)
+    ali = User.objects.create_user("ali", password="x")
+    author = User.objects.create_user("vali", password="x")
+    Problem.objects.create(slug="v", title="V", statement_md="x", author=author)
+    lang = Language.objects.create(code="python", name="Python 3", docker_image="x", run_cmd="x")
+    Submission.objects.create(user=ali, problem=Problem.objects.get(slug="v"), language=lang, source="x")
+
+    client.force_login(staff)
+    for u in (staff, author):
+        r = client.post(reverse("moderation:user_delete", args=[u.pk]), follow=True)
+        assert 'class="ca-alert ca-alert-bad"' in r.content.decode()
+    assert User.objects.filter(pk__in=[staff.pk, author.pk]).count() == 2
+
+    assert client.post(reverse("moderation:user_delete", args=[ali.pk])).status_code == 302
+    assert not User.objects.filter(pk=ali.pk).exists() and not Submission.objects.exists()
+    assert AuditEntry.objects.filter(action="user_delete", note__contains="ali").exists()
+    assert client.get(reverse("moderation:user_delete", args=[author.pk])).status_code == 405

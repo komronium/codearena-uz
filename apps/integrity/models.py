@@ -82,6 +82,7 @@ class AuditEntry(models.Model):
         FLAG_REVIEW = "flag_review", "O‘xshashlik ko‘rildi"
         PROBLEM_DELETE = "problem_delete", "Masala o‘chirildi"
         CONTEST_DELETE = "contest_delete", "Musobaqa o‘chirildi"
+        USER_DELETE = "user_delete", "Foydalanuvchi o‘chirildi"
 
     actor = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="+")
     action = models.CharField(max_length=20, choices=Action.choices)
