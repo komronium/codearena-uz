@@ -11,7 +11,7 @@ from apps.accounts.forms import validate_public_username
 from apps.accounts.models import Group, User
 from apps.contests.models import Contest, ContestProblem
 from apps.contests.services import reuse_reason
-from apps.learn.models import PlanItem, PlanSection, StudyPlan
+from apps.learn.models import RESERVED_SLUGS, StudyPlan
 from apps.problems.models import MAX_HINT_PCT, Problem, ProblemHint, SQLDataset, Tag, TestCase
 from judge import sql_judge
 
@@ -255,10 +255,9 @@ class GroupForm(ModelForm):
 class TagForm(ModelForm):
     class Meta:
         model = Tag
-        fields = ["name", "kind", "about_md"]
+        fields = ["name", "kind"]
         widgets = {"name": forms.TextInput(attrs={**_CA_INPUT, "placeholder": "masalan: two-pointers"}),
-                   "kind": forms.Select(attrs={"class": "ca-select"}),
-                   "about_md": forms.Textarea(attrs={**_MD, "rows": 16})}
+                   "kind": forms.Select(attrs={"class": "ca-select"})}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -307,78 +306,29 @@ class AIGenerateForm(forms.Form):
         return cleaned
 
 
-# ---- study plans -------------------------------------------------------------
+# ---- courses -----------------------------------------------------------------
 
 class StudyPlanForm(ModelForm):
+    """A course: its problems are every open problem carrying any of the chosen tags."""
     class Meta:
         model = StudyPlan
-        fields = ["title", "slug", "summary", "description_md", "level", "icon", "order", "in_quest", "is_public"]
+        fields = ["title", "slug", "stage", "order", "level", "icon", "summary", "theory_md", "description_md",
+                  "tags", "is_public"]
         widgets = {
             **{k: forms.TextInput(attrs=_CA_INPUT) for k in ["title", "slug", "summary"]},
-            "icon": forms.Select(attrs={"class": "ca-select"}),
-            "description_md": forms.Textarea(attrs={**_MD, "rows": 4}),
-            "level": forms.Select(attrs={"class": "ca-select"}),
+            **{k: forms.Select(attrs={"class": "ca-select"}) for k in ["stage", "level", "icon"]},
+            "theory_md": forms.Textarea(attrs={**_MD, "rows": 18}),
+            "description_md": forms.Textarea(attrs={**_MD, "rows": 3}),
             "order": forms.NumberInput(attrs=_CA_INPUT),
+            "tags": forms.CheckboxSelectMultiple,
         }
-
-
-def _slug_lines(text: str) -> list[str]:
-    lines = (line.strip() for line in text.splitlines())
-    return [line for line in lines if line and not line.startswith("#")]
-
-
-class PlanSectionForm(ModelForm):
-    """A section's problems are typed as slugs, one per line, in plan order ("#" starts a note)."""
-    slugs = forms.CharField(required=False, widget=forms.Textarea(attrs={"class": "ca-input font-mono text-sm", "rows": 6}))
-
-    class Meta:
-        model = PlanSection
-        fields = ["title", "intro_md", "order"]
-        widgets = {"title": forms.TextInput(attrs=_CA_INPUT),
-                   "intro_md": forms.Textarea(attrs={**_MD, "rows": 3}),
-                   "order": forms.NumberInput(attrs={"class": "ca-input w-20"})}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.problems: list[Problem] = []
-        if self.instance.pk:
-            self.initial["slugs"] = "\n".join(self.instance.items.values_list("problem__slug", flat=True))
+        self.fields["tags"].queryset = Tag.objects.order_by("kind", "name")
 
-    def clean_slugs(self):
-        slugs = _slug_lines(self.cleaned_data["slugs"])
-        dupes = sorted({s for s in slugs if slugs.count(s) > 1})
-        if dupes:
-            raise ValidationError(f"Takrorlangan: {', '.join(dupes)}")
-        found = Problem.objects.filter(slug__in=slugs, status=Problem.Status.APPROVED).in_bulk(field_name="slug")
-        missing = [s for s in slugs if s not in found]
-        if missing:
-            raise ValidationError(f"Topilmadi yoki tasdiqlanmagan: {', '.join(missing)}")
-        self.problems = [found[s] for s in slugs]
-        return "\n".join(slugs)
-
-    def save(self, commit=True):
-        section = super().save(commit)
-        if commit:  # rewrite the problems in the typed order
-            section.items.all().delete()
-            PlanItem.objects.bulk_create([PlanItem(section=section, problem=p, order=i)
-                                          for i, p in enumerate(self.problems)])
-        return section
-
-
-class BasePlanSectionFormSet(BaseInlineFormSet):
-    def clean(self):
-        super().clean()
-        seen, twice = set(), set()
-        for f in self.forms:
-            if not hasattr(f, "cleaned_data") or f.cleaned_data.get("DELETE"):
-                continue
-            for p in f.problems:
-                (twice if p.slug in seen else seen).add(p.slug)
-        if twice:
-            raise ValidationError(f"Bir masala bir necha bo‘limda: {', '.join(sorted(twice))}")
-
-
-PlanSectionFormSet = inlineformset_factory(
-    StudyPlan, PlanSection, form=PlanSectionForm, formset=BasePlanSectionFormSet,
-    fields=["title", "intro_md", "order"], extra=1, can_delete=True,
-)
+    def clean_slug(self):
+        slug = self.cleaned_data["slug"]
+        if slug in RESERVED_SLUGS:
+            raise ValidationError("Bu nom band (O‘rganish bo‘limidagi sahifa). Boshqa slug tanlang.")
+        return slug

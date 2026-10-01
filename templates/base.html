@@ -206,7 +206,7 @@ from /problems/suggest/. "go" is the second key of a "g <key>" shortcut.{% endco
     <span><kbd class="ca-kbd">↑</kbd><kbd class="ca-kbd">↓</kbd> tanlash</span><span><kbd class="ca-kbd">Enter</kbd> ochish</span><span><kbd class="ca-kbd">?</kbd> yorliqlar</span>
   </div>
 </dialog>
-<script type="application/json" id="ca-palette-data">{"suggest": "{% url 'problems:suggest' %}", "all": "{% url 'problems:list' %}", "items": [
+<script type="application/json" id="ca-palette-data">{"suggest": "{% url 'problems:suggest' %}", "courses": "{% url 'learn:search' %}", "all": "{% url 'problems:list' %}", "items": [
   {% if nav.live %}{"group": "Tezkor", "quick": true, "icon": "radio", "label": "Jonli: {{ nav.live.title|escapejs }}", "hint": "musobaqa", "url": "{% url 'contests:detail' nav.live.pk %}"},{% endif %}
   {% if streak_pill.daily %}{"group": "Tezkor", "quick": true, "icon": "calendar-check", "label": "Bugungi masala: {{ streak_pill.daily.problem.title|escapejs }}", "hint": "{% if streak_pill.done %}yechilgan{% else %}+5 ball{% endif %}", "url": "{% url 'problems:detail' streak_pill.daily.problem.slug %}"},{% endif %}
   {"group": "Sahifalar", "icon": "house", "label": "Bosh sahifa", "words": "home dashboard", "keys": "g h", "go": "h", "url": "{% url 'home' %}"},

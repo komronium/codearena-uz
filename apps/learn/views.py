@@ -1,21 +1,33 @@
-import re
-from urllib.parse import unquote
+from urllib.parse import urlencode
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Q
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
-from apps.problems.models import Problem, Tag
-from apps.problems.skills import open_problems, skill_map
+from apps.problems.models import Problem
+from apps.problems.skills import open_problems
 from apps.problems.views import _render_statement
+from apps.submissions.models import UserProblemSolved
 
 from .forms import ListForm
 from .models import ProblemList, ProblemListItem, StudyPlan
-from .progress import plan_problem_ids, plan_progress, plan_sections, solved_ids
+from .progress import course_rows, plan_progress, plan_sections, solved_ids
+
+# Old addresses that moved: the first study plans, and topics whose tag was renamed or that
+# have no course of their own. Any other topic goes to the course that carries its tag.
+OLD_PLANS = {
+    "birinchi-qadam": "input-output", "massiv-va-satrlar": "arrays", "algoritmlarga-kirish": "complexity",
+    "malumotlar-tuzilmalari": "stack-queue", "rekursiya-va-qidiruv": "functions", "graflar": "graph-traversal",
+    "dinamik-dasturlash": "dp-intro", "matematika-va-sonlar": "number-basics",
+    "musobaqaga-tayyorgarlik": "complexity", "sql-asoslari": "sql-select",
+}
+MOVED_TOPICS = {"loops": "for-loop", "math": "arithmetic", "complexity": "complexity",
+                "data-structures": "stack-queue", "graphs": "graph-traversal"}
 
 
 def _plans_for(user):
@@ -23,113 +35,108 @@ def _plans_for(user):
     return plans if user.is_staff else plans.filter(is_public=True)
 
 
+def _current(user, plans):
+    """The course to continue: the unfinished one with the user's latest solve (a problem in
+    several courses: the earliest of them on the path), else the first unfinished course that
+    has problems."""
+    open_courses = [p for p in plans if p.progress["total"] and not p.progress["completed"]]
+    if user.is_authenticated and open_courses:
+        solved_at = dict(UserProblemSolved.objects.filter(user=user).values_list("problem_id", "solved_at"))
+        started = [(max(solved_at[i] for i in p.problem_ids if i in solved_at), -p.number, p)
+                   for p in open_courses if any(i in solved_at for i in p.problem_ids)]
+        if started:
+            return max(started, key=lambda t: t[:2])[2]
+    return open_courses[0] if open_courses else None
+
+
 def hub(request):
-    """Kurslar: the main path (in_quest courses, numbered) and the extra courses, each shown
-    once, plus one "continue" card with the next problem to solve."""
-    plans = list(_plans_for(request.user))
+    """O‘rganish: every course on one path, chapter by chapter (StudyPlan.Stage), numbered in
+    path order, plus one "continue" card with the next problem to solve."""
+    stage_rank = {v: i for i, v in enumerate(StudyPlan.Stage.values)}
+    plans = sorted(_plans_for(request.user).annotate(n_tags=Count("tags")),
+                   key=lambda p: (stage_rank.get(p.stage, len(stage_rank)), p.order, p.pk))
     progress = plan_progress(request.user, plans)
     details = plan_sections(request.user, plans)
-    for p in plans:
-        p.progress = progress[p.pk]
+    ids = {plan_id: [i for i, _ in rows] for plan_id, rows in course_rows(plans).items()}
+    for number, p in enumerate(plans, 1):
+        p.number, p.progress, p.problem_ids = number, progress[p.pk], ids[p.pk]
         p.dots = details[p.pk]["sections"]
         p.dots_done = sum(1 for s in p.dots if s["complete"])
-    quest = [p for p in plans if p.in_quest]
-    here = next((p for p in quest if not p.progress["completed"]), None)
-    # Continue what was started (in course order), else the first unfinished stage of the path.
-    current = next((p for p in plans if 0 < p.progress["done"] and not p.progress["completed"]), here)
+    current = _current(request.user, plans)
     next_problem = None
     if current is not None and details[current.pk]["next_id"]:
         next_problem = Problem.objects.filter(pk=details[current.pk]["next_id"]).first()
-    return render(request, "learn/hub.html", {
-        "quest": quest, "here": here if request.user.is_authenticated else None,
-        "extra": [p for p in plans if not p.in_quest],
-        "current": current, "next_problem": next_problem,
-    })
+    labels = dict(StudyPlan.Stage.choices)
+    stages = []
+    for p in plans:
+        if not stages or stages[-1]["stage"] != p.stage:
+            stages.append({"stage": p.stage, "label": labels.get(p.stage, p.stage), "courses": []})
+        stages[-1]["courses"].append(p)
+    return render(request, "learn/hub.html", {"stages": stages, "current": current, "next_problem": next_problem,
+                                              "here": current if request.user.is_authenticated else None})
 
 
-def _section_topic(intro_md: str, problems):
-    """The topic a section is about: the one its intro links to, else the most common tag
-    with written theory among its problems."""
-    linked = re.search(r"/learn/topics/([^/)\s]+)/", intro_md)
-    if linked:
-        tag = Tag.objects.filter(name=unquote(linked.group(1))).exclude(about_md="").first()
-        if tag is not None:
-            return tag
-    counts: dict = {}
-    for p in problems:
-        for t in p.tags.all():
-            if t.about_md.strip():
-                counts[t] = counts.get(t, 0) + 1
-    return max(counts, key=lambda t: (counts[t], t.name), default=None)
-
-
-def plan_detail(request, slug):
+def course_detail(request, slug):
+    """A course: its theory, then its open problems grouped by difficulty."""
     plan = get_object_or_404(_plans_for(request.user), slug=slug)
-    open_ids = set(plan_problem_ids([plan])[plan.pk])
-    solved = solved_ids(request.user, open_ids)
-    problems = Problem.objects.filter(pk__in=open_ids).prefetch_related("tags").in_bulk()
-    sections = []
-    for section in plan.sections.prefetch_related("items"):
-        # a section with no open problem yet still shows its intro and theory ("tez orada")
-        rows = [problems[i.problem_id] for i in section.items.all() if i.problem_id in problems]
-        done = sum(p.pk in solved for p in rows)
-        sections.append({"section": section, "intro_html": _render_statement(section.intro_md),
-                         "problems": rows, "done": done, "complete": bool(rows) and done == len(rows),
-                         "topic": _section_topic(section.intro_md, rows)})
-    for p in problems.values():
+    rows = course_rows([plan])[plan.pk]
+    problems = Problem.objects.filter(pk__in=[i for i, _ in rows]).prefetch_related("tags").in_bulk()
+    solved = solved_ids(request.user, problems)
+    labels = dict(Problem.Difficulty.choices)
+    groups: list[dict] = []
+    for problem_id, level in rows:
+        p = problems[problem_id]
         p.solved = p.pk in solved
-    next_id = plan_sections(request.user, [plan])[plan.pk]["next_id"]
-    return render(request, "learn/plan.html", {
-        "plan": plan, "sections": sections, "progress": plan_progress(request.user, [plan])[plan.pk],
-        "description_html": _render_statement(plan.description_md),
-        "next_problem": problems.get(next_id),
+        if not groups or groups[-1]["level"] != level:
+            groups.append({"level": level, "label": labels.get(level, level), "problems": [], "done": 0})
+        groups[-1]["problems"].append(p)
+        groups[-1]["done"] += p.solved
+    progress = plan_progress(request.user, [plan])[plan.pk]
+    next_id = next((i for i, _ in rows if i not in solved), None)
+    return render(request, "learn/course.html", {
+        "plan": plan, "groups": groups, "progress": progress, "next_problem": problems.get(next_id),
+        "theory_html": _render_statement(plan.theory_md), "description_html": _render_statement(plan.description_md),
     })
 
 
-# ---- topics ("Qo‘llanma") -------------------------------------------------------
-
-def _excerpt(md: str) -> str:
-    """First prose line of a topic's theory, markdown marks stripped, for its card."""
-    for line in md.splitlines():
-        line = line.strip()
-        if line and not line.startswith(("#", "```", "|", ">", "-", "*", "$$")):
-            return line.replace("**", "").replace("`", "")
-    return ""
+def plan_redirect(request, slug):
+    """/learn/plans/<slug>/ — where courses lived before."""
+    return redirect("learn:course", OLD_PLANS.get(slug, slug))
 
 
 def topics(request):
-    """Qo‘llanma: every topic with written theory, problems or not yet. Tags without theory
-    are plain filters on Masalalar."""
-    counts = {r["tag"].pk: r for r in skill_map(request.user)}
-    rows = []
-    for tag in Tag.objects.exclude(about_md=""):
-        r = counts.get(tag.pk) or {"tag": tag, "solved": 0, "total": 0, "pct": 0}
-        r["excerpt"] = _excerpt(tag.about_md)
-        rows.append(r)
-    rows.sort(key=lambda r: (-r["total"], r["tag"].name))
-    return render(request, "learn/topics.html", {
-        "groups": [(value, label, [r for r in rows if r["tag"].kind == value]) for value, label in Tag.Kind.choices],
-        "n_without_theory": Tag.objects.filter(about_md="").count() if request.user.is_staff else 0,
-    })
+    """Qo‘llanma's old list: its articles are inside the courses now."""
+    return redirect("learn:hub")
 
 
-def topic_detail(request, name):
-    tag = get_object_or_404(Tag, name=name)
-    problems = list(open_problems().filter(tags=tag).prefetch_related("tags").order_by("id"))
-    if not problems and not tag.about_md.strip():
-        raise Http404
-    solved = solved_ids(request.user, [p.pk for p in problems])
-    for p in problems:
-        p.solved = p.pk in solved
-    levels = dict(Problem.Difficulty.choices)
-    by_level = [(levels[v], [p for p in problems if p.difficulty == v]) for v in levels]
-    return render(request, "learn/topic.html", {
-        "tag": tag, "theory_html": _render_statement(tag.about_md), "n": len(problems), "done": len(solved),
-        "by_level": [(label, ps) for label, ps in by_level if ps],
-        "plans": (StudyPlan.objects.filter(Q(sections__items__problem__in=problems)
-                                           | Q(sections__intro_md__contains=f"/learn/topics/{tag.name}/"),
-                                           is_public=True).distinct()),
-    })
+def topic_redirect(request, name):
+    """An old Qo‘llanma article: to the course carrying its tag; a tag with no course but with
+    problems goes to the problem list filtered by it."""
+    slug = MOVED_TOPICS.get(name)
+    if slug is None:
+        course = _plans_for(request.user).filter(tags__name=name).order_by("order", "id").first()
+        slug = course.slug if course else None
+    if slug is not None:
+        return redirect("learn:course", slug)
+    if open_problems().filter(tags__name=name).exists():
+        return redirect(f"{reverse('problems:list')}?{urlencode({'tag': name})}")
+    raise Http404
+
+
+def course_search(request):
+    """Courses for the command palette: title, summary or theory matches, path order."""
+    q = request.GET.get("q", "").strip()[:60]
+    if len(q) < 2:
+        return JsonResponse({"results": []})
+    stage_labels = dict(StudyPlan.Stage.choices)
+    found = (_plans_for(request.user).filter(Q(title__icontains=q) | Q(summary__icontains=q)
+                                             | Q(theory_md__icontains=q) | Q(slug__icontains=q.replace(" ", "-")))
+             .order_by("order", "id")[:20])
+    rows = sorted(found, key=lambda p: (q.lower() not in p.title.lower(), p.order))[:5]
+    return JsonResponse({"results": [
+        {"title": p.title, "url": reverse("learn:course", args=[p.slug]), "icon": p.icon,
+         "hint": stage_labels.get(p.stage, "") if q.lower() in p.title.lower() else "nazariyada"}
+        for p in rows]})
 
 
 # ---- my lists ("Ro‘yxatlarim") -------------------------------------------------

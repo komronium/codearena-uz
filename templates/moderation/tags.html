@@ -1,31 +1,32 @@
 {% extends "base.html" %}
-{% block title %}Mavzular — boshqaruv{% endblock %}
+{% block title %}Teglar — boshqaruv{% endblock %}
 {% block content %}
-<div class="mb-6">{% include "moderation/_header.html" with title="Mavzular" subtitle="Masalalarni saralash uchun teglar" %}</div>
+<div class="mb-6">{% include "moderation/_header.html" with title="Teglar" subtitle="Masalalarni saralaydi; kurs o‘z masalalarini teglaridan oladi" %}</div>
 
 <div class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:items-start">
   <div class="ca-panel !p-0 overflow-x-auto">
     <table class="ca-table">
-      <thead><tr><th>Mavzu</th><th class="text-right">Masalalar</th><th class="text-right">Amal</th></tr></thead>
+      <thead><tr><th>Teg</th><th>Kurs</th><th class="text-right">Masalalar</th><th class="text-right">Amal</th></tr></thead>
       <tbody>
       {% for t in tags %}
       <tr>
         <td><a class="ca-link font-medium" href="{% url 'problems:list' %}?tag={{ t.name|urlencode }}">{{ t.name }}</a>{% if t.kind == "sql" %} <span class="ca-kind-sql">SQL</span>{% endif %}</td>
+        <td class="text-sm">{% for c in t.courses.all %}<a class="ca-link" href="{% url 'learn:course' c.slug %}">{{ c.title }}</a>{% if not forloop.last %}, {% endif %}{% empty %}<span class="text-warn">kursda yo‘q</span>{% endfor %}</td>
         <td class="tabular text-right text-mute">{{ t.n }}</td>
         <td class="text-right whitespace-nowrap">
-          <a href="{% url 'moderation:tag_edit' t.pk %}" class="ca-btn ca-btn-ghost !px-2 !py-1.5 text-xs{% if t.about_md %} text-accent{% endif %}" title="{% if t.about_md %}Nazariyani tahrirlash{% else %}Nazariya yozish{% endif %}" aria-label="Tahrirlash: {{ t.name }}"><i data-lucide="{% if t.about_md %}book-open{% else %}pencil{% endif %}" class="lu" aria-hidden="true"></i></a>
-          <form method="post" class="inline" action="{% url 'moderation:tag_delete' t.pk %}" onsubmit="return confirm('«{{ t.name|escapejs }}» mavzusini o‘chirasizmi? Masalalar o‘chmaydi.');">{% csrf_token %}
+          <a href="{% url 'moderation:tag_edit' t.pk %}" class="ca-btn ca-btn-ghost !px-2 !py-1.5 text-xs" title="Tahrirlash" aria-label="Tahrirlash: {{ t.name }}"><i data-lucide="pencil" class="lu" aria-hidden="true"></i></a>
+          <form method="post" class="inline" action="{% url 'moderation:tag_delete' t.pk %}" onsubmit="return confirm('«{{ t.name|escapejs }}» tegini o‘chirasizmi? Masalalar o‘chmaydi, kurslardan ham chiqadi.');">{% csrf_token %}
             <button class="ca-btn ca-btn-ghost !px-2 !py-1.5 text-xs text-bad" title="O‘chirish"><i data-lucide="trash-2" class="lu" aria-hidden="true"></i></button>
           </form>
         </td>
       </tr>
-      {% empty %}<tr><td colspan="3" class="text-center text-mute">Mavzu yo‘q.</td></tr>{% endfor %}
+      {% empty %}<tr><td colspan="4" class="text-center text-mute">Teg yo‘q.</td></tr>{% endfor %}
       </tbody>
     </table>
   </div>
   <form method="post" class="ca-panel space-y-3">
     {% csrf_token %}
-    <h2 class="ca-section-title !mb-0"><label for="{{ form.name.id_for_label }}">Yangi mavzu</label></h2>
+    <h2 class="ca-section-title !mb-0"><label for="{{ form.name.id_for_label }}">Yangi teg</label></h2>
     {{ form.name }}{{ form.name.errors }}
     <label class="ca-label" for="{{ form.kind.id_for_label }}">Turi</label>
     {{ form.kind }}

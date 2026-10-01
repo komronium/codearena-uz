@@ -21,7 +21,7 @@ from apps.problems.models import Problem, Tag, TestCase
 from apps.submissions.models import VERDICT_LABELS, Submission, TestResult, UserProblemSolved
 from apps.submissions.solves import refresh_solves
 from apps.integrity import audit
-from apps.learn.models import PlanItem, StudyPlan
+from apps.learn.models import StudyPlan
 from apps.learn.progress import plan_problem_ids
 from judge.runner import run_submission
 
@@ -32,7 +32,6 @@ from .forms import (
     ContestProblemFormSet,
     GroupForm,
     HintFormSet,
-    PlanSectionFormSet,
     ProblemForm,
     SQLDatasetForm,
     StudyPlanForm,
@@ -261,7 +260,7 @@ def tags(request):
     if request.method == "POST" and form.is_valid():
         form.save()
         return redirect("moderation:tags")
-    qs = Tag.objects.annotate(n=Count("problem")).order_by("name")
+    qs = Tag.objects.annotate(n=Count("problem")).prefetch_related("courses").order_by("name")
     return render(request, "moderation/tags.html", {"tags": qs, "form": form})
 
 
@@ -272,8 +271,8 @@ def tag_edit(request, pk):
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(request, f"«{tag.name}» saqlandi.")
-        return redirect("learn:topic", tag.name) if tag.problem_set.exists() else redirect("moderation:tags")
-    return render(request, "moderation/tag_form.html", {"form": form, "tag": tag})
+        return redirect("moderation:tags")
+    return render(request, "moderation/tag_form.html", {"form": form, "tag": tag, "courses": tag.courses.all()})
 
 
 @staff_required
@@ -283,12 +282,11 @@ def tag_delete(request, pk):
     return redirect("moderation:tags")
 
 
-# ---- study plans -------------------------------------------------------------
+# ---- courses -----------------------------------------------------------------
 
 @staff_required
 def plans(request):
-    qs = StudyPlan.objects.annotate(n_sections=Count("sections", distinct=True),
-                                    n_items=Count("sections__items", distinct=True)).order_by("order", "id")
+    qs = StudyPlan.objects.annotate(n_tags=Count("tags", distinct=True)).order_by("order", "id")
     open_counts = {k: len(v) for k, v in plan_problem_ids(qs).items()}
     for p in qs:
         p.n_open = open_counts[p.pk]
@@ -299,26 +297,18 @@ def plans(request):
 def plan_edit(request, pk=None):
     plan = get_object_or_404(StudyPlan, pk=pk) if pk else None
     form = StudyPlanForm(request.POST or None, instance=plan)
-    formset = PlanSectionFormSet(request.POST or None, instance=form.instance, prefix="sections")
-    if request.method == "POST" and form.is_valid() and formset.is_valid():
-        with transaction.atomic():
-            plan = form.save()
-            formset.instance = plan
-            formset.save()
-        messages.success(request, "Reja saqlandi.")
-        total = PlanItem.objects.filter(section__plan=plan).count()
-        closed = total - len(plan_problem_ids([plan])[plan.pk])
-        if closed:
-            messages.warning(request, f"{closed} ta masala hozir yopiq — ochilgunicha rejada ko‘rinmaydi.")
-        return redirect("learn:plan", plan.slug)
-    return render(request, "moderation/plan_form.html", {"form": form, "formset": formset, "plan": plan})
+    if request.method == "POST" and form.is_valid():
+        plan = form.save()
+        messages.success(request, "Kurs saqlandi.")
+        return redirect("learn:course", plan.slug)
+    return render(request, "moderation/plan_form.html", {"form": form, "plan": plan})
 
 
 @staff_required
 @require_POST
 def plan_delete(request, pk):
     plan = get_object_or_404(StudyPlan, pk=pk)
-    plan.delete()  # problems stay; only the plan, its sections and their links go
+    plan.delete()  # problems and tags stay; only the course goes
     messages.success(request, f"«{plan.title}» o‘chirildi.")
     return redirect("moderation:plans")
 

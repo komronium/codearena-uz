@@ -1,22 +1,36 @@
-"""Derived learn data (plan progress, the plan strip, the save menu), read from solves over the
-problems a user may see right now, so rejudges, publishes and newly hidden problems show up
-without anything stored."""
+"""Derived learn data (course progress, the course strip, the save menu), read from solves over
+the problems a user may see right now, so rejudges, publishes, retags and newly hidden problems
+show up without anything stored."""
+from apps.problems.models import Problem
 from apps.problems.skills import open_problems
 from apps.submissions.models import UserProblemSolved
 
-from .models import PlanItem, ProblemListItem
+from .models import ProblemListItem, StudyPlan
+
+LEVELS = Problem.Difficulty.values  # easiest first
+
+
+def course_rows(plans) -> dict[int, list[tuple[int, str]]]:
+    """Course id -> (problem id, difficulty) of its open problems: any of the course's tags,
+    easiest first, then oldest first. A problem may sit in several courses."""
+    courses_of: dict[int, list[int]] = {}
+    for plan_id, tag_id in (StudyPlan.tags.through.objects.filter(studyplan__in=[p.pk for p in plans])
+                            .values_list("studyplan_id", "tag_id")):
+        courses_of.setdefault(tag_id, []).append(plan_id)
+    found: dict[int, dict[int, str]] = {p.pk: {} for p in plans}
+    for tag_id, problem_id, difficulty in (Problem.tags.through.objects
+                                           .filter(tag_id__in=list(courses_of), problem__in=open_problems())
+                                           .values_list("tag_id", "problem_id", "problem__difficulty")):
+        for plan_id in courses_of[tag_id]:
+            found[plan_id][problem_id] = difficulty
+    rank = {v: i for i, v in enumerate(LEVELS)}
+    return {plan_id: sorted(rows.items(), key=lambda r: (rank.get(r[1], len(LEVELS)), r[0]))
+            for plan_id, rows in found.items()}
 
 
 def plan_problem_ids(plans) -> dict[int, list[int]]:
-    """Plan id -> its open problems' ids, in plan order (section, then item)."""
-    out: dict[int, list[int]] = {p.pk: [] for p in plans}
-    rows = (PlanItem.objects.filter(section__plan__in=list(out), problem__in=open_problems())
-            .order_by("section__order", "section_id", "order", "id")
-            .values_list("section__plan_id", "problem_id"))
-    for plan_id, problem_id in rows:
-        if problem_id not in out[plan_id]:
-            out[plan_id].append(problem_id)
-    return out
+    """Course id -> its open problems' ids, in course order."""
+    return {plan_id: [i for i, _ in rows] for plan_id, rows in course_rows(plans).items()}
 
 
 def solved_ids(user, ids) -> set[int]:
@@ -27,7 +41,7 @@ def solved_ids(user, ids) -> set[int]:
 
 
 def plan_progress(user, plans) -> dict[int, dict]:
-    """Plan id -> {"done", "total", "pct", "completed"}; a plan with nothing open is never completed."""
+    """Course id -> {"done", "total", "pct", "completed"}; a course with nothing open is never completed."""
     ids = plan_problem_ids(plans)
     solved = solved_ids(user, {i for v in ids.values() for i in v})
     out = {}
@@ -39,40 +53,33 @@ def plan_progress(user, plans) -> dict[int, dict]:
 
 
 def plan_sections(user, plans) -> dict[int, dict]:
-    """Plan id -> {"sections": [{"done", "total", "complete"}, ...] in plan order, "next_id":
-    the first unsolved open problem or None}; drives the section dots and the "Keyingi"
-    button. Sections with no open problem yet are listed too, never complete."""
-    from .models import PlanSection
-
-    out: dict[int, dict] = {p.pk: {"sections": [], "next_id": None} for p in plans}
-    by_section: dict[int, dict] = {}
-    for plan_id, section_id in (PlanSection.objects.filter(plan__in=list(out))
-                                .order_by("order", "id").values_list("plan_id", "id")):
-        by_section[section_id] = {"done": 0, "total": 0, "complete": False}
-        out[plan_id]["sections"].append(by_section[section_id])
-    rows = list(PlanItem.objects.filter(section__plan__in=list(out), problem__in=open_problems())
-                .order_by("section__order", "section_id", "order", "id")
-                .values_list("section__plan_id", "section_id", "problem_id"))
-    solved = solved_ids(user, {r[2] for r in rows})
-    for plan_id, section_id, problem_id in rows:
-        by_section[section_id]["total"] += 1
-        if problem_id in solved:
-            by_section[section_id]["done"] += 1
-        elif out[plan_id]["next_id"] is None:
-            out[plan_id]["next_id"] = problem_id
-    for s in by_section.values():
-        s["complete"] = s["total"] > 0 and s["done"] == s["total"]
+    """Course id -> {"sections": one {"level", "label", "done", "total", "complete"} per
+    difficulty that has open problems, easiest first; "next_id": the first unsolved problem
+    or None}. Drives the course card's dots and the "Keyingi" button."""
+    rows = course_rows(plans)
+    solved = solved_ids(user, {i for r in rows.values() for i, _ in r})
+    labels = dict(Problem.Difficulty.choices)
+    out = {}
+    for plan_id, problems in rows.items():
+        sections: dict[str, dict] = {}
+        next_id = None
+        for problem_id, level in problems:
+            s = sections.setdefault(level, {"level": level, "label": labels.get(level, level), "done": 0, "total": 0})
+            s["total"] += 1
+            if problem_id in solved:
+                s["done"] += 1
+            elif next_id is None:
+                next_id = problem_id
+        for s in sections.values():
+            s["complete"] = s["done"] == s["total"]
+        out[plan_id] = {"sections": list(sections.values()), "next_id": next_id}
     return out
 
 
 def plan_nav(user, plan_slug: str, problem_id: int) -> dict | None:
-    """The plan strip on a problem page opened from a plan (?plan=<slug>): the plan, its
+    """The course strip on a problem page opened from a course (?plan=<slug>): the course, its
     progress, and the open problems before and after this one. None when the slug is
-    unknown, the plan is hidden from this user, or the problem is not open in it."""
-    from apps.problems.models import Problem
-
-    from .models import StudyPlan
-
+    unknown, the course is hidden from this user, or the problem is not open in it."""
     if not plan_slug:
         return None
     plans = StudyPlan.objects.all() if user.is_staff else StudyPlan.objects.filter(is_public=True)

@@ -41,9 +41,9 @@
     {% endif %}
     {% if plan_nav %}
     {% with p=plan_nav.plan %}
-    {% if plan_nav.prev %}<a class="ca-btn ca-btn-ghost !px-2.5 !py-1.5" href="{% url 'problems:detail' plan_nav.prev.slug %}?plan={{ p.slug }}" title="{{ plan_nav.prev.title }}" aria-label="Rejadagi oldingi masala"><i data-lucide="chevron-left" class="lu" aria-hidden="true"></i></a>{% endif %}
-    <span class="tabular text-xs text-mute" title="Rejadagi o‘rni">{{ plan_nav.position }} / {{ plan_nav.total }}</span>
-    {% if plan_nav.next %}<a class="ca-btn ca-btn-ghost !px-2.5 !py-1.5" href="{% url 'problems:detail' plan_nav.next.slug %}?plan={{ p.slug }}" title="{{ plan_nav.next.title }}" aria-label="Rejadagi keyingi masala"><i data-lucide="chevron-right" class="lu" aria-hidden="true"></i></a>{% endif %}
+    {% if plan_nav.prev %}<a class="ca-btn ca-btn-ghost !px-2.5 !py-1.5" href="{% url 'problems:detail' plan_nav.prev.slug %}?plan={{ p.slug }}" title="{{ plan_nav.prev.title }}" aria-label="Kursdagi oldingi masala"><i data-lucide="chevron-left" class="lu" aria-hidden="true"></i></a>{% endif %}
+    <span class="tabular text-xs text-mute" title="Kursdagi o‘rni">{{ plan_nav.position }} / {{ plan_nav.total }}</span>
+    {% if plan_nav.next %}<a class="ca-btn ca-btn-ghost !px-2.5 !py-1.5" href="{% url 'problems:detail' plan_nav.next.slug %}?plan={{ p.slug }}" title="{{ plan_nav.next.title }}" aria-label="Kursdagi keyingi masala"><i data-lucide="chevron-right" class="lu" aria-hidden="true"></i></a>{% endif %}
     {% endwith %}
     {% else %}
     {% if prev_problem %}<a class="ca-btn ca-btn-ghost !px-2.5 !py-1.5" href="{% url 'problems:detail' prev_problem.slug %}" title="{{ prev_problem.title }}" aria-label="Oldingi masala"><i data-lucide="chevron-left" class="lu" aria-hidden="true"></i></a>{% endif %}

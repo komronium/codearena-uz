@@ -8,8 +8,8 @@
   <a class="ca-tab{% if ns == 'moderation' and un == 'submissions' %} is-active{% endif %}" href="{% url 'moderation:submissions' %}"><i data-lucide="history" class="lu" aria-hidden="true"></i>Urinishlar</a>
   <a class="ca-tab{% if ns == 'moderation' and un in 'users,user_edit' %} is-active{% endif %}" href="{% url 'moderation:users' %}"><i data-lucide="users-round" class="lu" aria-hidden="true"></i>Foydalanuvchilar</a>
   <a class="ca-tab{% if ns == 'moderation' and un in 'groups,group_new,group_edit' %} is-active{% endif %}" href="{% url 'moderation:groups' %}"><i data-lucide="school" class="lu" aria-hidden="true"></i>Guruhlar</a>
-  <a class="ca-tab{% if ns == 'moderation' and un in 'plans,plan_new,plan_edit' %} is-active{% endif %}" href="{% url 'moderation:plans' %}"><i data-lucide="graduation-cap" class="lu" aria-hidden="true"></i>Rejalar</a>
-  <a class="ca-tab{% if ns == 'moderation' and un in 'tags,tag_edit' %} is-active{% endif %}" href="{% url 'moderation:tags' %}"><i data-lucide="tags" class="lu" aria-hidden="true"></i>Mavzular</a>
+  <a class="ca-tab{% if ns == 'moderation' and un in 'plans,plan_new,plan_edit' %} is-active{% endif %}" href="{% url 'moderation:plans' %}"><i data-lucide="graduation-cap" class="lu" aria-hidden="true"></i>Kurslar</a>
+  <a class="ca-tab{% if ns == 'moderation' and un in 'tags,tag_edit' %} is-active{% endif %}" href="{% url 'moderation:tags' %}"><i data-lucide="tags" class="lu" aria-hidden="true"></i>Teglar</a>
   <a class="ca-tab{% if ns == 'integrity' and un == 'audit' %} is-active{% endif %}" href="{% url 'integrity:audit' %}"><i data-lucide="scroll-text" class="lu" aria-hidden="true"></i>Jurnal</a>
 </nav>
 {% endwith %}

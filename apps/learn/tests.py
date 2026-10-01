@@ -1,30 +1,33 @@
 import pytest
 from django.urls import reverse
+from django.utils import timezone
 
 from apps.accounts.models import User
-from apps.learn.models import PlanItem, PlanSection, StudyPlan
-from apps.learn.progress import plan_progress
-from apps.problems.models import Language, Problem
+from apps.learn.models import RESERVED_SLUGS, StudyPlan
+from apps.learn.progress import plan_progress, plan_sections
+from apps.problems.models import Language, Problem, Tag
 from apps.submissions.models import Submission, UserProblemSolved
 
 
-def _problem(slug, author, **kw):
-    return Problem.objects.create(slug=slug, title=slug.upper(), statement_md="x", author=author, **kw)
+def _problem(slug, author, *tags, **kw):
+    p = Problem.objects.create(slug=slug, title=slug.upper(), statement_md="x", author=author, **kw)
+    p.tags.add(*[Tag.objects.get_or_create(name=t)[0] for t in tags])
+    return p
 
 
-def _solve(user, problem):
+def _solve(user, problem, when=None):
     lang, _ = Language.objects.get_or_create(code="python", defaults=dict(name="Python 3", docker_image="x",
                                                                           run_cmd="x"))
     s = Submission.objects.create(user=user, problem=problem, language=lang, source="x", verdict="AC")
-    UserProblemSolved.objects.create(user=user, problem=problem, first_ac_submission=s)
+    row = UserProblemSolved.objects.create(user=user, problem=problem, first_ac_submission=s)
+    if when is not None:
+        UserProblemSolved.objects.filter(pk=row.pk).update(solved_at=when)
 
 
-def _plan(slug, problems, title="Reja", **kw):
-    plan = StudyPlan.objects.create(slug=slug, title=title, is_public=True, **kw)
-    section = PlanSection.objects.create(plan=plan, title="Bo‘lim")
-    for i, p in enumerate(problems):
-        PlanItem.objects.create(section=section, problem=p, order=i)
-    return plan
+def _course(slug, *tags, title="Kurs", **kw):
+    course = StudyPlan.objects.create(slug=slug, title=title, **{"is_public": True, **kw})
+    course.tags.add(*[Tag.objects.get_or_create(name=t)[0] for t in tags])
+    return course
 
 
 @pytest.fixture
@@ -37,125 +40,218 @@ def ali():
     return User.objects.create_user("ali", password="x")
 
 
+# ---- progress ----------------------------------------------------------------
+
 @pytest.mark.django_db
 def test_progress_ignores_hidden_problems(staff, ali):
-    shown, hidden = _problem("a", staff), _problem("b", staff, is_public=False)
-    plan = _plan("p", [shown, hidden])
+    shown, hidden = _problem("a", staff, "t"), _problem("b", staff, "t", is_public=False)
+    course = _course("c", "t")
     _solve(ali, hidden)
-    assert plan_progress(ali, [plan])[plan.pk] == {"done": 0, "total": 1, "pct": 0, "completed": False}
+    assert plan_progress(ali, [course])[course.pk] == {"done": 0, "total": 1, "pct": 0, "completed": False}
     _solve(ali, shown)
-    assert plan_progress(ali, [plan])[plan.pk]["completed"] is True
+    assert plan_progress(ali, [course])[course.pk]["completed"] is True
 
 
 @pytest.mark.django_db
-def test_empty_plan_is_not_completed(staff, ali):
-    plan = _plan("p", [_problem("b", staff, is_public=False)])
-    assert plan_progress(ali, [plan])[plan.pk] == {"done": 0, "total": 0, "pct": 0, "completed": False}
+def test_course_without_open_problems_is_never_completed(staff, ali):
+    _problem("b", staff, "t", is_public=False)
+    for course in (_course("c", "t"), _course("theory-only")):
+        assert plan_progress(ali, [course])[course.pk] == {"done": 0, "total": 0, "pct": 0, "completed": False}
 
-
-# ---- hub and plan pages ------------------------------------------------------
 
 @pytest.mark.django_db
-def test_hub_and_plan_render_for_anonymous(client, staff):
-    plan = _plan("birinchi", [_problem("a", staff)], title="Birinchi qadam", in_quest=True)
+def test_a_problem_counts_in_every_course_it_belongs_to(staff, ali):
+    p = _problem("lis", staff, "binary-search", "dynamic-programming")
+    one, two = _course("bs", "binary-search"), _course("dp", "dynamic-programming")
+    _solve(ali, p)
+    progress = plan_progress(ali, [one, two])
+    assert progress[one.pk]["completed"] and progress[two.pk]["completed"]
+
+
+@pytest.mark.django_db
+def test_course_groups_by_difficulty_easiest_first(staff, ali):
+    _problem("h", staff, "t", difficulty=Problem.Difficulty.HARD)  # created first, listed last
+    _problem("e", staff, "t", "u", difficulty=Problem.Difficulty.EASY)  # two of the course's tags: counted once
+    first = _problem("b1", staff, "t", difficulty=Problem.Difficulty.BEGINNER)
+    second = _problem("b2", staff, "u", difficulty=Problem.Difficulty.BEGINNER)
+    course = _course("c", "t", "u")
+    _solve(ali, first)
+    assert plan_sections(ali, [course])[course.pk] == {
+        "sections": [{"level": "beginner", "label": "Beginner", "done": 1, "total": 2, "complete": False},
+                     {"level": "easy", "label": "Easy", "done": 0, "total": 1, "complete": False},
+                     {"level": "hard", "label": "Hard", "done": 0, "total": 1, "complete": False}],
+        "next_id": second.pk}
+
+
+# ---- hub and course pages ----------------------------------------------------
+
+@pytest.mark.django_db
+def test_hub_and_course_render_for_anonymous(client, staff):
+    _problem("a", staff, "t")
+    _course("birinchi", "t", title="Birinchi qadam")
     r = client.get(reverse("learn:hub"))
     assert r.status_code == 200 and "Birinchi qadam" in r.content.decode()
-    r = client.get(reverse("learn:plan", args=[plan.slug]))
-    assert r.status_code == 200 and "A" in r.content.decode()
+    r = client.get(reverse("learn:course", args=["birinchi"]))
+    assert r.status_code == 200 and ">A<" in r.content.decode()
 
 
 @pytest.mark.django_db
-def test_plan_page_shows_progress(client, staff, ali):
-    a, b, c = (_problem(s, staff) for s in "abc")
-    plan = _plan("p", [a, b, c])
+def test_course_page_shows_progress_groups_and_next(client, staff, ali):
+    a, b = (_problem(s, staff, "t", difficulty=Problem.Difficulty.BEGINNER) for s in "ab")
+    _problem("c", staff, "t", difficulty=Problem.Difficulty.EASY)
+    _course("p", "t")
     _solve(ali, a)
     _solve(ali, b)
     client.force_login(ali)
-    body = client.get(reverse("learn:plan", args=[plan.slug])).content.decode()
-    assert "2/3" in body
-    assert f'href="/problems/c/?plan=p"' in body
+    body = client.get(reverse("learn:course", args=["p"])).content.decode()
+    assert "2/2" in body and "0/1" in body  # Beginner done, Easy not yet
+    assert body.index(">Beginner<") < body.index(">Easy<")
+    assert 'href="/problems/c/?plan=p"' in body and "Davom etish" in body
 
 
 @pytest.mark.django_db
-def test_plan_page_hides_hidden_problem(client, staff, ali):
-    plan = _plan("p", [_problem("open-one", staff), _problem("secret-one", staff, is_public=False)])
+def test_course_page_hides_hidden_problem(client, staff, ali):
+    _problem("open-one", staff, "t")
+    _problem("secret-one", staff, "t", is_public=False)
+    _course("p", "t")
     client.force_login(ali)
-    body = client.get(reverse("learn:plan", args=[plan.slug])).content.decode()
+    body = client.get(reverse("learn:course", args=["p"])).content.decode()
     assert "OPEN-ONE" in body and "SECRET-ONE" not in body and "0/1" in body
 
 
 @pytest.mark.django_db
-def test_private_plan_404_for_students_not_staff(client, staff, ali):
-    plan = _plan("p", [_problem("a", staff)], title="Yashirin reja")
-    plan.is_public = False
-    plan.save()
+def test_private_course_404_for_students_not_staff(client, staff, ali):
+    _course("p", title="Yashirin kurs", is_public=False)
     client.force_login(ali)
-    assert client.get(reverse("learn:plan", args=[plan.slug])).status_code == 404
-    assert "Yashirin reja" not in client.get(reverse("learn:hub")).content.decode()
+    assert client.get(reverse("learn:course", args=["p"])).status_code == 404
+    assert "Yashirin kurs" not in client.get(reverse("learn:hub")).content.decode()
     client.force_login(staff)
-    assert client.get(reverse("learn:plan", args=[plan.slug])).status_code == 200
-
-
-# ---- topics ------------------------------------------------------------------
-
-@pytest.mark.django_db
-def test_topic_page_lists_only_open_problems(client, staff):
-    from apps.problems.models import Tag
-
-    tag = Tag.objects.update_or_create(name="loops", defaults={"about_md": "**Sikl** — takrorlash."})[0]
-    shown, hidden = _problem("open-one", staff), _problem("secret-one", staff, is_public=False)
-    shown.tags.add(tag)
-    hidden.tags.add(tag)
-    _plan("p", [shown], title="Sikllar rejasi")
-    assert "loops" in client.get(reverse("learn:topics")).content.decode()
-    body = client.get(reverse("learn:topic", args=["loops"])).content.decode()
-    assert "OPEN-ONE" in body and "SECRET-ONE" not in body
-    assert "<strong>Sikl</strong>" in body and "Sikllar rejasi" in body
+    assert client.get(reverse("learn:course", args=["p"])).status_code == 200
 
 
 @pytest.mark.django_db
-def test_unknown_topic_404(client, staff):
-    from apps.problems.models import Tag
-
-    Tag.objects.create(name="empty")
-    assert client.get(reverse("learn:topic", args=["nope"])).status_code == 404
-    assert client.get(reverse("learn:topic", args=["empty"])).status_code == 404
+def test_course_shows_theory_before_problems_exist(client):
+    _course("heap", "heap", title="Ustuvor navbat", theory_md="Uyum eng kichik elementni **tez** beradi.")
+    _course("complexity", title="Murakkablik", theory_md="O(n)")
+    body = client.get(reverse("learn:course", args=["heap"])).content.decode()
+    assert "<strong>tez</strong>" in body and "tayyorlanmoqda" in body
+    assert "faqat nazariya" in client.get(reverse("learn:course", args=["complexity"])).content.decode()
+    hub = client.get(reverse("learn:hub")).content.decode()
+    assert "Tayyorlanmoqda" in hub and "Nazariya" in hub and "is-soon" in hub
 
 
 @pytest.mark.django_db
-def test_topic_theory_is_sanitized(client, staff):
-    from apps.problems.models import Tag
+def test_course_theory_is_sanitized(client):
+    _course("x", theory_md="salom <script>alert(1)</script>")
+    assert "<script>alert" not in client.get(reverse("learn:course", args=["x"])).content.decode()
 
-    tag = Tag.objects.create(name="xss", about_md="salom <script>alert(1)</script>")
-    _problem("a", staff).tags.add(tag)
-    assert "<script>alert" not in client.get(reverse("learn:topic", args=["xss"])).content.decode()
-
-
-# ---- plan strip on the problem page -------------------------------------------
 
 @pytest.mark.django_db
-def test_problem_page_shows_plan_strip_with_next(client, staff, ali):
-    a, b, c = (_problem(s, staff) for s in ("a1", "b1", "c1"))
-    _plan("p", [a, b, c], title="Mening rejam")
+def test_hub_groups_courses_by_stage_in_path_order(client, staff):
+    _course("later", title="Graf kursi", stage=StudyPlan.Stage.GRAPHS, order=1)
+    _course("first", title="Kiritish kursi", stage=StudyPlan.Stage.BASICS, order=9)
+    body = client.get(reverse("learn:hub")).content.decode()
+    assert body.index("Asoslar") < body.index("Kiritish kursi") < body.index(">Graflar<") < body.index("Graf kursi")
+
+
+@pytest.mark.django_db
+def test_hub_continues_the_course_solved_in_last(client, staff, ali):
+    a1, _ = _problem("a1", staff, "a"), _problem("a2", staff, "a")
+    b1, b2 = _problem("b1", staff, "b"), _problem("b2", staff, "b")
+    _course("aa", "a", title="Birinchi", order=1)
+    _course("bb", "b", title="Ikkinchi", order=2)
+    client.force_login(ali)
+    body = client.get(reverse("learn:hub")).content.decode()
+    assert 'href="/problems/a1/?plan=aa"' in body  # nothing solved: the first course with problems
+    now = timezone.now()
+    _solve(ali, a1, when=now - timezone.timedelta(days=1))
+    _solve(ali, b1, when=now)
+    body = client.get(reverse("learn:hub")).content.decode()
+    assert 'href="/problems/b2/?plan=bb"' in body and "Siz shu yerdasiz" in body
+    _solve(ali, b2)  # a finished course is never "current"
+    assert 'href="/problems/a2/?plan=aa"' in client.get(reverse("learn:hub")).content.decode()
+
+
+# ---- old addresses -----------------------------------------------------------
+
+@pytest.mark.django_db
+def test_old_plan_addresses_redirect(client):
+    r = client.get("/learn/plans/birinchi-qadam/")
+    assert r.status_code == 302 and r.url == "/learn/input-output/"
+    assert client.get("/learn/plans/arrays/").url == "/learn/arrays/"
+
+
+@pytest.mark.django_db
+def test_old_topic_addresses_redirect(client, staff):
+    _course("dictionaries", "hash-table")
+    _problem("a", staff, "implementation")
+    assert client.get("/learn/topics/").url == "/learn/"
+    assert client.get("/learn/topics/loops/").url == "/learn/for-loop/"
+    assert client.get("/learn/topics/hash-table/").url == "/learn/dictionaries/"
+    assert client.get("/learn/topics/implementation/").url == "/problems/?tag=implementation"
+    assert client.get("/learn/topics/nope/").status_code == 404
+
+
+@pytest.mark.django_db
+def test_reserved_paths_are_not_courses(client, ali):
+    _course("lists", title="Ro‘yxat kursi")  # can't be made through the form or add_courses; see below
+    client.force_login(ali)
+    assert "Ro‘yxat kursi" not in client.get("/learn/lists/").content.decode()
+
+
+# ---- search (Ctrl K) ---------------------------------------------------------
+
+@pytest.mark.django_db
+def test_course_search_matches_title_and_theory(client, ali):
+    _course("heap", title="Ustuvor navbat", theory_md="heapq bilan eng kichigi", stage=StudyPlan.Stage.STRUCTURES)
+    _course("secret", title="Yashirin navbat", is_public=False)
+    url = reverse("learn:search")
+    assert client.get(url, {"q": "n"}).json() == {"results": []}
+    rows = client.get(url, {"q": "navbat"}).json()["results"]
+    assert [r["title"] for r in rows] == ["Ustuvor navbat"]
+    assert rows[0] == {"title": "Ustuvor navbat", "url": "/learn/heap/", "icon": "book-open",
+                       "hint": "Ma’lumot tuzilmalari"}
+    assert client.get(url, {"q": "heapq"}).json()["results"][0]["hint"] == "nazariyada"
+
+
+# ---- course strip on the problem page -----------------------------------------
+
+@pytest.mark.django_db
+def test_problem_page_shows_course_strip_with_neighbours(client, staff, ali):
+    a, _, _ = (_problem(s, staff, "t") for s in ("a1", "b1", "c1"))
+    _course("p", "t", title="Mening kursim")
     _solve(ali, a)
     client.force_login(ali)
     body = client.get(reverse("problems:detail", args=["b1"]) + "?plan=p").content.decode()
-    assert "Mening rejam" in body and "1/3" in body
+    assert "Mening kursim" in body and "1/3" in body
     assert 'href="/problems/c1/?plan=p"' in body and 'href="/problems/a1/?plan=p"' in body
 
 
 @pytest.mark.django_db
 def test_problem_page_ignores_bad_plan_param(client, staff, ali):
-    a, other = _problem("a1", staff), _problem("z1", staff)
-    _plan("p", [other], title="Boshqa reja")
-    hidden = _plan("h", [a], title="Yopiq reja")
-    hidden.is_public = False
-    hidden.save()
+    _problem("a1", staff, "a")
+    _problem("z1", staff, "z")
+    _course("p", "z", title="Boshqa kurs")
+    _course("h", "a", title="Yopiq kurs", is_public=False)
     client.force_login(ali)
     for q in ("?plan=nope", "?plan=p", "?plan=h", "?plan=", "?plan=%00"):
         r = client.get(reverse("problems:detail", args=["a1"]) + q)
         assert r.status_code == 200
-        assert "Boshqa reja" not in r.content.decode() and "Yopiq reja" not in r.content.decode()
+        assert "Boshqa kurs" not in r.content.decode() and "Yopiq kurs" not in r.content.decode()
+
+
+@pytest.mark.django_db
+def test_profile_shows_completed_course_badge(client, staff, ali):
+    a = _problem("a1", staff, "a")
+    _problem("b1", staff, "b")
+    _course("p", "a", title="Birinchi qadam")
+    _course("q", "b", title="Tugamagan kurs")
+    _course("r", title="Faqat nazariya")
+    url = reverse("profile", args=[ali.username])
+    assert "Birinchi qadam" not in client.get(url).content.decode()
+    _solve(ali, a)
+    body = client.get(url).content.decode()
+    assert "Birinchi qadam" in body and "Tugamagan kurs" not in body and "Faqat nazariya" not in body
 
 
 # ---- my lists ----------------------------------------------------------------
@@ -243,178 +339,72 @@ def test_list_limit_and_problem_page_menu(client, staff, ali):
 
 # ---- staff editing -----------------------------------------------------------
 
-def _plan_post(**over):
-    data = {"slug": "yangi", "title": "Yangi reja", "summary": "", "description_md": "", "level": "beginner",
-            "icon": "book-open", "order": "1", "is_public": "on",
-            "sections-TOTAL_FORMS": "2", "sections-INITIAL_FORMS": "0", "sections-MIN_NUM_FORMS": "0",
-            "sections-MAX_NUM_FORMS": "1000",
-            "sections-0-title": "Sikllar", "sections-0-intro_md": "Kirish", "sections-0-order": "0",
-            "sections-0-slugs": "b1\n# izoh\n\na1\n",
-            "sections-1-title": "", "sections-1-intro_md": "", "sections-1-order": "0", "sections-1-slugs": ""}
+def _course_post(**over):
+    data = {"slug": "yangi", "title": "Yangi kurs", "stage": "basics", "order": "1", "level": "beginner",
+            "icon": "book-open", "summary": "", "theory_md": "Nazariya", "description_md": "", "is_public": "on"}
     data.update(over)
     return data
 
 
 @pytest.mark.django_db
-def test_staff_creates_plan_with_sections(client, staff):
-    _problem("a1", staff)
-    _problem("b1", staff)
+def test_staff_creates_edits_and_deletes_a_course(client, staff):
+    loops = Tag.objects.create(name="for-loop")
+    _problem("a1", staff, "for-loop")
     client.force_login(staff)
-    r = client.post(reverse("moderation:plan_new"), _plan_post())
-    assert r.status_code == 302, r.content.decode()[:2000]
-    plan = StudyPlan.objects.get(slug="yangi")
-    section = plan.sections.get()
-    assert list(section.items.values_list("problem__slug", flat=True)) == ["b1", "a1"]
-    # editing keeps the section and rewrites its problems in the new order
-    data = _plan_post(**{"sections-INITIAL_FORMS": "1", "sections-0-id": str(section.pk), "sections-0-plan": str(plan.pk),
-                         "sections-0-slugs": "a1"})
-    assert client.post(reverse("moderation:plan_edit", args=[plan.pk]), data).status_code == 302
-    assert list(section.items.values_list("problem__slug", flat=True)) == ["a1"]
-    assert client.get(reverse("moderation:plans")).status_code == 200
-    client.post(reverse("moderation:plan_delete", args=[plan.pk]))
-    assert not StudyPlan.objects.exists() and Problem.objects.count() == 2
+    assert f'value="{loops.pk}"' in client.get(reverse("moderation:plan_new")).content.decode()  # tag checkbox
+    r = client.post(reverse("moderation:plan_new"), _course_post(tags=[loops.pk]))
+    assert r.status_code == 302 and r.url == "/learn/yangi/"
+    course = StudyPlan.objects.get(slug="yangi")
+    assert list(course.tags.all()) == [loops] and course.theory_md == "Nazariya"
+    assert "1 masala" in client.get(reverse("moderation:plans")).content.decode()
+    assert "Nazariya" in client.get(reverse("moderation:plan_edit", args=[course.pk])).content.decode()
+    r = client.post(reverse("moderation:plan_edit", args=[course.pk]), _course_post(title="Sikllar", tags=[]))
+    assert r.status_code == 302
+    course.refresh_from_db()
+    assert course.title == "Sikllar" and not course.tags.exists()
+    client.post(reverse("moderation:plan_delete", args=[course.pk]))
+    assert not StudyPlan.objects.exists() and Problem.objects.count() == 1 and Tag.objects.filter(pk=loops.pk).exists()
 
 
 @pytest.mark.django_db
-def test_plan_form_rejects_bad_slugs(client, staff):
-    _problem("a1", staff)
-    _problem("p1", staff, status=Problem.Status.PENDING, is_public=False)
+@pytest.mark.parametrize("slug", sorted(RESERVED_SLUGS))
+def test_course_form_rejects_reserved_slugs(client, staff, slug):
     client.force_login(staff)
-    for slugs, words in (("a1\nnope", "nope"), ("a1\np1", "p1"), ("a1\na1", "a1")):
-        r = client.post(reverse("moderation:plan_new"), _plan_post(**{"sections-0-slugs": slugs}))
-        assert r.status_code == 200 and words in r.content.decode()
-    r = client.post(reverse("moderation:plan_new"), _plan_post(**{"sections-1-title": "Yana", "sections-1-slugs": "a1",
-                                                                  "sections-1-order": "1", "sections-0-slugs": "a1"}))
-    assert r.status_code == 200 and "bir necha bo‘limda" in r.content.decode()
+    r = client.post(reverse("moderation:plan_new"), _course_post(slug=slug))
+    assert r.status_code == 200 and "Bu nom band" in r.content.decode()
     assert not StudyPlan.objects.exists()
 
 
 @pytest.mark.django_db
-def test_plan_pages_require_staff(client, ali):
+def test_course_pages_require_staff(client, ali):
     client.force_login(ali)
     for url in (reverse("moderation:plans"), reverse("moderation:plan_new")):
         assert client.get(url).status_code == 302
 
 
 @pytest.mark.django_db
-def test_staff_edits_topic_theory(client, staff):
-    from apps.problems.models import Tag
-
+def test_staff_edits_a_tag_and_sees_its_courses(client, staff):
     tag = Tag.objects.create(name="stack")
+    _course("stack-queue", "stack", title="Stek va navbat")
     client.force_login(staff)
-    r = client.post(reverse("moderation:tag_edit", args=[tag.pk]),
-                    {"name": "stack", "kind": "code", "about_md": "LIFO"})
-    assert r.status_code == 302
+    assert "Stek va navbat" in client.get(reverse("moderation:tag_edit", args=[tag.pk])).content.decode()
+    assert "Stek va navbat" in client.get(reverse("moderation:tags")).content.decode()
+    r = client.post(reverse("moderation:tag_edit", args=[tag.pk]), {"name": "stek", "kind": "code"})
+    assert r.status_code == 302 and r.url == reverse("moderation:tags")
     tag.refresh_from_db()
-    assert tag.about_md == "LIFO"
-
-
-# ---- quest badges and starter content ---------------------------------------
-
-@pytest.mark.django_db
-def test_profile_shows_completed_plan_badge(client, staff, ali):
-    a = _problem("a1", staff)
-    _plan("p", [a], title="Birinchi qadam", in_quest=True)
-    _plan("q", [_problem("b1", staff)], title="Tugamagan reja")
-    url = reverse("profile", args=[ali.username])
-    assert "Birinchi qadam" not in client.get(url).content.decode()
-    _solve(ali, a)
-    body = client.get(url).content.decode()
-    assert "Birinchi qadam" in body and "Tugamagan reja" not in body
+    assert tag.name == "stek"
 
 
 @pytest.mark.django_db
-def test_add_study_plans_is_idempotent_and_skips_missing(staff):
-    from io import StringIO
-
-    from django.core.management import call_command
-
-    from apps.learn.management.commands.add_study_plans import PLANS
-    from apps.problems.models import Tag
-
-    first_slug = PLANS[0]["sections"][0]["slugs"][0]
-    _problem(first_slug, staff)
-    Tag.objects.update_or_create(name="loops", defaults={"about_md": "o‘zim yozdim"})
-    out = StringIO()
-    call_command("add_study_plans", stdout=out)
-    call_command("add_study_plans", stdout=out)
-    assert StudyPlan.objects.count() == len(PLANS)
-    assert PlanItem.objects.count() == 1 and "topilmadi" in out.getvalue()
-    assert Tag.objects.get(name="loops").about_md == "o‘zim yozdim"  # staff text is never overwritten
-    assert Tag.objects.exclude(about_md="").count() > 5
-    # sections without problems yet are kept, so the course shows its whole outline
-    assert PlanSection.objects.count() == sum(len(p["sections"]) for p in PLANS)
-    # topics that don't exist on the portal yet are created with theory and the right kind
-    assert Tag.objects.get(name="heap").kind == Tag.Kind.CODE and Tag.objects.get(name="heap").about_md
-    assert Tag.objects.get(name="window-functions").kind == Tag.Kind.SQL
-
-
-@pytest.mark.django_db
-def test_staff_plan_list_follows_plan_order(client, staff):
-    a = _problem("a1", staff)
-    _plan("aa-reja", [a], title="Alfa reja", order=2)
-    _plan("zz-reja", [a, _problem("b1", staff)], title="Zeta reja", order=1)
+def test_staff_course_list_follows_course_order(client, staff):
+    _course("aa", title="Alfa kurs", order=2)
+    _course("zz", title="Zeta kurs", order=1)
     client.force_login(staff)
     body = client.get(reverse("moderation:plans")).content.decode()
-    assert body.index("Zeta reja") < body.index("Alfa reja")
+    assert body.index("Zeta kurs") < body.index("Alfa kurs")
 
 
-# ---- Kurslar / Qo‘llanma restructure -----------------------------------------------------------
-
-@pytest.mark.django_db
-def test_plan_sections_counts_each_section_and_finds_the_next_unsolved(staff, ali):
-    from apps.learn.progress import plan_sections
-
-    a, b, c = (_problem(s, staff) for s in "abc")
-    plan = _plan("p", [a, b])
-    second = PlanSection.objects.create(plan=plan, title="Ikkinchi", order=1)
-    PlanItem.objects.create(section=second, problem=c)
-    PlanSection.objects.create(plan=plan, title="Tez orada", order=2)  # nothing open yet: listed, never complete
-    _solve(ali, a)
-    assert plan_sections(ali, [plan])[plan.pk] == {
-        "sections": [{"done": 1, "total": 2, "complete": False}, {"done": 0, "total": 1, "complete": False},
-                     {"done": 0, "total": 0, "complete": False}],
-        "next_id": b.pk}
-
-
-@pytest.mark.django_db
-def test_hub_shows_each_course_once_and_continues_with_the_next_problem(client, staff, ali):
-    a, b = _problem("a", staff), _problem("b", staff)
-    _plan("birinchi", [a, b], title="Birinchi qadam", in_quest=True)
-    _plan("sql", [_problem("s", staff)], title="SQL asoslari")
-    _solve(ali, a)
-    client.force_login(ali)
-    body = client.get(reverse("learn:hub")).content.decode()
-    # the path course used to be listed again under "O‘quv rejalar"
-    assert body.count('href="/learn/plans/birinchi/"') == 2  # its card + the "continue" title, nothing more
-    assert "Qo‘shimcha kurslar" in body and "SQL asoslari" in body
-    assert f'href="{reverse("problems:detail", args=["b"])}?plan=birinchi"' in body
-
-
-@pytest.mark.django_db
-def test_guide_lists_only_topics_with_theory(client, staff):
-    from apps.problems.models import Tag
-
-    with_theory = Tag.objects.create(name="sikllar", about_md="# Sikl\n\nTakrorlash uchun **for** ishlatiladi.")
-    bare = Tag.objects.create(name="yalang")
-    p = _problem("a", staff)
-    p.tags.add(with_theory, bare)
-    body = client.get(reverse("learn:topics")).content.decode()
-    assert "sikllar" in body and "Takrorlash uchun for ishlatiladi." in body
-    assert "yalang" not in body
-
-
-@pytest.mark.django_db
-def test_course_section_links_to_its_topic_theory(client, staff):
-    from apps.problems.models import Tag
-
-    tag = Tag.objects.create(name="sikllar", about_md="Nazariya")
-    a = _problem("a", staff)
-    a.tags.add(tag, Tag.objects.create(name="matn"))  # no theory: not a candidate
-    plan = _plan("p", [a])
-    body = client.get(reverse("learn:plan", args=[plan.slug])).content.decode()
-    assert f'href="{reverse("learn:topic", args=["sikllar"])}"' in body and "Nazariya: sikllar" in body
-
+# ---- layout ------------------------------------------------------------------
 
 @pytest.mark.django_db
 def test_saved_lists_sit_under_masalalar(client, ali):
@@ -422,35 +412,3 @@ def test_saved_lists_sit_under_masalalar(client, ali):
     assert reverse("learn:lists") in client.get(reverse("problems:list")).content.decode()
     body = client.get(reverse("learn:lists")).content.decode()
     assert f'href="{reverse("problems:list")}" class="ca-sidebar-link is-active"' in body
-
-
-@pytest.mark.django_db
-def test_section_theory_prefers_the_topic_its_intro_links_to(client, staff):
-    from apps.problems.models import Tag
-
-    io, math = (Tag.objects.update_or_create(name=n, defaults={"about_md": "x"})[0] for n in ("input-output", "math"))
-    a = _problem("a", staff)
-    a.tags.add(io, math)
-    plan = _plan("p", [a])
-    plan.sections.update(intro_md="Nazariya: [input-output](/learn/topics/input-output/).")
-    assert "Nazariya: input-output" in client.get(reverse("learn:plan", args=[plan.slug])).content.decode()
-
-
-@pytest.mark.django_db
-def test_topic_and_course_show_theory_before_any_problem_exists(client, staff):
-    from apps.problems.models import Tag
-
-    Tag.objects.create(name="heap", about_md="Uyum eng kichik elementni tez beradi.")
-    Tag.objects.create(name="no-theory")
-    guide = client.get(reverse("learn:topics")).content.decode()
-    assert "heap" in guide and "Masalalar tez orada" in guide and "no-theory" not in guide
-    r = client.get(reverse("learn:topic", args=["heap"]))
-    assert r.status_code == 200 and "tez orada" in r.content.decode()
-    assert client.get(reverse("learn:topic", args=["no-theory"])).status_code == 404
-
-    plan = StudyPlan.objects.create(slug="ds", title="Tuzilmalar", is_public=True, in_quest=True)
-    PlanSection.objects.create(plan=plan, title="Uyum", intro_md="Nazariya: [heap](/learn/topics/heap/).")
-    body = client.get(reverse("learn:plan", args=["ds"])).content.decode()
-    assert "Uyum" in body and "Masalalar tez orada" in body and "Nazariya: heap" in body
-    assert "Masalalar tez orada" in client.get(reverse("learn:hub")).content.decode()
-    assert "Tuzilmalar" in client.get(reverse("learn:topic", args=["heap"])).content.decode()  # linked course

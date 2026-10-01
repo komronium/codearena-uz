@@ -6,36 +6,40 @@
 <header class="ca-course-hero mb-8">
   <span class="ca-course-art ca-course-art-lg" aria-hidden="true"><i data-lucide="{{ plan.icon }}" class="lu"></i></span>
   <div class="min-w-0 flex-1">
-    {% if plan.summary %}<p class="text-sm text-mute">{{ plan.summary }}</p>{% endif %}
+    <p class="text-sm text-mute">{{ plan.get_stage_display }}{% if plan.summary %} · {{ plan.summary }}{% endif %}</p>
     <h1 class="ca-page-title mt-1">{{ plan.title }}</h1>
     <p class="mt-2 flex flex-wrap items-center gap-2 text-sm text-mute">
       <span class="ca-diff ca-diff-{{ plan.level }}">{{ plan.get_level_display }}</span>
-      <span class="tabular">{{ sections|length }} bo‘lim · {{ progress.total }} masala</span>
-      {% if plan.in_quest %}<span class="ca-chip"><i data-lucide="map" class="lu mr-1" aria-hidden="true"></i>Asosiy yo‘l</span>{% endif %}
+      {% if progress.total %}<span class="tabular">{{ progress.total }} masala</span>{% endif %}
       {% if not plan.is_public %}<span class="ca-chip text-mute">Yashirin</span>{% endif %}
       {% if user.is_staff %}<a class="ca-link" href="{% url 'moderation:plan_edit' plan.pk %}"><i data-lucide="pencil" class="lu mr-1" aria-hidden="true"></i>Tahrirlash</a>{% endif %}
     </p>
     {% if next_problem %}<a class="ca-btn ca-btn-primary mt-4" href="{% url 'problems:detail' next_problem.slug %}?plan={{ plan.slug }}"><i data-lucide="play" class="lu" aria-hidden="true"></i>{% if progress.done %}Davom etish{% else %}Boshlash{% endif %}</a>
-    {% elif progress.completed %}<p class="mt-4 font-semibold text-ok"><i data-lucide="check" class="lu mr-1" aria-hidden="true"></i>Kurs tugatildi</p>
-    {% elif not progress.total %}<p class="mt-4 text-sm text-mute"><i data-lucide="clock" class="lu mr-1" aria-hidden="true"></i>Masalalar tez orada qo‘shiladi — nazariyani hozirdan o‘qishingiz mumkin.</p>{% endif %}
+    {% elif progress.completed %}<p class="mt-4 font-semibold text-ok"><i data-lucide="check" class="lu mr-1" aria-hidden="true"></i>Kurs tugatildi</p>{% endif %}
   </div>
 </header>
 
 <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-start">
   <div class="space-y-5">
-    {% for s in sections %}
-    <section class="ca-sec" aria-labelledby="sec-{{ forloop.counter }}">
+    {% if theory_html %}
+    {# Open until the first solve: then the problems come first and the theory is one click away. #}
+    <details class="ca-sec ca-theory"{% if not progress.done %} open{% endif %}>
+      <summary class="ca-sec-head"><h2><i data-lucide="book-open" class="lu mr-1.5 text-accent" aria-hidden="true"></i>Nazariya</h2><i data-lucide="chevron-down" class="lu ca-theory-chevron ml-auto text-mute" aria-hidden="true"></i></summary>
+      <div class="prose max-w-none px-5 py-4">{{ theory_html|safe }}</div>
+    </details>
+    {% endif %}
+
+    <h2 class="ca-section-title !mb-0 pt-2">Masalalar</h2>
+    {% for g in groups %}
+    <section class="ca-sec" aria-labelledby="lvl-{{ g.level }}">
       <div class="ca-sec-head">
-        <h2 id="sec-{{ forloop.counter }}"><span class="mr-2 font-mono text-xs text-mute">{{ forloop.counter|stringformat:"02d" }}</span>{{ s.section.title }}</h2>
-        {% if s.topic %}<a class="ca-link ml-auto text-xs" href="{% url 'learn:topic' s.topic.name %}"><i data-lucide="book-open" class="lu mr-1" aria-hidden="true"></i>Nazariya: {{ s.topic.name }}</a>{% endif %}
-        {% if user.is_authenticated and s.problems %}<span class="tabular text-xs {% if s.complete %}text-ok{% else %}text-mute{% endif %}{% if not s.topic %} ml-auto{% endif %}">{{ s.done }}/{{ s.problems|length }}</span>{% endif %}
+        <h2 id="lvl-{{ g.level }}"><span class="ca-diff ca-diff-{{ g.level }}">{{ g.label }}</span></h2>
+        <span class="tabular ml-auto text-xs {% if g.done == g.problems|length %}text-ok{% else %}text-mute{% endif %}">{% if user.is_authenticated %}{{ g.done }}/{% endif %}{{ g.problems|length }}</span>
       </div>
-      {% if s.intro_html %}<div class="prose ca-sec-intro max-w-none text-sm">{{ s.intro_html|safe }}</div>{% endif %}
-      {% if s.problems %}{% include "learn/_problem_rows.html" with rows=s.problems %}
-      {% else %}<p class="ca-sec-soon"><i data-lucide="clock" class="lu" aria-hidden="true"></i>Masalalar tez orada{% if s.topic %} — hozircha <a class="ca-link" href="{% url 'learn:topic' s.topic.name %}">nazariyani o‘qing</a>{% endif %}.</p>{% endif %}
+      {% include "learn/_problem_rows.html" with rows=g.problems %}
     </section>
     {% empty %}
-    <div class="ca-empty">Bu kursda hali bo‘lim yo‘q.</div>
+    <p class="ca-sec ca-sec-soon"><i data-lucide="clock" class="lu" aria-hidden="true"></i>{% if plan.tags.exists %}Bu kurs uchun masalalar tayyorlanmoqda — hozircha nazariyani o‘qing.{% else %}Bu kurs — faqat nazariya.{% endif %}</p>
     {% endfor %}
   </div>
 
@@ -52,11 +56,13 @@
       <div class="prose max-w-none text-sm">{{ description_html|safe }}</div>
     </section>
     {% endif %}
+    {% if progress.total %}
     <section aria-labelledby="award-title">
       <h2 id="award-title" class="mb-2 text-base font-semibold">Nishon</h2>
       <p class="flex items-center gap-3 text-sm"><span class="ca-award{% if not progress.completed %} is-locked{% endif %}" aria-hidden="true"><i data-lucide="{{ plan.icon }}" class="lu"></i></span>
         <span class="text-mute">{% if progress.completed %}Olingan — profilingizda ko‘rinadi.{% else %}Kursni tugatsangiz profilingizga «{{ plan.title }}» nishoni qo‘shiladi.{% endif %}</span></p>
     </section>
+    {% endif %}
   </aside>
 </div>
 {% endblock %}

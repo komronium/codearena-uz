@@ -1,4 +1,4 @@
-{# Problem rows with a solved mark. Needs `rows` (problems with .solved); `plan` adds ?plan= to links. #}
+{# A course's problems of one difficulty (the group head names it), with a solved mark. Needs `rows` (problems with .solved); `plan` adds ?plan= to links. #}
 <ul class="ca-rows">
   {% for p in rows %}
   <li class="ca-row relative">
@@ -8,7 +8,6 @@
         {% if p.kind == "sql" %}<span class="ca-kind-sql"><i data-lucide="database" class="lu" aria-hidden="true"></i>SQL</span>{% endif %}</div>
       {% with tags=p.tags.all %}{% if tags %}<div class="ca-row-meta"><span class="ca-topics">{% for t in tags|slice:":3" %}{{ t.name }}{% if not forloop.last %} · {% endif %}{% endfor %}</span></div>{% endif %}{% endwith %}
     </div>
-    <span class="ca-diff ca-diff-{{ p.difficulty }}">{{ p.get_difficulty_display }}</span>
   </li>
   {% endfor %}
 </ul>

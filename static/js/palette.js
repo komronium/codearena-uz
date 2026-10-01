@@ -1,14 +1,14 @@
 // Command palette (Ctrl/⌘ K or "/"): pages, actions and an instant problem search in one list,
 // grouped, arrow keys to move, Enter to open. Plus two-key shortcuts ("g p" → problems) and "?"
 // for the list of them. The pages and actions come from base.html (#ca-palette-data), which knows
-// the URLs and who is signed in; problems come from /problems/suggest/.
+// the URLs and who is signed in; problems come from /problems/suggest/, courses from /learn/search/.
 (() => {
   const dlg = document.getElementById("ca-palette");
   const input = document.getElementById("ca-palette-q");
   const list = document.getElementById("ca-palette-list");
   const keysDlg = document.getElementById("ca-keys");
   if (!dlg || !input || !list) return;
-  let data = { items: [], suggest: "", all: "" };
+  let data = { items: [], suggest: "", courses: "", all: "" };
   try { data = JSON.parse(document.getElementById("ca-palette-data").textContent); } catch {}
 
   // "o‘", "g‘", apostrophes and case don't matter: "ogil" finds "O‘g‘il", "reyt" finds "Reyting".
@@ -27,7 +27,7 @@
     return i === q.length ? 3 : -1;
   };
 
-  let rows = [], active = 0, problems = [], lastQ = "", timer = null, ctrl = null;
+  let rows = [], active = 0, problems = [], courses = [], lastQ = "", timer = null, ctrl = null;
   const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
   function render() {
@@ -45,7 +45,8 @@
     const addProblems = () => problems.forEach((p) => add("Masalalar", { label: p.title, url: p.url, icon: p.solved ? "circle-check" : "file-code-2",
       hint: `${p.difficulty_label} · #${String(p.id).padStart(4, "0")}`, level: p.difficulty, solved: p.solved }));
     const pagesFirst = !q || (pages.length && pages[0].s <= 1) || !problems.length;
-    if (pagesFirst) { addPages(); addProblems(); } else { addProblems(); addPages(); }
+    const addCourses = () => courses.forEach((c) => add("Kurslar", { label: c.title, url: c.url, icon: c.icon, hint: c.hint }));
+    if (pagesFirst) { addPages(); addCourses(); addProblems(); } else { addCourses(); addProblems(); addPages(); }
     if (q) add("Masalalar", { label: `«${input.value.trim()}» bo‘yicha barcha masalalar`, url: `${data.all}?q=${encodeURIComponent(input.value.trim())}`, icon: "search" });
 
     rows = [];
@@ -87,10 +88,12 @@
     if (q === lastQ) return;
     lastQ = q;
     ctrl?.abort();
-    if (!q) { problems = []; render(); return; }
+    if (!q) { problems = []; courses = []; render(); return; }
     ctrl = new AbortController();
-    fetch(`${data.suggest}?q=${encodeURIComponent(q)}`, { signal: ctrl.signal, headers: { Accept: "application/json" } })
-      .then((r) => r.json()).then((j) => { problems = j.results || []; render(); }).catch(() => {});
+    const get = (url) => (url ? fetch(`${url}?q=${encodeURIComponent(q)}`, { signal: ctrl.signal, headers: { Accept: "application/json" } })
+      .then((r) => r.json()).then((j) => j.results || []) : Promise.resolve([]));
+    Promise.all([get(data.suggest), get(data.courses)])
+      .then(([p, c]) => { problems = p; courses = c; render(); }).catch(() => {});
   }
 
   input.addEventListener("input", () => {
@@ -116,7 +119,7 @@
   const open = () => {
     if (dlg.open) return;
     document.querySelectorAll("dialog[open]").forEach((d) => d.id !== "ca-tier-up" && d.close());
-    input.value = ""; lastQ = ""; problems = []; active = 0;
+    input.value = ""; lastQ = ""; problems = []; courses = []; active = 0;
     render();
     dlg.showModal();
     input.focus();

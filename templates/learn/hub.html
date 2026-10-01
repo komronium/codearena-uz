@@ -1,15 +1,13 @@
 {% extends "base.html" %}
 {% block title %}Kurslar — O‘rganish{% endblock %}
-{% block page_title %}<h1>O‘rganish</h1><span class="ca-topbar-sub">Kurs — boshidan oxirigacha yuriladi · Qo‘llanma — kerak bo‘lganda o‘qiladi</span>{% endblock %}
+{% block page_title %}<h1>O‘rganish</h1><span class="ca-topbar-sub">Har kurs — bitta mavzu: nazariya va masalalar, osonidan qiyiniga</span>{% endblock %}
 {% block content %}
-{% include "learn/_tabs.html" with tab="courses" %}
-
 {% if current %}
 <section class="ca-continue mb-10" aria-label="Davom ettirish">
   <span class="ca-course-art" aria-hidden="true"><i data-lucide="{{ current.icon }}" class="lu"></i></span>
   <div class="min-w-0 flex-1">
     <p class="ca-eyebrow">{% if current.progress.done %}Davom ettirish{% else %}Shu yerdan boshlang{% endif %}</p>
-    <p class="mt-0.5 text-lg font-semibold"><a class="ca-link" href="{% url 'learn:plan' current.slug %}">{{ current.title }}</a></p>
+    <p class="mt-0.5 text-lg font-semibold"><a class="ca-link" href="{% url 'learn:course' current.slug %}">{{ current.title }}</a></p>
     {% if user.is_authenticated %}
     <div class="mt-2 flex max-w-md items-center gap-3">
       <div class="ca-progress flex-1" role="progressbar" aria-valuenow="{{ current.progress.pct }}" aria-valuemin="0" aria-valuemax="100" aria-label="{{ current.title }}: {{ current.progress.pct }}%"><span style="width: {{ current.progress.pct }}%"></span></div>
@@ -22,30 +20,20 @@
 </section>
 {% endif %}
 
-{% if quest %}
-<section class="mb-10" aria-labelledby="quest-title">
-  <h2 id="quest-title" class="ca-section-title">Asosiy yo‘l</h2>
-  <p class="-mt-2 mb-1 text-sm text-mute">Shu tartibda o‘ting: har kurs keyingisiga tayyorlaydi.</p>
+{% for s in stages %}
+<section class="mb-10" aria-labelledby="stage-{{ s.stage }}">
+  <h2 id="stage-{{ s.stage }}" class="ca-section-title">{{ s.label }}</h2>
   <ol class="ca-quest">
-    {% for p in quest %}
-    <li class="ca-quest-stage{% if p.progress.completed %} is-done{% elif p == here %} is-here{% endif %}">
-      <span class="ca-quest-node" aria-hidden="true">{% if p.progress.completed %}<i data-lucide="check" class="lu"></i>{% else %}{{ forloop.counter }}{% endif %}</span>
+    {% for p in s.courses %}
+    <li class="ca-quest-stage{% if p.progress.completed %} is-done{% elif p == here %} is-here{% elif not p.progress.total %} is-soon{% endif %}">
+      <span class="ca-quest-node" aria-hidden="true">{% if p.progress.completed %}<i data-lucide="check" class="lu"></i>{% else %}{{ p.number }}{% endif %}</span>
       {% include "learn/_course_card.html" %}
     </li>
     {% endfor %}
   </ol>
-  {% if not user.is_authenticated %}<p class="mt-3 text-sm text-mute"><a class="ca-link" href="{% url 'register' %}">Ro‘yxatdan o‘ting</a> — yutuqlaringiz saqlanadi va har kurs uchun nishon olasiz.</p>{% endif %}
 </section>
-{% endif %}
-
-{% if extra %}
-<section class="mb-10" aria-labelledby="extra-title">
-  <h2 id="extra-title" class="ca-section-title">Qo‘shimcha kurslar</h2>
-  <div class="grid gap-4 md:grid-cols-2">{% for p in extra %}{% include "learn/_course_card.html" %}{% endfor %}</div>
-</section>
-{% endif %}
-
-{% if not quest and not extra %}
+{% empty %}
 <div class="ca-empty">Hali kurs yo‘q.{% if user.is_staff %} <a class="ca-link" href="{% url 'moderation:plan_new' %}">Birinchisini tuzing</a>{% endif %}</div>
-{% endif %}
+{% endfor %}
+{% if stages and not user.is_authenticated %}<p class="text-sm text-mute"><a class="ca-link" href="{% url 'register' %}">Ro‘yxatdan o‘ting</a> — yutuqlaringiz saqlanadi va har kurs uchun nishon olasiz.</p>{% endif %}
 {% endblock %}

@@ -1,7 +1,7 @@
-{# Problem page opened from a study plan: the way back, with the plan's progress. #}
-<a class="ca-link inline-flex min-w-0 items-center gap-2 text-mute" href="{% url 'learn:plan' nav.plan.slug %}">
+{# Problem page opened from a course: the way back, with the course's progress. #}
+<a class="ca-link inline-flex min-w-0 items-center gap-2 text-mute" href="{% url 'learn:course' nav.plan.slug %}">
   <i data-lucide="arrow-left" class="lu" aria-hidden="true"></i>
   <i data-lucide="{{ nav.plan.icon }}" class="lu text-accent" aria-hidden="true"></i>
-  <span class="truncate"><span class="sr-only">Reja: </span>{{ nav.plan.title }}</span>
-  {% if user.is_authenticated %}<span class="ca-chip tabular" title="Rejadan yechilgan masalalar"><i data-lucide="check" class="lu mr-1" aria-hidden="true"></i>{{ nav.done }}/{{ nav.total }}</span>{% endif %}
+  <span class="truncate"><span class="sr-only">Kurs: </span>{{ nav.plan.title }}</span>
+  {% if user.is_authenticated %}<span class="ca-chip tabular" title="Kursdan yechilgan masalalar"><i data-lucide="check" class="lu mr-1" aria-hidden="true"></i>{{ nav.done }}/{{ nav.total }}</span>{% endif %}
 </a>
