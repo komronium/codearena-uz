@@ -1,4 +1,7 @@
+from io import StringIO
+
 import pytest
+from django.core.management import call_command
 from django.urls import reverse
 from django.utils import timezone
 
@@ -402,6 +405,62 @@ def test_staff_course_list_follows_course_order(client, staff):
     client.force_login(staff)
     body = client.get(reverse("moderation:plans")).content.decode()
     assert body.index("Zeta kurs") < body.index("Alfa kurs")
+
+
+# ---- content commands ----------------------------------------------------------
+
+@pytest.mark.django_db
+def test_add_courses_is_idempotent_and_keeps_staff_edits(staff):
+    from apps.learn.management.commands.add_courses import COURSES
+
+    StudyPlan.objects.create(slug="birinchi-qadam", title="Eski reja")
+    StudyPlan.objects.create(slug="arrays", title="Ro‘yxatlar", theory_md="o‘zim yozdim")
+    _problem("a1", staff, "for-loop")
+    out = StringIO()
+    call_command("add_courses", stdout=out)
+    call_command("add_courses", stdout=out)
+    assert StudyPlan.objects.count() == len(COURSES) == 38
+    assert not StudyPlan.objects.filter(slug="birinchi-qadam").exists()  # the first plans redirect now
+    assert StudyPlan.objects.get(slug="arrays").theory_md == "o‘zim yozdim"
+    assert not StudyPlan.objects.filter(theory_md="").exists()
+    assert not {c[0] for c in COURSES} & RESERVED_SLUGS
+    assert Tag.objects.get(name="window-functions").kind == Tag.Kind.SQL
+    assert Tag.objects.get(name="for-loop").kind == Tag.Kind.CODE
+    assert list(StudyPlan.objects.get(slug="complexity").tags.all()) == []
+    sql = StudyPlan.objects.get(slug="sql-select").theory_md
+    assert "## WHERE" in sql and "\n## " in sql  # one section per topic
+
+
+@pytest.mark.django_db
+def test_add_courses_dry_run_writes_nothing():
+    out = StringIO()
+    call_command("add_courses", "--dry-run", stdout=out)
+    assert not StudyPlan.objects.exists() and "dry-run" in out.getvalue()
+
+
+@pytest.mark.django_db
+def test_retag_problems_splits_loops_and_math_and_reverses(staff):
+    fact = _problem("faktorial", staff, "loops", "math")
+    digits = _problem("p1-raqamlar-soni", staff, "loops")
+    other = _problem("not-in-table", staff, "strings")
+    call_command("retag_problems", "--dry-run", stdout=StringIO())
+    assert set(fact.tags.values_list("name", flat=True)) == {"loops", "math"}
+    call_command("retag_problems", stdout=StringIO())
+    call_command("retag_problems", stdout=StringIO())
+    assert set(fact.tags.values_list("name", flat=True)) == {"for-loop", "arithmetic"}
+    assert set(digits.tags.values_list("name", flat=True)) == {"while-loop"}
+    assert set(other.tags.values_list("name", flat=True)) == {"strings"}
+    assert not Tag.objects.filter(name__in=["loops", "math"]).exists()
+    call_command("retag_problems", "--reverse", stdout=StringIO())
+    assert set(fact.tags.values_list("name", flat=True)) == {"loops", "math"}
+
+
+@pytest.mark.django_db
+def test_retag_keeps_loops_while_a_problem_outside_the_table_has_it(staff):
+    _problem("unknown-loop", staff, "loops")
+    out = StringIO()
+    call_command("retag_problems", stdout=out)
+    assert Tag.objects.filter(name="loops").exists() and "unknown-loop" in out.getvalue()
 
 
 # ---- layout ------------------------------------------------------------------
