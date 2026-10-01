@@ -1360,8 +1360,8 @@ section.ca-ed-full #editor .cm-editor { height: calc(100vh - 9.5rem); }
 
 /* course page: one box per section, a grey head like a table head */
 .ca-sec { border: 1px solid rgb(var(--ca-line-rgb)); border-radius: var(--ca-radius); overflow: hidden; background: rgb(var(--ca-surface-rgb)); }
-.ca-sec-head { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem; padding: .7rem 1rem; background: rgb(var(--ca-sunk-rgb)); border-bottom: 1px solid rgb(var(--ca-line-rgb)); }
-.ca-sec-head h2 { font-size: .95rem; font-weight: 600; }
+.ca-sec > .ca-sec-head { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem; padding: .7rem 1rem; background: rgb(var(--ca-sunk-rgb)); border-bottom: 1px solid rgb(var(--ca-line-rgb)); }
+.ca-sec > .ca-sec-head h2 { font-size: .95rem; font-weight: 600; }
 .ca-sec-intro { padding: .75rem 1rem 0; color: rgb(var(--ca-mute-rgb)); }
 .ca-sec .ca-rows { border: 0; border-radius: 0; box-shadow: none; }
 .ca-sec-soon { display: flex; align-items: center; gap: .5rem; padding: .9rem 1rem; font-size: .875rem; color: rgb(var(--ca-mute-rgb)); }
