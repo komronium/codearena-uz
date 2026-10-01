@@ -2,7 +2,7 @@
 {% block title %}{{ tag.name }} — mavzu{% endblock %}
 {% block content %}
 <div class="mb-6">
-  {% include "moderation/_header.html" with title=tag.name subtitle="Nazariya /learn/topics/ sahifasida ko‘rinadi (Markdown: sarlavha, ro‘yxat, ```kod```)." back_url="/moderation/tags/" back_label="Mavzular" %}
+  {% include "moderation/_header.html" with title=tag.name subtitle="Nazariya yozilsa, mavzu O‘rganish → Qo‘llanma’da ko‘rinadi (Markdown: sarlavha, ro‘yxat, ```kod```)." back_url="/moderation/tags/" back_label="Mavzular" %}
 </div>
 <form method="post" novalidate class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:items-start">
   {% csrf_token %}

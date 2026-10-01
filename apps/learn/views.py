@@ -1,3 +1,6 @@
+import re
+from urllib.parse import unquote
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Q
@@ -12,7 +15,7 @@ from apps.problems.views import _render_statement
 
 from .forms import ListForm
 from .models import ProblemList, ProblemListItem, StudyPlan
-from .progress import plan_problem_ids, plan_progress, solved_ids
+from .progress import plan_problem_ids, plan_progress, plan_sections, solved_ids
 
 
 def _plans_for(user):
@@ -21,20 +24,43 @@ def _plans_for(user):
 
 
 def hub(request):
+    """Kurslar: the main path (in_quest courses, numbered) and the extra courses, each shown
+    once, plus one "continue" card with the next problem to solve."""
     plans = list(_plans_for(request.user))
     progress = plan_progress(request.user, plans)
+    details = plan_sections(request.user, plans)
     for p in plans:
         p.progress = progress[p.pk]
+        p.dots = details[p.pk]["sections"]
+        p.dots_done = sum(1 for s in p.dots if s["done"] == s["total"])
     quest = [p for p in plans if p.in_quest]
-    here = next((p for p in quest if not p.progress["completed"]), None) if request.user.is_authenticated else None
-    levels = dict(Problem.Difficulty.choices)
-    by_level = [(levels[v], [p for p in plans if p.level == v]) for v in levels]
+    here = next((p for p in quest if not p.progress["completed"]), None)
+    # Continue what was started (in course order), else the first unfinished stage of the path.
+    current = next((p for p in plans if 0 < p.progress["done"] and not p.progress["completed"]), here)
+    next_problem = None
+    if current is not None and details[current.pk]["next_id"]:
+        next_problem = Problem.objects.filter(pk=details[current.pk]["next_id"]).first()
     return render(request, "learn/hub.html", {
-        "quest": quest, "here": here,
-        # quest stages already show their progress above
-        "going": [p for p in plans if not p.in_quest and 0 < p.progress["done"] < p.progress["total"]],
-        "by_level": [(label, ps) for label, ps in by_level if ps],
+        "quest": quest, "here": here if request.user.is_authenticated else None,
+        "extra": [p for p in plans if not p.in_quest],
+        "current": current, "next_problem": next_problem,
     })
+
+
+def _section_topic(intro_md: str, problems):
+    """The topic a section is about: the one its intro links to, else the most common tag
+    with written theory among its problems."""
+    linked = re.search(r"/learn/topics/([^/)\s]+)/", intro_md)
+    if linked:
+        tag = Tag.objects.filter(name=unquote(linked.group(1))).exclude(about_md="").first()
+        if tag is not None:
+            return tag
+    counts: dict = {}
+    for p in problems:
+        for t in p.tags.all():
+            if t.about_md.strip():
+                counts[t] = counts.get(t, 0) + 1
+    return max(counts, key=lambda t: (counts[t], t.name), default=None)
 
 
 def plan_detail(request, slug):
@@ -46,22 +72,39 @@ def plan_detail(request, slug):
     for section in plan.sections.prefetch_related("items"):
         rows = [problems[i.problem_id] for i in section.items.all() if i.problem_id in problems]
         if rows:
+            done = sum(p.pk in solved for p in rows)
             sections.append({"section": section, "intro_html": _render_statement(section.intro_md),
-                             "problems": rows, "done": sum(p.pk in solved for p in rows)})
+                             "problems": rows, "done": done, "complete": done == len(rows),
+                             "topic": _section_topic(section.intro_md, rows)})
     for p in problems.values():
         p.solved = p.pk in solved
+    next_id = plan_sections(request.user, [plan])[plan.pk]["next_id"]
     return render(request, "learn/plan.html", {
         "plan": plan, "sections": sections, "progress": plan_progress(request.user, [plan])[plan.pk],
         "description_html": _render_statement(plan.description_md),
+        "next_problem": problems.get(next_id),
     })
 
 
-# ---- topics ("Mavzular") -------------------------------------------------------
+# ---- topics ("Qo‘llanma") -------------------------------------------------------
+
+def _excerpt(md: str) -> str:
+    """First prose line of a topic's theory, markdown marks stripped, for its card."""
+    for line in md.splitlines():
+        line = line.strip()
+        if line and not line.startswith(("#", "```", "|", ">", "-", "*", "$$")):
+            return line.replace("**", "").replace("`", "")
+    return ""
+
 
 def topics(request):
-    rows = skill_map(request.user)
+    """Qo‘llanma: only topics with written theory. The rest are plain tags, filtered on Masalalar."""
+    rows = [r for r in skill_map(request.user) if r["tag"].about_md.strip()]
+    for r in rows:
+        r["excerpt"] = _excerpt(r["tag"].about_md)
     return render(request, "learn/topics.html", {
-        "groups": [(label, [r for r in rows if r["tag"].kind == value]) for value, label in Tag.Kind.choices],
+        "groups": [(value, label, [r for r in rows if r["tag"].kind == value]) for value, label in Tag.Kind.choices],
+        "n_without_theory": Tag.objects.filter(about_md="").count() if request.user.is_staff else 0,
     })
 
 

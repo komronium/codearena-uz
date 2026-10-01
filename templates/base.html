@@ -35,7 +35,7 @@
   <div class="ca-col">
     <header class="ca-topbar">
       <a href="{% url 'home' %}" class="ca-topbar-brand" aria-label="CodeArena bosh sahifa">{% include "_brand_mark.html" %}</a>
-      <div class="ca-topbar-title">{% block page_title %}{% with ns=request.resolver_match.namespace un=request.resolver_match.url_name %}<p class="ca-topbar-section">{% if ns == "problems" %}Masalalar{% elif ns == "learn" %}O‘rganish{% elif ns == "contests" %}Musobaqalar{% elif ns == "classroom" and "duel" in un %}Duellar{% elif ns == "classroom" %}Vazifalar{% elif ns == "submissions" %}Urinishlar{% elif ns == "moderation" or ns == "integrity" %}Boshqaruv{% elif un == "profile" or un == "profile_edit" %}Profil{% else %}CodeArena{% endif %}</p>{% endwith %}{% endblock %}</div>
+      <div class="ca-topbar-title">{% block page_title %}{% with ns=request.resolver_match.namespace un=request.resolver_match.url_name %}<p class="ca-topbar-section">{% if ns == "problems" %}Masalalar{% elif ns == "learn" and "list" in un %}Masalalar{% elif ns == "learn" %}O‘rganish{% elif ns == "contests" %}Musobaqalar{% elif ns == "classroom" and "duel" in un %}Duellar{% elif ns == "classroom" %}Vazifalar{% elif ns == "submissions" %}Urinishlar{% elif ns == "moderation" or ns == "integrity" %}Boshqaruv{% elif un == "profile" or un == "profile_edit" %}Profil{% else %}CodeArena{% endif %}</p>{% endwith %}{% endblock %}</div>
       <div class="ca-topbar-tools">
         {% with live=nav.live %}{% if live and not contest and request.resolver_match.namespace != "contests" and request.resolver_match.url_name != "home" %}
         {# a contest is running: its clock and a way in, from every page #}

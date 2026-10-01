@@ -1,40 +1,60 @@
 {% extends "base.html" %}
-{% block title %}{{ plan.title }} — o‘quv reja{% endblock %}
+{% block title %}{{ plan.title }} — kurs{% endblock %}
 {% block content %}
-<header class="mb-8">
-  <a class="ca-link mb-3 inline-block text-sm text-mute" href="{% url 'learn:hub' %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>O‘rganish</a>
-  <div class="flex flex-wrap items-start gap-4">
-    <span class="ca-tile-icon !h-12 !w-12 shrink-0"><i data-lucide="{{ plan.icon }}" class="lu" aria-hidden="true"></i></span>
-    <div class="min-w-0 flex-1">
-      <h1 class="ca-page-title">{{ plan.title }}</h1>
-      <p class="mt-2 flex flex-wrap items-center gap-2 text-sm text-mute">
-        <span class="ca-diff ca-diff-{{ plan.level }}">{{ plan.get_level_display }}</span>
-        <span>{{ progress.total }} ta masala · {{ sections|length }} bo‘lim</span>
-        {% if plan.in_quest %}<span class="ca-chip"><i data-lucide="map" class="lu mr-1" aria-hidden="true"></i>Yo‘l bosqichi</span>{% endif %}
-        {% if not plan.is_public %}<span class="ca-chip text-mute">Yashirin</span>{% endif %}
-        {% if user.is_staff %}<a class="ca-link" href="{% url 'moderation:plan_edit' plan.pk %}"><i data-lucide="pencil" class="lu mr-1" aria-hidden="true"></i>Tahrirlash</a>{% endif %}
-      </p>
-    </div>
+<a class="ca-link mb-4 inline-block text-sm text-mute" href="{% url 'learn:hub' %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>Kurslar</a>
+
+<header class="ca-course-hero mb-8">
+  <span class="ca-course-art ca-course-art-lg" aria-hidden="true"><i data-lucide="{{ plan.icon }}" class="lu"></i></span>
+  <div class="min-w-0 flex-1">
+    {% if plan.summary %}<p class="text-sm text-mute">{{ plan.summary }}</p>{% endif %}
+    <h1 class="ca-page-title mt-1">{{ plan.title }}</h1>
+    <p class="mt-2 flex flex-wrap items-center gap-2 text-sm text-mute">
+      <span class="ca-diff ca-diff-{{ plan.level }}">{{ plan.get_level_display }}</span>
+      <span class="tabular">{{ sections|length }} bo‘lim · {{ progress.total }} masala</span>
+      {% if plan.in_quest %}<span class="ca-chip"><i data-lucide="map" class="lu mr-1" aria-hidden="true"></i>Asosiy yo‘l</span>{% endif %}
+      {% if not plan.is_public %}<span class="ca-chip text-mute">Yashirin</span>{% endif %}
+      {% if user.is_staff %}<a class="ca-link" href="{% url 'moderation:plan_edit' plan.pk %}"><i data-lucide="pencil" class="lu mr-1" aria-hidden="true"></i>Tahrirlash</a>{% endif %}
+    </p>
+    {% if next_problem %}<a class="ca-btn ca-btn-primary mt-4" href="{% url 'problems:detail' next_problem.slug %}?plan={{ plan.slug }}"><i data-lucide="play" class="lu" aria-hidden="true"></i>{% if progress.done %}Davom etish{% else %}Boshlash{% endif %}</a>
+    {% elif progress.completed %}<p class="mt-4 font-semibold text-ok"><i data-lucide="check" class="lu mr-1" aria-hidden="true"></i>Kurs tugatildi</p>{% endif %}
   </div>
-  {% if description_html %}<div class="prose mt-4 max-w-3xl">{{ description_html|safe }}</div>{% endif %}
-  {% if user.is_authenticated %}
-  <div class="mt-5 flex max-w-xl items-center gap-3">
-    <div class="ca-progress flex-1{% if progress.completed %} ca-progress-ok{% endif %}" role="progressbar" aria-valuenow="{{ progress.pct }}" aria-valuemin="0" aria-valuemax="100" aria-label="Reja bajarilishi"><span style="width: {{ progress.pct }}%"></span></div>
-    <span class="tabular text-sm"><b>{{ progress.done }}/{{ progress.total }}</b>{% if progress.completed %} · <span class="text-ok">tugatildi</span>{% endif %}</span>
-  </div>
-  {% endif %}
 </header>
 
-{% for s in sections %}
-<section class="mb-8" aria-labelledby="sec-{{ forloop.counter }}">
-  <div class="mb-3 flex items-baseline justify-between gap-3">
-    <h2 id="sec-{{ forloop.counter }}" class="ca-section-title !mb-0"><span class="mr-2 font-mono text-sm text-accent">{{ forloop.counter|stringformat:"02d" }}</span>{{ s.section.title }}</h2>
-    {% if user.is_authenticated %}<span class="tabular text-xs text-mute">{{ s.done }}/{{ s.problems|length }}</span>{% endif %}
+<div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-start">
+  <div class="space-y-5">
+    {% for s in sections %}
+    <section class="ca-sec" aria-labelledby="sec-{{ forloop.counter }}">
+      <div class="ca-sec-head">
+        <h2 id="sec-{{ forloop.counter }}"><span class="mr-2 font-mono text-xs text-mute">{{ forloop.counter|stringformat:"02d" }}</span>{{ s.section.title }}</h2>
+        {% if s.topic %}<a class="ca-link ml-auto text-xs" href="{% url 'learn:topic' s.topic.name %}"><i data-lucide="book-open" class="lu mr-1" aria-hidden="true"></i>Nazariya: {{ s.topic.name }}</a>{% endif %}
+        {% if user.is_authenticated %}<span class="tabular text-xs {% if s.complete %}text-ok{% else %}text-mute{% endif %}{% if not s.topic %} ml-auto{% endif %}">{{ s.done }}/{{ s.problems|length }}</span>{% endif %}
+      </div>
+      {% if s.intro_html %}<div class="prose ca-sec-intro max-w-none text-sm">{{ s.intro_html|safe }}</div>{% endif %}
+      {% include "learn/_problem_rows.html" with rows=s.problems %}
+    </section>
+    {% empty %}
+    <div class="ca-empty">Bu kursda hozircha ochiq masala yo‘q.</div>
+    {% endfor %}
   </div>
-  {% if s.intro_html %}<div class="prose mb-3 max-w-3xl text-sm">{{ s.intro_html|safe }}</div>{% endif %}
-  {% include "learn/_problem_rows.html" with rows=s.problems %}
-</section>
-{% empty %}
-<div class="ca-empty">Bu rejada hozircha ochiq masala yo‘q.</div>
-{% endfor %}
+
+  <aside class="space-y-6 lg:sticky lg:top-20">
+    {% if user.is_authenticated %}
+    <section class="ca-panel flex items-center gap-4" aria-label="Kurs bajarilishi">
+      <span class="ca-ring{% if progress.completed %} is-done{% endif %}" style="--p: {{ progress.pct }}" role="img" aria-label="{{ progress.pct }}% bajarildi"><b class="tabular">{{ progress.pct }}%</b></span>
+      <div class="text-sm"><p class="tabular"><b>{{ progress.done }}</b> / {{ progress.total }} masala</p><p class="text-mute">{% if progress.completed %}Tugatildi{% else %}yechildi{% endif %}</p></div>
+    </section>
+    {% endif %}
+    {% if description_html %}
+    <section aria-labelledby="about-title">
+      <h2 id="about-title" class="mb-2 text-base font-semibold">Kurs haqida</h2>
+      <div class="prose max-w-none text-sm">{{ description_html|safe }}</div>
+    </section>
+    {% endif %}
+    <section aria-labelledby="award-title">
+      <h2 id="award-title" class="mb-2 text-base font-semibold">Nishon</h2>
+      <p class="flex items-center gap-3 text-sm"><span class="ca-award{% if not progress.completed %} is-locked{% endif %}" aria-hidden="true"><i data-lucide="{{ plan.icon }}" class="lu"></i></span>
+        <span class="text-mute">{% if progress.completed %}Olingan — profilingizda ko‘rinadi.{% else %}Kursni tugatsangiz profilingizga «{{ plan.title }}» nishoni qo‘shiladi.{% endif %}</span></p>
+    </section>
+  </aside>
+</div>
 {% endblock %}

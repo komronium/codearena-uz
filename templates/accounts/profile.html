@@ -29,8 +29,8 @@
         </p>
         {% endif %}
         {% if plan_badges %}
-        <p class="ca-badges mt-1.5" aria-label="Tugatilgan o‘quv rejalar">
-          {% for p in plan_badges %}<a class="ca-badge-plan" href="{% url 'learn:plan' p.slug %}" title="{% if p.in_quest %}Yo‘l bosqichi{% else %}O‘quv reja{% endif %} tugatilgan"><span><i data-lucide="{{ p.icon }}" class="lu" aria-hidden="true"></i></span>{{ p.title }}</a>{% endfor %}
+        <p class="ca-badges mt-1.5" aria-label="Tugatilgan kurslar">
+          {% for p in plan_badges %}<a class="ca-badge-plan" href="{% url 'learn:plan' p.slug %}" title="Kurs tugatilgan"><span><i data-lucide="{{ p.icon }}" class="lu" aria-hidden="true"></i></span>{{ p.title }}</a>{% endfor %}
         </p>
         {% endif %}
         {% if profile_user.is_staff %}<p class="mt-1.5"><span class="ca-chip"><i data-lucide="shield-check" class="lu mr-1" aria-hidden="true"></i>Moderator</span></p>{% endif %}

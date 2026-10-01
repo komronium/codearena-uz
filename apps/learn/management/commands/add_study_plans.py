@@ -1,4 +1,4 @@
-"""The first study plans and topic theory, built from problems already on the portal.
+"""The first courses (study plans) and topic theory, built from problems already on the portal.
 
 Plans are matched by slug and their sections rebuilt on every run, so editing this file and
 re-running updates them (staff edits to these plans are overwritten; plans with other slugs are
@@ -19,9 +19,9 @@ PLANS = [
         "order": 1, "in_quest": True,
         "summary": "Kirish-chiqish, shartlar va sikllar: dasturlashni noldan boshlaganlar uchun.",
         "description_md": (
-            "Bu reja dasturlashni endi boshlaganlar uchun. Har bo‘lim oddiy masaladan boshlanadi va asta-sekin "
+            "Bu kurs dasturlashni endi boshlaganlar uchun. Har bo‘lim oddiy masaladan boshlanadi va asta-sekin "
             "qiyinlashadi. Masalani yecha olmasangiz — bo‘lim boshidagi mavzu sahifasini o‘qing, so‘ng qayting.\n\n"
-            "Maslahat: har kuni 3–5 ta masala yeching. Bir haftada reja tugaydi."
+            "Maslahat: har kuni 3–5 ta masala yeching. Bir haftada kurs tugaydi."
         ),
         "sections": [
             {"title": "Kirish va chiqish",
@@ -51,7 +51,7 @@ PLANS = [
         "order": 2, "in_quest": True,
         "summary": "Ro‘yxatlar, satrlar, hash-jadval va ikki ko‘rsatkich — algoritmlardan oldingi asos.",
         "description_md": (
-            "Bu rejada ko‘p sonlar bilan ishlaymiz. Kirish hajmi katta (10⁵ gacha): ikki ichma-ich sikl "
+            "Bu kursda ko‘p sonlar bilan ishlaymiz. Kirish hajmi katta (10⁵ gacha): ikki ichma-ich sikl "
             "vaqtga sig‘maydi, shuning uchun har masalada **chiziqli** yechim izlang."
         ),
         "sections": [

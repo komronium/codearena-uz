@@ -1,13 +1,14 @@
 {% extends "base.html" %}
 {% block title %}{{ tag.name }} — mavzu{% endblock %}
 {% block content %}
-<header class="mb-6">
-  <a class="ca-link mb-3 inline-block text-sm text-mute" href="{% url 'learn:topics' %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>Mavzular</a>
+<a class="ca-link mb-4 inline-block text-sm text-mute" href="{% url 'learn:topics' %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>Qo‘llanma</a>
+<header class="ca-guide-head ca-guide-{{ tag.kind }} ca-topic-hero mb-6">
+  <p class="ca-guide-kicker"><i data-lucide="{% if tag.kind == 'sql' %}database{% else %}book-open{% endif %}" class="lu" aria-hidden="true"></i>Qo‘llanma · {{ tag.get_kind_display }}</p>
   <h1 class="ca-page-title" translate="no">{{ tag.name }}</h1>
-  <p class="mt-2 flex flex-wrap items-center gap-3 text-sm text-mute">
-    <span>{{ n }} ta masala{% if user.is_authenticated %} · <b class="text-ink">{{ done }}</b> tasi yechilgan{% endif %}</span>
-    <a class="ca-link" href="{% url 'problems:list' %}?tag={{ tag.name|urlencode }}"><i data-lucide="list-checks" class="lu mr-1" aria-hidden="true"></i>Masalalar ro‘yxatida</a>
-    {% if user.is_staff %}<a class="ca-link" href="{% url 'moderation:tag_edit' tag.pk %}"><i data-lucide="pencil" class="lu mr-1" aria-hidden="true"></i>Tahrirlash</a>{% endif %}
+  <p class="mt-2 flex flex-wrap items-center gap-3 text-sm opacity-90">
+    <span>{{ n }} ta masala{% if user.is_authenticated %} · <b>{{ done }}</b> tasi yechilgan{% endif %}</span>
+    <a class="underline underline-offset-2" href="{% url 'problems:list' %}?tag={{ tag.name|urlencode }}"><i data-lucide="list-checks" class="lu mr-1" aria-hidden="true"></i>Masalalar ro‘yxatida</a>
+    {% if user.is_staff %}<a class="underline underline-offset-2" href="{% url 'moderation:tag_edit' tag.pk %}"><i data-lucide="pencil" class="lu mr-1" aria-hidden="true"></i>Tahrirlash</a>{% endif %}
   </p>
 </header>
 <div class="grid gap-8 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:items-start">
@@ -25,7 +26,7 @@
     {% endfor %}
     {% if plans %}
     <section aria-labelledby="plans-title">
-      <h2 id="plans-title" class="mb-2 text-sm font-semibold text-mute">Shu mavzu kirgan rejalar</h2>
+      <h2 id="plans-title" class="mb-2 text-sm font-semibold text-mute">Shu mavzu kirgan kurslar</h2>
       <div class="flex flex-wrap gap-2">{% for p in plans %}<a class="ca-chip" href="{% url 'learn:plan' p.slug %}"><i data-lucide="{{ p.icon }}" class="lu mr-1" aria-hidden="true"></i>{{ p.title }}</a>{% endfor %}</div>
     </section>
     {% endif %}

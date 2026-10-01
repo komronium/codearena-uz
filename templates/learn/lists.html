@@ -2,7 +2,7 @@
 {% block title %}Ro‘yxatlarim{% endblock %}
 {% block page_title %}<h1>Ro‘yxatlarim</h1><span class="ca-topbar-sub">Saqlangan masalalar</span>{% endblock %}
 {% block content %}
-<a class="ca-link mb-4 inline-block text-sm text-mute" href="{% url 'learn:hub' %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>O‘rganish</a>
+<a class="ca-link mb-4 inline-block text-sm text-mute" href="{% url 'problems:list' %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>Masalalar</a>
 <div class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:items-start">
   <section aria-label="Ro‘yxatlar">
     {% if lists %}

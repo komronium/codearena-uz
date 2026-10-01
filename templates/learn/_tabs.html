@@ -1,0 +1,5 @@
+{# The two halves of O‘rganish; `tab` is "courses" or "guide". #}
+<nav class="ca-tabs mb-6" aria-label="O‘rganish bo‘limlari">
+  <a class="ca-tab{% if tab == 'courses' %} is-active{% endif %}" href="{% url 'learn:hub' %}"{% if tab == 'courses' %} aria-current="page"{% endif %}><i data-lucide="graduation-cap" class="lu" aria-hidden="true"></i>Kurslar</a>
+  <a class="ca-tab{% if tab == 'guide' %} is-active{% endif %}" href="{% url 'learn:topics' %}"{% if tab == 'guide' %} aria-current="page"{% endif %}><i data-lucide="book-open" class="lu" aria-hidden="true"></i>Qo‘llanma</a>
+</nav>

@@ -38,6 +38,28 @@ def plan_progress(user, plans) -> dict[int, dict]:
     return out
 
 
+def plan_sections(user, plans) -> dict[int, dict]:
+    """Plan id -> {"sections": [{"done", "total"}, ...] in plan order, "next_id": the first
+    unsolved open problem or None}; drives the section dots and the "Keyingi" button."""
+    out: dict[int, dict] = {p.pk: {"sections": [], "next_id": None} for p in plans}
+    rows = list(PlanItem.objects.filter(section__plan__in=list(out), problem__in=open_problems())
+                .order_by("section__order", "section_id", "order", "id")
+                .values_list("section__plan_id", "section_id", "problem_id"))
+    solved = solved_ids(user, {r[2] for r in rows})
+    by_section: dict[int, dict] = {}
+    for plan_id, section_id, problem_id in rows:
+        plan = out[plan_id]
+        if section_id not in by_section:
+            by_section[section_id] = {"done": 0, "total": 0}
+            plan["sections"].append(by_section[section_id])
+        by_section[section_id]["total"] += 1
+        if problem_id in solved:
+            by_section[section_id]["done"] += 1
+        elif plan["next_id"] is None:
+            plan["next_id"] = problem_id
+    return out
+
+
 def plan_nav(user, plan_slug: str, problem_id: int) -> dict | None:
     """The plan strip on a problem page opened from a plan (?plan=<slug>): the plan, its
     progress, and the open problems before and after this one. None when the slug is

@@ -19,7 +19,7 @@ class StudyPlan(models.Model):
     level = models.CharField(max_length=10, choices=Problem.Difficulty.choices, default=Problem.Difficulty.BEGINNER)
     icon = models.CharField(max_length=40, default="book-open", choices=[(i, i) for i in ICONS])
     order = models.PositiveIntegerField(default=0)
-    in_quest = models.BooleanField(default=False)  # a stage of the "Yo‘l"
+    in_quest = models.BooleanField(default=False)  # on the main path ("Asosiy yo‘l"); else an extra course
     is_public = models.BooleanField(default=False)
 
     class Meta:

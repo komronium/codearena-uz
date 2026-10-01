@@ -1,8 +1,8 @@
 {% extends "base.html" %}
-{% block title %}O‘quv rejalar — boshqaruv{% endblock %}
+{% block title %}Kurslar — boshqaruv{% endblock %}
 {% block content %}
 <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
-  <div>{% include "moderation/_header.html" with title="O‘quv rejalar" subtitle="Yo‘l bosqichlari va mavzuli rejalar" %}</div>
+  <div>{% include "moderation/_header.html" with title="Kurslar" subtitle="Asosiy yo‘l kurslari va qo‘shimcha kurslar" %}</div>
   <a href="{% url 'moderation:plan_new' %}" class="ca-btn ca-btn-primary"><i data-lucide="plus" class="lu" aria-hidden="true"></i>Reja tuzish</a>
 </div>
 {% if plans %}
@@ -14,7 +14,7 @@
       <div class="ca-row-title">
         <span class="tabular shrink-0 text-xs font-normal text-mute">{{ p.order }}</span>
         <a class="ca-link" href="{% url 'learn:plan' p.slug %}">{{ p.title }}</a>
-        {% if p.in_quest %}<span class="ca-chip shrink-0"><i data-lucide="map" class="lu mr-1" aria-hidden="true"></i>Yo‘l</span>{% endif %}
+        {% if p.in_quest %}<span class="ca-chip shrink-0"><i data-lucide="map" class="lu mr-1" aria-hidden="true"></i>Asosiy yo‘l</span>{% endif %}
         {% if not p.is_public %}<span class="ca-chip shrink-0 !bg-ink/5 text-mute">Yashirin</span>{% endif %}
       </div>
       <div class="ca-row-meta">

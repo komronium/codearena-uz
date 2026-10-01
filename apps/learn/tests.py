@@ -352,3 +352,77 @@ def test_staff_plan_list_follows_plan_order(client, staff):
     client.force_login(staff)
     body = client.get(reverse("moderation:plans")).content.decode()
     assert body.index("Zeta reja") < body.index("Alfa reja")
+
+
+# ---- Kurslar / Qo‘llanma restructure -----------------------------------------------------------
+
+@pytest.mark.django_db
+def test_plan_sections_counts_each_section_and_finds_the_next_unsolved(staff, ali):
+    from apps.learn.progress import plan_sections
+
+    a, b, c = (_problem(s, staff) for s in "abc")
+    plan = _plan("p", [a, b])
+    second = PlanSection.objects.create(plan=plan, title="Ikkinchi", order=1)
+    PlanItem.objects.create(section=second, problem=c)
+    _solve(ali, a)
+    assert plan_sections(ali, [plan])[plan.pk] == {"sections": [{"done": 1, "total": 2}, {"done": 0, "total": 1}],
+                                                   "next_id": b.pk}
+
+
+@pytest.mark.django_db
+def test_hub_shows_each_course_once_and_continues_with_the_next_problem(client, staff, ali):
+    a, b = _problem("a", staff), _problem("b", staff)
+    _plan("birinchi", [a, b], title="Birinchi qadam", in_quest=True)
+    _plan("sql", [_problem("s", staff)], title="SQL asoslari")
+    _solve(ali, a)
+    client.force_login(ali)
+    body = client.get(reverse("learn:hub")).content.decode()
+    # the path course used to be listed again under "O‘quv rejalar"
+    assert body.count('href="/learn/plans/birinchi/"') == 2  # its card + the "continue" title, nothing more
+    assert "Qo‘shimcha kurslar" in body and "SQL asoslari" in body
+    assert f'href="{reverse("problems:detail", args=["b"])}?plan=birinchi"' in body
+
+
+@pytest.mark.django_db
+def test_guide_lists_only_topics_with_theory(client, staff):
+    from apps.problems.models import Tag
+
+    with_theory = Tag.objects.create(name="sikllar", about_md="# Sikl\n\nTakrorlash uchun **for** ishlatiladi.")
+    bare = Tag.objects.create(name="yalang")
+    p = _problem("a", staff)
+    p.tags.add(with_theory, bare)
+    body = client.get(reverse("learn:topics")).content.decode()
+    assert "sikllar" in body and "Takrorlash uchun for ishlatiladi." in body
+    assert "yalang" not in body
+
+
+@pytest.mark.django_db
+def test_course_section_links_to_its_topic_theory(client, staff):
+    from apps.problems.models import Tag
+
+    tag = Tag.objects.create(name="sikllar", about_md="Nazariya")
+    a = _problem("a", staff)
+    a.tags.add(tag, Tag.objects.create(name="matn"))  # no theory: not a candidate
+    plan = _plan("p", [a])
+    body = client.get(reverse("learn:plan", args=[plan.slug])).content.decode()
+    assert f'href="{reverse("learn:topic", args=["sikllar"])}"' in body and "Nazariya: sikllar" in body
+
+
+@pytest.mark.django_db
+def test_saved_lists_sit_under_masalalar(client, ali):
+    client.force_login(ali)
+    assert reverse("learn:lists") in client.get(reverse("problems:list")).content.decode()
+    body = client.get(reverse("learn:lists")).content.decode()
+    assert f'href="{reverse("problems:list")}" class="ca-sidebar-link is-active"' in body
+
+
+@pytest.mark.django_db
+def test_section_theory_prefers_the_topic_its_intro_links_to(client, staff):
+    from apps.problems.models import Tag
+
+    io, math = (Tag.objects.update_or_create(name=n, defaults={"about_md": "x"})[0] for n in ("input-output", "math"))
+    a = _problem("a", staff)
+    a.tags.add(io, math)
+    plan = _plan("p", [a])
+    plan.sections.update(intro_md="Nazariya: [input-output](/learn/topics/input-output/).")
+    assert "Nazariya: input-output" in client.get(reverse("learn:plan", args=[plan.slug])).content.decode()
