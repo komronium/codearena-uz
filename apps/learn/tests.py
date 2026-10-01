@@ -342,6 +342,11 @@ def test_add_study_plans_is_idempotent_and_skips_missing(staff):
     assert PlanItem.objects.count() == 1 and "topilmadi" in out.getvalue()
     assert Tag.objects.get(name="loops").about_md == "o‘zim yozdim"  # staff text is never overwritten
     assert Tag.objects.exclude(about_md="").count() > 5
+    # sections without problems yet are kept, so the course shows its whole outline
+    assert PlanSection.objects.count() == sum(len(p["sections"]) for p in PLANS)
+    # topics that don't exist on the portal yet are created with theory and the right kind
+    assert Tag.objects.get(name="heap").kind == Tag.Kind.CODE and Tag.objects.get(name="heap").about_md
+    assert Tag.objects.get(name="window-functions").kind == Tag.Kind.SQL
 
 
 @pytest.mark.django_db

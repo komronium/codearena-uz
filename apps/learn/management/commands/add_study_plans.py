@@ -2,8 +2,9 @@
 
 Plans are matched by slug and their sections rebuilt on every run, so editing this file and
 re-running updates them (staff edits to these plans are overwritten; plans with other slugs are
-left alone). Problems that don't exist yet are skipped with a note. Topic theory is written only
-where a topic has none, so text written by staff is never replaced.
+left alone). Problems that don't exist yet are skipped with a note, but their section stays: it
+shows its theory and "Masalalar tez orada" until problems arrive. Topics missing from the portal
+are created; theory is written only where a topic has none, so text written by staff is never replaced.
 
     python manage.py add_study_plans [--dry-run]
 """
@@ -12,6 +13,8 @@ from django.db import transaction
 
 from apps.learn.models import PlanItem, PlanSection, StudyPlan
 from apps.problems.models import Problem, Tag
+
+from ._more_topics import MORE_TOPICS, SQL_TOPICS
 
 PLANS = [
     {
@@ -110,6 +113,177 @@ PLANS = [
         ],
     },
     {
+        "slug": "malumotlar-tuzilmalari", "title": "Ma’lumotlar tuzilmalari", "level": "medium", "icon": "layers",
+        "order": 4, "in_quest": True,
+        "summary": "Stek, navbat, lug‘at, uyum, DSU va segmentlar daraxti — qachon qaysi biri kerak.",
+        "description_md": (
+            "To‘g‘ri tuzilma tanlansa, sekin yechim tezlashadi. Har bo‘limda avval tuzilmaning g‘oyasini o‘qing: "
+            "u qaysi amalni tez bajaradi va qaysi masalalarda uchraydi.\n\n"
+            "Masalasi hali yo‘q bo‘limlarda nazariya tayyor — masalalar tez orada qo‘shiladi."
+        ),
+        "sections": [
+            {"title": "Stek",
+             "intro": "Oxirgi kirgan — birinchi chiqadi: qavslar, monoton stek. Nazariya: [stack](/learn/topics/stack/).",
+             "slugs": ["qavslar-balansi"]},
+            {"title": "Navbat va deque",
+             "intro": "Birinchi kirgan — birinchi chiqadi; oyna maksimumi. Nazariya: [queue](/learn/topics/queue/).",
+             "slugs": []},
+            {"title": "Lug‘at va to‘plam",
+             "intro": "Sanash, juftlik izlash va takrorsiz oraliqlar. Nazariya: [hash-table](/learn/topics/hash-table/).",
+             "slugs": ["c3-pair-sum", "c3-top-word", "c3-unique-substring"]},
+            {"title": "Uyum (heap)",
+             "intro": "Eng kichigini tez olish: ustuvor navbat. Nazariya: [heap](/learn/topics/heap/).",
+             "slugs": []},
+            {"title": "Bog‘langan ro‘yxat",
+             "intro": "Tugunlar va havolalar; sekin va tez ko‘rsatkich. Nazariya: [linked-list](/learn/topics/linked-list/).",
+             "slugs": []},
+            {"title": "DSU",
+             "intro": "Guruhlarni birlashtirish va «bir guruhdami?» savoli. Nazariya: [union-find](/learn/topics/union-find/).",
+             "slugs": []},
+            {"title": "Segmentlar daraxti",
+             "intro": "Oraliq so‘rovlari va o‘zgarishlar O(log n) da. Nazariya: [segment-tree](/learn/topics/segment-tree/).",
+             "slugs": ["oraliq-minimumi"]},
+        ],
+    },
+    {
+        "slug": "rekursiya-va-qidiruv", "title": "Rekursiya va qidiruv", "level": "medium", "icon": "puzzle",
+        "order": 5, "in_quest": True,
+        "summary": "Rekursiya, to‘liq perebor, backtracking va ikkilik qidiruv.",
+        "description_md": (
+            "Ko‘p masalani «hamma variantni tekshir» deb boshlash mumkin. Bu kurs shu fikrni tartibga soladi: "
+            "rekursiya bilan variantlarni yozish, keraksiz shoxlarni kesish va javobni ikkilik qidiruv bilan topish."
+        ),
+        "sections": [
+            {"title": "Rekursiya",
+             "intro": "Funksiya o‘zini kichikroq kirish bilan chaqiradi. Nazariya: [recursion](/learn/topics/recursion/).",
+             "slugs": []},
+            {"title": "To‘liq perebor",
+             "intro": "Kichik chegaralarda barcha variantlarni tekshirish. Nazariya: [brute-force](/learn/topics/brute-force/).",
+             "slugs": []},
+            {"title": "Backtracking",
+             "intro": "Javobni qadamma-qadam qurish va orqaga qaytish. Nazariya: [backtracking](/learn/topics/backtracking/).",
+             "slugs": []},
+            {"title": "Ikkilik qidiruv",
+             "intro": "Saralangan ro‘yxatda log n qadamda qidirish. Nazariya: [binary-search](/learn/topics/binary-search/).",
+             "slugs": ["p2-butun-ildiz", "narxlar-sorovlari"]},
+            {"title": "Javob bo‘yicha ikkilik qidiruv",
+             "intro": "«X yetarlimi?» monoton bo‘lsa, eng kichik X ni topish. Nazariya: [binary-search](/learn/topics/binary-search/).",
+             "slugs": []},
+            {"title": "Bo‘l va hukmronlik qil",
+             "intro": "Ikkiga bo‘lib, alohida yechib, birlashtirish. Nazariya: [divide-and-conquer](/learn/topics/divide-and-conquer/).",
+             "slugs": []},
+        ],
+    },
+    {
+        "slug": "graflar", "title": "Graflar", "level": "hard", "icon": "network",
+        "order": 6, "in_quest": True,
+        "summary": "BFS, DFS, eng qisqa yo‘l, minimal skelet daraxt va daraxtlar.",
+        "description_md": (
+            "Shaharlar va yo‘llar, labirint kataklari, do‘stlar tarmog‘i — hammasi graf. Avval grafni xotirada "
+            "saqlashni o‘rganing, keyin har bo‘limdagi algoritm qaysi savolga javob berishini tushuning."
+        ),
+        "sections": [
+            {"title": "Graf tasviri",
+             "intro": "Uchlar, qirralar va qo‘shnilar ro‘yxati. Nazariya: [graphs](/learn/topics/graphs/).",
+             "slugs": []},
+            {"title": "BFS",
+             "intro": "Qatlam-qatlam yurish: vaznsiz grafda eng qisqa yo‘l. Nazariya: [bfs](/learn/topics/bfs/).",
+             "slugs": ["labirint"]},
+            {"title": "DFS va komponentalar",
+             "intro": "Chuqurlik bo‘yicha yurish, komponentalar va sikllar. Nazariya: [dfs](/learn/topics/dfs/).",
+             "slugs": []},
+            {"title": "Eng qisqa yo‘l",
+             "intro": "Vaznli grafda Dijkstra. Nazariya: [shortest-paths](/learn/topics/shortest-paths/).",
+             "slugs": ["shaharlar-yollari"]},
+            {"title": "Minimal skelet daraxt",
+             "intro": "Kruskal va DSU: hamma uchni eng arzon bog‘lash. Nazariya: [union-find](/learn/topics/union-find/).",
+             "slugs": ["yollar-tarmogi"]},
+            {"title": "Daraxtlar",
+             "intro": "Ildiz, chuqurlik, qism daraxt va diametr. Nazariya: [trees](/learn/topics/trees/).",
+             "slugs": []},
+        ],
+    },
+    {
+        "slug": "dinamik-dasturlash", "title": "Dinamik dasturlash", "level": "hard", "icon": "brain",
+        "order": 7, "in_quest": True,
+        "summary": "Holat va o‘tish: zinapoya, tangalar, ketma-ketliklar, ryukzak.",
+        "description_md": (
+            "DP — musobaqalarda eng ko‘p uchraydigan mavzu. Har masalada to‘rt savolga javob bering: holat nima, "
+            "o‘tish qanday, boshlang‘ich qiymat va javob qayerda. Nazariya: "
+            "[dynamic-programming](/learn/topics/dynamic-programming/)."
+        ),
+        "sections": [
+            {"title": "Asoslar",
+             "intro": "Eng oddiy DP: oldingi javoblardan keyingisini yig‘ish. Nazariya: [dynamic-programming](/learn/topics/dynamic-programming/).",
+             "slugs": ["p2-zinapoya"]},
+            {"title": "Bir o‘lchovli DP",
+             "intro": "`dp[i]` — i gacha bo‘lgan eng yaxshi javob. Nazariya: [dynamic-programming](/learn/topics/dynamic-programming/).",
+             "slugs": ["tangalar-bilan-tolash"]},
+            {"title": "Ketma-ketliklar",
+             "intro": "Eng uzun o‘suvchi va umumiy qism ketma-ketliklar. Nazariya: [dynamic-programming](/learn/topics/dynamic-programming/).",
+             "slugs": ["eng-uzun-osuvchi"]},
+            {"title": "Ryukzak",
+             "intro": "Sig‘im chegarasida eng qimmat to‘plam. Nazariya: [dynamic-programming](/learn/topics/dynamic-programming/).",
+             "slugs": []},
+            {"title": "Ikki o‘lchovli DP",
+             "intro": "To‘rdagi yo‘llar va ikki satr bo‘yicha holat. Nazariya: [dynamic-programming](/learn/topics/dynamic-programming/).",
+             "slugs": []},
+        ],
+    },
+    {
+        "slug": "matematika-va-sonlar", "title": "Matematika va sonlar", "level": "easy", "icon": "sigma",
+        "order": 8, "in_quest": False,
+        "summary": "Bo‘luvchilar, tub sonlar, kombinatorika, geometriya va bitlar.",
+        "description_md": (
+            "Ko‘p masalada sikl o‘rniga formula bor. Bu kursda olimpiada matematikasining asosiy vositalari: "
+            "bo‘luvchilar, EKUB, modul bo‘yicha hisob, sanash va oddiy geometriya."
+        ),
+        "sections": [
+            {"title": "Bo‘luvchilar va tub sonlar",
+             "intro": "√n gacha tekshirish va Eratosfen g‘alviri. Nazariya: [number-theory](/learn/topics/number-theory/).",
+             "slugs": ["p1-boluvchilar-soni", "p1-tub-sonmi", "qutilarga-teng-bolish-boluvchilar",
+                       "wc1-tub-kopaytuvchilar"]},
+            {"title": "EKUB va modul",
+             "intro": "EKUB, EKUK va katta javobni `10⁹ + 7` bo‘yicha hisoblash. Nazariya: [number-theory](/learn/topics/number-theory/).",
+             "slugs": []},
+            {"title": "Kombinatorika",
+             "intro": "Tanlashlar va juftliklarni sanash. Nazariya: [combinatorics](/learn/topics/combinatorics/).",
+             "slugs": ["p2-paskal-uchburchagi", "p2-yaxshi-juftliklar"]},
+            {"title": "Geometriya",
+             "intro": "Masofa, yuz va burilish yo‘nalishi. Nazariya: [geometry](/learn/topics/geometry/).",
+             "slugs": ["doira-perimetri-va-yuzi", "p1-nuqta-va-aylana"]},
+            {"title": "Bitlar",
+             "intro": "Ikkilik sanoq va XOR xossalari. Nazariya: [bit-manipulation](/learn/topics/bit-manipulation/).",
+             "slugs": ["wc1-ikkilik-son", "p2-ikkining-darajasi", "p2-juftsiz-son"]},
+        ],
+    },
+    {
+        "slug": "musobaqaga-tayyorgarlik", "title": "Musobaqaga tayyorgarlik", "level": "medium", "icon": "trophy",
+        "order": 9, "in_quest": False,
+        "summary": "Murakkablikni baholash, ehtiyotkor kod, perebor, ochko‘z va siljuvchi oyna.",
+        "description_md": (
+            "Musobaqada g‘oyani bilish yetmaydi: yechim vaqtga sig‘ishini oldindan baholash, chegaraviy holatlarni "
+            "unutmaslik va xatoni tez topish kerak. Bu kurs shu ko‘nikmalar uchun."
+        ),
+        "sections": [
+            {"title": "Murakkablik",
+             "intro": "Kod yozishdan oldin yechim vaqtga sig‘adimi? Nazariya: [complexity](/learn/topics/complexity/).",
+             "slugs": []},
+            {"title": "Ehtiyotkor bajarish",
+             "intro": "Shartni aniq bajarish va chegaraviy holatlar. Nazariya: [implementation](/learn/topics/implementation/).",
+             "slugs": []},
+            {"title": "Perebor va stress-test",
+             "intro": "Sekin, lekin to‘g‘ri yechim bilan tezini tekshirish. Nazariya: [brute-force](/learn/topics/brute-force/).",
+             "slugs": []},
+            {"title": "Ochko‘z algoritmlar",
+             "intro": "Har qadamda eng yaxshi tanlov — qachon ishlaydi. Nazariya: [greedy](/learn/topics/greedy/).",
+             "slugs": []},
+            {"title": "Siljuvchi oyna",
+             "intro": "Oraliqni ikki ko‘rsatkich bilan surish. Nazariya: [sliding-window](/learn/topics/sliding-window/).",
+             "slugs": ["eng-uzun-oraliq"]},
+        ],
+    },
+    {
         "slug": "sql-asoslari", "title": "SQL asoslari", "level": "beginner", "icon": "database",
         "order": 10, "in_quest": False,
         "summary": "SELECT dan oyna funksiyalarigacha: talabalar, mahsulotlar va buyurtmalar jadvallarida.",
@@ -118,20 +292,33 @@ PLANS = [
             "tekshiriladi, shuning uchun javobni «qo‘lda» emas, umumiy holda yozing. Nazariya: [sql](/learn/topics/sql/)."
         ),
         "sections": [
-            {"title": "SELECT va WHERE", "intro": "Kerakli ustun va qatorlarni tanlash.",
+            {"title": "SELECT va WHERE",
+             "intro": "Kerakli ustun va qatorlarni tanlash. Nazariya: [select](/learn/topics/select/), "
+                      "[where](/learn/topics/where/), [distinct](/learn/topics/distinct/), [like](/learn/topics/like/), "
+                      "[null-values](/learn/topics/null-values/).",
              "slugs": ["sql-talabalar-royxati", "sql-toshkentlik-talabalar", "sql-alochi-talabalar",
                        "sql-tugilgan-yillar", "sql-a-harfli-ismlar", "sql-telefonsiz-mijozlar",
                        "sql-mijozlar-shaharlari"]},
-            {"title": "Saralash va hisoblangan ustunlar", "intro": "`ORDER BY`, `LIMIT`, `CASE` va ifodalar.",
+            {"title": "Saralash va hisoblangan ustunlar",
+             "intro": "`ORDER BY`, `LIMIT`, `CASE` va ifodalar. Nazariya: [order-by](/learn/topics/order-by/), "
+                      "[limit](/learn/topics/limit/), [case-when](/learn/topics/case-when/), "
+                      "[string-functions](/learn/topics/string-functions/).",
              "slugs": ["sql-narx-boyicha-tartib", "sql-eng-qimmat-uchta", "sql-ombordagi-qiymat", "sql-ism-uzunligi",
                        "sql-baho-harfi"]},
-            {"title": "Guruhlash", "intro": "`GROUP BY`, `COUNT`, `AVG` va `HAVING`.",
+            {"title": "Guruhlash",
+             "intro": "`GROUP BY`, `COUNT`, `AVG` va `HAVING`. Nazariya: [group-by](/learn/topics/group-by/), "
+                      "[aggregation](/learn/topics/aggregation/), [having](/learn/topics/having/), "
+                      "[date-functions](/learn/topics/date-functions/).",
              "slugs": ["sql-shahar-boyicha-talabalar", "sql-guruh-ortacha-bali", "sql-kategoriya-narxlari",
                        "sql-ombor-hisoboti", "sql-yaxshi-guruhlar", "sql-yil-boyicha-yollanganlar"]},
-            {"title": "JOIN", "intro": "Bir nechta jadvalni bog‘lash: `JOIN` va `LEFT JOIN`.",
+            {"title": "JOIN",
+             "intro": "Bir nechta jadvalni bog‘lash: `JOIN` va `LEFT JOIN`. Nazariya: [join](/learn/topics/join/), "
+                      "[left-join](/learn/topics/left-join/).",
              "slugs": ["sql-buyurtma-egalari", "sql-xodimlar-bolimlari", "sql-mijozlar-xarajati",
                        "sql-kurslar-talabalar-soni", "sql-buyurtmasiz-mijozlar"]},
-            {"title": "Murakkab so‘rovlar", "intro": "Ichki so‘rovlar va oyna funksiyalari.",
+            {"title": "Murakkab so‘rovlar",
+             "intro": "Ichki so‘rovlar va oyna funksiyalari. Nazariya: [subquery](/learn/topics/subquery/), "
+                      "[window-functions](/learn/topics/window-functions/).",
              "slugs": ["sql-ortachadan-yuqori-maosh", "sql-bolim-rekordchilari", "sql-bolimdagi-top-2",
                        "sql-oylik-tushum", "sql-ketma-ket-uch-kun"]},
         ],
@@ -450,9 +637,10 @@ class Command(BaseCommand):
             for spec in PLANS:
                 self._plan(spec)
             filled = 0
-            for name, text in TOPICS.items():
-                tag = Tag.objects.filter(name=name).first()
-                if tag is not None and not tag.about_md.strip():
+            for name, text in {**TOPICS, **MORE_TOPICS}.items():
+                kind = Tag.Kind.SQL if name in SQL_TOPICS else Tag.Kind.CODE
+                tag, _ = Tag.objects.get_or_create(name=name, defaults={"kind": kind})
+                if not tag.about_md.strip():
                     tag.about_md = text
                     tag.save(update_fields=["about_md"])
                     filled += 1
@@ -470,8 +658,6 @@ class Command(BaseCommand):
         n = 0
         for order, section_spec in enumerate(spec["sections"]):
             problems = [found[s] for s in section_spec["slugs"] if s in found]
-            if not problems:
-                continue
             section = PlanSection.objects.create(plan=plan, title=section_spec["title"],
                                                  intro_md=section_spec["intro"], order=order)
             PlanItem.objects.bulk_create([PlanItem(section=section, problem=p, order=i) for i, p in enumerate(problems)])
