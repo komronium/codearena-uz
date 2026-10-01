@@ -39,24 +39,29 @@ def plan_progress(user, plans) -> dict[int, dict]:
 
 
 def plan_sections(user, plans) -> dict[int, dict]:
-    """Plan id -> {"sections": [{"done", "total"}, ...] in plan order, "next_id": the first
-    unsolved open problem or None}; drives the section dots and the "Keyingi" button."""
+    """Plan id -> {"sections": [{"done", "total", "complete"}, ...] in plan order, "next_id":
+    the first unsolved open problem or None}; drives the section dots and the "Keyingi"
+    button. Sections with no open problem yet are listed too, never complete."""
+    from .models import PlanSection
+
     out: dict[int, dict] = {p.pk: {"sections": [], "next_id": None} for p in plans}
+    by_section: dict[int, dict] = {}
+    for plan_id, section_id in (PlanSection.objects.filter(plan__in=list(out))
+                                .order_by("order", "id").values_list("plan_id", "id")):
+        by_section[section_id] = {"done": 0, "total": 0, "complete": False}
+        out[plan_id]["sections"].append(by_section[section_id])
     rows = list(PlanItem.objects.filter(section__plan__in=list(out), problem__in=open_problems())
                 .order_by("section__order", "section_id", "order", "id")
                 .values_list("section__plan_id", "section_id", "problem_id"))
     solved = solved_ids(user, {r[2] for r in rows})
-    by_section: dict[int, dict] = {}
     for plan_id, section_id, problem_id in rows:
-        plan = out[plan_id]
-        if section_id not in by_section:
-            by_section[section_id] = {"done": 0, "total": 0}
-            plan["sections"].append(by_section[section_id])
         by_section[section_id]["total"] += 1
         if problem_id in solved:
             by_section[section_id]["done"] += 1
-        elif plan["next_id"] is None:
-            plan["next_id"] = problem_id
+        elif out[plan_id]["next_id"] is None:
+            out[plan_id]["next_id"] = problem_id
+    for s in by_section.values():
+        s["complete"] = s["total"] > 0 and s["done"] == s["total"]
     return out
 
 

@@ -3,15 +3,15 @@
   <div class="min-w-0 flex-1">
     <h3 class="flex flex-wrap items-center gap-x-2 gap-y-1">
       <a class="ca-stretch" href="{% url 'learn:plan' p.slug %}">{{ p.title }}</a>
-      {% if p == here %}<span class="ca-chip ca-chip-score">Siz shu yerdasiz</span>{% elif p.progress.completed %}<span class="ca-chip text-ok">Tugatildi</span>{% endif %}
+      {% if not p.progress.total %}<span class="ca-chip text-mute">Masalalar tez orada</span>{% elif p == here %}<span class="ca-chip ca-chip-score">Siz shu yerdasiz</span>{% elif p.progress.completed %}<span class="ca-chip text-ok">Tugatildi</span>{% endif %}
       {% if not p.is_public %}<span class="ca-chip text-mute">Yashirin</span>{% endif %}
     </h3>
     <p class="ca-course-meta"><span class="ca-diff ca-diff-{{ p.level }}">{{ p.get_level_display }}</span>
-      {% if user.is_authenticated %}<span class="tabular"><b class="text-ink">{{ p.dots_done }}/{{ p.dots|length }}</b> bo‘lim · {{ p.progress.done }}/{{ p.progress.total }} masala</span>
+      {% if user.is_authenticated and p.progress.total %}<span class="tabular"><b class="text-ink">{{ p.dots_done }}/{{ p.dots|length }}</b> bo‘lim · {{ p.progress.done }}/{{ p.progress.total }} masala</span>
       {% else %}<span class="tabular">{{ p.dots|length }} bo‘lim · {{ p.progress.total }} masala</span>{% endif %}</p>
     {% if p.dots %}
     <ol class="ca-dots" aria-label="Bo‘limlar: {{ p.dots_done }} tasi tugatilgan, jami {{ p.dots|length }}">
-      {% for s in p.dots %}<li class="{% if s.done == s.total %}is-done{% elif s.done %}is-started{% endif %}"><span class="sr-only">{{ forloop.counter }}-bo‘lim: {{ s.done }}/{{ s.total }}</span></li>{% endfor %}
+      {% for s in p.dots %}<li class="{% if s.complete %}is-done{% elif s.done %}is-started{% endif %}"><span class="sr-only">{{ forloop.counter }}-bo‘lim: {{ s.done }}/{{ s.total }}</span></li>{% endfor %}
     </ol>
     {% endif %}
   </div>

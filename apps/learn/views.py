@@ -32,7 +32,7 @@ def hub(request):
     for p in plans:
         p.progress = progress[p.pk]
         p.dots = details[p.pk]["sections"]
-        p.dots_done = sum(1 for s in p.dots if s["done"] == s["total"])
+        p.dots_done = sum(1 for s in p.dots if s["complete"])
     quest = [p for p in plans if p.in_quest]
     here = next((p for p in quest if not p.progress["completed"]), None)
     # Continue what was started (in course order), else the first unfinished stage of the path.
@@ -70,12 +70,12 @@ def plan_detail(request, slug):
     problems = Problem.objects.filter(pk__in=open_ids).prefetch_related("tags").in_bulk()
     sections = []
     for section in plan.sections.prefetch_related("items"):
+        # a section with no open problem yet still shows its intro and theory ("tez orada")
         rows = [problems[i.problem_id] for i in section.items.all() if i.problem_id in problems]
-        if rows:
-            done = sum(p.pk in solved for p in rows)
-            sections.append({"section": section, "intro_html": _render_statement(section.intro_md),
-                             "problems": rows, "done": done, "complete": done == len(rows),
-                             "topic": _section_topic(section.intro_md, rows)})
+        done = sum(p.pk in solved for p in rows)
+        sections.append({"section": section, "intro_html": _render_statement(section.intro_md),
+                         "problems": rows, "done": done, "complete": bool(rows) and done == len(rows),
+                         "topic": _section_topic(section.intro_md, rows)})
     for p in problems.values():
         p.solved = p.pk in solved
     next_id = plan_sections(request.user, [plan])[plan.pk]["next_id"]
@@ -98,10 +98,15 @@ def _excerpt(md: str) -> str:
 
 
 def topics(request):
-    """Qo‘llanma: only topics with written theory. The rest are plain tags, filtered on Masalalar."""
-    rows = [r for r in skill_map(request.user) if r["tag"].about_md.strip()]
-    for r in rows:
-        r["excerpt"] = _excerpt(r["tag"].about_md)
+    """Qo‘llanma: every topic with written theory, problems or not yet. Tags without theory
+    are plain filters on Masalalar."""
+    counts = {r["tag"].pk: r for r in skill_map(request.user)}
+    rows = []
+    for tag in Tag.objects.exclude(about_md=""):
+        r = counts.get(tag.pk) or {"tag": tag, "solved": 0, "total": 0, "pct": 0}
+        r["excerpt"] = _excerpt(tag.about_md)
+        rows.append(r)
+    rows.sort(key=lambda r: (-r["total"], r["tag"].name))
     return render(request, "learn/topics.html", {
         "groups": [(value, label, [r for r in rows if r["tag"].kind == value]) for value, label in Tag.Kind.choices],
         "n_without_theory": Tag.objects.filter(about_md="").count() if request.user.is_staff else 0,
@@ -111,7 +116,7 @@ def topics(request):
 def topic_detail(request, name):
     tag = get_object_or_404(Tag, name=name)
     problems = list(open_problems().filter(tags=tag).prefetch_related("tags").order_by("id"))
-    if not problems:
+    if not problems and not tag.about_md.strip():
         raise Http404
     solved = solved_ids(request.user, [p.pk for p in problems])
     for p in problems:
@@ -121,7 +126,9 @@ def topic_detail(request, name):
     return render(request, "learn/topic.html", {
         "tag": tag, "theory_html": _render_statement(tag.about_md), "n": len(problems), "done": len(solved),
         "by_level": [(label, ps) for label, ps in by_level if ps],
-        "plans": (StudyPlan.objects.filter(is_public=True, sections__items__problem__in=problems).distinct()),
+        "plans": (StudyPlan.objects.filter(Q(sections__items__problem__in=problems)
+                                           | Q(sections__intro_md__contains=f"/learn/topics/{tag.name}/"),
+                                           is_public=True).distinct()),
     })
 
 

@@ -16,7 +16,8 @@
       {% if user.is_staff %}<a class="ca-link" href="{% url 'moderation:plan_edit' plan.pk %}"><i data-lucide="pencil" class="lu mr-1" aria-hidden="true"></i>Tahrirlash</a>{% endif %}
     </p>
     {% if next_problem %}<a class="ca-btn ca-btn-primary mt-4" href="{% url 'problems:detail' next_problem.slug %}?plan={{ plan.slug }}"><i data-lucide="play" class="lu" aria-hidden="true"></i>{% if progress.done %}Davom etish{% else %}Boshlash{% endif %}</a>
-    {% elif progress.completed %}<p class="mt-4 font-semibold text-ok"><i data-lucide="check" class="lu mr-1" aria-hidden="true"></i>Kurs tugatildi</p>{% endif %}
+    {% elif progress.completed %}<p class="mt-4 font-semibold text-ok"><i data-lucide="check" class="lu mr-1" aria-hidden="true"></i>Kurs tugatildi</p>
+    {% elif not progress.total %}<p class="mt-4 text-sm text-mute"><i data-lucide="clock" class="lu mr-1" aria-hidden="true"></i>Masalalar tez orada qo‘shiladi — nazariyani hozirdan o‘qishingiz mumkin.</p>{% endif %}
   </div>
 </header>
 
@@ -27,18 +28,19 @@
       <div class="ca-sec-head">
         <h2 id="sec-{{ forloop.counter }}"><span class="mr-2 font-mono text-xs text-mute">{{ forloop.counter|stringformat:"02d" }}</span>{{ s.section.title }}</h2>
         {% if s.topic %}<a class="ca-link ml-auto text-xs" href="{% url 'learn:topic' s.topic.name %}"><i data-lucide="book-open" class="lu mr-1" aria-hidden="true"></i>Nazariya: {{ s.topic.name }}</a>{% endif %}
-        {% if user.is_authenticated %}<span class="tabular text-xs {% if s.complete %}text-ok{% else %}text-mute{% endif %}{% if not s.topic %} ml-auto{% endif %}">{{ s.done }}/{{ s.problems|length }}</span>{% endif %}
+        {% if user.is_authenticated and s.problems %}<span class="tabular text-xs {% if s.complete %}text-ok{% else %}text-mute{% endif %}{% if not s.topic %} ml-auto{% endif %}">{{ s.done }}/{{ s.problems|length }}</span>{% endif %}
       </div>
       {% if s.intro_html %}<div class="prose ca-sec-intro max-w-none text-sm">{{ s.intro_html|safe }}</div>{% endif %}
-      {% include "learn/_problem_rows.html" with rows=s.problems %}
+      {% if s.problems %}{% include "learn/_problem_rows.html" with rows=s.problems %}
+      {% else %}<p class="ca-sec-soon"><i data-lucide="clock" class="lu" aria-hidden="true"></i>Masalalar tez orada{% if s.topic %} — hozircha <a class="ca-link" href="{% url 'learn:topic' s.topic.name %}">nazariyani o‘qing</a>{% endif %}.</p>{% endif %}
     </section>
     {% empty %}
-    <div class="ca-empty">Bu kursda hozircha ochiq masala yo‘q.</div>
+    <div class="ca-empty">Bu kursda hali bo‘lim yo‘q.</div>
     {% endfor %}
   </div>
 
   <aside class="space-y-6 lg:sticky lg:top-20">
-    {% if user.is_authenticated %}
+    {% if user.is_authenticated and progress.total %}
     <section class="ca-panel flex items-center gap-4" aria-label="Kurs bajarilishi">
       <span class="ca-ring{% if progress.completed %} is-done{% endif %}" style="--p: {{ progress.pct }}" role="img" aria-label="{{ progress.pct }}% bajarildi"><b class="tabular">{{ progress.pct }}%</b></span>
       <div class="text-sm"><p class="tabular"><b>{{ progress.done }}</b> / {{ progress.total }} masala</p><p class="text-mute">{% if progress.completed %}Tugatildi{% else %}yechildi{% endif %}</p></div>

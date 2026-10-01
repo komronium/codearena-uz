@@ -364,9 +364,12 @@ def test_plan_sections_counts_each_section_and_finds_the_next_unsolved(staff, al
     plan = _plan("p", [a, b])
     second = PlanSection.objects.create(plan=plan, title="Ikkinchi", order=1)
     PlanItem.objects.create(section=second, problem=c)
+    PlanSection.objects.create(plan=plan, title="Tez orada", order=2)  # nothing open yet: listed, never complete
     _solve(ali, a)
-    assert plan_sections(ali, [plan])[plan.pk] == {"sections": [{"done": 1, "total": 2}, {"done": 0, "total": 1}],
-                                                   "next_id": b.pk}
+    assert plan_sections(ali, [plan])[plan.pk] == {
+        "sections": [{"done": 1, "total": 2, "complete": False}, {"done": 0, "total": 1, "complete": False},
+                     {"done": 0, "total": 0, "complete": False}],
+        "next_id": b.pk}
 
 
 @pytest.mark.django_db
@@ -426,3 +429,23 @@ def test_section_theory_prefers_the_topic_its_intro_links_to(client, staff):
     plan = _plan("p", [a])
     plan.sections.update(intro_md="Nazariya: [input-output](/learn/topics/input-output/).")
     assert "Nazariya: input-output" in client.get(reverse("learn:plan", args=[plan.slug])).content.decode()
+
+
+@pytest.mark.django_db
+def test_topic_and_course_show_theory_before_any_problem_exists(client, staff):
+    from apps.problems.models import Tag
+
+    Tag.objects.create(name="heap", about_md="Uyum eng kichik elementni tez beradi.")
+    Tag.objects.create(name="no-theory")
+    guide = client.get(reverse("learn:topics")).content.decode()
+    assert "heap" in guide and "Masalalar tez orada" in guide and "no-theory" not in guide
+    r = client.get(reverse("learn:topic", args=["heap"]))
+    assert r.status_code == 200 and "tez orada" in r.content.decode()
+    assert client.get(reverse("learn:topic", args=["no-theory"])).status_code == 404
+
+    plan = StudyPlan.objects.create(slug="ds", title="Tuzilmalar", is_public=True, in_quest=True)
+    PlanSection.objects.create(plan=plan, title="Uyum", intro_md="Nazariya: [heap](/learn/topics/heap/).")
+    body = client.get(reverse("learn:plan", args=["ds"])).content.decode()
+    assert "Uyum" in body and "Masalalar tez orada" in body and "Nazariya: heap" in body
+    assert "Masalalar tez orada" in client.get(reverse("learn:hub")).content.decode()
+    assert "Tuzilmalar" in client.get(reverse("learn:topic", args=["heap"])).content.decode()  # linked course

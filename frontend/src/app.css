@@ -1365,6 +1365,8 @@ section.ca-ed-full #editor .cm-editor { height: calc(100vh - 9.5rem); }
 .ca-sec-head h2 { font-size: .95rem; font-weight: 600; }
 .ca-sec-intro { padding: .75rem 1rem 0; color: rgb(var(--ca-mute-rgb)); }
 .ca-sec .ca-rows { border: 0; border-radius: 0; box-shadow: none; }
+.ca-sec-soon { display: flex; align-items: center; gap: .5rem; padding: .9rem 1rem; font-size: .875rem; color: rgb(var(--ca-mute-rgb)); }
+.ca-sec-soon svg.lucide { width: 1rem; height: 1rem; flex: none; }
 .ca-ring {
   flex: none; display: grid; place-items: center; width: 4.5rem; height: 4.5rem; border-radius: 9999px; font-size: .9rem;
   background: radial-gradient(closest-side, rgb(var(--ca-surface-rgb)) 78%, transparent 80% 100%),

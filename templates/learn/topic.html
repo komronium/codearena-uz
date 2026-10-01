@@ -6,8 +6,8 @@
   <p class="ca-guide-kicker"><i data-lucide="{% if tag.kind == 'sql' %}database{% else %}book-open{% endif %}" class="lu" aria-hidden="true"></i>Qo‘llanma · {{ tag.get_kind_display }}</p>
   <h1 class="ca-page-title" translate="no">{{ tag.name }}</h1>
   <p class="mt-2 flex flex-wrap items-center gap-3 text-sm opacity-90">
-    <span>{{ n }} ta masala{% if user.is_authenticated %} · <b>{{ done }}</b> tasi yechilgan{% endif %}</span>
-    <a class="underline underline-offset-2" href="{% url 'problems:list' %}?tag={{ tag.name|urlencode }}"><i data-lucide="list-checks" class="lu mr-1" aria-hidden="true"></i>Masalalar ro‘yxatida</a>
+    <span>{% if n %}{{ n }} ta masala{% if user.is_authenticated %} · <b>{{ done }}</b> tasi yechilgan{% endif %}{% else %}Masalalar tez orada{% endif %}</span>
+    {% if n %}<a class="underline underline-offset-2" href="{% url 'problems:list' %}?tag={{ tag.name|urlencode }}"><i data-lucide="list-checks" class="lu mr-1" aria-hidden="true"></i>Masalalar ro‘yxatida</a>{% endif %}
     {% if user.is_staff %}<a class="underline underline-offset-2" href="{% url 'moderation:tag_edit' tag.pk %}"><i data-lucide="pencil" class="lu mr-1" aria-hidden="true"></i>Tahrirlash</a>{% endif %}
   </p>
 </header>
@@ -23,6 +23,8 @@
       <h2 id="lvl-{{ forloop.counter }}" class="mb-2 text-sm font-semibold text-mute">{{ label }}</h2>
       {% include "learn/_problem_rows.html" with plan=None %}
     </section>
+    {% empty %}
+    <p class="ca-sec-soon ca-panel"><i data-lucide="clock" class="lu" aria-hidden="true"></i>Bu mavzu bo‘yicha masalalar tez orada qo‘shiladi.</p>
     {% endfor %}
     {% if plans %}
     <section aria-labelledby="plans-title">

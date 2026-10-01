@@ -16,8 +16,9 @@
       </div>
       {% if r.excerpt %}<p class="ca-guide-text">{{ r.excerpt|truncatechars:110 }}</p>{% endif %}
       <div class="ca-guide-foot">
-        <span><b class="tabular">{{ r.total }}</b> masala</span>
-        {% if user.is_authenticated %}<span><b class="tabular">{{ r.solved }}</b> yechilgan</span><span class="ml-auto tabular font-semibold{% if r.solved == r.total %} text-ok{% endif %}">{{ r.pct }}%</span>{% endif %}
+        {% if not r.total %}<span>Masalalar tez orada</span>
+        {% else %}<span><b class="tabular">{{ r.total }}</b> masala</span>{% endif %}
+        {% if user.is_authenticated and r.total %}<span><b class="tabular">{{ r.solved }}</b> yechilgan</span><span class="ml-auto tabular font-semibold{% if r.solved == r.total %} text-ok{% endif %}">{{ r.pct }}%</span>{% endif %}
       </div>
     </article>
     {% endfor %}
