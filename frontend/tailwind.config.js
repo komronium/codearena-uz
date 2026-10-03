@@ -23,8 +23,8 @@ module.exports = {
         warn: { DEFAULT: "rgb(var(--ca-warn-rgb) / <alpha-value>)", soft: "rgb(var(--ca-warn-rgb) / .12)" },
       },
       fontFamily: {
-        sans: ["Anthropic Sans Text", "Inter", "ui-sans-serif", "system-ui", "sans-serif"],
-        mono: ["Anthropic Mono", "JetBrains Mono", "ui-monospace", "monospace"],
+        sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
+        mono: ["JetBrains Mono", "ui-monospace", "monospace"],
       },
     },
   },

@@ -4,8 +4,7 @@
  * (e.g. [hidden] { display: none }) and utilities win. Everything here is kept whole:
  * class names built in templates (ca-verdict-{{ v }}) are invisible to Tailwind's scan. */
 
-/* The project's own UI fonts (static/fonts, committed as-is). Inter and JetBrains Mono
- * follow them in every stack: they cover what these lack (Cyrillic, for one). */
+/* Inter and JetBrains Mono are vendored locally with Latin, extended Latin and Cyrillic subsets. */
 @font-face { font-family: "Anthropic Sans Text"; font-weight: 400; font-style: normal; font-display: swap; src: url("../fonts/AnthropicSans-Text-Regular.otf") format("opentype"); }
 @font-face { font-family: "Anthropic Sans Text"; font-weight: 500; font-style: normal; font-display: swap; src: url("../fonts/AnthropicSans-Text-Medium.otf") format("opentype"); }
 @font-face { font-family: "Anthropic Sans Text"; font-weight: 600; font-style: normal; font-display: swap; src: url("../fonts/AnthropicSans-Text-Semibold.otf") format("opentype"); }
@@ -18,8 +17,8 @@
  * za’faron = medium / medal / streak, malina = hard / wrong, osmon = beginner / info.
  * Every text pairing is 4.5:1 or more on paper, sunk wells and its own 12% chip, both themes. */
 :root {
-  --ca-radius: 14px;
-  --ca-radius-sm: 10px;
+  --ca-radius: 10px;
+  --ca-radius-sm: 8px;
     --ca-paper-rgb: 255 255 255;
     --ca-surface-rgb: 255 255 255;
     --ca-field-rgb: 255 255 255;
@@ -103,7 +102,7 @@
 :root[data-theme="dark"] { color-scheme: dark; }
 html { color-scheme: light dark; }
 body {
-  font-family: "Anthropic Sans Text", Inter, ui-sans-serif, system-ui, sans-serif;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
   background: rgb(var(--ca-paper-rgb));
 }
 h1, h2, h3 { letter-spacing: -.02em; }
@@ -112,7 +111,7 @@ h1 { text-wrap: balance; }
 .ca-section-title { font-size: 1.05rem; font-weight: 600; margin-bottom: .75rem; }
 .ca-spin { display: inline-block; animation: ca-spin 1s linear infinite; }
 @keyframes ca-spin { to { transform: rotate(360deg); } }
-.font-mono, code, pre { font-family: "Anthropic Mono", "JetBrains Mono", ui-monospace, monospace; }
+.font-mono, code, pre { font-family: "JetBrains Mono", ui-monospace, monospace; }
 .tabular { font-variant-numeric: tabular-nums; }
 .ca-skip {
   position: absolute; left: -9999px; top: 0; z-index: 100;
@@ -552,7 +551,7 @@ a.ca-st-label:hover { text-decoration: underline; text-underline-offset: 3px; }
 .ca-pick-n { font-size: .72rem; font-weight: 500; opacity: .8; font-variant-numeric: tabular-nums; }
 .ca-pick-sm > span { padding: .25rem .6rem; font-size: .78rem; font-weight: 500; }
 .ca-kbd {
-  display: inline-block; padding: .05rem .4rem; border-radius: 5px; font-size: .7rem; font-family: "Anthropic Mono", "JetBrains Mono", monospace;
+  display: inline-block; padding: .05rem .4rem; border-radius: 5px; font-size: .7rem; font-family: "JetBrains Mono", monospace;
   border: 1px solid rgb(var(--ca-line-rgb)); border-bottom-width: 2px; background: rgb(var(--ca-surface-rgb)); color: rgb(var(--ca-mute-rgb));
 }
 .ca-progress { height: .4rem; border-radius: 9999px; background: rgb(var(--ca-ink-rgb) / .07); overflow: hidden; }
@@ -603,7 +602,7 @@ a.ca-st-label:hover { text-decoration: underline; text-underline-offset: 3px; }
 .ca-cmp-n { display: inline-block; width: 2.75rem; padding-right: .75rem; text-align: right; color: rgb(var(--ca-mute-rgb) / .7); user-select: none; }
 .ca-terminal {
   background: #14161A; color: #EAEBE5; border-radius: var(--ca-radius);
-  font-family: "Anthropic Mono", "JetBrains Mono", ui-monospace, monospace; font-size: .875rem; line-height: 1.55;
+  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: .875rem; line-height: 1.55;
 }
 .ca-terminal code.hljs { background: transparent; padding: 0; font-family: inherit; }
 .ca-test {
@@ -617,9 +616,9 @@ a.ca-st-label:hover { text-decoration: underline; text-underline-offset: 3px; }
 .ca-pre, .prose pre {
   background: rgb(var(--ca-sunk-rgb)); border: 1px solid rgb(var(--ca-line-rgb));
   border-radius: var(--ca-radius); padding: .75rem 1rem; overflow-x: auto;
-  font-family: "Anthropic Mono", "JetBrains Mono", ui-monospace, monospace; font-size: .875rem; color: rgb(var(--ca-ink-rgb));
+  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: .875rem; color: rgb(var(--ca-ink-rgb));
 }
-.prose code { font-family: "Anthropic Mono", "JetBrains Mono", monospace; font-size: .85em; }
+.prose code { font-family: "JetBrains Mono", monospace; font-size: .85em; }
 .prose p { margin: .65em 0; }
 .prose h1,.prose h2,.prose h3 { font-weight: 600; margin: 1em 0 .4em; text-wrap: pretty; }
 .prose ul { list-style: disc; padding-left: 1.4em; margin: .65em 0; }
@@ -627,14 +626,14 @@ a.ca-st-label:hover { text-decoration: underline; text-underline-offset: 3px; }
 .prose li + li { margin-top: .2em; }
 .prose a { color: rgb(var(--ca-accent-rgb)); text-decoration: underline; text-underline-offset: 2px; }
 #editor .cm-editor { height: min(70vh, 560px); font-size: var(--ed-size, 14px); }
-#editor .cm-scroller { font-family: var(--ed-font, "Anthropic Mono", "JetBrains Mono", ui-monospace, monospace); line-height: 1.55; }
+#editor .cm-scroller { font-family: var(--ed-font, "JetBrains Mono", ui-monospace, monospace); line-height: 1.55; }
 #editor .cm-focused { outline: none; }
 section.ca-ed-full { position: fixed; inset: 0; z-index: 60; padding: 1rem; background: rgb(var(--ca-paper-rgb)); }
 section.ca-ed-full #editor .cm-editor { height: calc(100vh - 9.5rem); }
 .ca-editor-fallback {
   display: block; width: 100%; height: min(70vh, 560px); padding: .75rem 1rem; resize: vertical;
   background: transparent; color: rgb(var(--ca-ink-rgb)); border: 0; outline: none;
-  font-family: "Anthropic Mono", "JetBrains Mono", ui-monospace, monospace; font-size: .9rem; line-height: 1.55; tab-size: 4;
+  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: .9rem; line-height: 1.55; tab-size: 4;
 }
 .ca-statement { font-size: .95rem; line-height: 1.65; }
 .ca-statement-h { font-size: 1.05rem; font-weight: 700; margin-bottom: .5rem; letter-spacing: -.01em; }
@@ -644,7 +643,7 @@ section.ca-ed-full #editor .cm-editor { height: calc(100vh - 9.5rem); }
   background: rgb(var(--ca-sunk-rgb)); border-bottom: 1px solid rgb(var(--ca-line-rgb));
   font-size: .75rem; font-weight: 600; color: rgb(var(--ca-mute-rgb));
 }
-.ca-sample pre { padding: .65rem .75rem; font-family: "Anthropic Mono", "JetBrains Mono", ui-monospace, monospace; font-size: .875rem; overflow-x: auto; }
+.ca-sample pre { padding: .65rem .75rem; font-family: "JetBrains Mono", ui-monospace, monospace; font-size: .875rem; overflow-x: auto; }
 .ca-copy-btn { color: rgb(var(--ca-mute-rgb)); font-size: .9rem; line-height: 1; padding: .15rem; border-radius: .3rem; }
 .ca-copy-btn:hover { color: rgb(var(--ca-ink-rgb)); background: rgb(var(--ca-ink-rgb) / .06); }
 .ca-sidebar-link {
@@ -914,7 +913,7 @@ section.ca-ed-full #editor .cm-editor { height: calc(100vh - 9.5rem); }
 .ca-sql-table { margin-top: .75rem; border: 1px solid rgb(var(--ca-line-rgb)); border-radius: var(--ca-radius); overflow: hidden; }
 .ca-sql-table figcaption {
   display: flex; align-items: center; gap: .4rem; padding: .45rem .75rem; font-size: .8rem; font-weight: 600;
-  font-family: "Anthropic Mono", "JetBrains Mono", ui-monospace, monospace; color: rgb(var(--ca-sql-rgb));
+  font-family: "JetBrains Mono", ui-monospace, monospace; color: rgb(var(--ca-sql-rgb));
   border-bottom: 1px solid rgb(var(--ca-line-rgb)); background: rgb(var(--ca-sunk-rgb));
 }
 .ca-sql-table figcaption .text-mute { font-family: inherit; font-weight: 400; }
@@ -992,7 +991,7 @@ section.ca-ed-full #editor .cm-editor { height: calc(100vh - 9.5rem); }
 .ca-h2 { font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 700; letter-spacing: -.03em; line-height: 1.15; }
 .ca-step { padding: 1.4rem 1.5rem 1.5rem; border-top: 2px solid rgb(var(--ca-accent-rgb)); background: rgb(var(--ca-surface-rgb)); border-radius: 0 0 var(--ca-radius) var(--ca-radius); }
 .ca-step p { margin-top: .35rem; font-size: .9rem; color: rgb(var(--ca-mute-rgb)); }
-.ca-step-n { display: block; margin-bottom: .6rem; font-family: "Anthropic Mono", "JetBrains Mono", monospace; font-size: .85rem; font-weight: 600; color: rgb(var(--ca-accent-rgb)); }
+.ca-step-n { display: block; margin-bottom: .6rem; font-family: "JetBrains Mono", monospace; font-size: .85rem; font-weight: 600; color: rgb(var(--ca-accent-rgb)); }
 .ca-bento { display: grid; gap: 1rem; }
 @media (min-width: 768px) { .ca-bento { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (min-width: 1024px) { .ca-bento { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
@@ -1187,7 +1186,7 @@ section.ca-ed-full #editor .cm-editor { height: calc(100vh - 9.5rem); }
 @media (min-width: 1024px) { .ca-live-hero-body { grid-template-columns: minmax(0, 1.4fr) auto minmax(0, 1fr); } }
 .ca-live-clock { display: flex; flex-direction: column; align-items: flex-start; }
 @media (min-width: 1024px) { .ca-live-clock { align-items: center; } }
-.ca-live-clock b { font-family: "Anthropic Mono", "JetBrains Mono", ui-monospace, monospace; font-size: 2.35rem; font-weight: 500; letter-spacing: -.02em; line-height: 1.1; }
+.ca-live-clock b { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 2.35rem; font-weight: 500; letter-spacing: -.02em; line-height: 1.1; }
 .ca-live-clock span { font-size: .8rem; color: rgb(var(--ca-mute-rgb)); }
 .ca-live-hero-bar { height: 4px; background: color-mix(in srgb, rgb(var(--ca-ok-fill-rgb)) 14%, rgb(var(--ca-surface-rgb))); }
 .ca-live-hero-bar > span { display: block; height: 100%; background: rgb(var(--ca-ok-fill-rgb)); }

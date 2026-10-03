@@ -51,6 +51,7 @@ const esmFile = (spec) => spec.replace(/^@/, "").replaceAll("/", "-") + ".js";
 const FONTS = [
   ["Inter", ["@fontsource-variable/inter/wght.css"]],
   ["JetBrains Mono", ["400", "400-italic", "500", "700"].map((w) => `@fontsource/jetbrains-mono/${w}.css`)],
+  ["Lilex", ["400.css", "500.css"].map((w) => `@fontsource/lilex/${w}`)],
   ["Fira Code", ["400", "500"].map((w) => `@fontsource/fira-code/${w}.css`)],
 ];
 const SUBSETS = ["latin", "latin-ext", "cyrillic", "cyrillic-ext"];
@@ -76,7 +77,7 @@ const VENDOR_FONTS = {
 const LICENSED = [
   "htmx.org", "lucide", "@highlightjs/cdn-assets", "katex", "easymde", "@fortawesome/fontawesome-free",
   "tailwindcss", "@fontsource-variable/inter",
-  "@fontsource/jetbrains-mono", "@fontsource/fira-code", "@babel/runtime",
+  "@fontsource/jetbrains-mono", "@fontsource/fira-code", "@fontsource/lilex", "@babel/runtime",
   ...ESM.filter((s) => !s.startsWith("@babel/")),
 ];
 

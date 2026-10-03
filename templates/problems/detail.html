@@ -277,7 +277,7 @@
                 </select></label>
               <label class="ca-pref"><span>Shrift</span>
                 <select data-pref="font" class="ca-select !w-40 !py-1 text-sm">
-                  <option value="anthropic">Anthropic Mono</option><option value="jetbrains">JetBrains Mono</option><option value="fira">Fira Code</option><option value="system">Tizim</option>
+                  <option value="jetbrains">JetBrains Mono</option><option value="lilex">Lilex</option><option value="fira">Fira Code</option><option value="anthropic">Anthropic Mono</option><option value="system">Tizim</option>
                 </select></label>
               <label class="ca-pref"><span>O‘lcham</span>
                 <input type="range" data-pref="size" min="12" max="22" step="1" class="min-w-0 flex-1">
@@ -387,12 +387,13 @@ resolves their bare imports so @codemirror/state loads once — two copies break
   const tabC = new Compartment(), wrapC = new Compartment(), vimC = new Compartment();
   const prefKey = "ca-editor";
   const FONTS = {
-    anthropic: '"Anthropic Mono", "JetBrains Mono", ui-monospace, monospace',
+    anthropic: '"Anthropic Mono", ui-monospace, monospace',
     jetbrains: '"JetBrains Mono", ui-monospace, monospace',
+    lilex: '"Lilex", ui-monospace, monospace',
     fira: '"Fira Code", ui-monospace, monospace',
     system: "ui-monospace, Menlo, Consolas, monospace",
   };
-  let prefs = { theme: "auto", font: "anthropic", size: 14, tab: "4", wrap: false, vim: false, starter: true };
+  let prefs = { theme: "auto", font: "jetbrains", size: 14, tab: "4", wrap: false, vim: false, starter: true };
   try { prefs = { ...prefs, ...JSON.parse(localStorage.getItem(prefKey) || "{}") }; } catch {}
   const THEMES = {
     "github-light": () => import("@uiw/codemirror-theme-github").then((m) => m.githubLight),

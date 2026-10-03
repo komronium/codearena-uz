@@ -3,10 +3,7 @@
 {% block content %}
 {% include "contests/_dq_banner.html" with participation=my_participation %}
 <div class="ca-panel mb-6 !p-0 overflow-hidden">
-  {# the contest's kind as a picture: rated — Olov, a group's own — Islimiy naqsh, open — Yulduzli tun #}
-  {% if contest.is_rated %}{% with "international-master" as theme %}<div class="ca-banner ca-banner-{{ theme }} !h-12 sm:!h-14" aria-hidden="true"><span class="ca-banner-tag">Reytingli</span></div>{% endwith %}
-  {% elif contest.require_group_id %}<div class="ca-banner ca-banner-pupil !h-12 sm:!h-14" aria-hidden="true"><span class="ca-banner-tag">Guruh musobaqasi</span></div>
-  {% else %}<div class="ca-banner ca-banner-newbie !h-12 sm:!h-14" aria-hidden="true"><span class="ca-banner-tag">Ochiq musobaqa</span></div>{% endif %}
+  <div class="h-1 bg-line" aria-hidden="true"></div>
   <div class="px-6 pb-5 pt-5">
     <div class="mb-2 flex flex-wrap items-center gap-2">
       {% if contest.is_running %}<span class="ca-diff ca-diff-easy"><span class="ca-live-dot" aria-hidden="true"></span>Jonli</span>

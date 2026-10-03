@@ -58,7 +58,7 @@ script or stylesheet.
     docker compose exec web python manage.py migrate
     docker compose exec web python manage.py seed
 
-## Deploy (VPS, http://SERVER_IP:2009)
+## Deploy (VPS, https://codearena.uz)
 
 Ubuntu/Debian with Docker Engine + compose plugin installed. Everything runs
 inside compose: gunicorn + whitenoise (`web`), judge worker (`worker`),
@@ -66,8 +66,9 @@ inside compose: gunicorn + whitenoise (`web`), judge worker (`worker`),
 
     git clone <repo> /opt/codearena && cd /opt/codearena
     cp .env.prod.example .env
-    # edit .env: SECRET_KEY (python3 -c "import secrets;print(secrets.token_urlsafe(50))"),
-    #            ALLOWED_HOSTS=SERVER_IP, CSRF_TRUSTED_ORIGINS=http://SERVER_IP:2009, POSTGRES_PASSWORD
+    # edit .env: SECRET_KEY (python3 -c "import secrets;print(secrets.token_urlsafe(50))"), POSTGRES_PASSWORD
+    sudo install -m 0644 deploy/codearena.tmpfiles.conf /etc/tmpfiles.d/codearena.conf
+    sudo systemd-tmpfiles --create /etc/tmpfiles.d/codearena.conf
     sudo mkdir -p /var/codearena/work && sudo chmod 777 /var/codearena/work
     for l in python cpp java node; do docker build -t codearena-judge-$l judge/images/$l; done
     docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
@@ -80,7 +81,7 @@ Once, after the first deploy:
     sudo cp deploy/docker-daemon.json /etc/docker/daemon.json && sudo systemctl restart docker
     docker compose exec web python manage.py seed            # languages + admin (admin/admin)
     docker compose exec web python manage.py seed_problems --author admin
-    sudo ufw allow 2009/tcp
+    sudo ufw allow 80/tcp && sudo ufw allow 443/tcp
 
 First thing after start: log in as `admin`, open `/accounts/password_reset/`
 or Boshqaruv → Foydalanuvchilar and change the `admin` password.
@@ -90,8 +91,12 @@ Update: `git pull && docker compose -f docker-compose.yml -f docker-compose.prod
 `docker compose logs -f web worker scheduler`. Backup:
 `docker compose exec db pg_dump -U codearena codearena > backup.sql`.
 
-Behind a domain + HTTPS later: put Caddy/nginx in front of :2009, set
-`USE_HTTPS=1`, `ALLOWED_HOSTS=example.com`, `CSRF_TRUSTED_ORIGINS=https://example.com`.
+Nginx serves `codearena.uz` and `www.codearena.uz` on ports 80/443 and proxies to
+the web container through `/run/codearena/gunicorn.sock`; the web container has no
+published host port. Point both DNS names to the VPS, then issue the TLS certificate
+with Certbot (`certbot --nginx -d codearena.uz -d www.codearena.uz --redirect`).
+Certbot installs automatic renewal; verify it with `certbot renew --cert-name
+codearena.uz --dry-run`.
 
 ## Contests, rating, integrity
 
