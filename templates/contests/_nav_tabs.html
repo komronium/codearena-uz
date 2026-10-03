@@ -1,0 +1,5 @@
+<nav class="ca-contest-tabs" aria-label="Musobaqa bo‘limlari">
+  <a href="{% url 'contests:detail' contest.pk %}#contest-overview"{% if active == 'overview' %} aria-current="page"{% endif %}>Umumiy</a>
+  <a href="{% url 'contests:detail' contest.pk %}#contest-problems">Masalalar <span>{{ problems|length }}</span></a>
+  <a href="{% url 'contests:standings' contest.pk %}"{% if active == 'scoreboard' %} aria-current="page"{% endif %}>Natijalar</a>
+</nav>

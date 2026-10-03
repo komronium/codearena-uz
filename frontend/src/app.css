@@ -4,7 +4,7 @@
  * (e.g. [hidden] { display: none }) and utilities win. Everything here is kept whole:
  * class names built in templates (ca-verdict-{{ v }}) are invisible to Tailwind's scan. */
 
-/* Inter and JetBrains Mono are vendored locally with Latin, extended Latin and Cyrillic subsets. */
+/* Apple devices use their native San Francisco system font; Inter and JetBrains Mono are vendored fallbacks. */
 @font-face { font-family: "Anthropic Sans Text"; font-weight: 400; font-style: normal; font-display: swap; src: url("../fonts/AnthropicSans-Text-Regular.otf") format("opentype"); }
 @font-face { font-family: "Anthropic Sans Text"; font-weight: 500; font-style: normal; font-display: swap; src: url("../fonts/AnthropicSans-Text-Medium.otf") format("opentype"); }
 @font-face { font-family: "Anthropic Sans Text"; font-weight: 600; font-style: normal; font-display: swap; src: url("../fonts/AnthropicSans-Text-Semibold.otf") format("opentype"); }
@@ -102,7 +102,7 @@
 :root[data-theme="dark"] { color-scheme: dark; }
 html { color-scheme: light dark; }
 body {
-  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", Inter, ui-sans-serif, system-ui, sans-serif;
   background: rgb(var(--ca-paper-rgb));
 }
 h1, h2, h3 { letter-spacing: -.02em; }
@@ -1404,6 +1404,58 @@ section.ca-ed-full #editor .cm-editor { height: calc(100vh - 9.5rem); }
 .ca-save-row { display: flex; width: 100%; align-items: center; gap: .5rem; padding: .4rem .5rem; border-radius: .4rem; font-size: .875rem; text-align: left; }
 .ca-save-row:hover { background: rgb(var(--ca-ink-rgb) / .05); }
 .ca-save-row[aria-pressed="true"] svg.lucide { color: rgb(var(--ca-accent-rgb)); }
+
+/* Kick Start inspired workspace: flat white navigation, quiet borders, useful density. */
+@media (min-width: 1280px) {
+  .ca-shell { display: block; }
+  .ca-rail {
+    position: sticky; top: 0; z-index: 45; width: 100%; height: 3.75rem; min-height: 3.75rem;
+    flex-direction: row; justify-content: flex-start; gap: 1.15rem; overflow: visible;
+    padding: 0 clamp(1.25rem, 4vw, 4rem); background: rgb(var(--ca-paper-rgb));
+    border-bottom: 1px solid rgb(var(--ca-line-rgb));
+  }
+  .ca-rail-brand { display: inline-flex; width: auto; height: auto; gap: .55rem; margin: 0 .7rem 0 0; color: rgb(var(--ca-ink-rgb)); font-size: 1.05rem; font-weight: 700; letter-spacing: -.025em; }
+  .ca-rail-brand .ca-brand-mark { width: 1.65rem; height: 1.65rem; }
+  .ca-rail .ca-ikat-o { fill: rgb(var(--ca-accent-fill-rgb)); }
+  .ca-rail-group, .ca-rail-foot { flex-direction: row; align-items: center; gap: .15rem; }
+  .ca-rail-group + .ca-rail-group { position: static; margin: 0 0 0 .25rem; padding: 0 0 0 .75rem; border-left: 1px solid rgb(var(--ca-line-rgb)); }
+  .ca-rail-group + .ca-rail-group::before { display: none; }
+  .ca-rail-link {
+    width: auto; min-height: 2.65rem; flex-direction: row; gap: .42rem; padding: .45rem .6rem;
+    border-radius: .4rem; color: rgb(var(--ca-mute-rgb)); font-size: .8rem; font-weight: 500;
+  }
+  .ca-rail-link svg.lucide { width: 1.05rem; height: 1.05rem; }
+  .ca-rail-link:hover { color: rgb(var(--ca-ink-rgb)); background: rgb(var(--ca-ink-rgb) / .045); }
+  .ca-rail-link:hover .ca-rail-ind { background: transparent; }
+  .ca-rail-ind { width: auto; height: auto; background: transparent !important; }
+  .ca-rail-link.is-active { position: relative; color: rgb(var(--ca-accent-rgb)); font-weight: 600; background: transparent; }
+  .ca-rail-link.is-active .ca-rail-ind { color: rgb(var(--ca-accent-rgb)); }
+  .ca-rail-link.is-active::after { content: ""; position: absolute; right: .6rem; bottom: -.55rem; left: .6rem; height: 2px; background: rgb(var(--ca-accent-fill-rgb)); }
+  .ca-rail .ca-rail-link:focus-visible .ca-rail-ind { outline-color: rgb(var(--ca-accent-rgb)); }
+  .ca-rail .ca-rail-link:focus-visible:not(:has(.ca-rail-ind)), .ca-rail summary:focus-visible { outline-color: rgb(var(--ca-accent-rgb)); }
+  .ca-rail .ca-badge-live, .ca-rail .ca-badge-n { box-shadow: 0 0 0 2px rgb(var(--ca-paper-rgb)); }
+  .ca-rail-foot { margin: 0 0 0 auto; padding: 0; }
+  .ca-rail .ca-dropdown-trigger:hover, .ca-rail .ca-dropdown[open] > .ca-dropdown-trigger { background: rgb(var(--ca-ink-rgb) / .05); }
+  .ca-rail .ca-dropdown-panel { position: absolute; top: calc(100% + .5rem); right: 0; bottom: auto; left: auto; color: rgb(var(--ca-ink-rgb)); }
+  .ca-rail .ca-dropdown-dot { box-shadow: 0 0 0 2px rgb(var(--ca-paper-rgb)); }
+  .ca-topbar { top: 3.75rem; min-height: 3.5rem; padding-inline: clamp(1.25rem, 4vw, 4rem); background: rgb(var(--ca-paper-rgb) / .96); }
+  .ca-main { max-width: 88rem; margin-inline: auto; padding-top: 1.75rem; }
+}
+.ca-panel, .ca-card { box-shadow: none; border-radius: var(--ca-radius); }
+.ca-live-hero { border-radius: var(--ca-radius); background: rgb(var(--ca-surface-rgb)); border-color: rgb(var(--ca-line-rgb)); }
+.ca-live-hero-body { padding: 1.35rem 1.5rem; }
+.ca-contest-tabs { display: flex; gap: 1.5rem; margin: 0 0 1.5rem; overflow-x: auto; border-bottom: 1px solid rgb(var(--ca-line-rgb)); scrollbar-width: none; }
+.ca-contest-tabs a { display: inline-flex; flex: none; align-items: center; gap: .45rem; min-height: 2.75rem; margin-bottom: -1px; border-bottom: 2px solid transparent; color: rgb(var(--ca-mute-rgb)); font-size: .875rem; font-weight: 500; }
+.ca-contest-tabs a:hover { color: rgb(var(--ca-ink-rgb)); }
+.ca-contest-tabs a[aria-current="page"] { color: rgb(var(--ca-accent-rgb)); border-bottom-color: rgb(var(--ca-accent-fill-rgb)); font-weight: 600; }
+.ca-contest-tabs a span { color: rgb(var(--ca-mute-rgb)); font-size: .75rem; font-variant-numeric: tabular-nums; }
+#contest-overview, #contest-problems { scroll-margin-top: 8rem; }
+@media (max-width: 1279px) {
+  .ca-bottom-nav { background: rgb(var(--ca-paper-rgb)); border-top: 1px solid rgb(var(--ca-line-rgb)); }
+  .ca-bottom-nav a, .ca-bottom-nav button { color: rgb(var(--ca-mute-rgb)); }
+  .ca-bottom-nav a.is-active { color: rgb(var(--ca-accent-rgb)); }
+  .ca-bottom-nav a.is-active .ca-bn-icon { background: rgb(var(--ca-accent-rgb) / .1); color: rgb(var(--ca-accent-rgb)); }
+}
 
 @tailwind base;
 @tailwind components;
