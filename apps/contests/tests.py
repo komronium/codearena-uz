@@ -639,7 +639,7 @@ def test_newcomers_start_at_zero_and_ramp_up_to_their_real_rating():
     assert hidden(0, 0) == START and hidden(700, len(RAMP)) == 700
     shown = [0, 0]
     for k in range(len(RAMP)):
-        shown = _new_ratings([{"rank": 1}, {"rank": 1}], shown, [k, k])
+        shown = _new_ratings([{"rank": 1, "disqualified": False}] * 2, shown, [k, k])
         assert shown == [sum(RAMP[:k + 1]) - (k + 1)] * 2
     assert shown == [START - 6] * 2
 
@@ -864,6 +864,26 @@ def test_dq_after_rating_recomputes_the_latest_contest(client, problem_a, python
     assert rows[ali.pk].rank == 1 and ali.rating == rows[ali.pk].rating_after
     assert "Reyting qayta hisoblandi" in r.content.decode()
     assert AuditEntry.objects.filter(action="rating_recompute", contest=c).count() == 1
+
+
+@pytest.mark.django_db
+def test_a_disqualified_newcomer_gets_no_ramp_bonus_and_keeps_the_step(problem_a, python):
+    """Last place plus a newcomer's +360 bonus used to come out as a gain. Disqualified: the change
+    can only take away, and the ramp step waits for the next clean contest."""
+    from .rating import RAMP, apply_rating
+
+    cheat, ali, bob = (User.objects.create_user(n, password="x") for n in ("cheat", "ali", "bob"))
+    c = _rated_contest("Debut", 30, problem_a, python, [cheat, ali], [bob])
+    Participation.objects.filter(contest=c, user=cheat).update(disqualified=True)
+    apply_rating(c)
+    for u in (cheat, ali, bob):
+        u.refresh_from_db()
+    assert cheat.rating <= 0 < bob.rating < ali.rating  # bob, last of the clean ones, still gains
+
+    nxt = _rated_contest("Next", 1, problem_a, python, [cheat])
+    apply_rating(nxt)
+    p = Participation.objects.get(contest=nxt, user=cheat)
+    assert p.rating_after - p.rating_before >= RAMP[0] - 50  # the first step's bonus, on a lone win
 
 
 @pytest.mark.django_db

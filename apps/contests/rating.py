@@ -81,11 +81,16 @@ def _new_ratings(rows, shown: list[int], rated: list[int]) -> list[int]:
     for i, row in enumerate(rows, start=1):
         last[row["rank"]] = i
     changes = deltas([hidden(s, n) for s, n in zip(shown, rated)], [last[row["rank"]] for row in rows])
-    return [s + d + bonus(n) for s, d, n in zip(shown, changes, rated)]
+    # Disqualified: ranked last, and the change may only take away. No newcomer bonus either, and
+    # the contest doesn't use up a ramp step (_rated_counts skips it), so the hidden rating moves
+    # by exactly the loss; otherwise a newcomer's bonus would turn the last place into a gain.
+    return [s + min(0, d) if row["disqualified"] else s + d + bonus(n)
+            for row, s, d, n in zip(rows, shown, changes, rated)]
 
 
 def _rated_counts(user_ids) -> dict[int, int]:
-    return dict(Participation.objects.filter(user__in=user_ids, rating_after__isnull=False)
+    """Rated contests behind each user, for the newcomer ramp; a disqualification doesn't count."""
+    return dict(Participation.objects.filter(user__in=user_ids, rating_after__isnull=False, disqualified=False)
                 .values("user").annotate(n=Count("pk")).values_list("user", "n"))
 
 
@@ -156,7 +161,7 @@ def recalc_official() -> None:
                 p.official_before, p.official_after = old, new
                 p.save(update_fields=["official_before", "official_after"])
                 current[p.user_id] = new
-                played[p.user_id] = played.get(p.user_id, 0) + 1
+                played[p.user_id] = played.get(p.user_id, 0) + (not row["disqualified"])
         User.objects.exclude(pk__in=current).filter(official_rating__isnull=False).update(official_rating=None)
         User.objects.bulk_update([User(pk=pk, official_rating=r) for pk, r in current.items()], ["official_rating"])
 
