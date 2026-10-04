@@ -37,7 +37,7 @@ class Evidence:
 
 
 def contest_evidence(contest) -> dict[int, list[Evidence]]:
-    """user id -> evidence, in a stable order (by kind, then problem)."""
+    """user id -> evidence, in a stable order (by kind, then problem label)."""
     out: dict[int, list[Evidence]] = {}
     labels = dict(contest.contest_problems.values_list("problem_id", "label"))
     subs = list(Submission.objects.filter(contest=contest).order_by("created", "id"))
@@ -60,10 +60,9 @@ def contest_evidence(contest) -> dict[int, list[Evidence]]:
             if check(sub, snaps.get((sub.user_id, sub.problem_id), [])):
                 hits.setdefault((sub.user_id, sub.problem_id), []).append(sub)
         for (user_id, problem_id), bad in hits.items():
-            what = ("tracker ishlamaganda yuborilgan" if kind == "silent"
-                    else "kodi muharrirda yozilmagan")
+            # the kind's label says what happened; the report lists one kind's problems on one line
             out.setdefault(user_id, []).append(Evidence(
-                kind, f"{labels.get(problem_id, '?')}: {len(bad)} ta yuborish {what}", problem_id, bad[-1]))
+                kind, f"{labels.get(problem_id, '?')}: {len(bad)} ta yuborish", problem_id, bad[-1]))
 
     for (user_id, problem_id), rows in snaps.items():
         # the first snapshot is the baseline: a starter template can be big
@@ -76,7 +75,7 @@ def contest_evidence(contest) -> dict[int, list[Evidence]]:
     _similar(contest, labels, out)
     order = list(WEIGHTS)
     for items in out.values():
-        items.sort(key=lambda e: (order.index(e.kind), e.problem_id or 0))
+        items.sort(key=lambda e: (order.index(e.kind), e.text))  # the text starts with the problem's label
     return out
 
 

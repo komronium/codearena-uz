@@ -32,7 +32,8 @@
       <td class="tabular text-right {% if c.paste %}text-bad font-semibold{% endif %}">{{ c.paste }}</td>
       <td class="tabular text-right {% if c.fast %}text-warn font-semibold{% endif %}">{{ c.fast }}</td>
       <td class="tabular text-right {% if c.copy %}text-warn{% endif %}">{{ c.copy }}</td>
-      <td class="min-w-56 text-xs">{% for e in c.evidence %}<p class="leading-5"><b class="text-bad">{{ e.label }}</b> · {% if e.submission %}<a class="ca-link" href="{% url 'submissions:detail' e.submission.pk %}">{{ e.text }}</a>{% else %}{{ e.text }}{% endif %}</p>{% empty %}<span class="text-mute">—</span>{% endfor %}</td>
+      {# one line per kind of evidence, its problems after it; each links to the submission it rests on #}
+      <td class="min-w-56 text-xs">{% regroup c.evidence by label as kinds %}{% for k in kinds %}<p class="leading-5"><b class="text-bad">{{ k.grouper }}</b> · {% for e in k.list %}{% if e.submission %}<a class="ca-link" href="{% url 'submissions:detail' e.submission.pk %}">{{ e.text }}</a>{% else %}{{ e.text }}{% endif %}{% if not forloop.last %}; {% endif %}{% endfor %}</p>{% empty %}<span class="text-mute">—</span>{% endfor %}</td>
       <td class="text-right"><span class="ca-chip {% if c.risk >= 15 %}text-bad{% elif c.risk >= 6 %}text-warn{% else %}text-mute{% endif %} tabular font-semibold">{{ c.risk }}</span></td>
       <td class="hidden md:table-cell tabular text-xs text-mute">{{ c.last|date:"d.m H:i:s" }}</td>
       <td class="text-right">
