@@ -110,6 +110,18 @@ hisoblash. CLI equivalent:
 
     python manage.py recalc_rating [contest_id]       # is_rated contests only; no-op once applied
 
+The maths is Codeforces' (`apps/contests/rating.py`): Elo seeds, each contestant
+moves halfway to the rating that matches their place, and an anti-inflation fee
+keeps the changes summing to just below zero. Newcomers are rated from 1000 but
+shown 0; their first six rated contests add +360, 250, 180, 110, 70, 30 on top of
+the change. Tiers (`apps/accounts/tiers.py`) run from Boshlovchi (below 700) to
+Afsonaviy Grandmaster (1900+). A contest can be a division: Div. 1 rates 1900+,
+Div. 2 below 1900, Div. 3 below 1600, Div. 4 below 1400; the others take part
+out of competition, unrated. After deploying a change to the rating maths, rebuild
+every rating once (manual rating edits are lost):
+
+    docker compose exec web python manage.py recalc_rating --replay
+
 Similarity is checked on demand from the contest's Nazorat hisoboti, for the
 problems staff pick (same-language AC pairs, both 4+ lines, >= 90%):
 

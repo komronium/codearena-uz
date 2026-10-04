@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.core.paginator import Paginator
@@ -40,7 +41,12 @@ def contest_list(request):
         # your place and progress so far, from the same standings the table shows
         row = c.me and next((r for r in _standings(c) if r["user"].pk == request.user.pk), None)
         c.my_rank, c.my_solved = (row["rank"], row["solved"]) if row else (None, None)
-    return render(request, "contests/list.html", {"running": running, "upcoming": upcoming, "ended": ended})
+    # the sidebar's top ten, from the rating page's pool: users with a finished rated contest
+    top_rated = (get_user_model().objects.filter(is_active=True, participations__rating_after__isnull=False)
+                 .distinct().order_by("-rating", "username")[:10])
+    return render(request, "contests/list.html", {"running": running, "upcoming": upcoming, "ended": ended,
+                                                  "next_contest": next(iter([*running, *upcoming]), None),
+                                                  "top_rated": top_rated})
 
 
 def _standings(contest, problems=None):
@@ -182,6 +188,7 @@ def clarifications(request, pk):
         qs = qs.filter(Q(answered_at__isnull=False) | Q(user=request.user))
     return render(request, "contests/clarifications.html", {
         "contest": contest,
+        "registered": registered,
         "clars": qs,
         # Titles are secret until the start; before it only general questions are possible.
         "problems": contest.contest_problems.select_related("problem")

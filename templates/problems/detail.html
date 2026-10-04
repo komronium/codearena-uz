@@ -1,8 +1,6 @@
 {% extends "base.html" %}{% load static tiers %}
 {% block title %}{% if contest_problem %}{{ contest_problem.label }}. {% endif %}{{ problem.title }}{% endblock %}
 
-{% block page_title %}{% if contest %}<p class="ca-topbar-section">Musobaqa</p>{% else %}{{ block.super }}{% endif %}{% endblock %}
-
 {% block content %}
 {% include "contests/_dq_banner.html" with participation=my_participation %}
 {% if duel %}
@@ -61,7 +59,7 @@
 </div>
 {% endif %}
 {# phones and tablets: one pane at a time, so the editor isn't a long scroll below the statement #}
-<div class="ca-seg sticky top-[61px] z-30 mb-4 lg:hidden" role="group" aria-label="Ko‘rinish">
+<div class="ca-seg sticky top-[calc(var(--ca-nav-h)+.5rem)] z-30 mb-4 lg:hidden" role="group" aria-label="Ko‘rinish">
   <button type="button" data-pane-tab="statement" aria-pressed="true" aria-controls="statement-pane"><i data-lucide="file-text" class="lu mr-1.5" aria-hidden="true"></i>Masala</button>
   <button type="button" data-pane-tab="solve" aria-pressed="false" aria-controls="solve-pane"><i data-lucide="code" class="lu mr-1.5" aria-hidden="true"></i>Yechim</button>
 </div>
@@ -91,7 +89,7 @@
           <button type="button" class="ca-stars-sum" data-dialog="rate-dialog" title="{{ problem.n_ratings }} ta baho"><i data-lucide="star" class="lu" aria-hidden="true"></i><b class="tabular text-ink">{{ problem.avg_stars|floatformat:1 }}</b><span class="sr-only">/5,</span> <span class="tabular">({{ problem.n_ratings }})</span></button>
           {% endif %}
           {% if not contest %}
-          <span><i data-lucide="user" class="lu mr-1.5" aria-hidden="true"></i><a class="ca-tier-ink font-semibold" href="{% url 'profile' problem.author.username %}" translate="no" style="--tier: {{ problem.author.rating|tier_color }}">{{ problem.author.username }}</a></span>
+          <span><i data-lucide="user" class="lu mr-1.5" aria-hidden="true"></i><a class="ca-tier-ink font-semibold{{ problem.author.rating|lg }}" href="{% url 'profile' problem.author.username %}" translate="no" style="--tier: {{ problem.author.rating|tier_color }}">{{ problem.author.username }}</a></span>
           {% endif %}
         </div>
         {% if not contest and problem.tags.all %}
@@ -237,11 +235,11 @@
   <section class="lg:sticky lg:top-20" id="solve-pane" aria-label="Yechim yuborish">
   {% if contest and user.is_authenticated %}<div class="ca-watermark" data-wm="{{ user.username }} · {% now 'd.m.Y H:i' %}" aria-hidden="true"></div>{% endif %}
     {% if user.is_authenticated %}
-    <form method="post" action="{% url 'submissions:submit' problem.slug %}" id="submit-form" class="ca-panel !p-0">
+    <form method="post" action="{% url 'submissions:submit' problem.slug %}" id="submit-form" class="ca-panel ca-ide !p-0">
       {% csrf_token %}
     {% else %}
     {# guests write here too; the code stays in this browser and "send" goes through sign-up and back #}
-    <form method="get" action="{% url 'register' %}" id="submit-form" class="ca-panel !p-0">
+    <form method="get" action="{% url 'register' %}" id="submit-form" class="ca-panel ca-ide !p-0">
       <input type="hidden" name="next" value="{{ request.path }}#yechim">
     {% endif %}
       <div class="relative flex flex-wrap items-center justify-between gap-2 border-b border-line px-4 py-2.5">
@@ -260,7 +258,7 @@
             <div class="ca-panel ca-prefs absolute inset-x-2 top-full z-20 mt-1 !p-0 text-sm sm:inset-x-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-72">
               <label class="ca-pref"><span>Ranglar</span>
                 <select data-pref="theme" class="ca-select !w-40 !py-1 text-sm">
-                  <option value="auto">Sayt bilan</option>
+                  <option value="auto">Standart (qorong‘i)</option>
                   <optgroup label="Qorong‘i">
                     <option value="dark">One Dark</option><option value="vscode-dark">VS Code Dark</option><option value="github-dark">GitHub Dark</option>
                     <option value="tokyo-night">Tokyo Night</option><option value="tokyo-night-storm">Tokyo Night Storm</option>
@@ -470,19 +468,14 @@ resolves their bare imports so @codemirror/state loads once — two copies break
   const tabExt = () => [indentUnit.of(" ".repeat(+prefs.tab)), EditorState.tabSize.of(+prefs.tab)];
   const wrapExt = () => (prefs.wrap ? EditorView.lineWrapping : []);
   const vimExt = async () => (prefs.vim ? (await import("@replit/codemirror-vim")).vim() : []);
-  const siteDark = () => {
-    const t = document.documentElement.dataset.theme;
-    return t ? t === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
-  };
   const themeExt = async () => {
     const load = THEMES[prefs.theme];
     if (load) return load();
-    const dark = prefs.theme === "auto" ? siteDark() : prefs.theme === "dark";
-    return dark ? oneDark : [];
+    return prefs.theme === "light" ? [] : oneDark;  // the solve pane is dark in both site themes
   };
   const editorEl = document.getElementById("editor");
   const applyPrefs = () => {
-    editorEl.style.setProperty("--ed-font", FONTS[prefs.font] || FONTS.anthropic);
+    editorEl.style.setProperty("--ed-font", FONTS[prefs.font] || FONTS.jetbrains);
     editorEl.style.setProperty("--ed-size", prefs.size + "px");
     document.getElementById("pref-size-val").textContent = prefs.size;
     try { localStorage.setItem(prefKey, JSON.stringify(prefs)); } catch {}
@@ -529,8 +522,6 @@ resolves their bare imports so @codemirror/state loads once — two copies break
   langSel.addEventListener("change", setLang);
   const syncTheme = async () => view.dispatch({ effects: themeC.reconfigure(await themeExt()) });
   syncTheme();
-  window.addEventListener("ca-theme", syncTheme);
-  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", syncTheme);
   const syncVim = async () => view.dispatch({ effects: vimC.reconfigure(await vimExt()) });
   if (prefs.vim) syncVim();
   document.querySelectorAll("#editor-prefs [data-pref]").forEach((el) => {

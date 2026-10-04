@@ -1,0 +1,64 @@
+{% comment %}A round's header, after Kick Start's: status, title and facts on the left; on the right the clock, the
+time left over a red line of the time already gone; the round's tabs on the bottom edge. Goes in base.html's
+band block. ctx: contest, active ("overview" | "scoreboard" | "questions"), registered, and optionally
+problems and n_participants. The join buttons show on the overview only.{% endcomment %}
+<section class="ca-band" aria-labelledby="round-title">
+  <div class="ca-band-in">
+    <div class="ca-band-top">
+      <div class="min-w-0">
+        <p class="ca-band-kicker">
+          {% if contest.is_running %}<span class="ca-tag ca-tag-live"><span class="ca-live-dot" aria-hidden="true"></span>Jonli</span>
+          {% elif contest.has_ended %}<span class="ca-tag"><i data-lucide="flag" class="lu" aria-hidden="true"></i>Tugagan</span>
+          {% else %}<span class="ca-tag ca-tag-soon"><i data-lucide="hourglass" class="lu" aria-hidden="true"></i>Kutilmoqda</span>{% endif %}
+          {% if contest.division %}<span class="ca-tag ca-tag-div" title="{{ contest.get_division_display }}">Div. {{ contest.division }}</span>{% endif %}
+          {% if contest.is_rated %}<span class="ca-tag ca-tag-rated" title="Natija reytingga ta‘sir qiladi"><i data-lucide="trending-up" class="lu" aria-hidden="true"></i>Reytingli</span>{% endif %}
+          {% if registered %}<span class="ca-tag"><i data-lucide="check" class="lu" aria-hidden="true"></i>{% if contest.has_ended %}Qatnashgansiz{% else %}Qatnashyapsiz{% endif %}</span>{% endif %}
+        </p>
+        <h1 id="round-title">{{ contest.title }}</h1>
+        <p class="ca-band-meta">
+          <span><i data-lucide="calendar" class="lu" aria-hidden="true"></i><span class="tabular">{{ contest.start|date:"d.m.Y H:i" }}–{% if contest.start|date:"Ymd" != contest.end|date:"Ymd" %}{{ contest.end|date:"d.m.Y H:i" }}{% else %}{{ contest.end|date:"H:i" }}{% endif %}</span></span>
+          <span><i data-lucide="hourglass" class="lu" aria-hidden="true"></i>{{ contest.duration_label }}</span>
+          {% if problems %}<span><i data-lucide="list-checks" class="lu" aria-hidden="true"></i>{{ problems|length }} ta masala</span>{% endif %}
+          {% if n_participants is not None %}<span><i data-lucide="users" class="lu" aria-hidden="true"></i>{{ n_participants }} ishtirokchi</span>{% endif %}
+        </p>
+        {% if active == "overview" and not contest.has_ended %}
+        <div class="ca-band-actions">
+          {% if not user.is_authenticated %}
+          <a class="ca-btn ca-btn-primary" href="{% url 'login' %}?next={{ request.path|urlencode }}"><i data-lucide="log-in" class="lu" aria-hidden="true"></i>Kirib qatnashish</a>
+          {% elif not user.is_staff and not registered %}
+          <form method="post" action="{% url 'contests:register' contest.pk %}" id="contest-register-form">
+            {% csrf_token %}
+            <button type="submit" class="ca-btn ca-btn-primary" id="contest-register-btn"><i data-lucide="log-in" class="lu" aria-hidden="true"></i>Qatnashish</button>
+          </form>
+          <script>
+            document.getElementById("contest-register-form").addEventListener("submit", () => {
+              const b = document.getElementById("contest-register-btn");
+              b.disabled = true;
+              b.textContent = "Yuborilmoqda…";
+            });
+          </script>
+          {% endif %}
+          {% if contest.is_running and registered %}<span data-leaves-wrap class="!hidden text-sm text-bad">Sahifadan chiqishlar: <b class="tabular" data-leaves>0</b></span>{% endif %}
+        </div>
+        {% endif %}
+      </div>
+      <div class="ca-clock{% if not contest.has_started %} is-wait{% endif %}">
+        {% if contest.has_ended %}
+        <span class="ca-clock-label">Tugagan</span>
+        <span class="ca-clock-time">00:00:00</span>
+        <div class="ca-clock-bar" aria-hidden="true"><span style="width: 100%"></span></div>
+        {% else %}
+        <span class="ca-clock-label">{% if contest.is_running %}Qolgan vaqt{% else %}Boshlanishiga{% endif %}</span>
+        <span class="ca-clock-time" data-countdown="{% if contest.is_running %}{{ contest.end|date:'c' }}{% else %}{{ contest.start|date:'c' }}{% endif %}" data-label="" data-suffix="1"></span>
+        <div class="ca-clock-bar" aria-hidden="true"><span data-span-from="{{ contest.start|date:'c' }}" data-span-to="{{ contest.end|date:'c' }}" style="width: 0"></span></div>
+        {% endif %}
+      </div>
+    </div>
+    <nav class="ca-contest-tabs" aria-label="Musobaqa bo‘limlari">
+      <a href="{% url 'contests:detail' contest.pk %}"{% if active == "overview" %} aria-current="page"{% endif %}>Umumiy</a>
+      <a href="{% url 'contests:detail' contest.pk %}#contest-problems">Masalalar{% if problems %} <span>{{ problems|length }}</span>{% endif %}</a>
+      <a href="{% url 'contests:standings' contest.pk %}"{% if active == "scoreboard" %} aria-current="page"{% endif %}>Natijalar</a>
+      {% if registered or user.is_staff %}<a href="{% url 'contests:clarifications' contest.pk %}"{% if active == "questions" %} aria-current="page"{% endif %}>Savol-javoblar</a>{% endif %}
+    </nav>
+  </div>
+</section>

@@ -6,13 +6,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
   <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#110F26" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#151921" media="(prefers-color-scheme: dark)">
   <link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
   <title>{% block title %}CodeArena{% endblock %}</title>
   <script>
     try { const t = localStorage.getItem("ca-theme"); if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch {}
   </script>
-  <link rel="preload" href="{% static 'fonts/AnthropicSans-Text-Regular.otf' %}" as="font" type="font/otf" crossorigin>
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
   <script src="{% static 'vendor/lucide.min.js' %}" defer></script>
   <script src="{% static 'vendor/htmx.min.js' %}" defer></script>
@@ -30,53 +29,20 @@
 </head>
 <body class="min-h-full bg-paper text-ink antialiased" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
 <a class="ca-skip" href="#main">Asosiy tarkibga o‘tish</a>
-<div class="ca-shell">
-  <nav class="ca-rail" aria-label="Asosiy menyu">{% include "_rail.html" %}</nav>
-  <div class="ca-col">
-    <header class="ca-topbar">
-      <a href="{% url 'home' %}" class="ca-topbar-brand" aria-label="CodeArena bosh sahifa">{% include "_brand_mark.html" %}</a>
-      <div class="ca-topbar-title">{% block page_title %}{% with ns=request.resolver_match.namespace un=request.resolver_match.url_name %}<p class="ca-topbar-section">{% if ns == "problems" %}Masalalar{% elif ns == "learn" and "list" in un %}Masalalar{% elif ns == "learn" %}O‘rganish{% elif ns == "contests" %}Musobaqalar{% elif ns == "classroom" and "duel" in un %}Duellar{% elif ns == "classroom" %}Vazifalar{% elif ns == "submissions" %}Urinishlar{% elif ns == "moderation" or ns == "integrity" %}Boshqaruv{% elif un == "profile" or un == "profile_edit" %}Profil{% else %}CodeArena{% endif %}</p>{% endwith %}{% endblock %}</div>
-      <div class="ca-topbar-tools">
-        {% with live=nav.live %}{% if live and not contest and request.resolver_match.namespace != "contests" and request.resolver_match.url_name != "home" %}
-        {# a contest is running: its clock and a way in, from every page #}
-        <a href="{% url 'contests:detail' live.pk %}" class="ca-live-pill" title="{{ live.title }}{% if live.count > 1 %} (+{{ live.count|add:'-1' }} ta boshqa jonli){% endif %}">
-          <span class="ca-live-dot" aria-hidden="true"></span>
-          <span class="hidden lg:inline">{% if live.joined %}Musobaqangiz davom etmoqda{% else %}Jonli musobaqa{% endif %}</span>
-          <span class="tabular font-bold" data-countdown="{{ live.end|date:'c' }}" data-label="" data-suffix="1"></span>
-          <span class="sr-only">— {{ live.title }}</span>
-        </a>
-        {% endif %}{% endwith %}
-        <button type="button" class="ca-search-btn hidden md:flex" data-palette-open aria-keyshortcuts="Control+K Meta+K /">
-          <i data-lucide="search" class="lu" aria-hidden="true"></i><span>Qidirish…</span><kbd class="ca-kbd" aria-hidden="true">Ctrl K</kbd>
-        </button>
-        <button type="button" class="ca-icon-btn md:hidden" data-palette-open aria-label="Qidirish"><i data-lucide="search" class="lu" aria-hidden="true"></i></button>
-        {% if user.is_authenticated %}
-        {% with s=streak_pill %}{% if s.daily %}
-        <a href="{% url 'problems:detail' s.daily.problem.slug %}" class="ca-streak{% if s.done %} is-done{% elif s.current %} is-risk{% endif %}"
-           title="{% if s.done %}Bugungi masala yechildi — seriya {{ s.current }} kun{% elif s.current %}Seriya {{ s.current }} kun: bugun kun masalasini yeching, aks holda uziladi{% else %}Kun masalasini yechib, seriyani boshlang{% endif %}">
-          <i data-lucide="flame" class="lu" aria-hidden="true"></i><span class="tabular">{{ s.current }}</span><span class="hidden sm:inline" aria-hidden="true">kun</span>{% if not s.done %}<b class="ca-streak-todo" aria-hidden="true"></b>{% endif %}
-          <span class="sr-only">kunlik seriya{% if s.done %}, bugungi masala yechilgan{% elif s.current %}, bugungi masala hali yechilmagan{% endif %}</span>
-        </a>
-        {% endif %}{% endwith %}
-        {% else %}
-        <a href="{% url 'login' %}" class="ca-btn ca-btn-ghost !py-1.5">Kirish</a>
-        <a href="{% url 'register' %}" class="ca-btn ca-btn-primary hidden !py-1.5 sm:inline-flex">Ro‘yxatdan o‘tish</a>
-        {% endif %}
-      </div>
-    </header>
-    <main id="main" class="ca-main">
-      {% if user.is_staff and request.resolver_match.namespace == "moderation" or user.is_staff and request.resolver_match.url_name == "audit" %}{% include "_mod_tabs.html" %}{% endif %}
-      {% if messages %}
-      <div class="mb-6 space-y-2" role="status" aria-live="polite">
-        {% for m in messages %}
-        <div class="ca-alert{% if m.level_tag == 'error' %} ca-alert-bad{% elif m.level_tag == 'warning' %} ca-alert-warn{% endif %}">{{ m }}</div>
-        {% endfor %}
-      </div>
-      {% endif %}
-      {% block content %}{% endblock %}
-    </main>
+<header class="ca-nav">{% include "_navbar.html" %}</header>
+{% block band %}{% endblock %}
+<main id="main" class="ca-main">
+  {% if user.is_staff and request.resolver_match.namespace == "moderation" or user.is_staff and request.resolver_match.url_name == "audit" %}{% include "_mod_tabs.html" %}{% endif %}
+  {% if messages %}
+  <div class="mb-6 space-y-2" role="status" aria-live="polite">
+    {% for m in messages %}
+    <div class="ca-alert{% if m.level_tag == 'error' %} ca-alert-bad{% elif m.level_tag == 'warning' %} ca-alert-warn{% endif %}">{{ m }}</div>
+    {% endfor %}
   </div>
-</div>
+  {% endif %}
+  <div class="ca-pagehead">{% block page_title %}{% endblock %}</div>
+  {% block content %}{% endblock %}
+</main>
 <nav class="ca-bottom-nav md:hidden" aria-label="Mobil menyu">
   {% with ns=request.resolver_match.namespace un=request.resolver_match.url_name %}
   <a href="{% url 'home' %}"{% if un == 'home' %} class="is-active" aria-current="page"{% endif %}><span class="ca-bn-icon"><i data-lucide="house" class="lu" aria-hidden="true"></i></span><span>Bosh sahifa</span></a>
@@ -98,7 +64,7 @@ A native dialog gives focus trapping and Esc for free.{% endcomment %}
     {% if user.is_authenticated %}
     <a href="{% url 'profile' user.username %}" class="mb-2 flex items-center gap-3 rounded-[var(--ca-radius-sm)] bg-sunk px-3 py-3" style="--tier: {{ user.rating|tier_color }}" translate="no">
       <span class="ca-avatar ca-user-avatar h-10 w-10 text-base{% if not user.avatar %} ca-art-{{ user.rating|tier_slug }}{% endif %}">{% if user.avatar %}<img src="{{ user.avatar.url }}" alt="" width="40" height="40">{% else %}{{ user.username|first }}{% endif %}</span>
-      <span class="min-w-0"><span class="ca-tier-ink block truncate font-semibold">{{ user.get_full_name|default:user.username }}</span><span class="block text-xs text-mute tabular">{{ user.rating|tier_name }} · {{ user.rating }} · {{ user.practice_points }} ball</span></span>
+      <span class="min-w-0"><span class="ca-tier-ink block truncate font-semibold{{ user.rating|lg }}">{{ user.get_full_name|default:user.username }}</span><span class="block text-xs text-mute tabular">{{ user.rating|tier_name }} · {{ user.rating }} · {{ user.practice_points }} ball</span></span>
       <i data-lucide="chevron-right" class="lu ml-auto text-mute" aria-hidden="true"></i>
     </a>
     {% endif %}
@@ -142,6 +108,11 @@ A native dialog gives focus trapping and Esc for free.{% endcomment %}
         if (left <= 0) { el.textContent = el.dataset.suffix ? "" : el.dataset.label + ": 00:00:00"; return; }
         el.textContent = el.dataset.suffix ? fmt(left) + " " + el.dataset.label : el.dataset.label + ": " + fmt(left);
       });
+      // a round's clock line: the share of [from, to] already gone
+      document.querySelectorAll("[data-span-from]").forEach((el) => {
+        const from = new Date(el.dataset.spanFrom), to = new Date(el.dataset.spanTo);
+        el.style.width = Math.min(100, Math.max(0, (now - from) / (to - from) * 100)) + "%";
+      });
     };
     tick(); setInterval(tick, 1000);
     document.addEventListener("htmx:afterSettle", tick);
@@ -165,7 +136,7 @@ A native dialog gives focus trapping and Esc for free.{% endcomment %}
       if (cur === "system") delete document.documentElement.dataset.theme;
       else document.documentElement.dataset.theme = cur;
       if (btn) {
-        (btn.querySelector(".ca-rail-ind") || btn).innerHTML = `<i data-lucide="${icons[cur]}" class="lu" aria-hidden="true"></i>`;
+        btn.innerHTML = `<i data-lucide="${icons[cur]}" class="lu" aria-hidden="true"></i>`;
         btn.title = labels[cur];
         window.caIcons();
       }

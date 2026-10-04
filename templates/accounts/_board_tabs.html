@@ -1,4 +1,4 @@
-<nav class="ca-tabs ca-tabs-scroll mb-6 min-w-0 flex-1" aria-label="Reyting turlari">
+<nav class="ca-tabs ca-tabs-scroll mb-4" aria-label="Reyting turlari">
   <a class="ca-tab{% if request.resolver_match.url_name == 'rating' %} is-active{% endif %}" href="{% url 'rating' %}"{% if request.resolver_match.url_name == 'rating' %} aria-current="page"{% endif %}><i data-lucide="trophy" class="lu" aria-hidden="true"></i><span class="sm:hidden">Reyting</span><span class="hidden sm:inline">Musobaqa reytingi</span></a>
   <a class="ca-tab{% if request.resolver_match.url_name == 'top' %} is-active{% endif %}" href="{% url 'top' %}"{% if request.resolver_match.url_name == 'top' %} aria-current="page"{% endif %}><i data-lucide="star" class="lu" aria-hidden="true"></i><span class="sm:hidden">Ballar</span><span class="hidden sm:inline">Amaliyot ballari</span></a>
 </nav>

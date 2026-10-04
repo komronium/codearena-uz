@@ -5,6 +5,11 @@ from apps.submissions.models import Submission
 PENALIZED = {"WA", "TLE", "MLE", "RE", "OLE"}
 
 
+def elapsed(minutes: int) -> str:
+    """Minutes from the start as Codeforces prints a solve time: hh:mm."""
+    return f"{minutes // 60:02d}:{minutes % 60:02d}"
+
+
 def compute_standings(contest):
     """Score = sum of ContestProblem.points for solved problems; ties broken by
     penalty = minutes to first AC + 20 * wrong attempts, over solved problems
@@ -30,10 +35,9 @@ def compute_standings(contest):
                 cells.append({"solved": False, "wrong": wrong, "minutes": None, "ac_at": None})
                 continue
             wrong = sum(1 for s in subs if s.created < ac.created and s.verdict in PENALIZED)
-            seconds = int((ac.created - contest.start).total_seconds())
-            minutes = seconds // 60
+            minutes = int((ac.created - contest.start).total_seconds()) // 60
             cells.append({"solved": True, "wrong": wrong, "minutes": minutes, "ac_at": ac.created,
-                          "time": f"{minutes:02d}:{seconds % 60:02d}"})
+                          "time": elapsed(minutes), "points": cp.points})
             solved += 1
             score += cp.points
             penalty += minutes + 20 * wrong
@@ -43,9 +47,12 @@ def compute_standings(contest):
         if p.rating_after is not None and p.rating_before is not None:
             delta = p.rating_after - p.rating_before
         attempted = any(subs_by_user_problem.get((p.user_id, cp.id)) for cp in problems)
+        # Out of the contest's division: on the board, never rated. Judged by the rating it
+        # was rated from once applied, so a later climb doesn't relabel an old result.
+        out = not contest.rates(p.user.rating if p.rating_before is None else p.rating_before)
         rows.append({"participation": p, "user": p.user, "solved": solved, "penalty": penalty,
                      "score": score, "last_ac": last_ac, "cells": cells, "rating_delta": delta,
-                     "disqualified": p.disqualified, "attempted": attempted})
+                     "disqualified": p.disqualified, "attempted": attempted, "out": out})
 
     # Disqualified participants always sort below everyone else: they keep their cells
     # for the record but take the last ranks, which is what makes their rating drop.

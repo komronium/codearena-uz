@@ -3,7 +3,7 @@ would have placed among the real participants. Unrated."""
 from apps.submissions.models import Submission
 
 from .models import ContestProblem, Participation, VirtualParticipation
-from .standings import PENALIZED, compute_standings
+from .standings import PENALIZED, compute_standings, elapsed
 
 
 def start_refusal(user, contest) -> str:
@@ -42,11 +42,10 @@ def virtual_result(vp) -> dict:
         if ac is None:
             cells.append({"cp": cp, "solved": False, "wrong": wrong})
             continue
-        seconds = int((ac.created - vp.start).total_seconds())
-        minutes = seconds // 60
+        minutes = int((ac.created - vp.start).total_seconds()) // 60
         score += cp.points
         penalty += minutes + 20 * wrong
-        cells.append({"cp": cp, "solved": True, "wrong": wrong, "time": f"{minutes:02d}:{seconds % 60:02d}"})
+        cells.append({"cp": cp, "solved": True, "wrong": wrong, "time": elapsed(minutes)})
     real = [r for r in compute_standings(vp.contest) if not r["disqualified"] and r["attempted"]]
     rank = 1 + sum(1 for r in real if (-r["score"], r["penalty"]) < (-score, penalty))
     return {"score": score, "penalty": penalty, "cells": cells, "rank": rank, "field": len(real),

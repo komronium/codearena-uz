@@ -18,9 +18,9 @@
       <div class="pt-3">
         {% if profile_user.get_full_name %}
         <h1 class="text-2xl font-bold leading-tight text-ink">{{ profile_user.get_full_name }}</h1>
-        <p class="ca-tier-ink mt-0.5 text-base font-semibold" translate="no" style="--tier: {{ tier_color }}">@{{ profile_user.username }}</p>
+        <p class="ca-tier-ink mt-0.5 text-base font-semibold" translate="no" style="--tier: {{ tier_color }}">@<span class="{{ profile_user.rating|lg }}">{{ profile_user.username }}</span></p>
         {% else %}
-        <h1 class="ca-tier-ink text-2xl font-bold leading-tight" translate="no" style="--tier: {{ tier_color }}">{{ profile_user.username }}</h1>
+        <h1 class="ca-tier-ink text-2xl font-bold leading-tight{{ profile_user.rating|lg }}" translate="no" style="--tier: {{ tier_color }}">{{ profile_user.username }}</h1>
         {% endif %}
         {% if streak_badges.earned or streak_badges.next and user == profile_user %}
         <p class="mt-1.5 flex flex-wrap items-center gap-1.5">

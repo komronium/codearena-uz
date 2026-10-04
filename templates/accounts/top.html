@@ -1,26 +1,29 @@
-{% extends "base.html" %}
+{% extends "base.html" %}{% load tiers %}
 {% block title %}Foydalanuvchilar{% endblock %}
 {% block page_title %}<h1>Reyting</h1><span class="ca-topbar-sub">{{ total }} ishtirokchi · musobaqadan tashqari yechilgan masalalar ballari</span>{% endblock %}
 {% block content %}
 {% include "accounts/_board_tabs.html" %}
-
-{% if users %}
-{% if podium %}{% include "accounts/_podium.html" with metric="points" %}{% endif %}
-{% if rows %}
-<ol class="ca-rows" aria-label="Reyting jadvali">
-  <li class="ca-lb !py-2 text-xs font-semibold text-mute" aria-hidden="true"><span class="text-center">#</span><span>Foydalanuvchi</span><span class="text-right">Yechilgan</span><span class="text-right">Ball</span></li>
-  {% for u in rows %}
-  <li class="ca-lb{% if u == user %} is-me{% endif %}">
-    <span class="text-center">{% include "accounts/_rank.html" with rank=u.rank %}</span>
-    <div class="flex min-w-0">{% include "accounts/_user.html" with tier=False %}</div>
-    <span class="tabular text-right text-sm text-mute">{{ u.solved_count }}</span>
-    <span class="ca-lb-value">{{ u.practice_points }}</span>
-  </li>
-  {% endfor %}
-</ol>
-{% endif %}
+<section class="ca-box !mb-0" aria-labelledby="board-title">
+  <h2 class="ca-box-cap" id="board-title">Amaliyot ballari</h2>
+  <div class="ca-box-body">
+  {% if users %}
+  <table class="ca-table">
+    <thead><tr><th class="w-14 text-center">#</th><th>Foydalanuvchi</th><th class="w-28 text-center">Yechilgan</th><th class="w-24 text-center">Ball</th></tr></thead>
+    <tbody>
+    {% for u in users %}
+    <tr{% if u == user %} class="ca-row-me"{% endif %}>
+      <td class="text-center tabular">{{ u.rank }}</td>
+      <td><a class="ca-user-name{{ u.rating|lg }}" style="--tier: {{ u.rating|tier_color }}" href="{% url 'profile' u.username %}" translate="no">{{ u.username }}</a></td>
+      <td class="text-center tabular text-mute">{{ u.solved_count }}</td>
+      <td class="text-center tabular font-bold">{{ u.practice_points }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="ca-box-pad py-8 text-center text-mute">Hali reyting yo‘q.</p>
+  {% endif %}
+  </div>
+</section>
 {% include "accounts/_leaderboard_nav.html" %}
-{% else %}
-<div class="ca-empty">Hali reyting yo‘q.</div>
-{% endif %}
 {% endblock %}

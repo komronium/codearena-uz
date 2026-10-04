@@ -1,0 +1,1 @@
+{% comment %}A round's kind, as small tags after its name. ctx: c (a Contest).{% endcomment %}{% if c.division %} <span class="ca-tag ca-tag-div" title="{{ c.get_division_display }}">Div. {{ c.division }}</span>{% endif %}{% if c.is_rated %} <span class="ca-tag ca-tag-rated">Reytingli</span>{% endif %}

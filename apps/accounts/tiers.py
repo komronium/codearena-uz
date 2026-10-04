@@ -2,26 +2,29 @@
 the progress to the next tier, and the daily-streak badges. Views, template tags and context
 processors all import from here."""
 
-# (floor, ceiling, name, color) — floor None = -inf, ceiling None = +inf.
+# (floor, ceiling, name, color) — floor None = -inf, ceiling None = +inf. The freshman scale
+# (shown ratings start at 0, see apps.contests.rating) on Codeforces' own tier colours.
 RATING_TIERS = [
-    (None, 1300, "Newbie", "#6B7280"),
-    (1300, 1500, "Pupil", "#16A34A"),
-    (1500, 1700, "Specialist", "#06B6D4"),
-    (1700, 1900, "Expert", "#3B82F6"),
-    (1900, 2100, "Candidate Master", "#8B5CF6"),
-    (2100, 2300, "Master", "#D97706"),
-    (2300, 2400, "International Master", "#EA580C"),
-    (2400, None, "Grandmaster", "#DC2626"),
+    (None, 700, "Boshlovchi", "#888888"),
+    (700, 900, "Shogird", "#008000"),
+    (900, 1100, "Mutaxassis", "#03A89E"),
+    (1100, 1300, "Bilimdon", "#0000FF"),
+    (1300, 1500, "Master", "#AA00AA"),
+    (1500, 1700, "Ustoz", "#FF8C00"),
+    (1700, 1900, "Grandmaster", "#FF0000"),
+    (1900, None, "Afsonaviy Grandmaster", "#FF0000"),
 ]
 TIER_ORDER = {name: i for i, (_floor, _ceiling, name, _color) in enumerate(RATING_TIERS)}
+# Legendary names are written like Codeforces' LGM: the first letter in ink (black on light), the rest red.
+LEGENDARY = RATING_TIERS[-1][0]
 
 # Profile banner per tier: (CSS modifier, the picture's name). Styles live in app.css
 # (.ca-banner-<slug> for the banner, .ca-art-<slug> for letter avatars).
 TIER_BANNERS = {
-    "Newbie": ("newbie", "Yulduzli tun"), "Pupil": ("pupil", "Islimiy naqsh"), "Specialist": ("specialist", "Daryo"),
-    "Expert": ("expert", "Rishton koshini"), "Candidate Master": ("candidate-master", "Registon girihi"),
-    "Master": ("master", "Quyosh"), "International Master": ("international-master", "Olov"),
-    "Grandmaster": ("grandmaster", "Toj"),
+    "Boshlovchi": ("boshlovchi", "Yulduzli tun"), "Shogird": ("shogird", "Islimiy naqsh"),
+    "Mutaxassis": ("mutaxassis", "Daryo"), "Bilimdon": ("bilimdon", "Rishton koshini"),
+    "Master": ("master", "Registon girihi"), "Ustoz": ("ustoz", "Quyosh"),
+    "Grandmaster": ("grandmaster", "Olov"), "Afsonaviy Grandmaster": ("afsonaviy", "Toj"),
 }
 
 # Daily-problem streak badges: (days, name, icon). Earned by the best run ever, kept for good.
@@ -42,6 +45,10 @@ def rating_tier(rating: int) -> str:
 
 def tier_color(rating: int) -> str:
     return _band(rating)[3]
+
+
+def is_legendary(rating: int) -> bool:
+    return rating >= LEGENDARY
 
 
 def tier_banner(rating: int) -> tuple[str, str]:

@@ -2,37 +2,38 @@
 {% block title %}Urinishlar{% endblock %}
 {% block page_title %}<h1>Urinishlar</h1><span class="ca-topbar-sub">Yuborgan yechimlaringiz, eng yangisi tepada</span>{% endblock %}
 {% block content %}
-<div class="mb-4 flex flex-wrap gap-1.5" role="group" aria-label="Holat bo‘yicha filtr">
-  <a href="{% url 'submissions:mine' %}" class="ca-filter {% if not verdict %}is-active{% endif %}"{% if not verdict %} aria-current="true"{% endif %}>Hammasi</a>
-  {% for v, label in verdicts %}
-  <a href="?verdict={{ v }}" class="ca-filter {% if verdict == v %}is-active{% endif %}"{% if verdict == v %} aria-current="true"{% endif %}>{{ label }}</a>
-  {% endfor %}
-</div>
-
-{% if subs %}
-<ul class="ca-rows">
-  {% for s in subs %}
-  <li class="ca-sub">
-    {% include "submissions/_verdict.html" with v=s.verdict %}
-    <div class="min-w-0">
-      <a class="ca-link block truncate !text-ink hover:!text-accent" href="{% url 'problems:detail' s.problem.slug %}">{{ s.problem.title }}</a>
-      <p class="ca-row-meta !mt-0.5">
-        <a class="tabular hover:text-accent" href="{% url 'submissions:detail' s.pk %}" aria-label="Urinish #{{ s.pk }} kodi">#{{ s.pk|stringformat:"06d" }}</a>
-        <span>{{ s.language.name }}</span>
-        <span class="tabular sm:hidden">{{ s.created|date:"d.m H:i" }}</span>
-        {% if s.total %}<span class="tabular">{{ s.passed }}/{{ s.total }} test</span>{% endif %}
-        {% if s.verdict == "AC" %}<span class="tabular"><i data-lucide="timer" class="lu" aria-hidden="true"></i>{{ s.exec_ms }} ms</span>{% if s.mem_kb %}<span class="tabular"><i data-lucide="memory-stick" class="lu" aria-hidden="true"></i>{% widthratio s.mem_kb 1024 1 %} MB</span>{% endif %}{% endif %}
-      </p>
-    </div>
-    <div class="flex items-center gap-3">
-      <time class="tabular hidden text-sm text-mute sm:inline" datetime="{{ s.created|date:'c' }}">{{ s.created|date:"d.m H:i" }}</time>
-      <a class="ca-btn ca-btn-ghost !px-2 !py-1.5" href="{% url 'submissions:detail' s.pk %}" title="Kodni ko‘rish" aria-label="Kodni ko‘rish: #{{ s.pk }}"><i data-lucide="code" class="lu" aria-hidden="true"></i></a>
-    </div>
-  </li>
-  {% endfor %}
-</ul>
+{% comment %}After Codeforces' status page: one boxed table, a submission per row, the verdict as coloured
+text; the verdict filter on the box's caption.{% endcomment %}
+<section class="ca-box !mb-0" aria-labelledby="subs-title">
+  <div class="ca-box-cap">
+    <h2 id="subs-title">Urinishlar{% if subs %} <small>{{ subs.paginator.count }}</small>{% endif %}</h2>
+    <nav class="ca-box-tools ca-levels" aria-label="Holat bo‘yicha filtr">
+      <a href="{% url 'submissions:mine' %}"{% if not verdict %} aria-current="true"{% endif %}>Hammasi</a>
+      {% for v, label in verdicts %}<a href="?verdict={{ v }}"{% if verdict == v %} aria-current="true"{% endif %}>{{ label }}</a>{% endfor %}
+    </nav>
+  </div>
+  <div class="ca-box-body">
+  {% if subs %}
+  <table class="ca-table">
+    <thead><tr><th class="w-20 text-center">#</th><th class="hidden w-32 text-center sm:table-cell">Yuborilgan</th><th>Masala</th><th class="hidden w-28 text-center md:table-cell">Til</th><th class="w-44 text-center">Natija</th><th class="hidden w-20 text-center sm:table-cell">Vaqt</th><th class="hidden w-20 text-center md:table-cell">Xotira</th></tr></thead>
+    <tbody>
+    {% for s in subs %}
+    <tr>
+      <td class="text-center"><a class="ca-link tabular text-xs" href="{% url 'submissions:detail' s.pk %}" title="Kodni ko‘rish" aria-label="Urinish #{{ s.pk }} kodi">{{ s.pk|stringformat:"06d" }}</a></td>
+      <td class="hidden text-center tabular text-mute sm:table-cell"><time datetime="{{ s.created|date:'c' }}">{{ s.created|date:"d.m.Y H:i" }}</time></td>
+      <td class="max-w-0 truncate"><a class="ca-link" href="{% url 'problems:detail' s.problem.slug %}">{{ s.problem.title }}</a></td>
+      <td class="hidden text-center text-mute md:table-cell">{{ s.language.name }}</td>
+      <td class="text-center">{% include "submissions/_verdict.html" with v=s.verdict %}{% if s.total and s.verdict != "AC" %} <span class="tabular text-xs text-mute" title="O‘tgan testlar">{{ s.passed }}/{{ s.total }}</span>{% endif %}</td>
+      <td class="hidden text-center tabular text-mute sm:table-cell">{% if s.verdict == "AC" %}{{ s.exec_ms }} ms{% endif %}</td>
+      <td class="hidden text-center tabular text-mute md:table-cell">{% if s.verdict == "AC" and s.mem_kb %}{% widthratio s.mem_kb 1024 1 %} MB{% endif %}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="ca-box-pad py-8 text-center text-mute">{% if verdict %}Bu holatda urinish yo‘q.{% else %}Hali urinish yo‘q. <a class="ca-link" href="{% url 'problems:list' %}">Masalalarga o‘tish »</a>{% endif %}</p>
+  {% endif %}
+  </div>
+</section>
 {% include "_pagination.html" with page=subs %}
-{% else %}
-<div class="ca-empty"><i data-lucide="history" class="lu mb-2 block text-2xl" aria-hidden="true"></i>{% if verdict %}Bu holatda urinish yo‘q.{% else %}Hali urinish yo‘q. Birinchi masalani yeching.{% endif %}<div class="mt-3"><a class="ca-btn ca-btn-primary" href="{% url 'problems:list' %}">Masalalarga o‘tish</a></div></div>
-{% endif %}
 {% endblock %}

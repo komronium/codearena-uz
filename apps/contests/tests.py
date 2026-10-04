@@ -219,6 +219,25 @@ def test_standings_view_renders(client, contest):
 
 
 @pytest.fixture
+def veteran(db):
+    """Makes users past the newcomer ramp (six rated contests behind them), whose shown rating
+    is the one the maths uses."""
+    from .rating import RAMP
+
+    start = timezone.now() - timezone.timedelta(days=60)
+    history = [Contest.objects.create(title=f"History {i}", is_rated=True, rating_applied=True,
+                                      start=start + timezone.timedelta(days=i),
+                                      end=start + timezone.timedelta(days=i, hours=2)) for i in range(len(RAMP))]
+
+    def make(username, rating):
+        user = User.objects.create_user(username, password="x", rating=rating)
+        Participation.objects.bulk_create(Participation(user=user, contest=c, rating_before=rating, rating_after=rating)
+                                          for c in history)
+        return user
+    return make
+
+
+@pytest.fixture
 def ended_rated_contest(db, problem_a, problem_b):
     c = Contest.objects.create(title="Rated", is_rated=True,
                                start=timezone.now() - timezone.timedelta(hours=2),
@@ -228,9 +247,8 @@ def ended_rated_contest(db, problem_a, problem_b):
     return c
 
 
-def test_recalc_rating_applies_deltas_and_is_idempotent(ended_rated_contest, problem_a, python):
-    winner = User.objects.create_user("winner", password="x", rating=1500)
-    loser = User.objects.create_user("loser", password="x", rating=1500)
+def test_recalc_rating_applies_deltas_and_is_idempotent(ended_rated_contest, problem_a, python, veteran):
+    winner, loser = veteran("winner", 1500), veteran("loser", 1500)
     Participation.objects.create(user=winner, contest=ended_rated_contest)
     Participation.objects.create(user=loser, contest=ended_rated_contest)
     _sub(winner, problem_a, ended_rated_contest, python, "AC", 5)
@@ -283,28 +301,22 @@ def test_recalc_rating_rejects_contest_not_ended(python):
         call_command("recalc_rating", c.pk, stdout=StringIO())
 
 
-def test_recalc_rating_favorite_win_has_small_delta(ended_rated_contest, problem_a, python):
-    """Unequal ratings: 1800 favorite finishing 1st vs 1200 underdog 2nd —
-    favorite's gain must be small (performance ≈ seed expectation)."""
-    from apps.contests.rating import _expected_seed
+def test_recalc_rating_favorite_win_has_small_delta(ended_rated_contest, problem_a, python, veteran):
+    """Unequal ratings: 1800 favorite finishing 1st vs 1200 underdog 2nd — the win was
+    expected, so it is worth less than the same win in an equal field."""
+    from apps.contests.rating import deltas
 
-    favorite = User.objects.create_user("fav", password="x", rating=1800)
-    underdog = User.objects.create_user("dog", password="x", rating=1200)
+    favorite, underdog = veteran("fav", 1800), veteran("dog", 1200)
     Participation.objects.create(user=favorite, contest=ended_rated_contest)
     Participation.objects.create(user=underdog, contest=ended_rated_contest)
     _sub(favorite, problem_a, ended_rated_contest, python, "AC", 5)
     _sub(underdog, problem_a, ended_rated_contest, python, "WA", 7)
 
-    # Seed for favorite (higher rating) must be better (lower) than underdog's.
-    ratings = [1800, 1200]
-    assert _expected_seed(0, ratings) < _expected_seed(1, ratings)
-
     call_command("recalc_rating", ended_rated_contest.pk, stdout=StringIO())
 
     favorite.refresh_from_db()
     underdog.refresh_from_db()
-    assert favorite.rating > 1800
-    assert favorite.rating - 1800 < 60  # vs +226 for an upset win in an equal field
+    assert 0 < favorite.rating - 1800 < deltas([1500, 1500], [1, 2])[0]
     assert underdog.rating < 1200
 
 
@@ -323,10 +335,10 @@ def test_recalc_rating_skips_registered_without_submissions(ended_rated_contest,
     assert Participation.objects.get(user=ghost, contest=ended_rated_contest).rating_after is None
 
 
-def test_tied_results_share_rank_and_rating_delta(ended_rated_contest, problem_a, python):
+def test_tied_results_share_rank_and_rating_delta(ended_rated_contest, problem_a, python, veteran):
     """Same solved+penalty -> same rank ("1, 1, 3") and identical rating change; the
     arbitrary sort order between equals must not decide who gains and who loses."""
-    users = [User.objects.create_user(f"u{i}", password="x", rating=1500) for i in range(3)]
+    users = [veteran(f"u{i}", 1500) for i in range(3)]
     for u in users:
         Participation.objects.create(user=u, contest=ended_rated_contest)
     _sub(users[0], problem_a, ended_rated_contest, python, "AC", 5)
@@ -342,14 +354,17 @@ def test_tied_results_share_rank_and_rating_delta(ended_rated_contest, problem_a
     assert users[0].rating == users[1].rating > 1500 > users[2].rating
 
 
-def test_rating_gain_scales_with_solved_fraction():
-    """Same rank, more solved -> bigger gain (margin of victory); losses are damped."""
-    from apps.contests.rating import rating_delta
-    full = rating_delta(seed=8, rank=1, n=15, k=150, solved_frac=1.0)
-    partial = rating_delta(seed=8, rank=1, n=15, k=150, solved_frac=0.9)
-    assert full > partial > 0
-    loss = rating_delta(seed=8, rank=15, n=15, k=150, solved_frac=0.0)
-    assert -full < loss < 0
+def test_codeforces_deltas_and_anti_inflation():
+    """Mirzayanov's algorithm: a 2-person equal field by hand is +107 / -87 before the
+    anti-inflation fee of 11 each. The changes never sum above zero, and an equal field
+    rewards places in order."""
+    from apps.contests.rating import deltas
+
+    assert deltas([1500, 1500], [1, 2]) == [96, -98]
+    field = deltas([1000] * 15, list(range(1, 16)))
+    assert field == sorted(field, reverse=True) and field[0] > 0 > field[-1]
+    assert -15 <= sum(field) <= 0
+    assert deltas([1000] * 3, [2, 2, 3])[:2] == [27, 27]  # a tie group all take its last place
 
 
 def test_contest_detail_shows_my_rank_and_solved_marks(client, contest, problem_a, problem_b, python):
@@ -365,7 +380,7 @@ def test_contest_detail_shows_my_rank_and_solved_marks(client, contest, problem_
     r = client.get(reverse("contests:detail", args=[contest.pk]))
     html = r.content.decode()
     assert "#2" in html and "Sizning o‘rningiz" in html  # bob solved A earlier -> lower penalty
-    assert 'title="Yechilgan 10:00"' in html
+    assert 'title="Yechilgan 00:10"' in html  # hh:mm from the start, as Codeforces prints it
     assert r.context["problems"][0].solved_count == 2 and r.context["problems"][1].solved_count == 0
 
 
@@ -550,16 +565,73 @@ def test_disqualify_requires_staff(client):
     assert client.post(reverse("contests:disqualify", args=[c.pk, u.pk])).status_code == 302
 
 
-def test_rating_delta_classroom_scale():
-    """15 newbies at 1200: full-solve winner +226, 8th +1, last -74 (losses halved)."""
-    from apps.contests.rating import _expected_seed, rating_delta
+def test_newcomers_start_at_zero_and_ramp_up_to_their_real_rating():
+    """The maths starts a newcomer at 1000 but shows 0; six bonuses close the gap. Two
+    newcomers who always tie lose 1 a contest to the fee, so they end at 1000 - 6."""
+    from apps.contests.rating import RAMP, START, _new_ratings, hidden
 
-    ratings = [1200] * 15
-    seed = _expected_seed(0, ratings)  # 8.0 for an all-equal field
-    assert rating_delta(seed, 1, 15, 150, 1.0) == 226
-    assert rating_delta(seed, 1, 15, 150, 0.2) == 106  # same rank, 1/5 solved: smaller gain
-    assert rating_delta(seed, 8, 15, 150, 0.5) == 1
-    assert rating_delta(seed, 15, 15, 150, 0.0) == -74
+    assert hidden(0, 0) == START and hidden(700, len(RAMP)) == 700
+    shown = [0, 0]
+    for k in range(len(RAMP)):
+        shown = _new_ratings([{"rank": 1}, {"rank": 1}], shown, [k, k])
+        assert shown == [sum(RAMP[:k + 1]) - (k + 1)] * 2
+    assert shown == [START - 6] * 2
+
+
+def test_last_place_newcomer_still_sees_a_gain(ended_rated_contest, problem_a, python):
+    a, b = (User.objects.create_user(n, password="x") for n in ("a", "b"))
+    assert a.rating == 0
+    for u, verdict in ((a, "AC"), (b, "WA")):
+        Participation.objects.create(user=u, contest=ended_rated_contest)
+        _sub(u, problem_a, ended_rated_contest, python, verdict, 5)
+    call_command("recalc_rating", ended_rated_contest.pk, stdout=StringIO())
+    a.refresh_from_db()
+    b.refresh_from_db()
+    assert a.rating > b.rating > 0
+
+
+def test_division_rates_only_its_range_and_recounts_places(ended_rated_contest, problem_a, python, veteran):
+    """Div. 4 is rated below 1400: a 1500 winner is on the board out of competition, and
+    the rated pair is rated as 1st and 2nd between themselves."""
+    from .rating import deltas
+
+    Contest.objects.filter(pk=ended_rated_contest.pk).update(division=Contest.Division.DIV4)
+    ended_rated_contest.refresh_from_db()
+    strong, ali, bob = veteran("strong", 1500), veteran("ali", 1000), veteran("bob", 1000)
+    for i, (u, verdict) in enumerate(((strong, "AC"), (ali, "AC"), (bob, "WA"))):
+        Participation.objects.create(user=u, contest=ended_rated_contest)
+        _sub(u, problem_a, ended_rated_contest, python, verdict, 5 + i)
+    rows = compute_standings(ended_rated_contest)
+    assert [(r["user"].username, r["out"]) for r in rows] == [("strong", True), ("ali", False), ("bob", False)]
+
+    call_command("recalc_rating", ended_rated_contest.pk, stdout=StringIO())
+    for u in (strong, ali, bob):
+        u.refresh_from_db()
+    assert strong.rating == 1500
+    assert Participation.objects.get(user=strong, contest=ended_rated_contest).rating_after is None
+    assert [ali.rating - 1000, bob.rating - 1000] == deltas([1000, 1000], [1, 2])
+    assert ended_rated_contest.rates(1399) and not ended_rated_contest.rates(1400)
+
+
+def test_replay_rebuilds_ratings_from_zero(problem_a, python):
+    """--replay re-applies every applied contest in end order: the same ratings as applying
+    them one by one, whatever happened to the numbers in between."""
+    from .rating import apply_rating
+
+    ali, bob = (User.objects.create_user(n, password="x") for n in ("ali", "bob"))
+    first = _rated_contest("First", 10, problem_a, python, [ali], [bob])
+    second = _rated_contest("Second", 1, problem_a, python, [bob], [ali])
+    apply_rating(first)
+    apply_rating(second)
+    applied = dict(User.objects.values_list("username", "rating"))
+    User.objects.update(rating=1234)
+
+    out = StringIO()
+    call_command("recalc_rating", replay=True, stdout=out)
+    assert "replayed 2 rated contests" in out.getvalue()
+    assert dict(User.objects.values_list("username", "rating")) == applied
+    p = Participation.objects.get(contest=second, user=ali)
+    assert p.rating_before == Participation.objects.get(contest=first, user=ali).rating_after
 
 
 def test_upcoming_contest_problem_titles_stay_secret(client, author):
@@ -702,13 +774,13 @@ def _rated_contest(title, hours_ago, problem, python, users_solving, users_tryin
 
 
 @pytest.mark.django_db
-def test_dq_after_rating_recomputes_the_latest_contest(client, problem_a, python):
+def test_dq_after_rating_recomputes_the_latest_contest(client, problem_a, python, veteran):
     from apps.integrity.models import AuditEntry
 
     from .rating import apply_rating
 
     staff = User.objects.create_user("boss", password="x", is_staff=True)
-    cheat, ali, bob = (User.objects.create_user(n, password="x") for n in ("cheat", "ali", "bob"))
+    cheat, ali, bob = (veteran(n, 1200) for n in ("cheat", "ali", "bob"))
     c = _rated_contest("Final", 1, problem_a, python, [cheat, ali], [bob])
     apply_rating(c)
     cheat.refresh_from_db()
@@ -805,7 +877,7 @@ def test_virtual_run_tags_submissions_and_ranks_among_real_participants(enqueue,
     res = virtual_result(vp)
     # ali: 30 min + 20 for the WA = 50; bob: 60; vali: 45 from the virtual start -> 1st of 2
     assert (res["score"], res["penalty"], res["rank"], res["field"]) == (100, 45, 1, 2)
-    assert res["cells"][0]["time"] == "45:00"
+    assert res["cells"][0]["time"] == "00:45"
     page = client.get(reverse("contests:detail", args=[past_contest.pk])).content.decode()
     assert "1-o‘rin" in page and "Virtual" in page
 
@@ -854,7 +926,7 @@ def test_standings_live_poll_gets_only_the_table_and_counts_skip_disqualified(cl
     assert "diskvalifikatsiya" in body  # bob's pinned line says so instead of a plain rank
 
     poll = client.get(url, HTTP_HX_REQUEST="true").content.decode()
-    assert poll.lstrip().startswith("<div id=\"st-live\"") and "<html" not in poll and "ca-rail" not in poll
+    assert poll.lstrip().startswith("<div id=\"st-live\"") and "<html" not in poll and "ca-nav" not in poll
 
 
 def test_a_problem_added_mid_contest_gets_its_column_without_waiting_for_the_cache(client, contest, author, python, problem_a):
@@ -904,7 +976,7 @@ def _verified(*names):
 
 @pytest.mark.django_db
 def test_recalc_official_rates_only_verified_users_and_reranks_without_the_rest(problem_a, python):
-    from .rating import recalc_official
+    from .rating import RAMP, recalc_official
 
     ali, bob = _verified("ali", "bob")
     anon = User.objects.create_user("anon", password="x")  # not verified: open rating only
@@ -913,12 +985,13 @@ def test_recalc_official_rates_only_verified_users_and_reranks_without_the_rest(
 
     for u in (ali, bob, anon):
         u.refresh_from_db()
-    assert anon.official_rating is None and anon.rating == 1200
+    assert anon.official_rating is None and anon.rating == 0
     rows = {p.user_id: p for p in Participation.objects.filter(contest=c)}
     assert rows[anon.pk].official_after is None
-    # ali was 2nd overall but 1st of the verified pair: a 2-person win, not a mid-table result
-    assert rows[ali.pk].official_before == 1200 and ali.official_rating == rows[ali.pk].official_after > 1200
-    assert bob.official_rating < 1200
+    # ali was 2nd overall but 1st of the verified pair: a 2-person win, not a mid-table result.
+    # Both are newcomers, so the first bonus (RAMP[0]) comes on top of the change.
+    assert rows[ali.pk].official_before == 0 and ali.official_rating == rows[ali.pk].official_after > RAMP[0]
+    assert bob.official_rating < RAMP[0]
 
 
 @pytest.mark.django_db
@@ -971,6 +1044,8 @@ def _online_official(problem, python, solving, trying=(), top_n=2):
 def test_online_official_needs_top_n_explained_before_apply(staff_client, problem_a, python):
     from apps.integrity.models import AuditEntry
 
+    from .rating import RAMP
+
     ali, bob, zarina = _verified("ali", "bob", "zarina")
     anon = User.objects.create_user("anon", password="x")
     c = _online_official(problem_a, python, [anon, ali, bob], [zarina])
@@ -996,7 +1071,7 @@ def test_online_official_needs_top_n_explained_before_apply(staff_client, proble
     staff_client.post(apply)
     c.refresh_from_db()
     ali.refresh_from_db()
-    assert c.official_applied_at is not None and ali.official_rating > 1200
+    assert c.official_applied_at is not None and ali.official_rating > RAMP[0]
     assert AuditEntry.objects.filter(contest=c, action="official_review").count() == 2
     assert AuditEntry.objects.filter(contest=c, action="official_apply").exists()
 
@@ -1029,14 +1104,14 @@ def test_apply_official_refuses_unofficial_or_running_contest(staff_client, cont
 def test_dq_after_official_apply_rebuilds_official_rating(staff_client, problem_a, python):
     cheat, ali = _verified("cheat", "ali")
     c = _official("Lab", 1, problem_a, python, [cheat, ali])
-    from .rating import recalc_official
+    from .rating import RAMP, recalc_official
     recalc_official()
     cheat.refresh_from_db()
-    assert cheat.official_rating > 1200
+    assert cheat.official_rating > RAMP[0]  # newcomer: the first bonus plus a win
 
     r = staff_client.post(reverse("contests:disqualify", args=[c.pk, cheat.pk]), {"disqualified": "1"}, follow=True)
     cheat.refresh_from_db()
-    assert cheat.official_rating < 1200
+    assert cheat.official_rating < RAMP[0]
     assert "Rasmiy reyting qayta hisoblandi" in r.content.decode()
 
 
@@ -1044,6 +1119,8 @@ def test_dq_after_official_apply_rebuilds_official_rating(staff_client, problem_
 def test_teacher_verifies_own_student_and_past_official_contest_counts(client, problem_a, python):
     from apps.accounts.models import Group
     from apps.integrity.models import AuditEntry
+
+    from .rating import RAMP
 
     teacher = User.objects.create_user("ustoz", password="x", role="teacher")
     stranger = User.objects.create_user("begona", password="x", role="teacher")
@@ -1059,7 +1136,7 @@ def test_teacher_verifies_own_student_and_past_official_contest_counts(client, p
     client.post(url, {"verified": "1", "note": "Pasport ko‘rildi"})
     student.refresh_from_db()
     assert student.verified_by == teacher and student.verified_note == "Pasport ko‘rildi"
-    assert student.official_rating > 1200  # the lab contest before verification now counts
+    assert student.official_rating > RAMP[0]  # the lab contest before verification now counts
     assert AuditEntry.objects.filter(action="verify", subject=student, actor=teacher).exists()
 
     client.post(url, {"verified": "0"})

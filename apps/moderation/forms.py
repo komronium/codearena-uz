@@ -146,7 +146,7 @@ class _DateTimeLocal(forms.DateTimeInput):
 class ContestForm(ModelForm):
     class Meta:
         model = Contest
-        fields = ["title", "description_md", "start", "end", "is_rated", "is_official", "review_top_n",
+        fields = ["title", "description_md", "start", "end", "is_rated", "division", "is_official", "review_top_n",
                   "allowed_ip_prefix", "require_group"]
         widgets = {
             "title": forms.TextInput(attrs=_CA_INPUT),
@@ -156,11 +156,13 @@ class ContestForm(ModelForm):
             "allowed_ip_prefix": forms.TextInput(attrs={**_CA_INPUT, "placeholder": "masalan 10.0."}),
             "review_top_n": forms.NumberInput(attrs={**_CA_INPUT, "min": 0, "max": 100}),
             "require_group": forms.Select(attrs={"class": "ca-select"}),
+            "division": forms.Select(attrs={"class": "ca-select"}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["review_top_n"].required = False
+        self.fields["division"].required = False
 
     def clean(self):
         data = super().clean()
@@ -174,6 +176,10 @@ class ContestForm(ModelForm):
         # left empty = the model default, not a validation error on an otherwise filled form
         value = self.cleaned_data.get("review_top_n")
         return 10 if value is None else value
+
+    def clean_division(self):
+        value = self.cleaned_data.get("division")
+        return Contest.Division.OPEN if value is None else value
 
 
 class BaseContestProblemFormSet(BaseInlineFormSet):

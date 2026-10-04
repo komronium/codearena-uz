@@ -23,8 +23,8 @@ module.exports = {
         warn: { DEFAULT: "rgb(var(--ca-warn-rgb) / <alpha-value>)", soft: "rgb(var(--ca-warn-rgb) / .12)" },
       },
       fontFamily: {
-        sans: ["-apple-system", "BlinkMacSystemFont", "SF Pro Display", "Inter", "ui-sans-serif", "system-ui", "sans-serif"],
-        mono: ["JetBrains Mono", "ui-monospace", "monospace"],
+        sans: ["Inter", "ui-sans-serif", "system-ui", "-apple-system", "Segoe UI", "sans-serif"],
+        mono: ["Lilex", "ui-monospace", "monospace"],
       },
     },
   },

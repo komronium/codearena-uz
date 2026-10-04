@@ -1,24 +1,9 @@
 {% extends "base.html" %}{% load tiers %}
 {% block title %}{{ contest.title }} — Natijalar{% endblock %}
 
+{% block band %}{% include "contests/_band.html" with active="scoreboard" n_participants=rows|length %}{% endblock %}
 {% block content %}
 {# problem titles are secret until the start, even for registered users #}
-<div class="mb-6 flex flex-wrap items-end justify-between gap-3">
-  <div>
-    <a class="ca-link mb-2 inline-block text-sm text-mute" href="{% url 'contests:detail' contest.pk %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>{{ contest.title }}</a>
-    <h1 class="ca-page-title">Natijalar</h1>
-    <p class="mt-1 text-sm text-mute">
-      {{ rows|length }} ishtirokchi · ko‘p ball yutadi, teng bo‘lsa jarimasi kam
-      {% if contest.is_running %}· <span class="tabular font-medium text-ink" data-countdown="{{ contest.end|date:'c' }}" data-label="Tugashiga"></span>{% endif %}
-    </p>
-  </div>
-  <div class="flex flex-wrap items-center gap-2">
-    {% if contest.is_running %}<span class="ca-live-badge"><span class="ca-live-dot" aria-hidden="true"></span>Jonli · har 20 soniyada yangilanadi</span>{% endif %}
-  </div>
-</div>
-
-{% include "contests/_nav_tabs.html" with active="scoreboard" %}
-
 {% if rows %}
 <div class="mb-3 flex flex-wrap items-center gap-2">
   <label class="relative w-full max-w-xs">
@@ -27,6 +12,7 @@
     <input type="search" id="st-search" class="ca-input !py-1.5 pl-8 text-sm" placeholder="Ism yoki login…" autocomplete="off">
   </label>
   {% if my_row %}<button type="button" class="ca-btn ca-btn-ghost !py-1.5 text-sm" data-goto-me><i data-lucide="locate-fixed" class="lu" aria-hidden="true"></i>Mening o‘rnim</button>{% endif %}
+  {% if contest.is_running %}<span class="ca-tag ca-tag-live"><span class="ca-live-dot" aria-hidden="true"></span>Jonli · har 20 soniyada yangilanadi</span>{% endif %}
   <span class="ml-auto hidden text-xs text-mute" id="st-scroll-hint"><i data-lucide="move-horizontal" class="lu mr-1" aria-hidden="true"></i>Jadvalni yonga suring</span>
 </div>
 

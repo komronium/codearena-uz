@@ -109,21 +109,21 @@ def test_home_rating_card_and_date(client, world):
     r = client.get("/")
     card = r.context["rating_card"]
     assert card["delta"] == -20 and card["rank"] == 1 and card["total"] == 1
-    assert card["next"]["name"] == "Pupil" and card["next"]["need"] == 120
+    assert card["next"]["name"] == "Master" and card["next"]["need"] == 120
     weekday, day_month = r.context["today_label"].split(", ")
     assert weekday in {"Dushanba", "Seshanba", "Chorshanba", "Payshanba", "Juma", "Shanba", "Yakshanba"}
     assert day_month == f"{timezone.localdate().day}-" + day_month.split("-", 1)[1]
-    assert "Pupil</span> darajasigacha" in r.content.decode()
+    assert "Master</span> darajasigacha" in r.content.decode()
 
 
 @pytest.mark.django_db
-def test_rail_offers_admin_to_staff_only(client, world):
+def test_top_bar_offers_admin_to_staff_only(client, world):
     client.force_login(User.objects.create_user("ali", password="x"))
-    rail = client.get("/").content.decode().split('class="ca-rail"', 1)[1].split("</nav>", 1)[0]
-    assert reverse("problems:list") in rail and reverse("moderation:dashboard") not in rail
+    links = client.get("/").content.decode().split('class="ca-nav-links"', 1)[1].split("</nav>", 1)[0]
+    assert reverse("problems:list") in links and reverse("moderation:dashboard") not in links
     client.force_login(User.objects.create_user("boss", password="x", is_staff=True))
-    rail = client.get("/").content.decode().split('class="ca-rail"', 1)[1].split("</nav>", 1)[0]
-    assert reverse("moderation:dashboard") in rail
+    links = client.get("/").content.decode().split('class="ca-nav-links"', 1)[1].split("</nav>", 1)[0]
+    assert reverse("moderation:dashboard") in links
 
 
 @pytest.mark.django_db

@@ -176,24 +176,22 @@ def profile_edit(request):
     return render(request, "accounts/profile_edit.html", {"form": form})
 
 
-def _podium_split(page):
-    """Leaderboard page -> first page's top 3 as podium cards, the rest as table rows (each with .rank)."""
-    rows = list(page)
-    for i, u in enumerate(rows):
+def _ranked(page):
+    """A leaderboard page with each user's place on the whole board as .rank."""
+    for i, u in enumerate(page):
         u.rank = page.start_index() + i
-    podium = rows[:3] if page.number == 1 else []
-    return {"podium": podium, "rows": rows[len(podium):]}
+    return page
 
 
 def top(request):
     qs = (User.objects.filter(is_active=True).annotate(solved_count=Count("userproblemsolved", distinct=True))
           .order_by("-practice_points", "username"))
     page = Paginator(qs, 50).get_page(request.GET.get("page"))
-    return render(request, "accounts/top.html", {"users": page, "total": qs.count(), **_podium_split(page)})
+    return render(request, "accounts/top.html", {"users": _ranked(page), "total": qs.count()})
 
 
 def rating(request):
-    # Only users who finished a rated contest; a default 1200 says nothing about anyone.
+    # Only users who finished a rated contest; a default 0 says nothing about anyone.
     rated = Participation.objects.filter(rating_after__isnull=False)
     last = rated.filter(user=OuterRef("pk")).order_by("-contest__end").annotate(d=F("rating_after") - F("rating_before"))
     qs = (User.objects.filter(is_active=True)
@@ -212,7 +210,7 @@ def rating(request):
             me = {"rank": sum(1 for r in ratings if r > request.user.rating) + 1,
                   "delta": mine.rating_after - mine.rating_before, "next": _next_tier(request.user.rating)}
     return render(request, "accounts/rating.html",
-                  {"users": page, "total": len(ratings), "tiers": tiers, "me": me, **_podium_split(page)})
+                  {"users": _ranked(page), "total": len(ratings), "tiers": tiers, "me": me})
 
 
 def _plan_badges(user) -> list:

@@ -1,19 +1,23 @@
-{% load tiers %}{% comment %}Account menu at the foot of the rail: profile, settings, theme and sign-out in one place
-(a <details> needs no script to open; base.html closes it on outside click and Esc).{% endcomment %}
+{% load tiers %}{% comment %}Account menu at the right of the top bar: profile, settings, theme and sign-out in one place,
+and below xl the places the top bar has no room for (a <details> needs no script to open; base.html
+closes it on outside click and Esc).{% endcomment %}
 <details class="ca-dropdown" data-dropdown style="--tier: {{ user.rating|tier_color }}">
   <summary class="ca-dropdown-trigger" aria-label="Hisob: {{ user.username }}" title="{{ user.username }}" translate="no">
     <span class="ca-avatar ca-user-avatar h-9 w-9 text-sm{% if not user.avatar %} ca-art-{{ user.rating|tier_slug }}{% endif %}">{% if user.avatar %}<img src="{{ user.avatar.url }}" alt="" width="36" height="36">{% else %}{{ user.username|first }}{% endif %}</span>
-    {% if unread_reviews %}<b class="ca-dropdown-dot" aria-label="{{ unread_reviews }} ta o‘qilmagan sharh"></b>{% endif %}
+    {% if unread_reviews %}<b class="ca-dropdown-dot" aria-label="{{ unread_reviews }} ta o‘qilmagan sharh"></b>{% elif nav.due or nav.staff.total %}<b class="ca-dropdown-dot xl:hidden" aria-hidden="true"></b>{% endif %}
   </summary>
   <div class="ca-dropdown-panel">
     <div class="flex items-center gap-3 border-b border-line px-3 pb-3 pt-2">
       <span class="ca-avatar ca-user-avatar h-10 w-10 text-base{% if not user.avatar %} ca-art-{{ user.rating|tier_slug }}{% endif %}">{% if user.avatar %}<img src="{{ user.avatar.url }}" alt="" width="40" height="40">{% else %}{{ user.username|first }}{% endif %}</span>
       <span class="min-w-0">
-        <span class="ca-tier-ink block truncate font-semibold" translate="no">{{ user.get_full_name|default:user.username }}</span>
+        <span class="ca-tier-ink block truncate font-semibold{{ user.rating|lg }}" translate="no">{{ user.get_full_name|default:user.username }}</span>
         <span class="mt-1 flex items-center gap-2"><span class="ca-tier">{{ user.rating|tier_name }}</span><span class="text-xs text-mute tabular">{{ user.rating }} · {{ user.practice_points }} ball</span></span>
       </span>
     </div>
     <a class="ca-dropdown-item" href="{% url 'profile' user.username %}"><i data-lucide="user" class="lu" aria-hidden="true"></i>Profilim</a>
+    <a class="ca-dropdown-item xl:hidden" href="{% url 'classroom:list' %}"><i data-lucide="notebook-pen" class="lu" aria-hidden="true"></i>Vazifalar{% if nav.due %}<span class="ca-chip ca-chip-score ml-auto tabular" title="Muddati 2 kun ichida tugaydi">{{ nav.due }}</span>{% endif %}</a>
+    <a class="ca-dropdown-item xl:hidden" href="{% url 'classroom:duels' %}"><i data-lucide="swords" class="lu" aria-hidden="true"></i>Duellar</a>
+    {% if user.is_staff %}<a class="ca-dropdown-item xl:hidden" href="{% url 'moderation:dashboard' %}"><i data-lucide="shield" class="lu" aria-hidden="true"></i>Boshqaruv{% if nav.staff.total %}<span class="ca-chip ca-chip-score ml-auto tabular" title="Ko‘rib chiqishni kutmoqda">{{ nav.staff.total }}</span>{% endif %}</a>{% endif %}
     <a class="ca-dropdown-item" href="{% url 'submissions:mine' %}"><i data-lucide="history" class="lu" aria-hidden="true"></i>Urinishlarim{% if unread_reviews %}<span class="ca-chip ca-chip-score ml-auto tabular" title="O‘qilmagan kod sharhlari">{{ unread_reviews }}</span>{% endif %}</a>
     <a class="ca-dropdown-item" href="{% url 'profile_edit' %}"><i data-lucide="pencil" class="lu" aria-hidden="true"></i>Profilni tahrirlash</a>
     <div class="ca-dropdown-row border-t border-line">

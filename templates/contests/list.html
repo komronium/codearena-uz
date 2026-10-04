@@ -1,78 +1,116 @@
 {% extends "base.html" %}
+{% load tiers %}
 {% block title %}Musobaqalar{% endblock %}
 {% block page_title %}<h1>Musobaqalar</h1><span class="ca-topbar-sub">Ko‘p ball to‘plagan yutadi; teng bo‘lsa jarimasi kami</span>{% endblock %}
 {% block content %}
-{% if not running and not upcoming and not ended.paginator.count %}
-<div class="ca-empty">Hali musobaqa yo‘q.</div>
-{% endif %}
-
-{% for c in running %}
-<article class="ca-live-hero" aria-labelledby="live-{{ c.pk }}">
-  <div class="ca-live-hero-body">
-    <div class="min-w-0">
-      <p class="flex flex-wrap items-center gap-3"><span class="ca-live-badge"><span class="ca-live-dot" aria-hidden="true"></span>Jonli</span>{% if c.is_rated %}<span class="ca-chip">Reytingli</span>{% endif %}</p>
-      <h2 id="live-{{ c.pk }}" class="mt-2 text-[1.75rem] font-bold leading-tight tracking-tight"><a class="hover:text-accent" href="{% url 'contests:detail' c.pk %}">{{ c.title }}</a></h2>
-      <p class="mt-1.5 text-sm text-mute">{{ c.n_problems }} ta masala · {{ c.duration_label }} · {{ c.n_participants }} ishtirokchi</p>
+{% comment %}After Codeforces' contests page: the rounds on now and next in one boxed table, the past ones
+in another, grouped by month; on the right the nearest round's clock and the top of the rating.{% endcomment %}
+<div class="ca-cols">
+<div class="min-w-0">
+  <section class="ca-box" aria-labelledby="now-title">
+    <h2 class="ca-box-cap" id="now-title">Joriy va kelgusi musobaqalar</h2>
+    <div class="ca-box-body">
+    {% if running or upcoming %}
+    <table class="ca-table">
+      <thead><tr><th>Musobaqa</th><th class="text-center">Boshlanish</th><th class="text-center hidden sm:table-cell">Davomiyligi</th><th class="text-center">Holat</th><th class="text-center"><span class="sr-only">Qatnashish</span></th></tr></thead>
+      <tbody>
+      {% for c in running %}
+      <tr>
+        <td class="ca-ct-name"><a class="ca-link" href="{% url 'contests:detail' c.pk %}">{{ c.title }}</a>{% include "contests/_tags.html" %}</td>
+        <td class="text-center tabular">{{ c.start|date:"d.m.Y H:i" }}</td>
+        <td class="text-center hidden sm:table-cell">{{ c.duration_label }}</td>
+        <td class="text-center"><span class="font-semibold text-ok"><span class="ca-live-dot" aria-hidden="true"></span>Davom etmoqda</span>
+          <span class="block text-xs text-mute">qoldi <span class="tabular" data-countdown="{{ c.end|date:'c' }}" data-label="" data-suffix="1"></span></span></td>
+        <td class="text-center"><a class="ca-link font-semibold" href="{% url 'contests:detail' c.pk %}">{% if c.me %}Davom etish{% else %}Qatnashish{% endif %} »</a>
+          <span class="ca-n" title="{{ c.n_participants }} ishtirokchi"><i data-lucide="user" class="lu" aria-hidden="true"></i>x{{ c.n_participants }}</span></td>
+      </tr>
+      {% endfor %}
+      {% for c in upcoming %}
+      <tr>
+        <td class="ca-ct-name"><a class="ca-link" href="{% url 'contests:detail' c.pk %}">{{ c.title }}</a>{% include "contests/_tags.html" %}</td>
+        <td class="text-center tabular">{{ c.start|date:"d.m.Y H:i" }}</td>
+        <td class="text-center hidden sm:table-cell">{{ c.duration_label }}</td>
+        <td class="text-center"><span class="text-mute">Boshlanishiga</span> <span class="tabular font-semibold" data-countdown="{{ c.start|date:'c' }}" data-label="" data-suffix="1"></span></td>
+        <td class="text-center">
+          {% if c.me %}<span class="font-semibold text-ok"><i data-lucide="check" class="lu" aria-hidden="true"></i> Ro‘yxatdasiz</span>
+          {% elif not user.is_authenticated %}<a class="ca-link font-semibold" href="{% url 'login' %}?next={{ request.path|urlencode }}">Ro‘yxatdan o‘tish »</a>
+          {% elif not user.is_staff %}<form method="post" action="{% url 'contests:register' c.pk %}" class="inline">{% csrf_token %}<button class="ca-btn ca-btn-primary ca-btn-xs">Ro‘yxatdan o‘tish »</button></form>{% endif %}
+          <span class="ca-n" title="{{ c.n_participants }} kishi ro‘yxatda"><i data-lucide="user" class="lu" aria-hidden="true"></i>x{{ c.n_participants }}</span>
+        </td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="ca-box-pad text-center text-mute">Hozircha rejalashtirilgan musobaqa yo‘q.</p>
+    {% endif %}
     </div>
-    <div class="ca-live-clock">
-      <b class="tabular" data-countdown="{{ c.end|date:'c' }}" data-label="" data-suffix="1"></b>
-      <span>qoldi</span>
-    </div>
-    <div class="flex flex-col gap-3 lg:items-end">
-      <p class="text-sm text-mute">{% if c.me %}Siz: {% if c.my_rank %}<b class="text-ink">{{ c.my_rank }}-o‘rin</b> · {{ c.my_solved }} / {{ c.n_problems }} yechilgan{% else %}ro‘yxatdasiz{% endif %}{% else %}Hali qatnashmagansiz{% endif %}</p>
-      <div class="flex flex-wrap gap-2">
-        <a class="ca-btn ca-btn-ghost" href="{% url 'contests:standings' c.pk %}"><i data-lucide="medal" class="lu" aria-hidden="true"></i>Natijalar</a>
-        <a class="ca-btn ca-btn-primary" href="{% url 'contests:detail' c.pk %}">{% if c.me %}Davom etish{% else %}Qatnashish{% endif %}<i data-lucide="arrow-right" class="lu" aria-hidden="true"></i></a>
-      </div>
-    </div>
-  </div>
-  <div class="ca-live-hero-bar" role="progressbar" aria-label="O‘tgan vaqt" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ c.elapsed_pct }}"><span style="width: {{ c.elapsed_pct }}%"></span></div>
-</article>
-{% endfor %}
+  </section>
 
-{% if upcoming %}
-<section class="mb-10" aria-labelledby="up-title">
-  <div class="ca-sec-head"><h2 id="up-title">Kutilmoqda <span class="ml-1 text-sm font-normal text-mute">{{ upcoming|length }}</span></h2></div>
-  <ul class="ca-lines">
-    {% for c in upcoming %}
-    <li class="relative !gap-5">
-      <span class="ca-daytile" aria-hidden="true"><b>{{ c.start|date:"d" }}</b><span>{{ c.start_month_short }}</span></span>
-      <div class="min-w-0 flex-1">
-        <p class="flex flex-wrap items-center gap-2"><a class="ca-line-title ca-stretch text-base font-semibold" href="{% url 'contests:detail' c.pk %}">{{ c.title }}</a>{% if c.is_rated %}<span class="ca-chip relative">Reytingli</span>{% endif %}</p>
-        <p class="ca-line-meta">{{ c.start|date:"d.m.Y H:i" }} · {{ c.duration_label }} · {{ c.n_participants }} ro‘yxatda</p>
-      </div>
-      <span class="hidden text-sm text-mute md:inline">Boshlanishiga <b class="tabular text-ink" data-countdown="{{ c.start|date:'c' }}" data-label="" data-suffix="1"></b></span>
-      {% if c.me %}<span class="ca-verdict ca-verdict-ac relative shrink-0"><i data-lucide="check" class="lu" aria-hidden="true"></i>Ro‘yxatdasiz</span>
-      {% else %}<span class="ca-btn ca-btn-ghost relative hidden shrink-0 !py-1.5 sm:inline-flex" aria-hidden="true">Qatnashish</span>{% endif %}
-    </li>
-    {% endfor %}
-  </ul>
-</section>
-{% endif %}
-
-{% if ended.paginator.count %}
-<section aria-labelledby="end-title">
-  <div class="ca-sec-head">
-    <h2 id="end-title">Tugaganlar <span class="ml-1 text-sm font-normal text-mute">{{ ended.paginator.count }}</span></h2>
-    <span class="ca-ended-cols" aria-hidden="true"><span>Ishtirokchi</span><span>O‘rningiz</span><span class="text-right">Reyting</span><span></span></span>
-  </div>
-  {% regroup ended by start_month as months %}
-  {% for m in months %}
-  <h3 class="ca-month">{{ m.grouper }}</h3>
-  <ul class="ca-lines">
-    {% for c in m.list %}
-    <li class="ca-ended">
-      <span class="text-sm tabular text-mute">{{ c.start|date:"d.m" }}</span>
-      <span class="flex min-w-0 flex-wrap items-center gap-2"><a class="ca-line-title ca-stretch" href="{% url 'contests:standings' c.pk %}">{{ c.title }}</a>{% if c.is_rated %}<span class="ca-chip relative">Reytingli</span>{% endif %}</span>
-      <span class="hidden text-sm text-mute md:inline">{{ c.n_participants }} ishtirokchi</span>
-      <span class="text-sm text-mute">{% if c.me and c.me.rank %}{% if c.me.rank <= 3 %}<span class="ca-rank ca-rank-{{ c.me.rank }} !h-5 !w-5 text-[.7rem]" aria-label="{{ c.me.rank }}-o‘rin">{{ c.me.rank }}</span>{% else %}<b class="tabular text-ink">{{ c.me.rank }}</b>{% endif %}<span class="tabular"> / {{ c.n_participants }}</span>{% elif c.me %}qatnashgansiz{% else %}—{% endif %}</span>
-      <span class="text-right text-sm font-bold tabular">{% if c.my_delta is not None %}<span class="{% if c.my_delta > 0 %}text-ok{% elif c.my_delta < 0 %}text-bad{% else %}text-mute{% endif %}">{% if c.my_delta > 0 %}+{% endif %}{{ c.my_delta }}</span>{% else %}<span class="font-normal text-mute">—</span>{% endif %}</span>
-      <i data-lucide="chevron-right" class="lu justify-self-end text-mute" aria-hidden="true"></i>
-    </li>
-    {% endfor %}
-  </ul>
-  {% endfor %}
+  <section class="ca-box" aria-labelledby="end-title">
+    <h2 class="ca-box-cap" id="end-title">O‘tgan musobaqalar <small>{{ ended.paginator.count }}</small></h2>
+    <div class="ca-box-body">
+    {% if ended.paginator.count %}
+    <table class="ca-table">
+      <thead><tr><th>Musobaqa</th><th class="text-center">Boshlanish</th><th class="text-center hidden md:table-cell">Davomiyligi</th><th class="text-center">Natijalar</th><th class="text-center">Siz</th></tr></thead>
+      {% regroup ended by start_month as months %}
+      {% for m in months %}
+      <tbody>
+      <tr class="ca-month"><th colspan="5" scope="rowgroup">{{ m.grouper }}</th></tr>
+      {% for c in m.list %}
+      <tr>
+        <td class="ca-ct-name"><a class="ca-link" href="{% url 'contests:detail' c.pk %}">{{ c.title }}</a>{% include "contests/_tags.html" %}</td>
+        <td class="text-center tabular">{{ c.start|date:"d.m.Y H:i" }}</td>
+        <td class="text-center hidden md:table-cell">{{ c.duration_label }}</td>
+        <td class="text-center"><a class="ca-link" href="{% url 'contests:standings' c.pk %}">Yakuniy natijalar</a>
+          <span class="ca-n" title="{{ c.n_participants }} ishtirokchi"><i data-lucide="user" class="lu" aria-hidden="true"></i>x{{ c.n_participants }}</span></td>
+        <td class="text-center tabular">{% if c.me and c.me.rank %}<b>{{ c.me.rank }}</b><span class="text-mute">-o‘rin</span>{% elif c.me %}<span class="text-mute">qatnashgan</span>{% else %}<span class="text-mute">—</span>{% endif %}
+          {% if c.my_delta is not None %}<b class="ml-1 {% if c.my_delta > 0 %}text-ok{% elif c.my_delta < 0 %}text-bad{% else %}text-mute{% endif %}">{% if c.my_delta > 0 %}+{% endif %}{{ c.my_delta }}</b>{% endif %}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+      {% endfor %}
+    </table>
+    {% else %}
+    <p class="ca-box-pad text-center text-mute">Hali tugagan musobaqa yo‘q.</p>
+    {% endif %}
+    </div>
+  </section>
   {% include "_pagination.html" with page=ended %}
-</section>
-{% endif %}
+</div>
+
+<aside class="ca-aside" aria-label="Qo‘shimcha">
+  {% with next=next_contest %}{% if next %}
+  <section class="ca-box" aria-labelledby="next-title">
+    <h2 class="ca-box-cap" id="next-title">Diqqat</h2>
+    <div class="ca-box-body ca-box-pad text-center">
+      <p class="text-mute">{% if next.is_running %}Musobaqa davom etmoqda{% else %}Musobaqa oldidan{% endif %}</p>
+      <a class="ca-link text-base font-semibold" href="{% url 'contests:detail' next.pk %}">{{ next.title }}</a>
+      <p class="mt-1 text-xl font-semibold tabular" data-countdown="{% if next.is_running %}{{ next.end|date:'c' }}{% else %}{{ next.start|date:'c' }}{% endif %}" data-label="" data-suffix="1"></p>
+      {% if next.is_running and next.me and next.my_rank %}<p class="mt-1 text-mute">Siz: <b class="text-ink">{{ next.my_rank }}-o‘rin</b>, {{ next.my_solved }} / {{ next.n_problems }} yechilgan</p>{% endif %}
+      <a class="ca-link mt-1.5 inline-block font-semibold" href="{% url 'contests:detail' next.pk %}">{% if next.is_running %}{% if next.me %}Davom etish{% else %}Qatnashish{% endif %}{% elif next.me %}Musobaqa sahifasi{% else %}Ro‘yxatdan o‘tish{% endif %} »</a>
+    </div>
+  </section>
+  {% endif %}{% endwith %}
+  {% if top_rated %}
+  <section class="ca-box" aria-labelledby="top-title">
+    <h2 class="ca-box-cap" id="top-title">Eng yuqori reyting <a class="ca-box-tools ca-link" href="{% url 'rating' %}">Barchasi »</a></h2>
+    <div class="ca-box-body">
+      <table class="ca-table">
+        <thead><tr><th class="w-10 text-center">#</th><th>Foydalanuvchi</th><th class="text-center">Reyting</th></tr></thead>
+        <tbody>
+        {% for u in top_rated %}
+        <tr{% if u == user %} class="ca-row-me"{% endif %}>
+          <td class="text-center tabular">{{ forloop.counter }}</td>
+          <td class="max-w-0 truncate"><a class="ca-user-name{{ u.rating|lg }}" style="--tier: {{ u.rating|tier_color }}" href="{% url 'profile' u.username %}" translate="no">{{ u.username }}</a></td>
+          <td class="text-center tabular">{{ u.rating }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  {% endif %}
+</aside>
+</div>
 {% endblock %}

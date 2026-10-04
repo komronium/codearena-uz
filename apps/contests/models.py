@@ -9,12 +9,22 @@ from apps.problems.models import Problem
 _UZ_MONTHS_SHORT = "Yan Fev Mar Apr May Iyn Iyl Avg Sen Okt Noy Dek".split()
 _UZ_MONTHS = "Yanvar Fevral Mart Aprel May Iyun Iyul Avgust Sentabr Oktabr Noyabr Dekabr".split()
 
+# Shown ratings each division rates, [floor, ceiling); None = no bound (info.md, Codeforces' split).
+DIVISION_RANGE = {1: (1900, None), 2: (None, 1900), 3: (None, 1600), 4: (None, 1400)}
+
 
 class Contest(models.Model):
     class Type(models.TextChoices):
         # ponytail: single format kept as a field so old rows/migrations stay valid;
         # ICPC was dropped — equal points per problem gives the same ranking.
         SCORE = "score", "Ball"
+
+    class Division(models.IntegerChoices):
+        OPEN = 0, "Ochiq (hamma uchun)"
+        DIV1 = 1, "Div. 1 (reyting 1900 va yuqori)"
+        DIV2 = 2, "Div. 2 (reyting 1900 dan past)"
+        DIV3 = 3, "Div. 3 (reyting 1600 dan past)"
+        DIV4 = 4, "Div. 4 (reyting 1400 dan past)"
 
     title = models.CharField(max_length=200)
     description_md = models.TextField(blank=True)
@@ -25,6 +35,9 @@ class Contest(models.Model):
     allowed_ip_prefix = models.CharField(max_length=50, blank=True)
     require_group = models.ForeignKey(Group, null=True, blank=True, on_delete=models.SET_NULL)
     rating_applied = models.BooleanField(default=False)
+    # Rated only for users in the division's range; the rest take part out of competition:
+    # on the board, but not rated (apps.contests.rating).
+    division = models.PositiveSmallIntegerField(choices=Division.choices, default=Division.OPEN)
     # Supervised (lab, or online with a top-N code check): counts toward the official rating
     # once staff apply it (apps.contests.rating.recalc_official).
     is_official = models.BooleanField(default=False)
@@ -39,6 +52,11 @@ class Contest(models.Model):
 
     def __str__(self):
         return self.title
+
+    def rates(self, rating: int) -> bool:
+        """Whether a user with this shown rating competes officially (is rated) in this contest."""
+        floor, ceiling = DIVISION_RANGE.get(self.division, (None, None))
+        return (floor is None or rating >= floor) and (ceiling is None or rating < ceiling)
 
     @property
     def is_running(self) -> bool:

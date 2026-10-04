@@ -1,0 +1,54 @@
+{% comment %}The top bar, after Kick Start: the brand, the places as text links (the current one underlined on
+the bar's edge), and the tools on the right. Your own work (homework, duels, submissions) and the staff link
+show from xl up; narrower screens reach them from the account menu, phones from the bottom bar and the
+menu sheet (base.html). Badges: a pulsing dot while a contest runs, homework due within two days, unread
+code reviews, the staff queue.{% endcomment %}
+{% with ns=request.resolver_match.namespace un=request.resolver_match.url_name %}
+<div class="ca-nav-in">
+  <a href="{% url 'home' %}" class="ca-nav-brand" aria-label="CodeArena bosh sahifa">{% include "_brand_mark.html" %}<span>CodeArena</span></a>
+  <nav class="ca-nav-links" aria-label="Asosiy menyu">
+    <a href="{% url 'problems:list' %}" class="ca-nav-link{% if ns == 'problems' and not contest %} is-active{% endif %}"{% if ns == 'problems' and not contest %} aria-current="page"{% endif %}>Masalalar</a>
+    <a href="{% url 'learn:hub' %}" class="ca-nav-link{% if ns == 'learn' %} is-active{% endif %}"{% if ns == 'learn' %} aria-current="page"{% endif %}>O‘rganish</a>
+    <a href="{% url 'contests:list' %}" class="ca-nav-link{% if ns == 'contests' or ns == 'problems' and contest %} is-active{% endif %}"{% if ns == 'contests' or ns == 'problems' and contest %} aria-current="page"{% endif %}{% if nav.live %} title="Jonli: {{ nav.live.title }}"{% endif %}>Musobaqalar{% if nav.live %}<b class="ca-badge-live"><span class="sr-only">, jonli musobaqa bor</span></b>{% endif %}</a>
+    <a href="{% url 'rating' %}" class="ca-nav-link{% if un == 'rating' or un == 'top' %} is-active{% endif %}"{% if un == 'rating' or un == 'top' %} aria-current="page"{% endif %}>Reyting</a>
+    {% if user.is_authenticated %}
+    <span class="ca-nav-sep" aria-hidden="true"></span>
+    <a href="{% url 'classroom:list' %}" class="ca-nav-link is-more{% if ns == 'classroom' and 'duel' not in un %} is-active{% endif %}"{% if ns == 'classroom' and 'duel' not in un %} aria-current="page"{% endif %}{% if nav.due %} title="{{ nav.due }} ta vazifa muddati 2 kun ichida tugaydi"{% endif %}>Vazifalar{% if nav.due %}<b class="ca-badge-n is-warn">{{ nav.due }}<span class="sr-only"> ta vazifa muddati yaqin</span></b>{% endif %}</a>
+    <a href="{% url 'classroom:duels' %}" class="ca-nav-link is-more{% if ns == 'classroom' and 'duel' in un %} is-active{% endif %}"{% if ns == 'classroom' and 'duel' in un %} aria-current="page"{% endif %}>Duellar</a>
+    <a href="{% url 'submissions:mine' %}" class="ca-nav-link is-more{% if ns == 'submissions' %} is-active{% endif %}"{% if ns == 'submissions' %} aria-current="page"{% endif %}{% if unread_reviews %} title="{{ unread_reviews }} ta o‘qilmagan kod sharhi"{% endif %}>Urinishlar{% if unread_reviews %}<b class="ca-badge-n">{{ unread_reviews }}<span class="sr-only"> ta o‘qilmagan sharh</span></b>{% endif %}</a>
+    {% endif %}
+    {% if user.is_staff %}
+    <a href="{% url 'moderation:dashboard' %}" class="ca-nav-link is-more{% if ns == 'moderation' or ns == 'integrity' %} is-active{% endif %}"{% if ns == 'moderation' or ns == 'integrity' %} aria-current="page"{% endif %}{% if nav.staff.total %} title="{{ nav.staff.total }} ta ish ko‘rib chiqishni kutmoqda"{% endif %}>Admin{% if nav.staff.total %}<b class="ca-badge-n is-warn">{{ nav.staff.total }}<span class="sr-only"> ta ish kutmoqda</span></b>{% endif %}</a>
+    {% endif %}
+  </nav>
+  <div class="ca-nav-tools">
+    {% with live=nav.live %}{% if live and not contest and ns != "contests" and un != "home" %}
+    {# a contest is running: its clock and a way in, from every page #}
+    <a href="{% url 'contests:detail' live.pk %}" class="ca-live-pill" title="{{ live.title }}{% if live.count > 1 %} (+{{ live.count|add:'-1' }} ta boshqa jonli){% endif %}">
+      <span class="ca-live-dot" aria-hidden="true"></span>
+      <span class="hidden 2xl:inline">{% if live.joined %}Musobaqangiz davom etmoqda{% else %}Jonli musobaqa{% endif %}</span>
+      <span class="tabular" data-countdown="{{ live.end|date:'c' }}" data-label="" data-suffix="1"></span>
+      <span class="sr-only">— {{ live.title }}</span>
+    </a>
+    {% endif %}{% endwith %}
+    <button type="button" class="ca-search-btn hidden lg:flex" data-palette-open aria-keyshortcuts="Control+K Meta+K /">
+      <i data-lucide="search" class="lu" aria-hidden="true"></i><span>Qidirish…</span><kbd class="ca-kbd" aria-hidden="true">Ctrl K</kbd>
+    </button>
+    <button type="button" class="ca-icon-btn lg:hidden" data-palette-open aria-label="Qidirish"><i data-lucide="search" class="lu" aria-hidden="true"></i></button>
+    {% if user.is_authenticated %}
+    {% with s=streak_pill %}{% if s.daily %}
+    <a href="{% url 'problems:detail' s.daily.problem.slug %}" class="ca-streak{% if s.done %} is-done{% elif s.current %} is-risk{% endif %}"
+       title="{% if s.done %}Bugungi masala yechildi — seriya {{ s.current }} kun{% elif s.current %}Seriya {{ s.current }} kun: bugun kun masalasini yeching, aks holda uziladi{% else %}Kun masalasini yechib, seriyani boshlang{% endif %}">
+      <i data-lucide="flame" class="lu" aria-hidden="true"></i><span class="tabular">{{ s.current }}</span>{% if not s.done %}<b class="ca-streak-todo" aria-hidden="true"></b>{% endif %}
+      <span class="sr-only">kunlik seriya{% if s.done %}, bugungi masala yechilgan{% elif s.current %}, bugungi masala hali yechilmagan{% endif %}</span>
+    </a>
+    {% endif %}{% endwith %}
+    <span class="hidden md:block">{% include "_user_menu.html" %}</span>
+    {% else %}
+    <button type="button" id="theme-toggle" class="ca-icon-btn hidden md:grid" title="Ko‘rinish" aria-label="Ko‘rinishni almashtirish (yorug‘ / qorong‘i)"><i data-lucide="sun-moon" class="lu" aria-hidden="true"></i></button>
+    <a href="{% url 'login' %}" class="ca-btn ca-btn-ghost !py-1.5">Kirish</a>
+    <a href="{% url 'register' %}" class="ca-btn ca-btn-primary hidden !py-1.5 sm:inline-flex">Ro‘yxatdan o‘tish</a>
+    {% endif %}
+  </div>
+</div>
+{% endwith %}

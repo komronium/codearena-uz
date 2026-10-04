@@ -36,7 +36,7 @@ def test_committed_build_matches_the_templates():
 
 
 def test_tier_colours_are_not_used_raw_as_text():
-    """Several tier colours fail contrast as text (Pupil green is 3.3:1 on white); text goes
+    """Several tier colours fail contrast as text (Ustoz orange is 2.3:1 on white); text goes
     through .ca-tier-ink, which mixes the tier toward the theme's ink."""
     raw = re.compile(r"(?<![-\w])color:\s*(?:\{\{[^}]*(?:tier_color|t\.color)[^}]*\}\}|var\(--tier\))")
     sources = [*TEMPLATES, FRONTEND / "src" / "app.css"]

@@ -11,7 +11,7 @@ class User(AbstractUser):
         TEACHER = "teacher"
         ADMIN = "admin"
 
-    rating = models.IntegerField(default=1200, db_index=True)
+    rating = models.IntegerField(default=0, db_index=True)  # shown rating; see apps.contests.rating
     practice_points = models.IntegerField(default=0, db_index=True)
     duel_rating = models.IntegerField(default=1200)  # 1v1 duels only (apps.classroom.duels)
     # From supervised contests only (apps.contests.rating.recalc_official); None until the first one.

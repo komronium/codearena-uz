@@ -2,18 +2,28 @@ from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 
 from apps.contests.models import Contest
-from apps.contests.rating import apply_rating
+from apps.contests.rating import apply_rating, recalc_official, replay
 
 
 class Command(BaseCommand):
-    help = ("Apply Elo-style rating deltas for a finished rated contest (apps.contests.rating). "
+    help = ("Apply the rating changes of a finished rated contest (apps.contests.rating). "
             "Idempotent via Contest.rating_applied. Omit contest_id to process every ended rated "
-            "contest that hasn't had rating applied yet (cron-friendly).")
+            "contest that hasn't had rating applied yet (cron-friendly). --replay rebuilds every "
+            "rating from zero over the applied contests, after a change to the rating maths.")
 
     def add_arguments(self, parser):
         parser.add_argument("contest_id", type=int, nargs="?", default=None)
+        parser.add_argument("--replay", action="store_true",
+                            help="rebuild every rating from zero; manual rating edits are lost")
 
     def handle(self, *args, **opts):
+        if opts["replay"]:
+            if opts["contest_id"] is not None:
+                raise CommandError("--replay takes no contest_id")
+            n = replay()
+            recalc_official()  # same maths
+            self.stdout.write(self.style.SUCCESS(f"replayed {n} rated contests and the official rating"))
+            return
         if opts["contest_id"] is not None:
             try:
                 contest = Contest.objects.get(pk=opts["contest_id"])
