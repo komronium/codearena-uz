@@ -1,10 +1,11 @@
-{% extends "base.html" %}{% load tiers %}
+{% extends "base.html" %}{% load tiers verdicts %}
 {% block title %}Urinishlar{% endblock %}
 {% block page_title %}<h1>Urinishlar</h1><span class="ca-topbar-sub">{% if own %}Yuborgan yechimlaringiz{% else %}Saytdagi barcha yechimlar{% endif %}, eng yangisi tepada</span>{% endblock %}
 {% block content %}
 {% comment %}After Codeforces' status page: one boxed table, a submission per row with its author in their
 tier colour, the verdict as coloured text; "everyone / mine" tabs above, the verdict filter on the caption.
-Only the author (and staff, teachers) can open the code, so other rows' numbers are plain text.{% endcomment %}
+Only the author (and staff, teachers) can open the code, so other rows' numbers are plain text.
+On a phone the author moves under the problem and a verdict may wrap, so the problem's name stays readable.{% endcomment %}
 {% if user.is_authenticated %}
 <nav class="ca-tabs mb-4" aria-label="Kimning urinishlari">
   <a class="ca-tab{% if not own %} is-active{% endif %}" href="{% url 'submissions:mine' %}{% if verdict %}?verdict={{ verdict }}{% endif %}"{% if not own %} aria-current="page"{% endif %}><i data-lucide="users" class="lu" aria-hidden="true"></i>Hamma</a>
@@ -16,24 +17,27 @@ Only the author (and staff, teachers) can open the code, so other rows' numbers 
     <h2 id="subs-title">Urinishlar{% if subs %} <small>{{ subs.paginator.count }}</small>{% endif %}</h2>
     <nav class="ca-box-tools ca-levels" aria-label="Holat bo‘yicha filtr">
       <a href="{% querystring verdict=None page=None %}"{% if not verdict %} aria-current="true"{% endif %}>Hammasi</a>
-      {% for v, label in verdicts %}<a href="{% querystring verdict=v page=None %}"{% if verdict == v %} aria-current="true"{% endif %}>{{ label }}</a>{% endfor %}
+      {# the codes the table prints, the words in the tooltip #}
+      {% for v, label in verdicts %}<a href="{% querystring verdict=v page=None %}" title="{{ v|verdict_words }}"{% if verdict == v %} aria-current="true"{% endif %}>{{ v }}</a>{% endfor %}
     </nav>
   </div>
   <div class="ca-box-body">
   {% if subs %}
   <table class="ca-table">
-    <thead><tr><th class="w-20 text-center">#</th><th class="hidden w-32 text-center sm:table-cell">Yuborilgan</th>{% if not own %}<th class="w-36">Muallif</th>{% endif %}<th>Masala</th><th class="hidden w-28 text-center md:table-cell">Til</th><th class="w-44 text-center">Natija</th><th class="hidden w-20 text-center sm:table-cell">Vaqt</th><th class="hidden w-20 text-center md:table-cell">Xotira</th></tr></thead>
+    <thead><tr><th class="w-16 text-center sm:w-20">#</th><th class="hidden w-32 text-center sm:table-cell">Yuborilgan</th>{% if not own %}<th class="hidden w-36 sm:table-cell">Muallif</th>{% endif %}<th>Masala</th><th class="hidden w-28 text-center md:table-cell">Til</th><th class="w-28 text-center sm:w-44">Natija</th><th class="hidden w-20 text-center sm:table-cell">Vaqt</th><th class="hidden w-20 text-center md:table-cell">Xotira</th></tr></thead>
     <tbody>
     {% for s in subs %}
     <tr>
       <td class="text-center">{% if s.user_id == user.pk or user.is_staff %}<a class="ca-link tabular text-xs" href="{% url 'submissions:detail' s.pk %}" title="Kodni ko‘rish" aria-label="Urinish #{{ s.pk }} kodi">{{ s.pk|stringformat:"06d" }}</a>{% else %}<span class="tabular text-xs text-mute">{{ s.pk|stringformat:"06d" }}</span>{% endif %}</td>
       <td class="hidden text-center tabular text-mute sm:table-cell"><time datetime="{{ s.created|date:'c' }}">{{ s.created|date:"d.m.Y H:i" }}</time></td>
-      {% if not own %}<td class="max-w-0 truncate"><a class="ca-user-name{{ s.user.rating|lg }}" style="--tier: {{ s.user.rating|tier_color }}" href="{% url 'profile' s.user.username %}" translate="no">{{ s.user.username }}</a></td>{% endif %}
-      <td class="max-w-0 truncate"><a class="ca-link" href="{% url 'problems:detail' s.problem.slug %}">{{ s.problem.title }}</a></td>
+      {% if not own %}<td class="hidden max-w-0 truncate sm:table-cell"><a class="ca-user-name{{ s.user.rating|lg }}" style="--tier: {{ s.user.rating|tier_color }}" href="{% url 'profile' s.user.username %}" translate="no">{{ s.user.username }}</a></td>{% endif %}
+      <td class="max-w-0 truncate"><a class="ca-link" href="{% url 'problems:detail' s.problem.slug %}">{{ s.problem.title }}</a>
+        {% if not own %}<a class="ca-user-name{{ s.user.rating|lg }} block truncate text-xs sm:hidden" style="--tier: {{ s.user.rating|tier_color }}" href="{% url 'profile' s.user.username %}" translate="no">{{ s.user.username }}</a>{% endif %}</td>
       <td class="hidden text-center text-mute md:table-cell">{{ s.language.name }}</td>
-      <td class="text-center">{% include "submissions/_verdict.html" with v=s.verdict %}{% if s.total and s.verdict != "AC" %} <span class="tabular text-xs text-mute" title="O‘tgan testlar">{{ s.passed }}/{{ s.total }}</span>{% endif %}</td>
-      <td class="hidden text-center tabular text-mute sm:table-cell">{% if s.verdict == "AC" %}{{ s.exec_ms }} ms{% endif %}</td>
-      <td class="hidden text-center tabular text-mute md:table-cell">{% if s.verdict == "AC" and s.mem_kb %}{% widthratio s.mem_kb 1024 1 %} MB{% endif %}</td>
+      <td class="text-center">{% include "submissions/_verdict.html" with v=s.verdict sub=s brief=True %}</td>
+      {# time and memory for every judged run, as Codeforces shows them; a compile error never ran #}
+      <td class="hidden text-center tabular text-mute sm:table-cell">{% if s.is_terminal and s.verdict != "CE" %}{{ s.exec_ms }} ms{% endif %}</td>
+      <td class="hidden text-center tabular text-mute md:table-cell">{% if s.is_terminal and s.verdict != "CE" and s.mem_kb %}{% widthratio s.mem_kb 1024 1 %} MB{% endif %}</td>
     </tr>
     {% endfor %}
     </tbody>

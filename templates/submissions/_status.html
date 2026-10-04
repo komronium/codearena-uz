@@ -2,7 +2,7 @@
 <div data-verdict="{{ s.verdict }}" {% if not s.is_terminal %}hx-get="{% url 'submissions:status' s.pk %}{% if compact %}?compact=1{% endif %}" hx-trigger="every 1s" hx-swap="outerHTML"{% endif %}
      role="status" aria-live="polite" aria-busy="{% if not s.is_terminal %}true{% else %}false{% endif %}">
   <div class="flex flex-wrap items-center gap-3">
-    {% include "submissions/_verdict.html" with v=s.verdict %}
+    {% include "submissions/_verdict.html" with v=s.verdict sub=s %}
     {% if s.is_terminal and s.verdict != 'CE' %}
     <span class="tabular text-sm text-mute">{{ s.passed }}/{{ s.total }} test · {{ s.exec_ms }} ms{% if s.mem_kb %} · {% widthratio s.mem_kb 1024 1 %} MB{% endif %}</span>
     {% elif s.verdict == 'RUNNING' and progress %}

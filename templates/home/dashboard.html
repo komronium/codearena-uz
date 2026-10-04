@@ -90,7 +90,7 @@ your latest submissions); on the right your rating box, problems to try next, ro
           <td class="max-w-0 truncate"><a class="ca-link" href="{% url 'submissions:detail' s.pk %}">{{ s.problem.title }}</a></td>
           <td class="hidden text-center text-mute sm:table-cell">{{ s.language.name }}</td>
           <td class="text-center tabular text-mute"><time datetime="{{ s.created|date:'c' }}">{{ s.created|date:"d.m H:i" }}</time></td>
-          <td class="text-center">{% include "submissions/_verdict.html" with v=s.verdict %}</td>
+          <td class="text-center">{% include "submissions/_verdict.html" with v=s.verdict sub=s brief=True %}</td>
         </tr>
         {% endfor %}
         </tbody>

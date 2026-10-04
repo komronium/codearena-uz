@@ -120,7 +120,19 @@ def test_status_compact_poll_stays_compact(client, problem, python, user):
     compact = client.get(reverse("submissions:status", args=[s.pk]) + "?compact=1").content
     full = client.get(reverse("submissions:status", args=[s.pk])).content
     assert b"ca-test-WA" not in compact and b"ca-verdict-bad" in compact
+    assert "Noto‘g‘ri javob 1-testda" in compact.decode()  # Codeforces' "Wrong answer on test 1"
     assert b"ca-test-WA" in full
+
+
+def test_tables_print_the_verdict_code_and_keep_the_words_for_the_tooltip(client, problem, python, user):
+    Submission.objects.create(user=user, problem=problem, language=python, source="x", verdict="WA", passed=2, total=5)
+    Submission.objects.create(user=user, problem=problem, language=python, source="x", verdict="AC", passed=5, total=5)
+    client.force_login(user)
+    html = client.get(reverse("submissions:mine")).content.decode()
+    # the judge stops at the first failing test: 2 passed, so it fell on the 3rd
+    assert ('title="Noto‘g‘ri javob 3-testda"><span aria-hidden="true">WA<small>3</small></span>'
+            '<span class="sr-only">Noto‘g‘ri javob 3-testda</span>') in html
+    assert 'title="Qabul qilindi"><span aria-hidden="true">AC</span>' in html
 
 
 def test_ole_verdict_shows_as_output_limit(client, problem, python, user):
@@ -130,7 +142,8 @@ def test_ole_verdict_shows_as_output_limit(client, problem, python, user):
     TestResult.objects.create(submission=s, testcase=problem.testcases.first(), verdict="OLE")
     client.force_login(user)
     status = client.get(reverse("submissions:status", args=[s.pk])).content
-    assert b"ca-verdict-warn" in status and b"Output Limit" in status and b"ca-test-OLE" in status
+    assert b'ca-verdict-warn" title="OLE"' in status and "Chiqish juda katta" in status.decode()
+    assert b"ca-test-OLE" in status
     mine = client.get(reverse("submissions:mine") + "?verdict=OLE")
     assert list(mine.context["subs"]) == [s] and ("OLE", "Chiqish juda katta") in mine.context["verdicts"]
     detail = client.get(reverse("problems:detail", args=[problem.slug])).content

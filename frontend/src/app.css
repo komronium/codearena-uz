@@ -34,10 +34,10 @@
     --ca-accent-fill-rgb: 26 79 214;
     --ca-accent-fill-hover-rgb: 20 64 178;
     --ca-on-fill-rgb: 255 255 255;
-    --ca-ok-rgb: 10 122 62;            /* accepted, as text */
+    --ca-ok-rgb: 8 112 56;             /* accepted, as text: 4.5:1 even on its own 16% tint over a grey row */
     --ca-ok-fill-rgb: 14 128 66;       /* accepted, as a fill */
     --ca-bad-rgb: 197 34 31;
-    --ca-warn-rgb: 138 90 0;           /* amber, as text */
+    --ca-warn-rgb: 122 80 0;           /* amber, as text: 4.5:1 on its own tint over a box frame */
     --ca-info-rgb: 7 100 126;
     --ca-gold-rgb: 242 169 0;          /* medals, the streak; never text */
     --ca-clock-rgb: 229 57 53;         /* the round clock's progress line */
@@ -614,14 +614,17 @@ svg.lucide { width: 1.2em; height: 1.2em; display: inline-block; vertical-align:
 }
 .ca-alert-bad { box-shadow: inset 4px 0 0 rgb(var(--ca-bad-rgb)), var(--ca-shadow); color: rgb(var(--ca-bad-rgb)); }
 .ca-alert-warn { box-shadow: inset 4px 0 0 rgb(var(--ca-warn-rgb)), var(--ca-shadow); }
-/* verdicts as Codeforces prints them: coloured bold text, no pill */
-.ca-verdict { display: inline-flex; align-items: center; gap: .3rem; font-size: .8125rem; font-weight: 700; white-space: nowrap; }
+/* verdicts as tinted labels: green accepted, red a wrong answer or a crash, amber a broken limit, grey the rest.
+   The tint is mixed with the surface, not see-through, so on a striped or solved row the text keeps 4.5:1. */
+.ca-verdict { --v: var(--ca-mute-rgb); display: inline-flex; align-items: center; gap: .3rem; padding: .05rem .45rem;
+  border-radius: var(--ca-radius-sm); background: color-mix(in srgb, rgb(var(--v)) 11%, rgb(var(--ca-surface-rgb)));
+  color: rgb(var(--v)); font-size: .8125rem; font-weight: 600; line-height: 1.5; white-space: nowrap; }
 .ca-verdict svg.lucide { width: .9rem; height: .9rem; }
-.ca-verdict-ac { color: rgb(var(--ca-ok-rgb)); }
-.ca-verdict-bad { color: rgb(var(--ca-bad-rgb)); }
-.ca-verdict-warn { color: rgb(var(--ca-warn-rgb)); }
-.ca-verdict-mute { color: rgb(var(--ca-mute-rgb)); }
-.ca-verdict-pending { color: rgb(var(--ca-accent-rgb)); }
+.ca-verdict small { font-size: inherit; font-weight: 400; }  /* "WA3": the failing test after the code */
+.ca-verdict-ac { --v: var(--ca-ok-rgb); }
+.ca-verdict-bad { --v: var(--ca-bad-rgb); }
+.ca-verdict-warn { --v: var(--ca-warn-rgb); }
+@media (max-width: 639px) { .ca-table .ca-verdict { white-space: normal; } }
 .ca-verdict-pending.is-live::after {
   content: ""; width: .45rem; height: .45rem; border-radius: 50%;
   background: rgb(var(--ca-accent-rgb)); animation: ca-pulse 1.2s ease-in-out infinite;

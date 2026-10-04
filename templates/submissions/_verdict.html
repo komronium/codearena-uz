@@ -1,19 +1,7 @@
-{% if v == "AC" %}
-<span class="ca-verdict ca-verdict-ac" title="AC — Accepted"><i data-lucide="check" class="lu" aria-hidden="true"></i>To‘g‘ri</span>
-{% elif v == "WA" %}
-<span class="ca-verdict ca-verdict-bad" title="WA — Wrong Answer"><i data-lucide="x" class="lu" aria-hidden="true"></i>Noto‘g‘ri javob</span>
-{% elif v == "TLE" %}
-<span class="ca-verdict ca-verdict-warn" title="TL — Time Limit"><i data-lucide="clock" class="lu" aria-hidden="true"></i>Vaqt oshdi</span>
-{% elif v == "MLE" %}
-<span class="ca-verdict ca-verdict-warn" title="ML — Memory Limit"><i data-lucide="cpu" class="lu" aria-hidden="true"></i>Xotira oshdi</span>
-{% elif v == "OLE" %}
-<span class="ca-verdict ca-verdict-warn" title="OL — Output Limit"><i data-lucide="scissors" class="lu" aria-hidden="true"></i>Chiqish juda katta</span>
-{% elif v == "RE" %}
-<span class="ca-verdict ca-verdict-bad" title="RE — Runtime Error"><i data-lucide="triangle-alert" class="lu" aria-hidden="true"></i>Dastur xatosi</span>
-{% elif v == "CE" %}
-<span class="ca-verdict ca-verdict-mute" title="CE — Compile Error"><i data-lucide="code" class="lu" aria-hidden="true"></i>Kompilyatsiya xatosi</span>
-{% elif v == "RUNNING" %}
-<span class="ca-verdict ca-verdict-pending" title="Tekshirilmoqda"><i data-lucide="loader-circle" class="lu ca-spin" aria-hidden="true"></i>Tekshirilmoqda</span>
-{% else %}
-<span class="ca-verdict ca-verdict-pending" title="Navbatda"><i data-lucide="hourglass" class="lu" aria-hidden="true"></i>Navbatda</span>
-{% endif %}
+{% load verdicts %}{% comment %}A submission's verdict as a tinted label: green accepted, red a wrong answer or a crash, amber a broken
+limit, grey the rest. brief=True, for dense tables, prints the judge's code and the failing test ("WA3") and keeps
+the Uzbek words for the tooltip and screen readers; otherwise the words themselves ("Noto‘g‘ri javob 3-testda").
+sub= the submission gives the test number: the judge stops at the first failing test, so it is passed + 1.{% endcomment %}
+{% if v == "RUNNING" %}<span class="ca-verdict ca-verdict-pending"><i data-lucide="loader-circle" class="lu ca-spin" aria-hidden="true"></i>Tekshirilmoqda</span>
+{% elif v == "PENDING" or not v %}<span class="ca-verdict ca-verdict-pending"><i data-lucide="hourglass" class="lu" aria-hidden="true"></i>Navbatda</span>
+{% else %}{% with words=v|verdict_words n=sub.passed|add:1 %}<span class="ca-verdict ca-verdict-{% if v == 'AC' %}ac{% elif v == 'WA' or v == 'RE' %}bad{% elif v == 'TLE' or v == 'MLE' or v == 'OLE' %}warn{% else %}mute{% endif %}" title="{% if brief %}{{ words }}{% if sub.total and v != 'CE' and sub.passed < sub.total %} {{ n }}-testda{% endif %}{% else %}{{ v }}{% endif %}">{% if brief %}<span aria-hidden="true">{{ v }}{% if sub.total and v != 'CE' and sub.passed < sub.total %}<small>{{ n }}</small>{% endif %}</span><span class="sr-only">{{ words }}{% if sub.total and v != 'CE' and sub.passed < sub.total %} {{ n }}-testda{% endif %}</span>{% else %}{% if v == 'AC' %}<i data-lucide="check" class="lu" aria-hidden="true"></i>{% endif %}{{ words }}{% if sub.total and v != 'CE' and sub.passed < sub.total %} {{ n }}-testda{% endif %}{% endif %}</span>{% endwith %}{% endif %}
