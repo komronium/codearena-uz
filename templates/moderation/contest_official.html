@@ -19,7 +19,7 @@
   <li class="ca-row">
     <div class="ca-row-main">
       <div class="ca-row-title"><span class="tabular text-xs text-mute">#{{ r.rank }}</span>{% include "accounts/_user.html" with u=r.user tier=False %}</div>
-      <div class="ca-row-meta"><span class="tabular">{{ r.score }} ball</span>
+      <div class="ca-row-meta"><span class="tabular">{% if contest.type == "icpc" %}{{ r.solved }} ta masala{% else %}{{ r.score }} ball{% endif %}</span>
         <a class="ca-link" href="{% url 'moderation:submissions' %}?user={{ r.user.username|urlencode }}&contest={{ contest.pk }}">Kodlari</a>
         {% if r.participation.reviewed_at %}<span class="text-ok"><i data-lucide="check" class="lu" aria-hidden="true"></i>Tushuntirdi · {{ r.participation.reviewed_at|date:"d.m H:i" }}</span>{% else %}<span class="text-warn">Tekshirilmagan</span>{% endif %}
       </div>

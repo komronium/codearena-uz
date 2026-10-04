@@ -146,7 +146,7 @@ class _DateTimeLocal(forms.DateTimeInput):
 class ContestForm(ModelForm):
     class Meta:
         model = Contest
-        fields = ["title", "description_md", "start", "end", "is_rated", "division", "is_official", "review_top_n",
+        fields = ["title", "description_md", "start", "end", "type", "is_rated", "division", "is_official", "review_top_n",
                   "allowed_ip_prefix", "require_group"]
         widgets = {
             "title": forms.TextInput(attrs=_CA_INPUT),
@@ -157,12 +157,19 @@ class ContestForm(ModelForm):
             "review_top_n": forms.NumberInput(attrs={**_CA_INPUT, "min": 0, "max": 100}),
             "require_group": forms.Select(attrs={"class": "ca-select"}),
             "division": forms.Select(attrs={"class": "ca-select"}),
+            "type": forms.Select(attrs={"class": "ca-select"}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["review_top_n"].required = False
         self.fields["division"].required = False
+        self.fields["type"].required = False
+        if self.instance.pk is None:
+            self.initial.setdefault("type", Contest.Type.CF)  # new rounds run on Codeforces' rules
+        elif self.instance.has_started:
+            # the rules rank the board: switching them would reorder a contest already played
+            self.fields["type"].disabled = True
 
     def clean(self):
         data = super().clean()
@@ -176,6 +183,10 @@ class ContestForm(ModelForm):
         # left empty = the model default, not a validation error on an otherwise filled form
         value = self.cleaned_data.get("review_top_n")
         return 10 if value is None else value
+
+    def clean_type(self):
+        # left out (an older form) = the rules it has, Codeforces' for a new contest
+        return self.cleaned_data.get("type") or (self.instance.type if self.instance.pk else Contest.Type.CF)
 
     def clean_division(self):
         value = self.cleaned_data.get("division")

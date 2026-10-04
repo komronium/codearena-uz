@@ -2,8 +2,9 @@
 runs it re-fetches itself every 20 s (the view answers an htmx request with just this block);
 standings.html keeps the sideways scroll and the search across the swap, and skips a refresh
 while the table is being touched. The table follows Codeforces: a plain grid with striped rows,
-the handle in its tier colour, a solved cell as the problem's points in green over the solve time
-(hh:mm from the start), an unsolved one with tries as a grey −N, accepted / tried per problem last.{% endcomment %}
+the handle in its tier colour, a solved cell in green over the solve time (hh:mm from the start) —
+the points it earned, or ICPC's "+" with the wrong tries before it — an unsolved one with tries as
+a grey −N, accepted / tried per problem last. Codeforces rules have no penalty column.{% endcomment %}
 <div id="st-live"{% if contest.is_running %} hx-get="{% url 'contests:standings' contest.pk %}" hx-trigger="every 20s [window.caStIdle ? caStIdle() : !document.hidden]" hx-swap="outerHTML"{% endif %}>
 {% if my_row %}
 {# your line, always in view: rank, score, penalty and each problem at a glance #}
@@ -13,10 +14,10 @@ the handle in its tier colour, a solved cell as the problem's points in green ov
   {% else %}
   <span class="ca-st-mine-rank">#{{ my_row.rank }}<small>/ {{ rows|length }}</small></span>
   {% endif %}
-  <span><b class="tabular">{{ my_row.score }}</b> ball · <span class="text-mute">jarima</span> <b class="tabular">{{ my_row.penalty }}</b></span>
+  <span>{% if contest.type == "icpc" %}<b class="tabular">{{ my_row.solved }}</b> ta masala{% else %}<b class="tabular">{{ my_row.score }}</b> ball{% endif %}{% if contest.wrong_try_minutes is not None %} · <span class="text-mute">jarima</span> <b class="tabular">{{ my_row.penalty }}</b>{% endif %}</span>
   <span class="flex flex-wrap gap-x-3 gap-y-1">
     {% for cell in my_row.cells %}{% with cp=problems|slice:forloop.counter|last %}
-    <span class="ca-st-pill" title="{{ cp.label }}: {% if cell.solved %}yechilgan {{ cell.time }}{% elif cell.wrong %}{{ cell.wrong }} ta noto‘g‘ri urinish{% else %}urinish yo‘q{% endif %}">{{ cp.label }}{% if cell.solved %}<b class="ca-cf-ac">{{ cp.points }}</b>{% elif cell.wrong %}<b class="ca-cf-wa">−{{ cell.wrong }}</b>{% else %}<b class="text-line" aria-hidden="true">·</b>{% endif %}</span>
+    <span class="ca-st-pill" title="{{ cp.label }}: {% if cell.solved %}yechilgan {{ cell.time }}{% elif cell.wrong %}{{ cell.wrong }} ta noto‘g‘ri urinish{% else %}urinish yo‘q{% endif %}">{{ cp.label }}{% if cell.solved %}<b class="ca-cf-ac">{{ cell.mark }}</b>{% elif cell.wrong %}<b class="ca-cf-wa">−{{ cell.wrong }}</b>{% else %}<b class="text-line" aria-hidden="true">·</b>{% endif %}</span>
     {% endwith %}{% endfor %}
   </span>
 </div>
@@ -27,12 +28,12 @@ the handle in its tier colour, a solved cell as the problem's points in green ov
     <tr>
       <th class="ca-sticky ca-sticky-rank">#</th>
       <th class="ca-sticky ca-sticky-user !text-left">Ishtirokchi</th>
-      <th title="Ball">=</th>
-      <th title="AC daqiqasi + 20 × noto‘g‘ri urinish (yechilgan masalalar bo‘yicha)">Jarima</th>
+      <th title="{% if contest.type == 'icpc' %}Yechilgan masalalar{% else %}Ball{% endif %}">=</th>
+      {% if contest.wrong_try_minutes is not None %}<th title="AC daqiqasi + {{ contest.wrong_try_minutes }} × noto‘g‘ri urinish (yechilgan masalalar bo‘yicha)">Jarima</th>{% endif %}
       {% for cp in problems %}
       <th class="ca-st-prob">
         {% if contest.has_started and registered or contest.has_ended or contest.has_started and user.is_staff %}<a class="ca-st-label" href="{% url 'problems:detail' cp.problem.slug %}" title="{{ cp.problem.title }}">{{ cp.label }}</a>{% else %}<span class="ca-st-label">{{ cp.label }}</span>{% endif %}
-        <span class="ca-st-sub tabular">{{ cp.points }}</span>
+        {% if contest.type != "icpc" %}<span class="ca-st-sub tabular">{{ cp.points }}</span>{% endif %}
       </th>
       {% endfor %}
       {% if contest.rating_applied %}<th title="Reyting o‘zgarishi">Δ</th>{% endif %}
@@ -49,12 +50,12 @@ the handle in its tier colour, a solved cell as the problem's points in green ov
       {% elif r.out and contest.is_rated %}<span class="ca-tag ca-tag-out ml-1" title="{{ contest.get_division_display }}: natija reytingga ta’sir qilmaydi">tashqarida</span>{% endif %}
     </td>
     <td class="ca-st-score tabular">{{ r.score }}</td>
-    <td class="tabular text-mute">{{ r.penalty }}</td>
+    {% if contest.wrong_try_minutes is not None %}<td class="tabular text-mute">{{ r.penalty }}</td>{% endif %}
     {% for cell in r.cells %}
     <td class="ca-cell{% if cell.first %} ca-cell-first{% endif %}"{% if cell.solved %} title="{% if cell.first %}Birinchi bo‘lib yechdi: {% endif %}{{ cell.time }}{% if cell.wrong %}, {{ cell.wrong }} ta noto‘g‘ri urinishdan keyin{% endif %}"{% endif %}>
       {% if cell.first %}<span class="sr-only">birinchi bo‘lib yechdi,</span>{% endif %}
       {% if cell.solved %}
-        <span class="ca-cf-ac">{{ cell.points }}</span>
+        <span class="ca-cf-ac">{{ cell.mark }}</span>
         <span class="ca-cf-time">{{ cell.time }}</span>
       {% elif cell.wrong %}
         <span class="ca-cf-wa">−{{ cell.wrong }}</span>
@@ -81,7 +82,7 @@ the handle in its tier colour, a solved cell as the problem's points in green ov
     <tr>
       <td class="ca-sticky ca-sticky-rank"></td>
       <td class="ca-sticky ca-sticky-user !text-left" title="Yechganlar / urinib ko‘rganlar">Yechdi / urindi</td>
-      <td></td><td></td>
+      <td></td>{% if contest.wrong_try_minutes is not None %}<td></td>{% endif %}
       {% for cp in problems %}<td class="tabular" title="{{ cp.n_solved }} kishi yechdi, {{ cp.n_tried }} kishi urindi"><b class="ca-cf-ac !inline">{{ cp.n_solved }}</b>/{{ cp.n_tried }}</td>{% endfor %}
       {% if contest.rating_applied %}<td></td>{% endif %}
       {% if user.is_staff %}<td></td>{% endif %}
@@ -90,10 +91,12 @@ the handle in its tier colour, a solved cell as the problem's points in green ov
 </table>
 </div>
 <p class="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs text-mute" aria-label="Belgilar izohi">
-  <span><b class="ca-cf-ac !inline">300</b> — yechildi: masala balli, ostida vaqt (soat:daqiqa)</span>
+  {% if contest.type == "cf" %}<span><b class="ca-cf-ac !inline">488</b> — yechildi: olingan ball (vaqt o‘tishi va har xato −50 bilan kamayadi, kamida 30%), ostida vaqt</span>
+  {% elif contest.type == "icpc" %}<span><b class="ca-cf-ac !inline">+1</b> — yechildi, oldin 1 noto‘g‘ri urinish; ostida vaqt (soat:daqiqa)</span>
+  {% else %}<span><b class="ca-cf-ac !inline">300</b> — yechildi: masala balli, ostida vaqt (soat:daqiqa)</span>{% endif %}
   <span><b class="ca-cf-wa">−1</b> — 1 noto‘g‘ri urinish, hali yechilmagan</span>
   <span><span class="ca-cf-first-key" aria-hidden="true"></span> birinchi yechgan</span>
-  <span><b class="text-ink">Jarima</b> = yechish daqiqalari + 20 × noto‘g‘ri urinish</span>
+  {% if contest.wrong_try_minutes is not None %}<span><b class="text-ink">Jarima</b> = yechish daqiqalari + {{ contest.wrong_try_minutes }} × noto‘g‘ri urinish</span>{% endif %}
   {% if contest.division and contest.is_rated %}<span><span class="ca-tag ca-tag-out">tashqarida</span> — divizion diapazonidan tashqarida, reytingsiz</span>{% endif %}
   {% if contest.is_running %}<span class="ml-auto">Yangilandi: <span class="tabular">{% now "H:i:s" %}</span></span>{% endif %}
 </p>

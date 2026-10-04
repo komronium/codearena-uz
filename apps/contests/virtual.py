@@ -3,7 +3,7 @@ would have placed among the real participants. Unrated."""
 from apps.submissions.models import Submission
 
 from .models import ContestProblem, Participation, VirtualParticipation
-from .standings import PENALIZED, compute_standings, elapsed
+from .standings import cell, compute_standings, totals
 
 
 def start_refusal(user, contest) -> str:
@@ -29,24 +29,15 @@ def active_virtual_for(user, problem):
 
 
 def virtual_result(vp) -> dict:
-    """Score, penalty and cells like the standings, timed from the virtual start, and the
-    rank among the real, not disqualified participants."""
-    problems = list(vp.contest.contest_problems.select_related("problem"))
+    """Score, penalty and cells like the standings, by the contest's rules but timed from the
+    virtual start, and the rank among the real, not disqualified participants."""
+    contest = vp.contest
+    problems = list(contest.contest_problems.select_related("problem"))
     subs = list(Submission.objects.filter(virtual=vp).order_by("created", "id"))
-    score = penalty = 0
-    cells = []
-    for cp in problems:
-        mine = [s for s in subs if s.problem_id == cp.problem_id]
-        ac = next((s for s in mine if s.verdict == Submission.Verdict.AC), None)
-        wrong = sum(1 for s in mine if s.verdict in PENALIZED and (ac is None or s.created < ac.created))
-        if ac is None:
-            cells.append({"cp": cp, "solved": False, "wrong": wrong})
-            continue
-        minutes = int((ac.created - vp.start).total_seconds()) // 60
-        score += cp.points
-        penalty += minutes + 20 * wrong
-        cells.append({"cp": cp, "solved": True, "wrong": wrong, "time": elapsed(minutes)})
-    real = [r for r in compute_standings(vp.contest) if not r["disqualified"] and r["attempted"]]
+    cells = [{**cell(contest, cp, [s for s in subs if s.problem_id == cp.problem_id], vp.start), "cp": cp}
+             for cp in problems]
+    score, penalty, solved = totals(contest, cells)
+    real = [r for r in compute_standings(contest) if not r["disqualified"] and r["attempted"]]
     rank = 1 + sum(1 for r in real if (-r["score"], r["penalty"]) < (-score, penalty))
-    return {"score": score, "penalty": penalty, "cells": cells, "rank": rank, "field": len(real),
-            "running": vp.is_running, "end": vp.end}
+    return {"score": score, "penalty": penalty, "solved": solved, "cells": cells, "rank": rank,
+            "field": len(real), "running": vp.is_running, "end": vp.end}

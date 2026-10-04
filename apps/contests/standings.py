@@ -1,5 +1,7 @@
 from apps.submissions.models import Submission
 
+from .models import Contest
+
 # Only a judged wrong answer is a wrong try: compile errors and submissions still in
 # the queue cost no penalty and are not shown as tries.
 PENALIZED = {"WA", "TLE", "MLE", "RE", "OLE"}
@@ -10,10 +12,50 @@ def elapsed(minutes: int) -> str:
     return f"{minutes // 60:02d}:{minutes % 60:02d}"
 
 
+def counts_as_wrong(contest, sub) -> bool:
+    """A rejected try that costs. Codeforces' rules (cf and icpc) also forgive a failure on
+    test 1, the statement's example; points contests keep the rule they were played under."""
+    return sub.verdict in PENALIZED and (contest.type == Contest.Type.SCORE or sub.passed > 0)
+
+
+def problem_points(contest, points: int, minutes: int, wrong: int) -> int:
+    """What a solve is worth. Codeforces: max(0.3x, x - floor(120xt / 250d) - 50w), so the
+    value falls to 52% by the end of a contest of d minutes, each wrong try costs 50 and nothing
+    drops below 30%. ICPC counts solved problems; a points contest gives the full points."""
+    if contest.type == Contest.Type.CF:
+        d = max(1, int((contest.end - contest.start).total_seconds()) // 60)
+        return max(3 * points // 10, points - 120 * points * minutes // (250 * d) - 50 * wrong)
+    return 1 if contest.type == Contest.Type.ICPC else points
+
+
+def cell(contest, cp, subs, start) -> dict:
+    """One participant's cell for one problem, from their submissions to it (oldest first),
+    timed from `start`: the contest's, or a virtual run's."""
+    ac = next((s for s in subs if s.verdict == "AC"), None)
+    wrong = sum(1 for s in subs if (ac is None or s.created < ac.created) and counts_as_wrong(contest, s))
+    if ac is None:
+        return {"solved": False, "wrong": wrong, "minutes": None, "ac_at": None}
+    minutes = int((ac.created - start).total_seconds()) // 60
+    points = problem_points(contest, cp.points, minutes, wrong)
+    # what the board prints: ICPC marks a solve "+" with the wrong tries before it, the rest their points
+    mark = (f"+{wrong}" if wrong else "+") if contest.type == Contest.Type.ICPC else str(points)
+    return {"solved": True, "wrong": wrong, "minutes": minutes, "ac_at": ac.created,
+            "time": elapsed(minutes), "points": points, "mark": mark}
+
+
+def totals(contest, cells) -> tuple[int, int, int]:
+    """(score, penalty, solved) of one row. Penalty: minutes to each solve plus the contest's
+    minutes per wrong try before it; none under Codeforces rules, where tries cost points."""
+    solved = [c for c in cells if c["solved"]]
+    per_try = contest.wrong_try_minutes
+    penalty = 0 if per_try is None else sum(c["minutes"] + per_try * c["wrong"] for c in solved)
+    return sum(c["points"] for c in solved), penalty, len(solved)
+
+
 def compute_standings(contest):
-    """Score = sum of ContestProblem.points for solved problems; ties broken by
-    penalty = minutes to first AC + 20 * wrong attempts, over solved problems
-    (the ICPC rule). Equal points per problem reproduce plain ICPC ranking."""
+    """The board's rows, best first, by the contest's rules (Contest.Type): the higher score,
+    then the lower penalty. Under ICPC the score is the number solved; under Codeforces rules
+    the penalty is always 0, so equal points share a place."""
     problems = list(contest.contest_problems.select_related("problem"))
     participations = list(contest.participations.select_related("user"))
 
@@ -24,25 +66,9 @@ def compute_standings(contest):
 
     rows = []
     for p in participations:
-        solved = penalty = score = 0
-        last_ac = None
-        cells = []
-        for cp in problems:
-            subs = subs_by_user_problem.get((p.user_id, cp.id), [])
-            ac = next((s for s in subs if s.verdict == "AC"), None)
-            if ac is None:
-                wrong = sum(1 for s in subs if s.verdict in PENALIZED)
-                cells.append({"solved": False, "wrong": wrong, "minutes": None, "ac_at": None})
-                continue
-            wrong = sum(1 for s in subs if s.created < ac.created and s.verdict in PENALIZED)
-            minutes = int((ac.created - contest.start).total_seconds()) // 60
-            cells.append({"solved": True, "wrong": wrong, "minutes": minutes, "ac_at": ac.created,
-                          "time": elapsed(minutes), "points": cp.points})
-            solved += 1
-            score += cp.points
-            penalty += minutes + 20 * wrong
-            if last_ac is None or ac.created > last_ac:
-                last_ac = ac.created
+        cells = [cell(contest, cp, subs_by_user_problem.get((p.user_id, cp.id), []), contest.start)
+                 for cp in problems]
+        score, penalty, solved = totals(contest, cells)
         delta = None
         if p.rating_after is not None and p.rating_before is not None:
             delta = p.rating_after - p.rating_before
@@ -51,7 +77,7 @@ def compute_standings(contest):
         # was rated from once applied, so a later climb doesn't relabel an old result.
         out = not contest.rates(p.user.rating if p.rating_before is None else p.rating_before)
         rows.append({"participation": p, "user": p.user, "solved": solved, "penalty": penalty,
-                     "score": score, "last_ac": last_ac, "cells": cells, "rating_delta": delta,
+                     "score": score, "cells": cells, "rating_delta": delta,
                      "disqualified": p.disqualified, "attempted": attempted, "out": out})
 
     # Disqualified participants always sort below everyone else: they keep their cells

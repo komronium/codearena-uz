@@ -14,13 +14,13 @@ your mark, how many solved it); on the right your result, virtual participation 
     {% if problems and not contest.has_started %}
     {# sealed until start for everyone, staff included; staff edit problems in moderation #}
     <table class="ca-table">
-      <thead><tr><th class="w-12 text-center">#</th><th>Masala</th><th class="w-20 text-center">Ball</th></tr></thead>
+      <thead><tr><th class="w-12 text-center">#</th><th>Masala</th>{% if contest.type != "icpc" %}<th class="w-20 text-center">Ball</th>{% endif %}</tr></thead>
       <tbody>
       {% for cp in problems %}
       <tr>
         <td class="text-center"><span class="ca-prob-label">{{ cp.label }}</span></td>
         <td class="text-mute"><i data-lucide="lock-keyhole" class="lu mr-1" aria-hidden="true"></i>Musobaqa boshlanganda ochiladi</td>
-        <td class="text-center tabular">{{ cp.points }}</td>
+        {% if contest.type != "icpc" %}<td class="text-center tabular">{{ cp.points }}</td>{% endif %}
       </tr>
       {% endfor %}
       </tbody>
@@ -29,7 +29,7 @@ your mark, how many solved it); on the right your result, virtual participation 
     {% elif problems %}
     {% with open=registered|default:contest.has_ended|default:user.is_staff %}
     <table class="ca-table">
-      <thead><tr><th class="w-12 text-center">#</th><th>Masala</th><th class="w-20 text-center">Ball</th><th class="w-16 text-center">Siz</th><th class="w-24 text-center">Yechdi</th></tr></thead>
+      <thead><tr><th class="w-12 text-center">#</th><th>Masala</th>{% if contest.type != "icpc" %}<th class="w-20 text-center"{% if contest.type == "cf" %} title="Boshlang‘ich ball: vaqt o‘tishi bilan kamayadi"{% endif %}>Ball</th>{% endif %}<th class="w-16 text-center">Siz</th><th class="w-24 text-center">Yechdi</th></tr></thead>
       <tbody>
       {% for cp in problems %}
       <tr{% if cp.my_cell.solved %} class="ca-row-ac"{% elif cp.my_cell.wrong %} class="ca-row-wa"{% endif %}>
@@ -40,8 +40,8 @@ your mark, how many solved it); on the right your result, virtual participation 
             <span class="ca-limits">{{ cp.problem.tl_ms }} ms{% if cp.problem.kind != "sql" %}, {{ cp.problem.ml_mb }} MB{% endif %}</span>
           </div>
         </td>
-        <td class="text-center tabular">{{ cp.points }}</td>
-        <td class="text-center">{% if cp.my_cell.solved %}<span class="ca-cf-ac !inline" title="Yechilgan {{ cp.my_cell.time }}">+{% if cp.my_cell.wrong %}{{ cp.my_cell.wrong }}{% endif %}<span class="sr-only"> yechilgan</span></span>
+        {% if contest.type != "icpc" %}<td class="text-center tabular">{{ cp.points }}</td>{% endif %}
+        <td class="text-center">{% if cp.my_cell.solved %}<span class="ca-cf-ac !inline" title="Yechilgan {{ cp.my_cell.time }}">{% if contest.type == "cf" %}{{ cp.my_cell.points }}{% else %}+{% if cp.my_cell.wrong %}{{ cp.my_cell.wrong }}{% endif %}{% endif %}<span class="sr-only"> yechilgan</span></span>
           {% elif cp.my_cell.wrong %}<span class="ca-cf-wa" title="{{ cp.my_cell.wrong }} noto‘g‘ri urinish">−{{ cp.my_cell.wrong }}</span>{% endif %}</td>
         <td class="text-center"><span class="ca-n !ml-0" title="{{ cp.solved_count }} ishtirokchi yechdi"><i data-lucide="user" class="lu" aria-hidden="true"></i>x{{ cp.solved_count }}</span></td>
       </tr>
@@ -63,9 +63,9 @@ your mark, how many solved it); on the right your result, virtual participation 
     <div class="ca-box-body">
       <dl class="ca-facts">
         <div><dt>O‘rin</dt><dd><b>#{{ my_row.rank }}</b> <span class="text-mute">/ {{ n_participants }}</span></dd></div>
-        <div><dt>Ball</dt><dd><b>{{ my_row.score }}</b></dd></div>
+        {% if contest.type != "icpc" %}<div><dt>Ball</dt><dd><b>{{ my_row.score }}</b></dd></div>{% endif %}
         <div><dt>Yechilgan</dt><dd><b>{{ my_row.solved }}</b> <span class="text-mute">/ {{ problems|length }}</span></dd></div>
-        <div><dt>Jarima</dt><dd>{{ my_row.penalty }}</dd></div>
+        {% if contest.wrong_try_minutes is not None %}<div><dt>Jarima</dt><dd>{{ my_row.penalty }}</dd></div>{% endif %}
         {% if my_row.rating_delta is not None %}<div><dt>Reyting</dt><dd><b class="{% if my_row.rating_delta >= 0 %}text-ok{% else %}text-bad{% endif %}">{{ my_row.rating_delta|stringformat:"+d" }}</b></dd></div>{% endif %}
       </dl>
       <a class="ca-box-more ca-link" href="{% url 'contests:standings' contest.pk %}#me">Natijalar jadvalida »</a>
@@ -79,9 +79,9 @@ your mark, how many solved it); on the right your result, virtual participation 
       <small class="ca-box-tools">{% if virtual.running %}<span class="tabular font-semibold text-ok" data-countdown="{{ virtual.end|date:'c' }}" data-label="" data-suffix="1"></span>{% else %}tugagan{% endif %}</small></h2>
     <div class="ca-box-body ca-box-pad">
       <p>{% if virtual.running %}Vaqt siz boshlagan paytdan hisoblanadi. Hozirgi natija bilan siz{% else %}Siz{% endif %}
-        <b>{{ virtual.rank }}-o‘rin</b>da bo‘lardingiz ({{ virtual.field }} ishtirokchidan): ball <b class="tabular">{{ virtual.score }}</b>, jarima <b class="tabular">{{ virtual.penalty }}</b>.</p>
+        <b>{{ virtual.rank }}-o‘rin</b>da bo‘lardingiz ({{ virtual.field }} ishtirokchidan): {% if contest.type == "icpc" %}<b class="tabular">{{ virtual.solved }}</b> ta masala{% else %}ball <b class="tabular">{{ virtual.score }}</b>{% endif %}{% if contest.wrong_try_minutes is not None %}, jarima <b class="tabular">{{ virtual.penalty }}</b>{% endif %}.</p>
       <p class="mt-2 flex flex-wrap gap-x-3 gap-y-1">
-        {% for c in virtual.cells %}<span class="ca-st-pill" title="{{ c.cp.label }}: {% if c.solved %}yechilgan {{ c.time }}{% elif c.wrong %}{{ c.wrong }} ta noto‘g‘ri urinish{% else %}urinish yo‘q{% endif %}">{{ c.cp.label }}{% if c.solved %}<b class="ca-cf-ac">{{ c.cp.points }}</b>{% elif c.wrong %}<b class="ca-cf-wa">−{{ c.wrong }}</b>{% else %}<b class="text-line" aria-hidden="true">·</b>{% endif %}</span>{% endfor %}
+        {% for c in virtual.cells %}<span class="ca-st-pill" title="{{ c.cp.label }}: {% if c.solved %}yechilgan {{ c.time }}{% elif c.wrong %}{{ c.wrong }} ta noto‘g‘ri urinish{% else %}urinish yo‘q{% endif %}">{{ c.cp.label }}{% if c.solved %}<b class="ca-cf-ac">{{ c.mark }}</b>{% elif c.wrong %}<b class="ca-cf-wa">−{{ c.wrong }}</b>{% else %}<b class="text-line" aria-hidden="true">·</b>{% endif %}</span>{% endfor %}
       </p>
       {% if not virtual.running %}<p class="mt-2 text-xs text-mute">Reytingga ta’sir qilmaydi.</p>{% endif %}
     </div>
@@ -99,8 +99,17 @@ your mark, how many solved it); on the right your result, virtual participation 
   <section class="ca-box" aria-labelledby="rules-title">
     <h2 class="ca-box-cap" id="rules-title">Qoidalar</h2>
     <div class="ca-box-body ca-box-pad">
+      {% if contest.type == "cf" %}
+      <p>Codeforces qoidasi: ko‘p ball to‘plagan yutadi; ball teng bo‘lsa, o‘rin ham teng.</p>
+      <p class="mt-1.5 text-mute">Masala balli har daqiqa kamayadi va musobaqa oxirida boshlang‘ichning 52% iga tushadi. Har noto‘g‘ri urinish −50 ball, lekin ball 30% dan pastga tushmaydi.</p>
+      {% elif contest.type == "icpc" %}
+      <p>ICPC qoidasi: ko‘p masala yechgan yutadi; teng bo‘lsa — <b>jarimasi</b> kami.</p>
+      <p class="mt-1.5 text-mute">Jarima = har yechilgan masala uchun boshlanishdan o‘tgan daqiqalar + har noto‘g‘ri urinish uchun 10 daqiqa.</p>
+      {% else %}
       <p>Ko‘p ball to‘plagan yutadi; ball teng bo‘lsa — <b>jarimasi</b> kami.</p>
       <p class="mt-1.5 text-mute">Jarima = har yechilgan masala uchun boshlanishdan o‘tgan daqiqalar + har noto‘g‘ri urinish uchun 20 daqiqa.</p>
+      {% endif %}
+      {% if contest.type != "score" %}<p class="mt-1.5 text-mute">Kompilyatsiya xatosi va 1-testda (misolda) yiqilgan urinish hisobga olinmaydi.</p>{% endif %}
       {% if contest.division and contest.is_rated %}<p class="mt-1.5 text-mute">{{ contest.get_division_display }}: diapazondan tashqaridagilar ham qatnashadi, lekin reytingi o‘zgarmaydi.</p>{% endif %}
     </div>
   </section>

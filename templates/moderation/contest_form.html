@@ -57,7 +57,14 @@
   <aside class="space-y-6 lg:sticky lg:top-20">
     <section class="ca-panel space-y-4">
       <h3 class="ca-section-title !mb-0">Sozlamalar</h3>
-      <p class="text-xs text-mute">Masalalar ballari yig‘indisi ko‘p bo‘lgan yutadi; teng bo‘lsa jarima vaqti (AC daqiqasi + 20 × noto‘g‘ri urinish) kam bo‘lgan yuqori turadi.</p>
+      <div><label class="ca-label" for="{{ form.type.id_for_label }}">Qoidalar</label>{{ form.type }}
+        <ul class="mt-1.5 space-y-1 text-xs text-mute">
+          <li><b class="text-ink">Codeforces</b>: masala balli oxirigacha 52% ga tushadi, har xato −50, kamida 30%. Ballarni 500, 1000, 1500… qiling.</li>
+          <li><b class="text-ink">ICPC</b>: ko‘p yechgan yutadi, tenglikda jarima = daqiqalar + 10 × xato. Codeforces Div. 3/4 shunday.</li>
+          <li>Ikkalasida kompilyatsiya xatosi va 1-testdagi xato jarimasiz.</li>
+        </ul>
+        {% if form.type.field.disabled %}<p class="mt-1 text-xs text-warn">Musobaqa boshlangan: qoidani o‘zgartirib bo‘lmaydi.</p>{% endif %}
+        {% if form.type.errors %}<p class="mt-1 text-sm text-bad">{{ form.type.errors.0 }}</p>{% endif %}</div>
       <label class="flex items-center gap-2 text-sm">{{ form.is_rated }} Reytingli musobaqa</label>
       <div><label class="ca-label" for="{{ form.division.id_for_label }}">Divizion</label>{{ form.division }}
         <p class="mt-1 text-xs text-mute">Diapazondan tashqaridagilar ham qatnashadi, lekin reytingi o‘zgarmaydi.</p>

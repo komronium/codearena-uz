@@ -80,7 +80,7 @@
             <span class="ca-rank ca-rank-{{ p.rank }}" aria-label="{{ p.rank }}-o‘rin">{{ p.rank }}</span>
             <span class="ca-avatar ca-user-avatar h-7 w-7 text-xs ca-art-{{ p.user.rating|tier_slug }}" aria-hidden="true">{{ p.user.username|first }}</span>
             <a class="ca-user-name{{ p.user.rating|lg }}" href="{% url 'profile' p.user.username %}" translate="no">{{ p.user.username }}</a>
-            <span class="ml-auto tabular font-semibold">{{ p.score }} <small class="font-normal text-mute">ball</small></span>
+            <span class="ml-auto tabular font-semibold">{{ p.score }} <small class="font-normal text-mute">{% if last_rated.type == "icpc" %}ta masala{% else %}ball{% endif %}</small></span>
           </li>
           {% endfor %}
         </ol>

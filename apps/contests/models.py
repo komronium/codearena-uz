@@ -15,9 +15,12 @@ DIVISION_RANGE = {1: (1900, None), 2: (None, 1900), 3: (None, 1600), 4: (None, 1
 
 class Contest(models.Model):
     class Type(models.TextChoices):
-        # ponytail: single format kept as a field so old rows/migrations stay valid;
-        # ICPC was dropped — equal points per problem gives the same ranking.
-        SCORE = "score", "Ball"
+        # The contest's rules; apps.contests.standings ranks by them. Codeforces runs its own
+        # rules for Div. 1/2 rounds and ICPC for Div. 3/4; "score" is the original rule, kept
+        # for the contests played under it.
+        SCORE = "score", "Ball: to‘liq ball, tenglikda jarima"
+        CF = "cf", "Codeforces: ball vaqt bilan kamayadi"
+        ICPC = "icpc", "ICPC: yechilganlar soni va jarima"
 
     class Division(models.IntegerChoices):
         OPEN = 0, "Ochiq (hamma uchun)"
@@ -52,6 +55,12 @@ class Contest(models.Model):
 
     def __str__(self):
         return self.title
+
+    @property
+    def wrong_try_minutes(self) -> int | None:
+        """Penalty minutes per wrong try before a solve; None under Codeforces rules, where a
+        wrong try costs 50 points instead and there is no penalty."""
+        return {self.Type.SCORE: 20, self.Type.ICPC: 10}.get(self.type)
 
     def rates(self, rating: int) -> bool:
         """Whether a user with this shown rating competes officially (is rated) in this contest."""

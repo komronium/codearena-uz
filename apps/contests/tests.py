@@ -44,9 +44,9 @@ def contest(db, problem_a, problem_b):
     return c
 
 
-def _sub(user, problem, contest, python, verdict, minutes_after_start):
+def _sub(user, problem, contest, python, verdict, minutes_after_start, passed=0):
     s = Submission.objects.create(user=user, problem=problem, contest=contest, language=python,
-                                  source="x", verdict=verdict)
+                                  source="x", verdict=verdict, passed=passed)
     s.created = contest.start + timezone.timedelta(minutes=minutes_after_start)
     s.save(update_fields=["created"])
     return s
@@ -68,6 +68,72 @@ def test_ranks_by_score_then_penalty(contest, problem_a, problem_b, python):
     assert [r["user"] for r in rows] == [ali, bob]
     assert rows[0]["penalty"] == 10 and rows[0]["solved"] == 1
     assert rows[1]["penalty"] == 40 and rows[1]["solved"] == 1
+
+
+def _rules_contest(rules, minutes, problem_a, problem_b, users):
+    """An ended contest of `minutes` under `rules`, problems A (500) and B (1000), `users` in it."""
+    now = timezone.now()
+    c = Contest.objects.create(title=rules, type=rules, start=now - timezone.timedelta(minutes=minutes), end=now)
+    ContestProblem.objects.create(contest=c, problem=problem_a, label="A", order=0, points=500)
+    ContestProblem.objects.create(contest=c, problem=problem_b, label="B", order=1, points=1000)
+    people = [User.objects.create_user(name, password="x") for name in users]
+    for u in people:
+        Participation.objects.create(user=u, contest=c)
+    return c, people
+
+
+def test_codeforces_points_fall_with_time_and_wrong_tries(problem_a, problem_b, python):
+    """max(0.3x, x - floor(120xt / 250d) - 50w): a 500 solved at 00:04 of a 2.5-hour round is the
+    494 a Codeforces board shows; each counted wrong try costs 50; nothing drops below 30%."""
+    c, (ali, bob, cem) = _rules_contest(Contest.Type.CF, 150, problem_a, problem_b, ["ali", "bob", "cem"])
+    _sub(ali, problem_a, c, python, "AC", 4)
+    _sub(bob, problem_a, c, python, "WA", 1, passed=3)
+    _sub(bob, problem_a, c, python, "AC", 10)
+    for minute in range(7):
+        _sub(cem, problem_a, c, python, "WA", minute, passed=1)
+    _sub(cem, problem_a, c, python, "AC", 140)
+    rows = {r["user"]: r for r in compute_standings(c)}
+    assert rows[ali]["cells"][0]["points"] == 494
+    assert rows[bob]["cells"][0]["points"] == 500 - 16 - 50
+    assert rows[cem]["cells"][0]["points"] == 150
+    assert rows[ali]["score"] == 494 and rows[ali]["penalty"] == rows[bob]["penalty"] == 0
+
+
+def test_codeforces_forgives_test_1_and_compile_errors_and_ties_share_a_place(problem_a, problem_b, python):
+    c, (ali, bob) = _rules_contest(Contest.Type.CF, 120, problem_a, problem_b, ["ali", "bob"])
+    _sub(ali, problem_a, c, python, "WA", 1)  # failed test 1, the statement's example
+    _sub(ali, problem_a, c, python, "CE", 2)
+    _sub(ali, problem_a, c, python, "AC", 5)
+    _sub(bob, problem_a, c, python, "AC", 5)
+    rows = compute_standings(c)
+    assert [r["cells"][0]["wrong"] for r in rows] == [0, 0]
+    assert [(r["score"], r["rank"]) for r in rows] == [(490, 1), (490, 1)]
+
+
+def test_icpc_ranks_by_solved_then_penalty_of_10_minutes_a_try(problem_a, problem_b, python):
+    c, (ali, bob, cem) = _rules_contest(Contest.Type.ICPC, 120, problem_a, problem_b, ["ali", "bob", "cem"])
+    _sub(ali, problem_a, c, python, "AC", 50)
+    _sub(ali, problem_b, c, python, "AC", 60)
+    _sub(bob, problem_a, c, python, "AC", 15)
+    _sub(cem, problem_b, c, python, "WA", 1, passed=2)
+    _sub(cem, problem_b, c, python, "AC", 3)  # 3 + 10 = 13 < bob's 15; at 20 a try bob would lead
+    rows = compute_standings(c)
+    assert [(r["user"], r["score"], r["penalty"]) for r in rows] == [(ali, 2, 110), (cem, 1, 13), (bob, 1, 15)]
+    assert rows[1]["cells"][1]["mark"] == "+1" and rows[0]["cells"][0]["mark"] == "+"
+
+
+def test_board_shows_each_rules_columns(client, problem_a, problem_b, python):
+    cf, (ali,) = _rules_contest(Contest.Type.CF, 150, problem_a, problem_b, ["ali"])
+    _sub(ali, problem_a, cf, python, "AC", 4)
+    cache.clear()
+    html = client.get(reverse("contests:standings", args=[cf.pk])).content.decode()
+    assert 'class="ca-cf-ac">494</span>' in html and ">Jarima</th>" not in html
+
+    icpc, (bob,) = _rules_contest(Contest.Type.ICPC, 120, problem_a, problem_b, ["bob"])
+    _sub(bob, problem_a, icpc, python, "WA", 1, passed=1)
+    _sub(bob, problem_a, icpc, python, "AC", 7)
+    html = client.get(reverse("contests:standings", args=[icpc.pk])).content.decode()
+    assert 'class="ca-cf-ac">+1</span>' in html and ">Jarima</th>" in html
 
 
 def test_more_points_rank_above_lower_penalty(contest, problem_a, problem_b, python):

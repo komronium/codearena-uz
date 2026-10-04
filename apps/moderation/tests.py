@@ -186,6 +186,19 @@ def test_staff_can_edit_problem_and_toggle_visibility(client):
 
 
 @pytest.mark.django_db
+def test_contest_form_starts_on_codeforces_rules_and_locks_them_once_started():
+    from django.utils import timezone
+
+    from apps.contests.models import Contest
+    from apps.moderation.forms import ContestForm
+
+    assert ContestForm().initial["type"] == Contest.Type.CF
+    now = timezone.now()
+    started = Contest.objects.create(title="R", start=now - timezone.timedelta(minutes=5), end=now + timezone.timedelta(hours=1))
+    assert ContestForm(instance=started).fields["type"].disabled
+
+
+@pytest.mark.django_db
 def test_staff_can_create_contest_with_problems(client):
     from apps.contests.models import Contest
 

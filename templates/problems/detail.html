@@ -71,7 +71,7 @@
         <h1 class="ca-page-title">{% if contest_problem %}<span class="text-accent">{{ contest_problem.label }}.</span> {% endif %}{{ problem.title }}</h1>
         <div class="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-sm text-mute">
           {% if contest_problem %}
-          <span><i data-lucide="star" class="lu mr-1.5 text-warn" aria-hidden="true"></i><b class="tabular text-ink">{{ contest_problem.points }}</b> ball</span>
+          {% if contest.type != "icpc" %}<span{% if contest.type == "cf" %} title="Boshlang‘ich ball: vaqt o‘tishi va noto‘g‘ri urinishlar bilan kamayadi"{% endif %}><i data-lucide="star" class="lu mr-1.5 text-warn" aria-hidden="true"></i><b class="tabular text-ink">{{ contest_problem.points }}</b> ball</span>{% endif %}
           {% else %}
           <span class="ca-diff ca-diff-{{ problem.difficulty }}">{{ problem.get_difficulty_display }}</span>
           {% if voided == "held" %}
