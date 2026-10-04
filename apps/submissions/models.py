@@ -4,11 +4,15 @@ from django.db import models
 from apps.contests.models import Contest
 from apps.problems.models import Language, Problem, TestCase
 
-
 # What a learner reads instead of the judge's code (the code stays in the chip's tooltip).
 VERDICT_LABELS = {
-    "AC": "To‘g‘ri", "WA": "Noto‘g‘ri javob", "TLE": "Vaqt oshdi", "MLE": "Xotira oshdi",
-    "OLE": "Chiqish juda katta", "RE": "Dastur xatosi", "CE": "Kompilyatsiya xatosi",
+    "AC": "To‘g‘ri",
+    "WA": "Noto‘g‘ri javob",
+    "TLE": "Vaqt oshdi",
+    "MLE": "Xotira oshdi",
+    "OLE": "Chiqish juda katta",
+    "RE": "Dastur xatosi",
+    "CE": "Kompilyatsiya xatosi",
 }
 
 
@@ -26,9 +30,19 @@ class Submission(models.Model):
 
     TERMINAL = {"AC", "WA", "TLE", "MLE", "OLE", "RE", "CE"}
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="submissions")
-    problem = models.ForeignKey(Problem, on_delete=models.CASCADE, related_name="submissions")
-    contest = models.ForeignKey(Contest, null=True, blank=True, on_delete=models.SET_NULL, related_name="submissions")
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="submissions"
+    )
+    problem = models.ForeignKey(
+        Problem, on_delete=models.CASCADE, related_name="submissions"
+    )
+    contest = models.ForeignKey(
+        Contest,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="submissions",
+    )
     language = models.ForeignKey(Language, on_delete=models.PROTECT)
     source = models.TextField()
     # Contest telemetry (apps.integrity.evidence): the browser's random device id, the
@@ -37,9 +51,16 @@ class Submission(models.Model):
     ip = models.GenericIPAddressField(null=True, blank=True)
     tracker_seen_at = models.DateTimeField(null=True, blank=True)
     # Made during the user's virtual run of a past contest (apps.contests.virtual).
-    virtual = models.ForeignKey("contests.VirtualParticipation", null=True, blank=True, on_delete=models.SET_NULL,
-                                related_name="submissions")
-    verdict = models.CharField(max_length=8, choices=Verdict.choices, default=Verdict.PENDING)
+    virtual = models.ForeignKey(
+        "contests.VirtualParticipation",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="submissions",
+    )
+    verdict = models.CharField(
+        max_length=8, choices=Verdict.choices, default=Verdict.PENDING
+    )
     exec_ms = models.IntegerField(default=0)
     mem_kb = models.IntegerField(default=0)
     passed = models.IntegerField(default=0)
@@ -57,7 +78,9 @@ class Submission(models.Model):
 
 
 class TestResult(models.Model):
-    submission = models.ForeignKey(Submission, on_delete=models.CASCADE, related_name="results")
+    submission = models.ForeignKey(
+        Submission, on_delete=models.CASCADE, related_name="results"
+    )
     testcase = models.ForeignKey(TestCase, on_delete=models.CASCADE)
     verdict = models.CharField(max_length=8)
     exec_ms = models.IntegerField(default=0)
@@ -71,6 +94,7 @@ class TestResult(models.Model):
 class UserProblemSolved(models.Model):
     """Derived: the user's earliest eligible AC for the problem. Maintained by
     apps.submissions.solves.refresh_solves; practice points are computed from these rows."""
+
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     problem = models.ForeignKey(Problem, on_delete=models.CASCADE)
     first_ac_submission = models.ForeignKey(Submission, on_delete=models.CASCADE)
