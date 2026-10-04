@@ -14,6 +14,7 @@ urlpatterns = [
     path("<int:pk>/edit/", views.assignment_edit, name="edit"),
     path("review/<int:pk>/", views.review, name="review"),
     path("duels/", views.duel_list, name="duels"),
+    path("duels/people/", views.duel_people, name="duel_people"),
     path("duels/<int:pk>/", views.duel_detail, name="duel"),
     path("duels/<int:pk>/answer/", views.duel_answer, name="duel_answer"),
 ]

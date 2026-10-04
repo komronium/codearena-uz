@@ -5,14 +5,15 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
-from django.db.models import Q
-from django.http import Http404, HttpResponse, HttpResponseBadRequest
+from django.db.models import Case, IntegerField, Q, Value, When
+from django.http import Http404, HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from apps.accounts.models import Group, User
+from apps.accounts.tiers import tier_color
 from apps.submissions.models import Submission
 
 from . import duels
@@ -214,11 +215,30 @@ def duel_list(request):
         "levels": [{"value": v, "label": lbl, "joinable": joinable.get(v, 0)}
                    for v, lbl in Duel._meta.get_field("difficulty").choices],
         "form": request.POST if error else {},
-        # usernames are hard to remember: offer the people from your groups
-        "classmates": sorted(set(User.objects.filter(student_groups__in=request.user.student_groups.all(),
-                                                     is_active=True)
-                                 .exclude(pk=request.user.pk).values_list("username", flat=True)[:100])),
     })
+
+
+@login_required
+def duel_people(request):
+    """Who to challenge, for the duel form's finder (handles are hard to remember): with nothing typed your
+    classmates and the people you have duelled, else up to 8 active users whose handle holds the text, the
+    exact handle first, then those starting with it."""
+    q = request.GET.get("q", "").strip()[:30]
+    people = User.objects.filter(is_active=True).exclude(pk=request.user.pk)
+    mates = set(people.filter(student_groups__in=request.user.student_groups.all()).values_list("pk", flat=True))
+    if q:
+        found = (people.filter(username__icontains=q)
+                 .annotate(rank=Case(When(username__iexact=q, then=Value(0)),
+                                     When(username__istartswith=q, then=Value(1)),
+                                     default=Value(2), output_field=IntegerField()))
+                 .order_by("rank", "username")[:8])
+    else:
+        pairs = (Duel.objects.filter(Q(challenger=request.user) | Q(opponent=request.user), opponent__isnull=False)
+                 .order_by("-pk").values_list("challenger_id", "opponent_id")[:30])
+        rivals = {b if a == request.user.pk else a for a, b in pairs}
+        found = people.filter(pk__in=mates | rivals).order_by("username")[:8]
+    return JsonResponse({"results": [{"username": u.username, "color": tier_color(u.rating), "duel": u.duel_rating,
+                                      "mate": u.pk in mates} for u in found]})
 
 
 def _my_duel(request, pk):

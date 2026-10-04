@@ -27,11 +27,16 @@ The duel rating is its own Elo and never touches the contest rating.{% endcommen
 
     <form method="post" class="ca-box !mb-0" aria-labelledby="friend-title">{% csrf_token %}
       <h2 class="ca-box-cap" id="friend-title">Do‘stni chaqirish</h2>
-      <div class="ca-box-body ca-box-pad space-y-3">
+      {# overflow visible: the finder's list lies over what follows instead of scrolling inside the box #}
+      <div class="ca-box-body ca-box-pad space-y-3 !overflow-visible">
         <p class="text-mute">Masalani hoziroq yechasiz; do‘stingiz 3 kun ichida qabul qilsa, unga ham o‘sha masala beriladi.</p>
         <div class="grid gap-2 sm:grid-cols-[minmax(0,1fr)_9rem]">
-          <div><label class="sr-only" for="duel-opponent">Foydalanuvchi nomi</label><input id="duel-opponent" name="opponent" value="{{ form.opponent|default:'' }}" class="ca-input" required autocomplete="off" placeholder="{% if classmates %}guruhdosh yoki foydalanuvchi{% else %}foydalanuvchi nomi{% endif %}"{% if classmates %} list="classmates"{% endif %}>
-            {% if classmates %}<datalist id="classmates">{% for name in classmates %}<option value="{{ name }}">{% endfor %}</datalist>{% endif %}</div>
+          {# a finder: on focus your classmates and past rivals, typing searches every handle; a pick fills the field #}
+          <div class="relative" id="duel-finder"><label class="sr-only" for="duel-opponent">Raqib</label>
+            <i data-lucide="search" class="lu pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-mute" aria-hidden="true"></i>
+            <input id="duel-opponent" name="opponent" value="{{ form.opponent|default:'' }}" class="ca-input !pl-9" required autocomplete="off" placeholder="Raqibni qidiring" aria-describedby="duel-finder-help">
+            <span class="sr-only" id="duel-finder-help">Yozing yoki ro‘yxatdan tanlang; pastga strelka ro‘yxatga o‘tadi.</span>
+            <ul id="duel-hits" class="ca-picker-hits absolute inset-x-0 top-full z-20" aria-label="Topilgan foydalanuvchilar" hidden></ul></div>
           <div><label class="sr-only" for="duel-diff">Qiyinlik</label>
             <select id="duel-diff" name="difficulty" class="ca-select">{% for v, label in difficulties %}<option value="{{ v }}"{% if form.difficulty == v or not form.difficulty and v == "easy" %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
         </div>
@@ -126,4 +131,57 @@ The duel rating is its own Elo and never touches the contest rating.{% endcommen
   </section>
 </aside>
 </div>
+<script>
+(() => {
+  const input = document.getElementById("duel-opponent"), hits = document.getElementById("duel-hits");
+  let shown = [], timer;
+  const close = () => { hits.hidden = true; };
+  const pick = (name) => { input.value = name; close(); input.focus(); };
+  const render = (people) => {
+    shown = people;
+    hits.replaceChildren(...people.map((p) => {
+      const b = document.createElement("button"), name = document.createElement("span"), meta = document.createElement("span");
+      b.type = "button"; b.className = "ca-picker-hit";
+      name.className = "ca-user-name min-w-0 flex-1"; name.style.setProperty("--tier", p.color); name.translate = false; name.textContent = p.username;
+      meta.className = "tabular text-xs text-mute"; meta.textContent = (p.mate ? "guruhdosh · " : "") + `duel ${p.duel}`;
+      b.append(name, meta);
+      b.addEventListener("click", () => pick(p.username));
+      const li = document.createElement("li"); li.append(b);
+      return li;
+    }));
+    if (input.value.trim() && !people.length) {
+      const li = document.createElement("li"); li.className = "px-3 py-2 text-sm text-mute"; li.textContent = "Bunday foydalanuvchi topilmadi";
+      hits.append(li);
+    }
+    hits.hidden = !hits.children.length || document.activeElement !== input && !hits.contains(document.activeElement);
+  };
+  // without the list the field still takes a typed handle, and the server checks it
+  const search = () => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      const q = input.value.trim();
+      fetch(`{% url 'classroom:duel_people' %}?q=${encodeURIComponent(q)}`)
+        .then((r) => (r.ok ? r.json() : { results: [] }))
+        .then((data) => { if (q === input.value.trim()) render(data.results); })
+        .catch(close);
+    }, 150);
+  };
+  input.addEventListener("input", search);
+  // an empty field offers people on focus; a filled one (say, just picked) waits for typing
+  input.addEventListener("focus", () => { if (!input.value.trim()) search(); });
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowDown" && !hits.hidden) { e.preventDefault(); hits.querySelector("button")?.focus(); }
+    else if (e.key === "Enter" && !hits.hidden && shown.length) { e.preventDefault(); pick(shown[0].username); }
+    else if (e.key === "Escape") close();
+  });
+  hits.addEventListener("keydown", (e) => {
+    const items = [...hits.querySelectorAll("button")], i = items.indexOf(document.activeElement);
+    if (e.key === "ArrowDown") { e.preventDefault(); items[Math.min(i + 1, items.length - 1)]?.focus(); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); (items[i - 1] || input).focus(); }
+    else if (e.key === "Escape") { close(); input.focus(); }
+  });
+  document.addEventListener("click", (e) => { if (!e.target.closest("#duel-finder")) close(); });
+  document.addEventListener("focusin", (e) => { if (!e.target.closest("#duel-finder")) close(); });
+})();
+</script>
 {% endblock %}

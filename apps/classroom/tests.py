@@ -420,8 +420,23 @@ def test_duel_page_shows_each_run_from_its_own_start(client, duel_pool, python):
 
 
 @pytest.mark.django_db
-def test_challenge_form_suggests_classmates(client, klass):
+def test_duel_finder_offers_classmates_and_rivals_then_searches_every_handle(client, klass):
+    from .models import Duel
+
+    url = reverse("classroom:duel_people")
+    assert client.get(url).status_code == 302  # signed-in users only
     ali = User.objects.get(username="ali")
     client.force_login(ali)
-    names = client.get(reverse("classroom:duels")).context["classmates"]
-    assert sorted(names) == ["sami", "vali"]  # the group, minus yourself; the teacher isn't a member
+
+    def found(q=""):
+        return [(p["username"], p["mate"]) for p in client.get(url, {"q": q}).json()["results"]]
+
+    assert found() == [("sami", True), ("vali", True)]  # the group, minus yourself; the teacher isn't a member
+    Duel.objects.create(challenger=User.objects.create_user("bob", password="x"), opponent=ali, difficulty="easy")
+    assert found() == [("bob", False), ("sami", True), ("vali", True)]  # and whoever you have duelled
+    User.objects.create_user("valijon", password="x")
+    User.objects.create_user("avali", password="x")
+    User.objects.create_user("vali2", password="x", is_active=False)
+    # the exact handle, then those starting with it, then the rest; never a blocked user or yourself
+    assert [name for name, _ in found("VALI")] == ["vali", "valijon", "avali"]
+    assert "ali" not in [name for name, _ in found("ali")]
