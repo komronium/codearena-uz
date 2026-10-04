@@ -1,3 +1,4 @@
+from datetime import timedelta
 from io import StringIO
 from unittest.mock import patch
 
@@ -1047,6 +1048,22 @@ def test_add_class_contests_creates_two_contests_with_hidden_problems_once():
     assert all(p.testcases.filter(is_sample=True).count() == 2 for p in problems)
     assert all(p.testcases.count() >= 20 for p in problems.filter(slug__startswith="ca4-"))
 
+
+
+@pytest.mark.django_db
+def test_add_codearena_weekend_1_attaches_seven_hidden_problems_with_cf_points_once():
+    User.objects.create_superuser("admin", password="x")
+    start = timezone.now() + timedelta(hours=3)
+    c = Contest.objects.create(title="CodeArena Weekend #1", start=start, end=start + timedelta(hours=3),
+                               type=Contest.Type.CF)
+    call_command("add_codearena_weekend_1", stdout=StringIO())
+    call_command("add_codearena_weekend_1", stdout=StringIO())  # re-run: nothing new
+    cps = list(c.contest_problems.select_related("problem"))
+    assert [(cp.label, cp.points) for cp in cps] == [
+        ("A", 500), ("B", 500), ("C", 500), ("D", 750), ("E", 1000), ("F", 1000), ("G", 1250)]
+    assert [cp.problem.difficulty for cp in cps] == ["beginner"] * 3 + ["easy"] * 3 + ["medium"]
+    assert not any(cp.problem.is_public for cp in cps)
+    assert all(cp.problem.testcases.filter(is_sample=True).count() == 2 for cp in cps)
 
 # ---- official rating ------------------------------------------------------------------------------
 

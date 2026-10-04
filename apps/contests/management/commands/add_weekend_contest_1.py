@@ -336,7 +336,6 @@ class Command(BaseCommand):
             return
         if label in taken:
             raise CommandError(f"Musobaqada {label} yorlig'i band. Avval musobaqadagi masalalarni tozalang.")
-        ContestProblem.objects.create(contest=contest, problem=problem, label=label, order=order,
-                                      points=POINTS[spec["difficulty"]])
-        self.stdout.write(f"  {label}. {problem.title} ({problem.get_difficulty_display()}, "
-                          f"{POINTS[spec['difficulty']]} ball): {note}")
+        points = spec.get("points", POINTS[spec["difficulty"]])  # a Codeforces-rules contest sets its own
+        ContestProblem.objects.create(contest=contest, problem=problem, label=label, order=order, points=points)
+        self.stdout.write(f"  {label}. {problem.title} ({problem.get_difficulty_display()}, {points} ball): {note}")
