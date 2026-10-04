@@ -207,9 +207,14 @@ def ask_clarification(request, pk):
     question = request.POST.get("question", "").strip()
     if not question or len(question) > 2000:
         return HttpResponseBadRequest("question empty or too long")
-    Clarification.objects.create(
-        contest=contest, problem_id=request.POST.get("problem_id") or None,
-        user=request.user, question=question)
+    problem = None
+    if problem_id := request.POST.get("problem_id", ""):
+        # Only a problem of this round, and only once it has started (titles are secret before).
+        if problem_id.isdigit() and contest.has_started:
+            problem = contest.contest_problems.filter(pk=problem_id).first()
+        if problem is None:
+            return HttpResponseBadRequest("unknown problem")
+    Clarification.objects.create(contest=contest, problem=problem, user=request.user, question=question)
     return redirect("contests:clarifications", pk=pk)
 
 

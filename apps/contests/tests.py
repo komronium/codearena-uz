@@ -509,6 +509,22 @@ def test_ask_clarification_rejects_non_participant(client, contest):
 
 
 @pytest.mark.django_db
+def test_ask_clarification_takes_only_a_problem_of_this_contest(client, contest, problem_a):
+    other = Contest.objects.create(title="Other", start=contest.start, end=contest.end)
+    foreign = ContestProblem.objects.create(contest=other, problem=problem_a, label="A")
+    user = User.objects.create_user("ali", password="x")
+    Participation.objects.create(user=user, contest=contest)
+    client.force_login(user)
+    url = reverse("contests:ask_clarification", args=[contest.pk])
+    for bad in (str(foreign.pk), "abc"):
+        assert client.post(url, {"question": "?", "problem_id": bad}).status_code == 400
+    assert not Clarification.objects.exists()
+    own = contest.contest_problems.get(label="B")
+    assert client.post(url, {"question": "?", "problem_id": str(own.pk)}).status_code == 302
+    assert Clarification.objects.get().problem == own
+
+
+@pytest.mark.django_db
 def test_ask_clarification_rejects_after_contest_end(client, problem_a):
     ended = Contest.objects.create(title="Past", start=timezone.now() - timezone.timedelta(hours=2),
                                    end=timezone.now() - timezone.timedelta(hours=1))
