@@ -209,3 +209,12 @@ def test_home_strip_and_nav_point_at_the_contest_you_are_in(client):
     assert live_contest_for(me)["count"] == 2
     with patch("apps.home.context_processors.timezone.now", return_value=starts_soon.start + timedelta(seconds=1)):
         assert live_contest_for(me)["count"] == 3
+
+
+def test_server_error_page_renders_without_any_context():
+    """Django renders 500.html with no request or context processors: the brand mark include must still work."""
+    from django.template.loader import render_to_string
+
+    html = render_to_string("500.html")
+    assert "Serverda xatolik" in html and 'class="ca-brand-star"' in html
+
