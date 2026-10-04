@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ contest.title }}{% endblock %}
+{% block description %}{{ contest.title }} — {% if contest.is_rated %}reytingli {% endif %}dasturlash musobaqasi: {{ contest.start|date:'d.m.Y H:i' }}, {{ contest.duration_label }}{% if problems %}, {{ problems|length }} ta masala{% endif %}. Masalalar, natijalar va qoidalar.{% endblock %}
 {% block band %}{% include "contests/_band.html" with active="overview" %}{% endblock %}
 {% block content %}
 {% comment %}After Codeforces' contest page: the problems as one boxed table (letter, name and limits, points,

@@ -1,6 +1,8 @@
 """/ : what to do next for a signed-in student, what CodeArena is for a guest."""
 from django.db.models import Count, Q
+from django.http import HttpResponse
 from django.shortcuts import render
+from django.urls import reverse
 from django.utils import timezone
 
 from apps.accounts.models import User
@@ -99,3 +101,15 @@ def home(request):
         "taught": list(Assignment.objects.filter(group__teacher=user).select_related("group")
                        .order_by("-deadline")[:3]),
     })
+
+
+# staff tools, personal pages, sign-in plumbing and htmx/JSON endpoints: nothing a search should land on
+_NOT_FOR_CRAWLERS = ["/moderation/", "/integrity/", "/submissions/", "/classroom/", "/django-rq/",
+                     "/accounts/profile/edit/", "/accounts/password-", "/accounts/reset/", "/accounts/verify/",
+                     "/accounts/logout/", "/accounts/teacher-request/", "/problems/suggest/", "/learn/search/"]
+
+
+def robots_txt(request):
+    lines = ["User-agent: *", *(f"Disallow: {path}" for path in _NOT_FOR_CRAWLERS),
+             f"Sitemap: {request.build_absolute_uri(reverse('sitemap'))}"]
+    return HttpResponse("\n".join(lines) + "\n", content_type="text/plain")

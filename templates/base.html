@@ -1,4 +1,4 @@
-{% load static tiers %}
+{% load static tiers seo %}
 <!doctype html>
 <html lang="uz" class="h-full">
 <head>
@@ -8,7 +8,19 @@
   <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#151921" media="(prefers-color-scheme: dark)">
   <link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
-  <title>{% block title %}CodeArena{% endblock %}</title>
+  <title>{% block head_title %}{% block title %}CodeArena{% endblock %} — CodeArena{% endblock %}</title>
+  {# search results and link previews (Telegram, Facebook); og:title and og:description fall back to these two #}
+  <meta name="description" content="{% block description %}O‘zbek tilida dasturlash: masalalar yeching, mavzulab kurslarda o‘rganing, reytingli musobaqalarda bellashing. Kodingiz serverda shu zahoti testlanadi.{% endblock %}">
+  {% canonical_url as canonical %}{% static 'img/og.png' as og_image %}
+  <link rel="canonical" href="{{ canonical }}">
+  <meta property="og:site_name" content="CodeArena">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="uz_UZ">
+  <meta property="og:url" content="{{ canonical }}">
+  <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ og_image }}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <link rel="preload" href="{% static 'fonts/inter-latin-wght-normal.woff2' %}" as="font" type="font/woff2" crossorigin>
   <script>
     try { const t = localStorage.getItem("ca-theme"); if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch {}
   </script>

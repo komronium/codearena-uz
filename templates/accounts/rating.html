@@ -1,5 +1,6 @@
 {% extends "base.html" %}{% load tiers %}
 {% block title %}Reyting{% endblock %}
+{% block description %}CodeArena musobaqa reytingi: {{ total }} ishtirokchi, Elo bo‘yicha o‘rinlar va darajalar.{% endblock %}
 {% block page_title %}<h1>Reyting</h1><span class="ca-topbar-sub">{{ total }} ishtirokchi · reytingli musobaqalar natijasi bo‘yicha</span>{% endblock %}
 {% block content %}
 {% comment %}After Codeforces' rating page: one boxed table, handles and ratings in their tier colour, equal

@@ -218,3 +218,51 @@ def test_server_error_page_renders_without_any_context():
     html = render_to_string("500.html")
     assert "Serverda xatolik" in html and 'class="ca-brand-star"' in html
 
+
+@pytest.mark.django_db
+def test_robots_keep_crawlers_out_of_staff_and_personal_pages_and_name_the_sitemap(client):
+    r = client.get("/robots.txt")
+    assert r.status_code == 200 and r["Content-Type"].startswith("text/plain")
+    body = r.content.decode()
+    assert "Disallow: /moderation/" in body and "Disallow: /submissions/" in body
+    assert "Sitemap: http://testserver/sitemap.xml" in body
+
+
+@pytest.mark.django_db
+def test_sitemap_lists_only_what_a_guest_can_open(client, world):
+    from apps.contests.models import ContestProblem
+    from apps.learn.models import StudyPlan
+
+    open_problem, hidden, sealed, _ = world
+    hidden.is_public = False
+    hidden.save()
+    upcoming = Contest.objects.get(title="Keyingi raund")
+    ContestProblem.objects.create(contest=upcoming, problem=sealed, label="A")  # not before the start
+    StudyPlan.objects.create(slug="sikllar", title="Sikllar", is_public=True)
+    StudyPlan.objects.create(slug="qoralama", title="Qoralama")
+    teacher = User.objects.create_user("ustoz-sm", password="x")
+    own = Contest.objects.create(title="Guruh raundi", start=timezone.now(), end=timezone.now(),
+                                 require_group=Group.objects.create(name="G", teacher=teacher))
+
+    body = client.get("/sitemap.xml").content.decode()
+    assert "/problems/p0/" in body and "/problems/p1/" not in body and "/problems/p2/" not in body
+    assert "/learn/sikllar/" in body and "/learn/qoralama/" not in body
+    assert f"/contests/{upcoming.pk}/" in body and f"/contests/{own.pk}/" not in body
+
+
+@pytest.mark.django_db
+def test_head_names_the_page_for_search_and_link_previews(client, world):
+    p = world[0]
+    p.statement_md = 'Agar son juft bo‘lsa, "HA" chiqaring.\n\n**Cheklov:** 1 < n'
+    p.save()
+    page = client.get(reverse("problems:detail", args=[p.slug])).content.decode()
+    assert f"<title>{p.title} — CodeArena</title>" in page
+    # the statement as plain text, escaped once
+    assert '<meta name="description" content="Agar son juft bo‘lsa, &quot;HA&quot; chiqaring. Cheklov: 1 &lt; n">' in page
+    assert f'<link rel="canonical" href="http://testserver/problems/{p.slug}/">' in page
+    assert 'property="og:image" content="http://testserver/static/img/og.png"' in page
+    # filters fold into the list itself; a plain list keeps its page
+    listing = reverse("problems:list")
+    assert f'rel="canonical" href="http://testserver{listing}"' in client.get(listing + "?tag=x&page=2").content.decode()
+    assert f'rel="canonical" href="http://testserver{listing}?page=2"' in client.get(listing + "?page=2").content.decode()
+

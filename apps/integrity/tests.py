@@ -669,7 +669,8 @@ def test_practice_editor_locks_long_paste_on_easy_only_and_says_so(client):
     assert "const locked = true" in easy_page and "uzun kod qo‘yish yopiq" in easy_page
     hard_page = client.get(reverse("problems:detail", args=[hard.slug])).content.decode()
     assert "const locked = false" in hard_page and "o‘qituvchi ko‘radi" in hard_page
-    assert "<title>Vazifalar</title>" in client.get(reverse("classroom:list")).content.decode()
+    # the page's name and the site's, nothing else (its copy-code script once landed inside <title>)
+    assert "<title>Vazifalar — CodeArena</title>" in client.get(reverse("classroom:list")).content.decode()
 
 
 @pytest.mark.django_db

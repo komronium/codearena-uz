@@ -1,5 +1,6 @@
-{% extends "base.html" %}
+{% extends "base.html" %}{% load seo %}
 {% block title %}{{ plan.title }} — kurs{% endblock %}
+{% block description %}{% if plan.summary %}{{ plan.summary }}{% else %}{{ theory_html|plain }}{% endif %}{% endblock %}
 {% block content %}
 <a class="ca-link mb-4 inline-block text-sm text-mute" href="{% url 'learn:hub' %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>Kurslar</a>
 

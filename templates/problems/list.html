@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load pagination daily tiers %}
 {% block title %}Masalalar{% endblock %}
+{% block description %}{{ total }} ta dasturlash masalasi: boshlang‘ichdan qiyingacha, mavzular bo‘yicha. Yeching — kodingiz serverda shu zahoti testlanadi.{% endblock %}
 {% block page_title %}<h1>Masalalar</h1><span class="ca-topbar-sub">{{ total }} ta ochiq{% if progress %} · <b class="font-semibold text-ink">{{ progress.done }}</b> tasi yechilgan{% endif %}</span>{% endblock %}
 {% block content %}
 {% comment %}After Codeforces' problemset: one boxed table (your mark, number, name with its topics on the

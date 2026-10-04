@@ -1,5 +1,6 @@
 {% extends "base.html" %}{% load tiers %}
 {% block title %}{{ contest.title }} — Natijalar{% endblock %}
+{% block description %}{{ contest.title }} natijalari: o‘rinlar, ballar va har bir masala bo‘yicha urinishlar.{% endblock %}
 
 {% block band %}{% include "contests/_band.html" with active="scoreboard" n_participants=rows|length %}{% endblock %}
 {% block content %}

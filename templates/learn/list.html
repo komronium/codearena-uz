@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ lst.name }} — ro‘yxat{% endblock %}
+{% block description %}«{{ lst.name }}» — {{ lst.owner.username }} tuzgan {{ rows|length }} ta masalalik ro‘yxat.{% endblock %}
 {% block content %}
 <header class="mb-6">
   {% if is_owner %}<a class="ca-link mb-3 inline-block text-sm text-mute" href="{% url 'learn:lists' %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>Ro‘yxatlarim</a>{% endif %}

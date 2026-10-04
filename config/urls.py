@@ -1,8 +1,10 @@
 from django.conf import settings
+from django.contrib.sitemaps.views import sitemap
 from django.urls import include, path, re_path
 from django.views.static import serve
 
-from apps.home.views import home
+from apps.home.sitemaps import SITEMAPS
+from apps.home.views import home, robots_txt
 
 urlpatterns = [
     path("django-rq/", include("django_rq.urls")),
@@ -14,6 +16,8 @@ urlpatterns = [
     path("moderation/", include("apps.moderation.urls")),
     path("classroom/", include("apps.classroom.urls")),
     path("learn/", include("apps.learn.urls")),
+    path("robots.txt", robots_txt, name="robots"),
+    path("sitemap.xml", sitemap, {"sitemaps": SITEMAPS}, name="sitemap"),
     path("", home, name="home"),
 ]
 

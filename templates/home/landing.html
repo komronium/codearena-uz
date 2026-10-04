@@ -1,5 +1,6 @@
 {% extends "base.html" %}{% load numbers tiers %}
-{% block title %}CodeArena — dasturlashni musobaqada o‘rganing{% endblock %}
+{% block head_title %}CodeArena — dasturlashni musobaqada o‘rganing{% endblock %}
+{% block head %}<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebSite", "name": "CodeArena", "url": "{{ request.scheme }}://{{ request.get_host }}/"}</script>{% endblock %}
 
 {% block content %}
 <section class="ca-hero" aria-labelledby="hero-title">

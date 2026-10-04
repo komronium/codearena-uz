@@ -13,6 +13,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.sitemaps",
     "django_rq",
     "apps.accounts.apps.AccountsConfig",
     "apps.problems.apps.ProblemsConfig",
@@ -22,6 +23,7 @@ INSTALLED_APPS = [
     "apps.moderation.apps.ModerationConfig",
     "apps.classroom.apps.ClassroomConfig",
     "apps.learn.apps.LearnConfig",
+    "apps.home",  # no models: the front page, sitemap and the head tags' template filters
 ]
 
 MIDDLEWARE = [
