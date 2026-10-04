@@ -1,4 +1,5 @@
-"""CodeArena Weekend #1 (Codeforces rules): seven hidden problems, 3 Beginner, 3 Easy, 1 Medium, on
+"""CodeArena Weekend #1 (Codeforces rules): seven hidden problems, 3 Beginner (two of them for someone
+who has just started), 3 Easy, 1 Medium, on
 input/output, if, for and arithmetic, attached to the existing contest as A..G with CF-scale points.
 None repeats a problem already on the portal.
 
@@ -20,28 +21,30 @@ def _uniq(inputs):
     return list(dict.fromkeys(inputs))
 
 
-# ---- A. Beginner: metro kartasi ----------------------------------------------------------
+# ---- A. Beginner: metro safari ---------------------------------------------------------
 def metro_solve(inp):
     b, p, n = map(int, inp.split())
-    return _lines(max(0, n * p - b))
+    return _lines(b - n * p)
 
 
 def metro_tests(rng):
-    tests = ["5000 1700 4", "10000 1700 5", "8500 1700 5", "0 1 1", "1000000 10000 100", "0 10000 100",
-             "1700 1700 1", "1699 1700 1"]
-    tests += [f"{rng.randint(0, 10**6)} {rng.randint(1, 10**4)} {rng.randint(1, 100)}" for _ in range(14)]
+    tests = ["10000 1700 4", "5000 1700 2", "1700 1700 1", "1000000 1 1", "1000000 10000 100", "0 1 0",
+             "500 100 5", "999999 3 333333"]
+    for _ in range(14):
+        p, n = rng.randint(1, 10**4), rng.randint(0, 100)
+        tests.append(f"{rng.randint(n * p, 10**6)} {p} {n}")  # n * p <= 10**6 always
     return _uniq(tests)
 
 
 # ---- B. Beginner: stadion ----------------------------------------------------------------
 def stadion_solve(inp):
     lap, d = map(int, inp.split())
-    return _lines(f"{d // lap} {d % lap}")
+    return _lines(d // lap)
 
 
 def stadion_tests(rng):
-    tests = ["400 1000", "400 1200", "400 0", "400 399", "1 1000000000", "1000 1000000000", "1000 999", "7 50"]
-    tests += [f"{rng.randint(1, 1000)} {rng.randint(0, rng.choice([1000, 10**6, 10**9]))}" for _ in range(14)]
+    tests = ["400 1000", "400 1200", "400 0", "400 399", "1 1000000", "1000 1000000", "1000 999", "7 50"]
+    tests += [f"{rng.randint(1, 1000)} {rng.randint(0, rng.choice([1000, 10**5, 10**6]))}" for _ in range(14)]
     return _uniq(tests)
 
 
@@ -123,21 +126,23 @@ def chipta_tests(rng):
 
 PROBLEMS = [
     {
-        "slug": "caw1-metro-kartasi", "title": "Metro kartasi", "difficulty": "beginner", "points": 500,
+        "slug": "caw1-metro-safari", "title": "Metro safari", "difficulty": "beginner", "points": 250,
         "tags": ["input-output", "arithmetic"], "solve": metro_solve, "tests": metro_tests, "samples": 2,
-        "statement": ("Metro kartasida $b$ so‘m bor. Bir safar $p$ so‘m turadi. Bu hafta metroda $n$ marta yurish "
-                      "kerak. Kartaga kamida qancha pul solish kerak? Pul yetsa, hech narsa solish shart emas."),
+        "statement": ("Metro kartasida $b$ so‘m bor. Bir safar $p$ so‘m turadi. Ali metroda $n$ marta yurdi. "
+                      "Kartada qancha pul qoldi?"),
         "input": ("Bitta qatorda uchta butun son: $b$, $p$, $n$ "
-                  "($0 \\le b \\le 10^6$, $1 \\le p \\le 10^4$, $1 \\le n \\le 100$)."),
-        "output": "Solinishi kerak bo‘lgan eng kam summa (pul yetsa, `0`).",
+                  "($0 \\le b \\le 10^6$, $1 \\le p \\le 10^4$, $0 \\le n \\le 100$). "
+                  "Pul har doim yetadi: $n \\cdot p \\le b$."),
+        "output": "Kartada qolgan pul.",
     },
     {
-        "slug": "caw1-stadion", "title": "Stadion aylanasi", "difficulty": "beginner", "points": 500,
+        "slug": "caw1-stadion-aylanalari", "title": "Stadion aylanalari", "difficulty": "beginner", "points": 250,
         "tags": ["input-output", "arithmetic"], "solve": stadion_solve, "tests": stadion_tests, "samples": 2,
         "statement": ("Stadion yugurish yo‘lagining bir aylanasi $L$ metr. Sportchi startdan $d$ metr yugurdi. "
-                      "U nechta to‘liq aylana yugurdi va oxirgi chala aylanada necha metr yugurdi?"),
-        "input": "Bitta qatorda ikkita butun son: $L$ va $d$ ($1 \\le L \\le 1000$, $0 \\le d \\le 10^9$).",
-        "output": "Bitta qatorda probel bilan ikkita son: to‘liq aylanalar soni va qolgan metrlar.",
+                      "U nechta to‘liq aylana yugurdi?\n\n"
+                      "Maslahat: Pythonda butun bo‘lish — `//` (masalan, `1000 // 400` = `2`)."),
+        "input": "Bitta qatorda ikkita butun son: $L$ va $d$ ($1 \\le L \\le 1000$, $0 \\le d \\le 10^6$).",
+        "output": "To‘liq aylanalar soni.",
     },
     {
         "slug": "caw1-batareya", "title": "Batareya", "difficulty": "beginner", "points": 500,
@@ -216,6 +221,7 @@ class Command(WeekendCommand):
             raise CommandError("Muallif topilmadi — --author bilan mavjud login bering.")
 
         with transaction.atomic():
+            self._drop_old(contest, PROBLEMS, "caw1-")
             taken = set(contest.contest_problems.values_list("label", flat=True))
             for i, spec in enumerate(PROBLEMS):
                 self._add(contest, spec, "ABCDEFG"[i], i, author, taken)

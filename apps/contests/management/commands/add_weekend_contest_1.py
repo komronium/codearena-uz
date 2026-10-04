@@ -296,11 +296,11 @@ class Command(BaseCommand):
             f"Tayyor: «{contest.title}» da {contest.contest_problems.count()} ta masala. "
             "Masalalar yashirin; musobaqa tugagach Boshqaruv → Musobaqalar → «Masalalarni ochish»."))
 
-    def _drop_old(self, contest):
+    def _drop_old(self, contest, problems=PROBLEMS, prefix="wc1-"):
         """An earlier version of this set may be attached already: take off the wc1-* problems that
         are no longer in it, and delete them when nobody has submitted to them."""
-        keep = {spec["slug"] for spec in PROBLEMS}
-        old = Problem.objects.filter(slug__startswith="wc1-", is_public=False).exclude(slug__in=keep)
+        keep = {spec["slug"] for spec in problems}
+        old = Problem.objects.filter(slug__startswith=prefix, is_public=False).exclude(slug__in=keep)
         for problem in old:
             ContestProblem.objects.filter(contest=contest, problem=problem).delete()
             if problem.submissions.exists():

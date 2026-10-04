@@ -1060,7 +1060,7 @@ def test_add_codearena_weekend_1_attaches_seven_hidden_problems_with_cf_points_o
     call_command("add_codearena_weekend_1", stdout=StringIO())  # re-run: nothing new
     cps = list(c.contest_problems.select_related("problem"))
     assert [(cp.label, cp.points) for cp in cps] == [
-        ("A", 500), ("B", 500), ("C", 500), ("D", 750), ("E", 1000), ("F", 1000), ("G", 1250)]
+        ("A", 250), ("B", 250), ("C", 500), ("D", 750), ("E", 1000), ("F", 1000), ("G", 1250)]
     assert [cp.problem.difficulty for cp in cps] == ["beginner"] * 3 + ["easy"] * 3 + ["medium"]
     assert not any(cp.problem.is_public for cp in cps)
     assert all(cp.problem.testcases.filter(is_sample=True).count() == 2 for cp in cps)
