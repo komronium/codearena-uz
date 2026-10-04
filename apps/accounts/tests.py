@@ -129,13 +129,15 @@ def test_rating_shows_your_place_the_next_tier_and_everyones_last_change(client)
     _rated(low, high)  # both from 1200: +50 and +450
     client.force_login(low)
     r = client.get(reverse("rating"))
-    assert r.context["me"] == {"rank": 2, "delta": 50,
-                               "next": {"name": "Master", "color": "#AA00AA", "need": 50, "pct": 75}}
-    assert {t["name"]: t["count"] for t in r.context["tiers"] if t["count"]} == {"Bilimdon": 1, "Ustoz": 1}
+    assert r.context["me"] == {"rank": 2, "delta": 50, "page": 1, "contests": 1,
+                               "next": {"name": "Candidate Master", "color": "#AA00AA", "need": 50, "pct": 75}}
+    found = client.get(reverse("rating"), {"q": "hig"}).context["users"]
+    assert [(u.username, u.rank) for u in found] == [("high", 1)]  # a search keeps the board place
+    assert {t["name"]: t["count"] for t in r.context["tiers"] if t["count"]} == {"Expert": 1, "Master": 1}
     assert [u.last_delta for u in r.context["users"]] == [450, 50]
     assert _next_tier(1500)["name"] == "Grandmaster" and _next_tier(1500)["pct"] == 0
-    assert _next_tier(0) == {"name": "Shogird", "color": "#008000", "need": 700, "pct": 0}
-    assert _next_tier(2400) is None  # Afsonaviy Grandmaster has nothing above it
+    assert _next_tier(0) == {"name": "Pupil", "color": "#008000", "need": 700, "pct": 0}
+    assert _next_tier(2400) is None  # Legendary Grandmaster has nothing above it
 
     client.force_login(User.objects.create_user("fresh", password="x"))
     assert client.get(reverse("rating")).context["me"] is None  # no rated contest yet: no place
@@ -327,9 +329,9 @@ def test_tier_up_congratulates_once_and_first_visit_only_records(client):
     u = U.objects.create_user("tiery", password="x", rating=600)
     client.force_login(u)
     assert "ca-tier-up" not in client.get("/").content.decode()  # first visit: just remembered
-    assert U.objects.get(pk=u.pk).seen_tier == "Boshlovchi"
+    assert U.objects.get(pk=u.pk).seen_tier == "Newbie"
     U.objects.filter(pk=u.pk).update(rating=750)
-    assert "Tabriklaymiz! Siz endi Shogird" in client.get("/").content.decode()
+    assert "Tabriklaymiz! Siz endi Pupil" in client.get("/").content.decode()
     assert "ca-tier-up" not in client.get("/").content.decode()  # only once
     U.objects.filter(pk=u.pk).update(rating=650)
     assert "ca-tier-up" not in client.get("/").content.decode()  # a drop is silent
@@ -347,7 +349,7 @@ def test_next_streak_badge_counts_from_the_current_run():
 def test_tier_up_is_claimed_once_even_by_two_tabs():
     from apps.accounts.context_processors import _claim_tier_up
     from apps.accounts.models import User as U
-    U.objects.create_user("twotabs", password="x", rating=750, seen_tier="Boshlovchi")
+    U.objects.create_user("twotabs", password="x", rating=750, seen_tier="Newbie")
     tab1, tab2 = U.objects.get(username="twotabs"), U.objects.get(username="twotabs")
-    assert _claim_tier_up(tab1)["name"] == "Shogird"
+    assert _claim_tier_up(tab1)["name"] == "Pupil"
     assert _claim_tier_up(tab2) is None  # the other tab read the old tier too, but lost the update

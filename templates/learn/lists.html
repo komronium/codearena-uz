@@ -19,7 +19,7 @@
       {% endfor %}
     </ul>
     {% else %}
-    <div class="ca-empty"><i data-lucide="bookmark" class="lu mb-2 block text-2xl" aria-hidden="true"></i>Hali ro‘yxat yo‘q. Masala sahifasidagi <b>Saqlash</b> tugmasi bilan yoki shu yerda yarating.</div>
+    <div class="ca-empty"><span class="mb-2 flex justify-center text-2xl"><i data-lucide="bookmark" class="lu" aria-hidden="true"></i></span>Hali ro‘yxat yo‘q. Masala sahifasidagi <b>Saqlash</b> tugmasi bilan yoki shu yerda yarating.</div>
     {% endif %}
   </section>
   <form method="post" class="ca-panel space-y-3" aria-labelledby="new-list">{% csrf_token %}

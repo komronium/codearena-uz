@@ -415,7 +415,7 @@ svg.lucide { width: 1.2em; height: 1.2em; display: inline-block; vertical-align:
 .ca-box-cap small { font-size: .8125rem; font-weight: 400; color: rgb(var(--ca-mute-rgb)); }
 .ca-box-tools { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-left: auto; font-size: .8125rem; font-weight: 400; }
 .ca-box-body { border-radius: calc(var(--ca-radius) - 2px); background: rgb(var(--ca-surface-rgb)); overflow-x: auto; }
-.ca-box-body > .ca-table { border: 0; border-radius: 0; }
+.ca-box-body > .ca-table, .ca-box-body > .ca-rows { border: 0; border-radius: 0; }
 .ca-box-pad { padding: .75rem .9rem; }
 /* a page with a sidebar, after Codeforces: the work on the left, small context boxes on the right */
 .ca-cols { display: grid; gap: 0 1.25rem; }
@@ -433,6 +433,21 @@ svg.lucide { width: 1.2em; height: 1.2em; display: inline-block; vertical-align:
 .ca-facts > * { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; padding: .4rem .9rem; }
 .ca-facts > * + * { border-top: 1px solid rgb(var(--ca-line-rgb)); }
 .ca-facts dt { color: rgb(var(--ca-mute-rgb)); }
+/* learn hub: a tile per course badge, gold once the course is finished, a progress line until then */
+.ca-course-badges { display: grid; grid-template-columns: repeat(auto-fill, minmax(2.25rem, 1fr)); gap: .4rem; }
+.ca-course-badges a {
+  position: relative; display: grid; place-items: center; aspect-ratio: 1; border-radius: var(--ca-radius-sm);
+  color: rgb(var(--ca-mute-rgb) / .7); background: rgb(var(--ca-ink-rgb) / .05);
+}
+.ca-course-badges a:hover { color: rgb(var(--ca-ink-rgb)); background: rgb(var(--ca-ink-rgb) / .09); }
+.ca-course-badges a.is-earned { color: rgb(var(--ca-gold-rgb)); background: rgb(var(--ca-gold-rgb) / .14); box-shadow: inset 0 0 0 1px rgb(var(--ca-gold-rgb) / .45); }
+.ca-course-badges svg.lucide { width: 1.05rem; height: 1.05rem; }
+.ca-course-badge-pct { position: absolute; inset: auto 3px 3px; height: 2px; border-radius: 9999px; background: linear-gradient(90deg, rgb(var(--ca-accent-rgb)) var(--p), transparent var(--p)); }
+/* rating page: a row per tier, its name and range over a bar as long as its head count */
+.ca-tier-bars > li { display: grid; grid-template-columns: 1fr auto; align-items: baseline; column-gap: .75rem; row-gap: .3rem; padding: .45rem .9rem; }
+.ca-tier-bars > li + li { border-top: 1px solid rgb(var(--ca-line-rgb)); }
+.ca-tier-bar { grid-column: 1 / -1; height: .25rem; border-radius: 9999px; background: rgb(var(--ca-ink-rgb) / .06); overflow: hidden; }
+.ca-tier-bar > span { display: block; height: 100%; border-radius: inherit; background: var(--tier); }
 .ca-facts dd { font-family: var(--ca-mono); font-variant-numeric: tabular-nums; }
 .ca-box-more { display: block; padding: .4rem .9rem; border-top: 1px solid rgb(var(--ca-line-rgb)); font-size: .8125rem; text-align: right; }
 /* a list's filters over its table: pickers left, quick actions right */
@@ -442,9 +457,15 @@ svg.lucide { width: 1.2em; height: 1.2em; display: inline-block; vertical-align:
 .ca-toolbar .ca-picker select { max-width: 8.5rem; text-overflow: ellipsis; }
 /* level links on a box's caption: the chosen one sits on white */
 .ca-levels { gap: .15rem; }
-.ca-levels a { display: inline-flex; align-items: center; gap: .3rem; padding: .15rem .45rem; border-radius: var(--ca-radius-sm); color: rgb(var(--ca-mute-rgb)); }
-.ca-levels a:hover { color: rgb(var(--ca-ink-rgb)); }
-.ca-levels a[aria-current] { color: rgb(var(--ca-ink-rgb)); font-weight: 600; background: rgb(var(--ca-surface-rgb)); }
+.ca-levels a, .ca-levels button { display: inline-flex; align-items: center; gap: .3rem; padding: .15rem .45rem; border-radius: var(--ca-radius-sm); color: rgb(var(--ca-mute-rgb)); }
+.ca-levels a:hover, .ca-levels button:hover { color: rgb(var(--ca-ink-rgb)); }
+.ca-levels a[aria-current], .ca-levels button[aria-pressed="true"] { color: rgb(var(--ca-ink-rgb)); font-weight: 600; background: rgb(var(--ca-surface-rgb)); }
+/* the profile card's facts: label and value pairs, two columns where there is room */
+.ca-profile-facts { display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: .3rem 2rem; }
+.ca-profile-facts > div { display: flex; align-items: baseline; gap: .5rem; }
+.ca-profile-facts dt { color: rgb(var(--ca-mute-rgb)); }
+.ca-profile-facts dt::after { content: ":"; }
+.ca-profile-facts dd { font-variant-numeric: tabular-nums; }
 .ca-levels a > span:last-child { font-family: var(--ca-mono); font-size: .72rem; color: rgb(var(--ca-mute-rgb)); }
 .ca-solved { color: rgb(var(--ca-ok-rgb)); }
 .ca-solved svg.lucide { width: 1.1rem; height: 1.1rem; stroke-width: 3; }
@@ -1302,6 +1323,7 @@ section.ca-ed-full #editor .cm-editor { height: calc(100vh - 9.5rem); }
 .ca-course-art-lg svg.lucide { width: 3rem; height: 3rem; }
 .ca-dots { display: flex; align-items: center; margin-top: .85rem; max-width: 22rem; }
 .ca-dots li { position: relative; flex: 1; height: .9rem; }
+.ca-dots-inline { width: 4.5rem; margin-top: 0; }  /* in a table cell, beside the count */
 .ca-dots li::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 4px; margin-top: -2px; background: rgb(var(--ca-ink-rgb) / .08); }
 .ca-dots li::after {
   content: ""; position: absolute; right: 0; top: 50%; width: .9rem; height: .9rem; margin-top: -.45rem; border-radius: 9999px;
@@ -1394,7 +1416,7 @@ section.ca-ed-full #editor .cm-editor { height: calc(100vh - 9.5rem); }
 .ca-tag-out { color: rgb(var(--ca-mute-rgb)); background: transparent; box-shadow: inset 0 0 0 1px rgb(var(--ca-line-rgb)); font-weight: 500; }
 
 
-/* Afsonaviy Grandmaster, Codeforces' legendary style: the first letter in ink, the rest in the tier red */
+/* Legendary Grandmaster, Codeforces' legendary style: the first letter in ink, the rest in the tier red */
 :is(span, a).ca-lg { display: inline-block; max-width: 100%; }  /* ::first-letter needs a block box */
 .ca-lg::first-letter { color: rgb(var(--ca-ink-rgb)); }
 

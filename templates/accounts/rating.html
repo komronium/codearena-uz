@@ -2,22 +2,30 @@
 {% block title %}Reyting{% endblock %}
 {% block page_title %}<h1>Reyting</h1><span class="ca-topbar-sub">{{ total }} ishtirokchi · reytingli musobaqalar natijasi bo‘yicha</span>{% endblock %}
 {% block content %}
-{% comment %}After Codeforces' rating page: one boxed table, handles in their tier colour; on the right your
-place and the way to the next tier, and the tiers with how many people hold each.{% endcomment %}
+{% comment %}After Codeforces' rating page: one boxed table, handles and ratings in their tier colour, equal
+ratings sharing a place; a handle search over it. On the right your place and the way to the next tier,
+and how many people hold each tier as bars.{% endcomment %}
 {% include "accounts/_board_tabs.html" %}
 <div class="ca-cols">
 <div class="min-w-0">
   <section class="ca-box !mb-0" aria-labelledby="board-title">
-    <h2 class="ca-box-cap" id="board-title">Musobaqa reytingi</h2>
+    <div class="ca-box-cap">
+      <h2 id="board-title">Musobaqa reytingi</h2>
+      <form method="get" class="ca-box-tools" role="search" aria-label="Foydalanuvchini qidirish">
+        <label class="ca-picker ca-picker-search !min-w-0"><i data-lucide="search" class="lu" aria-hidden="true"></i><input type="search" name="q" value="{{ q }}" placeholder="Foydalanuvchi" aria-label="Foydalanuvchi nomi"></label>
+      </form>
+    </div>
     <div class="ca-box-body">
+    {% if q %}<p class="ca-box-pad !py-2 border-b border-line text-mute">«{{ q }}»: {{ users.paginator.count }} ta topildi · <a class="ca-link" href="{% url 'rating' %}">hammasi</a></p>{% endif %}
     {% if users %}
     <table class="ca-table">
-      <thead><tr><th class="w-14 text-center">#</th><th>Foydalanuvchi</th><th class="hidden w-28 text-center sm:table-cell">Musobaqalar</th><th class="w-24 text-center" title="Oxirgi reytingli musobaqadagi o‘zgarish">Oxirgi</th><th class="w-24 text-center">Reyting</th></tr></thead>
+      <thead><tr><th class="w-14 text-center">#</th><th>Foydalanuvchi</th><th class="hidden w-44 lg:table-cell">Daraja</th><th class="hidden w-28 text-center sm:table-cell">Musobaqalar</th><th class="w-24 text-center" title="Oxirgi reytingli musobaqadagi o‘zgarish">Oxirgi</th><th class="w-24 text-center">Reyting</th></tr></thead>
       <tbody>
       {% for u in users %}
-      <tr{% if u == user %} class="ca-row-me"{% endif %}>
+      <tr{% if u == user %} class="ca-row-me" id="me"{% endif %}>
         <td class="text-center tabular">{{ u.rank }}</td>
-        <td><a class="ca-user-name{{ u.rating|lg }}" style="--tier: {{ u.rating|tier_color }}" href="{% url 'profile' u.username %}" translate="no">{{ u.username }}</a></td>
+        <td><a class="ca-user-name{{ u.rating|lg }}" style="--tier: {{ u.rating|tier_color }}" href="{% url 'profile' u.username %}" translate="no">{{ u.username }}</a>{% if u.get_full_name %} <span class="hidden text-xs text-mute md:inline">{{ u.get_full_name }}</span>{% endif %}</td>
+        <td class="hidden lg:table-cell"><span class="ca-tier-ink text-xs font-semibold" style="--tier: {{ u.rating|tier_color }}">{{ u.rating|tier_name }}</span></td>
         <td class="hidden text-center tabular text-mute sm:table-cell">{{ u.contest_count }}</td>
         <td class="text-center tabular font-semibold {% if u.last_delta > 0 %}text-ok{% elif u.last_delta < 0 %}text-bad{% else %}text-mute{% endif %}">{{ u.last_delta|stringformat:"+d" }}</td>
         <td class="text-center tabular font-bold"><span class="ca-tier-ink" style="--tier: {{ u.rating|tier_color }}">{{ u.rating }}</span></td>
@@ -26,7 +34,7 @@ place and the way to the next tier, and the tiers with how many people hold each
       </tbody>
     </table>
     {% else %}
-    <p class="ca-box-pad py-8 text-center text-mute">Hali reyting yo‘q: reytingli musobaqa tugagach, bu yerda paydo bo‘ladi.</p>
+    <p class="ca-box-pad py-8 text-center text-mute">{% if q %}Bunday foydalanuvchi reytingda yo‘q.{% else %}Hali reyting yo‘q: reytingli musobaqa tugagach, bu yerda paydo bo‘ladi.{% endif %}</p>
     {% endif %}
     </div>
   </section>
@@ -42,6 +50,7 @@ place and the way to the next tier, and the tiers with how many people hold each
         <div><dt>O‘rin</dt><dd><b>{{ me.rank }}</b> <span class="text-mute">/ {{ total }}</span></dd></div>
         <div><dt>Reyting</dt><dd><b class="ca-tier-ink">{{ user.rating }}</b> <span class="{% if me.delta >= 0 %}text-ok{% else %}text-bad{% endif %}" title="Oxirgi reytingli musobaqada">{{ me.delta|stringformat:"+d" }}</span></dd></div>
         <div><dt>Daraja</dt><dd class="!font-sans"><span class="ca-tier-ink{{ user.rating|lg }} font-semibold">{{ user.rating|tier_name }}</span></dd></div>
+        <div><dt>Musobaqalar</dt><dd>{{ me.contests }}</dd></div>
       </dl>
       <div class="ca-box-pad border-t border-line">
         {% if me.next %}
@@ -49,24 +58,22 @@ place and the way to the next tier, and the tiers with how many people hold each
         <div class="ca-progress mt-2" role="progressbar" aria-label="{{ me.next.name }} darajasigacha" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ me.next.pct }}"><span style="width: {{ me.next.pct }}%; background: var(--tier)"></span></div>
         {% else %}<p class="text-mute">Eng yuqori darajadasiz.</p>{% endif %}
       </div>
+      {% if users.number != me.page or q %}<a class="ca-box-more ca-link" href="{% url 'rating' %}?page={{ me.page }}#me">Jadvalda ko‘rish »</a>{% endif %}
     </div>
   </section>
   {% endif %}
   <section class="ca-box" aria-labelledby="tiers-title">
     <h2 class="ca-box-cap" id="tiers-title">Darajalar</h2>
     <div class="ca-box-body">
-      <table class="ca-table">
-        <thead><tr><th>Daraja</th><th class="text-center">Reyting</th><th class="w-12 text-center" title="Shu darajadagi ishtirokchilar">Soni</th></tr></thead>
-        <tbody>
+      <ul class="ca-tier-bars">
         {% for t in tiers reversed %}
-        <tr>
-          <td class="whitespace-nowrap"><span class="ca-tier-ink font-semibold" style="--tier: {{ t.color }}">{{ t.name }}</span></td>
-          <td class="text-center tabular text-mute">{% if t.floor %}{{ t.floor }}{% else %}0{% endif %}{% if t.ceiling %}–{{ t.ceiling|add:"-1" }}{% else %}+{% endif %}</td>
-          <td class="text-center tabular">{% if t.count %}{{ t.count }}{% else %}<span class="text-mute">—</span>{% endif %}</td>
-        </tr>
+        <li style="--tier: {{ t.color }}">
+          <span class="ca-tier-ink font-semibold{% if not t.ceiling %} ca-lg{% endif %}">{{ t.name }}</span>
+          <span class="tabular text-xs text-mute">{% if t.floor %}{{ t.floor }}{% else %}0{% endif %}{% if t.ceiling %}–{{ t.ceiling|add:"-1" }}{% else %}+{% endif %} · <b class="text-ink" title="Shu darajadagi ishtirokchilar">{{ t.count }}</b></span>
+          <span class="ca-tier-bar" aria-hidden="true"><span style="width: {{ t.pct }}%"></span></span>
+        </li>
         {% endfor %}
-        </tbody>
-      </table>
+      </ul>
     </div>
   </section>
 </aside>

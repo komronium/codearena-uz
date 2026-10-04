@@ -54,44 +54,60 @@
 </section>
 {% endif %}
 
-{% if assignments %}
-<ul class="ca-rows mb-8">
-  {% for a in assignments %}
-  <li class="ca-row">
-    <div class="ca-row-main">
-      <a class="ca-row-title ca-link" href="{% url 'classroom:detail' a.pk %}">{{ a.title }}</a>
-      <div class="ca-row-meta">
-        <span><i data-lucide="users" class="lu" aria-hidden="true"></i>{{ a.group.name }}</span>
-        <span class="tabular {% if a.my_solved == a.my_total %}font-semibold text-ok{% endif %}">{{ a.my_solved }} / {{ a.my_total }} yechilgan</span>
+{% comment %}A student sees their assignments in one box and joins a group from the side; a teacher's
+groups and the assignments they set stay full width.{% endcomment %}
+{% if assignments or not can_teach %}
+<div class="{% if not can_teach %}ca-cols{% endif %}">
+<div class="min-w-0">
+<section class="ca-box" aria-labelledby="mine-title">
+  <h2 class="ca-box-cap" id="mine-title">Vazifalarim <small>{{ assignments|length }}</small></h2>
+  <div class="ca-box-body">
+  {% if assignments %}
+  <ul class="ca-rows">
+    {% for a in assignments %}
+    <li class="ca-row">
+      <div class="ca-row-main">
+        <a class="ca-row-title ca-link" href="{% url 'classroom:detail' a.pk %}">{{ a.title }}</a>
+        <div class="ca-row-meta">
+          <span><i data-lucide="users" class="lu" aria-hidden="true"></i>{{ a.group.name }}</span>
+          <span class="tabular {% if a.my_solved == a.my_total %}font-semibold text-ok{% endif %}">{{ a.my_solved }} / {{ a.my_total }} yechilgan</span>
+        </div>
       </div>
-    </div>
-    <div class="ca-row-side text-sm">
-      {% if a.deadline > now %}<span class="text-mute">Muddatgacha</span> <span class="tabular font-semibold" data-countdown="{{ a.deadline|date:'c' }}" data-label="" data-suffix="1"></span>
-      {% else %}<span class="text-mute">Muddat o‘tgan · {{ a.deadline|date:"d.m.Y H:i" }}</span>{% endif %}
-    </div>
-  </li>
-  {% endfor %}
-</ul>
-{% elif not taught and not can_teach %}
-<div class="ca-empty">Hozircha vazifa yo‘q. O‘qituvchi guruhingizga vazifa berganda shu yerda ko‘rinadi.</div>
-{% endif %}
-
+      <div class="ca-row-side text-sm">
+        {% if a.deadline > now %}<span class="text-mute">Muddatgacha</span> <span class="tabular font-semibold" data-countdown="{{ a.deadline|date:'c' }}" data-label="" data-suffix="1"></span>
+        {% else %}<span class="text-mute">Muddat o‘tgan · {{ a.deadline|date:"d.m.Y H:i" }}</span>{% endif %}
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="ca-box-pad py-8 text-center text-mute">Hozircha vazifa yo‘q. O‘qituvchi guruhingizga vazifa berganda shu yerda ko‘rinadi.</p>
+  {% endif %}
+  </div>
+</section>
+</div>
 {% if not can_teach %}
-<form method="post" action="{% url 'classroom:group_join' %}" class="ca-panel mb-8 flex flex-wrap items-end justify-between gap-3">{% csrf_token %}
-  <div class="min-w-0">
-    <label class="font-semibold" for="join-code">Guruhga qo‘shilish</label>
-    <p class="text-sm text-mute">{% if joined_groups %}Guruhlaringiz: {% for g in joined_groups %}<b class="font-medium text-ink">{{ g.name }}</b>{% if not forloop.last %}, {% endif %}{% endfor %}. {% endif %}O‘qituvchi bergan 6 belgili kodni kiriting.</p>
-  </div>
-  <div class="flex gap-2">
-    <input id="join-code" name="code" maxlength="8" required autocomplete="off" spellcheck="false" class="ca-input !w-36 !py-1.5 font-mono uppercase tracking-widest" placeholder="AB3K9P">
-    <button class="ca-btn ca-btn-primary !py-1.5 shrink-0"><i data-lucide="log-in" class="lu" aria-hidden="true"></i>Qo‘shilish</button>
-  </div>
-</form>
+<aside class="ca-aside" aria-label="Guruhlar">
+  <section class="ca-box" aria-labelledby="join-title">
+    <h2 class="ca-box-cap" id="join-title">Guruhga qo‘shilish</h2>
+    <form method="post" action="{% url 'classroom:group_join' %}" class="ca-box-body ca-box-pad space-y-2">{% csrf_token %}
+      {% if joined_groups %}<p class="text-sm text-mute">Guruhlaringiz: {% for g in joined_groups %}<b class="font-medium text-ink">{{ g.name }}</b>{% if not forloop.last %}, {% endif %}{% endfor %}.</p>{% endif %}
+      <label class="block text-sm text-mute" for="join-code">O‘qituvchi bergan 6 belgili kodni kiriting.</label>
+      <div class="flex gap-2">
+        <input id="join-code" name="code" maxlength="8" required autocomplete="off" spellcheck="false" class="ca-input !py-1.5 font-mono uppercase tracking-widest" placeholder="AB3K9P">
+        <button class="ca-btn ca-btn-primary !py-1.5 shrink-0"><i data-lucide="log-in" class="lu" aria-hidden="true"></i>Qo‘shilish</button>
+      </div>
+    </form>
+  </section>
+</aside>
+{% endif %}
+</div>
 {% endif %}
 
 {% if taught %}
-<h2 class="ca-section-title">Men bergan vazifalar</h2>
-<div class="ca-panel !p-0 overflow-x-auto">
+<section class="ca-box" aria-labelledby="taught-title">
+<h2 class="ca-box-cap" id="taught-title">Men bergan vazifalar <small>{{ taught|length }}</small></h2>
+<div class="ca-box-body">
 <table class="ca-table">
   <thead><tr><th>Vazifa</th><th>Guruh</th><th>Muddat</th><th class="text-right">Amal</th></tr></thead>
   <tbody>
@@ -106,6 +122,7 @@
   </tbody>
 </table>
 </div>
+</section>
 {% endif %}
 <script>
   document.querySelectorAll("[data-copy-code]").forEach((b) => b.addEventListener("click", async () => {

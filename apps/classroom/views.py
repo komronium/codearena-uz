@@ -1,4 +1,5 @@
 import csv
+from collections import Counter
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -187,7 +188,23 @@ def duel_list(request):
     mine = (Duel.objects.filter(Q(challenger=request.user) | Q(opponent=request.user))
             .select_related("challenger", "opponent", "winner", "problem"))
     joinable = duels.joinable_counts(request.user)
+    finished = [d for d in mine if d.status == Duel.Status.FINISHED]
+    record = {"wins": sum(1 for d in finished if d.winner_id == request.user.pk),
+              "losses": sum(1 for d in finished if d.winner_id and d.winner_id != request.user.pk)}
+    record["draws"] = len(finished) - record["wins"] - record["losses"]
+    # the duel board: everyone with a finished duel, by duel rating
+    played = Counter()
+    for pair in Duel.objects.filter(status=Duel.Status.FINISHED).values_list("challenger_id", "opponent_id"):
+        played.update(pair)
+    played.pop(None, None)
+    board = list(User.objects.filter(pk__in=played, is_active=True).order_by("-duel_rating", "username")
+                 .only("username", "rating", "duel_rating")[:10])
+    for u in board:
+        u.duels = played[u.pk]
+    rank = (User.objects.filter(pk__in=played, is_active=True, duel_rating__gt=request.user.duel_rating).count() + 1
+            if request.user.pk in played else None)
     return render(request, "classroom/duels.html", {
+        "record": record, "board": board, "duel_rank": rank, "duelists": len(played),
         "incoming": [d for d in mine if d.status == Duel.Status.PENDING and d.opponent_id == request.user.pk],
         "open": [d for d in mine if d.status in duels.OPEN
                  and not (d.status == Duel.Status.PENDING and d.opponent_id == request.user.pk)],

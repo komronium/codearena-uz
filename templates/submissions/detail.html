@@ -4,7 +4,7 @@
 <div class="mb-6 flex flex-wrap items-start justify-between gap-3">
   <div>
     {% if s.user_id == user.pk %}
-    <a class="ca-link mb-2 inline-block text-sm text-mute" href="{% url 'submissions:mine' %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>Urinishlar</a>
+    <a class="ca-link mb-2 inline-block text-sm text-mute" href="{% url 'submissions:mine' %}?mine=1"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>Urinishlar</a>
     {% elif user.is_staff %}
     <a class="ca-link mb-2 inline-block text-sm text-mute" href="{% url 'moderation:submissions' %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>Barcha urinishlar</a>
     {% else %}

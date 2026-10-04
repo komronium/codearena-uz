@@ -198,19 +198,27 @@ def rating(request):
           .annotate(contest_count=Count("participations", filter=Q(participations__rating_after__isnull=False)),
                     last_delta=Subquery(last.values("d")[:1]))
           .filter(contest_count__gt=0).order_by("-rating", "username"))
-    page = Paginator(qs, 50).get_page(request.GET.get("page"))
-    ratings = list(qs.values_list("rating", flat=True))
+    ratings = list(qs.values_list("rating", flat=True))  # highest first
+    q = request.GET.get("q", "").strip()[:50]
+    page = Paginator(qs.filter(username__icontains=q) if q else qs, 50).get_page(request.GET.get("page"))
+    for u in page:  # the place on the whole board, equal ratings sharing it, a search included
+        u.rank = sum(1 for r in ratings if r > u.rating) + 1
     tiers = [{"name": n, "color": c, "floor": f, "ceiling": ce,
               "count": sum(1 for r in ratings if (f is None or r >= f) and (ce is None or r < ce))}
              for f, ce, n, c in _RATING_TIERS]
+    biggest = max((t["count"] for t in tiers), default=0)
+    for t in tiers:
+        t["pct"] = round(100 * t["count"] / biggest) if biggest else 0
     me = None
     if request.user.is_authenticated:
         mine = rated.filter(user=request.user).order_by("-contest__end").first()
         if mine is not None:
-            me = {"rank": sum(1 for r in ratings if r > request.user.rating) + 1,
-                  "delta": mine.rating_after - mine.rating_before, "next": _next_tier(request.user.rating)}
+            row = list(qs.values_list("pk", flat=True)).index(request.user.pk)
+            me = {"rank": sum(1 for r in ratings if r > request.user.rating) + 1, "page": row // 50 + 1,
+                  "delta": mine.rating_after - mine.rating_before, "next": _next_tier(request.user.rating),
+                  "contests": rated.filter(user=request.user).count()}
     return render(request, "accounts/rating.html",
-                  {"users": _ranked(page), "total": len(ratings), "tiers": tiers, "me": me})
+                  {"users": page, "total": len(ratings), "tiers": tiers, "me": me, "q": q})
 
 
 def _plan_badges(user) -> list:
@@ -293,6 +301,7 @@ def profile(request, username):
         "plan_badges": _plan_badges(profile_user),
         "tier_color": _tier_color(profile_user.rating),
         "rating_history": rating_history,
+        "max_rating": max((p.rating_after for p in rating_history), default=None),
         "rating_chart": _rating_chart(rating_history) if rating_history else None,
         "activity": _activity_calendar(profile_user),
         "skill_groups": _skill_groups(profile_user),

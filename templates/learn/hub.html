@@ -3,7 +3,8 @@
 {% block page_title %}<h1>O‘rganish</h1><span class="ca-topbar-sub">Har kurs — bitta mavzu: nazariya va masalalar, osonidan qiyiniga</span>{% endblock %}
 {% block content %}
 {% comment %}After Codeforces EDU: each stage of the path is a boxed table of its courses (number, course,
-level, your progress); on the right the course to go on with and its next problem.{% endcomment %}
+level, your progress); on the right the course to go on with and its next few problems, then a badge per
+course — lit once finished, with a progress line until then.{% endcomment %}
 <div class="ca-cols">
 <div class="min-w-0">
 {% for s in stages %}
@@ -30,7 +31,7 @@ level, your progress); on the right the course to go on with and its next proble
           {% if p.progress.total %}
           <span class="inline-flex items-center gap-2">
             <span class="tabular{% if p.progress.completed %} font-semibold text-ok{% endif %}">{% if user.is_authenticated %}{{ p.progress.done }}/{% endif %}{{ p.progress.total }}</span>
-            {% if p.dots %}<ol class="ca-dots" aria-label="Qiyinlik bo‘yicha: {{ p.dots_done }} tasi tugatilgan, jami {{ p.dots|length }}">{% for d in p.dots %}<li class="{% if d.complete %}is-done{% elif d.done %}is-started{% endif %}" title="{{ d.label }}: {{ d.done }}/{{ d.total }}"><span class="sr-only">{{ d.label }}: {{ d.done }}/{{ d.total }}</span></li>{% endfor %}</ol>{% endif %}
+            {% if p.dots %}<ol class="ca-dots ca-dots-inline" aria-label="Qiyinlik bo‘yicha: {{ p.dots_done }} tasi tugatilgan, jami {{ p.dots|length }}">{% for d in p.dots %}<li class="{% if d.complete %}is-done{% elif d.done %}is-started{% endif %}" title="{{ d.label }}: {{ d.done }}/{{ d.total }}"><span class="sr-only">{{ d.label }}: {{ d.done }}/{{ d.total }}</span></li>{% endfor %}</ol>{% endif %}
           </span>
           {% else %}<span class="text-mute">—</span>{% endif %}
         </td>
@@ -58,10 +59,31 @@ level, your progress); on the right the course to go on with and its next proble
       </div>
       {% endif %}
       {% if next_problem %}
-      <p class="mt-2 text-mute">Keyingi masala: <b class="text-ink">{{ next_problem.title }}</b></p>
       <a class="ca-btn ca-btn-primary mt-2.5" href="{% url 'problems:detail' next_problem.slug %}?plan={{ current.slug }}"><i data-lucide="play" class="lu" aria-hidden="true"></i>{% if current.progress.done %}Davom etish{% else %}Boshlash{% endif %}</a>
       {% endif %}
     </div>
+    {% if up_next %}
+    <ol class="ca-box-body ca-facts border-t border-line" aria-label="Navbatdagi masalalar">
+      {% for p in up_next %}<li><a class="ca-link min-w-0 truncate" href="{% url 'problems:detail' p.slug %}?plan={{ current.slug }}">{{ p.title }}</a><span class="ca-diff ca-diff-{{ p.difficulty }}">{{ p.get_difficulty_display }}</span></li>{% endfor %}
+    </ol>
+    <a class="ca-box-more ca-link" href="{% url 'learn:course' current.slug %}">Kursning barcha masalalari »</a>
+    {% endif %}
+  </section>
+  {% endif %}
+  {% if badges and user.is_authenticated %}
+  <section class="ca-box" aria-labelledby="badges-title">
+    <h2 class="ca-box-cap" id="badges-title">Nishonlar <small class="ca-box-tools tabular">{{ badges_earned }} / {{ badges|length }}</small></h2>
+    <div class="ca-box-body ca-box-pad">
+      <p class="text-xs text-mute">Kursni oxirigacha yechsangiz, uning nishoni profilingizda chiqadi.</p>
+      <ul class="ca-course-badges mt-2.5">
+        {% for p in badges %}
+        <li><a class="{% if p.progress.completed %}is-earned{% endif %}" href="{% url 'learn:course' p.slug %}" title="{{ p.title }}: {% if p.progress.completed %}olingan{% else %}{{ p.progress.done }}/{{ p.progress.total }} yechilgan{% endif %}" aria-label="{{ p.title }}{% if p.progress.completed %}, olingan{% endif %}">
+          <i data-lucide="{{ p.icon }}" class="lu" aria-hidden="true"></i>{% if not p.progress.completed and p.progress.done %}<span class="ca-course-badge-pct" style="--p: {{ p.progress.pct }}%"></span>{% endif %}
+        </a></li>
+        {% endfor %}
+      </ul>
+    </div>
+    <a class="ca-box-more ca-link" href="{% url 'profile' user.username %}">Profilimdagi nishonlar »</a>
   </section>
   {% endif %}
   {% if stages and not user.is_authenticated %}

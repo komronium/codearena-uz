@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load pagination %}
+{% load pagination daily tiers %}
 {% block title %}Masalalar{% endblock %}
 {% block page_title %}<h1>Masalalar</h1><span class="ca-topbar-sub">{{ total }} ta ochiq{% if progress %} · <b class="font-semibold text-ink">{{ progress.done }}</b> tasi yechilgan{% endif %}</span>{% endblock %}
 {% block content %}
@@ -97,15 +97,30 @@ right, level, stars, solve rate) under a row of filters; on the right the day's 
 </div>
 
 <aside class="ca-aside" aria-label="Tavsiyalar">
-  {% if daily %}
+  {% if daily %}{% daily_stats daily user as ds %}
   <section class="ca-box" aria-labelledby="daily-title">
-    <h2 class="ca-box-cap" id="daily-title">Kun masalasi <small class="ca-box-tools tabular">{{ daily.date|date:"d.m.Y" }}</small></h2>
-    <div class="ca-box-body ca-box-pad">
-      <a class="ca-link text-[.9375rem] font-semibold" href="{% url 'problems:detail' daily.problem.slug %}">{{ daily.problem.title }}</a>
-      <p class="mt-1"><span class="ca-diff ca-diff-{{ daily.problem.difficulty }}">{{ daily.problem.get_difficulty_display }}</span></p>
-      <p class="mt-2 text-mute">{% if daily_done %}Bugun yechildi{% if streak %} · seriya <b class="text-ink">{{ streak }}</b> kun{% endif %}{% else %}Bugun yechsangiz <b class="text-ink">+5 ball</b>{% if streak %}, seriya {{ streak|add:1 }} kunga yetadi{% endif %}{% endif %}</p>
-      {% if daily_done %}<p class="mt-2.5 font-semibold text-ok"><i data-lucide="check" class="lu" aria-hidden="true"></i> Yechildi</p>
-      {% else %}<a class="ca-btn ca-btn-primary mt-2.5" href="{% url 'problems:detail' daily.problem.slug %}"><i data-lucide="play" class="lu" aria-hidden="true"></i>Yechish</a>{% endif %}
+    <h2 class="ca-box-cap" id="daily-title">Kun masalasi
+      {% if user.is_authenticated %}<span class="ca-box-tools text-mute" title="Kun masalasi seriyasi · eng uzuni {{ ds.best }}"><i data-lucide="flame" class="lu{% if ds.streak %} text-gold{% endif %}" aria-hidden="true"></i><b class="tabular text-ink">{{ ds.streak }}</b> kun</span>
+      {% else %}<small class="ca-box-tools tabular">{{ daily.date|date:"d.m.Y" }}</small>{% endif %}</h2>
+    <div class="ca-box-body">
+      <div class="ca-box-pad">
+        <a class="ca-link text-[.9375rem] font-semibold" href="{% url 'problems:detail' daily.problem.slug %}">{{ daily.problem.title }}</a>
+        <p class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-mute"><span class="ca-diff ca-diff-{{ daily.problem.difficulty }}">{{ daily.problem.get_difficulty_display }}</span><span>+5 ball</span></p>
+        <p class="mt-2 text-mute">{% if ds.solvers %}Bugun <b class="tabular text-ink">{{ ds.solvers }}</b> kishi yechdi{% if ds.recent %}:
+          {% for u in ds.recent %}<a class="ca-user-name !inline{{ u.rating|lg }}" style="--tier: {{ u.rating|tier_color }}" href="{% url 'profile' u.username %}" translate="no">{{ u.username }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}{% if ds.solvers > ds.recent|length %} va boshqalar{% endif %}{% endif %}
+          {% else %}Bugun hali hech kim yechmadi — birinchi bo‘ling.{% endif %}</p>
+      </div>
+      {% if user.is_authenticated %}
+      <div class="ca-box-pad border-t border-line">
+        {% include "home/_week.html" with week=ds.week %}
+        <p class="mt-2.5 text-xs text-mute">{% if daily_done %}Bugun yechildi · seriya <b class="text-ink">{{ ds.streak }}</b> kun{% elif ds.streak %}Bugun yechsangiz seriya <b class="text-ink">{{ ds.streak|add:1 }}</b> kunga yetadi, yechmasangiz uziladi{% else %}Bugun yechsangiz seriya boshlanadi{% endif %} · eng uzuni <b class="text-ink">{{ ds.best }}</b></p>
+        {% if ds.next_badge %}<p class="mt-1.5 text-xs text-mute"><i data-lucide="{{ ds.next_badge.icon }}" class="lu mr-1" aria-hidden="true"></i>«{{ ds.next_badge.name }}» nishoniga yana <b class="text-ink">{{ ds.next_badge.left }}</b> kun ketma-ket</p>{% endif %}
+      </div>
+      {% endif %}
+      <div class="ca-box-pad border-t border-line">
+        {% if daily_done %}<p class="font-semibold text-ok"><i data-lucide="check" class="lu" aria-hidden="true"></i> Bugun yechildi</p>
+        {% else %}<a class="ca-btn ca-btn-primary" href="{% url 'problems:detail' daily.problem.slug %}"><i data-lucide="play" class="lu" aria-hidden="true"></i>Yechish</a>{% endif %}
+      </div>
     </div>
   </section>
   {% endif %}

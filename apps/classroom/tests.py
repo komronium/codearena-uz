@@ -349,6 +349,13 @@ def test_the_faster_solve_wins_once_the_other_clock_cant_beat_it(duel_pool, pyth
     p1.refresh_from_db()
     assert p1.duel_rating == 1216
 
+    from django.test import Client
+    page = Client()
+    page.force_login(p2)
+    r = page.get(reverse("classroom:duels"))
+    assert [(u.username, u.duels) for u in r.context["board"]] == [(p1.username, 1), (p2.username, 1)]
+    assert r.context["duel_rank"] == 2 and r.context["record"] == {"wins": 0, "losses": 1, "draws": 0}
+
 
 @pytest.mark.django_db
 def test_no_ac_from_either_is_a_draw_and_an_open_duel_nobody_joins_expires(duel_pool):

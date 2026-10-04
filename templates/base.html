@@ -189,7 +189,7 @@ from /problems/suggest/. "go" is the second key of a "g <key>" shortcut.{% endco
   {% if user.is_authenticated %}
   {"group": "Sahifalar", "icon": "notebook-pen", "label": "Vazifalar", "words": "homework uy vazifasi guruh", "keys": "g v", "go": "v", "url": "{% url 'classroom:list' %}"},
   {"group": "Sahifalar", "icon": "swords", "label": "Duellar", "words": "duel 1v1 bellashuv", "keys": "g d", "go": "d", "url": "{% url 'classroom:duels' %}"},
-  {"group": "Sahifalar", "icon": "history", "label": "Urinishlarim", "words": "submissions yechimlar natijalar", "keys": "g u", "go": "u", "url": "{% url 'submissions:mine' %}"},
+  {"group": "Sahifalar", "icon": "history", "label": "Urinishlarim", "words": "submissions yechimlar natijalar", "keys": "g u", "go": "u", "url": "{% url 'submissions:mine' %}?mine=1"},
   {"group": "Sahifalar", "icon": "user", "label": "Profilim", "words": "profile men", "keys": "g m", "go": "m", "url": "{% url 'profile' user.username %}"},
   {"group": "Sahifalar", "icon": "pencil", "label": "Profilni tahrirlash", "words": "settings sozlamalar rasm avatar", "url": "{% url 'profile_edit' %}"},
   {"group": "Sahifalar", "icon": "key-round", "label": "Parolni almashtirish", "words": "password", "url": "{% url 'password_change' %}"},

@@ -63,17 +63,26 @@ def hub(request):
         p.dots = details[p.pk]["sections"]
         p.dots_done = sum(1 for s in p.dots if s["complete"])
     current = _current(request.user, plans)
-    next_problem = None
+    next_problem, up_next = None, []
     if current is not None and details[current.pk]["next_id"]:
-        next_problem = Problem.objects.filter(pk=details[current.pk]["next_id"]).first()
+        # the current course's next few unsolved problems, in course order
+        solved = solved_ids(request.user, current.problem_ids)
+        todo = [i for i in current.problem_ids if i not in solved][:5]
+        found = Problem.objects.in_bulk(todo)
+        up_next = [found[i] for i in todo if i in found]
+        next_problem = up_next[0] if up_next else None
     labels = dict(StudyPlan.Stage.choices)
     stages = []
     for p in plans:
         if not stages or stages[-1]["stage"] != p.stage:
             stages.append({"stage": p.stage, "label": labels.get(p.stage, p.stage), "courses": []})
         stages[-1]["courses"].append(p)
-    return render(request, "learn/hub.html", {"stages": stages, "current": current, "next_problem": next_problem,
-                                              "here": current if request.user.is_authenticated else None})
+    # a course badge per finished course; the ones with problems still to earn show locked
+    badges = [p for p in plans if p.progress["total"] and p.is_public]
+    return render(request, "learn/hub.html", {
+        "stages": stages, "current": current, "next_problem": next_problem, "up_next": up_next,
+        "here": current if request.user.is_authenticated else None,
+        "badges": badges, "badges_earned": sum(1 for p in badges if p.progress["completed"])})
 
 
 def course_detail(request, slug):

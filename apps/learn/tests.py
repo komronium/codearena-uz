@@ -172,7 +172,10 @@ def test_hub_continues_the_course_solved_in_last(client, staff, ali):
     body = client.get(reverse("learn:hub")).content.decode()
     assert 'href="/problems/b2/?plan=bb"' in body and "Siz shu yerdasiz" in body
     _solve(ali, b2)  # a finished course is never "current"
-    assert 'href="/problems/a2/?plan=aa"' in client.get(reverse("learn:hub")).content.decode()
+    r = client.get(reverse("learn:hub"))
+    assert 'href="/problems/a2/?plan=aa"' in r.content.decode()
+    assert [p.slug for p in r.context["up_next"]] == ["a2"]  # the current course's unsolved, in order
+    assert r.context["badges_earned"] == 1 and len(r.context["badges"]) == 2  # bb finished
 
 
 # ---- old addresses -----------------------------------------------------------

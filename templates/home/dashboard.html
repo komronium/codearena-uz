@@ -79,7 +79,7 @@ your latest submissions); on the right your rating box, problems to try next, ro
   {% endif %}
 
   <section class="ca-box" aria-labelledby="recent-title">
-    <h2 class="ca-box-cap" id="recent-title">So‘nggi urinishlar{% if recent %} <a class="ca-box-tools ca-link" href="{% url 'submissions:mine' %}">Hammasi »</a>{% endif %}</h2>
+    <h2 class="ca-box-cap" id="recent-title">So‘nggi urinishlar{% if recent %} <a class="ca-box-tools ca-link" href="{% url 'submissions:mine' %}?mine=1">Hammasi »</a>{% endif %}</h2>
     <div class="ca-box-body">
     {% if recent %}
       <table class="ca-table">

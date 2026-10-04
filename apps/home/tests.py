@@ -109,7 +109,7 @@ def test_home_rating_card_and_date(client, world):
     r = client.get("/")
     card = r.context["rating_card"]
     assert card["delta"] == -20 and card["rank"] == 1 and card["total"] == 1
-    assert card["next"]["name"] == "Master" and card["next"]["need"] == 120
+    assert card["next"]["name"] == "Candidate Master" and card["next"]["need"] == 120
     weekday, day_month = r.context["today_label"].split(", ")
     assert weekday in {"Dushanba", "Seshanba", "Chorshanba", "Payshanba", "Juma", "Shanba", "Yakshanba"}
     assert day_month == f"{timezone.localdate().day}-" + day_month.split("-", 1)[1]

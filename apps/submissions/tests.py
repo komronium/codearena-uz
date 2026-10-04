@@ -494,6 +494,27 @@ def test_mine_paginates_at_50(client, problem, python, user):
     assert r.context["subs"].paginator.num_pages == 2
 
 
+def test_status_page_shows_everyone_but_never_a_contests_problems_or_others_code(client, problem, python, user):
+    from apps.contests.models import Contest, ContestProblem
+
+    other = User.objects.create_user("other", password="x")
+    theirs = Submission.objects.create(user=other, problem=problem, language=python, source="x", verdict="AC")
+    mine = Submission.objects.create(user=user, problem=problem, language=python, source="x", verdict="WA")
+    hidden = Problem.objects.create(slug="held", title="Held", statement_md="x", is_public=True, author=other)
+    Submission.objects.create(user=other, problem=hidden, language=python, source="x", verdict="AC")
+    now = timezone.now()
+    upcoming = Contest.objects.create(title="U", start=now + timezone.timedelta(days=1), end=now + timezone.timedelta(days=2))
+    ContestProblem.objects.create(contest=upcoming, problem=hidden, label="A", order=0)
+
+    r = client.get(reverse("submissions:mine"))  # guests see the board too
+    assert list(r.context["subs"]) == [mine, theirs]
+    client.force_login(user)
+    body = client.get(reverse("submissions:mine")).content.decode()
+    assert reverse("submissions:detail", args=[mine.pk]) in body
+    assert reverse("submissions:detail", args=[theirs.pk]) not in body and ">other</a>" in body
+    assert list(client.get(reverse("submissions:mine") + "?mine=1").context["subs"]) == [mine]
+
+
 @patch("apps.submissions.views.django_rq.enqueue")
 def test_submit_rate_limited_after_max_per_window(enqueue, client, problem, python, user):
     from django.core.cache import cache

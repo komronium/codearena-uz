@@ -4,7 +4,7 @@ from django.utils import timezone
 
 from apps.accounts.models import User
 from apps.contests.models import Contest, ContestProblem, Participation
-from .models import Language, Problem, Tag, TestCase
+from .models import DailySolve, Language, Problem, Tag, TestCase
 from .scoring import BANDS, MIN_ATTEMPTS, compute_points
 
 
@@ -690,6 +690,11 @@ def test_problem_list_shows_the_daily_problem(client, catalog):
     assert "Kun masalasi" in r.content.decode()
     daily = r.context["daily"]
     assert daily.problem.pk not in [p.pk for p, _ in r.context["next_picks"]]
+    assert "Bugun hali hech kim yechmadi" in r.content.decode()
+    DailySolve.objects.create(user=User.objects.create_user("vali", password="x"), daily=daily)
+    body = client.get(reverse("problems:list")).content.decode()
+    assert "Bugun <b class=\"tabular text-ink\">1</b> kishi yechdi" in body and ">vali</a>" in body
+    assert "«Chiroq» nishoniga yana" in body
 
 
 @pytest.mark.django_db

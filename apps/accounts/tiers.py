@@ -3,16 +3,17 @@ the progress to the next tier, and the daily-streak badges. Views, template tags
 processors all import from here."""
 
 # (floor, ceiling, name, color) — floor None = -inf, ceiling None = +inf. The freshman scale
-# (shown ratings start at 0, see apps.contests.rating) on Codeforces' own tier colours.
+# (shown ratings start at 0, see apps.contests.rating) with Codeforces' tier names and colours.
+# Users.seen_tier stores these names: renaming one needs a data migration (accounts 0012).
 RATING_TIERS = [
-    (None, 700, "Boshlovchi", "#888888"),
-    (700, 900, "Shogird", "#008000"),
-    (900, 1100, "Mutaxassis", "#03A89E"),
-    (1100, 1300, "Bilimdon", "#0000FF"),
-    (1300, 1500, "Master", "#AA00AA"),
-    (1500, 1700, "Ustoz", "#FF8C00"),
+    (None, 700, "Newbie", "#888888"),
+    (700, 900, "Pupil", "#008000"),
+    (900, 1100, "Specialist", "#03A89E"),
+    (1100, 1300, "Expert", "#0000FF"),
+    (1300, 1500, "Candidate Master", "#AA00AA"),
+    (1500, 1700, "Master", "#FF8C00"),
     (1700, 1900, "Grandmaster", "#FF0000"),
-    (1900, None, "Afsonaviy Grandmaster", "#FF0000"),
+    (1900, None, "Legendary Grandmaster", "#FF0000"),
 ]
 TIER_ORDER = {name: i for i, (_floor, _ceiling, name, _color) in enumerate(RATING_TIERS)}
 # Legendary names are written like Codeforces' LGM: the first letter in ink (black on light), the rest red.
@@ -21,10 +22,10 @@ LEGENDARY = RATING_TIERS[-1][0]
 # Profile banner per tier: (CSS modifier, the picture's name). Styles live in app.css
 # (.ca-banner-<slug> for the banner, .ca-art-<slug> for letter avatars).
 TIER_BANNERS = {
-    "Boshlovchi": ("boshlovchi", "Yulduzli tun"), "Shogird": ("shogird", "Islimiy naqsh"),
-    "Mutaxassis": ("mutaxassis", "Daryo"), "Bilimdon": ("bilimdon", "Rishton koshini"),
-    "Master": ("master", "Registon girihi"), "Ustoz": ("ustoz", "Quyosh"),
-    "Grandmaster": ("grandmaster", "Olov"), "Afsonaviy Grandmaster": ("afsonaviy", "Toj"),
+    "Newbie": ("boshlovchi", "Yulduzli tun"), "Pupil": ("shogird", "Islimiy naqsh"),
+    "Specialist": ("mutaxassis", "Daryo"), "Expert": ("bilimdon", "Rishton koshini"),
+    "Candidate Master": ("master", "Registon girihi"), "Master": ("ustoz", "Quyosh"),
+    "Grandmaster": ("grandmaster", "Olov"), "Legendary Grandmaster": ("afsonaviy", "Toj"),
 }
 
 # Daily-problem streak badges: (days, name, icon). Earned by the best run ever, kept for good.

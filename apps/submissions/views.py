@@ -2,6 +2,7 @@ import django_rq
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import redirect_to_login
 from django.core.paginator import Paginator
 from django.http import Http404, HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -184,12 +185,23 @@ def status(request, pk):
     return render(request, "submissions/_status.html", ctx)
 
 
-@login_required
 def mine(request):
-    qs = Submission.objects.filter(user=request.user).select_related("problem", "language")
+    """The status page, after Codeforces': everyone's submissions, newest first, or with ?mine=1 your
+    own. Other people's rows leave out anything that could give a contest away: problems that aren't
+    public, and every problem a running or upcoming contest holds. Only the code stays private (_own)."""
+    own = request.GET.get("mine") == "1"
+    if own and not request.user.is_authenticated:
+        return redirect_to_login(request.get_full_path())
+    qs = Submission.objects.select_related("problem", "language", "user")
+    if own:
+        qs = qs.filter(user=request.user)
+    else:
+        qs = (qs.filter(problem__is_public=True, user__is_active=True)
+              .exclude(problem__contests__end__gt=timezone.now()))
     verdict = request.GET.get("verdict", "")
     if verdict in Submission.TERMINAL:
         qs = qs.filter(verdict=verdict)
     page = Paginator(qs, 50).get_page(request.GET.get("page"))
     verdicts = list(VERDICT_LABELS.items())
-    return render(request, "submissions/list.html", {"subs": page, "verdict": verdict, "verdicts": verdicts})
+    return render(request, "submissions/list.html",
+                  {"subs": page, "verdict": verdict, "verdicts": verdicts, "own": own})

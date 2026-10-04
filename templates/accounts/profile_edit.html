@@ -9,9 +9,9 @@
     <div class="flex items-center gap-5 border-b border-line px-6 py-5">
       <div class="relative shrink-0">
         {% if user.avatar %}
-        <img id="avatar-preview" src="{{ user.avatar.url }}" alt="" class="h-20 w-20 rounded-full object-cover">
+        <img id="avatar-preview" src="{{ user.avatar.url }}" alt="" class="h-20 w-20 rounded-[var(--ca-radius)] object-cover">
         {% else %}
-        <div class="ca-avatar ca-art-{{ user.rating|tier_slug }} h-20 w-20 text-3xl" style="--tier: {{ user.rating|tier_color }}"><span id="avatar-letter">{{ user.username|first }}</span><img id="avatar-preview" src="" alt="" class="hidden h-20 w-20 rounded-full object-cover"></div>
+        <div class="ca-avatar ca-art-{{ user.rating|tier_slug }} h-20 w-20 !rounded-[var(--ca-radius)] text-3xl" style="--tier: {{ user.rating|tier_color }}"><span id="avatar-letter">{{ user.username|first }}</span><img id="avatar-preview" src="" alt="" class="hidden h-20 w-20 rounded-[var(--ca-radius)] object-cover"></div>
         {% endif %}
       </div>
       <div class="min-w-0">
