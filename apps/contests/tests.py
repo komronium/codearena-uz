@@ -1391,3 +1391,62 @@ def test_voiding_after_rating_recomputes_the_latest_contest(client, problem_a, p
     cheat.refresh_from_db()
     assert cheat.rating == rows[cheat.pk].rating_after < 1200
     assert "Reyting qayta hisoblandi" in r.content.decode()
+
+
+# ---- CodeArena Marathon #1 and round badges --------------------------------------------------------
+
+@pytest.mark.django_db
+def test_add_codearena_marathon_1_creates_an_unrated_48_hour_round_of_ten_hidden_problems_once(client):
+    User.objects.create_superuser("admin", password="x")
+    with pytest.raises(CommandError):  # no round yet, and no start to create it with
+        call_command("add_codearena_marathon_1", stdout=StringIO())
+    start = (timezone.localtime() + timedelta(days=3)).replace(hour=18, minute=0, second=0, microsecond=0)
+    call_command("add_codearena_marathon_1", start=start.strftime("%Y-%m-%d %H:%M"), stdout=StringIO())
+    call_command("add_codearena_marathon_1", stdout=StringIO())  # re-run: the same round, nothing new
+
+    c = Contest.objects.get(title="CodeArena Marathon #1")
+    assert c.start == start and c.end - c.start == timedelta(hours=48)
+    assert (c.type, c.is_rated, c.division, c.badge) == ("score", False, 0, "Marathon #1")
+    cps = list(c.contest_problems.select_related("problem"))
+    assert [cp.label for cp in cps] == list("ABCDEFGHIJ")
+    assert [cp.points for cp in cps] == [100, 100, 200, 200, 250, 300, 350, 400, 500, 500]
+    assert [cp.problem.difficulty for cp in cps] == ["beginner"] * 2 + ["easy"] * 3 + ["medium"] * 3 + ["hard"] * 2
+    assert not any(cp.problem.is_public for cp in cps)
+    assert all(cp.problem.testcases.count() >= 20 and cp.problem.testcases.filter(is_sample=True).count() == 2
+               for cp in cps)
+    page = client.get(reverse("contests:detail", args=[c.pk])).content.decode()
+    assert "Musobaqa haqida" in page and "48 soatlik marafon" in page  # its description, rendered
+    assert "Reytingsiz" in page and "«Marathon #1» nishoni" in page
+
+
+@pytest.mark.django_db
+def test_a_published_round_with_a_badge_marks_its_solvers_profiles(client, problem_a, problem_b, python):
+    now = timezone.now()
+    c = Contest.objects.create(title="Marathon", badge="Marathon #1", start=now - timedelta(hours=3),
+                               end=now - timedelta(hours=1))
+    ContestProblem.objects.create(contest=c, problem=problem_a, label="A", order=0, points=100)
+    ContestProblem.objects.create(contest=c, problem=problem_b, label="B", order=1, points=100)
+    users = {n: User.objects.create_user(n, password="x") for n in ("first", "second", "third", "fourth", "none", "cheat")}
+    for u in users.values():
+        Participation.objects.create(user=u, contest=c)
+    _sub(users["first"], problem_a, c, python, "AC", 5)
+    _sub(users["first"], problem_b, c, python, "AC", 6)
+    for name, minutes in (("second", 10), ("third", 20), ("fourth", 30)):
+        _sub(users[name], problem_a, c, python, "AC", minutes)
+    _sub(users["none"], problem_a, c, python, "WA", 7, passed=1)
+    _sub(users["cheat"], problem_a, c, python, "AC", 1)
+    _sub(users["cheat"], problem_b, c, python, "AC", 2)
+    Participation.objects.filter(user=users["cheat"]).update(disqualified=True)
+
+    def badges(name):
+        return client.get(reverse("profile", args=[name])).context["contest_badges"]
+    assert badges("first") == []  # results are final once staff publish the round
+    Contest.objects.filter(pk=c.pk).update(published_at=now)
+    cache.clear()
+    assert [(b["name"], b["medal"], b["solved"], b["total"]) for b in badges("first")] == [("Marathon #1", 1, 2, 2)]
+    assert [b["medal"] for b in badges("third")] == [3]
+    assert [(b["medal"], b["solved"]) for b in badges("fourth")] == [(None, 1)]
+    assert badges("none") == [] and badges("cheat") == []
+    page = client.get(reverse("profile", args=["fourth"])).content.decode()
+    assert "Marathon #1 · 1/2" in page and "ca-badge-contest" in page
+    assert "ca-badge-medal-1" in client.get(reverse("profile", args=["first"])).content.decode()
