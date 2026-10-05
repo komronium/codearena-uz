@@ -135,14 +135,17 @@ def contest_report(request, pk):
                 + c["away_ms"] // 60_000 + n_suspicious.get(user, 0) * 4
                 + sum(e.weight for e in c["evidence"]))
     parts = {p.user_id: p for p in Participation.objects.filter(contest=contest)}
+    labels = dict(contest.contest_problems.values_list("problem_id", "label"))
+    voided = set(VoidedProblem.objects.filter(participation__contest=contest)
+                 .values_list("participation__user_id", "contest_problem__label"))
     for user, c in counts.items():
         c["evidence"] = evidence.get(user.pk, [])
         c["risk"] = _risk(user, c)
         c["suspicious"] = n_suspicious.get(user, 0)
         c["participation"] = parts.get(user.pk)
+        c.update(_advice(c, {labels.get(r["problem"].pk, "?") for r in suspicious if r["user"] == user},
+                         {label for user_id, label in voided if user_id == user.pk}, labels))
     rows = sorted(counts.items(), key=lambda kv: -kv[1]["risk"])
-    voided = set(VoidedProblem.objects.filter(participation__contest=contest)
-                 .values_list("participation__user_id", "contest_problem__label"))
     flags = _flag_cards(contest, counts, parts, voided)
     return render(request, "integrity/contest_report.html", {
         "contest": contest, "rows": rows, "flags": flags,
@@ -152,6 +155,24 @@ def contest_report(request, pk):
         "speed_limits": _SPEED_LIMITS_S, "contest_problems": contest.contest_problems.select_related("problem"),
         "audit": AuditEntry.objects.filter(contest=contest).select_related("actor", "subject")[:20],
     })
+
+
+def _advice(c, suspicious_labels, voided_labels, labels) -> dict:
+    """What a participant's evidence points to, by the honor rules' ladder: evidence on one problem,
+    void that problem; on two or more, or about the account itself (one device for two people, two
+    devices at once), disqualify. Staff decide; this only says which buttons fit. Gives the problems
+    with evidence, the advice ("void", "dq" or "") and each problem's void button state."""
+    problems = {labels.get(e.problem_id, "?") for e in c["evidence"] if e.problem_id} | suspicious_labels
+    still_open = sorted(problems - voided_labels)  # struck ones are decided already
+    p = c["participation"]
+    advice = ""
+    if p is not None and not p.disqualified:
+        if any(e.problem_id is None for e in c["evidence"]) or len(problems) >= 2 and still_open:
+            advice = "dq"
+        elif still_open:
+            advice = "void"
+    return {"problems": sorted(problems), "open_problems": still_open, "advice": advice,
+            "void_choices": [(label, label in voided_labels) for label in sorted(problems | voided_labels)]}
 
 
 def _empty_counts():
@@ -290,6 +311,22 @@ def flag_review(request, pk):
     if flag.reviewed:
         audit.record(request, audit.Action.FLAG_REVIEW, contest=flag.submission_a.contest, note=flag.note)
     return redirect(reverse("integrity:contest_report", args=[flag.submission_a.contest_id]) + f"#flag-{flag.pk}")
+
+
+@staff_required
+@require_POST
+def flag_user(request, pk, user_id):
+    """The deep check of one suspect: their every attempt against everyone's (flag_similarity --user)."""
+    from .management.commands.flag_similarity import flag_user as deep_check
+
+    contest = get_object_or_404(Contest, pk=pk)
+    user = get_object_or_404(User, pk=user_id)
+    created = deep_check(contest, user)
+    if created:
+        messages.success(request, f"{user.username}: {created} ta yangi o‘xshashlik topildi — pastda, «O‘xshash kodlar»da.")
+    else:
+        messages.info(request, f"{user.username}: barcha urinishlari tekshirildi, yangi o‘xshashlik topilmadi.")
+    return redirect(reverse("integrity:contest_report", args=[pk]) + "#flags")
 
 
 @staff_required

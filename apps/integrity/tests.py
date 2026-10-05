@@ -805,3 +805,94 @@ def test_staff_tabs_show_on_integrity_pages_with_the_current_one_marked(client):
     assert 'aria-label="Boshqaruv bo‘limlari"' in body
     assert f'aria-current="page" href="{reverse("integrity:practice_report")}"' in body
     assert 'aria-label="Boshqaruv bo‘limlari"' not in client.get(reverse("home")).content.decode()
+
+
+# ---- the automatic sweep, the deep check of one suspect, and the report's advice ---------------------
+
+OTHER_SOURCE = """t = int(input())
+for _ in range(t):
+    a, b = map(int, input().split())
+    if a > b:
+        a, b = b, a
+    print(b - a)
+"""
+
+
+def _ended_round(problem, minutes_ago, title="Round"):
+    c = Contest.objects.create(title=title, start=timezone.now() - timezone.timedelta(minutes=minutes_ago + 60),
+                               end=timezone.now() - timezone.timedelta(minutes=minutes_ago))
+    ContestProblem.objects.create(contest=c, problem=problem, label="A")
+    return c
+
+
+def test_pending_sweep_checks_each_ended_round_once_after_it_settles(flag_problem, flag_python):
+    settled, fresh = _ended_round(flag_problem, 30, "Settled"), _ended_round(flag_problem, 2, "Fresh")
+    for c in (settled, fresh):
+        for name in ("p1", "p2"):
+            user = User.objects.get_or_create(username=f"{name}-{c.pk}")[0]
+            _ac(user, flag_problem, c, flag_python, LONG_SOURCE)
+
+    call_command("flag_similarity", pending=True, stdout=StringIO())
+    settled.refresh_from_db()
+    fresh.refresh_from_db()
+    assert settled.similarity_checked_at is not None and fresh.similarity_checked_at is None  # judge may still run
+    assert SimilarityFlag.objects.filter(submission_a__contest=settled).count() == 1
+    assert not SimilarityFlag.objects.filter(submission_a__contest=fresh).exists()
+
+    SimilarityFlag.objects.all().delete()
+    call_command("flag_similarity", pending=True, stdout=StringIO())  # swept already: left alone
+    assert not SimilarityFlag.objects.exists()
+
+
+def test_deep_check_compares_every_attempt_and_the_sweep_keeps_what_it_found(client, flag_contest, flag_problem,
+                                                                             flag_python):
+    copier, source = User.objects.create_user("copier", password="x"), User.objects.create_user("source", password="x")
+    for u in (copier, source):
+        Participation.objects.create(user=u, contest=flag_contest)
+    _ac(source, flag_problem, flag_contest, flag_python, LONG_SOURCE)
+    # the copy failed, then the copier rewrote it: its last try and AC are its own
+    Submission.objects.create(user=copier, problem=flag_problem, contest=flag_contest, language=flag_python,
+                              source=LONG_SOURCE, verdict="WA")
+    _ac(copier, flag_problem, flag_contest, flag_python, OTHER_SOURCE)
+
+    call_command("flag_similarity", flag_contest.pk, stdout=StringIO())
+    assert not SimilarityFlag.objects.exists()  # ACs and last tries only: the early copy slips through
+
+    client.force_login(User.objects.create_user("boss", password="x", is_staff=True))
+    r = client.post(reverse("integrity:flag_user", args=[flag_contest.pk, copier.pk]), follow=True)
+    flag = SimilarityFlag.objects.get()
+    assert flag.deep and flag.score == 1.0
+    assert {flag.submission_a.user, flag.submission_b.user} == {copier, source}
+    assert "1 ta yangi o‘xshashlik topildi" in r.content.decode() and "Chuqur tekshiruv" in r.content.decode()
+
+    call_command("flag_similarity", flag_contest.pk, stdout=StringIO())  # the round's own check again
+    assert SimilarityFlag.objects.filter(pk=flag.pk, deep=True).exists()
+
+
+def test_report_advises_voiding_one_problem_and_disqualifying_for_more(client, flag_contest, flag_problem,
+                                                                       flag_python):
+    from apps.contests.models import VoidedProblem
+
+    other = Problem.objects.create(slug="b", title="B", statement_md="x", author=flag_problem.author)
+    ContestProblem.objects.create(contest=flag_contest, problem=other, label="B")
+    one, two, peer = (User.objects.create_user(n, password="x") for n in ("one", "two", "peer"))
+    for u in (one, two, peer):
+        Participation.objects.create(user=u, contest=flag_contest)
+    _ac(peer, flag_problem, flag_contest, flag_python, LONG_SOURCE)
+    _ac(peer, other, flag_contest, flag_python, OTHER_SOURCE)
+    _ac(one, flag_problem, flag_contest, flag_python, LONG_SOURCE)  # copied A only
+    _ac(two, flag_problem, flag_contest, flag_python, LONG_SOURCE)  # copied both
+    _ac(two, other, flag_contest, flag_python, OTHER_SOURCE)
+    call_command("flag_similarity", flag_contest.pk, stdout=StringIO())
+
+    client.force_login(User.objects.create_user("boss", password="x", is_staff=True))
+    rows = {u.username: c for u, c in client.get(reverse("integrity:contest_report", args=[flag_contest.pk]))
+            .context["rows"]}
+    assert (rows["one"]["advice"], rows["one"]["open_problems"]) == ("void", ["A"])
+    assert (rows["two"]["advice"], rows["two"]["problems"]) == ("dq", ["A", "B"])
+
+    VoidedProblem.objects.create(participation=Participation.objects.get(user=one), contest_problem=flag_contest
+                                 .contest_problems.get(label="A"))
+    rows = {u.username: c for u, c in client.get(reverse("integrity:contest_report", args=[flag_contest.pk]))
+            .context["rows"]}
+    assert rows["one"]["advice"] == "" and rows["one"]["void_choices"] == [("A", True)]  # decided: undo offered

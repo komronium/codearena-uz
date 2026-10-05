@@ -34,11 +34,32 @@
       <td class="tabular text-right {% if c.fast %}text-warn font-semibold{% endif %}">{{ c.fast }}</td>
       <td class="tabular text-right {% if c.copy %}text-warn{% endif %}">{{ c.copy }}</td>
       {# one line per kind of evidence, its problems after it; each links to the submission it rests on #}
-      <td class="min-w-56 text-xs">{% regroup c.evidence by label as kinds %}{% for k in kinds %}<p class="leading-5"><b class="text-bad">{{ k.grouper }}</b> · {% for e in k.list %}{% if e.submission %}<a class="ca-link" href="{% url 'submissions:detail' e.submission.pk %}">{{ e.text }}</a>{% else %}{{ e.text }}{% endif %}{% if not forloop.last %}; {% endif %}{% endfor %}</p>{% empty %}<span class="text-mute">—</span>{% endfor %}</td>
+      <td class="min-w-56 text-xs">{% regroup c.evidence by label as kinds %}{% for k in kinds %}<p class="leading-5"><b class="text-bad">{{ k.grouper }}</b> · {% for e in k.list %}{% if e.submission %}<a class="ca-link" href="{% url 'submissions:detail' e.submission.pk %}">{{ e.text }}</a>{% else %}{{ e.text }}{% endif %}{% if not forloop.last %}; {% endif %}{% endfor %}</p>{% empty %}<span class="text-mute">—</span>{% endfor %}
+        {# the honor rules' ladder: one problem's evidence voids that problem, more (or the account's own) disqualifies; staff decide #}
+        {% if c.participation and not c.participation.disqualified and c.void_choices %}
+        <div class="mt-1.5 flex flex-wrap items-center gap-1">
+          {% if c.advice == "dq" %}<span class="mr-1 font-semibold text-bad">Tavsiya: diskvalifikatsiya</span>
+          {% elif c.advice == "void" %}<span class="mr-1 font-semibold text-warn">Tavsiya: {{ c.open_problems|join:", " }} ni bekor qilish</span>{% endif %}
+          {% for label, is_void in c.void_choices %}
+          <form method="post" action="{% url 'contests:void' contest.pk user.pk %}"{% if not is_void %} onsubmit="const s=prompt('{{ label }} masalasi natijasini bekor qilish. Sabab (ixtiyoriy, faqat adminlar ko‘radi):','Nazorat hisoboti: {{ label }}'); if(s===null) return false; this.reason.value=s;"{% endif %}>{% csrf_token %}
+            <input type="hidden" name="label" value="{{ label }}"><input type="hidden" name="voided" value="{% if is_void %}0{% else %}1{% endif %}">
+            <input type="hidden" name="reason" value=""><input type="hidden" name="next" value="{% url 'integrity:contest_report' contest.pk %}">
+            {% if is_void %}<button class="ca-btn ca-btn-ghost !px-2 !py-0.5 text-xs" title="{{ label }} bekor qilingan — tiklash"><i data-lucide="undo-2" class="lu" aria-hidden="true"></i>{{ label }}</button>
+            {% else %}<button class="ca-btn ca-btn-ghost !px-2 !py-0.5 text-xs text-bad" title="Faqat {{ label }} masalasi natijasini bekor qilish"><i data-lucide="circle-slash" class="lu" aria-hidden="true"></i>{{ label }}</button>{% endif %}
+          </form>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </td>
       <td class="text-right"><span class="ca-chip {% if c.risk >= 15 %}text-bad{% elif c.risk >= 6 %}text-warn{% else %}text-mute{% endif %} tabular font-semibold">{{ c.risk }}</span></td>
       <td class="hidden md:table-cell tabular text-xs text-mute">{{ c.last|date:"d.m H:i:s" }}</td>
       <td class="text-right">
         {% if c.participation %}
+        <div class="flex items-center justify-end gap-1">
+        <a class="ca-btn ca-btn-ghost !px-2 !py-1" href="{% url 'contests:submissions' contest.pk %}?user={{ user.username|urlencode }}" title="Urinishlari, masalalar bo‘yicha" aria-label="{{ user.username }}: urinishlari"><i data-lucide="history" class="lu" aria-hidden="true"></i></a>
+        <form method="post" action="{% url 'integrity:flag_user' contest.pk user.pk %}">{% csrf_token %}
+          <button class="ca-btn ca-btn-ghost !px-2 !py-1" title="Chuqur tekshirish: barcha urinishlari hammaniki va oldingi yechimlar bilan solishtiriladi" aria-label="{{ user.username }}: chuqur tekshirish"><i data-lucide="scan-search" class="lu" aria-hidden="true"></i></button>
+        </form>
         <form method="post" action="{% url 'contests:disqualify' contest.pk user.pk %}" {% if not c.participation.disqualified %}onsubmit="const s=prompt('Sabab (ixtiyoriy):',''); if(s===null) return false; this.reason.value=s;"{% endif %}>{% csrf_token %}
           <input type="hidden" name="back" value="report"><input type="hidden" name="reason" value=""><input type="hidden" name="disqualified" value="{% if c.participation.disqualified %}0{% else %}1{% endif %}">
           {% if c.participation.disqualified %}
@@ -47,6 +68,7 @@
           <button class="ca-btn ca-btn-ghost !py-1 text-xs text-bad"><i data-lucide="ban" class="lu" aria-hidden="true"></i>Diskvalifikatsiya</button>
           {% endif %}
         </form>
+        </div>
         {% endif %}
       </td>
     </tr>
@@ -90,10 +112,11 @@
   {% endif %}
 </section>
 
-<section>
+<section id="flags">
   <div class="mb-3 flex flex-wrap items-end justify-between gap-2">
     <h2 class="ca-section-title !mb-0">O‘xshash kodlar {% if open_flags %}<span class="ca-chip ca-chip-score ml-1">{{ open_flags }} ko‘rilmagan</span>{% endif %}</h2>
-    <p class="max-w-2xl text-xs text-mute">Bir masala, bir til, kamida {{ min_lines }} qator kod, o‘xshashlik ≥ {{ threshold }}%. AC yechimlar, AC olmaganlarning oxirgi urinishi, va musobaqadan oldingi yechimlar (amaliyot, oldingi musobaqalar, muallif) solishtiriladi. O‘zgaruvchi nomlari va izohlar hisobga olinmaydi. <span class="ca-cmp-key"></span> — ikkala kodda ham bor qatorlar.</p>
+    <p class="max-w-2xl text-xs text-mute">Bir masala, bir til, kamida {{ min_lines }} qator kod, o‘xshashlik ≥ {{ threshold }}%. AC yechimlar, AC olmaganlarning oxirgi urinishi, va musobaqadan oldingi yechimlar (amaliyot, oldingi musobaqalar, muallif) solishtiriladi; ishtirokchi qatoridagi <i data-lucide="scan-search" class="lu" aria-hidden="true"></i> chuqur tekshiruv esa uning barcha urinishlarini solishtiradi. O‘zgaruvchi nomlari va izohlar hisobga olinmaydi. <span class="ca-cmp-key"></span> — ikkala kodda ham bor qatorlar.
+      {% if contest.similarity_checked_at and contest.similarity_checked_at >= contest.end %}<b class="text-ink">Barcha masalalar avtomatik tekshirildi: {{ contest.similarity_checked_at|date:"d.m H:i" }}.</b>{% elif not contest.has_ended %}<b class="text-ink">Musobaqa tugagach barcha masalalar avtomatik tekshiriladi.</b>{% endif %}</p>
   </div>
   <form method="post" action="{% url 'integrity:flag_run' contest.pk %}" class="ca-panel mb-4 flex flex-wrap items-center gap-x-4 gap-y-3 !py-3">{% csrf_token %}
     <fieldset class="flex flex-wrap items-center gap-1.5">
@@ -116,6 +139,7 @@
           <p class="truncate font-semibold">{% if f.label %}<span class="text-accent">{{ f.label }}.</span> {% endif %}{{ f.problem.title }}</p>
           <p class="text-xs text-mute">{{ f.sides.0.sub.language.name }} · {{ f.sides.0.n_hit }} / {{ f.sides.0.n_code }} qator mos · {% if f.prior %}musobaqadan oldingi yechim bilan{% else %}ikkinchi kod {% if f.gap_min %}{{ f.gap_min }} daqiqa{% else %}1 daqiqadan kam{% endif %} keyin yuborilgan{% endif %}</p>
         </div>
+        {% if f.deep %}<span class="ca-chip" title="Bitta ishtirokchining barcha urinishlari solishtirilganda topilgan">Chuqur tekshiruv</span>{% endif %}
         {% if f.reviewed %}<span class="ca-chip ca-chip-rated"><i data-lucide="check" class="lu mr-1" aria-hidden="true"></i>Ko‘rildi</span>{% else %}<span class="ca-chip ca-chip-score">Ko‘rilmagan</span>{% endif %}
       </header>
       <details class="ca-cmp border-t border-line"{% if not f.reviewed and forloop.counter <= 3 %} open{% endif %}>

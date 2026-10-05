@@ -25,4 +25,5 @@ urlpatterns = [
     ),
     path("flag/<int:pk>/review/", views.flag_review, name="flag_review"),
     path("contest/<int:pk>/flag-run/", views.flag_run, name="flag_run"),
+    path("contest/<int:pk>/flag-user/<int:user_id>/", views.flag_user, name="flag_user"),
 ]

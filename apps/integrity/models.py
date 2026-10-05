@@ -36,6 +36,9 @@ class SimilarityFlag(models.Model):
     score = models.FloatField()
     reviewed = models.BooleanField(default=False)
     note = models.TextField(blank=True)
+    # from one participant's deep check (flag_similarity --user), which compares every attempt:
+    # the round's own sweep, comparing ACs and last tries, doesn't drop it
+    deep = models.BooleanField(default=False)
 
     class Meta:
         ordering = ["-score"]

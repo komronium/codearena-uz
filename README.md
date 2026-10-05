@@ -141,10 +141,20 @@ every rating once (manual rating edits are lost):
 
     docker compose exec web python manage.py recalc_rating --replay
 
-Similarity is checked on demand from the contest's Nazorat hisoboti, for the
-problems staff pick (same-language AC pairs, both 4+ lines, >= 90%):
+Similarity (same-language AC pairs and last tries, both 4+ lines, >= 90%, plus
+solutions from before the round) runs by itself over every problem of a round 10
+minutes after it ends (the scheduler's `flag_similarity --pending`), and on demand
+from the contest's Nazorat hisoboti for the problems staff pick. A participant's
+deep check (the report's scan button) compares their every attempt, not only the
+AC and last try, with everyone's. Flags only inform: staff decide.
 
     python manage.py flag_similarity <contest_id> --problems A,C
+    python manage.py flag_similarity <contest_id> --user <handle>
+
+Two sanctions: void one problem of a participant's round (its cell counts as untried,
+the rest stands; silent for the participant), from the round's Urinishlar tab or
+the report, or disqualify the whole round. The report advises by the honor rules:
+evidence on one problem, void it; on more, or about the account, disqualify.
 
 Solves and practice points are derived (`apps/submissions/solves.py`): a solve is
 the user's earliest eligible AC (practice, or contest after the contest is

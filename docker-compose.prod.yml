@@ -25,9 +25,10 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock"
       - "/var/codearena/work:/var/codearena/work"
 
-  # Replaces host crontab: points and difficulty sweeps every 5 minutes (idempotent). Rating is applied by staff
-  # (Boshqaruv -> Musobaqalar) after disqualifying cheaters; similarity is run from the contest
-  # report for the problems they pick. Neither is swept automatically.
+  # Replaces host crontab: points and difficulty sweeps every 5 minutes (idempotent), and the similarity
+  # check of every problem of a round once it has ended (flag_similarity --pending; it only flags, staff
+  # decide). Rating is applied by staff (Boshqaruv -> Musobaqalar) after reviewing the flags; it is never
+  # swept automatically.
   scheduler:
     build: .
     restart: unless-stopped
@@ -41,6 +42,7 @@ services:
       sh -c "while true; do
                python manage.py recalc_points;
                python manage.py recalc_difficulty;
+               python manage.py flag_similarity --pending;
                sleep 300;
              done"
 
