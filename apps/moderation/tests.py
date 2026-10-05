@@ -754,3 +754,36 @@ def test_user_delete_removes_account_but_not_admins_or_authors(client):
     assert not User.objects.filter(pk=ali.pk).exists() and not Submission.objects.exists()
     assert AuditEntry.objects.filter(action="user_delete", note__contains="ali").exists()
     assert client.get(reverse("moderation:user_delete", args=[author.pk])).status_code == 405
+
+
+@pytest.mark.django_db
+def test_rating_button_reminds_of_flags_nobody_reviewed(client):
+    from django.utils import timezone
+
+    from apps.contests.models import Contest, ContestProblem
+    from apps.integrity.models import SimilarityFlag
+    from apps.problems.models import Language
+    from apps.submissions.models import Submission
+
+    author = User.objects.create_user("setter", password="x")
+    p = Problem.objects.create(slug="flagged", title="F", statement_md="x", author=author)
+    c = Contest.objects.create(title="Rated", is_rated=True, start=timezone.now() - timezone.timedelta(hours=3),
+                               end=timezone.now() - timezone.timedelta(hours=1))
+    ContestProblem.objects.create(contest=c, problem=p, label="A")
+    lang = Language.objects.create(code="python", name="Python 3", docker_image="x", run_cmd="x")
+    a, b = (Submission.objects.create(user=User.objects.create_user(n, password="x"), problem=p, contest=c,
+                                      language=lang, source="x", verdict="AC") for n in ("u1", "u2"))
+    flag = SimilarityFlag.objects.create(submission_a=a, submission_b=b, score=0.97)
+    client.force_login(User.objects.create_user("boss", password="x", is_staff=True))
+
+    page = client.get(reverse("moderation:contests")).content.decode()
+    assert "1 ta o‘xshashlik ko‘rilmagan" in page and "1 ta o‘xshashlik hali ko‘rib chiqilmagan!" in page
+    flag.reviewed = True
+    flag.save()
+    assert "ko‘rilmagan" not in client.get(reverse("moderation:contests")).content.decode()
+
+
+@pytest.mark.django_db
+def test_honor_rules_name_the_ladder_and_the_appeal_window(client):
+    page = client.get(reverse("honor")).content.decode()
+    assert "o‘sha masala natijasi bekor qilinadi" in page and "diskvalifikatsiya" in page and "48 soat" in page

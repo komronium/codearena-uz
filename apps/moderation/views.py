@@ -21,6 +21,7 @@ from apps.problems.models import Problem, Tag, TestCase
 from apps.submissions.models import VERDICT_LABELS, Submission, TestResult, UserProblemSolved
 from apps.submissions.solves import refresh_solves
 from apps.integrity import audit
+from apps.integrity.models import SimilarityFlag
 from apps.learn.models import StudyPlan
 from apps.learn.progress import plan_problem_ids
 from judge.runner import run_submission
@@ -317,10 +318,14 @@ def plan_delete(request, pk):
 
 @staff_required
 def contests(request):
+    # similarity flags nobody has looked at yet: the reminder before a rating that can't be taken back
+    open_flags = (SimilarityFlag.objects.filter(submission_a__contest=OuterRef("pk"), reviewed=False)
+                  .values("submission_a__contest").annotate(n=Count("pk")).values("n"))
     qs = Contest.objects.annotate(n_problems=Count("contest_problems", distinct=True),
                                   n_participants=Count("participations", distinct=True),
                                   n_hidden=Count("contest_problems", filter=Q(contest_problems__problem__is_public=False),
-                                                 distinct=True)).order_by("-start")
+                                                 distinct=True),
+                                  n_open_flags=Coalesce(Subquery(open_flags), 0)).order_by("-start")
     return render(request, "moderation/contests.html", {"contests": qs})
 
 
