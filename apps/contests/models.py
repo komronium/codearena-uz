@@ -54,7 +54,8 @@ class Contest(models.Model):
     problems = models.ManyToManyField(Problem, through="ContestProblem", related_name="contests")
     updated = models.DateTimeField(auto_now=True)  # the sitemap's lastmod; partial saves leave it
     # When the similarity check last ran over every problem by itself, after the end (flag_similarity
-    # --pending, the scheduler's sweep); staff's own runs for a few problems leave it.
+    # --pending, the scheduler's sweep); staff's own runs for a few problems leave it. Rounds from
+    # before the sweep carry their end: done, but never swept.
     similarity_checked_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):

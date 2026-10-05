@@ -842,6 +842,10 @@ def test_pending_sweep_checks_each_ended_round_once_after_it_settles(flag_proble
     SimilarityFlag.objects.all().delete()
     call_command("flag_similarity", pending=True, stdout=StringIO())  # swept already: left alone
     assert not SimilarityFlag.objects.exists()
+    # a round from before the sweep is marked at its end: done, and the report claims no sweep
+    Contest.objects.filter(pk=settled.pk).update(similarity_checked_at=settled.end)
+    call_command("flag_similarity", pending=True, stdout=StringIO())
+    assert not SimilarityFlag.objects.exists()
 
 
 def test_deep_check_compares_every_attempt_and_the_sweep_keeps_what_it_found(client, flag_contest, flag_problem,

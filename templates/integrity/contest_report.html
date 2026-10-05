@@ -116,7 +116,7 @@
   <div class="mb-3 flex flex-wrap items-end justify-between gap-2">
     <h2 class="ca-section-title !mb-0">O‘xshash kodlar {% if open_flags %}<span class="ca-chip ca-chip-score ml-1">{{ open_flags }} ko‘rilmagan</span>{% endif %}</h2>
     <p class="max-w-2xl text-xs text-mute">Bir masala, bir til, kamida {{ min_lines }} qator kod, o‘xshashlik ≥ {{ threshold }}%. AC yechimlar, AC olmaganlarning oxirgi urinishi, va musobaqadan oldingi yechimlar (amaliyot, oldingi musobaqalar, muallif) solishtiriladi; ishtirokchi qatoridagi <i data-lucide="scan-search" class="lu" aria-hidden="true"></i> chuqur tekshiruv esa uning barcha urinishlarini solishtiradi. O‘zgaruvchi nomlari va izohlar hisobga olinmaydi. <span class="ca-cmp-key"></span> — ikkala kodda ham bor qatorlar.
-      {% if contest.similarity_checked_at and contest.similarity_checked_at >= contest.end %}<b class="text-ink">Barcha masalalar avtomatik tekshirildi: {{ contest.similarity_checked_at|date:"d.m H:i" }}.</b>{% elif not contest.has_ended %}<b class="text-ink">Musobaqa tugagach barcha masalalar avtomatik tekshiriladi.</b>{% endif %}</p>
+      {% if contest.similarity_checked_at and contest.similarity_checked_at > contest.end %}<b class="text-ink">Barcha masalalar avtomatik tekshirildi: {{ contest.similarity_checked_at|date:"d.m H:i" }}.</b>{% elif not contest.similarity_checked_at %}<b class="text-ink">Musobaqa tugaganidan 10 daqiqa o‘tib barcha masalalar avtomatik tekshiriladi.</b>{% endif %}</p>
   </div>
   <form method="post" action="{% url 'integrity:flag_run' contest.pk %}" class="ca-panel mb-4 flex flex-wrap items-center gap-x-4 gap-y-3 !py-3">{% csrf_token %}
     <fieldset class="flex flex-wrap items-center gap-1.5">
