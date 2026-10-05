@@ -51,6 +51,9 @@ class Contest(models.Model):
     # Set by staff publishing the ended contest; from then on participants' contest ACs
     # count as practice solves (apps.submissions.solves).
     published_at = models.DateTimeField(null=True, blank=True)
+    # A badge on the profiles of everyone who solved something, once the round is published: this name
+    # ("Marathon #1") with a medal for the top three, else how many problems they solved. Empty: none.
+    badge = models.CharField(max_length=40, blank=True)
     problems = models.ManyToManyField(Problem, through="ContestProblem", related_name="contests")
     updated = models.DateTimeField(auto_now=True)  # the sitemap's lastmod; partial saves leave it
     # When the similarity check last ran over every problem by itself, after the end (flag_similarity

@@ -11,6 +11,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
 from apps.accounts.decorators import staff_required
+from apps.problems.views import _render_statement
 from apps.submissions.models import VERDICT_LABELS, Submission
 from apps.submissions.solves import refresh_solves
 
@@ -85,6 +86,7 @@ def contest_detail(request, pk):
         cp.solved_count = solved_count.get(cp.id, 0)
     return render(request, "contests/detail.html", {
         "contest": contest, "problems": problems, "registered": registered, "my_row": my_row,
+        "description_html": _render_statement(contest.description_md) if contest.description_md else "",
         "my_participation": me,
         "n_participants": contest.participations.count(),
         **_virtual_ctx(request, contest),

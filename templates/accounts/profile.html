@@ -178,7 +178,7 @@ colour is the person, green/red the results.{% endcomment %}
     </div>
   </section>
   {% endif %}
-  {% if streak_badges.earned or plan_badges or streak_badges.next and user == profile_user %}
+  {% if streak_badges.earned or plan_badges or contest_badges or streak_badges.next and user == profile_user %}
   <section class="ca-box" aria-labelledby="badges-title">
     <h2 class="ca-box-cap" id="badges-title">Nishonlar</h2>
     <div class="ca-box-body ca-box-pad space-y-2">
@@ -186,6 +186,12 @@ colour is the person, green/red the results.{% endcomment %}
       <p class="flex flex-wrap items-center gap-1.5">
         {% for b in streak_badges.earned %}<span class="ca-badge ca-badge-{{ b.icon }}" title="Kun masalasini {{ b.days }} kun ketma-ket yechgan"><i data-lucide="{{ b.icon }}" class="lu" aria-hidden="true"></i>{{ b.name }} · {{ b.days }} kun</span>{% endfor %}
         {% if streak_badges.next and user == profile_user %}<span class="ca-badge ca-badge-locked" title="Kun masalasini {{ streak_badges.next.days }} kun ketma-ket yeching"><i data-lucide="lock" class="lu" aria-hidden="true"></i>{{ streak_badges.next.name }} — yana {{ streak_badges.next.left }} kun</span>{% endif %}
+      </p>
+      {% endif %}
+      {% if contest_badges %}
+      {# a round's badge: a medal for the top three, else the problems solved; all of them, green #}
+      <p class="ca-badges" aria-label="Musobaqa nishonlari">
+        {% for b in contest_badges %}<a class="ca-badge ca-badge-contest{% if b.medal %} ca-badge-medal-{{ b.medal }}{% elif b.solved == b.total %} ca-badge-full{% endif %}" href="{% url 'contests:standings' b.contest.pk %}" title="{{ b.contest.title }}: {% if b.medal %}{{ b.medal }}-o‘rin, {% endif %}{{ b.solved }} / {{ b.total }} masala yechilgan"><i data-lucide="{% if b.medal %}medal{% elif b.solved == b.total %}trophy{% else %}flag{% endif %}" class="lu" aria-hidden="true"></i>{{ b.name }} · {% if b.medal %}{{ b.medal }}-o‘rin{% else %}{{ b.solved }}/{{ b.total }}{% endif %}</a>{% endfor %}
       </p>
       {% endif %}
       {% if plan_badges %}

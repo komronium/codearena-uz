@@ -1074,6 +1074,13 @@ section.ca-ed-full #editor .cm-editor { height: calc(100vh - 9.5rem); }
 .ca-badge-flame { background: #FFEDD5; color: #9A3412; }
 .ca-badge-sun { background: linear-gradient(90deg, #FDE68A, #F59E0B); color: #451A03; }
 .ca-badge-locked { background: rgb(var(--ca-sunk-rgb)); color: rgb(var(--ca-mute-rgb)); font-weight: 500; }
+/* a round's badge (Contest.badge): accent for taking part, green for every problem solved, medals for the top three */
+.ca-badge-contest { background: rgb(var(--ca-accent-rgb) / .12); color: rgb(var(--ca-accent-rgb)); }
+.ca-badge-full { background: rgb(var(--ca-ok-rgb) / .14); color: rgb(var(--ca-ok-rgb)); }
+.ca-badge-medal-1 { background: linear-gradient(90deg, #FDE68A, #F59E0B); color: #451A03; }
+.ca-badge-medal-2 { background: linear-gradient(90deg, #F3F4F6, #CBD5E1); color: #1E293B; }
+.ca-badge-medal-3 { background: linear-gradient(90deg, #FED7AA, #FB923C); color: #431407; }
+a.ca-badge:hover { filter: brightness(.95); }
 
 /* standings: your own line pinned above the table: rank, score, penalty, each problem's mark */
 .ca-st-mine { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem 1.25rem; padding: .45rem .8rem; border-radius: var(--ca-radius);

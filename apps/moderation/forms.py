@@ -148,13 +148,14 @@ class ContestForm(ModelForm):
     class Meta:
         model = Contest
         fields = ["title", "description_md", "start", "end", "type", "is_rated", "division", "is_official", "review_top_n",
-                  "allowed_ip_prefix", "require_group"]
+                  "allowed_ip_prefix", "require_group", "badge"]
         widgets = {
             "title": forms.TextInput(attrs=_CA_INPUT),
             "description_md": forms.Textarea(attrs={**_MD, "rows": 4}),
             "start": _DateTimeLocal(),
             "end": _DateTimeLocal(),
             "allowed_ip_prefix": forms.TextInput(attrs={**_CA_INPUT, "placeholder": "masalan 10.0."}),
+            "badge": forms.TextInput(attrs={**_CA_INPUT, "placeholder": "masalan Marathon #1"}),
             "review_top_n": forms.NumberInput(attrs={**_CA_INPUT, "min": 0, "max": 100}),
             "require_group": forms.Select(attrs={"class": "ca-select"}),
             "division": forms.Select(attrs={"class": "ca-select"}),

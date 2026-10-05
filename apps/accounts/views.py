@@ -15,6 +15,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
 from apps.contests.models import _UZ_MONTHS_SHORT, Participation
+from apps.contests.views import _standings  # cached, the standings page's own rows
 from apps.learn.models import StudyPlan
 from apps.learn.progress import plan_progress
 from apps.problems.models import Problem, Tag
@@ -243,6 +244,20 @@ def rating(request):
                   {"users": page, "total": len(ratings), "tiers": tiers, "spread": spread, "me": me, "q": q})
 
 
+def _contest_badges(user) -> list[dict]:
+    """The badges of published rounds that award one (Contest.badge), for a participant who solved at
+    least one of their problems and was not disqualified: a medal for the top three, else how many
+    were solved. From the round's own standings, so a voided problem doesn't count."""
+    badges = []
+    for p in (Participation.objects.filter(user=user, disqualified=False, contest__published_at__isnull=False)
+              .exclude(contest__badge="").select_related("contest").order_by("contest__end")):
+        row = next((r for r in _standings(p.contest) if r["user"].pk == user.pk), None)
+        if row is not None and row["solved"]:
+            badges.append({"contest": p.contest, "name": p.contest.badge, "solved": row["solved"],
+                           "total": len(row["cells"]), "medal": row["rank"] if row["rank"] <= 3 else None})
+    return badges
+
+
 def _plan_badges(user) -> list:
     """Public study plans the user finished: the quest's earned stages and other plans."""
     plans = list(StudyPlan.objects.filter(is_public=True))
@@ -323,6 +338,7 @@ def profile(request, username):
         "next_tier": _next_tier(profile_user.rating),
         "streak_badges": streak_badges(cur_streak, best_streak),
         "plan_badges": _plan_badges(profile_user),
+        "contest_badges": _contest_badges(profile_user),
         "tier_color": _tier_color(profile_user.rating),
         "rating_history": rating_history,
         "max_rating": max((p.rating_after for p in rating_history), default=None),

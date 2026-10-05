@@ -10,6 +10,12 @@ your mark, how many solved it); on the right your result, virtual participation 
 {% include "contests/_dq_banner.html" with participation=my_participation %}
 <div class="ca-cols">
 <div class="min-w-0">
+  {% if description_html %}
+  <section class="ca-box" aria-labelledby="about-title">
+    <h2 class="ca-box-cap" id="about-title">Musobaqa haqida</h2>
+    <div class="ca-box-body ca-box-pad prose max-w-none">{{ description_html|safe }}</div>
+  </section>
+  {% endif %}
   <section class="ca-box" aria-labelledby="contest-problems">
     <h2 class="ca-box-cap" id="contest-problems">Masalalar{% if problems %} <small>{{ problems|length }}</small>{% endif %}
       {% if user.is_staff %}<a class="ca-box-tools ca-link" href="{% url 'moderation:contest_edit' contest.pk %}">Boshqaruvda tahrirlash »</a>{% endif %}</h2>
@@ -114,6 +120,8 @@ your mark, how many solved it); on the right your result, virtual participation 
       {% endif %}
       {% if contest.type != "score" %}<p class="mt-1.5 text-mute">Kompilyatsiya xatosi va 1-testda (misolda) yiqilgan urinish hisobga olinmaydi.</p>{% endif %}
       {% if contest.division and contest.is_rated %}<p class="mt-1.5 text-mute">{{ contest.get_division_display }}: diapazondan tashqaridagilar ham qatnashadi, lekin reytingi o‘zgarmaydi.</p>{% endif %}
+      {% if not contest.is_rated %}<p class="mt-1.5 text-mute">Reytingsiz: natija reytingga ta’sir qilmaydi.</p>{% endif %}
+      {% if contest.badge %}<p class="mt-1.5 text-mute">Nishon: masalalar ochilgach, kamida bitta masala yechganlar profiliga «{{ contest.badge }}» nishoni qo‘shiladi; birinchi uchtalikka — medal.</p>{% endif %}
     </div>
   </section>
 </aside>

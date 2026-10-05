@@ -72,6 +72,9 @@
       <div><label class="ca-label" for="{{ form.require_group.id_for_label }}">Faqat guruh uchun</label>{{ form.require_group }}</div>
       <div><label class="ca-label" for="{{ form.allowed_ip_prefix.id_for_label }}">IP prefiks (ixtiyoriy)</label>{{ form.allowed_ip_prefix }}
         <p class="mt-1 text-xs text-mute">Faqat shu prefiksli IP dan yuborish mumkin, masalan sinf tarmog‘i.</p></div>
+      <div><label class="ca-label" for="{{ form.badge.id_for_label }}">Nishon (ixtiyoriy)</label>{{ form.badge }}
+        <p class="mt-1 text-xs text-mute">Masalalar ochilgach, kamida bitta masala yechganlar profiliga shu nomli nishon qo‘shiladi; birinchi uchtalikka — medal.</p>
+        {% if form.badge.errors %}<p class="mt-1 text-sm text-bad">{{ form.badge.errors.0 }}</p>{% endif %}</div>
     </section>
     <button type="submit" class="ca-btn ca-btn-primary w-full"><i data-lucide="check" class="lu" aria-hidden="true"></i>Saqlash</button>
   </aside>
