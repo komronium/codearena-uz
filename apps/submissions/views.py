@@ -188,14 +188,15 @@ def status(request, pk):
 def mine(request):
     """The status page, after Codeforces': everyone's submissions, newest first, or with ?mine=1 your
     own. Other people's rows leave out anything that could give a contest away: problems that aren't
-    public, and every problem a running or upcoming contest holds. Only the code stays private (_own)."""
+    public, and every problem a running or upcoming contest holds. Only the code stays private (_own).
+    Staff see every row; a round's own list is contests:submissions."""
     own = request.GET.get("mine") == "1"
     if own and not request.user.is_authenticated:
         return redirect_to_login(request.get_full_path())
     qs = Submission.objects.select_related("problem", "language", "user")
     if own:
         qs = qs.filter(user=request.user)
-    else:
+    elif not request.user.is_staff:
         qs = (qs.filter(problem__is_public=True, user__is_active=True)
               .exclude(problem__contests__end__gt=timezone.now()))
     verdict = request.GET.get("verdict", "")

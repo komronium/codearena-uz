@@ -10,6 +10,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from apps.accounts.decorators import staff_required
+from apps.submissions.models import VERDICT_LABELS, Submission
 from apps.submissions.solves import refresh_solves
 
 from apps.integrity import audit
@@ -17,7 +18,7 @@ from apps.integrity import audit
 from . import rating, virtual
 from .models import Clarification, Contest, Participation, VirtualParticipation
 from .services import access_allowed
-from .standings import compute_standings
+from .standings import compute_standings, elapsed
 
 
 def contest_list(request):
@@ -128,6 +129,33 @@ def standings(request, pk):
     # the live refresh asks for the table only: no header, menu or streak queries per poll
     template = "contests/_standings_live.html" if request.headers.get("HX-Request") else "contests/standings.html"
     return render(request, template, ctx)
+
+
+@staff_required
+def submissions(request, pk):
+    """Every submission of a round, newest first, for staff: during the round too, which the public
+    status page hides. ?problem=<label>, ?user=<handle> and ?verdict=<code> narrow it; a standings
+    cell opens one participant's one problem here. The table re-fetches itself while the round runs."""
+    contest = get_object_or_404(Contest, pk=pk)
+    problems = list(contest.contest_problems.select_related("problem"))
+    label = {cp.problem_id: cp.label for cp in problems}
+    f = {k: request.GET.get(k, "").strip() for k in ("problem", "user", "verdict")}
+    qs = (Submission.objects.filter(contest=contest).select_related("user", "problem", "language")
+          .defer("source", "compile_log"))
+    picked = next((cp for cp in problems if cp.label == f["problem"]), None)
+    if picked is not None:
+        qs = qs.filter(problem_id=picked.problem_id)
+    if f["user"]:
+        qs = qs.filter(user__username=f["user"])
+    if f["verdict"] in Submission.TERMINAL:
+        qs = qs.filter(verdict=f["verdict"])
+    page = Paginator(qs.order_by("-id"), 50).get_page(request.GET.get("page"))
+    for s in page:
+        s.label = label.get(s.problem_id, "?")
+        s.elapsed = elapsed(max(0, int((s.created - contest.start).total_seconds()) // 60))
+    template = "contests/_submissions_live.html" if request.headers.get("HX-Request") else "contests/submissions.html"
+    return render(request, template, {"contest": contest, "problems": problems, "page": page, "f": f,
+                                      "verdicts": list(VERDICT_LABELS.items())})
 
 
 @staff_required

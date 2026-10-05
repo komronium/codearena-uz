@@ -1,6 +1,6 @@
 {% comment %}A round's header, after Kick Start's: status, title and facts on the left; on the right the clock, the
 time left over a red line of the time already gone; the round's tabs on the bottom edge. Goes in base.html's
-band block. ctx: contest, active ("overview" | "scoreboard" | "questions"), registered, and optionally
+band block. ctx: contest, active ("overview" | "scoreboard" | "questions" | "submissions"), registered, and optionally
 problems and n_participants. The join buttons show on the overview only.{% endcomment %}
 <section class="ca-band" aria-labelledby="round-title">
   <div class="ca-band-in">
@@ -55,6 +55,7 @@ problems and n_participants. The join buttons show on the overview only.{% endco
       <a href="{% url 'contests:detail' contest.pk %}#contest-problems">Masalalar{% if problems %} <span>{{ problems|length }}</span>{% endif %}</a>
       <a href="{% url 'contests:standings' contest.pk %}"{% if active == "scoreboard" %} aria-current="page"{% endif %}>Natijalar</a>
       {% if registered or user.is_staff %}<a href="{% url 'contests:clarifications' contest.pk %}"{% if active == "questions" %} aria-current="page"{% endif %}>Savol-javoblar</a>{% endif %}
+      {% if user.is_staff %}<a href="{% url 'contests:submissions' contest.pk %}"{% if active == "submissions" %} aria-current="page"{% endif %}>Urinishlar</a>{% endif %}
     </nav>
   </div>
 </section>

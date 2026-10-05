@@ -53,6 +53,8 @@ a grey −N, accepted / tried per problem last. Codeforces rules have no penalty
     {% if contest.wrong_try_minutes is not None %}<td class="tabular text-mute">{{ r.penalty }}</td>{% endif %}
     {% for cell in r.cells %}
     <td class="ca-cell{% if cell.first %} ca-cell-first{% endif %}"{% if cell.solved %} title="{% if cell.first %}Birinchi bo‘lib yechdi: {% endif %}{{ cell.time }}{% if cell.wrong %}, {{ cell.wrong }} ta noto‘g‘ri urinishdan keyin{% endif %}"{% endif %}>
+      {# staff: the cell opens this participant's submissions to this problem #}
+      {% if user.is_staff %}{% with cp=problems|slice:forloop.counter|last %}<a class="ca-cell-link" href="{% url 'contests:submissions' contest.pk %}?user={{ r.user.username|urlencode }}&amp;problem={{ cp.label|urlencode }}" aria-label="{{ r.user.username }}, {{ cp.label }}: urinishlar">{% endwith %}{% endif %}
       {% if cell.first %}<span class="sr-only">birinchi bo‘lib yechdi,</span>{% endif %}
       {% if cell.solved %}
         <span class="ca-cf-ac">{{ cell.mark }}</span>
@@ -60,6 +62,7 @@ a grey −N, accepted / tried per problem last. Codeforces rules have no penalty
       {% elif cell.wrong %}
         <span class="ca-cf-wa">−{{ cell.wrong }}</span>
       {% else %}<span class="sr-only">urinish yo‘q</span>{% endif %}
+      {% if user.is_staff %}</a>{% endif %}
     </td>
     {% endfor %}
     {% if contest.rating_applied %}

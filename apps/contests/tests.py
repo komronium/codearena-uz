@@ -1261,3 +1261,43 @@ def test_teacher_verifies_own_student_and_past_official_contest_counts(client, p
     client.post(url, {"verified": "0"})
     student.refresh_from_db()
     assert student.verified_at is None and student.official_rating is None
+
+
+# ---- a round's submissions, for staff -------------------------------------------------------------
+
+@pytest.mark.django_db
+def test_staff_see_a_running_rounds_submissions(client, contest, problem_a, problem_b, python):
+    ali = User.objects.create_user("ali", password="x")
+    Participation.objects.create(user=ali, contest=contest)
+    _sub(ali, problem_a, contest, python, "WA", 5, passed=2)
+    _sub(ali, problem_b, contest, python, "AC", 30)
+    page = reverse("contests:submissions", args=[contest.pk])
+
+    # the public status page hides a running round from everyone else, and so does this list
+    client.force_login(User.objects.create_user("bob", password="x"))
+    assert client.get(reverse("submissions:mine")).context["subs"].paginator.count == 0
+    assert client.get(page).status_code in (302, 403)
+
+    client.force_login(User.objects.create_user("boss", password="x", is_staff=True))
+    assert client.get(reverse("submissions:mine")).context["subs"].paginator.count == 2
+    r = client.get(page)
+    assert [(s.label, s.verdict, s.elapsed) for s in r.context["page"]] == [("B", "AC", "00:30"), ("A", "WA", "00:05")]
+    assert 'aria-current="page">Urinishlar</a>' in r.content.decode()  # the round's own tab
+    assert [s.label for s in client.get(page + "?problem=A&user=ali").context["page"]] == ["A"]
+    assert [s.label for s in client.get(page + "?verdict=AC").context["page"]] == ["B"]
+    # while the round runs the table re-fetches itself; that request gets the table alone
+    live = client.get(page, headers={"HX-Request": "true"})
+    assert [t.name for t in live.templates][0] == "contests/_submissions_live.html"
+
+
+@pytest.mark.django_db
+def test_a_standings_cell_opens_its_submissions_for_staff_only(client, contest, problem_a, python):
+    ali = User.objects.create_user("ali", password="x")
+    Participation.objects.create(user=ali, contest=contest)
+    _sub(ali, problem_a, contest, python, "AC", 12)
+    link = f'{reverse("contests:submissions", args=[contest.pk])}?user=ali&amp;problem=A'
+    standings = reverse("contests:standings", args=[contest.pk])
+    client.force_login(ali)
+    assert link not in client.get(standings).content.decode()
+    client.force_login(User.objects.create_user("boss", password="x", is_staff=True))
+    assert link in client.get(standings).content.decode()

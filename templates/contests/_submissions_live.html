@@ -1,0 +1,33 @@
+{% load tiers %}{% comment %}The round's submissions table (contests/submissions.html). While the round runs, its first page
+re-fetches itself every 15 s with the same filters; the view answers an htmx request with just this block.{% endcomment %}
+<div id="subs-live"{% if contest.is_running and page.number == 1 %} hx-get="{{ request.get_full_path }}" hx-trigger="every 15s [!document.hidden]" hx-swap="outerHTML"{% endif %}>
+<section class="ca-box !mb-0" aria-labelledby="subs-title">
+  <div class="ca-box-cap"><h2 id="subs-title">Urinishlar <small>{{ page.paginator.count }}</small></h2></div>
+  <div class="ca-box-body">
+  {% if page.object_list %}
+  <table class="ca-table">
+    <thead><tr><th class="w-16 text-center sm:w-20">#</th><th class="w-16 text-center" title="Musobaqa boshlanganidan beri (soat:daqiqa)">Vaqt</th><th>Ishtirokchi</th><th class="w-14 text-center">Masala</th><th class="hidden w-32 text-center md:table-cell">Til</th><th class="w-28 text-center">Natija</th><th class="hidden w-24 text-center sm:table-cell">Vaqt</th><th class="w-20"><span class="sr-only">Kod va yozilishi</span></th></tr></thead>
+    <tbody>
+    {% for s in page %}
+    <tr>
+      <td class="text-center"><a class="ca-link tabular text-xs" href="{% url 'submissions:detail' s.pk %}" title="Kodni ko‘rish" aria-label="Urinish #{{ s.pk }} kodi">{{ s.pk|stringformat:"06d" }}</a></td>
+      <td class="text-center tabular text-mute"><time datetime="{{ s.created|date:'c' }}" title="{{ s.created|date:'d.m.Y H:i:s' }}">{{ s.elapsed }}</time></td>
+      <td class="max-w-0 truncate"><a class="ca-user-name{{ s.user.rating|lg }}" style="--tier: {{ s.user.rating|tier_color }}" href="{% querystring user=s.user.username page=None %}" title="Faqat {{ s.user.username }} urinishlari" translate="no">{{ s.user.username }}</a></td>
+      <td class="text-center"><a class="ca-link font-semibold" href="{% querystring problem=s.label page=None %}" title="{{ s.problem.title }}: faqat shu masala">{{ s.label }}</a></td>
+      <td class="hidden text-center text-mute md:table-cell">{{ s.language.name }}</td>
+      <td class="text-center">{% include "submissions/_verdict.html" with v=s.verdict sub=s brief=True %}</td>
+      <td class="hidden text-center tabular text-mute sm:table-cell">{% if s.is_terminal and s.verdict != "CE" %}{{ s.exec_ms }} ms{% endif %}</td>
+      <td class="whitespace-nowrap text-right">
+        <a class="ca-btn ca-btn-ghost !px-2 !py-1" href="{% url 'submissions:detail' s.pk %}" title="Kodni ko‘rish" aria-label="Kodni ko‘rish: #{{ s.pk }}"><i data-lucide="code" class="lu" aria-hidden="true"></i></a>
+        <a class="ca-btn ca-btn-ghost !px-2 !py-1" href="{% url 'integrity:replay' contest.pk s.user_id s.problem_id %}" title="Yozilishini ko‘rish" aria-label="Yozilishini ko‘rish: {{ s.user.username }}, {{ s.label }}"><i data-lucide="history" class="lu" aria-hidden="true"></i></a>
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="ca-box-pad py-8 text-center text-mute">{% if f.problem or f.user or f.verdict %}Bu filtr bo‘yicha urinish yo‘q.{% else %}Hali urinish yo‘q.{% endif %}</p>
+  {% endif %}
+  </div>
+</section>
+</div>

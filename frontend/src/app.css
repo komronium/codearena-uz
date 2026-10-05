@@ -209,6 +209,11 @@ svg.lucide { width: 1.2em; height: 1.2em; display: inline-block; vertical-align:
 .ca-st-label { display: block; font-size: .9rem; font-weight: 700; color: rgb(var(--ca-accent-rgb)); text-decoration: underline; text-underline-offset: 2px; }
 .ca-st-sub { display: block; margin-top: .05rem; font-size: .72rem; font-weight: 600; color: rgb(var(--ca-mute-rgb)); }
 .ca-cell { min-width: 4rem; line-height: 1.15; }
+/* staff: a cell opens that participant's submissions to the problem */
+.ca-cell:has(.ca-cell-link) { padding: 0; }
+.ca-cell-link { display: block; padding: .45rem .6rem; color: inherit; }
+.ca-cell-link:hover { background: rgb(var(--ca-accent-rgb) / .08); }
+.ca-cell-link:focus-visible { outline-offset: -2px; }
 .ca-cf-ac { display: block; font-weight: 700; font-size: .95rem; color: rgb(var(--ca-ok-rgb)); }
 .ca-cf-time { display: block; margin-top: .1rem; font-family: var(--ca-mono); font-size: .7rem; color: rgb(var(--ca-mute-rgb)); }
 .ca-cf-wa { font-weight: 600; color: rgb(var(--ca-mute-rgb)); }

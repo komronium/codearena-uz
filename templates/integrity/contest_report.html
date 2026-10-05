@@ -9,6 +9,7 @@
   </div>
   <div class="flex gap-2">
     <a href="{% url 'contests:standings' contest.pk %}" class="ca-btn ca-btn-ghost !py-1.5"><i data-lucide="table" class="lu" aria-hidden="true"></i>Natijalar</a>
+    <a href="{% url 'contests:submissions' contest.pk %}" class="ca-btn ca-btn-ghost !py-1.5"><i data-lucide="history" class="lu" aria-hidden="true"></i>Urinishlar</a>
     <a href="{% url 'moderation:contests' %}" class="ca-btn ca-btn-ghost !py-1.5">Orqaga</a>
   </div>
 </div>

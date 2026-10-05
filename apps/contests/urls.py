@@ -10,6 +10,7 @@ urlpatterns = [
     path("<int:pk>/register/", views.register, name="register"),
     path("<int:pk>/virtual/", views.virtual_start, name="virtual"),
     path("<int:pk>/standings/", views.standings, name="standings"),
+    path("<int:pk>/submissions/", views.submissions, name="submissions"),
     path("<int:pk>/disqualify/<int:user_id>/", views.disqualify, name="disqualify"),
     path("<int:pk>/clarifications/", views.clarifications, name="clarifications"),
     path("<int:pk>/clarifications/ask/", views.ask_clarification, name="ask_clarification"),

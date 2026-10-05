@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}{{ contest.title }} — Urinishlar{% endblock %}
+{% block band %}{% include "contests/_band.html" with active="submissions" %}{% endblock %}
+{% block content %}
+{% comment %}Staff only: the round's submissions, newest first, during the round too (the public status page hides
+them). The filters narrow it to a problem, a participant or a verdict; a standings cell opens one participant's
+one problem here, and a row's handle or letter narrows the list to it.{% endcomment %}
+<form method="get" class="mb-4 flex flex-wrap items-end gap-3">
+  <div>
+    <label class="ca-label" for="f-problem">Masala</label>
+    <select id="f-problem" name="problem" class="ca-select !w-auto max-w-[16rem] !py-1.5 text-sm">
+      <option value="">Hammasi</option>
+      {% for cp in problems %}<option value="{{ cp.label }}"{% if cp.label == f.problem %} selected{% endif %}>{{ cp.label }}. {{ cp.problem.title }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="w-full max-w-[12rem]">
+    <label class="ca-label" for="f-user">Ishtirokchi</label>
+    <input id="f-user" name="user" value="{{ f.user }}" class="ca-input !py-1.5 text-sm" placeholder="login…" autocomplete="off" spellcheck="false">
+  </div>
+  <div>
+    <label class="ca-label" for="f-verdict">Holat</label>
+    <select id="f-verdict" name="verdict" class="ca-select !w-auto !py-1.5 text-sm">
+      <option value="">Hammasi</option>
+      {% for v, label in verdicts %}<option value="{{ v }}"{% if v == f.verdict %} selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+  </div>
+  <button class="ca-btn ca-btn-ghost !py-1.5"><i data-lucide="list-filter" class="lu" aria-hidden="true"></i>Filtrlash</button>
+  {% if f.problem or f.user or f.verdict %}<a class="ca-link text-sm" href="{% url 'contests:submissions' contest.pk %}">Tozalash</a>{% endif %}
+</form>
+{% include "contests/_submissions_live.html" %}
+{% include "_pagination.html" with page=page %}
+{% endblock %}
