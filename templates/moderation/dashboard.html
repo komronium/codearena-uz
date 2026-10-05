@@ -3,7 +3,7 @@
 {% block content %}
 <h1 class="ca-page-title mb-6">Boshqaruv</h1>
 
-<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">  {# eight counters: two full rows of four #}
   {# things waiting for a decision come first #}
   <a href="{% url 'moderation:queue' %}" class="ca-panel ca-stat-card {% if counts.pending %}ca-stat-card-warn{% endif %}">
     <i data-lucide="shield-check" class="lu" aria-hidden="true"></i>

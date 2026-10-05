@@ -106,7 +106,7 @@
 
         {% if problem.kind == "sql" %}
         <div>
-          <h2 class="ca-statement-h">Namunaviy ma‘lumotlar</h2>
+          <h2 class="ca-statement-h">Namunaviy ma’lumotlar</h2>
           {% for t in sql_tables %}
           <figure class="ca-sql-table">
             <figcaption><i data-lucide="table-2" class="lu" aria-hidden="true"></i><span translate="no">{{ t.name }}</span><span class="text-mute">· {{ t.rows|length }} qator</span></figcaption>
@@ -130,7 +130,7 @@
         </div>
         {% endif %}
         <div>
-          <h2 class="ca-statement-h">Namunaviy ma‘lumotlarda kutilgan natija</h2>
+          <h2 class="ca-statement-h">Namunaviy ma’lumotlarda kutilgan natija</h2>
           <figure class="ca-sql-table">
             <div class="overflow-x-auto">
               <table class="ca-table">
@@ -138,18 +138,18 @@
               </table>
             </div>
           </figure>
-          <p class="mt-2 text-xs text-mute">{% if sql_dataset.ordered %}Qatorlar aynan shu tartibda bo‘lishi kerak.{% else %}Qatorlar tartibi ahamiyatsiz, ustunlar tartibi muhim.{% endif %}{% if sql_dataset.check_seed_sql %} Yechim yashirin, kattaroq ma‘lumotlarda ham tekshiriladi.{% endif %}</p>
+          <p class="mt-2 text-xs text-mute">{% if sql_dataset.ordered %}Qatorlar aynan shu tartibda bo‘lishi kerak.{% else %}Qatorlar tartibi ahamiyatsiz, ustunlar tartibi muhim.{% endif %}{% if sql_dataset.check_seed_sql %} Yechim yashirin, kattaroq ma’lumotlarda ham tekshiriladi.{% endif %}</p>
         </div>
         {% else %}
         {% if input_html %}
         <div>
-          <h2 class="ca-statement-h">Kirish ma‘lumotlari</h2>
+          <h2 class="ca-statement-h">Kirish ma’lumotlari</h2>
           <div class="prose max-w-none">{{ input_html|safe }}</div>
         </div>
         {% endif %}
         {% if output_html %}
         <div>
-          <h2 class="ca-statement-h">Chiqish ma‘lumotlari</h2>
+          <h2 class="ca-statement-h">Chiqish ma’lumotlari</h2>
           <div class="prose max-w-none">{{ output_html|safe }}</div>
         </div>
         {% endif %}
@@ -310,7 +310,7 @@
       <div class="flex flex-wrap items-center justify-between gap-3 border-t border-line px-4 py-3">
         <span class="hidden text-xs text-mute sm:inline"><kbd class="ca-kbd">Ctrl</kbd> + <kbd class="ca-kbd">Enter</kbd> — yuborish · <kbd class="ca-kbd">Ctrl</kbd> + <kbd class="ca-kbd">'</kbd> — sinash{% if not contest and user.is_authenticated %}<span title="Mashqda kod qanday yozilgani (uzun kod qo‘yish, boshqa oynaga o‘tish) o‘qituvchingizga ko‘rinadi. Ko‘chirilgan yechim uchun ball berilmaydi."> · {% if problem.difficulty == "beginner" or problem.difficulty == "easy" %}uzun kod qo‘yish yopiq{% else %}o‘qituvchi ko‘radi{% endif %} <i data-lucide="info" class="lu" aria-hidden="true"></i></span>{% endif %}</span>
         <div class="ml-auto flex items-center gap-2">
-          <button type="button" id="trial-btn" class="ca-btn ca-btn-ghost" title="{% if problem.kind == 'sql' %}So‘rovni namunaviy ma‘lumotlarda ishga tushirish{% else %}Namunaviy testlarda sinash{% endif %} — urinish hisoblanmaydi"><i data-lucide="play" class="lu" aria-hidden="true"></i>Sinab ko‘rish</button>
+          <button type="button" id="trial-btn" class="ca-btn ca-btn-ghost" title="{% if problem.kind == 'sql' %}So‘rovni namunaviy ma’lumotlarda ishga tushirish{% else %}Namunaviy testlarda sinash{% endif %} — urinish hisoblanmaydi"><i data-lucide="play" class="lu" aria-hidden="true"></i>Sinab ko‘rish</button>
           <button type="submit" id="submit-btn" class="ca-btn ca-btn-primary"><i data-lucide="rocket" class="lu" aria-hidden="true"></i>Yuborish</button>
         </div>
       </div>
@@ -580,7 +580,7 @@ resolves their bare imports so @codemirror/state loads once — two copies break
   if (trialBtn) {
     const out = document.getElementById("trial-out"), stdinEl = document.getElementById("trial-stdin");  // no stdin box on SQL problems
     const esc = (t) => (t ?? "").replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
-    const V = { AC: ["ac", "check", "To‘g‘ri"], OK: ["ac", "check", "Bajarildi"], WA: ["bad", "x", "Noto‘g‘ri javob"],
+    const V = { AC: ["ac", "check", "Qabul qilindi"], OK: ["ac", "check", "Bajarildi"], WA: ["bad", "x", "Noto‘g‘ri javob"],
                 TLE: ["warn", "clock", "Vaqt oshdi"], MLE: ["warn", "cpu", "Xotira oshdi"], OLE: ["warn", "scissors", "Chiqish juda katta"],
                 RE: ["bad", "triangle-alert", "Dastur xatosi"], CE: ["mute", "code", "Kompilyatsiya xatosi"], IE: ["mute", "circle-alert", "Xato"] };
     const chip = (v) => { const [c, i, t] = V[v] || V.IE; return `<span class="ca-verdict ca-verdict-${c}"><i data-lucide="${i}" class="lu" aria-hidden="true"></i>${t}</span>`; };
@@ -595,12 +595,12 @@ resolves their bare imports so @codemirror/state loads once — two copies break
         return show(`<p class="flex items-center gap-2">${chip(r.verdict)}${r.verdict === "TLE" ? "So‘rov vaqt chegarasidan oshdi." : "So‘rov bajarilmadi: sintaksisni tekshiring. Faqat bitta SELECT (yoki WITH … SELECT) ruxsat etiladi."}</p>`);
       }
       const more = r.n_rows > r.rows.length ? `<p class="mt-1 text-xs text-mute">Jami ${r.n_rows} qator, birinchi ${r.rows.length} tasi ko‘rsatildi.</p>` : "";
-      show(`<p class="flex items-center gap-2 font-medium">${chip(r.verdict)}${r.verdict === "AC" ? "Namunaviy ma‘lumotlarda natija to‘g‘ri" : "Natija kutilganidan farq qiladi"}</p>
+      show(`<p class="flex items-center gap-2 font-medium">${chip(r.verdict)}${r.verdict === "AC" ? "Namunaviy ma’lumotlarda natija to‘g‘ri" : "Natija kutilganidan farq qiladi"}</p>
         <div class="mt-2 grid gap-3 lg:grid-cols-2">
           <div><p class="mb-1 text-xs font-medium text-mute">Sizning natijangiz</p>${grid(r.columns, r.rows)}${more}</div>
           <div><p class="mb-1 text-xs font-medium text-mute">Kutilgan</p>${grid([], r.expected)}</div>
         </div>
-        <p class="mt-2 text-xs text-mute">Sinov urinish hisoblanmaydi. Yuborilganda yashirin ma‘lumotlarda ham tekshiriladi.</p>`);
+        <p class="mt-2 text-xs text-mute">Sinov urinish hisoblanmaydi. Yuborilganda yashirin ma’lumotlarda ham tekshiriladi.</p>`);
     }
     function render(r) {
       if (r.sql) return renderSql(r);

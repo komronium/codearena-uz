@@ -9,10 +9,5 @@
   {% if contest %}<a href="{% url 'integrity:audit' %}" class="ca-btn ca-btn-ghost !py-1.5">Hammasi</a>{% endif %}
 </div>
 {% include "integrity/_audit_rows.html" with entries=entries %}
-{% if entries.has_other_pages %}
-<nav class="mt-4 flex justify-between text-sm" aria-label="Sahifalar">
-  {% if entries.has_previous %}<a class="ca-link" href="?{% if contest %}contest={{ contest.pk }}&{% endif %}page={{ entries.previous_page_number }}">← Yangiroq</a>{% else %}<span></span>{% endif %}
-  {% if entries.has_next %}<a class="ca-link" href="?{% if contest %}contest={{ contest.pk }}&{% endif %}page={{ entries.next_page_number }}">Eskiroq →</a>{% endif %}
-</nav>
-{% endif %}
+{% include "_pagination.html" with page=entries %}
 {% endblock %}

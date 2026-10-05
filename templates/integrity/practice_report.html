@@ -39,7 +39,7 @@
     <td class="min-w-40"><a class="ca-link" href="{% url 'problems:detail' s.problem.slug %}">{{ s.problem.title }}</a>
       <span class="ca-diff ca-diff-{{ s.problem.difficulty }} ml-1 text-xs">{{ s.problem.get_difficulty_display }}</span></td>
     <td class="min-w-56 text-xs">{% for w in r.why %}<p class="leading-5">{{ w }}</p>{% endfor %}
-      <a class="ca-link text-xs" href="{% url 'submissions:detail' s.first_ac_submission_id %}">Kodni ko‘rish →</a></td>
+      <a class="ca-link text-xs" href="{% url 'submissions:detail' s.first_ac_submission_id %}">Kodni ko‘rish »</a></td>
     <td class="text-right"><span class="ca-chip {% if r.score >= 8 %}text-bad{% else %}text-warn{% endif %} tabular font-semibold">{{ r.score }}</span></td>
     <td class="hidden md:table-cell tabular text-xs text-mute whitespace-nowrap">{{ s.first_ac_submission.created|date:"d.m H:i" }}</td>
     <td class="text-right whitespace-nowrap">

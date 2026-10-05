@@ -796,3 +796,12 @@ def test_a_strongly_flagged_new_solve_is_held_until_a_teacher_clears_it(client):
     client.post(reverse("integrity:practice_decide", args=[kid.pk, p.pk]), {"decision": "clear"})
     kid.refresh_from_db()
     assert kid.practice_points == p.points
+
+
+@pytest.mark.django_db
+def test_staff_tabs_show_on_integrity_pages_with_the_current_one_marked(client):
+    client.force_login(User.objects.create_user("tabs-boss", password="x", is_staff=True))
+    body = client.get(reverse("integrity:practice_report")).content.decode()
+    assert 'aria-label="Boshqaruv bo‘limlari"' in body
+    assert f'aria-current="page" href="{reverse("integrity:practice_report")}"' in body
+    assert 'aria-label="Boshqaruv bo‘limlari"' not in client.get(reverse("home")).content.decode()

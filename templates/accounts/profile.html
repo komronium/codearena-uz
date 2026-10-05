@@ -2,41 +2,53 @@
 {% block title %}{{ profile_user.username }}{% endblock %}
 {% block description %}{{ profile_user.username }} — CodeArena’dagi profili: reyting {{ profile_user.rating }}, {{ solved|length }} ta yechilgan masala, musobaqalar tarixi.{% endblock %}
 {% block content %}
-{% comment %}After Codeforces' profile: a boxed card with the tier over the handle in its colour, the
-name, the facts (rating with its max, places, practice points) and the picture on the right; under it the
-rating graph, the contests, the activity and the problems. On the right what was solved by level and the
-badges. Colour only carries meaning: the tier colour is the person, green/red the results.{% endcomment %}
+{% comment %}A profile: a boxed card with the picture, the handle in its tier colour and the tier as a chip, the
+name and facts, then one row of numbers (rating with its max, places, contests, practice points, the daily
+streak); under it the rating graph and contests, the activity and the problem map. On the right what was solved
+by level, every topic as a bar of how much of it is solved, and the badges. Colour only carries meaning: the tier
+colour is the person, green/red the results.{% endcomment %}
 <div class="ca-cols">
 <div class="min-w-0">
 <section class="ca-box" aria-labelledby="who" style="--tier: {{ tier_color }}">
-  <div class="ca-box-body ca-box-pad flex flex-wrap items-start justify-between gap-5">
-    <div class="min-w-0">
-      <p class="ca-tier-ink text-sm font-semibold{{ profile_user.rating|lg }}">{% if rating_history %}{{ tier }}{% else %}<span class="text-mute">Reytingsiz</span>{% endif %}</p>
-      <h1 id="who" class="ca-tier-ink text-2xl font-bold leading-tight{{ profile_user.rating|lg }}" translate="no">{{ profile_user.username }}</h1>
-      {% if profile_user.get_full_name %}<p class="mt-0.5 text-mute">{{ profile_user.get_full_name }}</p>{% endif %}
-      <p class="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-mute">
-        {% if profile_user.location %}<span><i data-lucide="map-pin" class="lu mr-1" aria-hidden="true"></i>{{ profile_user.location }}</span>{% endif %}
-        {% if profile_user.school %}<span><i data-lucide="graduation-cap" class="lu mr-1" aria-hidden="true"></i>{{ profile_user.school }}</span>{% endif %}
-        <span><i data-lucide="calendar" class="lu mr-1" aria-hidden="true"></i>{{ profile_user.date_joined|date:"d.m.Y" }} dan beri</span>
-        {% if profile_user.is_staff %}<span><i data-lucide="shield-check" class="lu mr-1" aria-hidden="true"></i>Moderator</span>{% endif %}
-      </p>
-      <dl class="ca-profile-facts mt-4">
-        <div><dt>Reyting</dt><dd>{% if rating_history %}<b class="ca-tier-ink">{{ profile_user.rating }}</b>{% if max_rating > profile_user.rating %} <span class="text-mute">(max. <span class="ca-tier-ink" style="--tier: {{ max_rating|tier_color }}">{{ max_rating }}</span>)</span>{% endif %}{% else %}—{% endif %}</dd></div>
-        <div><dt>Reytingda o‘rni</dt><dd>{% if rating_rank %}<b>{{ rating_rank }}</b> <span class="text-mute">/ {{ total_rated }}</span>{% else %}—{% endif %}</dd></div>
-        <div><dt>Musobaqalar</dt><dd>{{ rating_history|length }}</dd></div>
-        <div><dt>Amaliyot ball</dt><dd><b>{{ profile_user.practice_points }}</b> <span class="text-mute">· yechilgan {{ solved|length }} ta masala uchun</span></dd></div>
-        <div><dt>Ballda o‘rni</dt><dd>{% if points_rank %}<b>{{ points_rank }}</b> <span class="text-mute">/ {{ total_users }}</span>{% else %}—{% endif %}</dd></div>
-        <div><dt>Kun masalasi seriyasi</dt><dd>{{ streak.0 }} kun <span class="text-mute">· eng uzuni {{ streak.1 }}</span></dd></div>
-      </dl>
-      {% if next_tier and rating_history %}<p class="mt-3 text-xs text-mute">{{ next_tier.name }} darajasigacha <b class="text-ink">{{ next_tier.need }}</b> reyting</p>
-      <div class="ca-progress mt-1 max-w-xs" role="progressbar" aria-label="{{ next_tier.name }} darajasigacha" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ next_tier.pct }}"><span style="width: {{ next_tier.pct }}%; background: var(--tier)"></span></div>{% endif %}
+  <div class="ca-box-body">
+    <div class="ca-box-pad flex items-start gap-4 sm:gap-5">
+      {% if profile_user.avatar %}<img src="{{ profile_user.avatar.url }}" alt="" class="h-16 w-16 shrink-0 rounded-[var(--ca-radius)] border border-line object-cover sm:h-24 sm:w-24">
+      {% else %}<span class="ca-avatar ca-art-{{ banner.0 }} !h-16 !w-16 shrink-0 !rounded-[var(--ca-radius)] text-3xl sm:!h-24 sm:!w-24 sm:text-4xl" aria-hidden="true">{{ profile_user.username|slice:":1" }}</span>{% endif %}
+      <div class="min-w-0 flex-1">
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <h1 id="who" class="ca-tier-ink text-2xl font-bold leading-tight{{ profile_user.rating|lg }}" translate="no">{{ profile_user.username }}</h1>
+          {% if rating_history %}<span class="ca-user-tier">{{ tier }}</span>{% else %}<span class="ca-tag">Reytingsiz</span>{% endif %}
+        </div>
+        {% if profile_user.get_full_name %}<p class="mt-0.5 text-mute">{{ profile_user.get_full_name }}</p>{% endif %}
+        <p class="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-mute">
+          {% if profile_user.location %}<span><i data-lucide="map-pin" class="lu mr-1" aria-hidden="true"></i>{{ profile_user.location }}</span>{% endif %}
+          {% if profile_user.school %}<span><i data-lucide="graduation-cap" class="lu mr-1" aria-hidden="true"></i>{{ profile_user.school }}</span>{% endif %}
+          <span><i data-lucide="calendar" class="lu mr-1" aria-hidden="true"></i>{{ profile_user.date_joined|date:"d.m.Y" }} dan beri</span>
+          {% if profile_user.is_staff %}<span><i data-lucide="shield-check" class="lu mr-1" aria-hidden="true"></i>Moderator</span>{% endif %}
+        </p>
+      </div>
+      {% if user == profile_user %}
+      <div class="flex shrink-0 flex-col items-end gap-1.5">
+        <a href="{% url 'profile_edit' %}" class="ca-btn ca-btn-ghost ca-btn-xs"><i data-lucide="pencil" class="lu" aria-hidden="true"></i>Tahrirlash</a>
+        {% if user.is_staff %}<a href="{% url 'moderation:dashboard' %}" class="ca-link text-xs">Boshqaruv »</a>{% endif %}
+      </div>
+      {% endif %}
     </div>
-    <div class="flex items-center gap-3 max-sm:order-first sm:flex-col sm:gap-2">
-      {% if profile_user.avatar %}<img src="{{ profile_user.avatar.url }}" alt="" class="h-16 w-16 rounded-[var(--ca-radius)] sm:h-28 sm:w-28 border border-line object-cover">
-      {% else %}<span class="ca-avatar ca-art-{{ banner.0 }} !h-16 !w-16 !rounded-[var(--ca-radius)] text-3xl sm:!h-28 sm:!w-28 sm:text-5xl" aria-hidden="true">{{ profile_user.username|slice:":1" }}</span>{% endif %}
-      {% if user == profile_user %}<a href="{% url 'profile_edit' %}" class="ca-btn ca-btn-ghost ca-btn-xs"><i data-lucide="pencil" class="lu" aria-hidden="true"></i>Tahrirlash</a>
-      {% if user.is_staff %}<a href="{% url 'moderation:dashboard' %}" class="ca-link text-xs">Boshqaruv »</a>{% endif %}{% endif %}
+    <dl class="ca-profile-stats">
+      <div><dt>Reyting</dt><dd>{% if rating_history %}<b class="ca-tier-ink">{{ profile_user.rating }}</b>{% else %}—{% endif %}</dd>
+        {% if rating_history and max_rating > profile_user.rating %}<dd class="ca-stat-note">maks. <span class="ca-tier-ink" style="--tier: {{ max_rating|tier_color }}">{{ max_rating }}</span></dd>{% endif %}</div>
+      <div><dt>Reytingda o‘rni</dt><dd>{% if rating_rank %}{{ rating_rank }}<small>/ {{ total_rated }}</small>{% else %}—{% endif %}</dd></div>
+      <div><dt>Musobaqalar</dt><dd>{{ rating_history|length }}</dd></div>
+      <div><dt>Amaliyot ball</dt><dd>{{ profile_user.practice_points }}</dd><dd class="ca-stat-note">yechilgan {{ solved|length }} ta masala uchun</dd></div>
+      <div><dt>Ballda o‘rni</dt><dd>{% if points_rank %}{{ points_rank }}<small>/ {{ total_users }}</small>{% else %}—{% endif %}</dd></div>
+      <div><dt>Kun masalasi seriyasi</dt><dd>{{ streak.0 }} kun</dd><dd class="ca-stat-note">eng uzuni {{ streak.1 }}</dd></div>
+    </dl>
+    {% if next_tier and rating_history %}
+    <div class="ca-box-pad flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-line !py-2.5 text-xs text-mute">
+      <span><span class="ca-tier-ink font-semibold" style="--tier: {{ next_tier.color }}">{{ next_tier.name }}</span> darajasigacha <b class="tabular text-ink">{{ next_tier.need }}</b> reyting</span>
+      <div class="ca-progress min-w-[8rem] flex-1" role="progressbar" aria-label="{{ next_tier.name }} darajasigacha" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ next_tier.pct }}"><span style="width: {{ next_tier.pct }}%; background: var(--tier)"></span></div>
     </div>
+    {% endif %}
   </div>
 </section>
 
@@ -102,27 +114,6 @@ badges. Colour only carries meaning: the tier colour is the person, green/red th
   </div>
 </section>
 
-{% if skill_groups %}
-<section class="ca-box" aria-labelledby="skills-title">
-  <h2 class="ca-box-cap" id="skills-title">Mavzular</h2>
-  <div class="ca-box-body ca-box-pad space-y-4">
-    {% for kind, label, rows in skill_groups %}
-    <div>
-      <p class="mb-2 flex items-center gap-1.5 text-xs font-medium text-mute"><i data-lucide="{% if kind == 'sql' %}database{% else %}code{% endif %}" class="lu" aria-hidden="true"></i>{{ label }}</p>
-      {# a pill per topic, filled as far as it is solved; untouched ones stay quiet #}
-      <div class="ca-skills">
-        {% for r in rows %}
-        <a class="ca-skill{% if kind == 'sql' %} is-sql{% endif %}{% if r.solved == r.total %} is-done{% elif r.solved %} is-started{% endif %}" style="--p: {{ r.pct }}%" href="{% url 'problems:list' %}?tag={{ r.tag.name|urlencode }}" title="{{ r.tag.name }}: {{ r.total }} tadan {{ r.solved }} tasi yechilgan">
-          {% if r.solved == r.total %}<i data-lucide="check" class="lu" aria-hidden="true"></i>{% endif %}{{ r.tag.name }}<span class="ca-skill-n tabular">{{ r.solved }}/{{ r.total }}</span>
-        </a>
-        {% endfor %}
-      </div>
-    </div>
-    {% endfor %}
-  </div>
-</section>
-{% endif %}
-
 <section class="ca-box !mb-0" aria-labelledby="map-title">
   <div class="ca-box-cap">
     <h2 id="map-title">Masalalar xaritasi</h2>
@@ -163,6 +154,26 @@ badges. Colour only carries meaning: the tier colour is the person, green/red th
       {% if solved_hidden > 0 %}<p class="mt-1">Yana <b class="tabular text-ink">{{ solved_hidden }}</b> ta yechilgan masala hozir kelgusi musobaqada, shuning uchun yashirin.</p>{% endif %}
     </div>{% endif %}
   </section>
+  {% if skill_groups %}
+  <section class="ca-box" aria-labelledby="skills-title">
+    <h2 class="ca-box-cap" id="skills-title">Mavzular</h2>
+    <div class="ca-box-body">
+      {% for kind, label, rows in skill_groups %}
+      {% if skill_groups|length > 1 %}<p class="ca-box-pad !pb-1 flex items-center gap-1.5 text-xs font-medium text-mute{% if not forloop.first %} border-t border-line{% endif %}"><i data-lucide="{% if kind == 'sql' %}database{% else %}code{% endif %}" class="lu" aria-hidden="true"></i>{{ label }}</p>{% endif %}
+      {# a row per topic, most problems first: its name, solved of all, and a bar filled as far #}
+      <ul class="ca-topic-bars{% if kind == 'sql' %} is-sql{% endif %}">
+        {% for r in rows %}
+        <li class="{% if r.solved == r.total %}is-done{% elif not r.solved %}is-new{% endif %}">
+          <a class="ca-link" href="{% url 'problems:list' %}?tag={{ r.tag.name|urlencode }}">{{ r.tag.name }}</a>
+          <span class="tabular text-xs"><b>{{ r.solved }}</b><span class="text-mute">/{{ r.total }}</span></span>
+          <span class="ca-topic-bar" role="img" aria-label="{{ r.tag.name }}: {{ r.total }} tadan {{ r.solved }} tasi yechilgan"><span style="width: {{ r.pct }}%"></span></span>
+        </li>
+        {% endfor %}
+      </ul>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
   {% if streak_badges.earned or plan_badges or streak_badges.next and user == profile_user %}
   <section class="ca-box" aria-labelledby="badges-title">
     <h2 class="ca-box-cap" id="badges-title">Nishonlar</h2>

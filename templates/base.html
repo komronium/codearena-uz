@@ -44,7 +44,7 @@
 <header class="ca-nav">{% include "_navbar.html" %}</header>
 {% block band %}{% endblock %}
 <main id="main" class="ca-main">
-  {% if user.is_staff and request.resolver_match.namespace == "moderation" or user.is_staff and request.resolver_match.url_name == "audit" %}{% include "_mod_tabs.html" %}{% endif %}
+  {% if user.is_staff and request.resolver_match.namespace == "moderation" or user.is_staff and request.resolver_match.namespace == "integrity" %}{% include "_mod_tabs.html" %}{% endif %}
   {% if messages %}
   <div class="mb-6 space-y-2" role="status" aria-live="polite">
     {% for m in messages %}
@@ -58,8 +58,8 @@
 <nav class="ca-bottom-nav md:hidden" aria-label="Mobil menyu">
   {% with ns=request.resolver_match.namespace un=request.resolver_match.url_name %}
   <a href="{% url 'home' %}"{% if un == 'home' %} class="is-active" aria-current="page"{% endif %}><span class="ca-bn-icon"><i data-lucide="house" class="lu" aria-hidden="true"></i></span><span>Bosh sahifa</span></a>
-  <a href="{% url 'problems:list' %}"{% if ns == 'problems' and not contest %} class="is-active" aria-current="page"{% endif %}><span class="ca-bn-icon"><i data-lucide="list-checks" class="lu" aria-hidden="true"></i></span><span>Masalalar</span></a>
-  <a href="{% url 'learn:hub' %}"{% if ns == 'learn' %} class="is-active" aria-current="page"{% endif %}><span class="ca-bn-icon"><i data-lucide="graduation-cap" class="lu" aria-hidden="true"></i></span><span>O‘rganish</span></a>
+  <a href="{% url 'problems:list' %}"{% if ns == 'problems' and not contest or ns == 'learn' and un == 'lists' or ns == 'learn' and un == 'list' %} class="is-active" aria-current="page"{% endif %}><span class="ca-bn-icon"><i data-lucide="list-checks" class="lu" aria-hidden="true"></i></span><span>Masalalar</span></a>
+  <a href="{% url 'learn:hub' %}"{% if ns == 'learn' and un != 'lists' and un != 'list' %} class="is-active" aria-current="page"{% endif %}><span class="ca-bn-icon"><i data-lucide="graduation-cap" class="lu" aria-hidden="true"></i></span><span>O‘rganish</span></a>
   <a href="{% url 'contests:list' %}"{% if ns == 'contests' or ns == 'problems' and contest %} class="is-active" aria-current="page"{% endif %}><span class="ca-bn-icon"><i data-lucide="trophy" class="lu" aria-hidden="true"></i>{% if nav.live %}<b class="ca-badge-live"><span class="sr-only">, jonli musobaqa bor</span></b>{% endif %}</span><span>Musobaqa</span></a>
   <a href="{% url 'rating' %}"{% if un == 'rating' or un == 'top' %} class="is-active" aria-current="page"{% endif %}><span class="ca-bn-icon"><i data-lucide="chart-column" class="lu" aria-hidden="true"></i></span><span>Reyting</span></a>
   <button type="button" data-menu-open aria-haspopup="dialog" aria-controls="ca-menu"><span class="ca-bn-icon">{% if user.is_authenticated %}<i data-lucide="user" class="lu" aria-hidden="true"></i>{% else %}<i data-lucide="menu" class="lu" aria-hidden="true"></i>{% endif %}</span><span>{% if user.is_authenticated %}Men{% else %}Menyu{% endif %}</span>{% with n=unread_reviews|add:nav.due %}{% if n %}<b class="ca-badge-n ca-bn-badge">{{ n }}<span class="sr-only"> ta yangi: sharh yoki muddati yaqin vazifa</span></b>{% endif %}{% endwith %}</button>
@@ -135,6 +135,11 @@ A native dialog gives focus trapping and Esc for free.{% endcomment %}
     menu.querySelector("[data-menu-close]").addEventListener("click", () => menu.close());
     menu.addEventListener("click", (e) => { if (e.target === menu) menu.close(); });  // tap on the backdrop
   })();
+  // A code block too big for its box scrolls; Safari reaches such a scroller from the keyboard
+  // only when it is focusable.
+  document.querySelectorAll("pre").forEach((pre) => {
+    if (pre.scrollWidth > pre.clientWidth || pre.scrollHeight > pre.clientHeight) pre.tabIndex = 0;
+  });
   (() => {
     // Theme: "system" follows the OS. Guests cycle it with the header button; signed-in
     // users pick it in the account menu.

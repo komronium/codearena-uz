@@ -2,57 +2,67 @@
 {% block title %}{{ contest.title }} — Savollar{% endblock %}
 {% block band %}{% include "contests/_band.html" with active="questions" %}{% endblock %}
 {% block content %}
-{% if not contest.has_ended %}
-<form method="post" action="{% url 'contests:ask_clarification' contest.pk %}" class="ca-panel mb-8 space-y-3" id="ask-clar-form">
-  {% csrf_token %}
-  <div>
-    <label class="ca-label" for="clar-problem">Masala (ixtiyoriy)</label>
-    <select id="clar-problem" name="problem_id" class="ca-select">
-      <option value="">Umumiy savol</option>
-      {% for cp in problems %}
-      <option value="{{ cp.id }}">{{ cp.label }}. {{ cp.problem.title }}</option>
-      {% endfor %}
-    </select>
-  </div>
-  <div>
-    <label class="ca-label" for="clar-question">Savol</label>
-    <textarea id="clar-question" name="question" required maxlength="2000" rows="3" class="ca-input w-full"></textarea>
-  </div>
-  <button type="submit" class="ca-btn ca-btn-primary text-sm">Yuborish</button>
-</form>
+{% comment %}The round's Q&A board, boxed like the rest of the round: a participant asks in the first box (staff
+answer, they never ask); below, every question with its answer, or staff's answer field.{% endcomment %}
+{% if registered and not contest.has_ended %}
+<section class="ca-box" aria-labelledby="ask-title">
+  <h2 class="ca-box-cap" id="ask-title">Savol berish <small>Javob berilgach savol va javob barcha ishtirokchilarga ko‘rinadi</small></h2>
+  <form method="post" action="{% url 'contests:ask_clarification' contest.pk %}" class="ca-box-body ca-box-pad space-y-3" id="ask-clar-form">
+    {% csrf_token %}
+    <div>
+      <label class="ca-label" for="clar-problem">Masala</label>
+      <select id="clar-problem" name="problem_id" class="ca-select">
+        <option value="">Umumiy savol</option>
+        {% for cp in problems %}
+        <option value="{{ cp.id }}">{{ cp.label }}. {{ cp.problem.title }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label class="ca-label" for="clar-question">Savol</label>
+      <textarea id="clar-question" name="question" required maxlength="2000" rows="3" class="ca-input w-full"></textarea>
+    </div>
+    <button type="submit" class="ca-btn ca-btn-primary text-sm"><i data-lucide="send" class="lu" aria-hidden="true"></i>Yuborish</button>
+  </form>
+</section>
 {% endif %}
 
-{% if clars %}
-<div class="space-y-4">
-{% for c in clars %}
-<div class="ca-panel">
-  <p class="mb-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-mute">
-    {% include "accounts/_user.html" with u=c.user %}
-    <span aria-hidden="true">·</span>
-    <span class="tabular">{{ c.created|date:"d.m H:i" }}</span>
-    {% if c.problem %}<span aria-hidden="true">·</span><span>{{ c.problem.label }}</span>{% endif %}
-  </p>
-  <p class="mb-3 whitespace-pre-wrap">{{ c.question }}</p>
-  {% if c.is_answered %}
-  <div class="rounded-[var(--ca-radius)] border border-line bg-paper/60 p-3">
-    <p class="mb-1 text-xs font-medium text-accent">Javob — {{ c.answered_by.username }}</p>
-    <p class="whitespace-pre-wrap text-sm">{{ c.answer }}</p>
-  </div>
-  {% elif user.is_staff %}
-  <form method="post" action="{% url 'contests:answer_clarification' contest.pk c.pk %}" class="clar-answer-form flex gap-2">
-    {% csrf_token %}
-    <textarea name="answer" required rows="2" class="ca-input flex-1" placeholder="Javob yozing…"></textarea>
-    <button type="submit" class="ca-btn ca-btn-primary self-end text-sm">Javob berish</button>
-  </form>
+<section class="ca-box" aria-labelledby="clars-title">
+  <h2 class="ca-box-cap" id="clars-title">Savol-javoblar{% if clars %} <small class="tabular">{{ clars|length }}</small>{% endif %}</h2>
+  <div class="ca-box-body">
+  {% if clars %}
+  <ol class="divide-y divide-line">
+  {% for c in clars %}
+    <li class="ca-box-pad">
+      <p class="mb-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-mute">
+        {% include "accounts/_user.html" with u=c.user %}
+        <span aria-hidden="true">·</span>
+        <span class="tabular">{{ c.created|date:"d.m H:i" }}</span>
+        {% if c.problem %}<span aria-hidden="true">·</span><span class="font-semibold text-ink">{{ c.problem.label }}</span>{% endif %}
+      </p>
+      <p class="whitespace-pre-wrap">{{ c.question }}</p>
+      {% if c.is_answered %}
+      <div class="mt-2 rounded-[var(--ca-radius-sm)] border-l-[3px] border-accent bg-sunk px-3 py-2">
+        <p class="mb-0.5 text-xs font-medium text-accent">Javob · {{ c.answered_by.username }}</p>
+        <p class="whitespace-pre-wrap text-sm">{{ c.answer }}</p>
+      </div>
+      {% elif user.is_staff %}
+      <form method="post" action="{% url 'contests:answer_clarification' contest.pk c.pk %}" class="clar-answer-form mt-2 flex gap-2">
+        {% csrf_token %}
+        <textarea name="answer" required rows="2" class="ca-input flex-1" placeholder="Javob yozing…" aria-label="{{ c.user.username }} savoliga javob"></textarea>
+        <button type="submit" class="ca-btn ca-btn-primary self-end text-sm">Javob berish</button>
+      </form>
+      {% else %}
+      <p class="mt-1 text-sm text-mute">Hali javob berilmagan.</p>
+      {% endif %}
+    </li>
+  {% endfor %}
+  </ol>
   {% else %}
-  <p class="text-sm text-mute">Hali javob berilmagan.</p>
+  <p class="ca-box-pad py-8 text-center text-mute">Hali savol yo‘q.</p>
   {% endif %}
-</div>
-{% endfor %}
-</div>
-{% else %}
-<div class="ca-empty">Hali savol yo‘q.</div>
-{% endif %}
+  </div>
+</section>
 <script>
   document.getElementById("ask-clar-form")?.addEventListener("submit", function () {
     const b = this.querySelector("button[type=submit]");

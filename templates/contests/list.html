@@ -13,12 +13,12 @@ in another, grouped by month; on the right the nearest round's clock and the top
     <div class="ca-box-body">
     {% if running or upcoming %}
     <table class="ca-table">
-      <thead><tr><th>Musobaqa</th><th class="text-center">Boshlanish</th><th class="text-center hidden sm:table-cell">Davomiyligi</th><th class="text-center">Holat</th><th class="text-center"><span class="sr-only">Qatnashish</span></th></tr></thead>
+      <thead><tr><th>Musobaqa</th><th class="text-center hidden sm:table-cell">Boshlanish</th><th class="text-center hidden sm:table-cell">Davomiyligi</th><th class="text-center">Holat</th><th class="text-center"><span class="sr-only">Qatnashish</span></th></tr></thead>
       <tbody>
       {% for c in running %}
       <tr>
         <td class="ca-ct-name"><a class="ca-link" href="{% url 'contests:detail' c.pk %}">{{ c.title }}</a>{% include "contests/_tags.html" %}</td>
-        <td class="text-center tabular">{{ c.start|date:"d.m.Y H:i" }}</td>
+        <td class="text-center tabular hidden sm:table-cell">{{ c.start|date:"d.m.Y H:i" }}</td>
         <td class="text-center hidden sm:table-cell">{{ c.duration_label }}</td>
         <td class="text-center"><span class="font-semibold text-ok"><span class="ca-live-dot" aria-hidden="true"></span>Davom etmoqda</span>
           <span class="block text-xs text-mute">qoldi <span class="tabular" data-countdown="{{ c.end|date:'c' }}" data-label="" data-suffix="1"></span></span></td>
@@ -29,7 +29,7 @@ in another, grouped by month; on the right the nearest round's clock and the top
       {% for c in upcoming %}
       <tr>
         <td class="ca-ct-name"><a class="ca-link" href="{% url 'contests:detail' c.pk %}">{{ c.title }}</a>{% include "contests/_tags.html" %}</td>
-        <td class="text-center tabular">{{ c.start|date:"d.m.Y H:i" }}</td>
+        <td class="text-center tabular hidden sm:table-cell">{{ c.start|date:"d.m.Y H:i" }}</td>
         <td class="text-center hidden sm:table-cell">{{ c.duration_label }}</td>
         <td class="text-center"><span class="text-mute">Boshlanishiga</span> <span class="tabular font-semibold" data-countdown="{{ c.start|date:'c' }}" data-label="" data-suffix="1"></span></td>
         <td class="text-center">
@@ -53,11 +53,11 @@ in another, grouped by month; on the right the nearest round's clock and the top
     <div class="ca-box-body">
     {% if ended.paginator.count %}
     <table class="ca-table">
-      <thead><tr><th>Musobaqa</th><th class="text-center">Boshlanish</th><th class="text-center hidden md:table-cell">Davomiyligi</th><th class="text-center">Natijalar</th><th class="text-center">Siz</th></tr></thead>
+      <thead><tr><th>Musobaqa</th><th class="text-center">Boshlanish</th><th class="text-center hidden md:table-cell">Davomiyligi</th><th class="text-center">Natijalar</th>{% if user.is_authenticated %}<th class="text-center">Siz</th>{% endif %}</tr></thead>
       {% regroup ended by start_month as months %}
       {% for m in months %}
       <tbody>
-      <tr class="ca-month"><th colspan="5" scope="rowgroup">{{ m.grouper }}</th></tr>
+      <tr class="ca-month"><th colspan="{% if user.is_authenticated %}5{% else %}4{% endif %}" scope="rowgroup">{{ m.grouper }}</th></tr>
       {% for c in m.list %}
       <tr>
         <td class="ca-ct-name"><a class="ca-link" href="{% url 'contests:detail' c.pk %}">{{ c.title }}</a>{% include "contests/_tags.html" %}</td>
@@ -65,8 +65,8 @@ in another, grouped by month; on the right the nearest round's clock and the top
         <td class="text-center hidden md:table-cell">{{ c.duration_label }}</td>
         <td class="text-center"><a class="ca-link" href="{% url 'contests:standings' c.pk %}">Yakuniy natijalar</a>
           <span class="ca-n" title="{{ c.n_participants }} ishtirokchi"><i data-lucide="user" class="lu" aria-hidden="true"></i>x{{ c.n_participants }}</span></td>
-        <td class="text-center tabular">{% if c.me and c.me.rank %}<b>{{ c.me.rank }}</b><span class="text-mute">-o‘rin</span>{% elif c.me %}<span class="text-mute">qatnashgan</span>{% else %}<span class="text-mute">—</span>{% endif %}
-          {% if c.my_delta is not None %}<b class="ml-1 {% if c.my_delta > 0 %}text-ok{% elif c.my_delta < 0 %}text-bad{% else %}text-mute{% endif %}">{% if c.my_delta > 0 %}+{% endif %}{{ c.my_delta }}</b>{% endif %}</td>
+        {% if user.is_authenticated %}<td class="text-center tabular">{% if c.me and c.me.rank %}<b>{{ c.me.rank }}</b><span class="text-mute">-o‘rin</span>{% elif c.me %}<span class="text-mute">qatnashgan</span>{% else %}<span class="text-mute">—</span>{% endif %}
+          {% if c.my_delta is not None %}<b class="ml-1 {% if c.my_delta > 0 %}text-ok{% elif c.my_delta < 0 %}text-bad{% else %}text-mute{% endif %}">{% if c.my_delta > 0 %}+{% endif %}{{ c.my_delta }}</b>{% endif %}</td>{% endif %}
       </tr>
       {% endfor %}
       </tbody>

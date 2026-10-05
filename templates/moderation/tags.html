@@ -16,7 +16,7 @@
         <td class="text-right whitespace-nowrap">
           <a href="{% url 'moderation:tag_edit' t.pk %}" class="ca-btn ca-btn-ghost !px-2 !py-1.5 text-xs" title="Tahrirlash" aria-label="Tahrirlash: {{ t.name }}"><i data-lucide="pencil" class="lu" aria-hidden="true"></i></a>
           <form method="post" class="inline" action="{% url 'moderation:tag_delete' t.pk %}" onsubmit="return confirm('«{{ t.name|escapejs }}» tegini o‘chirasizmi? Masalalar o‘chmaydi, kurslardan ham chiqadi.');">{% csrf_token %}
-            <button class="ca-btn ca-btn-ghost !px-2 !py-1.5 text-xs text-bad" title="O‘chirish"><i data-lucide="trash-2" class="lu" aria-hidden="true"></i></button>
+            <button class="ca-btn ca-btn-ghost !px-2 !py-1.5 text-xs text-bad" title="O‘chirish" aria-label="O‘chirish: {{ t.name }}"><i data-lucide="trash-2" class="lu" aria-hidden="true"></i></button>
           </form>
         </td>
       </tr>

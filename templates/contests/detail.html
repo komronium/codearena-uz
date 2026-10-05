@@ -67,7 +67,7 @@ your mark, how many solved it); on the right your result, virtual participation 
         {% if contest.type != "icpc" %}<div><dt>Ball</dt><dd><b>{{ my_row.score }}</b></dd></div>{% endif %}
         <div><dt>Yechilgan</dt><dd><b>{{ my_row.solved }}</b> <span class="text-mute">/ {{ problems|length }}</span></dd></div>
         {% if contest.wrong_try_minutes is not None %}<div><dt>Jarima</dt><dd>{{ my_row.penalty }}</dd></div>{% endif %}
-        {% if my_row.rating_delta is not None %}<div><dt>Reyting</dt><dd><b class="{% if my_row.rating_delta >= 0 %}text-ok{% else %}text-bad{% endif %}">{{ my_row.rating_delta|stringformat:"+d" }}</b></dd></div>{% endif %}
+        {% if my_row.rating_delta is not None %}<div><dt>Reyting</dt><dd><b class="{% if my_row.rating_delta > 0 %}text-ok{% elif my_row.rating_delta < 0 %}text-bad{% else %}text-mute{% endif %}">{{ my_row.rating_delta|stringformat:"+d" }}</b></dd></div>{% endif %}
       </dl>
       <a class="ca-box-more ca-link" href="{% url 'contests:standings' contest.pk %}#me">Natijalar jadvalida »</a>
     </div>

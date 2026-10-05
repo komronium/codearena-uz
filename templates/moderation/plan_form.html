@@ -2,7 +2,7 @@
 {% block title %}{% if plan %}{{ plan.title }} — tahrirlash{% else %}Yangi kurs{% endif %}{% endblock %}
 {% block content %}
 <div class="mb-6">
-  {% include "moderation/_header.html" with title=plan.title|default:"Yangi kurs" subtitle="Kursga tanlangan teglardagi barcha ochiq masalalar tushadi, osonidan qiyiniga." back_url="/moderation/plans/" back_label="Kurslar" %}
+  {% url 'moderation:plans' as back %}{% include "moderation/_header.html" with title=plan.title|default:"Yangi kurs" subtitle="Kursga tanlangan teglardagi barcha ochiq masalalar tushadi, osonidan qiyiniga." back_url=back back_label="Kurslar" %}
 </div>
 {% if form.non_field_errors %}<div class="ca-alert ca-alert-bad mb-4" role="alert">{{ form.non_field_errors }}</div>{% endif %}
 

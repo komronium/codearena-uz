@@ -611,7 +611,8 @@ def test_problem_list_and_profile_show_them(client, catalog):
     page = client.get(reverse("problems:list")).content.decode()
     assert "Siz uchun" in page
     profile = client.get(reverse("profile", args=["ali"])).content.decode()
-    assert "Mavzular" in profile and "ca-skill is-started" in profile  # math: 1 of 3 solved
+    # math: 1 of 3 solved, its bar a third full
+    assert "Mavzular" in profile and '<b>1</b><span class="text-mute">/3</span>' in profile and "width: 33%" in profile
 
 
 @pytest.mark.django_db

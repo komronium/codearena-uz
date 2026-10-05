@@ -11,7 +11,7 @@ problems and n_participants. The join buttons show on the overview only.{% endco
           {% elif contest.has_ended %}<span class="ca-tag"><i data-lucide="flag" class="lu" aria-hidden="true"></i>Tugagan</span>
           {% else %}<span class="ca-tag ca-tag-soon"><i data-lucide="hourglass" class="lu" aria-hidden="true"></i>Kutilmoqda</span>{% endif %}
           {% if contest.division %}<span class="ca-tag ca-tag-div" title="{{ contest.get_division_display }}">Div. {{ contest.division }}</span>{% endif %}
-          {% if contest.is_rated %}<span class="ca-tag ca-tag-rated" title="Natija reytingga ta‘sir qiladi"><i data-lucide="trending-up" class="lu" aria-hidden="true"></i>Reytingli</span>{% endif %}
+          {% if contest.is_rated %}<span class="ca-tag ca-tag-rated" title="Natija reytingga ta’sir qiladi"><i data-lucide="trending-up" class="lu" aria-hidden="true"></i>Reytingli</span>{% endif %}
           {% if registered %}<span class="ca-tag"><i data-lucide="check" class="lu" aria-hidden="true"></i>{% if contest.has_ended %}Qatnashgansiz{% else %}Qatnashyapsiz{% endif %}</span>{% endif %}
         </p>
         <h1 id="round-title">{{ contest.title }}</h1>
@@ -42,17 +42,13 @@ problems and n_participants. The join buttons show on the overview only.{% endco
         </div>
         {% endif %}
       </div>
+      {% if not contest.has_ended %}{# a finished round has no time left to show: its tag says so and its dates stay in the facts #}
       <div class="ca-clock{% if not contest.has_started %} is-wait{% endif %}">
-        {% if contest.has_ended %}
-        <span class="ca-clock-label">Tugagan</span>
-        <span class="ca-clock-time">00:00:00</span>
-        <div class="ca-clock-bar" aria-hidden="true"><span style="width: 100%"></span></div>
-        {% else %}
         <span class="ca-clock-label">{% if contest.is_running %}Qolgan vaqt{% else %}Boshlanishiga{% endif %}</span>
         <span class="ca-clock-time" data-countdown="{% if contest.is_running %}{{ contest.end|date:'c' }}{% else %}{{ contest.start|date:'c' }}{% endif %}" data-label="" data-suffix="1"></span>
         <div class="ca-clock-bar" aria-hidden="true"><span data-span-from="{{ contest.start|date:'c' }}" data-span-to="{{ contest.end|date:'c' }}" style="width: 0"></span></div>
-        {% endif %}
       </div>
+      {% endif %}
     </div>
     <nav class="ca-contest-tabs" aria-label="Musobaqa bo‘limlari">
       <a href="{% url 'contests:detail' contest.pk %}"{% if active == "overview" %} aria-current="page"{% endif %}>Umumiy</a>

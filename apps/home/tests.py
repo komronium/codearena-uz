@@ -266,3 +266,12 @@ def test_head_names_the_page_for_search_and_link_previews(client, world):
     assert f'rel="canonical" href="http://testserver{listing}"' in client.get(listing + "?tag=x&page=2").content.decode()
     assert f'rel="canonical" href="http://testserver{listing}?page=2"' in client.get(listing + "?page=2").content.decode()
 
+
+def test_no_template_comment_spreads_over_lines():
+    """{# #} ends on its own line; one spread over several lines is printed as page text."""
+    from pathlib import Path
+
+    templates = Path(__file__).resolve().parents[2] / "templates"
+    bad = [f"{path.relative_to(templates)}:{n}" for path in templates.rglob("*.html")
+           for n, line in enumerate(path.read_text().splitlines(), 1) if "{#" in line and "#}" not in line]
+    assert bad == []

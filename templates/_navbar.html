@@ -7,8 +7,8 @@ code reviews, the staff queue.{% endcomment %}
 <div class="ca-nav-in">
   <a href="{% url 'home' %}" class="ca-nav-brand" aria-label="CodeArena bosh sahifa">{% include "_brand_mark.html" %}<span>CodeArena</span></a>
   <nav class="ca-nav-links" aria-label="Asosiy menyu">
-    <a href="{% url 'problems:list' %}" class="ca-nav-link{% if ns == 'problems' and not contest %} is-active{% endif %}"{% if ns == 'problems' and not contest %} aria-current="page"{% endif %}>Masalalar</a>
-    <a href="{% url 'learn:hub' %}" class="ca-nav-link{% if ns == 'learn' %} is-active{% endif %}"{% if ns == 'learn' %} aria-current="page"{% endif %}>O‘rganish</a>
+    <a href="{% url 'problems:list' %}" class="ca-nav-link{% if ns == 'problems' and not contest or ns == 'learn' and un == 'lists' or ns == 'learn' and un == 'list' %} is-active{% endif %}"{% if ns == 'problems' and not contest or ns == 'learn' and un == 'lists' or ns == 'learn' and un == 'list' %} aria-current="page"{% endif %}>Masalalar</a>
+    <a href="{% url 'learn:hub' %}" class="ca-nav-link{% if ns == 'learn' and un != 'lists' and un != 'list' %} is-active{% endif %}"{% if ns == 'learn' and un != 'lists' and un != 'list' %} aria-current="page"{% endif %}>O‘rganish</a>
     <a href="{% url 'contests:list' %}" class="ca-nav-link{% if ns == 'contests' or ns == 'problems' and contest %} is-active{% endif %}"{% if ns == 'contests' or ns == 'problems' and contest %} aria-current="page"{% endif %}{% if nav.live %} title="Jonli: {{ nav.live.title }}"{% endif %}>Musobaqalar{% if nav.live %}<b class="ca-badge-live"><span class="sr-only">, jonli musobaqa bor</span></b>{% endif %}</a>
     <a href="{% url 'rating' %}" class="ca-nav-link{% if un == 'rating' or un == 'top' %} is-active{% endif %}"{% if un == 'rating' or un == 'top' %} aria-current="page"{% endif %}>Reyting</a>
     {% if user.is_authenticated %}

@@ -31,7 +31,7 @@ from .tiers import rating_tier
 from .tiers import streak_badges, tier_banner
 from .tiers import tier_color as _tier_color
 
-_CHART_W, _CHART_H = 700, 220
+_CHART_W, _CHART_H = 700, 190
 _CHART_L, _CHART_R = 56, 680
 _CHART_TOP, _CHART_BOTTOM = 10, 165
 
@@ -60,12 +60,12 @@ def _rating_chart(history: list) -> dict:
             "color": color, "label": name if y_bottom - y_top >= 14 else "",
         })
 
-    gridlines = []
-    for floor, _ceiling, _name, _color in _RATING_TIERS:
-        if floor is not None and lo < floor < hi:
-            gridlines.append({"y": round(y_for(floor), 1), "value": floor})
-    gridlines.append({"y": round(y_for(hi), 1), "value": round(hi)})
-    gridlines.append({"y": round(y_for(lo), 1), "value": round(lo)})
+    gridlines = [{"y": round(y_for(floor), 1), "value": floor}
+                 for floor, _ceiling, _name, _color in _RATING_TIERS if floor is not None and lo < floor < hi]
+    # The chart's own top and bottom get a label too, unless a tier line sits too close to read both.
+    for edge in (hi, lo):
+        if all(abs(y_for(edge) - g["y"]) >= 14 for g in gridlines):
+            gridlines.append({"y": round(y_for(edge), 1), "value": round(edge)})
 
     n = len(history)
     step = (_CHART_R - _CHART_L) / (n - 1) if n > 1 else 0
@@ -190,6 +190,30 @@ def top(request):
     return render(request, "accounts/top.html", {"users": _ranked(page), "total": qs.count()})
 
 
+def _rating_spread(ratings: list[int], mine: int | None) -> dict:
+    """Server-rendered SVG data for the rating page's histogram: how many people hold each 100 points, a bar per
+    step in its tier colour, the scale reaching at least 2000 so the tiers above everyone still show, the
+    viewer's own bar marked."""
+    step = 100
+    end = max(2000, (max(ratings, default=0) // step + 1) * step)
+    counts = [0] * (end // step)
+    for r in ratings:
+        counts[max(r, 0) // step] += 1
+    width, room, height = 380, 14, 110  # the drawing, the space over the bars for the "Siz" mark, the tallest bar
+    bar = width / len(counts)
+    biggest = max(counts) or 1
+    bars = []
+    for i, n in enumerate(counts):
+        lo, h = i * step, round(height * n / biggest, 1)
+        bars.append({"x": round(i * bar + 1, 1), "cx": round((i + .5) * bar, 1), "y": round(room + height - h, 1), "h": h, "n": n,
+                     "lo": lo, "hi": lo + step - 1, "color": _tier_color(lo),
+                     "mine": mine is not None and lo <= max(mine, 0) < lo + step})
+    ticks = [{"x": round(v / step * bar, 1), "value": v,
+              "anchor": "start" if v == 0 else "end" if v == end else "middle"} for v in range(0, end + 1, 500)]
+    return {"w": width, "h": room + height + 16, "base": room + height, "bar_w": round(bar - 2, 1),
+            "bars": bars, "ticks": ticks}
+
+
 def rating(request):
     # Only users who finished a rated contest; a default 0 says nothing about anyone.
     rated = Participation.objects.filter(rating_after__isnull=False)
@@ -206,9 +230,6 @@ def rating(request):
     tiers = [{"name": n, "color": c, "floor": f, "ceiling": ce,
               "count": sum(1 for r in ratings if (f is None or r >= f) and (ce is None or r < ce))}
              for f, ce, n, c in _RATING_TIERS]
-    biggest = max((t["count"] for t in tiers), default=0)
-    for t in tiers:
-        t["pct"] = round(100 * t["count"] / biggest) if biggest else 0
     me = None
     if request.user.is_authenticated:
         mine = rated.filter(user=request.user).order_by("-contest__end").first()
@@ -217,8 +238,9 @@ def rating(request):
             me = {"rank": sum(1 for r in ratings if r > request.user.rating) + 1, "page": row // 50 + 1,
                   "delta": mine.rating_after - mine.rating_before, "next": _next_tier(request.user.rating),
                   "contests": rated.filter(user=request.user).count()}
+    spread = _rating_spread(ratings, request.user.rating if me else None)
     return render(request, "accounts/rating.html",
-                  {"users": page, "total": len(ratings), "tiers": tiers, "me": me, "q": q})
+                  {"users": page, "total": len(ratings), "tiers": tiers, "spread": spread, "me": me, "q": q})
 
 
 def _plan_badges(user) -> list:
@@ -274,7 +296,9 @@ def profile(request, username):
     total_users, total_rated = ranked.count(), rated.count()
     rating_rank = points_rank = None
     if profile_user.is_active:
-        points_rank = ranked.filter(practice_points__gt=profile_user.practice_points).count() + 1
+        # no points, no place: everyone at 0 would otherwise share the place after the last scorer
+        if profile_user.practice_points > 0:
+            points_rank = ranked.filter(practice_points__gt=profile_user.practice_points).count() + 1
         if rating_history:
             rating_rank = rated.filter(rating__gt=profile_user.rating).count() + 1
 

@@ -76,11 +76,14 @@
       document.getElementById("rp-meta").textContent = `· ${i + 1}/${frames.length} · +${Math.floor(since / 60)} daq ${since % 60} s · ${f.src.length} belgi${f.lang ? " · " + f.lang : ""}`;
     }
     let timer = null;
-    const stop = () => { clearInterval(timer); timer = null; playBtn.innerHTML = '<i data-lucide="play" class="lu"></i>'; window.caIcons?.(); };
+    const stop = () => {
+      clearInterval(timer); timer = null;
+      playBtn.innerHTML = '<i data-lucide="play" class="lu"></i>'; playBtn.setAttribute("aria-label", "Ijro"); window.caIcons?.();
+    };
     playBtn.addEventListener("click", () => {
       if (timer) return stop();
       if (+range.value >= frames.length - 1) show(0);
-      playBtn.innerHTML = '<i data-lucide="pause" class="lu"></i>'; window.caIcons?.();
+      playBtn.innerHTML = '<i data-lucide="pause" class="lu"></i>'; playBtn.setAttribute("aria-label", "To‘xtatish"); window.caIcons?.();
       timer = setInterval(() => (+range.value < frames.length - 1 ? show(+range.value + 1) : stop()), 700);
     });
     range.addEventListener("input", () => show(+range.value));

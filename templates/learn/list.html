@@ -2,43 +2,57 @@
 {% block title %}{{ lst.name }} — ro‘yxat{% endblock %}
 {% block description %}«{{ lst.name }}» — {{ lst.owner.username }} tuzgan {{ rows|length }} ta masalalik ro‘yxat.{% endblock %}
 {% block content %}
-<header class="mb-6">
+{% comment %}One saved list: its problems in a boxed table with a solved mark; the owner renames, shares or
+deletes it from the box on the side.{% endcomment %}
+<header class="mb-5">
   {% if is_owner %}<a class="ca-link mb-3 inline-block text-sm text-mute" href="{% url 'learn:lists' %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>Ro‘yxatlarim</a>{% endif %}
   <h1 class="ca-page-title">{{ lst.name }}</h1>
   <p class="mt-2 flex flex-wrap items-center gap-3 text-sm text-mute">
     <span>{{ rows|length }} ta masala{% if n_hidden %} · {{ n_hidden }} ta masala hozir yopiq{% endif %}</span>
     {% if not is_owner %}<span translate="no">· {{ lst.owner.username }}</span>{% endif %}
-    {% if lst.is_public %}<span class="ca-chip"><i data-lucide="globe" class="lu mr-1" aria-hidden="true"></i>Ochiq havola</span>{% endif %}
+    {% if lst.is_public %}<span class="ca-tag"><i data-lucide="globe" class="lu" aria-hidden="true"></i>Ochiq havola</span>{% endif %}
   </p>
 </header>
-<div class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:items-start">
-  <section aria-label="Masalalar">
-    {% if rows %}
-    <ul class="ca-rows">
-      {% for p in rows %}
-      <li class="ca-row relative">
-        {% if p.solved %}<span class="ca-status ca-status-ok" title="Yechilgan"><i data-lucide="check" class="lu" aria-hidden="true"></i><span class="sr-only">Yechilgan</span></span>{% else %}<span class="ca-status" aria-hidden="true"></span>{% endif %}
-        <div class="ca-row-main"><div class="ca-row-title"><a class="ca-stretch" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a></div></div>
-        <span class="ca-diff ca-diff-{{ p.difficulty }}">{{ p.get_difficulty_display }}</span>
-        {% if is_owner %}
-        <form method="post" action="{% url 'learn:save' p.slug %}" class="relative z-10">{% csrf_token %}
-          <input type="hidden" name="list" value="{{ lst.pk }}"><input type="hidden" name="next" value="{{ request.path }}">
-          <button class="ca-btn ca-btn-ghost !px-2 !py-1.5" title="Ro‘yxatdan olish" aria-label="Ro‘yxatdan olish: {{ p.title }}"><i data-lucide="x" class="lu" aria-hidden="true"></i></button>
-        </form>
-        {% endif %}
-      </li>
-      {% endfor %}
-    </ul>
-    {% else %}<div class="ca-empty">Ro‘yxat bo‘sh.{% if is_owner %} Masala sahifasida <b>Saqlash</b> tugmasini bosing.{% endif %}</div>{% endif %}
+<div class="ca-cols">
+  <section class="ca-box min-w-0" aria-labelledby="list-title">
+    <h2 class="ca-box-cap" id="list-title">Masalalar</h2>
+    <div class="ca-box-body">
+      {% if rows %}
+      <table class="ca-table">
+        <thead><tr><th class="w-12 text-center"><span class="sr-only">Holat</span></th><th>Masala</th><th class="w-28 text-center">Qiyinlik</th>{% if is_owner %}<th class="w-14 text-center"><span class="sr-only">Olish</span></th>{% endif %}</tr></thead>
+        <tbody>
+        {% for p in rows %}
+        <tr{% if p.solved %} class="ca-row-ac"{% endif %}>
+          <td class="text-center">{% if p.solved %}<span class="ca-solved" title="Yechilgan"><i data-lucide="check" class="lu" aria-hidden="true"></i><span class="sr-only">Yechilgan</span></span>{% endif %}</td>
+          <td><a class="ca-link" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a></td>
+          <td class="text-center"><span class="ca-diff ca-diff-{{ p.difficulty }}">{{ p.get_difficulty_display }}</span></td>
+          {% if is_owner %}
+          <td class="text-center">
+            <form method="post" action="{% url 'learn:save' p.slug %}">{% csrf_token %}
+              <input type="hidden" name="list" value="{{ lst.pk }}"><input type="hidden" name="next" value="{{ request.path }}">
+              <button class="ca-btn ca-btn-ghost !px-2 !py-1" title="Ro‘yxatdan olish" aria-label="Ro‘yxatdan olish: {{ p.title }}"><i data-lucide="x" class="lu" aria-hidden="true"></i></button>
+            </form>
+          </td>
+          {% endif %}
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p class="ca-box-pad py-8 text-center text-mute">Ro‘yxat bo‘sh.{% if is_owner %} Masala sahifasida <b>Saqlash</b> tugmasini bosing.{% endif %}</p>
+      {% endif %}
+    </div>
   </section>
   {% if is_owner %}
-  <aside class="space-y-4">
-    <form method="post" action="{% url 'learn:list_edit' lst.pk %}" class="ca-panel space-y-3">{% csrf_token %}
-      <h2 class="ca-section-title !mb-0">Sozlamalar</h2>
-      <div><label class="ca-label" for="{{ form.name.id_for_label }}">Nomi</label>{{ form.name }}</div>
-      <label class="flex items-center gap-2 text-sm">{{ form.is_public }} Havola orqali hamma ko‘ra oladi</label>
-      <button class="ca-btn ca-btn-primary w-full"><i data-lucide="check" class="lu" aria-hidden="true"></i>Saqlash</button>
-    </form>
+  <aside class="ca-aside">
+    <section class="ca-box" aria-labelledby="settings-title">
+      <h2 class="ca-box-cap" id="settings-title">Sozlamalar</h2>
+      <form method="post" action="{% url 'learn:list_edit' lst.pk %}" class="ca-box-body ca-box-pad space-y-3">{% csrf_token %}
+        <div><label class="ca-label" for="{{ form.name.id_for_label }}">Nomi</label>{{ form.name }}</div>
+        <label class="flex items-center gap-2 text-sm">{{ form.is_public }} Havola orqali hamma ko‘ra oladi</label>
+        <button class="ca-btn ca-btn-primary w-full"><i data-lucide="check" class="lu" aria-hidden="true"></i>Saqlash</button>
+      </form>
+    </section>
     <form method="post" action="{% url 'learn:list_delete' lst.pk %}" onsubmit="return confirm('«{{ lst.name|escapejs }}» ro‘yxati o‘chiriladi. Davom etasizmi?');">{% csrf_token %}
       <button class="ca-btn ca-btn-ghost w-full text-bad"><i data-lucide="trash-2" class="lu" aria-hidden="true"></i>Ro‘yxatni o‘chirish</button>
     </form>

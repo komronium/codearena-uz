@@ -3,8 +3,8 @@
 {% block description %}Dasturlashni mavzulab o‘rganing: har kursda qisqa nazariya va osonidan qiyiniga masalalar, o‘zbek tilida.{% endblock %}
 {% block page_title %}<h1>O‘rganish</h1><span class="ca-topbar-sub">Har kurs — bitta mavzu: nazariya va masalalar, osonidan qiyiniga</span>{% endblock %}
 {% block content %}
-{% comment %}After Codeforces EDU: each stage of the path is a boxed table of its courses (number, course,
-level, your progress); on the right the course to go on with and its next few problems, then a badge per
+{% comment %}After Codeforces EDU: each stage of the path is a boxed table of its courses (number, course with
+its one-line summary, level, your progress); on the right the course to go on with and its next few problems, then a badge per
 course — lit once finished, with a progress line until then.{% endcomment %}
 <div class="ca-cols">
 <div class="min-w-0">
@@ -19,13 +19,16 @@ course — lit once finished, with a progress line until then.{% endcomment %}
       <tr class="{% if p.progress.completed %}is-done{% elif p == here %}is-here ca-row-me{% elif not p.progress.total %}is-soon{% endif %}">
         <td class="text-center tabular">{% if p.progress.completed %}<span class="ca-solved" title="Tugatildi"><i data-lucide="check" class="lu" aria-hidden="true"></i><span class="sr-only">Tugatildi</span></span>{% else %}{{ p.number }}{% endif %}</td>
         <td>
-          <span class="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <i data-lucide="{{ p.icon }}" class="lu text-mute" aria-hidden="true"></i>
-            <a class="ca-link font-medium" href="{% url 'learn:course' p.slug %}">{{ p.title }}</a>
-            {% if not p.progress.total %}<span class="ca-tag">{% if p.n_tags %}Tayyorlanmoqda{% else %}Nazariya{% endif %}</span>{% elif p == here %}<span class="ca-tag ca-tag-soon">Siz shu yerdasiz</span>{% endif %}
-            {% if not p.is_public %}<span class="ca-tag">Yashirin</span>{% endif %}
+          {# the icon keeps its own column, so on a phone a long title wraps beside it, not under it #}
+          <span class="flex gap-2">
+            <i data-lucide="{{ p.icon }}" class="lu mt-0.5 shrink-0 text-mute" aria-hidden="true"></i>
+            <span class="min-w-0">
+              <a class="ca-link font-medium" href="{% url 'learn:course' p.slug %}">{{ p.title }}</a>
+              {% if not p.progress.total %}<span class="ca-tag ml-1 align-middle">{% if p.n_tags %}Tayyorlanmoqda{% else %}Nazariya{% endif %}</span>{% elif p == here %}<span class="ca-tag ca-tag-soon ml-1 align-middle">Siz shu yerdasiz</span>{% endif %}
+              {% if not p.is_public %}<span class="ca-tag ml-1 align-middle">Yashirin</span>{% endif %}
+              {% if p.summary %}<span class="mt-0.5 block text-xs text-mute">{{ p.summary }}</span>{% endif %}
+            </span>
           </span>
-          {% if not p.progress.total and p.summary %}<span class="mt-0.5 block text-xs text-mute">{{ p.summary }}</span>{% endif %}
         </td>
         <td class="hidden text-center sm:table-cell"><span class="ca-diff ca-diff-{{ p.level }}">{{ p.get_level_display }}</span></td>
         <td class="text-center">

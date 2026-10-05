@@ -17,8 +17,8 @@
       <div class="min-w-0">
         <p class="ca-tier-ink truncate text-lg font-bold{{ user.rating|lg }}" translate="no" style="--tier: {{ user.rating|tier_color }}">{{ user.username }}</p>
         <p class="text-sm text-mute">{{ user.rating|tier_name }} · {{ user.rating }}</p>
-        <label class="ca-btn ca-btn-ghost mt-2 cursor-pointer !py-1.5 text-sm" for="id_avatar"><i data-lucide="camera" class="lu" aria-hidden="true"></i>Rasm tanlash</label>
         <input class="sr-only" type="file" name="avatar" id="id_avatar" accept="image/*">
+        <label class="ca-btn ca-btn-ghost mt-2 cursor-pointer !py-1.5 text-sm" for="id_avatar"><i data-lucide="camera" class="lu" aria-hidden="true"></i>Rasm tanlash</label>
         <p class="mt-1 text-xs text-mute">PNG yoki JPG, kvadrat rasm yaxshi ko‘rinadi.</p>
         {% if form.avatar.errors %}<p class="mt-1 text-sm text-bad">{{ form.avatar.errors.0 }}</p>{% endif %}
       </div>

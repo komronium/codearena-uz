@@ -12,7 +12,7 @@
 
 {% if can_teach %}
 <section class="mb-8" aria-labelledby="my-groups-title">
-  <div class="ca-sec-head"><h2 id="my-groups-title" class="ca-section-title !mb-0">Guruhlarim</h2></div>
+  <h2 id="my-groups-title" class="ca-section-title">Guruhlarim</h2>
   <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
     {% for g in my_groups %}
     <div class="ca-panel !p-4">
@@ -22,7 +22,7 @@
           <p class="text-xs text-mute tabular">{{ g.members.all|length }} ta o‘quvchi</p>
         </div>
         <div class="text-right">
-          <p class="text-[11px] uppercase tracking-wide text-mute">Qo‘shilish kodi</p>
+          <p class="text-xs text-mute">Qo‘shilish kodi</p>
           <button type="button" class="font-mono text-lg font-bold tracking-widest text-accent" data-copy-code="{{ g.join_code }}" title="Nusxalash" translate="no">{{ g.join_code }}</button>
         </div>
       </div>

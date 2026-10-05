@@ -1,33 +1,44 @@
 {% extends "base.html" %}
 {% block title %}Ro‘yxatlarim{% endblock %}
-{% block page_title %}<h1>Ro‘yxatlarim</h1><span class="ca-topbar-sub">Saqlangan masalalar</span>{% endblock %}
 {% block content %}
-<a class="ca-link mb-4 inline-block text-sm text-mute" href="{% url 'problems:list' %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>Masalalar</a>
-<div class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:items-start">
-  <section aria-label="Ro‘yxatlar">
-    {% if lists %}
-    <ul class="ca-rows">
-      {% for l in lists %}
-      <li class="ca-row relative">
-        <span class="ca-tile-icon ca-tile-icon-gold !h-9 !w-9"><i data-lucide="bookmark" class="lu" aria-hidden="true"></i></span>
-        <div class="ca-row-main">
-          <div class="ca-row-title"><a class="ca-stretch" href="{% url 'learn:list' l.pk %}">{{ l.name }}</a>{% if l.is_public %}<span class="ca-chip shrink-0"><i data-lucide="globe" class="lu mr-1" aria-hidden="true"></i>Ochiq</span>{% endif %}</div>
-          <div class="ca-row-meta"><span class="tabular">{{ l.created|date:"d.m.Y" }}</span></div>
-        </div>
-        <div class="ca-row-stat"><b>{{ l.n }}</b>masala</div>
-      </li>
-      {% endfor %}
-    </ul>
-    {% else %}
-    <div class="ca-empty"><span class="mb-2 flex justify-center text-2xl"><i data-lucide="bookmark" class="lu" aria-hidden="true"></i></span>Hali ro‘yxat yo‘q. Masala sahifasidagi <b>Saqlash</b> tugmasi bilan yoki shu yerda yarating.</div>
-    {% endif %}
+{% comment %}Your saved problem lists in one boxed table; a new list is made in the box on the side.{% endcomment %}
+<header class="mb-5">
+  <a class="ca-link mb-3 inline-block text-sm text-mute" href="{% url 'problems:list' %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>Masalalar</a>
+  <h1 class="ca-page-title">Ro‘yxatlarim</h1>
+  <p class="mt-2 text-sm text-mute">Keyinroq yechish uchun saqlangan masalalar</p>
+</header>
+<div class="ca-cols">
+  <section class="ca-box min-w-0" aria-labelledby="lists-title">
+    <h2 class="ca-box-cap" id="lists-title">Ro‘yxatlar{% if lists %} <small class="tabular">{{ lists|length }}</small>{% endif %}</h2>
+    <div class="ca-box-body">
+      {% if lists %}
+      <table class="ca-table">
+        <thead><tr><th>Nomi</th><th class="w-24 text-center">Masala</th><th class="hidden w-32 text-center sm:table-cell">Yaratilgan</th></tr></thead>
+        <tbody>
+        {% for l in lists %}
+        <tr>
+          <td><a class="ca-link font-medium" href="{% url 'learn:list' l.pk %}">{{ l.name }}</a>{% if l.is_public %} <span class="ca-tag ml-1 align-middle"><i data-lucide="globe" class="lu" aria-hidden="true"></i>Ochiq</span>{% endif %}</td>
+          <td class="text-center tabular">{{ l.n }}</td>
+          <td class="hidden text-center tabular sm:table-cell">{{ l.created|date:"d.m.Y" }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p class="ca-box-pad py-8 text-center text-mute">Hali ro‘yxat yo‘q. Masala sahifasidagi <b>Saqlash</b> tugmasi bilan yoki shu yerda yarating.</p>
+      {% endif %}
+    </div>
   </section>
-  <form method="post" class="ca-panel space-y-3" aria-labelledby="new-list">{% csrf_token %}
-    <h2 id="new-list" class="ca-section-title !mb-0">Yangi ro‘yxat</h2>
-    {% if form.non_field_errors %}<div class="ca-alert ca-alert-bad" role="alert">{{ form.non_field_errors.0 }}</div>{% endif %}
-    <div><label class="ca-label" for="{{ form.name.id_for_label }}">Nomi</label>{{ form.name }}{{ form.name.errors }}</div>
-    <label class="flex items-center gap-2 text-sm">{{ form.is_public }} Havola orqali hamma ko‘ra oladi</label>
-    <button class="ca-btn ca-btn-primary w-full"><i data-lucide="plus" class="lu" aria-hidden="true"></i>Yaratish</button>
-  </form>
+  <aside class="ca-aside">
+    <section class="ca-box" aria-labelledby="new-list">
+      <h2 class="ca-box-cap" id="new-list">Yangi ro‘yxat</h2>
+      <form method="post" class="ca-box-body ca-box-pad space-y-3">{% csrf_token %}
+        {% if form.non_field_errors %}<div class="ca-alert ca-alert-bad" role="alert">{{ form.non_field_errors.0 }}</div>{% endif %}
+        <div><label class="ca-label" for="{{ form.name.id_for_label }}">Nomi</label>{{ form.name }}{{ form.name.errors }}</div>
+        <label class="flex items-center gap-2 text-sm">{{ form.is_public }} Havola orqali hamma ko‘ra oladi</label>
+        <button class="ca-btn ca-btn-primary w-full"><i data-lucide="plus" class="lu" aria-hidden="true"></i>Yaratish</button>
+      </form>
+    </section>
+  </aside>
 </div>
 {% endblock %}

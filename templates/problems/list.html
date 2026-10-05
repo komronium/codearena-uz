@@ -22,26 +22,28 @@ right, level, stars, solve rate) under a row of filters; on the right the day's 
       <form method="get" class="ca-toolbar" role="search" aria-label="Masalalarni saralash">
         {% if selected_difficulty %}<input type="hidden" name="difficulty" value="{{ selected_difficulty }}">{% endif %}
         {% if sort != "id" or dir == "desc" %}<input type="hidden" name="sort" value="{{ sort }}"><input type="hidden" name="dir" value="{{ dir }}">{% endif %}
-        <label class="ca-picker ca-picker-search"><i data-lucide="search" class="lu" aria-hidden="true"></i><input type="search" name="q" value="{{ q }}" placeholder="Nomi bo‘yicha" aria-label="Nomi bo‘yicha qidirish"></label>
-        <label class="ca-picker"><span>Turi</span>
+        <label class="ca-picker ca-picker-search"><i data-lucide="search" class="lu" aria-hidden="true"></i><input type="search" name="q" value="{{ q }}" placeholder="Masala nomi" aria-label="Masala nomi bo‘yicha qidirish"></label>
+        {% comment %}A filter shows only its name until it is set, then "Name: value" in the accent colour. Its first,
+        hidden option is that closed-state name; "Barchasi" in the list clears it.{% endcomment %}
+        <label class="ca-picker{% if selected_kind %} is-set{% endif %}"><span{% if not selected_kind %} class="sr-only"{% endif %}>Turi:</span>
           <select name="kind" onchange="this.form.tag.value = ''; this.form.submit()">
-            <option value="">hammasi</option>
+            <option value="" hidden>Turi</option><option value="">Barchasi</option>
             {% for value, label in kinds %}<option value="{{ value }}" {% if value == selected_kind %}selected{% endif %}>{{ label }}</option>{% endfor %}
-          </select>
+          </select><i data-lucide="chevron-down" class="lu ca-picker-caret" aria-hidden="true"></i>
         </label>
-        <label class="ca-picker"><span>Mavzu</span>
+        <label class="ca-picker{% if selected_tag %} is-set{% endif %}"><span{% if not selected_tag %} class="sr-only"{% endif %}>Mavzu:</span>
           <select name="tag" onchange="this.form.submit()">
-            <option value="">hammasi</option>
+            <option value="" hidden>Mavzu</option><option value="">Barchasi</option>
             {% for label, tags in tag_groups %}{% if tags %}<optgroup label="{{ label }}">{% for t in tags %}<option value="{{ t.name }}" {% if t.name == selected_tag %}selected{% endif %}>{{ t.name }}</option>{% endfor %}</optgroup>{% endif %}{% endfor %}
-          </select>
+          </select><i data-lucide="chevron-down" class="lu ca-picker-caret" aria-hidden="true"></i>
         </label>
         {% if user.is_authenticated %}
-        <label class="ca-picker"><span>Holat</span>
+        <label class="ca-picker{% if selected_status %} is-set{% endif %}"><span{% if not selected_status %} class="sr-only"{% endif %}>Holat:</span>
           <select name="status" onchange="this.form.submit()">
-            <option value="">hammasi</option>
+            <option value="" hidden>Holat</option><option value="">Barchasi</option>
             <option value="unsolved" {% if selected_status == "unsolved" %}selected{% endif %}>yechilmagan</option>
             <option value="solved" {% if selected_status == "solved" %}selected{% endif %}>yechilgan</option>
-          </select>
+          </select><i data-lucide="chevron-down" class="lu ca-picker-caret" aria-hidden="true"></i>
         </label>
         {% endif %}
         {% if q or selected_tag or selected_difficulty or selected_status or selected_kind %}<a href="{% url 'problems:list' %}" class="ca-link" title="Filtrni tozalash">Tozalash</a>{% endif %}
@@ -79,7 +81,7 @@ right, level, stars, solve rate) under a row of filters; on the right the day's 
             </div>
           </td>
           <td class="text-center whitespace-nowrap"><span class="ca-diff ca-diff-{{ p.difficulty }}">{{ p.get_difficulty_display }}</span></td>
-          {% if any_rated %}<td class="hidden text-center text-mute lg:table-cell">{% if p.avg_stars %}<span class="ca-stars-sum" title="O‘rtacha baho"><i data-lucide="star" class="lu" aria-hidden="true"></i><span class="tabular">{{ p.avg_stars|floatformat:1 }}</span></span>{% else %}<span aria-label="baho yo‘q">—</span>{% endif %}</td>{% endif %}
+          {% if any_rated %}<td class="hidden text-center text-mute lg:table-cell">{% if p.avg_stars %}<span class="ca-stars-sum" title="O‘rtacha baho"><i data-lucide="star" class="lu" aria-hidden="true"></i><span class="tabular">{{ p.avg_stars|floatformat:1 }}</span></span>{% else %}<span aria-hidden="true">—</span><span class="sr-only">baho yo‘q</span>{% endif %}</td>{% endif %}
           <td class="text-center tabular text-mute" title="{{ p.ac_count }} / {{ p.attempts }} urinish muvaffaqiyatli">{{ p.pass_rate }}%</td>
         </tr>
         {% endfor %}

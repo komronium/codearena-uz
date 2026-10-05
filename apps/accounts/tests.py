@@ -80,6 +80,19 @@ def test_profile_404_for_unknown_username(client):
     assert client.get(reverse("profile", args=["nobody"])).status_code == 404
 
 
+def test_rating_chart_axis_labels_never_overlap():
+    import datetime
+    from types import SimpleNamespace
+
+    from .views import _rating_chart
+
+    end = datetime.datetime(2026, 9, 6)
+    # 1224 pads the top to 1335, 15 px above the 1300 tier line: only one of the two may be labelled
+    history = [SimpleNamespace(rating_after=r, contest=SimpleNamespace(end=end)) for r in (484, 689, 868, 1126, 1224)]
+    ys = sorted(g["y"] for g in _rating_chart(history)["gridlines"])
+    assert all(b - a >= 14 for a, b in zip(ys, ys[1:])), ys
+
+
 @pytest.mark.django_db
 def test_profile_shows_rating_history_graph(client):
     from django.utils import timezone
@@ -353,3 +366,27 @@ def test_tier_up_is_claimed_once_even_by_two_tabs():
     tab1, tab2 = U.objects.get(username="twotabs"), U.objects.get(username="twotabs")
     assert _claim_tier_up(tab1)["name"] == "Pupil"
     assert _claim_tier_up(tab2) is None  # the other tab read the old tier too, but lost the update
+
+
+@pytest.mark.django_db
+def test_rating_board_shows_handles_only_and_a_histogram_of_every_100_points(client):
+    ann = User.objects.create_user("ann", password="x", first_name="Anna", last_name="Karimova", rating=1250)
+    bek = User.objects.create_user("bek", password="x", rating=640)
+    _rated(ann, bek)
+    r = client.get(reverse("rating"))
+    assert "Karimova" not in r.content.decode()  # the real name stays on the profile
+    bars = r.context["spread"]["bars"]
+    assert len(bars) == 20  # up to 2000 even when nobody is there: the tiers above everyone still show
+    assert {b["lo"]: b["n"] for b in bars if b["n"]} == {600: 1, 1200: 1}
+    assert not any(b["mine"] for b in bars)  # a guest has no bar of their own
+    client.force_login(ann)
+    assert [b["lo"] for b in client.get(reverse("rating")).context["spread"]["bars"] if b["mine"]] == [1200]
+
+
+@pytest.mark.django_db
+def test_profile_gives_no_points_place_without_points(client):
+    User.objects.create_user("scorer", password="x", practice_points=10)
+    User.objects.create_user("fresh", password="x")
+    assert client.get(reverse("profile", args=["scorer"])).context["points_rank"] == 1
+    # everyone at 0 would share the place after the last scorer: "2 / 34" with no points at all
+    assert client.get(reverse("profile", args=["fresh"])).context["points_rank"] is None

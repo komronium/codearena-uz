@@ -2,7 +2,7 @@
 {% block title %}{{ tag.name }} — teg{% endblock %}
 {% block content %}
 <div class="mb-6">
-  {% include "moderation/_header.html" with title=tag.name subtitle="Nazariya kursda yoziladi; teg masalalarni kursga olib kiradi." back_url="/moderation/tags/" back_label="Teglar" %}
+  {% url 'moderation:tags' as back %}{% include "moderation/_header.html" with title=tag.name subtitle="Nazariya kursda yoziladi; teg masalalarni kursga olib kiradi." back_url=back back_label="Teglar" %}
 </div>
 <form method="post" novalidate class="grid max-w-3xl gap-6 sm:grid-cols-2 sm:items-start">
   {% csrf_token %}

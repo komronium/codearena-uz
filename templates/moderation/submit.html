@@ -28,39 +28,39 @@
       </div>
       <div class="grid gap-4 sm:grid-cols-2" data-kind-only="code">
         <div>
-          <label class="ca-label" for="{{ form.input_md.id_for_label }}">Kirish ma‘lumotlari</label>
+          <label class="ca-label" for="{{ form.input_md.id_for_label }}">Kirish ma’lumotlari</label>
           {{ form.input_md }}
         </div>
         <div>
-          <label class="ca-label" for="{{ form.output_md.id_for_label }}">Chiqish ma‘lumotlari</label>
+          <label class="ca-label" for="{{ form.output_md.id_for_label }}">Chiqish ma’lumotlari</label>
           {{ form.output_md }}
         </div>
       </div>
     </section>
 
     <section class="ca-panel space-y-4" data-kind-only="sql">
-      <h2 class="ca-section-title !mb-0">SQL ma‘lumotlar bazasi</h2>
+      <h2 class="ca-section-title !mb-0">SQL ma’lumotlar bazasi</h2>
       <div>
         <label class="ca-label" for="{{ sql_form.schema_sql.id_for_label }}">Jadval tuzilishi (CREATE TABLE …)</label>
         {{ sql_form.schema_sql }}{{ sql_form.schema_sql.errors }}
       </div>
       <div>
-        <label class="ca-label" for="{{ sql_form.seed_sql.id_for_label }}">Ma‘lumotlar (INSERT …)</label>
+        <label class="ca-label" for="{{ sql_form.seed_sql.id_for_label }}">Ma’lumotlar (INSERT …)</label>
         {{ sql_form.seed_sql }}{{ sql_form.seed_sql.errors }}
       </div>
       <div>
         <label class="ca-label" for="{{ sql_form.expected_result.id_for_label }}">Kutilgan natija</label>
         {{ sql_form.expected_result }}{{ sql_form.expected_result.errors }}
-        <p class="mt-1 text-xs text-mute">Har qator — bitta natija qatori, ustunlar TAB bilan ajratilgan, sarlavhasiz. Namunaviy ma‘lumot va shu natija masala sahifasida jadval bo‘lib ko‘rinadi.</p>
+        <p class="mt-1 text-xs text-mute">Har qator — bitta natija qatori, ustunlar TAB bilan ajratilgan, sarlavhasiz. Namunaviy ma’lumot va shu natija masala sahifasida jadval bo‘lib ko‘rinadi.</p>
       </div>
       <label class="flex items-center gap-2 text-sm">{{ sql_form.ordered }} Qatorlar tartibi muhim (shart ORDER BY talab qiladi)</label>
       <div>
-        <label class="ca-label" for="{{ sql_form.check_seed_sql.id_for_label }}">Yashirin ma‘lumotlar (INSERT …, ixtiyoriy)</label>
+        <label class="ca-label" for="{{ sql_form.check_seed_sql.id_for_label }}">Yashirin ma’lumotlar (INSERT …, ixtiyoriy)</label>
         {{ sql_form.check_seed_sql }}{{ sql_form.check_seed_sql.errors }}
-        <p class="mt-1 text-xs text-mute">Talabaga ko‘rinmaydi. So‘rov bu ma‘lumotlarda ham tekshiriladi — ko‘rsatilgan javobni qo‘lda yozib qo‘yish o‘tmaydi.</p>
+        <p class="mt-1 text-xs text-mute">Talabaga ko‘rinmaydi. So‘rov bu ma’lumotlarda ham tekshiriladi — ko‘rsatilgan javobni qo‘lda yozib qo‘yish o‘tmaydi.</p>
       </div>
       <div>
-        <label class="ca-label" for="{{ sql_form.check_expected_result.id_for_label }}">Yashirin ma‘lumotlarda kutilgan natija</label>
+        <label class="ca-label" for="{{ sql_form.check_expected_result.id_for_label }}">Yashirin ma’lumotlarda kutilgan natija</label>
         {{ sql_form.check_expected_result }}{{ sql_form.check_expected_result.errors }}
       </div>
     </section>
@@ -138,6 +138,9 @@
   </div>
 
   <aside class="space-y-6 lg:sticky lg:top-20">
+    {% comment %}The sticky aside is taller than a screen, so only its top stays in view down a long test list:
+    on a wide screen the save button sits there; on a phone it ends the form.{% endcomment %}
+    <button type="submit" class="ca-btn ca-btn-primary hidden w-full lg:flex"><i data-lucide="check" class="lu" aria-hidden="true"></i>Masalani saqlash</button>
     <section class="ca-panel space-y-4">
       <h2 class="ca-section-title !mb-0">Sozlamalar</h2>
       <div>
@@ -165,7 +168,7 @@
         <div class="mt-1 flex flex-wrap gap-1.5">{% for cb in form.tags %}<label class="ca-pick ca-pick-sm">{{ cb.tag }}<span>{{ cb.choice_label }}</span></label>{% endfor %}</div>
       </fieldset>
     </section>
-    <button type="submit" class="ca-btn ca-btn-primary w-full"><i data-lucide="check" class="lu" aria-hidden="true"></i>Masalani saqlash</button>
+    <button type="submit" class="ca-btn ca-btn-primary w-full lg:hidden"><i data-lucide="check" class="lu" aria-hidden="true"></i>Masalani saqlash</button>
   </aside>
 </form>
 
@@ -177,8 +180,11 @@
 (function () {
   document.querySelectorAll("textarea.ca-md").forEach((el) => {
     // autoDownloadFontAwesome: false, or it fetches its own copy from a CDN
-    new EasyMDE({ element: el, spellChecker: false, status: false, autoDownloadFontAwesome: false, minHeight: el.rows > 4 ? "220px" : "90px",
+    const mde = new EasyMDE({ element: el, spellChecker: false, status: false, autoDownloadFontAwesome: false, minHeight: el.rows > 4 ? "220px" : "90px",
       toolbar: ["bold", "italic", "heading", "|", "code", "quote", "unordered-list", "ordered-list", "table", "|", "preview", "guide"] });
+    // typing goes into CodeMirror's own hidden textarea: give it the field's label for screen readers
+    const label = el.id && document.querySelector(`label[for="${el.id}"]`);
+    if (label) mde.codemirror.getInputField().setAttribute("aria-label", label.textContent.trim());
   });
 
   const kind = document.getElementById("{{ form.kind.id_for_label }}");

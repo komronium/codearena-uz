@@ -10,7 +10,7 @@
 {% if groups %}
 <div class="ca-panel !p-0 overflow-x-auto">
 <table class="ca-table">
-  <thead><tr><th>Guruh</th><th>O‘qituvchi</th><th>Qo‘shilish kodi</th><th class="text-right">A‘zolar</th><th class="text-right">Amal</th></tr></thead>
+  <thead><tr><th>Guruh</th><th>O‘qituvchi</th><th>Qo‘shilish kodi</th><th class="text-right">A’zolar</th><th class="text-right">Amal</th></tr></thead>
   <tbody>
   {% for g in groups %}
   <tr>
@@ -20,9 +20,9 @@
     <td class="tabular text-right text-mute">{{ g.n }}</td>
     <td class="text-right">
       <div class="flex justify-end gap-1 whitespace-nowrap">
-        <a href="{% url 'moderation:group_edit' g.pk %}" class="ca-btn ca-btn-ghost !px-2 !py-1.5 text-xs" title="Tahrirlash"><i data-lucide="pencil" class="lu" aria-hidden="true"></i></a>
+        <a href="{% url 'moderation:group_edit' g.pk %}" class="ca-btn ca-btn-ghost !px-2 !py-1.5 text-xs" title="Tahrirlash" aria-label="Tahrirlash: {{ g.name }}"><i data-lucide="pencil" class="lu" aria-hidden="true"></i></a>
         <form method="post" action="{% url 'moderation:group_delete' g.pk %}" onsubmit="return confirm('«{{ g.name|escapejs }}» guruhini o‘chirasizmi?');">{% csrf_token %}
-          <button class="ca-btn ca-btn-ghost !px-2 !py-1.5 text-xs text-bad" title="O‘chirish"><i data-lucide="trash-2" class="lu" aria-hidden="true"></i></button>
+          <button class="ca-btn ca-btn-ghost !px-2 !py-1.5 text-xs text-bad" title="O‘chirish" aria-label="O‘chirish: {{ g.name }}"><i data-lucide="trash-2" class="lu" aria-hidden="true"></i></button>
         </form>
       </div>
     </td>
@@ -32,6 +32,6 @@
 </table>
 </div>
 {% else %}
-<div class="ca-empty">Hali guruh yo‘q. Guruh — musobaqani faqat ma‘lum o‘quvchilar uchun ochish imkonini beradi.</div>
+<div class="ca-empty">Hali guruh yo‘q. Guruh — musobaqani faqat ma’lum o‘quvchilar uchun ochish imkonini beradi.</div>
 {% endif %}
 {% endblock %}
