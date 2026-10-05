@@ -7,19 +7,33 @@
   <meta name="color-scheme" content="light dark">
   <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#151921" media="(prefers-color-scheme: dark)">
+  {# Google's result icon is a PNG or ICO (it reads no SVG): the 96px PNG; browsers take the SVG #}
+  <link rel="icon" href="{% url 'favicon' %}" sizes="16x16 32x32 48x48">
   <link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
-  <title>{% block head_title %}{% block title %}CodeArena{% endblock %} — CodeArena{% endblock %}</title>
-  {# search results and link previews (Telegram, Facebook); og:title and og:description fall back to these two #}
-  <meta name="description" content="{% block description %}O‘zbek tilida dasturlash: masalalar yeching, mavzulab kurslarda o‘rganing, reytingli musobaqalarda bellashing. Kodingiz serverda shu zahoti testlanadi.{% endblock %}">
+  <link rel="icon" href="{% static 'img/favicon-96x96.png' %}" type="image/png" sizes="96x96">
+  <link rel="apple-touch-icon" href="{% static 'img/apple-touch-icon.png' %}">
+  <link rel="manifest" href="{% url 'manifest' %}">
+  {% capture page_title %}{% block head_title %}{% block title %}CodeArena{% endblock %}{% page_suffix %} — CodeArena{% endblock %}{% endcapture %}
+  <title>{{ page_title }}</title>
+  {# search results and link previews (Telegram, Facebook, X) #}
+  {% capture page_description %}{% block description %}{% site_description %}{% endblock %}{% endcapture %}
+  <meta name="description" content="{{ page_description }}">
+  <meta name="robots" content="{% block robots %}{% robots_meta %}{% endblock %}">
+  {% verification_meta %}
   {% canonical_url as canonical %}{% static 'img/og.png' as og_image %}
   <link rel="canonical" href="{{ canonical }}">
   <meta property="og:site_name" content="CodeArena">
-  <meta property="og:type" content="website">
+  <meta property="og:type" content="{% block og_type %}website{% endblock %}">
   <meta property="og:locale" content="uz_UZ">
   <meta property="og:url" content="{{ canonical }}">
+  <meta property="og:title" content="{{ page_title }}">
+  <meta property="og:description" content="{{ page_description }}">
   <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ og_image }}">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="CodeArena — o‘zbek tilida dasturlash masalalari, kurslar va musobaqalar">
+  <meta name="twitter:card" content="summary_large_image">
+  {% block structured_data %}{% endblock %}
   <link rel="preload" href="{% static 'fonts/inter-latin-wght-normal.woff2' %}" as="font" type="font/woff2" crossorigin>
   <script>
     try { const t = localStorage.getItem("ca-theme"); if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch {}
@@ -55,6 +69,21 @@
   <div class="ca-pagehead">{% block page_title %}{% endblock %}</div>
   {% block content %}{% endblock %}
 </main>
+{# the public places once more, as plain links: for the end of a long page, and for crawlers #}
+<footer class="ca-footer">
+  <div class="ca-footer-in">
+    <a href="{% url 'home' %}" class="ca-footer-brand">{% include "_brand_mark.html" %}<span>CodeArena</span></a>
+    <nav class="ca-footer-links" aria-label="Sayt bo‘limlari">
+      <a href="{% url 'problems:list' %}">Masalalar</a>
+      <a href="{% url 'learn:hub' %}">Kurslar</a>
+      <a href="{% url 'contests:list' %}">Musobaqalar</a>
+      <a href="{% url 'rating' %}">Reyting</a>
+      <a href="{% url 'top' %}">Amaliyot ballari</a>
+      <a href="{% url 'honor' %}">Halollik qoidalari</a>
+    </nav>
+    <p class="ca-footer-note">© {% now "Y" %} CodeArena · o‘zbek tilida dasturlash</p>
+  </div>
+</footer>
 <nav class="ca-bottom-nav md:hidden" aria-label="Mobil menyu">
   {% with ns=request.resolver_match.namespace un=request.resolver_match.url_name %}
   <a href="{% url 'home' %}"{% if un == 'home' %} class="is-active" aria-current="page"{% endif %}><span class="ca-bn-icon"><i data-lucide="house" class="lu" aria-hidden="true"></i></span><span>Bosh sahifa</span></a>

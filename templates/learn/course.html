@@ -1,6 +1,7 @@
 {% extends "base.html" %}{% load seo %}
 {% block title %}{{ plan.title }} — kurs{% endblock %}
 {% block description %}{% if plan.summary %}{{ plan.summary }}{% else %}{{ theory_html|plain }}{% endif %}{% endblock %}
+{% block structured_data %}{% url 'learn:hub' as hub_url %}{% breadcrumbs_jsonld "O‘rganish" hub_url plan.title request.path %}{% endblock %}
 {% block content %}
 {% comment %}A course, boxed like the course list it opens from: the theory and one box per difficulty on the left;
 your progress, the course note and its badge on the right.{% endcomment %}

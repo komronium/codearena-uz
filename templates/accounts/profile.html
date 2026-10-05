@@ -1,6 +1,10 @@
-{% extends "base.html" %}{% load tiers %}
+{% extends "base.html" %}{% load tiers seo %}
 {% block title %}{{ profile_user.username }}{% endblock %}
 {% block description %}{{ profile_user.username }} — CodeArena’dagi profili: reyting {{ profile_user.rating }}, {{ solved|length }} ta yechilgan masala, musobaqalar tarixi.{% endblock %}
+{% block robots %}{% if not profile_user.is_active or not solved and not rating_history %}noindex, follow{% else %}{{ block.super }}{% endif %}{% endblock %}
+{% block og_type %}profile{% endblock %}
+{% block structured_data %}<meta property="profile:username" content="{{ profile_user.username }}">
+{% url 'rating' as rating_url %}{% breadcrumbs_jsonld "Reyting" rating_url profile_user.username request.path %}{% profile_jsonld profile_user page_description %}{% endblock %}
 {% block content %}
 {% comment %}A profile: a boxed card with the picture, the handle in its tier colour and the tier as a chip, the
 name and facts, then one row of numbers (rating with its max, places, contests, practice points, the daily

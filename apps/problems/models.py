@@ -94,6 +94,7 @@ class Problem(models.Model):
     # Shown to a user once they solved it (and to staff and the author).
     editorial_md = models.TextField(blank=True)
     created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)  # the sitemap's lastmod; partial saves leave it
 
     def __str__(self):
         return self.title

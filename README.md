@@ -98,6 +98,25 @@ with Certbot (`certbot --nginx -d codearena.uz -d www.codearena.uz --redirect`).
 Certbot installs automatic renewal; verify it with `certbot renew --cert-name
 codearena.uz --dry-run`.
 
+## Search engines
+
+What Google reads is built in (`apps/home`): `robots.txt` (staff and personal pages, students'
+avatars and a list's search/sort/random addresses stay out), `sitemap.xml` (an index of one
+sitemap per kind: sections, problems, courses, contests, standings, profiles with something on
+them, each with `lastmod`), a canonical URL, description, robots meta and Open Graph/X tags on
+every page, and JSON-LD: `WebSite` + `Organization` on the home page (the site name and logo
+over a result), `BreadcrumbList` on problems, courses, contests and profiles, `ProfilePage` on
+profiles. Google's result icon is `static/img/favicon-96x96.png` (it reads no SVG), plus
+`/favicon.ico`, the Apple touch icon and `/manifest.webmanifest`.
+
+Once per domain, in [Google Search Console](https://search.google.com/search-console): add a
+*Domain* property for `codearena.uz` and verify it with the DNS TXT record it gives (or put the
+HTML-tag code in `GOOGLE_SITE_VERIFICATION`), submit `https://codearena.uz/sitemap.xml`, and ask
+URL Inspection to index the home page. Bing Webmaster Tools can import the property from Search
+Console; Yandex Webmaster takes `YANDEX_VERIFICATION`. `SITE_SAME_AS` lists the site's own
+channels (Telegram, Instagram...) for the Organization. Sitelinks under the result are Google's
+own choice: clear titles, the top bar and the footer's plain links are what it picks them from.
+
 ## Contests, rating, integrity
 
 Contests/problems are authored in Boshqaruv (`/moderation/`, staff only). A contest's problems stay hidden (404) from everyone

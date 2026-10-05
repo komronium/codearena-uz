@@ -1,10 +1,10 @@
 from django.conf import settings
-from django.contrib.sitemaps.views import sitemap
+from django.contrib.sitemaps import views as sitemaps
 from django.urls import include, path, re_path
 from django.views.static import serve
 
 from apps.home.sitemaps import SITEMAPS
-from apps.home.views import home, robots_txt
+from apps.home.views import favicon, home, manifest, robots_txt
 
 urlpatterns = [
     path("django-rq/", include("django_rq.urls")),
@@ -17,7 +17,12 @@ urlpatterns = [
     path("classroom/", include("apps.classroom.urls")),
     path("learn/", include("apps.learn.urls")),
     path("robots.txt", robots_txt, name="robots"),
-    path("sitemap.xml", sitemap, {"sitemaps": SITEMAPS}, name="sitemap"),
+    # an index of one sitemap per kind of page, so Search Console reports each kind's indexing apart
+    path("sitemap.xml", sitemaps.index, {"sitemaps": SITEMAPS, "sitemap_url_name": "sitemap_section"},
+         name="sitemap"),
+    path("sitemap-<section>.xml", sitemaps.sitemap, {"sitemaps": SITEMAPS}, name="sitemap_section"),
+    path("favicon.ico", favicon, name="favicon"),
+    path("manifest.webmanifest", manifest, name="manifest"),
     path("", home, name="home"),
 ]
 

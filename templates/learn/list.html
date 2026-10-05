@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{{ lst.name }} — ro‘yxat{% endblock %}
 {% block description %}«{{ lst.name }}» — {{ lst.owner.username }} tuzgan {{ rows|length }} ta masalalik ro‘yxat.{% endblock %}
+{% block robots %}noindex, follow{% endblock %}
 {% block content %}
 {% comment %}One saved list: its problems in a boxed table with a solved mark; the owner renames, shares or
 deletes it from the box on the side.{% endcomment %}

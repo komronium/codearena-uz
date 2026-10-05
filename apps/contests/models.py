@@ -52,6 +52,7 @@ class Contest(models.Model):
     # count as practice solves (apps.submissions.solves).
     published_at = models.DateTimeField(null=True, blank=True)
     problems = models.ManyToManyField(Problem, through="ContestProblem", related_name="contests")
+    updated = models.DateTimeField(auto_now=True)  # the sitemap's lastmod; partial saves leave it
 
     def __str__(self):
         return self.title

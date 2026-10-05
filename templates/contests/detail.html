@@ -1,5 +1,7 @@
-{% extends "base.html" %}
+{% extends "base.html" %}{% load seo %}
 {% block title %}{{ contest.title }}{% endblock %}
+{% block robots %}{% if contest.require_group_id %}noindex{% else %}{{ block.super }}{% endif %}{% endblock %}
+{% block structured_data %}{% url 'contests:list' as list_url %}{% breadcrumbs_jsonld "Musobaqalar" list_url contest.title request.path %}{% endblock %}
 {% block description %}{{ contest.title }} — {% if contest.is_rated %}reytingli {% endif %}dasturlash musobaqasi: {{ contest.start|date:'d.m.Y H:i' }}, {{ contest.duration_label }}{% if problems %}, {{ problems|length }} ta masala{% endif %}. Masalalar, natijalar va qoidalar.{% endblock %}
 {% block band %}{% include "contests/_band.html" with active="overview" %}{% endblock %}
 {% block content %}

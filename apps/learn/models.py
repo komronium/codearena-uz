@@ -45,6 +45,7 @@ class StudyPlan(models.Model):
     order = models.PositiveIntegerField(default=0)
     in_quest = models.BooleanField(default=False)  # unused since courses follow tags; dropped next
     is_public = models.BooleanField(default=False)
+    updated = models.DateTimeField(auto_now=True)  # the sitemap's lastmod
 
     class Meta:
         ordering = ["order", "id"]

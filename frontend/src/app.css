@@ -714,6 +714,16 @@ section.ca-ed-full #editor .cm-editor { height: calc(100vh - 9.5rem); }
 .ca-topbar-sub { min-width: 0; font-size: .8125rem; color: rgb(var(--ca-mute-rgb)); }
 .ca-main { width: 100%; max-width: 88rem; margin-inline: auto; padding: 1rem 1rem 2rem; }
 @media (min-width: 768px) { .ca-main { padding: 1.25rem 2rem 2.5rem; } }
+/* the footer: the brand, the public places as plain links, one quiet line */
+.ca-footer { border-top: 1px solid rgb(var(--ca-line-rgb)); }
+.ca-footer-in { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 2rem; max-width: 88rem; margin-inline: auto;
+  padding: 1.25rem 1rem; font-size: .8125rem; color: rgb(var(--ca-mute-rgb)); }
+@media (min-width: 768px) { .ca-footer-in { padding: 1.5rem 2rem; } }
+.ca-footer-brand { display: inline-flex; align-items: center; gap: .5rem; font-weight: 700; letter-spacing: -.02em; color: rgb(var(--ca-ink-rgb)); }
+.ca-footer-brand .ca-brand-mark { width: 1.25rem; height: 1.25rem; }
+.ca-footer-links { display: flex; flex-wrap: wrap; gap: .35rem 1.25rem; }
+.ca-footer-links a:hover { color: rgb(var(--ca-ink-rgb)); text-decoration: underline; text-underline-offset: 3px; }
+@media (min-width: 1024px) { .ca-footer-note { margin-left: auto; } }
 .ca-tabs-scroll { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
 .ca-tabs-scroll .ca-tab { white-space: nowrap; }
 /* top bar tools: the search button (opens the command palette), the live-contest pill */

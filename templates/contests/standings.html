@@ -1,6 +1,8 @@
-{% extends "base.html" %}{% load tiers %}
+{% extends "base.html" %}{% load tiers seo %}
 {% block title %}{{ contest.title }} — Natijalar{% endblock %}
 {% block description %}{{ contest.title }} natijalari: o‘rinlar, ballar va har bir masala bo‘yicha urinishlar.{% endblock %}
+{% block robots %}{% if contest.require_group_id %}noindex{% else %}{{ block.super }}{% endif %}{% endblock %}
+{% block structured_data %}{% url 'contests:list' as list_url %}{% url 'contests:detail' contest.pk as contest_url %}{% breadcrumbs_jsonld "Musobaqalar" list_url contest.title contest_url "Natijalar" request.path %}{% endblock %}
 
 {% block band %}{% include "contests/_band.html" with active="scoreboard" n_participants=rows|length %}{% endblock %}
 {% block content %}

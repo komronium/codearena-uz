@@ -1,6 +1,7 @@
-{% extends "base.html" %}{% load numbers tiers %}
+{% extends "base.html" %}{% load numbers tiers seo %}
 {% block head_title %}CodeArena — dasturlashni musobaqada o‘rganing{% endblock %}
-{% block head %}<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebSite", "name": "CodeArena", "url": "{{ request.scheme }}://{{ request.get_host }}/"}</script>{% endblock %}
+{# the site name and logo Google shows over the site's results #}
+{% block structured_data %}{% site_jsonld %}{% endblock %}
 
 {% block content %}
 <section class="ca-hero" aria-labelledby="hero-title">

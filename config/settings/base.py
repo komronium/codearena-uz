@@ -108,3 +108,13 @@ PASSWORD_HASHERS = ["apps.accounts.hashers.PBKDF2Hasher300k",
 
 # A practice submission is accepted only if its code was in the site's editor (apps.integrity.practice).
 PRACTICE_REQUIRE_EDITOR = True
+
+# Search engines (apps/home/templatetags/seo.py). The HTML-tag codes of Google Search Console and Yandex
+# Webmaster, printed in every page's head; a DNS record verifies the domain without them.
+SITE_VERIFICATION = {
+    "google-site-verification": os.environ.get("GOOGLE_SITE_VERIFICATION", ""),
+    "yandex-verification": os.environ.get("YANDEX_VERIFICATION", ""),
+}
+# The site's own pages elsewhere (Telegram channel, Instagram, GitHub...), comma-separated: the
+# Organization's sameAs, which ties them to the site in search.
+SITE_SAME_AS = [u.strip() for u in os.environ.get("SITE_SAME_AS", "").split(",") if u.strip()]

@@ -1,9 +1,12 @@
 """/ : what to do next for a signed-in student, what CodeArena is for a guest."""
+from django.contrib.staticfiles import finders
 from django.db.models import Count, Q
-from django.http import HttpResponse
+from django.http import FileResponse, HttpResponse, JsonResponse
 from django.shortcuts import render
+from django.templatetags.static import static
 from django.urls import reverse
 from django.utils import timezone
+from django.views.decorators.cache import cache_control
 
 from apps.accounts.models import User
 from apps.accounts.tiers import next_tier as _next_tier
@@ -17,6 +20,7 @@ from apps.problems.skills import next_problems, open_problems, shared_reason
 from apps.submissions.models import Submission
 
 from .context_processors import live_contest_for
+from .templatetags.seo import SITE_DESCRIPTION, SITE_NAME
 
 
 _WEEKDAYS = ["Dushanba", "Seshanba", "Chorshanba", "Payshanba", "Juma", "Shanba", "Yakshanba"]
@@ -103,13 +107,37 @@ def home(request):
     })
 
 
-# staff tools, personal pages, sign-in plumbing and htmx/JSON endpoints: nothing a search should land on
+# staff tools, personal pages, sign-in plumbing and htmx/JSON endpoints: nothing a search should land on;
+# and students' photos stay out of image search
 _NOT_FOR_CRAWLERS = ["/moderation/", "/integrity/", "/submissions/", "/classroom/", "/django-rq/",
                      "/accounts/profile/edit/", "/accounts/password-", "/accounts/reset/", "/accounts/verify/",
-                     "/accounts/logout/", "/accounts/teacher-request/", "/problems/suggest/", "/learn/search/"]
+                     "/accounts/logout/", "/accounts/teacher-request/", "/problems/suggest/", "/learn/search/",
+                     "/media/avatars/"]
+# a list's search, sorting, own-progress filter and random pick: endless addresses for the one list
+# (its tag and level filters stay open; their canonical URL folds them into the list)
+_LIST_PARAMS = ["q", "sort", "dir", "status", "kind", "random"]
 
 
 def robots_txt(request):
     lines = ["User-agent: *", *(f"Disallow: {path}" for path in _NOT_FOR_CRAWLERS),
-             f"Sitemap: {request.build_absolute_uri(reverse('sitemap'))}"]
+             *(f"Disallow: /*{sep}{param}=" for param in _LIST_PARAMS for sep in "?&"),
+             "", f"Sitemap: {request.build_absolute_uri(reverse('sitemap'))}"]
     return HttpResponse("\n".join(lines) + "\n", content_type="text/plain")
+
+
+@cache_control(public=True, max_age=7 * 24 * 3600)
+def favicon(request):
+    """/favicon.ico: browsers, feed readers and crawlers ask the root for it whatever the head says."""
+    return FileResponse(open(finders.find("img/favicon.ico"), "rb"), content_type="image/x-icon")
+
+
+@cache_control(public=True, max_age=24 * 3600)
+def manifest(request):
+    """The web app manifest: the name and icons a phone shows for the site on its home screen."""
+    icons = [{"src": static(f"img/{name}.png"), "sizes": f"{size}x{size}", "type": "image/png", "purpose": purpose}
+             for name, size, purpose in (("icon-192", 192, "any"), ("icon-512", 512, "any"),
+                                         ("icon-maskable-512", 512, "maskable"))]
+    return JsonResponse({"name": SITE_NAME, "short_name": SITE_NAME, "description": SITE_DESCRIPTION, "lang": "uz",
+                         "start_url": "/", "scope": "/", "display": "standalone",
+                         "background_color": "#FFFFFF", "theme_color": "#FFFFFF", "icons": icons},
+                        content_type="application/manifest+json", json_dumps_params={"ensure_ascii": False})

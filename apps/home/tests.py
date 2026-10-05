@@ -227,7 +227,17 @@ def test_robots_keep_crawlers_out_of_staff_and_personal_pages_and_name_the_sitem
     assert r.status_code == 200 and r["Content-Type"].startswith("text/plain")
     body = r.content.decode()
     assert "Disallow: /moderation/" in body and "Disallow: /submissions/" in body
+    assert "Disallow: /media/avatars/" in body  # students' photos stay out of image search
+    # a list's search, sorting and random pick are endless addresses for one list; its pages stay open
+    assert "Disallow: /*?sort=" in body and "Disallow: /*&sort=" in body and "Disallow: /*?random=" in body
+    assert "page=" not in body and "tag=" not in body
     assert "Sitemap: http://testserver/sitemap.xml" in body
+
+
+def _sitemap(client, section=None) -> str:
+    r = client.get(f"/sitemap-{section}.xml" if section else "/sitemap.xml")
+    assert r.status_code == 200
+    return r.content.decode()
 
 
 @pytest.mark.django_db
@@ -243,30 +253,150 @@ def test_sitemap_lists_only_what_a_guest_can_open(client, world):
     StudyPlan.objects.create(slug="sikllar", title="Sikllar", is_public=True)
     StudyPlan.objects.create(slug="qoralama", title="Qoralama")
     teacher = User.objects.create_user("ustoz-sm", password="x")
-    own = Contest.objects.create(title="Guruh raundi", start=timezone.now(), end=timezone.now(),
+    now = timezone.now()
+    own = Contest.objects.create(title="Guruh raundi", start=now, end=now,
                                  require_group=Group.objects.create(name="G", teacher=teacher))
+    ended = Contest.objects.create(title="O‘tgan raund", start=now - timezone.timedelta(days=2),
+                                   end=now - timezone.timedelta(days=2, hours=-2))
 
-    body = client.get("/sitemap.xml").content.decode()
-    assert "/problems/p0/" in body and "/problems/p1/" not in body and "/problems/p2/" not in body
-    assert "/learn/sikllar/" in body and "/learn/qoralama/" not in body
-    assert f"/contests/{upcoming.pk}/" in body and f"/contests/{own.pk}/" not in body
+    index = _sitemap(client)  # one sitemap per kind, so Search Console reports each apart
+    for section in ("sections", "problems", "courses", "contests", "standings", "profiles"):
+        assert f"http://testserver/sitemap-{section}.xml" in index
+    problems = _sitemap(client, "problems")
+    assert "/problems/p0/" in problems and "/problems/p1/" not in problems and "/problems/p2/" not in problems
+    assert "<lastmod>" in problems
+    courses = _sitemap(client, "courses")
+    assert "/learn/sikllar/" in courses and "/learn/qoralama/" not in courses
+    contests = _sitemap(client, "contests")
+    assert f"/contests/{upcoming.pk}/" in contests and f"/contests/{own.pk}/" not in contests
+    # results once a round has begun, dated by its end
+    standings = _sitemap(client, "standings")
+    assert f"/contests/{ended.pk}/standings/" in standings and f"/contests/{upcoming.pk}/standings/" not in standings
+    assert f"<lastmod>{ended.end:%Y-%m-%d}" in standings
+    assert "/accounts/register/" not in _sitemap(client, "sections")
+
+
+def _jsonld(page: str) -> list[dict]:
+    """The page's JSON-LD blocks, parsed."""
+    import json
+
+    return [json.loads(chunk.split(">", 1)[1].split("</script>", 1)[0])
+            for chunk in page.split('<script type="application/ld+json"')[1:]]
+
+
+def _robots(page: str) -> str:
+    return page.split('<meta name="robots" content="', 1)[1].split('"', 1)[0]
+
+
+@pytest.mark.django_db
+def test_profiles_are_indexed_once_they_have_something_on_them(client, world):
+    from apps.contests.models import Participation
+    from apps.submissions.models import UserProblemSolved
+
+    lang = Language.objects.create(code="python", name="Python 3", docker_image="x", run_cmd="x")
+    users = {n: User.objects.create_user(n, password="x") for n in ("solver", "empty", "blocked")}
+    solver, blocked = users["solver"], users["blocked"]
+    for u in (solver, blocked):
+        sub = Submission.objects.create(user=u, problem=world[0], language=lang, source="x", verdict="AC")
+        UserProblemSolved.objects.get_or_create(user=u, problem=world[0], defaults={"first_ac_submission": sub})
+    blocked.is_active = False
+    blocked.save()
+    rated = User.objects.create_user("rated", password="x")
+    past = Contest.objects.create(title="R", is_rated=True, start=timezone.now() - timezone.timedelta(days=3),
+                                  end=timezone.now() - timezone.timedelta(days=3, hours=-2))
+    Participation.objects.create(user=rated, contest=past, rating_before=0, rating_after=40)
+
+    profiles = _sitemap(client, "profiles")
+    assert "/accounts/profile/solver/" in profiles and "/accounts/profile/rated/" in profiles
+    assert "/accounts/profile/empty/" not in profiles and "/accounts/profile/blocked/" not in profiles
+    robots = {name: _robots(client.get(reverse("profile", args=[name])).content.decode())
+              for name in ("solver", "rated", "empty", "blocked")}
+    assert robots["solver"] == robots["rated"] == "max-image-preview:large"
+    assert robots["empty"] == robots["blocked"] == "noindex, follow"
+    page = client.get(reverse("profile", args=["solver"])).content.decode()
+    assert '"@type": "ProfilePage"' in page and '"name": "solver"' in page
+    assert '<meta property="og:type" content="profile">' in page
+
+
+@pytest.mark.django_db
+def test_home_names_the_site_for_google(client, world, settings):
+    settings.SITE_SAME_AS = ["https://t.me/codearena_uz"]
+    page = client.get("/").content.decode()
+    site, org = _jsonld(page)
+    assert site["@type"] == "WebSite" and site["name"] == "CodeArena" and site["url"] == "http://testserver/"
+    assert "CodeArena.uz" in site["alternateName"]  # other sites are called CodeArena too
+    assert org["@type"] == "Organization" and org["logo"] == "http://testserver/static/img/icon-512.png"
+    assert org["sameAs"] == ["https://t.me/codearena_uz"]
+    assert '<meta property="og:site_name" content="CodeArena">' in page
+
+
+@pytest.mark.django_db
+def test_icons_google_and_phones_can_use(client):
+    page = client.get(reverse("login")).content.decode()
+    # Google reads no SVG for a result's icon: a PNG over 48px beside it, and the root .ico
+    assert 'href="/static/img/favicon-96x96.png" type="image/png" sizes="96x96"' in page
+    assert '<link rel="icon" href="/favicon.ico"' in page and 'rel="apple-touch-icon"' in page
+    r = client.get("/favicon.ico")
+    assert r.status_code == 200 and r["Content-Type"] == "image/x-icon" and b"".join(r.streaming_content)[:4] == b"\0\0\1\0"
+    m = client.get("/manifest.webmanifest")
+    assert m["Content-Type"] == "application/manifest+json"
+    assert {i["sizes"] for i in m.json()["icons"]} == {"192x192", "512x512"} and m.json()["name"] == "CodeArena"
 
 
 @pytest.mark.django_db
 def test_head_names_the_page_for_search_and_link_previews(client, world):
     p = world[0]
     p.statement_md = 'Agar son juft bo‘lsa, "HA" chiqaring.\n\n**Cheklov:** 1 < n'
+    p.title = "</script> & co"  # JSON-LD must not end early
     p.save()
     page = client.get(reverse("problems:detail", args=[p.slug])).content.decode()
-    assert f"<title>{p.title} — CodeArena</title>" in page
-    # the statement as plain text, escaped once
-    assert '<meta name="description" content="Agar son juft bo‘lsa, &quot;HA&quot; chiqaring. Cheklov: 1 &lt; n">' in page
+    assert "<title>&lt;/script&gt; &amp; co — CodeArena</title>" in page
+    # the statement as plain text, escaped once, for both search and link previews
+    described = 'content="Agar son juft bo‘lsa, &quot;HA&quot; chiqaring. Cheklov: 1 &lt; n"'
+    assert f'<meta name="description" {described}>' in page and f'<meta property="og:description" {described}>' in page
+    assert '<meta property="og:title" content="&lt;/script&gt; &amp; co — CodeArena">' in page
     assert f'<link rel="canonical" href="http://testserver/problems/{p.slug}/">' in page
     assert 'property="og:image" content="http://testserver/static/img/og.png"' in page
-    # filters fold into the list itself; a plain list keeps its page
+    assert '<meta name="twitter:card" content="summary_large_image">' in page
+    # the trail desktop results show: Masalalar › the problem
+    (trail,) = _jsonld(page)
+    assert [(i["name"], i["item"]) for i in trail["itemListElement"]] == [
+        ("Masalalar", "http://testserver/problems/"), ("</script> & co", f"http://testserver/problems/{p.slug}/")]
+    assert "\\u003C/script\\u003E \\u0026 co" in page
+    # filters fold into the list itself; a plain list keeps its page and says so in its title
     listing = reverse("problems:list")
     assert f'rel="canonical" href="http://testserver{listing}"' in client.get(listing + "?tag=x&page=2").content.decode()
-    assert f'rel="canonical" href="http://testserver{listing}?page=2"' in client.get(listing + "?page=2").content.decode()
+    paged = client.get(listing + "?page=2").content.decode()
+    assert f'rel="canonical" href="http://testserver{listing}?page=2"' in paged
+    assert "<title>Masalalar — 2-sahifa — CodeArena</title>" in paged
+
+
+@pytest.mark.django_db
+def test_private_pages_and_group_rounds_stay_out_of_the_index(client, world, settings):
+    assert _robots(client.get(reverse("problems:list")).content.decode()) == "max-image-preview:large"
+    client.force_login(User.objects.create_user("boss", password="x", is_staff=True))
+    assert _robots(client.get(reverse("moderation:dashboard")).content.decode()) == "noindex"
+    client.logout()
+    teacher = User.objects.create_user("ustoz-r", password="x")
+    own = Contest.objects.create(title="Guruh", start=timezone.now(), end=timezone.now() + timezone.timedelta(hours=1),
+                                 require_group=Group.objects.create(name="G", teacher=teacher))
+    assert _robots(client.get(reverse("contests:detail", args=[own.pk])).content.decode()) == "noindex"
+    assert _robots(client.get(reverse("contests:standings", args=[own.pk])).content.decode()) == "noindex"
+    open_round = Contest.objects.get(title="Keyingi raund")
+    page = client.get(reverse("contests:detail", args=[open_round.pk])).content.decode()
+    assert _robots(page) == "max-image-preview:large" and '"@type": "BreadcrumbList"' in page
+    # the verification tags of Search Console and Yandex, once their codes are set
+    assert "google-site-verification" not in page
+    settings.SITE_VERIFICATION = {"google-site-verification": "abc", "yandex-verification": ""}
+    page = client.get("/").content.decode()
+    assert '<meta name="google-site-verification" content="abc">' in page and "yandex-verification" not in page
+
+
+@pytest.mark.django_db
+def test_footer_links_every_public_place(client):
+    footer = client.get(reverse("login")).content.decode().split('<footer class="ca-footer">', 1)[1].split("</footer>")[0]
+    for name in ("problems:list", "learn:hub", "contests:list", "rating", "top", "honor"):
+        assert f'href="{reverse(name)}"' in footer
 
 
 def test_no_template_comment_spreads_over_lines():

@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{{ problem.title }} — eng yaxshi yechimlar{% endblock %}
 {% block description %}«{{ problem.title }}» masalasining eng tez va eng qisqa yechimlari.{% endblock %}
+{% block robots %}noindex, follow{% endblock %}
 {% block content %}
 {% comment %}A problem's best accepted solution per user in a boxed table: sorted by run time or by code length
 (the caption's links), optionally within one language (the toolbar).{% endcomment %}

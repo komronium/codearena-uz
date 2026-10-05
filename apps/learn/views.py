@@ -109,13 +109,14 @@ def course_detail(request, slug):
 
 
 def plan_redirect(request, slug):
-    """/learn/plans/<slug>/ — where courses lived before."""
-    return redirect("learn:course", OLD_PLANS.get(slug, slug))
+    """/learn/plans/<slug>/ — where courses lived before. Moved for good: 301, so search engines
+    carry the old address's standing over."""
+    return redirect("learn:course", OLD_PLANS.get(slug, slug), permanent=True)
 
 
 def topics(request):
     """Qo‘llanma's old list: its articles are inside the courses now."""
-    return redirect("learn:hub")
+    return redirect("learn:hub", permanent=True)
 
 
 def topic_redirect(request, name):
@@ -126,9 +127,9 @@ def topic_redirect(request, name):
         course = _plans_for(request.user).filter(tags__name=name).order_by("order", "id").first()
         slug = course.slug if course else None
     if slug is not None:
-        return redirect("learn:course", slug)
+        return redirect("learn:course", slug, permanent=True)
     if open_problems().filter(tags__name=name).exists():
-        return redirect(f"{reverse('problems:list')}?{urlencode({'tag': name})}")
+        return redirect(f"{reverse('problems:list')}?{urlencode({'tag': name})}", permanent=True)
     raise Http404
 
 

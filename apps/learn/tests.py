@@ -183,7 +183,7 @@ def test_hub_continues_the_course_solved_in_last(client, staff, ali):
 @pytest.mark.django_db
 def test_old_plan_addresses_redirect(client):
     r = client.get("/learn/plans/birinchi-qadam/")
-    assert r.status_code == 302 and r.url == "/learn/input-output/"
+    assert r.status_code == 301 and r.url == "/learn/input-output/"  # for good: search engines move it over
     assert client.get("/learn/plans/arrays/").url == "/learn/arrays/"
 
 
@@ -192,7 +192,8 @@ def test_old_topic_addresses_redirect(client, staff):
     _course("dictionaries", "hash-table")
     _problem("a", staff, "implementation")
     assert client.get("/learn/topics/").url == "/learn/"
-    assert client.get("/learn/topics/loops/").url == "/learn/for-loop/"
+    r = client.get("/learn/topics/loops/")
+    assert r.status_code == 301 and r.url == "/learn/for-loop/"
     assert client.get("/learn/topics/hash-table/").url == "/learn/dictionaries/"
     assert client.get("/learn/topics/implementation/").url == "/problems/?tag=implementation"
     assert client.get("/learn/topics/nope/").status_code == 404

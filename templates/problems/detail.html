@@ -1,6 +1,7 @@
 {% extends "base.html" %}{% load static tiers seo %}
 {% block title %}{% if contest_problem %}{{ contest_problem.label }}. {% endif %}{{ problem.title }}{% endblock %}
 {% block description %}{{ statement_html|plain }}{% endblock %}
+{% block structured_data %}{% if not contest %}{% url 'problems:list' as list_url %}{% breadcrumbs_jsonld "Masalalar" list_url problem.title request.path %}{% endif %}{% endblock %}
 
 {% block content %}
 {% include "contests/_dq_banner.html" with participation=my_participation %}
@@ -101,7 +102,7 @@
       <div class="ca-statement space-y-6 px-6 py-5">
         <div class="prose max-w-none">{{ statement_html|safe }}</div>
         {% if problem.statement_image %}
-        <img class="w-full rounded-[var(--ca-radius)] border border-line" src="{{ problem.statement_image.url }}" alt="Masala rasmi" loading="lazy">
+        <img class="w-full rounded-[var(--ca-radius)] border border-line" src="{{ problem.statement_image.url }}" alt="«{{ problem.title }}» masalasining rasmi" loading="lazy">
         {% endif %}
 
         {% if problem.kind == "sql" %}
