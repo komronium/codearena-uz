@@ -18,8 +18,10 @@ services:
 
   worker:
     restart: unless-stopped
-    # Each judge worker runs one submission at a time; N of them judge N in parallel.
-    command: python manage.py rqworker-pool default run rejudge --num-workers ${JUDGE_WORKERS:-4}
+    # Each judge worker runs one submission at a time; N of them judge N in parallel. It starts once
+    # web has applied the migrations (they start together on a deploy), and exec hands it compose's
+    # stop signal, so a judging in progress finishes.
+    command: sh -c "until python manage.py migrate --check >/dev/null 2>&1; do sleep 5; done; exec python manage.py rqworker-pool default run rejudge --num-workers ${JUDGE_WORKERS:-4}"
     volumes: !override
       - "media:/app/media"
       - "/var/run/docker.sock:/var/run/docker.sock"
@@ -38,8 +40,10 @@ services:
     depends_on: [db, redis]
     networks:
       - codearena-net
+    # waits, like the worker, until web has applied the migrations
     command: >
-      sh -c "while true; do
+      sh -c "until python manage.py migrate --check >/dev/null 2>&1; do sleep 5; done;
+             while true; do
                python manage.py recalc_points;
                python manage.py recalc_difficulty;
                python manage.py flag_similarity --pending;
