@@ -11,7 +11,7 @@ from django.views.decorators.http import require_POST
 
 from apps.accounts.decorators import staff_required
 from apps.accounts.models import Group, User
-from apps.contests.models import Contest, Participation
+from apps.contests.models import Contest, Participation, VoidedProblem
 from apps.problems.models import Language, Problem
 from apps.submissions.models import Submission
 from apps.submissions.ratelimit import rate_limited
@@ -141,7 +141,9 @@ def contest_report(request, pk):
         c["suspicious"] = n_suspicious.get(user, 0)
         c["participation"] = parts.get(user.pk)
     rows = sorted(counts.items(), key=lambda kv: -kv[1]["risk"])
-    flags = _flag_cards(contest, counts, parts)
+    voided = set(VoidedProblem.objects.filter(participation__contest=contest)
+                 .values_list("participation__user_id", "contest_problem__label"))
+    flags = _flag_cards(contest, counts, parts, voided)
     return render(request, "integrity/contest_report.html", {
         "contest": contest, "rows": rows, "flags": flags,
         "open_flags": sum(1 for f in flags if not f.reviewed),
@@ -156,9 +158,10 @@ def _empty_counts():
     return {kind: 0 for kind in FocusEvent.Kind.values} | {"away_ms": 0, "last": None}
 
 
-def _flag_cards(contest, counts, parts):
+def _flag_cards(contest, counts, parts, voided=frozenset()):
     """Similarity flags ready for side-by-side review: earlier submission on the left,
-    each line marked if it is part of a shared block. Unreviewed first, then by score."""
+    each line marked if it is part of a shared block. Unreviewed first, then by score.
+    `voided`: the (user id, label) pairs whose result staff struck."""
     labels = dict(contest.contest_problems.values_list("problem_id", "label"))
     flags = sorted(
         SimilarityFlag.objects.filter(submission_a__contest=contest).select_related(
@@ -175,6 +178,7 @@ def _flag_cards(contest, counts, parts):
         f.sides = [_side(first, hit_first, counts, parts), _side(second, hit_second, counts, parts)]
         for side in f.sides:
             side["prior"] = side["sub"].contest_id != contest.pk
+            side["voided"] = (side["user"].pk, f.label) in voided
             if side["prior"]:
                 side["participation"] = None  # the source of a copy isn't on trial here
     return flags

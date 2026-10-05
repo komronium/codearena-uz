@@ -27,6 +27,44 @@ one problem here, and a row's handle or letter narrows the list to it.{% endcomm
   <button class="ca-btn ca-btn-ghost !py-1.5"><i data-lucide="list-filter" class="lu" aria-hidden="true"></i>Filtrlash</button>
   {% if f.problem or f.user or f.verdict %}<a class="ca-link text-sm" href="{% url 'contests:submissions' contest.pk %}">Tozalash</a>{% endif %}
 </form>
+{% if participant %}{% with p=participant.participation %}
+{# one participant's round problem by problem; a struck problem counts as untried, and only staff see that it was struck #}
+<section class="ca-box mb-4" aria-labelledby="who-title">
+  <div class="ca-box-cap">
+    <h2 id="who-title"><span translate="no">{{ p.user.username }}</span> — masalalar bo‘yicha{% if p.disqualified %} <span class="ca-tag ml-1 !text-bad" title="{{ p.disqualified_reason|default:'Diskvalifikatsiya' }}">DQ</span>{% endif %}</h2>
+    <a class="ca-box-tools ca-link" href="{% url 'integrity:contest_report' contest.pk %}">Nazorat hisoboti »</a>
+  </div>
+  <div class="ca-box-body">
+  <table class="ca-table">
+    <thead><tr><th class="w-14 text-center">Masala</th><th>Natija</th><th class="w-48"><span class="sr-only">Amallar</span></th></tr></thead>
+    <tbody>
+    {% for x in participant.results %}
+    <tr>
+      <td class="text-center font-semibold{% if x.cp.label == f.problem %} text-accent{% endif %}" title="{{ x.cp.problem.title }}">{{ x.cp.label }}</td>
+      <td>
+        {% if x.void %}<span class="font-semibold text-bad">Bekor qilingan</span>{% if x.void.reason %} <span class="text-mute">· {{ x.void.reason }}</span>{% endif %}
+        {% elif x.cell.solved %}<b class="ca-cf-ac !inline">{{ x.cell.mark }}</b> <span class="tabular text-mute">{{ x.cell.time }}{% if x.cell.wrong %} · {{ x.cell.wrong }} ta noto‘g‘ri urinishdan keyin{% endif %}</span>
+        {% elif x.cell.wrong %}<span class="text-mute">{{ x.cell.wrong }} ta noto‘g‘ri urinish</span>
+        {% else %}<span class="text-mute">urinish yo‘q</span>{% endif %}
+      </td>
+      <td class="whitespace-nowrap text-right">
+        <a class="ca-btn ca-btn-ghost !px-2 !py-1" href="{% url 'integrity:replay' contest.pk p.user_id x.cp.problem_id %}" title="Yozilishini ko‘rish" aria-label="Yozilishini ko‘rish: {{ x.cp.label }}"><i data-lucide="history" class="lu" aria-hidden="true"></i></a>
+        {% if x.void or x.cell.solved or x.cell.wrong %}
+        <form method="post" action="{% url 'contests:void' contest.pk p.user_id %}" class="inline"{% if not x.void %} onsubmit="const s=prompt('{{ x.cp.label }} masalasi natijasini bekor qilish. Sabab (ixtiyoriy, faqat adminlar ko‘radi):',''); if(s===null) return false; this.reason.value=s;"{% endif %}>{% csrf_token %}
+          <input type="hidden" name="label" value="{{ x.cp.label }}"><input type="hidden" name="voided" value="{% if x.void %}0{% else %}1{% endif %}">
+          <input type="hidden" name="reason" value=""><input type="hidden" name="next" value="{{ request.get_full_path }}">
+          {% if x.void %}<button class="ca-btn ca-btn-ghost !py-1 text-xs"><i data-lucide="undo-2" class="lu" aria-hidden="true"></i>Tiklash</button>
+          {% else %}<button class="ca-btn ca-btn-ghost !py-1 text-xs text-bad"><i data-lucide="ban" class="lu" aria-hidden="true"></i>Bekor qilish</button>{% endif %}
+        </form>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</section>
+{% endwith %}{% endif %}
 {% include "contests/_submissions_live.html" %}
 {% include "_pagination.html" with page=page %}
 {% endblock %}

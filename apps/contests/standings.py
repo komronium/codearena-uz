@@ -1,6 +1,6 @@
 from apps.submissions.models import Submission
 
-from .models import Contest
+from .models import Contest, VoidedProblem
 
 # Only a judged wrong answer is a wrong try: compile errors and submissions still in
 # the queue cost no penalty and are not shown as tries.
@@ -64,10 +64,16 @@ def compute_standings(contest):
         for s in Submission.objects.filter(contest=contest, problem=cp.problem).order_by("created"):
             subs_by_user_problem.setdefault((s.user_id, cp.id), []).append(s)
 
+    # a voided problem counts as untried; the participant still took part (attempted, below)
+    voided = set(VoidedProblem.objects.filter(participation__contest=contest)
+                 .values_list("participation_id", "contest_problem_id"))
     rows = []
     for p in participations:
-        cells = [cell(contest, cp, subs_by_user_problem.get((p.user_id, cp.id), []), contest.start)
-                 for cp in problems]
+        cells = []
+        for cp in problems:
+            void = (p.pk, cp.id) in voided
+            cells.append(cell(contest, cp, [] if void else subs_by_user_problem.get((p.user_id, cp.id), []),
+                              contest.start) | {"voided": void})
         score, penalty, solved = totals(contest, cells)
         delta = None
         if p.rating_after is not None and p.rating_before is not None:

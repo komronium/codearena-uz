@@ -7,6 +7,7 @@ from django.db.models import Count, Q
 from django.http import Http404, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
 from apps.accounts.decorators import staff_required
@@ -16,7 +17,7 @@ from apps.submissions.solves import refresh_solves
 from apps.integrity import audit
 
 from . import rating, virtual
-from .models import Clarification, Contest, Participation, VirtualParticipation
+from .models import Clarification, Contest, ContestProblem, Participation, VirtualParticipation, VoidedProblem
 from .services import access_allowed
 from .standings import compute_standings, elapsed
 
@@ -153,9 +154,23 @@ def submissions(request, pk):
     for s in page:
         s.label = label.get(s.problem_id, "?")
         s.elapsed = elapsed(max(0, int((s.created - contest.start).total_seconds()) // 60))
-    template = "contests/_submissions_live.html" if request.headers.get("HX-Request") else "contests/submissions.html"
-    return render(request, template, {"contest": contest, "problems": problems, "page": page, "f": f,
-                                      "verdicts": list(VERDICT_LABELS.items())})
+    if request.headers.get("HX-Request"):
+        return render(request, "contests/_submissions_live.html", {"contest": contest, "page": page, "f": f})
+    return render(request, "contests/submissions.html", {
+        "contest": contest, "problems": problems, "page": page, "f": f, "verdicts": list(VERDICT_LABELS.items()),
+        "participant": _participant_results(contest, problems, f["user"]) if f["user"] else None})
+
+
+def _participant_results(contest, problems, username) -> dict | None:
+    """One participant's round problem by problem, for staff to strike or restore a problem's result:
+    their standings cell and the void on it, if any."""
+    p = contest.participations.select_related("user").filter(user__username=username).first()
+    if p is None:
+        return None
+    row = next((r for r in _standings(contest, problems) if r["user"].pk == p.user_id), None)
+    voids = {v.contest_problem_id: v for v in p.voids.all()}
+    return {"participation": p, "results": [{"cp": cp, "cell": row["cells"][i] if row else None,
+                                             "void": voids.get(cp.id)} for i, cp in enumerate(problems)]}
 
 
 @staff_required
@@ -180,7 +195,7 @@ def disqualify(request, pk, user_id):
             for problem_id in p.contest.contest_problems.values_list("problem_id", flat=True):
                 refresh_solves(problem_id, [p.user_id])
         if p.contest.rating_applied:
-            _rerate_after_dq(request, p.contest)
+            _rerate(request, p.contest)
         if p.contest.official_applied_at:
             rating.recalc_official()
             audit.record(request, audit.Action.RATING_RECOMPUTE, contest=p.contest, note="rasmiy")
@@ -193,9 +208,55 @@ def disqualify(request, pk, user_id):
     return redirect("contests:standings", pk=pk)
 
 
-def _rerate_after_dq(request, contest):
-    """A DQ moves the participant to last place, which changes everyone's delta. Only the
-    latest rated contest can be redone without breaking later rating chains."""
+@staff_required
+@require_POST
+def void(request, pk, user_id):
+    """Strike (voided=1) or restore (voided=0) one participant's result on one problem of the round
+    (label=<letter>, reason): for work that was not their own on that problem alone, where a
+    disqualification would take the rest of their round too. Silent for the participant: the cell
+    counts as untried. Standings, solves after publish and an applied rating follow, as after a DQ."""
+    want = {"1": True, "0": False}.get(request.POST.get("voided"))
+    if want is None:
+        return HttpResponseBadRequest("voided must be 0 or 1")
+    p = get_object_or_404(Participation.objects.select_related("contest", "user"), contest_id=pk, user_id=user_id)
+    cp = get_object_or_404(ContestProblem, contest_id=pk, label=request.POST.get("label", ""))
+    current = VoidedProblem.objects.filter(participation=p, contest_problem=cp).first()
+    if want and current is None:
+        reason = request.POST.get("reason", "").strip()[:200]
+        VoidedProblem.objects.create(participation=p, contest_problem=cp, reason=reason)
+        audit.record(request, audit.Action.VOID, contest=p.contest, subject=p.user,
+                     note=f"{cp.label}: {reason}" if reason else cp.label)
+        messages.success(request, f"{p.user.username}: {cp.label} masalasi natijasi bekor qilindi.")
+    elif not want and current is not None:
+        current.delete()
+        audit.record(request, audit.Action.UNVOID, contest=p.contest, subject=p.user, note=cp.label)
+        messages.success(request, f"{p.user.username}: {cp.label} masalasi natijasi tiklandi.")
+    else:  # a stale page or a second tab: already as asked
+        return _back(request, pk)
+    cache.delete(f"contest-standings-{pk}")
+    if p.contest.published_at is not None:
+        refresh_solves(cp.problem_id, [p.user_id])
+    if p.contest.rating_applied:
+        _rerate(request, p.contest)
+    if p.contest.official_applied_at:
+        rating.recalc_official()
+        audit.record(request, audit.Action.RATING_RECOMPUTE, contest=p.contest, note="rasmiy")
+        messages.success(request, "Rasmiy reyting qayta hisoblandi.")
+    return _back(request, pk)
+
+
+def _back(request, pk):
+    """To the page the action came from (POST next=), else the standings."""
+    nxt = request.POST.get("next", "")
+    if url_has_allowed_host_and_scheme(nxt, allowed_hosts={request.get_host()}, require_https=request.is_secure()):
+        return redirect(nxt)
+    return redirect("contests:standings", pk=pk)
+
+
+def _rerate(request, contest):
+    """A DQ moves the participant to last place, and a voided problem lowers their score, which
+    changes everyone's delta. Only the latest rated contest can be redone without breaking later
+    rating chains."""
     if rating.is_latest(contest):
         rating.recompute(contest)
         audit.record(request, audit.Action.RATING_RECOMPUTE, contest=contest)

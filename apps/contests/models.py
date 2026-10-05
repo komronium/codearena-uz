@@ -179,3 +179,17 @@ class VirtualParticipation(models.Model):
     @property
     def is_running(self):
         return self.start <= timezone.now() < self.end
+
+
+class VoidedProblem(models.Model):
+    """A participant's result on one problem of a round, struck by staff because the work was not
+    their own. The cell counts as untried (no points, no wrong tries) and the rest of the round
+    stands, unlike a disqualification. Silent: nothing on the site tells the participant; staff see
+    it in the round's submissions and the integrity report, and the audit log keeps who and why."""
+    participation = models.ForeignKey(Participation, on_delete=models.CASCADE, related_name="voids")
+    contest_problem = models.ForeignKey(ContestProblem, on_delete=models.CASCADE, related_name="voids")
+    reason = models.CharField(max_length=200, blank=True)
+    at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("participation", "contest_problem")

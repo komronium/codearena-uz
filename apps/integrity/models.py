@@ -75,6 +75,8 @@ class AuditEntry(models.Model):
     class Action(models.TextChoices):
         DISQUALIFY = "disqualify", "Diskvalifikatsiya"
         REQUALIFY = "requalify", "Diskvalifikatsiya bekor"
+        VOID = "void", "Masala natijasi bekor"
+        UNVOID = "unvoid", "Masala natijasi tiklandi"
         REJUDGE = "rejudge", "Qayta tekshiruv"
         PUBLISH = "publish", "Masalalar ochildi"
         RATING_APPLY = "rating_apply", "Reyting hisoblandi"

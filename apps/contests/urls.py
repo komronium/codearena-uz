@@ -12,6 +12,7 @@ urlpatterns = [
     path("<int:pk>/standings/", views.standings, name="standings"),
     path("<int:pk>/submissions/", views.submissions, name="submissions"),
     path("<int:pk>/disqualify/<int:user_id>/", views.disqualify, name="disqualify"),
+    path("<int:pk>/void/<int:user_id>/", views.void, name="void"),
     path("<int:pk>/clarifications/", views.clarifications, name="clarifications"),
     path("<int:pk>/clarifications/ask/", views.ask_clarification, name="ask_clarification"),
     path("<int:pk>/clarifications/<int:cid>/answer/", views.answer_clarification, name="answer_clarification"),

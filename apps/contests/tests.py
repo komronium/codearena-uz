@@ -1301,3 +1301,93 @@ def test_a_standings_cell_opens_its_submissions_for_staff_only(client, contest, 
     assert link not in client.get(standings).content.decode()
     client.force_login(User.objects.create_user("boss", password="x", is_staff=True))
     assert link in client.get(standings).content.decode()
+
+
+# ---- voiding one problem ---------------------------------------------------------------------------
+
+@pytest.mark.django_db
+def test_voiding_one_problem_keeps_the_rest_of_the_round_and_is_silent(client, contest, problem_a, problem_b, python):
+    from apps.integrity.models import AuditEntry
+
+    ali, bob = User.objects.create_user("ali", password="x"), User.objects.create_user("bob", password="x")
+    for u in (ali, bob):
+        Participation.objects.create(user=u, contest=contest)
+    _sub(ali, problem_a, contest, python, "WA", 3, passed=1)
+    _sub(ali, problem_a, contest, python, "AC", 10)
+    _sub(ali, problem_b, contest, python, "AC", 20)
+    _sub(bob, problem_a, contest, python, "AC", 5)
+    url = reverse("contests:void", args=[contest.pk, ali.pk])
+
+    def scores():
+        return {r["user"].username: (r["rank"], r["score"]) for r in compute_standings(contest)}
+
+    assert scores() == {"ali": (1, 200), "bob": (2, 100)}
+
+    client.force_login(ali)  # only staff strike a result
+    client.post(url, {"label": "A", "voided": "1"})
+    assert scores()["ali"] == (1, 200)
+
+    client.force_login(User.objects.create_user("boss", password="x", is_staff=True))
+    client.post(url, {"label": "A", "voided": "1", "reason": "ko‘chirilgan"})
+    client.post(url, {"label": "A", "voided": "1", "reason": "again"})  # a stale second click changes nothing
+    row = next(r for r in compute_standings(contest) if r["user"] == ali)
+    # A is untried now (no points, no wrong try); B and the rest of the round stand
+    assert row["cells"][0] == {"solved": False, "wrong": 0, "minutes": None, "ac_at": None, "voided": True,
+                               "first": False}
+    assert row["cells"][1]["solved"] and row["attempted"]
+    assert scores() == {"bob": (1, 100), "ali": (2, 100)}  # equal points: bob's lower penalty first
+    assert [(e.action, e.note) for e in AuditEntry.objects.filter(contest=contest)] == [("void", "A: ko‘chirilgan")]
+
+    # nothing tells the participant or the public: the cell is just empty
+    client.force_login(ali)
+    page = client.get(reverse("contests:standings", args=[contest.pk])).content.decode()
+    assert "Bekor qilingan" not in page and "ko‘chirilgan" not in page
+    assert "Bekor qilingan" not in client.get(reverse("contests:detail", args=[contest.pk])).content.decode()
+
+    client.force_login(User.objects.get(username="boss"))
+    page = client.get(reverse("contests:submissions", args=[contest.pk]) + "?user=ali").content.decode()
+    assert "Bekor qilingan" in page and "ko‘chirilgan" in page  # staff see it, with the reason
+    client.post(url, {"label": "A", "voided": "0"})
+    assert scores() == {"ali": (1, 200), "bob": (2, 100)}
+    assert AuditEntry.objects.filter(contest=contest, action="unvoid", note="A").exists()
+
+
+@pytest.mark.django_db
+def test_voiding_after_publish_takes_that_practice_solve_back(client, problem_a, problem_b, python):
+    staff = User.objects.create_user("boss", password="x", is_staff=True)
+    ali = User.objects.create_user("ali", password="x")
+    c = Contest.objects.create(title="Past", start=timezone.now() - timezone.timedelta(hours=3),
+                               end=timezone.now() - timezone.timedelta(hours=2))
+    ContestProblem.objects.create(contest=c, problem=problem_a, label="A")
+    ContestProblem.objects.create(contest=c, problem=problem_b, label="B")
+    Participation.objects.create(user=ali, contest=c)
+    for p in (problem_a, problem_b):
+        Submission.objects.create(user=ali, problem=p, contest=c, language=python, source="x", verdict="AC")
+    client.force_login(staff)
+    client.post(reverse("moderation:contest_publish", args=[c.pk]))
+    assert set(ali.userproblemsolved_set.values_list("problem__slug", flat=True)) == {"a", "b"}
+
+    url = reverse("contests:void", args=[c.pk, ali.pk])
+    r = client.post(url, {"label": "A", "voided": "1", "next": reverse("integrity:contest_report", args=[c.pk])})
+    assert r.url == reverse("integrity:contest_report", args=[c.pk])  # back where the click came from
+    assert set(ali.userproblemsolved_set.values_list("problem__slug", flat=True)) == {"b"}
+    assert client.post(url, {"label": "A", "voided": "0", "next": "https://evil.example/"}).url == reverse(
+        "contests:standings", args=[c.pk])  # never off the site
+    assert set(ali.userproblemsolved_set.values_list("problem__slug", flat=True)) == {"a", "b"}
+
+
+@pytest.mark.django_db
+def test_voiding_after_rating_recomputes_the_latest_contest(client, problem_a, python, veteran):
+    from .rating import apply_rating
+
+    cheat, ali = veteran("cheat", 1200), veteran("ali", 1200)
+    c = _rated_contest("Final", 1, problem_a, python, [cheat, ali])
+    apply_rating(c)
+    assert Participation.objects.get(contest=c, user=cheat).rank == 1
+    client.force_login(User.objects.create_user("boss", password="x", is_staff=True))
+    r = client.post(reverse("contests:void", args=[c.pk, cheat.pk]), {"label": "A", "voided": "1"}, follow=True)
+    rows = {p.user_id: p for p in Participation.objects.filter(contest=c)}
+    assert rows[ali.pk].rank == 1 and rows[cheat.pk].rank == 2  # cheat still rated: took part, solved nothing
+    cheat.refresh_from_db()
+    assert cheat.rating == rows[cheat.pk].rating_after < 1200
+    assert "Reyting qayta hisoblandi" in r.content.decode()

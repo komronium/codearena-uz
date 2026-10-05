@@ -146,6 +146,18 @@
               <button class="ca-btn ca-btn-ghost !py-1 text-xs text-bad"><i data-lucide="ban" class="lu" aria-hidden="true"></i>{{ side.user.username }}ni diskvalifikatsiya</button>
               {% endif %}
             </form>
+            {# only this problem: the rest of the participant's round stands; silent for them #}
+            {% if f.label %}
+            <form method="post" action="{% url 'contests:void' contest.pk side.user.pk %}" class="border-t border-line px-4 py-2 text-right"{% if not side.voided %} onsubmit="const s=prompt('{{ f.label }} masalasi natijasini bekor qilish. Sabab (ixtiyoriy, faqat adminlar ko‘radi):','O‘xshash kod: #{{ f.sides.0.sub.pk }} / #{{ f.sides.1.sub.pk }}'); if(s===null) return false; this.reason.value=s;"{% endif %}>{% csrf_token %}
+              <input type="hidden" name="label" value="{{ f.label }}"><input type="hidden" name="voided" value="{% if side.voided %}0{% else %}1{% endif %}">
+              <input type="hidden" name="reason" value=""><input type="hidden" name="next" value="{% url 'integrity:contest_report' contest.pk %}#flag-{{ f.pk }}">
+              {% if side.voided %}
+              <button class="ca-btn ca-btn-ghost !py-1 text-xs"><i data-lucide="undo-2" class="lu" aria-hidden="true"></i>{{ side.user.username }}: {{ f.label }} natijasini tiklash</button>
+              {% else %}
+              <button class="ca-btn ca-btn-ghost !py-1 text-xs text-bad"><i data-lucide="circle-slash" class="lu" aria-hidden="true"></i>{{ side.user.username }}: faqat {{ f.label }} ni bekor qilish</button>
+              {% endif %}
+            </form>
+            {% endif %}
             {% endif %}
           </div>
           {% endfor %}

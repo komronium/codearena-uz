@@ -1,6 +1,6 @@
 """Solves and practice points are derived data. A user has solved a problem iff they have
 an eligible AC for it: a practice AC, or a contest AC once staff published the ended
-contest and the user was not disqualified from it. practice_points is the live price of
+contest and the user was neither disqualified from it nor had that problem voided. practice_points is the live price of
 the solved problems the user did not author. Everything that can change either goes
 through here."""
 from collections.abc import Iterable
@@ -10,7 +10,7 @@ from django.db.models import Count, Exists, F, IntegerField, OuterRef, Q, Subque
 from django.db.models.functions import Coalesce
 
 from apps.accounts.models import User
-from apps.contests.models import Participation
+from apps.contests.models import Participation, VoidedProblem
 from apps.problems.daily import DAILY_BONUS, refresh_daily
 from apps.problems.models import MAX_HINT_PCT, DailySolve, HintUnlock
 
@@ -20,9 +20,12 @@ from .models import Submission, UserProblemSolved
 def _eligible_acs(problem_id: int):
     disqualified = Participation.objects.filter(user_id=OuterRef("user_id"), contest_id=OuterRef("contest_id"),
                                                 disqualified=True)
+    voided = VoidedProblem.objects.filter(participation__user_id=OuterRef("user_id"),
+                                          participation__contest_id=OuterRef("contest_id"),
+                                          contest_problem__problem_id=OuterRef("problem_id"))
     return (Submission.objects
             .filter(Q(contest__isnull=True) | Q(contest__published_at__isnull=False), ~Exists(disqualified),
-                    problem_id=problem_id, verdict=Submission.Verdict.AC)
+                    ~Exists(voided), problem_id=problem_id, verdict=Submission.Verdict.AC)
             .order_by("created", "id"))
 
 
