@@ -26,6 +26,8 @@ def test_guests_get_the_landing_page(client, world):
     assert r.status_code == 200 and "home/landing.html" in [t.name for t in r.templates]
     assert "Ro‘yxatdan o‘tish" in page and "Keyingi raund" in page and "0 ishtirokchi" in page
     assert r.context["daily"] is not None and r.context["stats"]["problems"] == 4
+    # the decorative code sample scrolls on a phone; inert keeps it out of the tab order, aria-hidden alone does not
+    assert '<div class="relative mx-auto w-full min-w-0 max-w-lg lg:mr-0" inert>' in page
 
 
 @pytest.mark.django_db
