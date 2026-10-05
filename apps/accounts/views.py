@@ -184,8 +184,14 @@ def _ranked(page):
     return page
 
 
+def practice_board():
+    """Who stands on the practice-points board: active non-staff users with points. A 0 says nothing
+    about anyone, and the admin account is not a student."""
+    return User.objects.filter(is_active=True, is_staff=False, practice_points__gt=0)
+
+
 def top(request):
-    qs = (User.objects.filter(is_active=True).annotate(solved_count=Count("userproblemsolved", distinct=True))
+    qs = (practice_board().annotate(solved_count=Count("userproblemsolved", distinct=True))
           .order_by("-practice_points", "username"))
     page = Paginator(qs, 50).get_page(request.GET.get("page"))
     return render(request, "accounts/top.html", {"users": _ranked(page), "total": qs.count()})
@@ -308,12 +314,12 @@ def profile(request, username):
     # rating rank only counts users who finished a rated contest, like /rating
     ranked = User.objects.filter(is_active=True)
     rated = ranked.filter(participations__rating_after__isnull=False).distinct()
-    total_users, total_rated = ranked.count(), rated.count()
+    board = practice_board()  # the same people as /top: no points or staff, no place
+    total_users, total_rated = board.count(), rated.count()
     rating_rank = points_rank = None
     if profile_user.is_active:
-        # no points, no place: everyone at 0 would otherwise share the place after the last scorer
-        if profile_user.practice_points > 0:
-            points_rank = ranked.filter(practice_points__gt=profile_user.practice_points).count() + 1
+        if board.filter(pk=profile_user.pk).exists():
+            points_rank = board.filter(practice_points__gt=profile_user.practice_points).count() + 1
         if rating_history:
             rating_rank = rated.filter(rating__gt=profile_user.rating).count() + 1
 

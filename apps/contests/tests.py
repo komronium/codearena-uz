@@ -592,10 +592,18 @@ def test_non_staff_cannot_answer_clarification(client, contest):
 
     client.force_login(asker)
     r = client.post(reverse("contests:answer_clarification", args=[contest.pk, clar.pk]), {"answer": "yes"})
-    assert r.status_code == 302  # staff_required redirects to login
+    assert r.status_code == 403  # signed in, not staff: refused, not sent to the login form
     clar.refresh_from_db()
     assert clar.answer == ""
 
+
+
+def test_standings_headers_are_words_not_symbols(client, contest):
+    Participation.objects.create(user=User.objects.create_user("ali", password="x"), contest=contest)
+    page = client.get(reverse("contests:standings", args=[contest.pk])).content.decode()
+    assert ">Ball</th>" in page and ">=</th>" not in page
+    Contest.objects.filter(pk=contest.pk).update(type=Contest.Type.ICPC)
+    assert ">Yechildi</th>" in client.get(reverse("contests:standings", args=[contest.pk])).content.decode()
 
 @pytest.mark.django_db
 def test_disqualified_participant_ranks_last_and_cannot_submit(client):
@@ -645,7 +653,7 @@ def test_disqualify_requires_staff(client):
     u = User.objects.create_user("u", password="x")
     c = Contest.objects.create(title="C", start=timezone.now(), end=timezone.now() + timezone.timedelta(hours=1))
     client.force_login(u)
-    assert client.post(reverse("contests:disqualify", args=[c.pk, u.pk])).status_code == 302
+    assert client.post(reverse("contests:disqualify", args=[c.pk, u.pk])).status_code == 403
 
 
 def test_newcomers_start_at_zero_and_ramp_up_to_their_real_rating():

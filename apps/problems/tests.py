@@ -112,9 +112,9 @@ def test_private_contest_problem_visible_to_registered_participant(client, probl
     r = client.get(reverse("problems:detail", kwargs={"slug": "a-plus-b"}))
     assert r.status_code == 200
     assert b"Musobaqa rejimi" in r.content
-    # contest mode: statement + editor watermarked with who is viewing, printing blanked
+    # contest mode: printing blanked, and no visible watermark over the statement or the editor
     body = r.content.decode()
-    assert body.count('class="ca-watermark" data-wm="ali ·') == 2
+    assert "ca-watermark" not in body
     assert '<style media="print">' in body
     assert 'id="ca-away"' in body  # leave tracker + warning dialog
 

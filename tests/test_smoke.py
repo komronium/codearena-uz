@@ -15,8 +15,9 @@ def test_phone_menu_reaches_every_page(client):
     client.force_login(User.objects.create_user("ali", password="x"))
     page = client.get(reverse("problems:list")).content.decode()
     sheet = page[page.index('id="ca-menu"'):]
-    for name in ("classroom:list", "classroom:duels", "top", "rating", "submissions:mine"):
+    for name in ("classroom:list", "classroom:duels", "top", "rating"):
         assert f'href="{reverse(name)}"' in sheet, name
+    assert f'href="{reverse("submissions:mine")}?mine=1"' in sheet  # your own tries, not the whole site's
     assert reverse("moderation:dashboard") not in sheet
 
     client.force_login(User.objects.create_user("boss", password="x", is_staff=True))

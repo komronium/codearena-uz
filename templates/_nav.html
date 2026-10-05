@@ -12,8 +12,8 @@ grouped by what the student is doing. Profile, settings and sign-out live in the
   <i data-lucide="graduation-cap" class="lu" aria-hidden="true"></i>O‘rganish
 </a>{% endwith %}
 {% if user.is_authenticated %}
-<a href="{% url 'submissions:mine' %}" class="ca-sidebar-link {% if ns == 'submissions' %}is-active{% endif %}"{% if ns == 'submissions' %} aria-current="page"{% endif %}>
-  <i data-lucide="history" class="lu" aria-hidden="true"></i>Urinishlar
+<a href="{% url 'submissions:mine' %}?mine=1" class="ca-sidebar-link {% if ns == 'submissions' %}is-active{% endif %}"{% if ns == 'submissions' %} aria-current="page"{% endif %}>
+  <i data-lucide="history" class="lu" aria-hidden="true"></i>Urinishlarim
   {% if unread_reviews %}<span class="ca-chip ca-chip-score ml-auto tabular" title="O‘qilmagan kod sharhlari">{{ unread_reviews }}</span>{% endif %}
 </a>
 {% endif %}

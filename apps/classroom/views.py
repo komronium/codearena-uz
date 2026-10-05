@@ -14,6 +14,7 @@ from django.views.decorators.http import require_POST
 
 from apps.accounts.models import Group, User
 from apps.accounts.tiers import tier_color
+from apps.problems.views import _render_statement
 from apps.submissions.models import Submission
 
 from . import duels
@@ -125,7 +126,9 @@ def assignment_detail(request, pk):
     if not (manages or member):
         raise Http404
     problems = [ap.problem for ap in assignment.assignment_problems.select_related("problem")]
-    ctx = {"assignment": assignment, "problems": problems}
+    # the teacher writes markdown (the form says so); rendered and sanitized like a statement
+    ctx = {"assignment": assignment, "problems": problems,
+           "description_html": _render_statement(assignment.description_md)}
     if manages:
         rows = grid(assignment)
         if request.GET.get("format") == "csv":

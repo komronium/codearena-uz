@@ -7,6 +7,14 @@
 <section class="ca-hero" aria-labelledby="hero-title">
   <div class="relative grid items-center gap-12 lg:grid-cols-[1.1fr_1fr]">
     <div class="min-w-0">
+      {% if next_round %}{% with c=next_round %}
+      <a class="ca-announce{% if c.is_running %} is-live{% endif %} mb-6" href="{% url 'contests:detail' c.pk %}">
+        <span class="ca-announce-tag">{% if c.is_running %}<span class="ca-live-dot" aria-hidden="true"></span>Jonli musobaqa{% else %}<i data-lucide="calendar-clock" class="lu" aria-hidden="true"></i>Kelgusi musobaqa{% endif %}</span>
+        <span class="ca-announce-title">{{ c.title }}</span>
+        <span class="ca-announce-when">{% if c.is_running %}tugashiga <b class="tabular" data-countdown="{{ c.end|date:'c' }}" data-label="" data-suffix="1" data-ended="tugadi"></b>{% else %}boshlanishiga <b class="tabular" data-countdown="{{ c.start|date:'c' }}" data-label="" data-suffix="1" data-ended="boshlandi"></b>{% endif %}</span>
+        <i data-lucide="arrow-right" class="lu" aria-hidden="true"></i>
+      </a>
+      {% endwith %}{% endif %}
       <p class="ca-eyebrow">Talabalar uchun dasturlash platformasi</p>
       <h1 id="hero-title" class="ca-hero-title mt-4">Dasturlashni <span class="text-accent">musobaqada</span> o‘rganing</h1>
       <p class="mt-5 max-w-xl text-lg leading-relaxed text-mute">Masala yeching, sinfdoshingiz bilan bellashing, reytingda ko‘tariling. Kodingiz shu zahoti serverda testlanadi — natija halol.</p>

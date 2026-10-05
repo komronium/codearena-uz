@@ -21,7 +21,7 @@ your latest submissions); on the right your rating box, problems to try next, ro
   {% if daily %}
   <section class="ca-box" aria-labelledby="daily-title">
     <h2 class="ca-box-cap" id="daily-title">Kun masalasi <small class="tabular">{{ daily.date|date:"d.m.Y" }}</small>
-      <span class="ca-box-tools text-mute"><i data-lucide="flame" class="lu {% if streak %}text-gold{% endif %}" aria-hidden="true"></i><b class="tabular text-ink">{{ streak }}</b> kunlik seriya · eng uzuni {{ best_streak }}</span></h2>
+      <span class="ca-box-tools text-mute"><i data-lucide="flame" class="lu {% if streak %}text-gold{% endif %}" aria-hidden="true"></i>{% if streak %}<b class="tabular text-ink">{{ streak }}</b> kunlik seriya{% if best_streak > streak %} · eng uzuni {{ best_streak }}{% endif %}{% elif best_streak %}Eng uzun seriya: {{ best_streak }} kun{% else %}Seriyani bugun boshlang{% endif %}</span></h2>
     <div class="ca-box-body ca-box-pad flex flex-wrap items-center justify-between gap-x-8 gap-y-3">
       <div class="min-w-0">
         <a class="ca-link text-base font-semibold" href="{% url 'problems:detail' daily.problem.slug %}">{{ daily.problem.title }}</a>

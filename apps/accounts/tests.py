@@ -59,6 +59,19 @@ def test_top_lists_users_by_practice_points_desc(client):
     assert [u.username for u in users[:2]] == ["high", "low"]
 
 
+
+@pytest.mark.django_db
+def test_top_leaves_out_staff_and_users_without_points(client):
+    User.objects.create_user("ali", password="x", practice_points=40)
+    User.objects.create_user("yangi", password="x")
+    User.objects.create_user("admin", password="x", is_staff=True, practice_points=90)
+    r = client.get(reverse("top"))
+    assert [u.username for u in r.context["users"]] == ["ali"] and r.context["total"] == 1
+    # the profile's "Ballda o‘rni" counts the same board
+    r = client.get(reverse("profile", args=["ali"]))
+    assert r.context["points_rank"] == 1 and r.context["total_users"] == 1
+    assert client.get(reverse("profile", args=["admin"])).context["points_rank"] is None
+
 @pytest.mark.django_db
 def test_profile_shows_stats_and_solved_problems(client):
     author = User.objects.create_user("teacher", password="x")

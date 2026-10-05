@@ -24,7 +24,7 @@ teacher the whole group's grid (problems as numbered columns) with a CSV export.
 {% if assignment.description_md %}
 <section class="ca-box" aria-labelledby="task-title">
   <h2 class="ca-box-cap" id="task-title">Topshiriq</h2>
-  <div class="ca-box-body ca-box-pad whitespace-pre-line text-sm">{{ assignment.description_md }}</div>
+  <div class="ca-box-body ca-box-pad prose max-w-none text-sm">{{ description_html|safe }}</div>
 </section>
 {% endif %}
 

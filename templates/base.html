@@ -146,7 +146,14 @@ A native dialog gives focus trapping and Esc for free.{% endcomment %}
       const now = Date.now();
       document.querySelectorAll("[data-countdown]").forEach((el) => {
         const left = new Date(el.dataset.countdown) - now;
-        if (left <= 0) { el.textContent = el.dataset.suffix ? "" : el.dataset.label + ": 00:00:00"; return; }
+        if (left <= 0) {
+          // data-ended: what to say once the moment has passed (the bar's live pill says "Tugadi" and turns grey)
+          if (el.dataset.ended !== undefined) {
+            el.textContent = el.dataset.ended;
+            el.closest("[data-live-pill]")?.classList.add("is-ended");
+          } else el.textContent = el.dataset.suffix ? "" : el.dataset.label + ": 00:00:00";
+          return;
+        }
         el.textContent = el.dataset.suffix ? fmt(left) + " " + el.dataset.label : el.dataset.label + ": " + fmt(left);
       });
       // a round's clock line: the share of [from, to] already gone

@@ -64,8 +64,10 @@ def home(request):
         last_rated = (Contest.objects.filter(is_rated=True, end__lte=now, participations__rating_after__isnull=False)
                       .order_by("-end").distinct().first())
         podium = [r for r in _standings(last_rated) if not r["disqualified"]][:3] if last_rated else []
+        # the hero's first line: the round running now, else the next one, that anyone may enter
+        next_round = next((c for c in running + upcoming if not c.require_group_id), None)
         return render(request, "home/landing.html", {
-            "daily": daily, "running": running, "upcoming": upcoming,
+            "daily": daily, "running": running, "upcoming": upcoming, "next_round": next_round,
             "last_rated": last_rated, "podium": podium,
             "languages": list(Language.objects.filter(is_active=True).order_by("id").values_list("name", flat=True)),
             "stats": {"problems": open_problems().count(), "users": User.objects.filter(is_active=True).count(),

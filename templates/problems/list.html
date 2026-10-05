@@ -117,7 +117,7 @@ picks for you.{% endcomment %}
       {% if user.is_authenticated %}
       <div class="ca-box-pad border-t border-line">
         {% include "home/_week.html" with week=ds.week %}
-        <p class="mt-2.5 text-xs text-mute">{% if daily_done %}Bugun yechildi · seriya <b class="text-ink">{{ ds.streak }}</b> kun{% elif ds.streak %}Bugun yechsangiz seriya <b class="text-ink">{{ ds.streak|add:1 }}</b> kunga yetadi, yechmasangiz uziladi{% else %}Bugun yechsangiz seriya boshlanadi{% endif %} · eng uzuni <b class="text-ink">{{ ds.best }}</b></p>
+        <p class="mt-2.5 text-xs text-mute">{% if daily_done %}Bugun yechildi · seriya <b class="text-ink">{{ ds.streak }}</b> kun{% elif ds.streak %}Bugun yechsangiz seriya <b class="text-ink">{{ ds.streak|add:1 }}</b> kunga yetadi, yechmasangiz uziladi{% else %}Bugun yechsangiz seriya boshlanadi{% endif %}{% if ds.best > ds.streak %} · eng uzuni <b class="text-ink">{{ ds.best }}</b>{% endif %}</p>
         {% if ds.next_badge %}<p class="mt-1.5 text-xs text-mute"><i data-lucide="{{ ds.next_badge.icon }}" class="lu mr-1" aria-hidden="true"></i>«{{ ds.next_badge.name }}» nishoniga yana <b class="text-ink">{{ ds.next_badge.left }}</b> kun ketma-ket</p>{% endif %}
       </div>
       {% endif %}

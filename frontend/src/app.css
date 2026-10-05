@@ -558,7 +558,6 @@ svg.lucide { width: 1.2em; height: 1.2em; display: inline-block; vertical-align:
   .ca-spin { animation: none; }
   .ca-btn:active:not(:disabled), .ca-stat-card:hover, .ca-pmap:hover { transform: none; }
 }
-.ca-watermark { position: absolute; inset: 0; z-index: 5; pointer-events: none; background-repeat: repeat; }
 /* similarity review: shared lines tinted, line numbers in a gutter */
 .ca-cmp[open] > summary { border-bottom: 1px solid rgb(var(--ca-line-rgb)); }
 .ca-cmp-code { margin: 0; max-height: 28rem; overflow: auto; padding: .5rem 0; font-size: .8rem; line-height: 1.55; background: rgb(var(--ca-paper-rgb) / .6); }
@@ -697,7 +696,8 @@ section.ca-ed-full #editor .cm-editor { height: calc(100vh - 9.5rem); }
 .ca-nav-link:focus-visible { outline-offset: -4px; border-radius: 6px; }
 /* your own work and the staff link: on wide screens only; narrower, they live in the account menu */
 .ca-nav-link.is-more, .ca-nav-sep { display: none; }
-@media (min-width: 1280px) { .ca-nav-link.is-more { display: inline-flex; } .ca-nav-sep { display: block; } }
+/* from 1360px: at 1280 the extra links ran into a running round's clock; the account menu has them all */
+@media (min-width: 1360px) { .ca-nav-link.is-more { display: inline-flex; } .ca-nav-sep { display: block; } }
 .ca-nav-sep { width: 1px; margin: .85rem .3rem; background: rgb(var(--ca-line-rgb)); }
 .ca-nav-tools { margin-left: auto; display: flex; align-items: center; gap: .5rem; flex-shrink: 0; }
 /* badges beside a place's name: a pulsing dot while a contest runs, or a count */
@@ -742,6 +742,22 @@ section.ca-ed-full #editor .cm-editor { height: calc(100vh - 9.5rem); }
   color: rgb(var(--ca-ok-rgb)); background: rgb(var(--ca-ok-rgb) / .08); border: 1px solid rgb(var(--ca-ok-rgb) / .3); white-space: nowrap; }
 .ca-live-pill:hover { background: rgb(var(--ca-ok-rgb) / .14); }
 .ca-live-pill .ca-live-dot { margin-right: 0; }
+.ca-live-pill.is-ended { color: rgb(var(--ca-mute-rgb)); background: rgb(var(--ca-sunk-rgb)); border-color: rgb(var(--ca-line-rgb)); }
+.ca-live-pill.is-ended .ca-live-dot, .ca-live-pill.is-ended .ca-live-label { display: none; }
+/* the landing's first line: the round running now or the next one, with its clock */
+.ca-announce { display: inline-flex; flex-wrap: wrap; align-items: center; gap: .35rem .6rem; max-width: 100%; padding: .3rem .85rem .3rem .3rem;
+  border: 1px solid rgb(var(--ca-line-rgb)); border-radius: 9999px; background: rgb(var(--ca-surface-rgb)); box-shadow: var(--ca-shadow);
+  font-size: .8125rem; color: rgb(var(--ca-ink-rgb)); transition: border-color .15s ease; }
+.ca-announce:hover { border-color: rgb(var(--ca-accent-rgb) / .5); }
+.ca-announce-tag { display: inline-flex; align-items: center; gap: .35rem; padding: .15rem .6rem; border-radius: 9999px; font-size: .75rem; font-weight: 600;
+  color: rgb(var(--ca-warn-rgb)); background: rgb(var(--ca-warn-rgb) / .12); }
+.ca-announce.is-live .ca-announce-tag { color: rgb(var(--ca-ok-rgb)); background: rgb(var(--ca-ok-rgb) / .12); }
+.ca-announce-tag .ca-live-dot { margin-right: 0; }
+.ca-announce-title { min-width: 0; max-width: 18rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.ca-announce-when { color: rgb(var(--ca-mute-rgb)); }
+.ca-announce-when b { color: rgb(var(--ca-ink-rgb)); font-weight: 600; }
+.ca-announce > svg.lucide { width: .95rem; height: .95rem; color: rgb(var(--ca-mute-rgb)); }
+.ca-announce .ca-announce-tag svg.lucide { width: .85rem; height: .85rem; }
 .ca-streak { position: relative; }
 .ca-streak-todo { position: absolute; top: -.2rem; right: -.2rem; width: .55rem; height: .55rem; border-radius: 9999px; background: rgb(var(--ca-warn-rgb)); box-shadow: 0 0 0 2px rgb(var(--ca-surface-rgb)); }
 /* account dropdown (templates/_user_menu.html) */
@@ -1240,10 +1256,12 @@ a.ca-badge:hover { filter: brightness(.95); }
 /* the console: test runs print here, in mono on the darkest well */
 .ca-ide #trial-out { font-family: var(--ca-mono); font-size: .8rem; background: rgb(var(--ca-sunk-rgb)); }
 section.ca-ed-full { background: rgb(13 16 22); }
-/* wide screens: statement and editor side by side, the editor as tall as the window allows */
+/* wide screens: statement and editor side by side, the editor as tall as the window allows. The 14.5rem
+   is everything else in view at the top of the page: the back/actions row, the editor's toolbar, the
+   Sinab ko‘rish / Yuborish bar and the custom-input row, so the buttons fit on a 1366×768 laptop. */
 @media (min-width: 1024px) {
   #solve-pane { top: calc(var(--ca-nav-h) + 1rem); }
-  #solve-pane:not(.ca-ed-full) #editor .cm-editor, #solve-pane:not(.ca-ed-full) .ca-editor-fallback { height: max(22rem, calc(100dvh - var(--ca-nav-h) - 12.5rem)); }
+  #solve-pane:not(.ca-ed-full) #editor .cm-editor, #solve-pane:not(.ca-ed-full) .ca-editor-fallback { height: max(22rem, calc(100dvh - var(--ca-nav-h) - 14.5rem)); }
 }
 
 @tailwind base;

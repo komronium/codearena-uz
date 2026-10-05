@@ -45,7 +45,7 @@ colour is the person, green/red the results.{% endcomment %}
       <div><dt>Musobaqalar</dt><dd>{{ rating_history|length }}</dd></div>
       <div><dt>Amaliyot ball</dt><dd>{{ profile_user.practice_points }}</dd><dd class="ca-stat-note">yechilgan {{ solved|length }} ta masala uchun</dd></div>
       <div><dt>Ballda o‘rni</dt><dd>{% if points_rank %}{{ points_rank }}<small>/ {{ total_users }}</small>{% else %}—{% endif %}</dd></div>
-      <div><dt>Kun masalasi seriyasi</dt><dd>{{ streak.0 }} kun</dd><dd class="ca-stat-note">eng uzuni {{ streak.1 }}</dd></div>
+      <div><dt>Kun masalasi seriyasi</dt><dd>{{ streak.0 }} kun</dd>{% if streak.1 > streak.0 %}<dd class="ca-stat-note">eng uzuni {{ streak.1 }}</dd>{% endif %}</div>
     </dl>
     {% if next_tier and rating_history %}
     <div class="ca-box-pad flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-line !py-2.5 text-xs text-mute">
@@ -81,7 +81,7 @@ colour is the person, green/red the results.{% endcomment %}
   </div>
   {% endif %}
   <table class="ca-table">
-    <thead><tr><th class="w-10 text-center">#</th><th>Musobaqa</th><th class="hidden w-28 text-center sm:table-cell">Sana</th><th class="w-20 text-center">O‘rin</th><th class="w-16 text-center" title="O‘zgarish">Δ</th><th class="w-20 text-center">Reyting</th></tr></thead>
+    <thead><tr><th class="w-10 text-center">#</th><th>Musobaqa</th><th class="hidden w-28 text-center sm:table-cell">Sana</th><th class="w-20 text-center">O‘rin</th><th class="w-16 text-center" title="Reyting o‘zgarishi">±</th><th class="w-20 text-center">Reyting</th></tr></thead>
     <tbody>
     {% for p in rating_history reversed %}
     <tr{% if p.disqualified %} class="ca-row-dq"{% endif %}>

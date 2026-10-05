@@ -141,6 +141,15 @@ def test_students_see_their_groups_assignments_only(client, teacher, klass, pyth
     assert client.get(reverse("classroom:detail", args=[a.pk])).status_code == 404
 
 
+
+def test_assignment_description_is_rendered_markdown_and_sanitized(client, teacher, klass):
+    a = _assignment(klass, teacher, [_problem("p1", teacher)], timezone.now() + timezone.timedelta(days=2))
+    Assignment.objects.filter(pk=a.pk).update(description_md="**Juma kuni** yeching <script>alert(1)</script>")
+    client.force_login(User.objects.get(username="ali"))
+    page = client.get(reverse("classroom:detail", args=[a.pk])).content.decode()
+    assert "<strong>Juma kuni</strong>" in page and "**Juma" not in page
+    assert "<script>alert(1)</script>" not in page
+
 # ---- code review ---------------------------------------------------------------------------------
 
 @pytest.fixture

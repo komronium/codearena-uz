@@ -22,7 +22,7 @@
   {% if contest_problems|length > 1 %}
   <nav class="flex w-full flex-wrap gap-1.5 sm:order-last" aria-label="Musobaqa masalalari">
     {% for cp in contest_problems %}
-    <a href="{% url 'problems:detail' cp.problem.slug %}" class="ca-filter{% if cp.problem_id == problem.pk %} is-active{% endif %}"{% if cp.problem_id == problem.pk %} aria-current="page"{% endif %} title="{{ cp.problem.title }}"><b>{{ cp.label }}</b><span class="hidden sm:inline">. {{ cp.problem.title|truncatechars:22 }}</span></a>
+    <a href="{% url 'problems:detail' cp.problem.slug %}" class="ca-filter{% if cp.problem_id == problem.pk %} is-active{% endif %}"{% if cp.problem_id == problem.pk %} aria-current="page"{% endif %} title="{{ cp.problem.title }}"><span><b>{{ cp.label }}</b><span class="hidden sm:inline">. {{ cp.problem.title|truncatechars:22 }}</span></span></a>
     {% endfor %}
   </nav>
   {% endif %}
@@ -67,7 +67,6 @@
 </div>
 <div id="panes" data-pane="statement" class="grid gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:items-start">
   <section class="relative" id="statement-pane" aria-label="Masala matni">
-  {% if contest and user.is_authenticated %}<div class="ca-watermark" data-wm="{{ user.username }} · {% now 'd.m.Y H:i' %}" aria-hidden="true"></div>{% endif %}
     <div class="ca-panel !p-0 overflow-hidden">
       <div class="border-b border-line px-6 py-5">
         <h1 class="ca-page-title">{% if contest_problem %}<span class="text-accent">{{ contest_problem.label }}.</span> {% endif %}{{ problem.title }}</h1>
@@ -235,7 +234,6 @@
   </section>
 
   <section class="lg:sticky lg:top-20" id="solve-pane" aria-label="Yechim yuborish">
-  {% if contest and user.is_authenticated %}<div class="ca-watermark" data-wm="{{ user.username }} · {% now 'd.m.Y H:i' %}" aria-hidden="true"></div>{% endif %}
     {% if user.is_authenticated %}
     <form method="post" action="{% url 'submissions:submit' problem.slug %}" id="submit-form" class="ca-panel ca-ide !p-0">
       {% csrf_token %}
@@ -308,10 +306,11 @@
         </div>
       </div>
       {% else %}
-      <div class="flex flex-wrap items-center justify-between gap-3 border-t border-line px-4 py-3">
-        <span class="hidden text-xs text-mute sm:inline"><kbd class="ca-kbd">Ctrl</kbd> + <kbd class="ca-kbd">Enter</kbd> — yuborish · <kbd class="ca-kbd">Ctrl</kbd> + <kbd class="ca-kbd">'</kbd> — sinash{% if not contest and user.is_authenticated %}<span title="Mashqda kod qanday yozilgani (uzun kod qo‘yish, boshqa oynaga o‘tish) o‘qituvchingizga ko‘rinadi. Ko‘chirilgan yechim uchun ball berilmaydi."> · {% if problem.difficulty == "beginner" or problem.difficulty == "easy" %}uzun kod qo‘yish yopiq{% else %}o‘qituvchi ko‘radi{% endif %} <i data-lucide="info" class="lu" aria-hidden="true"></i></span>{% endif %}</span>
-        <div class="ml-auto flex items-center gap-2">
-          <button type="button" id="trial-btn" class="ca-btn ca-btn-ghost" title="{% if problem.kind == 'sql' %}So‘rovni namunaviy ma’lumotlarda ishga tushirish{% else %}Namunaviy testlarda sinash{% endif %} — urinish hisoblanmaydi"><i data-lucide="play" class="lu" aria-hidden="true"></i>Sinab ko‘rish</button>
+      {# one row on wide screens, the hints giving way first, so the buttons always sit right under the editor #}
+      <div class="flex flex-wrap items-center justify-between gap-3 border-t border-line px-4 py-3 lg:flex-nowrap">
+        <span class="hidden min-w-0 truncate text-xs text-mute sm:block"><kbd class="ca-kbd">Ctrl</kbd>+<kbd class="ca-kbd">Enter</kbd> yuborish{% if contest %} · <kbd class="ca-kbd">Ctrl</kbd>+<kbd class="ca-kbd">'</kbd> sinash{% else %}<span title="Mashqda kod qanday yozilgani (uzun kod qo‘yish, boshqa oynaga o‘tish) o‘qituvchingizga ko‘rinadi. Ko‘chirilgan yechim uchun ball berilmaydi."> · {% if problem.difficulty == "beginner" or problem.difficulty == "easy" %}uzun kod qo‘yish yopiq{% else %}o‘qituvchi ko‘radi{% endif %} <i data-lucide="info" class="lu" aria-hidden="true"></i></span>{% endif %}</span>
+        <div class="ml-auto flex shrink-0 items-center gap-2">
+          <button type="button" id="trial-btn" class="ca-btn ca-btn-ghost" title="{% if problem.kind == 'sql' %}So‘rovni namunaviy ma’lumotlarda ishga tushirish{% else %}Namunaviy testlarda sinash{% endif %} — urinish hisoblanmaydi (Ctrl+')"><i data-lucide="play" class="lu" aria-hidden="true"></i>Sinab ko‘rish</button>
           <button type="submit" id="submit-btn" class="ca-btn ca-btn-primary"><i data-lucide="rocket" class="lu" aria-hidden="true"></i>Yuborish</button>
         </div>
       </div>
@@ -899,19 +898,10 @@ resolves their bare imports so @codemirror/state loads once — two copies break
 </script>
 {% endif %}
 {% if contest %}
-{# contest mode: a leaked screenshot names its source; printing / save-as-PDF yields a blank page #}
+{# contest mode: printing / save-as-PDF yields a blank page #}
 <style media="print">
   body > * { display: none !important; }
   body::after { content: "Musobaqa paytida chop etish o‘chirilgan."; display: block; padding: 2rem; font: 16px sans-serif; }
 </style>
-<script>
-  (() => {
-    const esc = (t) => t.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-    document.querySelectorAll(".ca-watermark").forEach((el) => {
-      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="170"><text x="150" y="90" text-anchor="middle" transform="rotate(-24 150 85)" font-family="sans-serif" font-size="13" font-weight="600" fill="rgb(128,128,128)" fill-opacity=".22">${esc(el.dataset.wm)}</text></svg>`;
-      el.style.backgroundImage = `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
-    });
-  })();
-</script>
 {% endif %}
 {% endblock %}

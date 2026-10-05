@@ -386,7 +386,7 @@ def test_course_form_rejects_reserved_slugs(client, staff, slug):
 def test_course_pages_require_staff(client, ali):
     client.force_login(ali)
     for url in (reverse("moderation:plans"), reverse("moderation:plan_new")):
-        assert client.get(url).status_code == 302
+        assert client.get(url).status_code == 403
 
 
 @pytest.mark.django_db

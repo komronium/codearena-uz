@@ -30,6 +30,27 @@ def test_guests_get_the_landing_page(client, world):
     assert '<div class="relative mx-auto w-full min-w-0 max-w-lg lg:mr-0" inert>' in page
 
 
+
+@pytest.mark.django_db
+def test_landing_hero_announces_the_running_or_next_round(client, world):
+    now = timezone.now()
+    r = client.get("/")
+    assert r.context["next_round"].title == "Keyingi raund" and "Kelgusi musobaqa" in r.content.decode()
+    group = Group.objects.create(name="201", teacher=User.objects.get(username="author"))
+    Contest.objects.create(title="Guruh raundi", start=now - timezone.timedelta(minutes=5),
+                           end=now + timezone.timedelta(hours=1), require_group=group)
+    assert client.get("/").context["next_round"].title == "Keyingi raund"  # a group's own round isn't advertised
+    Contest.objects.create(title="Jonli raund", start=now - timezone.timedelta(minutes=5), end=now + timezone.timedelta(hours=1))
+    r = client.get("/")
+    assert r.context["next_round"].title == "Jonli raund" and "Jonli musobaqa" in r.content.decode()
+
+
+@pytest.mark.django_db
+def test_daily_box_shows_no_zero_streak_records(client, world):
+    client.force_login(User.objects.create_user("yangi", password="x"))
+    page = client.get("/").content.decode()
+    assert "Seriyani bugun boshlang" in page and "eng uzuni 0" not in page
+
 @pytest.mark.django_db
 def test_signed_in_home_gathers_what_to_do_next(client, world):
     ali = User.objects.create_user("ali", password="x", first_name="Ali")

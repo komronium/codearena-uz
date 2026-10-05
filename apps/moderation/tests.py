@@ -32,7 +32,7 @@ def test_submit_requires_login(client):
 @pytest.mark.django_db
 def test_student_cannot_submit_problems(client):
     client.force_login(User.objects.create_user("ali", password="x"))
-    assert client.get(reverse("moderation:submit")).status_code == 302
+    assert client.get(reverse("moderation:submit")).status_code == 403
     assert Problem.objects.count() == 0
 
 
@@ -96,7 +96,7 @@ def test_author_can_preview_own_pending_problem(client):
 def test_queue_requires_staff(client):
     user = User.objects.create_user("ali", password="x")
     client.force_login(user)
-    assert client.get(reverse("moderation:queue")).status_code == 302
+    assert client.get(reverse("moderation:queue")).status_code == 403
 
 
 @pytest.mark.django_db
@@ -176,8 +176,17 @@ def test_admin_urls_are_gone(client):
 def test_staff_pages_require_staff(client):
     client.force_login(User.objects.create_user("ali", password="x"))
     for name in ["dashboard", "problems", "contests", "users", "groups", "tags"]:
-        assert client.get(reverse(f"moderation:{name}")).status_code == 302, name
+        assert client.get(reverse(f"moderation:{name}")).status_code == 403, name
 
+
+
+@pytest.mark.django_db
+def test_staff_pages_send_guests_to_login_and_refuse_signed_in_students(client):
+    r = client.get(reverse("moderation:dashboard"))
+    assert r.status_code == 302 and r["Location"].startswith(reverse("login"))
+    client.force_login(User.objects.create_user("ali", password="x"))
+    r = client.get(reverse("moderation:dashboard"))
+    assert r.status_code == 403 and "Ruxsat yo‘q" in r.content.decode()
 
 @pytest.mark.django_db
 def test_staff_can_edit_problem_and_toggle_visibility(client):
@@ -679,7 +688,7 @@ def test_rejudge_warns_about_applied_rating_and_needs_staff(client):
     s = Submission.objects.create(user=ali, problem=p, contest=c, language=lang, source="x", verdict="AC")
 
     client.force_login(ali)
-    assert client.post(reverse("moderation:problem_rejudge", args=[p.pk])).status_code == 302
+    assert client.post(reverse("moderation:problem_rejudge", args=[p.pk])).status_code == 403
     s.refresh_from_db()
     assert s.verdict == "AC"  # not staff: nothing happened
 

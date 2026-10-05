@@ -28,7 +28,7 @@ a grey −N, accepted / tried per problem last. Codeforces rules have no penalty
     <tr>
       <th class="ca-sticky ca-sticky-rank">#</th>
       <th class="ca-sticky ca-sticky-user !text-left">Ishtirokchi</th>
-      <th title="{% if contest.type == 'icpc' %}Yechilgan masalalar{% else %}Ball{% endif %}" aria-label="{% if contest.type == 'icpc' %}Yechilgan masalalar{% else %}Ball{% endif %}">=</th>
+      <th title="{% if contest.type == 'icpc' %}Yechilgan masalalar{% else %}Jami ball{% endif %}">{% if contest.type == 'icpc' %}Yechildi{% else %}Ball{% endif %}</th>
       {% if contest.wrong_try_minutes is not None %}<th title="AC daqiqasi + {{ contest.wrong_try_minutes }} × noto‘g‘ri urinish (yechilgan masalalar bo‘yicha)">Jarima</th>{% endif %}
       {% for cp in problems %}
       <th class="ca-st-prob">
@@ -36,7 +36,7 @@ a grey −N, accepted / tried per problem last. Codeforces rules have no penalty
         {% if contest.type != "icpc" %}<span class="ca-st-sub tabular">{{ cp.points }}</span>{% endif %}
       </th>
       {% endfor %}
-      {% if contest.rating_applied %}<th title="Reyting o‘zgarishi" aria-label="Reyting o‘zgarishi">Δ</th>{% endif %}
+      {% if contest.rating_applied %}<th class="whitespace-nowrap" title="Reyting o‘zgarishi">Reyting ±</th>{% endif %}
       {% if user.is_staff %}<th class="w-10"><span class="sr-only">Amal</span></th>{% endif %}
     </tr>
   </thead>
