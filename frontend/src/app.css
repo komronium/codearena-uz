@@ -4,8 +4,8 @@
  * (e.g. [hidden] { display: none }) and utilities win. Everything here is kept whole:
  * class names built in templates (ca-verdict-{{ v }}) are invisible to Tailwind's scan. */
 
-/* Geist for words, Geist Mono for data: clocks, ranks, scores, times and code. Both are
-   vendored by build.mjs; Anthropic Mono stays as one of the editor's font options. */
+/* Inter for words, JetBrains Mono for data (clocks, ranks, scores, counts) and code. Both are
+   vendored by build.mjs; Lilex, Fira Code and Anthropic Mono stay as editor font options. */
 @font-face { font-family: "Anthropic Mono"; font-weight: 400; font-style: normal; font-display: swap; src: url("../fonts/AnthropicMono-Regular.otf") format("opentype"); }
 @font-face { font-family: "Anthropic Mono"; font-weight: 400; font-style: italic; font-display: swap; src: url("../fonts/AnthropicMono-Italic.otf") format("opentype"); }
 
@@ -18,8 +18,9 @@
   --ca-radius-sm: 4px;
   --ca-nav-h: 3rem;
   --ca-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  /* two monos: Lilex for the interface's numbers (scores, clocks, counts), JetBrains Mono for code */
-  --ca-mono: "Lilex", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  /* the interface's numbers (scores, clocks, counts) and code share JetBrains Mono: tall, clear digits
+     that sit well beside Inter, and a font the problem pages load anyway */
+  --ca-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --ca-code: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     --ca-paper-rgb: 255 255 255;
     --ca-surface-rgb: 255 255 255;
