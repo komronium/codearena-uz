@@ -39,7 +39,7 @@ teacher the whole group's grid (problems as numbered columns) with a CSV export.
       <tr{% if m.status == "ok" %} class="ca-row-ac"{% endif %}>
         <td class="text-center tabular">{{ forloop.counter }}</td>
         <td><a class="ca-link" href="{% url 'problems:detail' m.problem.slug %}">{{ m.problem.title }}</a></td>
-        <td class="hidden text-center sm:table-cell"><span class="ca-diff ca-diff-{{ m.problem.difficulty }}">{{ m.problem.get_difficulty_display }}</span></td>
+        <td class="hidden text-center sm:table-cell">{% include "problems/_difficulty.html" with p=m.problem %}</td>
         <td class="text-center">{% include "classroom/_status.html" with c=m %}</td>
       </tr>
       {% endfor %}

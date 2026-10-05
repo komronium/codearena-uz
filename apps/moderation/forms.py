@@ -29,7 +29,7 @@ class ProblemForm(ModelForm):
 
     class Meta:
         model = Problem
-        fields = ["title", "kind", "statement_md", "input_md", "output_md", "difficulty", "tags",
+        fields = ["title", "kind", "statement_md", "input_md", "output_md", "difficulty", "rating_guess", "tags",
                   "tl_ms", "ml_mb", "is_public", "editorial_md"]
         widgets = {
             "title": forms.TextInput(attrs=_CA_INPUT),
@@ -39,6 +39,7 @@ class ProblemForm(ModelForm):
             "output_md": forms.Textarea(attrs={**_MD, "rows": 3}),
             "editorial_md": forms.Textarea(attrs={**_MD, "rows": 5}),
             "difficulty": forms.Select(attrs={"class": "ca-select"}),
+            "rating_guess": forms.NumberInput(attrs={**_CA_INPUT, "min": 100, "max": 3500, "step": 100}),
             "tags": forms.CheckboxSelectMultiple,
             "tl_ms": forms.NumberInput(attrs=_CA_INPUT),
             "ml_mb": forms.NumberInput(attrs=_CA_INPUT),

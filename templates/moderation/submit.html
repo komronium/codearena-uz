@@ -151,6 +151,11 @@
         <label class="ca-label" for="{{ form.difficulty.id_for_label }}">Qiyinlik</label>
         {{ form.difficulty }}
       </div>
+      <div>
+        <label class="ca-label" for="{{ form.rating_guess.id_for_label }}">Taxminiy reyting</label>
+        {{ form.rating_guess }}{{ form.rating_guess.errors }}
+        <p class="mt-1 text-xs text-mute">Qaysi reytingdagi o‘quvchi masalani taxminan yarim holda yechadi, deb o‘ylaysiz? Bo‘sh qolsa, darajadan boshlanadi (Beginner 500, Easy 700, Medium 1000, Hard 1300); keyin kim urinib, kim yechganiga qarab o‘zi to‘g‘rilanadi.</p>
+      </div>
       <div class="grid grid-cols-2 gap-3" data-kind-only="code">
         <div>
           <label class="ca-label" for="{{ form.tl_ms.id_for_label }}">Vaqt (ms)</label>

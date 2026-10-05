@@ -5,7 +5,8 @@
 {% block page_title %}<h1>Masalalar</h1><span class="ca-topbar-sub">{{ total }} ta ochiq{% if progress %} · <b class="font-semibold text-ink">{{ progress.done }}</b> tasi yechilgan{% endif %}</span>{% endblock %}
 {% block content %}
 {% comment %}After Codeforces' problemset: one boxed table (your mark, number, name with its topics on the
-right, level, stars, solve rate) under a row of filters; on the right the day's problem and picks for you.{% endcomment %}
+right, difficulty rating, stars, how many solved it) under a row of filters; on the right the day's problem and
+picks for you.{% endcomment %}
 <div class="ca-cols">
 <div class="min-w-0">
   <section class="ca-box !mb-0" aria-labelledby="ps-title">
@@ -61,9 +62,9 @@ right, level, stars, solve rate) under a row of filters; on the right the day's 
             <th class="w-9"><span class="sr-only">Holat</span></th>
             <th class="w-16 text-center">{% include "problems/_sort_th.html" with key="id" label="#" %}</th>
             <th>{% include "problems/_sort_th.html" with key="title" label="Nomi" %}</th>
-            <th class="w-28 text-center">{% include "problems/_sort_th.html" with key="difficulty" label="Qiyinlik" %}</th>
+            <th class="w-28 text-center" title="Masala reytingi, Codeforces’dagidek: reytingi shu songa teng o‘quvchi uni taxminan yarim holda yechadi. Kim urinib, kim yechganiga qarab yangilanib boradi.">{% include "problems/_sort_th.html" with key="difficulty" label="Qiyinlik" %}</th>
             {% if any_rated %}<th class="hidden w-20 text-center lg:table-cell">{% include "problems/_sort_th.html" with key="rating" label="Baho" %}</th>{% endif %}
-            <th class="w-24 text-center">{% include "problems/_sort_th.html" with key="pass_rate" label="Yechilish" %}</th>
+            <th class="w-28 text-center">{% include "problems/_sort_th.html" with key="solvers" label="Yechganlar" %}</th>
           </tr>
         </thead>
         <tbody>
@@ -80,9 +81,9 @@ right, level, stars, solve rate) under a row of filters; on the right the day's 
               {% with tags=p.tags.all %}{% if tags %}<span class="ca-topics">{% for t in tags|slice:":3" %}<a{% if t.kind == "sql" %} class="is-sql"{% endif %} href="{% querystring tag=t.name page=None %}">{{ t.name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</span>{% endif %}{% endwith %}
             </div>
           </td>
-          <td class="text-center whitespace-nowrap"><span class="ca-diff ca-diff-{{ p.difficulty }}">{{ p.get_difficulty_display }}</span></td>
+          <td class="text-center whitespace-nowrap">{% include "problems/_difficulty.html" %}</td>
           {% if any_rated %}<td class="hidden text-center text-mute lg:table-cell">{% if p.avg_stars %}<span class="ca-stars-sum" title="O‘rtacha baho"><i data-lucide="star" class="lu" aria-hidden="true"></i><span class="tabular">{{ p.avg_stars|floatformat:1 }}</span></span>{% else %}<span aria-hidden="true">—</span><span class="sr-only">baho yo‘q</span>{% endif %}</td>{% endif %}
-          <td class="text-center tabular text-mute" title="{{ p.ac_count }} / {{ p.attempts }} urinish muvaffaqiyatli">{{ p.pass_rate }}%</td>
+          <td class="text-center"><span class="ca-n !ml-0" title="{{ p.solvers }} kishi yechgan · {{ p.ac_count }} / {{ p.attempts }} urinish muvaffaqiyatli"><i data-lucide="user" class="lu" aria-hidden="true"></i>x{{ p.solvers }}</span></td>
         </tr>
         {% endfor %}
         </tbody>

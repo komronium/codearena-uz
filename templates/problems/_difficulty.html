@@ -1,0 +1,3 @@
+{% comment %}A problem's difficulty as Codeforces prints it, a plain bold number: its rating, at which half of those
+who try it solve it (apps.problems.difficulty). The level is in the tooltip. Needs `p`.{% endcomment %}
+<b class="tabular" title="{{ p.get_difficulty_display }} · reyting {{ p.rating }}">{{ p.rating }}<span class="sr-only"> qiyinlik, {{ p.get_difficulty_display }}</span></b>

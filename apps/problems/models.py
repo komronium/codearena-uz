@@ -72,6 +72,15 @@ class Problem(models.Model):
         default=64, validators=[MinValueValidator(6)]
     )  # Docker's hard memory-limit floor
     points = models.IntegerField(default=100)
+    # Difficulty the Codeforces way (difficulty.py): the rating at which half of those who try it
+    # solve it, kept live by the recalc_difficulty sweep. rating_guess is where a setter starts it;
+    # blank starts it at its level's.
+    rating = models.PositiveSmallIntegerField(default=0)
+    rating_guess = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(100), MaxValueValidator(3500)],
+    )
     is_public = models.BooleanField(default=True)
     status = models.CharField(
         max_length=10, choices=Status.choices, default=Status.APPROVED
@@ -92,7 +101,8 @@ class Problem(models.Model):
     def save(self, *args, **kwargs):
         """Points follow the difficulty (scoring.BANDS): a new problem, or one whose difficulty
         changed, is priced right away rather than at the next recalc_points sweep, and the
-        people who solved it get the new price at once."""
+        people who solved it get the new price at once. The rating follows the level and the
+        setter's guess the same way: a new problem starts at its guess, a saved one is re-rated."""
         fields = kwargs.get("update_fields")
         repriced = False
         if fields is None or "difficulty" in fields:
@@ -114,6 +124,12 @@ class Problem(models.Model):
                 self.points, repriced = price(self), was is not None
                 if fields is not None:
                     kwargs["update_fields"] = {*fields, "points"}
+        if fields is None or {"difficulty", "rating_guess"} & set(fields):
+            from .difficulty import rate
+
+            self.rating = rate(self)
+            if fields is not None:
+                kwargs["update_fields"] = {*kwargs["update_fields"], "rating"}
         super().save(*args, **kwargs)
         if repriced:
             from apps.submissions.solves import sync_practice_points

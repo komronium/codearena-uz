@@ -15,7 +15,7 @@ from django.db.models import (
     Value,
     When,
 )
-from django.db.models.functions import Length
+from django.db.models.functions import Coalesce, Length
 from django.http import Http404, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -97,22 +97,26 @@ def _render_statement(statement_md: str) -> str:
     return bleach.clean(html, tags=_ALLOWED_TAGS, attributes=_ALLOWED_ATTRS)
 
 
-# Clickable column -> ordering expression. Difficulty sorts by level, not alphabetically.
-_DIFFICULTY_RANK = Case(
-    *(
-        When(difficulty=d, then=Value(i))
-        for i, d in enumerate(Problem.Difficulty.values)
-    ),
-    output_field=IntegerField(),
-)
+# Clickable column -> ordering expression. Difficulty is the problem's rating (difficulty.py).
 _SORTS = {
     "id": F("id"),
     "title": F("title"),
-    "difficulty": _DIFFICULTY_RANK,
+    "difficulty": F("rating"),
     "attempts": F("attempts"),
-    "pass_rate": F("pass_rate"),
+    "solvers": F("solvers"),
     "rating": F("avg_stars"),
 }
+
+# How many people solved it (one UserProblemSolved row each): the count Codeforces prints.
+_SOLVERS = Coalesce(
+    Subquery(
+        UserProblemSolved.objects.filter(problem=OuterRef("pk"))
+        .values("problem")
+        .annotate(n=Count("id"))
+        .values("n")[:1]
+    ),
+    0,
+)
 
 _AVG_STARS = Subquery(
     ProblemRating.objects.filter(problem=OuterRef("pk"))
@@ -249,13 +253,7 @@ def problem_list(request):
                 "submissions", filter=Q(submissions__verdict="AC"), distinct=True
             ),
             avg_stars=_AVG_STARS,
-        )
-        .annotate(
-            pass_rate=Case(
-                When(attempts=0, then=Value(0)),
-                default=F("ac_count") * 100 / F("attempts"),
-                output_field=IntegerField(),
-            ),
+            solvers=_SOLVERS,
         )
         .distinct()
     )

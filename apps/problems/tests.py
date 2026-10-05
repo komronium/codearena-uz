@@ -5,6 +5,7 @@ from django.utils import timezone
 from apps.accounts.models import User
 from apps.contests.models import Contest, ContestProblem, Participation
 from .models import DailySolve, Language, Problem, Tag, TestCase
+from .difficulty import LEVEL_RATING, estimate, results
 from .scoring import BANDS, MIN_ATTEMPTS, compute_points
 
 
@@ -915,3 +916,80 @@ def test_review_difficulty_moves_a_label_one_step_towards_how_students_did():
     assert Problem.objects.get(pk=too_easy.pk).difficulty == "medium"  # one step, not straight to beginner
     assert Problem.objects.get(pk=read.pk).difficulty == "easy"
     assert Problem.objects.get(pk=fine.pk).difficulty == "medium" and Problem.objects.get(pk=thin.pk).difficulty == "hard"
+
+
+# ---- difficulty rating (Codeforces-style, difficulty.py) ------------------------
+
+def test_estimate_without_attempts_is_the_guess():
+    assert estimate([], 1300) == 1300 and estimate([], 500) == 500
+
+
+def test_estimate_rises_with_failures_and_falls_with_solves():
+    failed, solved = estimate([(1000, False)] * 20, 1000), estimate([(1000, True)] * 20, 1000)
+    assert solved < 1000 < failed
+    assert failed % 100 == 0 and solved % 100 == 0  # in hundreds, as on Codeforces
+    assert estimate([(1000, True)] * 10_000, 1000) == 100  # never below the floor
+
+
+@pytest.mark.django_db
+def test_rating_counts_attempters_but_not_the_author_or_staff(problem):
+    from apps.submissions.models import Submission, UserProblemSolved
+
+    python = Language.objects.create(code="python", name="Python 3", docker_image="x", run_cmd="x")
+    staff = User.objects.create_user("admin", password="x", is_staff=True)
+    ali, vali = User.objects.create_user("ali", password="x"), User.objects.create_user("vali", password="x")
+    for user, verdict in [(problem.author, "AC"), (staff, "AC"), (ali, "AC"), (vali, "WA")]:
+        sub = Submission.objects.create(user=user, problem=problem, language=python, source="x", verdict=verdict)
+        if verdict == "AC":
+            UserProblemSolved.objects.create(user=user, problem=problem, first_ac_submission=sub)
+    Submission.objects.create(user=vali, problem=problem, language=python, source="x", verdict="WA")
+    # one entry a person however often they submit; newcomers count at the contest rating's start
+    assert sorted(results([problem.pk])[problem.pk]) == [(1000, False), (1000, True)]
+
+
+@pytest.mark.django_db
+def test_problem_starts_at_its_level_or_guess_and_re_rates_when_the_guess_changes(problem):
+    assert problem.rating == LEVEL_RATING["easy"]
+    hard = Problem.objects.create(slug="h", title="H", statement_md="x", author=problem.author, difficulty="hard")
+    assert hard.rating == LEVEL_RATING["hard"]
+    hard.rating_guess = 1800
+    hard.save(update_fields=["rating_guess"])
+    hard.refresh_from_db()
+    assert hard.rating == 1800
+
+
+@pytest.mark.django_db
+def test_recalc_difficulty_rates_from_attempts_and_is_idempotent(problem):
+    from io import StringIO
+
+    from django.core.management import call_command
+
+    from apps.submissions.models import Submission
+
+    python = Language.objects.create(code="python", name="Python 3", docker_image="x", run_cmd="x")
+    for i in range(20):  # twenty newcomers try, nobody solves it
+        user = User.objects.create_user(f"u{i}", password="x")
+        Submission.objects.create(user=user, problem=problem, language=python, source="x", verdict="WA")
+    call_command("recalc_difficulty", stdout=StringIO())
+    problem.refresh_from_db()
+    assert problem.rating > LEVEL_RATING["easy"]
+    out = StringIO()
+    call_command("recalc_difficulty", stdout=out)
+    assert "0 problem(s) re-rated" in out.getvalue()
+
+
+@pytest.mark.django_db
+def test_list_shows_rating_and_solver_count_and_sorts_by_solvers(client, problem):
+    from apps.submissions.models import Submission, UserProblemSolved
+
+    hard = Problem.objects.create(slug="h", title="H", statement_md="x", author=problem.author, difficulty="hard")
+    python = Language.objects.create(code="python", name="Python 3", docker_image="x", run_cmd="x")
+    ali = User.objects.create_user("ali", password="x")
+    sub = Submission.objects.create(user=ali, problem=hard, language=python, source="x", verdict="AC")
+    UserProblemSolved.objects.create(user=ali, problem=hard, first_ac_submission=sub)
+
+    r = client.get(reverse("problems:list"), {"sort": "solvers", "dir": "desc"})
+    assert [p.id for p in r.context["problems"].object_list] == [hard.id, problem.id]
+    html = r.content.decode()
+    assert f">{LEVEL_RATING['hard']}<" in html and f">{LEVEL_RATING['easy']}<" in html
+    assert 'title="1 kishi yechgan' in html and 'title="0 kishi yechgan' in html

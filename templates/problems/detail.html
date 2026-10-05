@@ -74,7 +74,7 @@
           {% if contest_problem %}
           {% if contest.type != "icpc" %}<span{% if contest.type == "cf" %} title="Boshlang‘ich ball: vaqt o‘tishi va noto‘g‘ri urinishlar bilan kamayadi"{% endif %}><i data-lucide="star" class="lu mr-1.5 text-warn" aria-hidden="true"></i><b class="tabular text-ink">{{ contest_problem.points }}</b> ball</span>{% endif %}
           {% else %}
-          <span class="ca-diff ca-diff-{{ problem.difficulty }}">{{ problem.get_difficulty_display }}</span>
+          <span class="ca-diff ca-diff-{{ problem.difficulty }}" title="Masala reytingi: reytingi shu songa teng o‘quvchi uni taxminan yarim holda yechadi">{{ problem.get_difficulty_display }} <b class="tabular ml-1.5">{{ problem.rating }}</b></span>
           {% if voided == "held" %}
           <span class="font-medium text-warn" title="Yechim qanday yozilgani shubhali ko‘rindi, shuning uchun ball o‘qituvchi ko‘rib chiqquncha ushlab turilibdi. O‘zingiz yozgan bo‘lsangiz, ball qaytariladi."><i data-lucide="hourglass" class="lu mr-1.5" aria-hidden="true"></i>Ball tekshiruvda</span>
           {% elif voided %}

@@ -54,6 +54,22 @@ def test_staff_submission_is_approved_and_public(client):
 
 
 @pytest.mark.django_db
+def test_staff_sets_where_a_problems_rating_starts(client):
+    client.force_login(User.objects.create_user("teacher", password="x", is_staff=True))
+    data = {"title": "Guessed", "statement_md": "x", "difficulty": "easy", "kind": "code",
+            "tl_ms": "1000", "ml_mb": "256", "rating_guess": "50"}
+    data.update(_formset_data())
+    data["testcases-0-input"], data["testcases-0-expected"] = "1\n", "1\n"
+
+    assert client.post(reverse("moderation:submit"), data).status_code == 200  # below the 100 floor
+    assert not Problem.objects.filter(title="Guessed").exists()
+    data["rating_guess"] = "1600"
+    assert client.post(reverse("moderation:submit"), data).status_code == 302
+    problem = Problem.objects.get(title="Guessed")
+    assert (problem.rating_guess, problem.rating) == (1600, 1600)
+
+
+@pytest.mark.django_db
 def test_submit_rejects_no_testcases(client):
     user = User.objects.create_user("ali", password="x", is_staff=True)
     client.force_login(user)
