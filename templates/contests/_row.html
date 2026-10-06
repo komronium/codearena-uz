@@ -18,7 +18,7 @@ c.me / c.my_delta (the viewer's participation and rating change) are set only by
     {% if state == "running" %}
       <span class="ca-count ca-st-running"><span class="ca-live-dot" aria-hidden="true"></span><b data-countdown="{{ c.end|date:'c' }}" data-label="" data-suffix="1"></b><small>qoldi</small></span>
     {% elif state == "upcoming" %}
-      <span class="ca-count ca-st-upcoming"><i data-lucide="hourglass" class="lu" aria-hidden="true"></i><b data-countdown="{{ c.start|date:'c' }}" data-label="" data-suffix="1"></b><small>keyin</small></span>
+      <span class="ca-count ca-st-upcoming"><i data-lucide="hourglass" class="lu" aria-hidden="true"></i><small>boshlanishiga</small><b data-countdown="{{ c.start|date:'c' }}" data-label="" data-suffix="1" data-ended="boshlandi"></b></span>
     {% else %}
       {% if c.my_delta is not None %}<span class="ca-row-stat"><b class="{% if c.my_delta > 0 %}!text-ok{% elif c.my_delta < 0 %}!text-bad{% else %}!text-mute{% endif %}">{{ c.my_delta|stringformat:"+d" }}</b>reyting</span>
       {% elif c.me %}<span class="ca-chip"><i data-lucide="check" class="lu mr-1" aria-hidden="true"></i>Qatnashdingiz</span>{% endif %}

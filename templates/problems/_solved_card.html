@@ -1,0 +1,22 @@
+{% comment %}Solved problems per level, after LeetCode's profile: a horseshoe ring (a track per level, filled as far as
+solved) with the total inside, and a row per level with its numbers, so colour is never the only key.
+ctx: ring (apps.problems.views._solved_ring), title, more_url (optional), more_label.{% endcomment %}
+<section class="ca-box" aria-labelledby="solved-title">
+  <h2 class="ca-box-cap" id="solved-title">{{ title|default:"Taraqqiyot" }}{% if more_url %}<a class="ca-box-tools ca-link" href="{{ more_url }}">{{ more_label|default:"Hammasi" }}</a>{% endif %}</h2>
+  <div class="ca-box-body ca-box-pad ca-solved">
+    <div class="ca-solved-ring" style="width: {{ ring.size }}px; height: {{ ring.size }}px">
+      <svg viewBox="0 0 {{ ring.size }} {{ ring.size }}" aria-hidden="true">
+        <g transform="rotate(135 {{ ring.c }} {{ ring.c }})" fill="none" stroke-width="{{ ring.stroke }}" stroke-linecap="round">
+          {% for s in ring.segments %}
+          <circle class="trk lv-{{ s.value }}" cx="{{ ring.c }}" cy="{{ ring.c }}" r="{{ ring.r }}" stroke-dasharray="{{ s.track }}" stroke-dashoffset="{{ s.offset }}"/>
+          {% if s.done %}<circle class="val lv-{{ s.value }}" cx="{{ ring.c }}" cy="{{ ring.c }}" r="{{ ring.r }}" stroke-dasharray="{{ s.fill }}" stroke-dashoffset="{{ s.offset }}"/>{% endif %}
+          {% endfor %}
+        </g>
+      </svg>
+      <p><b>{{ ring.done }}<small>/{{ ring.total }}</small></b><span><i data-lucide="check" class="lu" aria-hidden="true"></i>Yechilgan</span></p>
+    </div>
+    <ul class="ca-solved-levels">
+      {% for s in ring.segments %}<li><span class="ca-diff ca-diff-{{ s.value }}">{{ s.label }}</span><b>{{ s.done }}<small>/{{ s.total }}</small></b></li>{% endfor %}
+    </ul>
+  </div>
+</section>

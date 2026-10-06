@@ -70,27 +70,28 @@
     <div class="ca-panel !p-0 overflow-hidden">
       <div class="border-b border-line px-6 py-5">
         <h1 class="ca-page-title">{% if contest_problem %}<span class="text-accent">{{ contest_problem.label }}.</span> {% endif %}{{ problem.title }}</h1>
-        <div class="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-sm text-mute">
+        {# LeetCode's chips under the title: the level (and rating), what a solve is worth, the limits #}
+        <div class="ca-pchips">
           {% if contest_problem %}
-          {% if contest.type != "icpc" %}<span{% if contest.type == "cf" %} title="Boshlang‘ich ball: vaqt o‘tishi va noto‘g‘ri urinishlar bilan kamayadi"{% endif %}><i data-lucide="star" class="lu mr-1.5 text-warn" aria-hidden="true"></i><b class="tabular text-ink">{{ contest_problem.points }}</b> ball</span>{% endif %}
+          {% if contest.type != "icpc" %}<span class="ca-pchip"{% if contest.type == "cf" %} title="Boshlang‘ich ball: vaqt o‘tishi va noto‘g‘ri urinishlar bilan kamayadi"{% endif %}><i data-lucide="star" class="lu text-warn" aria-hidden="true"></i><b class="tabular">{{ contest_problem.points }}</b> ball</span>{% endif %}
           {% else %}
-          <span class="ca-diff ca-diff-{{ problem.difficulty }}" title="Masala reytingi: reytingi shu songa teng o‘quvchi uni taxminan yarim holda yechadi">{{ problem.get_difficulty_display }} <b class="tabular ml-1.5">{{ problem.rating }}</b></span>
+          <span class="ca-diff ca-diff-chip ca-diff-{{ problem.difficulty }}" title="Masala reytingi: reytingi shu songa teng o‘quvchi uni taxminan yarim holda yechadi">{{ problem.get_difficulty_display }}<span class="ml-1.5 font-medium opacity-80 tabular">{{ problem.rating }}</span></span>
           {% if voided == "held" %}
           <span class="font-medium text-warn" title="Yechim qanday yozilgani shubhali ko‘rindi, shuning uchun ball o‘qituvchi ko‘rib chiqquncha ushlab turilibdi. O‘zingiz yozgan bo‘lsangiz, ball qaytariladi."><i data-lucide="hourglass" class="lu mr-1.5" aria-hidden="true"></i>Ball tekshiruvda</span>
           {% elif voided %}
           <span class="font-medium text-bad" title="O‘qituvchi bu yechimni ko‘chirilgan deb belgiladi, shuning uchun amaliyot baliga qo‘shilmadi. Savol bo‘lsa, o‘qituvchingizga murojaat qiling."><i data-lucide="shield-alert" class="lu mr-1.5" aria-hidden="true"></i>Ball berilmadi</span>
           {% else %}
-          <span title="Yechsangiz amaliyot balingizga qo‘shiladi. Ko‘p odam yechgan masala biroz arzonlashadi."><i data-lucide="star" class="lu mr-1.5 text-warn" aria-hidden="true"></i><b class="tabular text-ink">{{ problem.points }}</b> ball</span>
+          <span class="ca-pchip" title="Yechsangiz amaliyot balingizga qo‘shiladi. Ko‘p odam yechgan masala biroz arzonlashadi."><i data-lucide="star" class="lu text-warn" aria-hidden="true"></i><b class="tabular">{{ problem.points }}</b> ball</span>
           {% endif %}
           {% endif %}
           {% if problem.kind == "sql" %}<span class="ca-kind-sql"><i data-lucide="database" class="lu" aria-hidden="true"></i>SQL</span>{% endif %}
-          <span><i data-lucide="clock" class="lu mr-1.5" aria-hidden="true"></i><b class="tabular text-ink">{{ problem.tl_ms }}</b> ms</span>
-          {% if problem.kind != "sql" %}<span><i data-lucide="cpu" class="lu mr-1.5" aria-hidden="true"></i><b class="tabular text-ink">{{ problem.ml_mb }}</b> MB</span>{% endif %}
+          <span class="ca-pchip" title="Vaqt chegarasi"><i data-lucide="clock" class="lu" aria-hidden="true"></i><b class="tabular">{{ problem.tl_ms }}</b> ms</span>
+          {% if problem.kind != "sql" %}<span class="ca-pchip" title="Xotira chegarasi"><i data-lucide="cpu" class="lu" aria-hidden="true"></i><b class="tabular">{{ problem.ml_mb }}</b> MB</span>{% endif %}
           {% if not contest and problem.n_ratings %}
-          <button type="button" class="ca-stars-sum" data-dialog="rate-dialog" title="{{ problem.n_ratings }} ta baho"><i data-lucide="star" class="lu" aria-hidden="true"></i><b class="tabular text-ink">{{ problem.avg_stars|floatformat:1 }}</b><span class="sr-only">/5,</span> <span class="tabular">({{ problem.n_ratings }})</span></button>
+          <button type="button" class="ca-pchip ca-stars-sum" data-dialog="rate-dialog" title="{{ problem.n_ratings }} ta baho"><i data-lucide="star" class="lu" aria-hidden="true"></i><b class="tabular text-ink">{{ problem.avg_stars|floatformat:1 }}</b><span class="sr-only">/5,</span> <span class="tabular">({{ problem.n_ratings }})</span></button>
           {% endif %}
           {% if not contest %}
-          <span><i data-lucide="user" class="lu mr-1.5" aria-hidden="true"></i><a class="ca-tier-ink font-semibold{{ problem.author.rating|lg }}" href="{% url 'profile' problem.author.username %}" translate="no" style="--tier: {{ problem.author.rating|tier_color }}">{{ problem.author.username }}</a></span>
+          <span class="ca-pchip"><i data-lucide="user" class="lu" aria-hidden="true"></i><a class="ca-tier-ink font-semibold{{ problem.author.rating|lg }}" href="{% url 'profile' problem.author.username %}" translate="no" style="--tier: {{ problem.author.rating|tier_color }}">{{ problem.author.username }}</a></span>
           {% endif %}
         </div>
         {% if not contest and problem.tags.all %}
@@ -177,6 +178,13 @@
           {% endfor %}
         </div>
         {% endif %}
+        {% if stats and stats.total %}
+        <dl class="ca-pstats" aria-label="Masala statistikasi">
+          <div><dt>Qabul qilingan</dt><dd class="tabular">{{ stats.accepted }}</dd></div>
+          <div><dt>Urinishlar</dt><dd class="tabular">{{ stats.total }}</dd></div>
+          <div><dt>Qabul darajasi</dt><dd class="tabular">{{ stats.rate|floatformat:1 }}%</dd></div>
+        </dl>
+        {% endif %}
       </div>
     </div>
     {% if hints or editorial_html or problem.editorial_md %}
@@ -250,7 +258,7 @@
           </select>
         </label>
         <div class="flex items-center gap-1">
-          <button type="button" id="editor-reset" class="ca-btn ca-btn-ghost !px-2.5 !py-1.5 text-xs" title="Tozalash"><i data-lucide="undo-2" class="lu" aria-hidden="true"></i>Tozalash</button>
+          <button type="button" id="editor-reset" class="ca-btn ca-btn-ghost !px-2.5 !py-1.5 text-xs" title="Tozalash" aria-label="Kodni tozalash"><i data-lucide="undo-2" class="lu" aria-hidden="true"></i></button>
           <button type="button" id="editor-full" class="ca-btn ca-btn-ghost !px-2.5 !py-1.5 text-xs" title="To‘liq ekran" aria-label="To‘liq ekran" aria-pressed="false"><i data-lucide="maximize-2" class="lu" aria-hidden="true"></i></button>
           <details class="sm:relative" id="editor-prefs" data-dropdown>
             <summary class="ca-btn ca-btn-ghost !px-2.5 !py-1.5 cursor-pointer list-none text-xs" title="Muharrir sozlamalari"><i data-lucide="settings-2" class="lu" aria-hidden="true"></i></summary>
@@ -292,27 +300,25 @@
               </div>
             </div>
           </details>
+          <span class="mx-1 h-5 w-px bg-line" aria-hidden="true"></span>
+          {% if user.is_authenticated %}
+          <button type="button" id="trial-btn" class="ca-btn ca-btn-ghost !py-1.5" title="{% if problem.kind == 'sql' %}So‘rovni namunaviy ma’lumotlarda ishga tushirish{% else %}Namunaviy testlarda sinash{% endif %} — urinish hisoblanmaydi (Ctrl+')"><i data-lucide="play" class="lu" aria-hidden="true"></i>Sinab ko‘rish</button>
+          <button type="submit" id="submit-btn" class="ca-btn ca-btn-success !py-1.5" title="Yuborish (Ctrl+Enter)"><i data-lucide="cloud-upload" class="lu" aria-hidden="true"></i>Yuborish</button>
+          {% else %}
+          <a class="ca-btn ca-btn-ghost !py-1.5" href="{% url 'login' %}?next={{ request.path|urlencode }}%23yechim"><i data-lucide="log-in" class="lu" aria-hidden="true"></i>Kirish</a>
+          <button type="submit" id="submit-btn" class="ca-btn ca-btn-success !py-1.5"><i data-lucide="user-plus" class="lu" aria-hidden="true"></i>Ro‘yxatdan o‘tib yuborish</button>
+          {% endif %}
         </div>
       </div>
       <div id="editor">
         <textarea {% if user.is_authenticated %}name="source" {% endif %}id="source" class="ca-editor-fallback" spellcheck="false" aria-label="Kod muharriri" placeholder="Kodni shu yerga yozing…"></textarea>
       </div>
       {% if not user.is_authenticated %}
-      <div class="flex flex-wrap items-center justify-between gap-3 border-t border-line px-4 py-3">
-        <span class="text-xs text-mute"><i data-lucide="save" class="lu mr-1" aria-hidden="true"></i>Kodingiz shu brauzerda saqlanadi.</span>
-        <div class="ml-auto flex items-center gap-2">
-          <a class="ca-btn ca-btn-ghost" href="{% url 'login' %}?next={{ request.path|urlencode }}%23yechim"><i data-lucide="log-in" class="lu" aria-hidden="true"></i>Kirish</a>
-          <button type="submit" id="submit-btn" class="ca-btn ca-btn-primary"><i data-lucide="user-plus" class="lu" aria-hidden="true"></i>Ro‘yxatdan o‘tib yuborish</button>
-        </div>
-      </div>
+      <div class="border-t border-line px-4 py-2.5 text-xs text-mute"><i data-lucide="save" class="lu mr-1" aria-hidden="true"></i>Kodingiz shu brauzerda saqlanadi. Yuborish uchun ro‘yxatdan o‘ting.</div>
       {% else %}
-      {# one row on wide screens, the hints giving way first, so the buttons always sit right under the editor #}
-      <div class="flex flex-wrap items-center justify-between gap-3 border-t border-line px-4 py-3 lg:flex-nowrap">
-        <span class="hidden min-w-0 truncate text-xs text-mute sm:block"><kbd class="ca-kbd">Ctrl</kbd>+<kbd class="ca-kbd">Enter</kbd> yuborish{% if contest %} · <kbd class="ca-kbd">Ctrl</kbd>+<kbd class="ca-kbd">'</kbd> sinash{% else %}<span title="Mashqda kod qanday yozilgani (uzun kod qo‘yish, boshqa oynaga o‘tish) o‘qituvchingizga ko‘rinadi. Ko‘chirilgan yechim uchun ball berilmaydi."> · {% if problem.difficulty == "beginner" or problem.difficulty == "easy" %}uzun kod qo‘yish yopiq{% else %}o‘qituvchi ko‘radi{% endif %} <i data-lucide="info" class="lu" aria-hidden="true"></i></span>{% endif %}</span>
-        <div class="ml-auto flex shrink-0 items-center gap-2">
-          <button type="button" id="trial-btn" class="ca-btn ca-btn-ghost" title="{% if problem.kind == 'sql' %}So‘rovni namunaviy ma’lumotlarda ishga tushirish{% else %}Namunaviy testlarda sinash{% endif %} — urinish hisoblanmaydi (Ctrl+')"><i data-lucide="play" class="lu" aria-hidden="true"></i>Sinab ko‘rish</button>
-          <button type="submit" id="submit-btn" class="ca-btn ca-btn-primary"><i data-lucide="rocket" class="lu" aria-hidden="true"></i>Yuborish</button>
-        </div>
+      {# the keys and the practice note under the editor; the buttons sit in the bar above it #}
+      <div class="flex items-center gap-3 border-t border-line px-4 py-2.5">
+        <span class="min-w-0 truncate text-xs text-mute"><kbd class="ca-kbd">Ctrl</kbd>+<kbd class="ca-kbd">Enter</kbd> yuborish{% if contest %} · <kbd class="ca-kbd">Ctrl</kbd>+<kbd class="ca-kbd">'</kbd> sinash{% else %}<span title="Mashqda kod qanday yozilgani (uzun kod qo‘yish, boshqa oynaga o‘tish) o‘qituvchingizga ko‘rinadi. Ko‘chirilgan yechim uchun ball berilmaydi."> · {% if problem.difficulty == "beginner" or problem.difficulty == "easy" %}uzun kod qo‘yish yopiq{% else %}o‘qituvchi ko‘radi{% endif %} <i data-lucide="info" class="lu" aria-hidden="true"></i></span>{% endif %}</span>
       </div>
       {% endif %}
       {% if problem.kind != "sql" and user.is_authenticated %}

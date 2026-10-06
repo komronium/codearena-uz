@@ -1,0 +1,11 @@
+{% comment %}This month's daily-problem calendar, after LeetCode's: Monday first, a solved day green, today blue, the
+neighbouring months' days faint. ctx: month (apps.problems.daily.month_strip).{% endcomment %}
+<div class="ca-month">
+  <p class="ca-month-head">{{ month.label }}</p>
+  <div class="ca-month-grid" role="list" aria-label="Kun masalasi, {{ month.label }}">
+    {% for w in month.weekdays %}<span class="ca-month-wd" aria-hidden="true">{{ w }}</span>{% endfor %}
+    {% for week in month.weeks %}{% for d in week %}
+    <span role="listitem" class="ca-month-day{% if not d.in_month %} is-out{% endif %}{% if d.done %} is-done{% endif %}{% if d.today %} is-today{% endif %}{% if d.future %} is-future{% endif %}" title="{{ d.date|date:'d.m' }}{% if d.done %}: yechilgan{% elif d.today %}: bugun{% endif %}">{{ d.day }}<span class="sr-only">{% if d.done %}, yechilgan{% elif d.today %}, bugun{% endif %}</span></span>
+    {% endfor %}{% endfor %}
+  </div>
+</div>

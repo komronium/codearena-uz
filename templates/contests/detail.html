@@ -1,58 +1,106 @@
-{% extends "base.html" %}{% load seo %}
+{% extends "base.html" %}{% load seo tiers %}
 {% block title %}{{ contest.title }}{% endblock %}
 {% block robots %}{% if contest.require_group_id %}noindex{% else %}{{ block.super }}{% endif %}{% endblock %}
 {% block structured_data %}{% url 'contests:list' as list_url %}{% breadcrumbs_jsonld "Musobaqalar" list_url contest.title request.path %}{% endblock %}
 {% block description %}{{ contest.title }} — {% if contest.is_rated %}reytingli {% endif %}dasturlash musobaqasi: {{ contest.start|date:'d.m.Y H:i' }}, {{ contest.duration_label }}{% if problems %}, {{ problems|length }} ta masala{% endif %}. Masalalar, natijalar va qoidalar.{% endblock %}
 {% block band %}{% include "contests/_band.html" with active="overview" %}{% endblock %}
 {% block content %}
-{% comment %}After Codeforces' contest page: the problems as one boxed table (letter, name and limits, points,
-your mark, how many solved it); on the right your result, virtual participation and the rules.{% endcomment %}
+{% comment %}A round's overview, after LeetCode's contest page. Once it is over, the final results come first; then the
+description; the problems as one list (letter, name, value, solvers, your result: under Codeforces rules the points
+a solve earned over its time, or −N tries). On the right: your result, the leaders or who is coming, the badge, how
+it is scored, virtual participation.{% endcomment %}
 {% include "contests/_dq_banner.html" with participation=my_participation %}
 <div class="ca-cols">
 <div class="min-w-0">
+  {% if contest.has_ended and leaders %}
+  <section class="ca-box" aria-labelledby="final-title">
+    <h2 class="ca-box-cap" id="final-title">Yakuniy natijalar<a class="ca-box-tools ca-link" href="{% url 'contests:standings' contest.pk %}">To‘liq jadval</a></h2>
+    <div class="ca-box-body">
+      <table class="ca-table">
+        <thead><tr>
+          <th class="w-16">O‘rin</th><th>Ishtirokchi</th>
+          <th class="w-24 text-right">{% if contest.type == "icpc" %}Yechildi{% else %}Ball{% endif %}</th>
+          {% if contest.wrong_try_minutes is not None %}<th class="w-24 text-right">Jarima</th>{% else %}<th class="w-24 text-right">Yechilgan</th>{% endif %}
+          {% if contest.rating_applied %}<th class="w-24 text-right">Reyting</th>{% endif %}
+        </tr></thead>
+        <tbody>
+        {% for r in leaders %}
+        <tr{% if r.user == user %} class="ca-row-me"{% endif %}>
+          <td>{% if r.rank <= 3 and r.solved %}<span class="ca-rank ca-rank-{{ r.rank }}">{{ r.rank }}</span>{% else %}<span class="ca-rank ca-rank-n">{{ r.rank }}</span>{% endif %}</td>
+          <td>{% include "accounts/_user.html" with u=r.user tier=False %}</td>
+          <td class="text-right font-semibold">{% if contest.type == "icpc" %}{{ r.solved }}{% else %}{{ r.score }}{% endif %}</td>
+          <td class="text-right text-mute">{% if contest.wrong_try_minutes is not None %}{{ r.penalty }}{% else %}{{ r.solved }}{% endif %}</td>
+          {% if contest.rating_applied %}<td class="text-right font-semibold{% if r.rating_delta > 0 %} text-ok{% elif r.rating_delta < 0 %} text-bad{% else %} text-mute{% endif %}">{% if r.rating_delta is not None %}{{ r.rating_delta|stringformat:"+d" }}{% endif %}</td>{% endif %}
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  {% endif %}
+
   {% if description_html %}
   <section class="ca-box" aria-labelledby="about-title">
     <h2 class="ca-box-cap" id="about-title">Musobaqa haqida</h2>
     <div class="ca-box-body ca-box-pad prose max-w-none">{{ description_html|safe }}</div>
   </section>
   {% endif %}
+
+  {% if not contest.has_started %}
+  {# the rules that matter before a round, each with what it is about; not a sequence, so no numbers #}
+  <section class="ca-box" aria-labelledby="honor-title">
+    <h2 class="ca-box-cap" id="honor-title">Muhim qoidalar<a class="ca-box-tools ca-link" href="{% url 'honor' %}">Halollik qoidalari</a></h2>
+    <ul class="ca-box-body ca-box-pad ca-rules">
+      <li><span aria-hidden="true"><i data-lucide="code-xml" class="lu"></i></span><p><b>Kod o‘zingizniki bo‘lsin.</b> Musobaqada har qanday tashqi yordam taqiqlanadi: AI, boshqa oyna, telefon, maslahatchi.</p></li>
+      <li><span aria-hidden="true"><i data-lucide="message-circle" class="lu"></i></span><p><b>Savollar «Savol-javoblar» orqali.</b> Shart tushunarsiz bo‘lsa, hakamlardan so‘rang.</p></li>
+      <li><span aria-hidden="true"><i data-lucide="lock-keyhole" class="lu"></i></span><p><b>Masalalar boshlanganda ochiladi.</b> Ungacha faqat harfi va bali ko‘rinadi.</p></li>
+    </ul>
+  </section>
+  {% endif %}
+
   <section class="ca-box" aria-labelledby="contest-problems">
     <h2 class="ca-box-cap" id="contest-problems">Masalalar{% if problems %} <small>{{ problems|length }}</small>{% endif %}
-      {% if user.is_staff %}<a class="ca-box-tools ca-link" href="{% url 'moderation:contest_edit' contest.pk %}">Boshqaruvda tahrirlash »</a>{% endif %}</h2>
+      <span class="ca-box-tools">
+        {% if contest.type == "cf" and contest.is_running %}<small class="text-mute"><i data-lucide="info" class="lu mr-1" aria-hidden="true"></i>Baho vaqt o‘tishi bilan kamayadi, xato urinish −50</small>{% endif %}
+        {% if user.is_staff %}<a class="ca-link" href="{% url 'moderation:contest_edit' contest.pk %}">Boshqaruvda tahrirlash</a>{% endif %}
+      </span></h2>
     <div class="ca-box-body">
     {% if problems and not contest.has_started %}
     {# sealed until start for everyone, staff included; staff edit problems in moderation #}
-    <table class="ca-table">
-      <thead><tr><th class="w-12 text-center">#</th><th>Masala</th>{% if contest.type != "icpc" %}<th class="w-20 text-center">Ball</th>{% endif %}</tr></thead>
-      <tbody>
-      {% for cp in problems %}
-      <tr>
-        <td class="text-center"><span class="ca-prob-label">{{ cp.label }}</span></td>
-        <td class="text-mute"><i data-lucide="lock-keyhole" class="lu mr-1" aria-hidden="true"></i>Musobaqa boshlanganda ochiladi</td>
-        {% if contest.type != "icpc" %}<td class="text-center tabular">{{ cp.points }}</td>{% endif %}
-      </tr>
-      {% endfor %}
-      </tbody>
-    </table>
-    {% if not registered and user.is_authenticated and not user.is_staff %}<p class="ca-box-pad border-t border-line text-mute">Qatnashish uchun oldindan «Qatnashish» tugmasini bosing.</p>{% endif %}
+    <div class="ca-box-pad">
+      <ul class="ca-locks" aria-label="Masalalar: harfi{% if contest.type != 'icpc' %} va bali{% endif %}">
+        {% for cp in problems %}<li><b>{{ cp.label }}</b>{% if contest.type != "icpc" %}<small class="tabular">{{ cp.points }} ball</small>{% endif %}</li>{% endfor %}
+      </ul>
+      <p class="mt-3 text-sm text-mute"><i data-lucide="lock-keyhole" class="lu mr-1" aria-hidden="true"></i>Musobaqa boshlanganda ochiladi.{% if not registered and user.is_authenticated and not user.is_staff %} Qatnashish uchun oldindan «Qatnashish» tugmasini bosing.{% endif %}</p>
+    </div>
     {% elif problems %}
     {% with open=registered|default:contest.has_ended|default:user.is_staff %}
     <table class="ca-table">
-      <thead><tr><th class="w-12 text-center">#</th><th>Masala</th>{% if contest.type != "icpc" %}<th class="w-20 text-center"{% if contest.type == "cf" %} title="Boshlang‘ich ball: vaqt o‘tishi bilan kamayadi"{% endif %}>Ball</th>{% endif %}<th class="w-16 text-center">Siz</th><th class="w-24 text-center">Yechdi</th></tr></thead>
+      <thead><tr>
+        <th class="w-12"><span class="sr-only">Harf</span></th><th>Masala</th>
+        {% if contest.has_ended %}<th class="hidden w-36 md:table-cell">Qiyinlik</th>{% endif %}
+        {% if contest.type != "icpc" %}<th class="w-24 text-right"{% if contest.type == "cf" %} title="To‘liq baho; vaqt o‘tishi bilan kamayadi"{% endif %}>Bahosi</th>{% endif %}
+        <th class="w-28 text-right">{% if contest.has_ended %}Yechdi / urindi{% else %}Yechganlar{% endif %}</th>
+        {% if my_row %}<th class="w-28 text-right">Natijangiz</th>{% endif %}
+      </tr></thead>
       <tbody>
       {% for cp in problems %}
-      <tr{% if cp.my_cell.solved %} class="ca-row-ac"{% elif cp.my_cell.wrong %} class="ca-row-wa"{% endif %}>
-        <td class="text-center">{% if open %}<a class="ca-prob-label ca-link" href="{% url 'problems:detail' cp.problem.slug %}">{{ cp.label }}</a>{% else %}<span class="ca-prob-label">{{ cp.label }}</span>{% endif %}</td>
+      <tr>
+        <td><span class="ca-letter{% if cp.my_cell.solved %} is-ok{% elif cp.my_cell.wrong %} is-try{% endif %}">{{ cp.label }}</span></td>
         <td>
           <div class="flex flex-wrap items-baseline justify-between gap-x-4">
             {% if open %}<a class="ca-link" href="{% url 'problems:detail' cp.problem.slug %}">{{ cp.problem.title }}</a>{% else %}<span class="text-mute">Qatnashgach ko‘rinadi</span>{% endif %}
             <span class="ca-limits">{{ cp.problem.tl_ms }} ms{% if cp.problem.kind != "sql" %}, {{ cp.problem.ml_mb }} MB{% endif %}</span>
           </div>
         </td>
-        {% if contest.type != "icpc" %}<td class="text-center tabular">{{ cp.points }}</td>{% endif %}
-        <td class="text-center">{% if cp.my_cell.solved %}<span class="ca-cf-ac !inline" title="Yechilgan {{ cp.my_cell.time }}">{% if contest.type == "cf" %}{{ cp.my_cell.points }}{% else %}+{% if cp.my_cell.wrong %}{{ cp.my_cell.wrong }}{% endif %}{% endif %}<span class="sr-only"> yechilgan</span></span>
-          {% elif cp.my_cell.wrong %}<span class="ca-cf-wa" title="{{ cp.my_cell.wrong }} noto‘g‘ri urinish">−{{ cp.my_cell.wrong }}</span>{% endif %}</td>
-        <td class="text-center"><span class="ca-n !ml-0" title="{{ cp.solved_count }} ishtirokchi yechdi"><i data-lucide="user" class="lu" aria-hidden="true"></i>x{{ cp.solved_count }}</span></td>
+        {% if contest.has_ended %}<td class="hidden md:table-cell">{% include "problems/_difficulty.html" with p=cp.problem %}</td>{% endif %}
+        {% if contest.type != "icpc" %}<td class="text-right"><span class="ca-worth"><b>{{ cp.points }}</b>{% if contest.type == "cf" and contest.is_running %}<small title="Hozir yechsangiz, xatosiz">hozir {{ cp.now_points }}</small>{% endif %}</span></td>{% endif %}
+        <td class="text-right text-mute">{% if contest.has_ended %}{{ cp.solved_count }} / {{ cp.n_tried }}{% else %}<span class="ca-n !ml-0" title="{{ cp.solved_count }} ishtirokchi yechdi"><i data-lucide="users" class="lu" aria-hidden="true"></i>{{ cp.solved_count }}</span>{% endif %}</td>
+        {% if my_row %}<td class="text-right">
+          {% if cp.my_cell.solved %}<span class="ca-cf-cell" title="Yechilgan: {{ cp.my_cell.time }}{% if cp.my_cell.wrong %}, {{ cp.my_cell.wrong }} ta xatodan keyin{% endif %}"><b class="ca-cf-ac">{{ cp.my_cell.mark }}</b><span class="ca-cf-time">{{ cp.my_cell.time }}</span></span>
+          {% elif cp.my_cell.wrong %}<span class="ca-cf-wa" title="{{ cp.my_cell.wrong }} ta noto‘g‘ri urinish">−{{ cp.my_cell.wrong }}</span>
+          {% else %}<span class="text-mute" aria-hidden="true">—</span><span class="sr-only">urinish yo‘q</span>{% endif %}
+        </td>{% endif %}
       </tr>
       {% endfor %}
       </tbody>
@@ -68,16 +116,50 @@ your mark, how many solved it); on the right your result, virtual participation 
 <aside class="ca-aside" aria-label="Musobaqa haqida">
   {% if my_row %}
   <section class="ca-box" aria-labelledby="me-title">
-    <h2 class="ca-box-cap" id="me-title">Sizning o‘rningiz</h2>
-    <div class="ca-box-body">
-      <dl class="ca-facts">
-        <div><dt>O‘rin</dt><dd><b>#{{ my_row.rank }}</b> <span class="text-mute">/ {{ n_participants }}</span></dd></div>
-        {% if contest.type != "icpc" %}<div><dt>Ball</dt><dd><b>{{ my_row.score }}</b></dd></div>{% endif %}
-        <div><dt>Yechilgan</dt><dd><b>{{ my_row.solved }}</b> <span class="text-mute">/ {{ problems|length }}</span></dd></div>
-        {% if contest.wrong_try_minutes is not None %}<div><dt>Jarima</dt><dd>{{ my_row.penalty }}</dd></div>{% endif %}
-        {% if my_row.rating_delta is not None %}<div><dt>Reyting</dt><dd><b class="{% if my_row.rating_delta > 0 %}text-ok{% elif my_row.rating_delta < 0 %}text-bad{% else %}text-mute{% endif %}">{{ my_row.rating_delta|stringformat:"+d" }}</b></dd></div>{% endif %}
+    <h2 class="ca-box-cap" id="me-title">Sizning natijangiz<a class="ca-box-tools ca-link" href="{% url 'contests:standings' contest.pk %}#me">Jadvalda</a></h2>
+    <div class="ca-box-body ca-box-pad">
+      <dl class="ca-stat-tiles">
+        <div><dt>O‘rin</dt><dd>{% if my_row.disqualified %}—{% else %}{{ my_row.rank }}<small>/ {{ n_participants }}</small>{% endif %}</dd></div>
+        <div><dt>{% if contest.type == "icpc" %}Yechildi{% else %}Ball{% endif %}</dt><dd>{% if contest.type == "icpc" %}{{ my_row.solved }}{% else %}{{ my_row.score }}{% endif %}</dd></div>
+        {% if my_row.rating_delta is not None %}<div><dt>Reyting</dt><dd class="{% if my_row.rating_delta > 0 %}text-ok{% elif my_row.rating_delta < 0 %}text-bad{% endif %}">{{ my_row.rating_delta|stringformat:"+d" }}</dd></div>
+        {% elif contest.wrong_try_minutes is not None %}<div><dt>Jarima</dt><dd>{{ my_row.penalty }}</dd></div>
+        {% else %}<div><dt>Yechilgan</dt><dd>{{ my_row.solved }}<small>/ {{ problems|length }}</small></dd></div>{% endif %}
       </dl>
-      <a class="ca-box-more ca-link" href="{% url 'contests:standings' contest.pk %}#me">Natijalar jadvalida »</a>
+      <ul class="ca-pcells" aria-label="Masalalar bo‘yicha">
+        {% for cell in my_row.cells %}{% with cp=problems|slice:forloop.counter|last %}<li class="{% if cell.solved %}is-ok{% elif cell.wrong %}is-try{% endif %}" title="{{ cp.label }}: {% if cell.solved %}yechilgan {{ cell.time }}{% elif cell.wrong %}{{ cell.wrong }} ta noto‘g‘ri urinish{% else %}urinish yo‘q{% endif %}">{{ cp.label }}</li>{% endwith %}{% endfor %}
+      </ul>
+      {% if my_row.rating_delta is not None and my_participation.rating_after is not None %}<p class="mt-3 text-xs text-mute">Reyting <b class="text-ink">{{ my_participation.rating_before }}</b> dan <b class="text-ink">{{ my_participation.rating_after }}</b> ga {% if my_row.rating_delta >= 0 %}chiqdi{% else %}tushdi{% endif %}.</p>{% endif %}
+    </div>
+  </section>
+  {% endif %}
+
+  {% if contest.is_running and leaders %}
+  <section class="ca-box" aria-labelledby="lead-title">
+    <h2 class="ca-box-cap" id="lead-title">Yetakchilar<a class="ca-box-tools ca-link" href="{% url 'contests:standings' contest.pk %}">Hammasi</a></h2>
+    <ol class="ca-box-body ca-board">
+      {% for r in leaders|slice:":5" %}
+      <li{% if r.user == user %} class="is-me"{% endif %}>{% if r.rank <= 3 and r.solved %}<span class="ca-rank ca-rank-{{ r.rank }}">{{ r.rank }}</span>{% else %}<span class="ca-rank ca-rank-n">{{ r.rank }}</span>{% endif %}{% include "accounts/_user.html" with u=r.user tier=False %}<b>{% if contest.type == "icpc" %}{{ r.solved }}{% else %}{{ r.score }}{% endif %}</b></li>
+      {% endfor %}
+    </ol>
+  </section>
+  {% endif %}
+
+  {% if contest.badge %}
+  <section class="ca-box" aria-labelledby="badge-title">
+    <h2 class="ca-box-cap" id="badge-title">Nishon</h2>
+    <div class="ca-box-body ca-box-pad ca-prize">
+      <span class="ca-hex{% if contest.type == 'score' %} is-score{% endif %}" aria-hidden="true"><i data-lucide="medal" class="lu"></i></span>
+      <p><b>{{ contest.badge }}</b><span>Masalalar ochilgach, kamida bitta masala yechganlar profiliga qo‘shiladi. Birinchi uchtalikka medal bilan.</span></p>
+    </div>
+  </section>
+  {% endif %}
+
+  {% if not contest.has_started and n_participants %}
+  <section class="ca-box" aria-labelledby="who-title">
+    <h2 class="ca-box-cap" id="who-title">Ro‘yxatdan o‘tganlar<small class="ca-box-tools">{{ n_participants }}</small></h2>
+    <div class="ca-box-body ca-box-pad">
+      <p class="ca-faces">{% for u in registrants %}<a class="ca-avatar h-8 w-8 text-xs{% if not u.avatar %} ca-art-{{ u.rating|tier_slug }}{% endif %}" style="--tier: {{ u.rating|tier_color }}" href="{% url 'profile' u.username %}" title="{{ u.username }}" translate="no">{% if u.avatar %}<img src="{{ u.avatar.url }}" alt="">{% else %}{{ u.username|first }}{% endif %}</a>{% endfor %}{% if n_participants > 8 %}<span>+{{ n_participants|add:"-8" }}</span>{% endif %}</p>
+      <p class="mt-2.5 text-xs text-mute">«Kalendarga qo‘shish» bilan saqlasangiz, kalendar bir soat oldin eslatadi.</p>
     </div>
   </section>
   {% endif %}
@@ -99,30 +181,37 @@ your mark, how many solved it); on the right your result, virtual participation 
   <section class="ca-box" aria-labelledby="virtual-title">
     <h2 class="ca-box-cap" id="virtual-title">Virtual ishtirok</h2>
     <form method="post" action="{% url 'contests:virtual' contest.pk %}" class="ca-box-body ca-box-pad" onsubmit="return confirm('Virtual ishtirok hozir boshlanadi va {{ contest.duration_label }} davom etadi. Boshlaysizmi?');">{% csrf_token %}
-      <p class="text-mute">Musobaqani o‘z vaqtingizda qayta ishlang va haqiqiy ishtirokchilar orasida qaysi o‘rinda bo‘lishingizni ko‘ring. Reytingga ta’sir qilmaydi.</p>
-      <button class="ca-btn ca-btn-primary mt-2.5"><i data-lucide="rewind" class="lu" aria-hidden="true"></i>Boshlash</button>
+      <p class="text-mute">Musobaqani o‘z vaqtingizda, xuddi jonli kabi ishlang va haqiqiy ishtirokchilar orasida qaysi o‘rinda bo‘lishingizni ko‘ring. Reytingga ta’sir qilmaydi.</p>
+      <button class="ca-btn ca-btn-primary mt-3"><i data-lucide="rewind" class="lu" aria-hidden="true"></i>Boshlash</button>
     </form>
   </section>
   {% endif %}
 
   <section class="ca-box" aria-labelledby="rules-title">
-    <h2 class="ca-box-cap" id="rules-title">Qoidalar</h2>
-    <div class="ca-box-body ca-box-pad">
+    <h2 class="ca-box-cap" id="rules-title">Qanday hisoblanadi</h2>
+    <dl class="ca-box-body ca-facts">
       {% if contest.type == "cf" %}
-      <p>Codeforces qoidasi: ko‘p ball to‘plagan yutadi; ball teng bo‘lsa, o‘rin ham teng.</p>
-      <p class="mt-1.5 text-mute">Masala balli har daqiqa kamayadi va musobaqa oxirida boshlang‘ichning 52% iga tushadi. Har noto‘g‘ri urinish −50 ball, lekin ball 30% dan pastga tushmaydi.</p>
+      <div><dt>G‘olib</dt><dd>Eng ko‘p ball</dd></div>
+      <div><dt>Ball teng bo‘lsa</dt><dd>O‘rin ham teng</dd></div>
+      <div><dt>Masala bahosi</dt><dd>Oxirida 52% qoladi</dd></div>
+      <div><dt>Xato urinish</dt><dd>−50, eng kami 30%</dd></div>
       {% elif contest.type == "icpc" %}
-      <p>ICPC qoidasi: ko‘p masala yechgan yutadi; teng bo‘lsa — <b>jarimasi</b> kami.</p>
-      <p class="mt-1.5 text-mute">Jarima = har yechilgan masala uchun boshlanishdan o‘tgan daqiqalar + har noto‘g‘ri urinish uchun 10 daqiqa.</p>
+      <div><dt>G‘olib</dt><dd>Ko‘p masala yechgan</dd></div>
+      <div><dt>Teng bo‘lsa</dt><dd>Jarimasi kam</dd></div>
+      <div><dt>Jarima</dt><dd>Daqiqalar + 10 × xato</dd></div>
       {% else %}
-      <p>Ko‘p ball to‘plagan yutadi; ball teng bo‘lsa — <b>jarimasi</b> kami.</p>
-      <p class="mt-1.5 text-mute">Jarima = har yechilgan masala uchun boshlanishdan o‘tgan daqiqalar + har noto‘g‘ri urinish uchun 20 daqiqa.</p>
+      <div><dt>G‘olib</dt><dd>Eng ko‘p ball</dd></div>
+      <div><dt>Ball teng bo‘lsa</dt><dd>Jarimasi kam</dd></div>
+      <div><dt>Jarima</dt><dd>Daqiqalar + 20 × xato</dd></div>
       {% endif %}
-      {% if contest.type != "score" %}<p class="mt-1.5 text-mute">Kompilyatsiya xatosi va 1-testda (misolda) yiqilgan urinish hisobga olinmaydi.</p>{% endif %}
-      {% if contest.division and contest.is_rated %}<p class="mt-1.5 text-mute">{{ contest.get_division_display }}: diapazondan tashqaridagilar ham qatnashadi, lekin reytingi o‘zgarmaydi.</p>{% endif %}
-      {% if not contest.is_rated %}<p class="mt-1.5 text-mute">Reytingsiz: natija reytingga ta’sir qilmaydi.</p>{% endif %}
-      {% if contest.badge %}<p class="mt-1.5 text-mute">Nishon: masalalar ochilgach, kamida bitta masala yechganlar profiliga «{{ contest.badge }}» nishoni qo‘shiladi; birinchi uchtalikka — medal.</p>{% endif %}
+      <div><dt>Reyting</dt><dd>{% if contest.is_rated %}O‘zgaradi{% else %}O‘zgarmaydi{% endif %}</dd></div>
+    </dl>
+    {% if contest.type != "score" or contest.division and contest.is_rated %}
+    <div class="ca-box-pad border-t border-line text-xs text-mute">
+      {% if contest.type != "score" %}<p>Kompilyatsiya xatosi va 1-testda (misolda) yiqilgan urinish hisobga olinmaydi.</p>{% endif %}
+      {% if contest.division and contest.is_rated %}<p class="mt-1">{{ contest.get_division_display }}: diapazondan tashqaridagilar ham qatnashadi, lekin reytingi o‘zgarmaydi.</p>{% endif %}
     </div>
+    {% endif %}
   </section>
 </aside>
 </div>

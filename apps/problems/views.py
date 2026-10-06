@@ -29,11 +29,13 @@ from apps.contests.services import (
     in_running_contest,
     in_upcoming_contest,
 )
-from apps.learn.progress import plan_nav, save_menu
+from apps.learn.models import StudyPlan
+from apps.learn.progress import plan_nav, plan_progress, save_menu
 from apps.submissions.models import Submission, UserProblemSolved
 from judge import sql_judge
 
 from .daily import daily_for, streaks
+from .progress import level_progress as levels_of, solved_ring
 from .models import (
     DailySolve,
     HintUnlock,
@@ -269,13 +271,18 @@ def problem_list(request):
     problems = problems.order_by(order, "id")
 
     page = Paginator(problems, 30).get_page(request.GET.get("page"))
-    solved_ids = set()
+    solved_ids, tried_ids = set(), set()
     if request.user.is_authenticated:
         solved_ids = set(
             UserProblemSolved.objects.filter(
                 user=request.user, problem__in=page.object_list
             ).values_list("problem_id", flat=True)
         )
+        # tried and not solved yet: the row's mark is a ring instead of a tick
+        tried_ids = set(
+            Submission.objects.filter(user=request.user, problem__in=page.object_list)
+            .values_list("problem_id", flat=True)
+        ) - solved_ids
     # Only on the plain first page: with a search or filter the user already knows what they want.
     browsing = not (q or tag or difficulty or status or kind) and page.number == 1
     daily = daily_for() if browsing else None
@@ -290,7 +297,17 @@ def problem_list(request):
     )
     total = visible.distinct().count()
     all_tags = list(Tag.objects.filter(problem__in=visible).distinct().order_by("name"))
-    progress = None
+    # the topics row: the biggest topics with their counts, the rest behind "Hammasi"
+    topics = list(Tag.objects.filter(problem__in=visible).annotate(n=Count("problem", distinct=True))
+                  .order_by("-n", "name"))
+    # the courses on top, only while browsing: a way in for whoever does not know what to solve
+    plans = []
+    if browsing:
+        plans = list(StudyPlan.objects.filter(is_public=True).order_by("order", "pk")[:3])
+        progress_by_plan = plan_progress(request.user, plans) if request.user.is_authenticated else {}
+        for plan in plans:
+            plan.progress = progress_by_plan.get(plan.pk)
+    progress = level_progress = None
     if request.user.is_authenticated:
         progress = {
             "done": UserProblemSolved.objects.filter(
@@ -298,12 +315,20 @@ def problem_list(request):
             ).count(),
             "total": total,
         }
+        # the side card: solved out of open, per level (whatever the filters above say)
+        level_progress = levels_of(request.user, visible)
     return render(
         request,
         "problems/list.html",
         {
             "problems": page,
             "progress": progress,
+            "level_progress": level_progress,
+            "ring": solved_ring(level_progress) if level_progress else None,
+            "top_topics": topics[:8],
+            "more_topics": topics[8:],
+            "plans": plans,
+            "tried_ids": tried_ids,
             "total": total,
             "level_chips": level_chips,
             "level_total": sum(by_level.values()),
@@ -396,6 +421,14 @@ def _sql_context(problem) -> dict:
         "sql_tables": tables,
         "sql_expected": sql_judge.parse_rows(dataset.expected_result),
     }
+
+
+def _problem_stats(problem) -> dict:
+    """LeetCode's line under a statement: judged submissions, how many were accepted, the share accepted."""
+    agg = Submission.objects.filter(problem=problem, verdict__in=Submission.TERMINAL).aggregate(
+        total=Count("id"), accepted=Count("id", filter=Q(verdict="AC")))
+    total, accepted = agg["total"], agg["accepted"]
+    return {"total": total, "accepted": accepted, "rate": 100 * accepted / total if total else None}
 
 
 def problem_detail(request, slug):
@@ -513,6 +546,7 @@ def problem_detail(request, slug):
             "open_contest": open_contest,
             "problem": problem,
             "my_subs": my_subs,
+            "stats": _problem_stats(problem) if contest is None else None,
             "prev_problem": public.filter(id__lt=problem.id).order_by("-id").first(),
             "next_problem": public.filter(id__gt=problem.id).order_by("id").first(),
             "statement_html": _render_statement(problem.statement_md),

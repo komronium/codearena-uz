@@ -152,6 +152,44 @@ def _own(request, pk):
     raise Http404
 
 
+def _beats(s) -> dict | None:
+    """LeetCode's comparison after an accept: where this run's time and memory stand among the other accepted
+    solutions of the problem in the same language (the share that did worse, ties counted half), with a
+    histogram of their times. None until five others exist: a share of two is noise."""
+    others = list(Submission.objects.filter(problem_id=s.problem_id, language_id=s.language_id, verdict="AC")
+                  .exclude(pk=s.pk).values_list("exec_ms", "mem_kb"))
+    if len(others) < 5:
+        return None
+
+    def share(mine, values):
+        worse = sum(1 for v in values if v > mine)
+        ties = sum(1 for v in values if v == mine)
+        return 100 * (worse + ties / 2) / len(values)
+
+    times = [t for t, _ in others]
+    mems = [m for _, m in others if m]
+    lo, hi = min(times + [s.exec_ms]), max(times + [s.exec_ms])
+    n_bins = 20
+    width = max(1, -(-(hi - lo + 1) // n_bins))
+    counts = [0] * n_bins
+    for t in times:
+        counts[min(n_bins - 1, (t - lo) // width)] += 1
+    mine_bin = min(n_bins - 1, (s.exec_ms - lo) // width)
+    top = max(counts) or 1
+    bar_w, gap, h = 24, 6, 96
+    bars = []
+    for i, c in enumerate(counts):
+        bh = max(3.0, c / top * h)
+        bars.append({"x": i * (bar_w + gap), "y": round(h - bh, 1), "h": round(bh, 1), "me": i == mine_bin})
+    mark_x = mine_bin * (bar_w + gap) + bar_w / 2
+    mark_y = h - bars[mine_bin]["h"] - 8
+    return {"time": share(s.exec_ms, times), "mem": share(s.mem_kb, mems) if mems and s.mem_kb else None,
+            "mem_mb": s.mem_kb / 1024, "n": len(others), "bars": bars, "bw": bar_w, "h": h,
+            "w": n_bins * (bar_w + gap) - gap, "vb_w": n_bins * (bar_w + gap) - gap + 12, "vb_h": h + 54,
+            "labels": [{"x": i * (bar_w + gap) + bar_w / 2, "y": h + 18, "ms": lo + i * width} for i in range(0, n_bins, 5)],
+            "mark": {"x": mark_x - 20, "y": mark_y - 20, "tx": mark_x, "ty": mark_y - 6}}
+
+
 def _results_ctx(s):
     results = list(s.results.select_related("testcase"))
     first_fail = next((r for r in results if r.verdict != "AC"), None)
@@ -159,6 +197,7 @@ def _results_ctx(s):
         first_fail.index = results.index(first_fail) + 1
     total = s.total or s.problem.testcases.count()
     return {"s": s, "results": results, "first_fail": first_fail,
+            "beats": _beats(s) if s.verdict == "AC" else None,
             "progress": {"done": len(results), "total": total,
                          "pct": int(len(results) * 100 / total) if total else 0}}
 

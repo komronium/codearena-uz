@@ -26,7 +26,7 @@ code reviews, the staff queue.{% endcomment %}
     {# a contest is running: its clock and a way in, from every page #}
     <a href="{% url 'contests:detail' live.pk %}" class="ca-live-pill" data-live-pill title="{{ live.title }}{% if live.count > 1 %} (+{{ live.count|add:'-1' }} ta boshqa jonli){% endif %}">
       <span class="ca-live-dot" aria-hidden="true"></span>
-      <span class="ca-live-label hidden 2xl:inline">{% if live.joined %}Musobaqangiz davom etmoqda{% else %}Jonli musobaqa{% endif %}</span>
+      <span class="ca-live-label sr-only">{% if live.joined %}Musobaqangiz davom etmoqda{% else %}Jonli musobaqa{% endif %}</span>
       <span class="tabular" data-countdown="{{ live.end|date:'c' }}" data-label="" data-suffix="1" data-ended="Tugadi"></span>
       <span class="sr-only">— {{ live.title }}</span>
     </a>

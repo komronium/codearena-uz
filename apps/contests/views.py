@@ -4,8 +4,11 @@ from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.db.models import Count, Q
-from django.http import Http404, HttpResponseBadRequest
+import datetime as dt
+
+from django.http import Http404, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
@@ -20,7 +23,7 @@ from apps.integrity import audit
 from . import rating, virtual
 from .models import Clarification, Contest, ContestProblem, Participation, VirtualParticipation, VoidedProblem
 from .services import access_allowed
-from .standings import compute_standings, elapsed
+from .standings import compute_standings, elapsed, problem_points
 
 
 def contest_list(request):
@@ -45,11 +48,19 @@ def contest_list(request):
         row = c.me and next((r for r in _standings(c) if r["user"].pk == request.user.pk), None)
         c.my_rank, c.my_solved = (row["rank"], row["solved"]) if row else (None, None)
     # the sidebar's top ten, from the rating page's pool: users with a finished rated contest
-    top_rated = (get_user_model().objects.filter(is_active=True, participations__rating_after__isnull=False)
-                 .distinct().order_by("-rating", "username")[:10])
+    pool = get_user_model().objects.filter(is_active=True, participations__rating_after__isnull=False).distinct()
+    top_rated = pool.order_by("-rating", "username")[:10]
+    # the cover's numbers: your rating, your place in that same pool, the rounds you finished
+    me = None
+    if request.user.is_authenticated:
+        rated = pool.filter(pk=request.user.pk).exists()
+        me = {"rating": request.user.rating, "rated": rated,
+              "place": pool.filter(rating__gt=request.user.rating).count() + 1 if rated else None,
+              "pool": pool.count(),
+              "attended": Participation.objects.filter(user=request.user, contest__end__lte=now).count()}
     return render(request, "contests/list.html", {"running": running, "upcoming": upcoming, "ended": ended,
                                                   "next_contest": next(iter([*running, *upcoming]), None),
-                                                  "top_rated": top_rated})
+                                                  "top_rated": top_rated, "me": me})
 
 
 def _standings(contest, problems=None):
@@ -73,24 +84,61 @@ def contest_detail(request, pk):
     me = (Participation.objects.filter(user=request.user, contest=contest).first()
           if request.user.is_authenticated else None)
     registered = me is not None
-    my_row, solved_count = None, {}
+    my_row, leaders, next_cp, registrants = None, [], None, []
     if contest.has_started:
         rows = _standings(contest, problems)
+        counted = [r for r in rows if not r["disqualified"]]
+        # the board's top: the leaders while it runs, the final results once it is over
+        leaders = counted[:6]
         for i, cp in enumerate(problems):
-            solved_count[cp.id] = sum(1 for r in rows if r["cells"][i]["solved"] and not r["disqualified"])
+            cp.solved_count = sum(1 for r in counted if r["cells"][i]["solved"])
+            cp.n_tried = sum(1 for r in counted if r["cells"][i]["solved"] or r["cells"][i]["wrong"])
         if request.user.is_authenticated:
             my_row = next((r for r in rows if r["user"].pk == request.user.pk), None)
             for i, cp in enumerate(problems):
                 cp.my_cell = my_row["cells"][i] if my_row else None
-    for cp in problems:
-        cp.solved_count = solved_count.get(cp.id, 0)
+        if contest.is_running:
+            # Codeforces rules: what a problem is worth if solved now, without wrong tries
+            minutes = int((timezone.now() - contest.start).total_seconds()) // 60
+            for cp in problems:
+                cp.now_points = problem_points(contest, cp.points, minutes, 0)
+            if registered:
+                next_cp = next((cp for cp in problems if not (cp.my_cell and cp.my_cell["solved"])), None)
+    else:
+        for cp in problems:
+            cp.solved_count = cp.n_tried = 0
+        # a few faces of who is coming, newest first
+        registrants = [p.user for p in contest.participations.select_related("user").order_by("-registered_at")[:8]]
     return render(request, "contests/detail.html", {
         "contest": contest, "problems": problems, "registered": registered, "my_row": my_row,
+        "leaders": leaders, "next_cp": next_cp, "registrants": registrants,
         "description_html": _render_statement(contest.description_md) if contest.description_md else "",
         "my_participation": me,
         "n_participants": contest.participations.count(),
         **_virtual_ctx(request, contest),
     })
+
+
+def calendar_ics(request, pk):
+    """The round as a calendar event (.ics) with a reminder an hour before, for any calendar app."""
+    contest = get_object_or_404(Contest, pk=pk)
+    url = request.build_absolute_uri(reverse("contests:detail", args=[contest.pk]))
+
+    def stamp(moment):
+        return moment.astimezone(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+
+    def text(value):
+        return value.replace("\\", "\\\\").replace(";", "\\;").replace(",", "\\,").replace("\n", "\\n")
+
+    lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//CodeArena//Musobaqalar//UZ", "CALSCALE:GREGORIAN", "METHOD:PUBLISH",
+             "BEGIN:VEVENT", f"UID:contest-{contest.pk}@{request.get_host()}", f"DTSTAMP:{stamp(timezone.now())}",
+             f"DTSTART:{stamp(contest.start)}", f"DTEND:{stamp(contest.end)}", f"SUMMARY:{text(contest.title)}",
+             f"URL:{url}", f"DESCRIPTION:{text(url)}",
+             "BEGIN:VALARM", "TRIGGER:-PT1H", "ACTION:DISPLAY", f"DESCRIPTION:{text(contest.title)}", "END:VALARM",
+             "END:VEVENT", "END:VCALENDAR", ""]
+    response = HttpResponse("\r\n".join(lines), content_type="text/calendar; charset=utf-8")
+    response["Content-Disposition"] = f'attachment; filename="codearena-{contest.pk}.ics"'
+    return response
 
 
 def _virtual_ctx(request, contest) -> dict:

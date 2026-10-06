@@ -1,0 +1,26 @@
+{% load tiers %}{% comment %}The day's problem in a side column, after LeetCode's: this month's calendar (solved days green,
+today blue), the problem with its level and the way in, your streak and the next streak badge, who solved it today.
+ctx: daily, ds (apps.problems.templatetags.daily.daily_stats), daily_done.{% endcomment %}
+<section class="ca-box" aria-labelledby="daily-title">
+  <h2 class="ca-box-cap" id="daily-title">Kun masalasi
+    {% if user.is_authenticated %}<span class="ca-box-tools text-mute" title="Kun masalasi seriyasi{% if ds.best %}, eng uzuni {{ ds.best }}{% endif %}"><i data-lucide="flame" class="lu{% if ds.streak %} text-gold{% endif %}" aria-hidden="true"></i><b class="text-ink">{{ ds.streak }}</b> kun</span>
+    {% else %}<small class="ca-box-tools">{{ daily.date|date:"d.m.Y" }}</small>{% endif %}</h2>
+  <div class="ca-box-body ca-box-pad">
+    {% if user.is_authenticated %}{% include "problems/_month.html" with month=ds.month %}{% endif %}
+    <div class="ca-daily">
+      <div class="min-w-0">
+        <a class="ca-link block truncate font-semibold" href="{% url 'problems:detail' daily.problem.slug %}">{{ daily.problem.title }}</a>
+        {% include "problems/_difficulty.html" with p=daily.problem %}
+      </div>
+      {% if daily_done %}<span class="ca-done"><i data-lucide="check" class="lu" aria-hidden="true"></i>Yechildi</span>
+      {% else %}<a class="ca-btn ca-btn-primary ca-btn-xs" href="{% url 'problems:detail' daily.problem.slug %}">Yechish</a>{% endif %}
+    </div>
+    {% if user.is_authenticated %}
+    <p class="ca-streak-line"><i data-lucide="flame" class="lu" aria-hidden="true"></i><span>{% if daily_done %}Bugun yechildi, seriya <b>{{ ds.streak }}</b> kun.{% elif ds.streak %}Bugun yechsangiz, seriya <b>{{ ds.streak|add:1 }}</b> kun bo‘ladi.{% else %}Bugun yechsangiz, seriya boshlanadi.{% endif %}{% if ds.best > ds.streak %} Eng uzuni <b>{{ ds.best }}</b>.{% endif %}</span></p>
+    {% if ds.next_badge %}<p class="mt-1 text-xs text-mute"><i data-lucide="{{ ds.next_badge.icon }}" class="lu mr-1" aria-hidden="true"></i>«{{ ds.next_badge.name }}» nishoniga yana <b class="text-ink">{{ ds.next_badge.left }}</b> kun ketma-ket</p>{% endif %}
+    {% endif %}
+    <p class="mt-1.5 text-xs text-mute">{% if ds.solvers %}Bugun <b class="tabular text-ink">{{ ds.solvers }}</b> kishi yechdi{% if ds.recent %}:
+      {% for u in ds.recent %}<a class="ca-user-name !inline{{ u.rating|lg }}" style="--tier: {{ u.rating|tier_color }}" href="{% url 'profile' u.username %}" translate="no">{{ u.username }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}{% if ds.solvers > ds.recent|length %} va boshqalar{% endif %}{% endif %}.
+      {% else %}Bugun hali hech kim yechmadi. Birinchi bo‘ling.{% endif %}</p>
+  </div>
+</section>

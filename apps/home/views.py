@@ -16,6 +16,7 @@ from apps.contests.models import Contest, Participation
 from apps.contests.views import _standings  # cached, the standings page's own numbers
 from apps.problems.daily import daily_for, streaks, week_strip
 from apps.problems.models import DailySolve, Language, Problem
+from apps.problems.progress import level_progress, solved_ring
 from apps.problems.skills import next_problems, open_problems, shared_reason
 from apps.submissions.models import Submission
 
@@ -38,6 +39,21 @@ def _rating_card(user) -> dict:
         "total": rated_users.count(),
         "next": _next_tier(user.rating),
     }
+
+
+def _spark(user, w=300, h=64) -> dict | None:
+    """The rating card's small line: the rating after each of the last ten rated rounds, oldest first."""
+    history = list(Participation.objects.filter(user=user, rating_after__isnull=False)
+                   .order_by("-contest__end").values_list("rating_after", flat=True)[:10])[::-1]
+    if len(history) < 2:
+        return None
+    lo, hi = min(history), max(history)
+    span, pad = (hi - lo) or 1, 6
+    xs = [pad + i * (w - 2 * pad) / (len(history) - 1) for i in range(len(history))]
+    ys = [pad + (hi - v) / span * (h - 2 * pad) for v in history]
+    line = " ".join(f"{x:.1f},{y:.1f}" for x, y in zip(xs, ys))
+    return {"w": w, "h": h, "line": line, "area": f"{xs[0]:.1f},{h} {line} {xs[-1]:.1f},{h}",
+            "x": f"{xs[-1]:.1f}", "y": f"{ys[-1]:.1f}", "first": history[0], "n": len(history)}
 
 
 def _live(user, running) -> dict | None:
@@ -102,6 +118,9 @@ def home(request):
         "running": running, "upcoming": upcoming, "live": _live(user, running),
         "today_label": f"{_WEEKDAYS[today.weekday()]}, {today.day}-{_MONTHS[today.month - 1]}",
         "rating_card": _rating_card(user),
+        "spark": _spark(user),
+        # LeetCode's ring of solved problems per level, out of the open problems
+        "ring": solved_ring(level_progress(user, open_problems())),
         "next_picks": next_picks, "picks_reason": shared_reason(next_picks),
         "recent": list(Submission.objects.filter(user=user).select_related("problem", "language")[:5]),
         "taught": list(Assignment.objects.filter(group__teacher=user).select_related("group")

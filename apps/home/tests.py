@@ -49,7 +49,7 @@ def test_landing_hero_announces_the_running_or_next_round(client, world):
 def test_daily_box_shows_no_zero_streak_records(client, world):
     client.force_login(User.objects.create_user("yangi", password="x"))
     page = client.get("/").content.decode()
-    assert "Seriyani bugun boshlang" in page and "eng uzuni 0" not in page
+    assert "Bugun yechsangiz, seriya boshlanadi" in page and "eng uzuni 0" not in page.lower()
 
 @pytest.mark.django_db
 def test_signed_in_home_gathers_what_to_do_next(client, world):
@@ -293,7 +293,7 @@ def test_sitemap_lists_only_what_a_guest_can_open(client, world):
     # results once a round has begun, dated by its end
     standings = _sitemap(client, "standings")
     assert f"/contests/{ended.pk}/standings/" in standings and f"/contests/{upcoming.pk}/standings/" not in standings
-    assert f"<lastmod>{ended.end:%Y-%m-%d}" in standings
+    assert f"<lastmod>{timezone.localtime(ended.end):%Y-%m-%d}" in standings  # the sitemap prints local (Tashkent) dates
     assert "/accounts/register/" not in _sitemap(client, "sections")
 
 

@@ -75,7 +75,7 @@
     <a href="{% url 'home' %}" class="ca-footer-brand">{% include "_brand_mark.html" %}<span>CodeArena</span></a>
     <nav class="ca-footer-links" aria-label="Sayt bo‘limlari">
       <a href="{% url 'problems:list' %}">Masalalar</a>
-      <a href="{% url 'learn:hub' %}">Kurslar</a>
+      <a href="{% url 'learn:hub' %}">O‘rganish</a>
       <a href="{% url 'contests:list' %}">Musobaqalar</a>
       <a href="{% url 'rating' %}">Reyting</a>
       <a href="{% url 'top' %}">Amaliyot ballari</a>
@@ -140,7 +140,9 @@ A native dialog gives focus trapping and Esc for free.{% endcomment %}
       const s = Math.max(0, Math.floor(ms / 1000));
       const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60), sec = s % 60;
       const pad = (n) => String(n).padStart(2, "0");
-      return (d ? d + " kun " : "") + pad(h) + ":" + pad(m) + ":" + pad(sec);
+      // a day or more away: days and hours ("4 kun 1 soat"); the last day: the ticking clock
+      if (d) return d + " kun" + (h ? " " + h + " soat" : "");
+      return pad(h) + ":" + pad(m) + ":" + pad(sec);
     };
     const tick = () => {
       const now = Date.now();
@@ -155,6 +157,16 @@ A native dialog gives focus trapping and Esc for free.{% endcomment %}
           return;
         }
         el.textContent = el.dataset.suffix ? fmt(left) + " " + el.dataset.label : el.dataset.label + ": " + fmt(left);
+      });
+      // a round's clock in three boxes: days, hours, minutes a day or more away, then hours, minutes, seconds
+      document.querySelectorAll("[data-cd-boxes]").forEach((el) => {
+        const s = Math.max(0, Math.floor((new Date(el.dataset.cdBoxes) - now) / 1000));
+        const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60);
+        const parts = d ? [[d, "kun"], [h, "soat"], [m, "daqiqa"]] : [[h, "soat"], [m, "daqiqa"], [s % 60, "soniya"]];
+        el.querySelectorAll("[data-cd]").forEach((box, i) => {
+          box.firstElementChild.textContent = String(parts[i][0]).padStart(2, "0");
+          box.lastElementChild.textContent = parts[i][1];
+        });
       });
       // a round's clock line: the share of [from, to] already gone
       document.querySelectorAll("[data-span-from]").forEach((el) => {

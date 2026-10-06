@@ -14,7 +14,7 @@
     {% if form.non_field_errors %}
     <div class="ca-alert ca-alert-bad" role="alert">{{ form.non_field_errors.0 }}</div>
     {% endif %}
-    {% include "registration/_auth_field.html" with name="username" label="Foydalanuvchi nomi" type="text" icon="at-sign" autocomplete="username" value=form.username.value errors=form.username.errors autofocus=True %}
+    {% include "registration/_auth_field.html" with name="username" label="Foydalanuvchi nomi" type="text" icon="at-sign" autocomplete="username" value=form.username.value errors=form.username.errors autofocus=True hint="Hammaga ko‘rinadi: reyting jadvali va profil havolasida. Email yozmang." %}
     <div class="grid grid-cols-2 gap-3">
       {% include "registration/_auth_field.html" with name="first_name" label="Ism" type="text" icon="user" autocomplete="given-name" value=form.first_name.value errors=form.first_name.errors %}
       {% include "registration/_auth_field.html" with name="last_name" label="Familiya" type="text" icon="user" autocomplete="family-name" value=form.last_name.value errors=form.last_name.errors optional=True %}
@@ -27,6 +27,7 @@
       <span><b class="font-semibold">Men o‘qituvchiman</b><span class="block text-xs text-mute">Admin tasdiqlagach, o‘z guruhingizni ochib, o‘quvchilarga vazifa berasiz.</span></span>
     </label>
     <button type="submit" class="ca-btn ca-btn-primary w-full !py-2.5"><i data-lucide="user-plus" class="lu" aria-hidden="true"></i>Hisob yaratish</button>
+    <p class="text-center text-xs text-mute">Hisob yaratib, <a class="ca-link" href="{% url 'honor' %}" target="_blank" rel="noopener">halollik qoidalari</a>ga rozilik bildirasiz.</p>
   </form>
   <p class="mt-4 text-center text-sm text-mute">
     Allaqachon hisobingiz bormi? <a class="ca-link font-medium" href="{% url 'login' %}{% if next %}?next={{ next|urlencode }}{% endif %}">Kirish</a>

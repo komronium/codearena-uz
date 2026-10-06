@@ -1,0 +1,30 @@
+{% comment %}A live or coming round on the contests page, after LeetCode's contest cards: a cover in the colour of its rules
+(Codeforces blue, points teal, ICPC violet) with its state and title, then when, how long and how many, then one
+action. ctx: c (from contests.views.contest_list), state ("running" | "upcoming").{% endcomment %}
+<article class="ca-ccard">
+  <a class="ca-ccard-cover{% if c.type == 'score' %} is-score{% elif c.type == 'icpc' %} is-icpc{% endif %}" href="{% url 'contests:detail' c.pk %}">
+    <svg class="ca-band-mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M31 16l-4.39 4.39v6.22h-6.22L16 31l-4.39-4.39H5.39v-6.22L1 16l4.39-4.39V5.39h6.22L16 1l4.39 4.39h6.22v6.22z"/></svg>
+    {% if state == "running" %}<span class="ca-tag ca-tag-live"><span class="ca-live-dot" aria-hidden="true"></span>Jonli</span>
+    {% else %}<span class="ca-tag ca-tag-soon"><i data-lucide="hourglass" class="lu" aria-hidden="true"></i><span data-countdown="{{ c.start|date:'c' }}" data-label="Boshlanishiga" data-ended="Boshlandi"></span></span>{% endif %}
+    <b>{{ c.title }}</b>
+  </a>
+  <div class="ca-ccard-body">
+    <ul class="ca-ccard-meta">
+      <li><i data-lucide="calendar" class="lu" aria-hidden="true"></i><span class="tabular">{{ c.start|date:"d.m.Y H:i" }}</span></li>
+      <li><i data-lucide="hourglass" class="lu" aria-hidden="true"></i>{{ c.duration_label }}, {% if c.type == "cf" %}Codeforces qoidasi{% elif c.type == "icpc" %}ICPC qoidasi{% else %}ball qoidasi{% endif %}, {% if c.is_rated %}reytingli{% else %}reytingsiz{% endif %}</li>
+      <li><i data-lucide="users" class="lu" aria-hidden="true"></i>{{ c.n_participants }} {% if state == "running" %}ishtirokchi{% else %}kishi ro‘yxatda{% endif %}</li>
+    </ul>
+    <div class="ca-ccard-foot">
+      {% if state == "running" %}
+        <span class="ca-ccard-clock"><b class="tabular" data-countdown="{{ c.end|date:'c' }}" data-label="" data-suffix="1"></b> qoldi</span>
+        {% if c.me and c.my_rank %}<span class="text-sm text-mute">{{ c.my_rank }}-o‘rin</span>{% endif %}
+        <a class="ca-btn ca-btn-primary ca-btn-xs ml-auto" href="{% url 'contests:detail' c.pk %}">{% if c.me %}Davom etish{% else %}Qatnashish{% endif %}</a>
+      {% else %}
+        <a class="ca-btn ca-btn-ghost ca-btn-xs" href="{% url 'contests:calendar' c.pk %}" download title="Kalendarga qo‘shish: bir soat oldin eslatadi"><i data-lucide="calendar-plus" class="lu" aria-hidden="true"></i>Kalendarga</a>
+        {% if c.me %}<span class="ca-ccard-ok ml-auto"><i data-lucide="check" class="lu" aria-hidden="true"></i>Ro‘yxatdasiz</span>
+        {% elif not user.is_authenticated %}<a class="ca-btn ca-btn-primary ca-btn-xs ml-auto" href="{% url 'login' %}?next={{ request.path|urlencode }}">Ro‘yxatdan o‘tish</a>
+        {% elif not user.is_staff %}<form class="ml-auto" method="post" action="{% url 'contests:register' c.pk %}">{% csrf_token %}<button class="ca-btn ca-btn-primary ca-btn-xs">Qatnashish</button></form>{% endif %}
+      {% endif %}
+    </div>
+  </div>
+</article>

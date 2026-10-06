@@ -12,6 +12,23 @@
   {% if s.verdict == 'RUNNING' and progress %}
   <div class="ca-progress mt-3 w-full max-w-sm" aria-hidden="true"><span style="width: {{ progress.pct }}%"></span></div>
   {% endif %}
+  {% if beats and not compact %}
+  {# LeetCode's comparison: where this accepted run stands among the others in the same language #}
+  <div class="ca-beats">
+    <div class="ca-beats-tiles">
+      <div class="is-on"><span><i data-lucide="clock" class="lu" aria-hidden="true"></i>Ishlash vaqti</span>
+        <p><b class="tabular">{{ s.exec_ms }}</b><small>ms</small><i aria-hidden="true"></i><span><b class="tabular">{{ beats.time|floatformat:1 }}%</b> yechimdan tezroq</span></p></div>
+      {% if beats.mem is not None %}<div><span><i data-lucide="cpu" class="lu" aria-hidden="true"></i>Xotira</span>
+        <p><b class="tabular">{{ beats.mem_mb|floatformat:1 }}</b><small>MB</small><i aria-hidden="true"></i><span><b class="tabular">{{ beats.mem|floatformat:1 }}%</b> yechimdan kam</span></p></div>{% endif %}
+    </div>
+    <svg class="ca-hist" viewBox="-6 -30 {{ beats.vb_w }} {{ beats.vb_h }}" role="img" aria-label="Qabul qilingan {{ beats.n }} ta yechimning ishlash vaqti taqsimoti; sizniki {{ s.exec_ms }} ms">
+      {% for b in beats.bars %}<rect x="{{ b.x }}" y="{{ b.y }}" width="{{ beats.bw }}" height="{{ b.h }}" rx="4"{% if b.me %} class="is-me"{% endif %}/>{% endfor %}
+      {% for l in beats.labels %}<text x="{{ l.x }}" y="{{ l.y }}">{{ l.ms }} ms</text>{% endfor %}
+      <g class="mark"><rect x="{{ beats.mark.x }}" y="{{ beats.mark.y }}" width="40" height="20" rx="10"/><text x="{{ beats.mark.tx }}" y="{{ beats.mark.ty }}">Siz</text></g>
+    </svg>
+    <p class="ca-beats-note">Shu masalaning {{ s.language.name }} dagi {{ beats.n }} ta boshqa qabul qilingan yechimi bilan solishtirildi.</p>
+  </div>
+  {% endif %}
   {% if s.is_terminal and s.verdict != 'AC' and not compact %}
   <p class="mt-2 text-sm text-mute"><i data-lucide="lightbulb" class="lu mr-1 text-warn" aria-hidden="true"></i>{% if s.verdict == 'WA' %}Dastur ishladi, lekin javob kutilganidan farq qildi. Chegaraviy holatlarni (0, 1, eng katta qiymat) va chiqish formatini tekshiring.{% elif s.verdict == 'TLE' %}Dastur vaqt chegarasiga sig‘madi. Tezroq algoritm kerak — masalan, ichma-ich sikllarni kamaytiring.{% elif s.verdict == 'MLE' %}Dastur ruxsat etilganidan ko‘p xotira ishlatdi. Katta massivlar va rekursiya chuqurligini tekshiring.{% elif s.verdict == 'OLE' %}Dastur juda ko‘p narsa chiqardi. Ortiqcha yoki sikl ichidagi chiqarishlarni olib tashlang.{% elif s.verdict == 'RE' %}Dastur xato bilan to‘xtadi: nolga bo‘lish, massiv chegarasidan chiqish yoki noto‘g‘ri kiritishni o‘qish bo‘lishi mumkin.{% elif s.verdict == 'CE' %}Kod kompilyatsiya bo‘lmadi. Til to‘g‘ri tanlanganini va sintaksisni tekshiring.{% endif %}</p>
   {% endif %}

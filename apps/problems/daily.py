@@ -79,6 +79,7 @@ def streaks(user) -> tuple[int, int]:
 
 
 WEEKDAYS_SHORT = ["Du", "Se", "Ch", "Pa", "Ju", "Sh", "Ya"]
+MONTHS = "Yanvar Fevral Mart Aprel May Iyun Iyul Avgust Sentabr Oktabr Noyabr Dekabr".split()
 
 
 def week_strip(user) -> list[dict]:
@@ -90,3 +91,20 @@ def week_strip(user) -> list[dict]:
                .values_list("daily__date", flat=True))
     return [{"label": WEEKDAYS_SHORT[i], "date": d, "done": d in done, "today": d == today, "future": d > today}
             for i, d in enumerate(days)]
+
+
+def month_strip(user) -> dict:
+    """This month as a calendar, Monday first and a week per row (with the neighbouring months' days to fill
+    the rows): which days' daily problem the user solved on its day, and which day is today."""
+    today = timezone.localdate()
+    first = today.replace(day=1)
+    last = (first + datetime.timedelta(days=32)).replace(day=1) - datetime.timedelta(days=1)
+    start = first - datetime.timedelta(days=first.weekday())
+    end = last + datetime.timedelta(days=6 - last.weekday())
+    done = set(DailySolve.objects.filter(user=user, daily__date__range=(start, end))
+               .values_list("daily__date", flat=True))
+    days = [start + datetime.timedelta(days=i) for i in range((end - start).days + 1)]
+    cells = [{"day": d.day, "date": d, "in_month": d.month == today.month, "done": d in done,
+              "today": d == today, "future": d > today} for d in days]
+    return {"label": f"{MONTHS[today.month - 1]}, {today.year}", "weekdays": WEEKDAYS_SHORT,
+            "weeks": [cells[i:i + 7] for i in range(0, len(cells), 7)]}

@@ -33,7 +33,7 @@ On a phone the author moves under the problem and a verdict may wrap, so the pro
       {% if not own %}<td class="hidden max-w-0 truncate sm:table-cell"><a class="ca-user-name{{ s.user.rating|lg }}" style="--tier: {{ s.user.rating|tier_color }}" href="{% url 'profile' s.user.username %}" translate="no">{{ s.user.username }}</a></td>{% endif %}
       <td class="max-w-0 truncate"><a class="ca-link" href="{% url 'problems:detail' s.problem.slug %}">{{ s.problem.title }}</a>
         {% if not own %}<a class="ca-user-name{{ s.user.rating|lg }} block truncate text-xs sm:hidden" style="--tier: {{ s.user.rating|tier_color }}" href="{% url 'profile' s.user.username %}" translate="no">{{ s.user.username }}</a>{% endif %}</td>
-      <td class="hidden text-center text-mute md:table-cell">{{ s.language.name }}</td>
+      <td class="hidden whitespace-nowrap text-center text-mute md:table-cell">{{ s.language.name }}</td>
       <td class="text-center">{% include "submissions/_verdict.html" with v=s.verdict sub=s brief=True %}</td>
       {# time and memory for every judged run, as Codeforces shows them; a compile error never ran #}
       <td class="hidden text-center tabular text-mute sm:table-cell">{% if s.is_terminal and s.verdict != "CE" %}{{ s.exec_ms }} ms{% endif %}</td>

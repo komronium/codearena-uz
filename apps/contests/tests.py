@@ -446,8 +446,8 @@ def test_contest_detail_shows_my_rank_and_solved_marks(client, contest, problem_
     client.force_login(ali)
     r = client.get(reverse("contests:detail", args=[contest.pk]))
     html = r.content.decode()
-    assert "#2" in html and "Sizning o‘rningiz" in html  # bob solved A earlier -> lower penalty
-    assert 'title="Yechilgan 00:10"' in html  # hh:mm from the start, as Codeforces prints it
+    assert "Sizning natijangiz" in html and "<dd>2<small>/ 2</small></dd>" in html  # bob solved A earlier -> lower penalty
+    assert 'title="Yechilgan: 00:10, 1 ta xatodan keyin"' in html  # hh:mm from the start, as Codeforces prints it
     assert r.context["problems"][0].solved_count == 2 and r.context["problems"][1].solved_count == 0
 
 
@@ -1458,3 +1458,15 @@ def test_a_published_round_with_a_badge_marks_its_solvers_profiles(client, probl
     page = client.get(reverse("profile", args=["fourth"])).content.decode()
     assert "Marathon #1 · 1/2" in page and "ca-badge-contest" in page
     assert "ca-badge-medal-1" in client.get(reverse("profile", args=["first"])).content.decode()
+
+
+def test_calendar_file_is_the_round_with_a_reminder_an_hour_before(client, contest):
+    """«Kalendarga qo‘shish» on the round's cover: one event any calendar app opens, no account needed."""
+    r = client.get(reverse("contests:calendar", args=[contest.pk]))
+    body = r.content.decode()
+    assert r.status_code == 200 and r["Content-Type"].startswith("text/calendar")
+    assert "attachment" in r["Content-Disposition"]
+    assert body.count("BEGIN:VEVENT") == 1 and "SUMMARY:Sprint" in body and "TRIGGER:-PT1H" in body
+    import datetime
+    assert f"DTSTART:{contest.start.astimezone(datetime.timezone.utc):%Y%m%dT%H%M%SZ}" in body
+    assert f"/contests/{contest.pk}/" in body

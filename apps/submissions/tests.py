@@ -636,3 +636,24 @@ def test_practice_submit_keeps_no_tracker_time(enqueue, client, problem, python,
     client.post(reverse("submissions:submit", args=[problem.slug]), {"language": "python", "source": "x"})
     s = Submission.objects.get()
     assert s.tracker_seen_at is None and s.device == ""
+
+
+def test_an_accept_shows_where_its_time_stands_among_the_others(client, problem, python, user):
+    """LeetCode's "faster than N%": the share of the other accepted runs (same problem, same language) that were
+    slower, ties counted half; nothing until five others exist, and only for an accept."""
+    def ac(who, ms, verdict="AC"):
+        return Submission.objects.create(user=who, problem=problem, language=python, source="x",
+                                         verdict=verdict, exec_ms=ms, mem_kb=4096, passed=1, total=1)
+
+    mine = ac(user, 40)
+    others = [User.objects.create_user(f"u{i}", password="x") for i in range(5)]
+    for who, ms in zip(others[:4], (20, 40, 60, 80)):
+        ac(who, ms)
+    client.force_login(user)
+    assert client.get(reverse("submissions:detail", args=[mine.pk])).context["beats"] is None  # four: too few
+    ac(others[4], 100)
+    beats = client.get(reverse("submissions:detail", args=[mine.pk])).context["beats"]
+    assert beats["n"] == 5 and beats["time"] == 100 * (3 + 0.5) / 5  # 60, 80, 100 slower; 40 a tie
+    assert sum(b["me"] for b in beats["bars"]) == 1
+    wrong = ac(user, 10, verdict="WA")
+    assert client.get(reverse("submissions:detail", args=[wrong.pk])).context["beats"] is None

@@ -1,0 +1,6 @@
+{
+  "enabledPlugins": {
+    "frontend-design@anthropic-plugin-directory": true,
+    "ui-ux-pro-max@ui-ux-pro-max-skill": true
+  }
+}
