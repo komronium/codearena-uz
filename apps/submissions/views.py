@@ -10,7 +10,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from apps.accounts.models import User
-from apps.contests.models import Participation
+from apps.contests.models import Participation, VoidedProblem
 from apps.contests.services import access_allowed, active_contest_for, in_running_contest, in_upcoming_contest
 from apps.contests.virtual import active_virtual_for
 from apps.integrity.practice import written_in_editor
@@ -45,6 +45,11 @@ def _gate(request, slug):
         return problem, contest, HttpResponseBadRequest("not eligible for this contest")
     if contest is not None and Participation.objects.filter(user=request.user, contest=contest, disqualified=True).exists():
         return problem, contest, HttpResponseBadRequest("disqualified from this contest")
+    if contest is not None and VoidedProblem.objects.filter(
+            participation__user=request.user, participation__contest=contest,
+            contest_problem__problem=problem, penalty=True).exists():
+        # AI penalty: the problem is struck and blocked for the rest of the round
+        return problem, contest, HttpResponseBadRequest("this problem is blocked in this contest")
     return problem, contest, None
 
 

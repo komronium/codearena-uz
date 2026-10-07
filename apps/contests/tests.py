@@ -1341,7 +1341,7 @@ def test_voiding_one_problem_keeps_the_rest_of_the_round_and_is_silent(client, c
     row = next(r for r in compute_standings(contest) if r["user"] == ali)
     # A is untried now (no points, no wrong try); B and the rest of the round stand
     assert row["cells"][0] == {"solved": False, "wrong": 0, "minutes": None, "ac_at": None, "voided": True,
-                               "first": False}
+                               "penalty": False, "first": False}
     assert row["cells"][1]["solved"] and row["attempted"]
     assert scores() == {"bob": (1, 100), "ali": (2, 100)}  # equal points: bob's lower penalty first
     assert [(e.action, e.note) for e in AuditEntry.objects.filter(contest=contest)] == [("void", "A: ko‘chirilgan")]
@@ -1399,6 +1399,65 @@ def test_voiding_after_rating_recomputes_the_latest_contest(client, problem_a, p
     cheat.refresh_from_db()
     assert cheat.rating == rows[cheat.pk].rating_after < 1200
     assert "Reyting qayta hisoblandi" in r.content.decode()
+
+
+@pytest.mark.django_db
+@patch("apps.submissions.views.django_rq.enqueue")
+def test_ai_penalty_returns_the_solution_as_a_wrong_try_and_blocks_the_problem(enqueue, client, contest, problem_a, problem_b, python):
+    from apps.integrity.models import AuditEntry
+
+    ali, bob = User.objects.create_user("ali", password="x"), User.objects.create_user("bob", password="x")
+    for u in (ali, bob):
+        Participation.objects.create(user=u, contest=contest)
+    _sub(ali, problem_a, contest, python, "WA", 2, passed=1)
+    _sub(ali, problem_a, contest, python, "AC", 10)
+    _sub(ali, problem_b, contest, python, "AC", 20)
+    _sub(bob, problem_a, contest, python, "AC", 5)
+    url = reverse("contests:void", args=[contest.pk, ali.pk])
+    staff = User.objects.create_user("boss", password="x", is_staff=True)
+
+    def row():
+        return next(r for r in compute_standings(contest) if r["user"] == ali)
+
+    assert row()["cells"][0]["solved"] and row()["cells"][0]["wrong"] == 1
+
+    client.force_login(ali)  # only staff strike a result
+    client.post(url, {"label": "A", "voided": "1", "penalty": "1"})
+    assert row()["cells"][0]["solved"]
+
+    client.force_login(staff)
+    client.post(url, {"label": "A", "voided": "1", "penalty": "1", "reason": "AI ishlatgan"})
+    client.post(url, {"label": "A", "voided": "1", "penalty": "1"})  # a stale second click changes nothing
+    # the cancelled solution is returned as a wrong try, on top of the earlier WA;
+    # B and the rest of the round stand
+    assert row()["cells"][0] == {"solved": False, "wrong": 2, "minutes": None, "ac_at": None,
+                                 "voided": True, "penalty": True, "first": False}
+    assert row()["cells"][1]["solved"]
+    assert [(e.action, e.note) for e in AuditEntry.objects.filter(contest=contest)] == [
+        ("penalty", "A: AI ishlatgan")]
+
+    # blocked: no more submissions to A until the round ends; the rest of the round stays open
+    client.force_login(ali)
+    assert client.post(reverse("submissions:submit", args=[problem_a.slug]),
+                       {"language": "python", "source": "print(1)"}).status_code == 400
+    assert client.post(reverse("submissions:submit", args=[problem_b.slug]),
+                       {"language": "python", "source": "print(1)"}).status_code == 302
+    # the problem page says so and locks the submit bar
+    assert "Bu masala siz uchun bloklangan" in client.get(
+        reverse("problems:detail", args=[problem_a.slug])).content.decode()
+    # silent otherwise: the board shows a plain wrong try, no mention of the penalty
+    assert "AI jarimasi" not in client.get(reverse("contests:standings", args=[contest.pk])).content.decode()
+
+    client.force_login(staff)
+    page = client.get(reverse("contests:submissions", args=[contest.pk]) + "?user=ali").content.decode()
+    assert "AI jarimasi" in page and "xato urinish hisoblandi, masala bloklangan" in page
+    # restore: the solve and the access come back
+    client.post(url, {"label": "A", "voided": "0"})
+    assert row()["cells"][0]["solved"] and row()["cells"][0]["wrong"] == 1
+    client.force_login(ali)
+    assert client.post(reverse("submissions:submit", args=[problem_a.slug]),
+                       {"language": "python", "source": "print(2)"}).status_code == 302
+    assert AuditEntry.objects.filter(contest=contest, action="unvoid", note="A").exists()
 
 
 # ---- CodeArena Marathon #1 and round badges --------------------------------------------------------

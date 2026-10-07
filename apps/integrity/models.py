@@ -80,6 +80,7 @@ class AuditEntry(models.Model):
         REQUALIFY = "requalify", "Diskvalifikatsiya bekor"
         VOID = "void", "Masala natijasi bekor"
         UNVOID = "unvoid", "Masala natijasi tiklandi"
+        PENALTY = "penalty", "AI jarimasi: xato urinish, masala bloklandi"
         REJUDGE = "rejudge", "Qayta tekshiruv"
         PUBLISH = "publish", "Masalalar ochildi"
         RATING_APPLY = "rating_apply", "Reyting hisoblandi"

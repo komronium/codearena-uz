@@ -23,7 +23,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from apps.classroom.duels import active_duel_for
-from apps.contests.models import ContestProblem
+from apps.contests.models import ContestProblem, VoidedProblem
 from apps.contests.services import (
     active_contest_for,
     in_running_contest,
@@ -507,6 +507,16 @@ def problem_detail(request, slug):
         if solved
         else None
     )
+    # AI penalty (a struck contest result): the problem is blocked for this
+    # participant until the round ends — say so and lock the submit bar.
+    contest_blocked = (
+        request.user.is_authenticated
+        and contest is not None
+        and VoidedProblem.objects.filter(
+            participation__user=request.user, participation__contest=contest,
+            contest_problem__problem=problem, penalty=True
+        ).exists()
+    )
     from apps.integrity.models import PracticeReview
 
     # "void": a teacher found it copied; "held": flagged strongly, points wait for a teacher
@@ -544,6 +554,7 @@ def problem_detail(request, slug):
             if editorial_open
             else "",
             "open_contest": open_contest,
+            "contest_blocked": contest_blocked,
             "problem": problem,
             "my_subs": my_subs,
             "stats": _problem_stats(problem) if contest is None else None,

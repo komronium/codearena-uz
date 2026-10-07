@@ -54,7 +54,7 @@ a grey −N, accepted / tried per problem last. Codeforces rules have no penalty
     {% for cell in r.cells %}
     <td class="ca-cell{% if cell.first %} ca-cell-first{% endif %}"{% if cell.solved %} title="{% if cell.first %}Birinchi bo‘lib yechdi: {% endif %}{{ cell.time }}{% if cell.wrong %}, {{ cell.wrong }} ta noto‘g‘ri urinishdan keyin{% endif %}"{% endif %}>
       {# staff: the cell opens this participant's submissions to this problem #}
-      {% if user.is_staff %}{% with cp=problems|slice:forloop.counter|last %}<a class="ca-cell-link" href="{% url 'contests:submissions' contest.pk %}?user={{ r.user.username|urlencode }}&amp;problem={{ cp.label|urlencode }}" aria-label="{{ r.user.username }}, {{ cp.label }}: urinishlar"{% if cell.voided %} title="Bekor qilingan"{% endif %}>{% endwith %}{% endif %}
+      {% if user.is_staff %}{% with cp=problems|slice:forloop.counter|last %}<a class="ca-cell-link" href="{% url 'contests:submissions' contest.pk %}?user={{ r.user.username|urlencode }}&amp;problem={{ cp.label|urlencode }}" aria-label="{{ r.user.username }}, {{ cp.label }}: urinishlar"{% if cell.penalty %} title="AI jarimasi: natija bekor qilingan, xato urinish hisoblandi, masala bloklangan"{% elif cell.voided %} title="Bekor qilingan"{% endif %}>{% endwith %}{% endif %}
       {% if cell.first %}<span class="sr-only">birinchi bo‘lib yechdi,</span>{% endif %}
       {% if cell.solved %}
         <span class="ca-cf-ac">{{ cell.mark }}</span>

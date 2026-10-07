@@ -192,10 +192,16 @@ class VoidedProblem(models.Model):
     """A participant's result on one problem of a round, struck by staff because the work was not
     their own. The cell counts as untried (no points, no wrong tries) and the rest of the round
     stands, unlike a disqualification. Silent: nothing on the site tells the participant; staff see
-    it in the round's submissions and the integrity report, and the audit log keeps who and why."""
+    it in the round's submissions and the integrity report, and the audit log keeps who and why.
+
+    `penalty` (AI caught red-handed): the strike counts as a wrong try instead — the cancelled
+    solution is returned as a failed attempt on the board — and the problem is blocked for the
+    participant for the rest of the round: no more submissions to it."""
     participation = models.ForeignKey(Participation, on_delete=models.CASCADE, related_name="voids")
     contest_problem = models.ForeignKey(ContestProblem, on_delete=models.CASCADE, related_name="voids")
     reason = models.CharField(max_length=200, blank=True)
+    # AI/cheat penalty: one wrong try for the struck solution, problem blocked until the round ends
+    penalty = models.BooleanField(default=False)
     at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

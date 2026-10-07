@@ -264,7 +264,9 @@ def void(request, pk, user_id):
     """Strike (voided=1) or restore (voided=0) one participant's result on one problem of the round
     (label=<letter>, reason): for work that was not their own on that problem alone, where a
     disqualification would take the rest of their round too. Silent for the participant: the cell
-    counts as untried. Standings, solves after publish and an applied rating follow, as after a DQ."""
+    counts as untried. With penalty=1 (AI caught red-handed) the strike counts as a wrong try
+    instead and the problem is blocked for the participant until the round ends. Standings,
+    solves after publish and an applied rating follow, as after a DQ."""
     want = {"1": True, "0": False}.get(request.POST.get("voided"))
     if want is None:
         return HttpResponseBadRequest("voided must be 0 or 1")
@@ -273,10 +275,16 @@ def void(request, pk, user_id):
     current = VoidedProblem.objects.filter(participation=p, contest_problem=cp).first()
     if want and current is None:
         reason = request.POST.get("reason", "").strip()[:200]
-        VoidedProblem.objects.create(participation=p, contest_problem=cp, reason=reason)
-        audit.record(request, audit.Action.VOID, contest=p.contest, subject=p.user,
+        penalty = request.POST.get("penalty") == "1"
+        VoidedProblem.objects.create(participation=p, contest_problem=cp, reason=reason,
+                                     penalty=penalty)
+        audit.record(request, audit.Action.PENALTY if penalty else audit.Action.VOID,
+                     contest=p.contest, subject=p.user,
                      note=f"{cp.label}: {reason}" if reason else cp.label)
-        messages.success(request, f"{p.user.username}: {cp.label} masalasi natijasi bekor qilindi.")
+        if penalty:
+            messages.success(request, f"{p.user.username}: {cp.label} AI jarimasi — xato urinish hisoblandi, masala bloklandi.")
+        else:
+            messages.success(request, f"{p.user.username}: {cp.label} masalasi natijasi bekor qilindi.")
     elif not want and current is not None:
         current.delete()
         audit.record(request, audit.Action.UNVOID, contest=p.contest, subject=p.user, note=cp.label)

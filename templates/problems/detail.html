@@ -60,6 +60,14 @@
   <form method="post" action="{% url 'contests:register' open_contest.pk %}">{% csrf_token %}<button class="ca-btn ca-btn-primary !py-1.5">Musobaqaga qo‘shilish</button></form>
 </div>
 {% endif %}
+{# AI penalty: staff struck this participant's result on this problem; it counts as a
+   wrong try and the problem stays blocked until the round ends #}
+{% if contest_blocked %}
+<div class="ca-alert ca-alert-bad mb-5" role="alert">
+  <p class="font-semibold"><i data-lucide="shield-alert" class="lu mr-1.5" aria-hidden="true"></i>Bu masala siz uchun bloklangan.</p>
+  <p class="mt-1 text-sm">Musobaqadagi yechimingiz bekor qilingan va xato urinish hisoblandi. Musobaqa tugaguncha bu masalaga yechim yuborish mumkin emas. Xato deb hisoblasangiz, o‘qituvchingizga murojaat qiling.</p>
+</div>
+{% endif %}
 {# phones and tablets: one pane at a time, so the editor isn't a long scroll below the statement #}
 <div class="ca-seg sticky top-[calc(var(--ca-nav-h)+.5rem)] z-30 mb-4 lg:hidden" role="group" aria-label="Ko‘rinish">
   <button type="button" data-pane-tab="statement" aria-pressed="true" aria-controls="statement-pane"><i data-lucide="file-text" class="lu mr-1.5" aria-hidden="true"></i>Masala</button>
@@ -302,8 +310,13 @@
           </details>
           <span class="mx-1 h-5 w-px bg-line" aria-hidden="true"></span>
           {% if user.is_authenticated %}
+          {% if contest_blocked %}
+          <button type="button" id="trial-btn" class="ca-btn ca-btn-ghost !py-1.5 opacity-50 cursor-not-allowed" disabled title="Masala bloklangan — musobaqa tugaguncha sinab bo‘lmaydi"><i data-lucide="play" class="lu" aria-hidden="true"></i>Sinab ko‘rish</button>
+          <button type="button" id="submit-btn" class="ca-btn ca-btn-success !py-1.5 opacity-50 cursor-not-allowed" disabled title="Masala bloklangan — musobaqa tugaguncha yechim yuborish mumkin emas"><i data-lucide="cloud-upload" class="lu" aria-hidden="true"></i>Yuborish</button>
+          {% else %}
           <button type="button" id="trial-btn" class="ca-btn ca-btn-ghost !py-1.5" title="{% if problem.kind == 'sql' %}So‘rovni namunaviy ma’lumotlarda ishga tushirish{% else %}Namunaviy testlarda sinash{% endif %} — urinish hisoblanmaydi (Ctrl+')"><i data-lucide="play" class="lu" aria-hidden="true"></i>Sinab ko‘rish</button>
           <button type="submit" id="submit-btn" class="ca-btn ca-btn-success !py-1.5" title="Yuborish (Ctrl+Enter)"><i data-lucide="cloud-upload" class="lu" aria-hidden="true"></i>Yuborish</button>
+          {% endif %}
           {% else %}
           <a class="ca-btn ca-btn-ghost !py-1.5" href="{% url 'login' %}?next={{ request.path|urlencode }}%23yechim"><i data-lucide="log-in" class="lu" aria-hidden="true"></i>Kirish</a>
           <button type="submit" id="submit-btn" class="ca-btn ca-btn-success !py-1.5"><i data-lucide="user-plus" class="lu" aria-hidden="true"></i>Ro‘yxatdan o‘tib yuborish</button>

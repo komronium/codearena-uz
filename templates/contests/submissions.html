@@ -42,7 +42,8 @@ one problem here, and a row's handle or letter narrows the list to it.{% endcomm
     <tr>
       <td class="text-center font-semibold{% if x.cp.label == f.problem %} text-accent{% endif %}" title="{{ x.cp.problem.title }}">{{ x.cp.label }}</td>
       <td>
-        {% if x.void %}<span class="font-semibold text-bad">Bekor qilingan</span>{% if x.void.reason %} <span class="text-mute">· {{ x.void.reason }}</span>{% endif %}
+        {% if x.void %}{% if x.void.penalty %}<span class="font-semibold text-bad">AI jarimasi</span>{% if x.void.reason %} <span class="text-mute">· {{ x.void.reason }}</span>{% endif %} <span class="text-mute">· xato urinish hisoblandi, masala bloklangan</span>
+        {% else %}<span class="font-semibold text-bad">Bekor qilingan</span>{% if x.void.reason %} <span class="text-mute">· {{ x.void.reason }}</span>{% endif %}{% endif %}
         {% elif x.cell.solved %}<b class="ca-cf-ac !inline">{{ x.cell.mark }}</b> <span class="tabular text-mute">{{ x.cell.time }}{% if x.cell.wrong %} · {{ x.cell.wrong }} ta noto‘g‘ri urinishdan keyin{% endif %}</span>
         {% elif x.cell.wrong %}<span class="text-mute">{{ x.cell.wrong }} ta noto‘g‘ri urinish</span>
         {% else %}<span class="text-mute">urinish yo‘q</span>{% endif %}
@@ -56,6 +57,13 @@ one problem here, and a row's handle or letter narrows the list to it.{% endcomm
           {% if x.void %}<button class="ca-btn ca-btn-ghost !py-1 text-xs"><i data-lucide="undo-2" class="lu" aria-hidden="true"></i>Tiklash</button>
           {% else %}<button class="ca-btn ca-btn-ghost !py-1 text-xs text-bad"><i data-lucide="ban" class="lu" aria-hidden="true"></i>Bekor qilish</button>{% endif %}
         </form>
+        {% if not x.void %}
+        <form method="post" action="{% url 'contests:void' contest.pk p.user_id %}" class="inline" onsubmit="const s=prompt('{{ x.cp.label }} masalasi natijasini AI tufayli bekor qilish: xato urinish hisoblanadi va masala bloklanadi. Sabab (ixtiyoriy, faqat adminlar ko‘radi):','AI ishlatgan'); if(s===null) return false; this.reason.value=s;">{% csrf_token %}
+          <input type="hidden" name="label" value="{{ x.cp.label }}"><input type="hidden" name="voided" value="1"><input type="hidden" name="penalty" value="1">
+          <input type="hidden" name="reason" value=""><input type="hidden" name="next" value="{{ request.get_full_path }}">
+          <button class="ca-btn ca-btn-ghost !py-1 text-xs text-bad" title="AI tufayli: natija xato urinish sifatida qaytariladi va masala bloklanadi"><i data-lucide="bot" class="lu" aria-hidden="true"></i>AI</button>
+        </form>
+        {% endif %}
         {% endif %}
       </td>
     </tr>

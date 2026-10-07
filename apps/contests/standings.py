@@ -64,16 +64,29 @@ def compute_standings(contest):
         for s in Submission.objects.filter(contest=contest, problem=cp.problem).order_by("created"):
             subs_by_user_problem.setdefault((s.user_id, cp.id), []).append(s)
 
-    # a voided problem counts as untried; the participant still took part (attempted, below)
+    # a voided problem counts as untried; a penalty strike counts as one wrong try
+    # (the cancelled solution returned as a failed attempt) and is blocked from
+    # resubmission; the participant still took part (attempted, below)
     voided = set(VoidedProblem.objects.filter(participation__contest=contest)
                  .values_list("participation_id", "contest_problem_id"))
+    penalties = set(VoidedProblem.objects.filter(participation__contest=contest, penalty=True)
+                    .values_list("participation_id", "contest_problem_id"))
     rows = []
     for p in participations:
         cells = []
         for cp in problems:
             void = (p.pk, cp.id) in voided
-            cells.append(cell(contest, cp, [] if void else subs_by_user_problem.get((p.user_id, cp.id), []),
-                              contest.start) | {"voided": void})
+            penalty = (p.pk, cp.id) in penalties
+            subs = subs_by_user_problem.get((p.user_id, cp.id), [])
+            if penalty:
+                # the struck solution is gone; the participant's other tries stay
+                subs = [s for s in subs if s.verdict != "AC"]
+            elif void:
+                subs = []
+            c = cell(contest, cp, subs, contest.start)
+            if penalty:
+                c["wrong"] += 1  # the cancelled solution, returned as a wrong try
+            cells.append(c | {"voided": void, "penalty": penalty})
         score, penalty, solved = totals(contest, cells)
         delta = None
         if p.rating_after is not None and p.rating_before is not None:
