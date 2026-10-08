@@ -1,14 +1,23 @@
-{% extends "base.html" %}{% load tiers daily %}
+{% extends "base.html" %}{% load tiers daily static %}
 {% block title %}Bosh sahifa{% endblock %}
-{% block page_icon %}<span class="ca-hd-icon"><i data-lucide="layout-dashboard" class="lu" aria-hidden="true"></i></span>{% endblock %}
-{% block page_title %}<h1>Salom, {{ user.first_name|default:user.username }}!</h1><span class="ca-topbar-sub">{{ today_label }}</span>{% endblock %}
+{% block head %}<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">{% endblock %}
+{% block page_icon %}{% endblock %}
+{% block page_title %}
+<div class="ca-dashboard-heading">
+  <span class="ca-dashboard-mark"><i data-lucide="layout-dashboard" class="lu" aria-hidden="true"></i></span>
+  <div class="min-w-0">
+    <p class="ca-dashboard-kicker">CODEARENA <span aria-hidden="true">/</span> SHAXSIY PANEL</p>
+    <h1>Salom, {{ user.first_name|default:user.username }}!</h1>
+    <p class="ca-dashboard-date">{{ today_label }} <span aria-hidden="true">·</span> Bugungi natijalaringiz va keyingi qadamlaringiz</p>
+  </div>
+  {% if daily %}<a class="ca-dashboard-primary" href="{% url 'problems:detail' daily.problem.slug %}"><i data-lucide="calendar-check" class="lu" aria-hidden="true"></i><span><small>BUGUNGI MASALA</small><b>{{ daily.problem.title }}</b></span><i data-lucide="arrow-up-right" class="lu ca-dashboard-arrow" aria-hidden="true"></i></a>{% endif %}
+</div>
+{% endblock %}
 {% block content %}
-{% comment %}Your home, after LeetCode's: a round running now first, on its cover; then your solved problems per level
-(the ring) beside your rating; your homework, the homework you set, your latest submissions. On the right the day's
-problem with this month's calendar, rounds coming up, problems to try next, duels.{% endcomment %}
 {% if daily %}{% daily_stats daily user as ds %}{% endif %}
+<div class="ca-dashboard">
 {% if live %}
-<section class="ca-live-strip{% if live.contest.type == 'score' %} is-score{% elif live.contest.type == 'icpc' %} is-icpc{% endif %}" aria-labelledby="live-title">
+<section class="ca-live-strip ca-dashboard-live{% if live.contest.type == 'score' %} is-score{% elif live.contest.type == 'icpc' %} is-icpc{% endif %}" aria-labelledby="live-title">
   <svg class="ca-band-mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M31 16l-4.39 4.39v6.22h-6.22L16 31l-4.39-4.39H5.39v-6.22L1 16l4.39-4.39V5.39h6.22L16 1l4.39 4.39h6.22v6.22z"/></svg>
   <span class="ca-tag ca-tag-live"><span class="ca-live-dot" aria-hidden="true"></span>Jonli</span>
   <div class="min-w-0 flex-1">
@@ -19,11 +28,9 @@ problem with this month's calendar, rounds coming up, problems to try next, duel
   <a class="ca-btn ca-btn-primary" href="{% url 'contests:detail' live.contest.pk %}">{% if live.joined %}Davom etish{% else %}Qatnashish{% endif %}</a>
 </section>
 {% endif %}
-<div class="ca-cols">
-<div class="min-w-0">
-  <div class="ca-two">
-    {% if ring %}{% url 'problems:list' as problems_url %}{% include "problems/_solved_card.html" with title="Yechilgan masalalar" more_url=problems_url more_label="Masalalar" %}{% endif %}
-    <section class="ca-box" aria-labelledby="me-title" style="--tier: {{ user.rating|tier_color }}">
+<div class="ca-dashboard-overview">
+  {% if ring %}{% url 'problems:list' as problems_url %}{% include "problems/_solved_card.html" with title="Yechilgan masalalar" more_url=problems_url more_label="Masalalar" %}{% endif %}
+  <section class="ca-box ca-dashboard-rating" aria-labelledby="me-title" style="--tier: {{ user.rating|tier_color }}">
       <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="trophy" class="lu" aria-hidden="true"></i></span><h2 id="me-title">Musobaqa reytingi<a class="ca-box-tools ca-link" href="{% url 'profile' user.username %}">Profil</a></h2></div>
       <div class="ca-box-body ca-box-pad">
         <p class="ca-rating-line"><b class="ca-tier-ink{{ user.rating|lg }}">{{ user.rating }}</b>
@@ -44,11 +51,14 @@ problem with this month's calendar, rounds coming up, problems to try next, duel
           <div><dt>Seriya</dt><dd>{{ streak }}<small>kun</small></dd></div>
         </dl>
       </div>
-    </section>
-  </div>
+  </section>
+</div>
+
+<div class="ca-dashboard-grid">
+<div class="ca-dashboard-primary-column">
 
   {% if homework %}
-  <section class="ca-box" aria-labelledby="hw-title">
+  <section class="ca-box ca-dashboard-box" aria-labelledby="hw-title">
     <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="notebook-pen" class="lu" aria-hidden="true"></i></span><h2 id="hw-title">Vazifalar<a class="ca-box-tools ca-link" href="{% url 'classroom:list' %}">Hammasi</a></h2></div>
     <div class="ca-box-body">
       <table class="ca-table">
@@ -69,7 +79,7 @@ problem with this month's calendar, rounds coming up, problems to try next, duel
   {% endif %}
 
   {% if taught %}
-  <section class="ca-box" aria-labelledby="taught-title">
+  <section class="ca-box ca-dashboard-box" aria-labelledby="taught-title">
     <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="notebook-pen" class="lu" aria-hidden="true"></i></span><h2 id="taught-title">Men bergan vazifalar<a class="ca-box-tools ca-link" href="{% url 'classroom:new' %}">+ Yangi vazifa</a></h2></div>
     <div class="ca-box-body">
       <table class="ca-table">
@@ -89,7 +99,7 @@ problem with this month's calendar, rounds coming up, problems to try next, duel
   </section>
   {% endif %}
 
-  <section class="ca-box" aria-labelledby="recent-title">
+  <section class="ca-box ca-dashboard-box ca-dashboard-recent" aria-labelledby="recent-title">
     <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="history" class="lu" aria-hidden="true"></i></span><h2 id="recent-title">So‘nggi urinishlar{% if recent %}<a class="ca-box-tools ca-link" href="{% url 'submissions:mine' %}?mine=1">Hammasi</a>{% endif %}</h2></div>
     <div class="ca-box-body">
     {% if recent %}
@@ -113,7 +123,7 @@ problem with this month's calendar, rounds coming up, problems to try next, duel
   </section>
 </div>
 
-<aside class="ca-aside" aria-label="Qo‘shimcha">
+<aside class="ca-dashboard-aside" aria-label="Qo‘shimcha">
   {% if daily %}{% include "problems/_daily_card.html" %}{% endif %}
 
   {% if upcoming %}
@@ -168,5 +178,6 @@ problem with this month's calendar, rounds coming up, problems to try next, duel
     </div>
   </section>
 </aside>
+</div>
 </div>
 {% endblock %}
