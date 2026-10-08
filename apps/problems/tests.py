@@ -613,7 +613,8 @@ def test_problem_list_and_profile_show_them(client, catalog):
     assert "Siz uchun" in page
     profile = client.get(reverse("profile", args=["ali"])).content.decode()
     # math: 1 of 3 solved, its bar a third full
-    assert "Mavzular" in profile and '<b>1</b><span class="text-mute">/3</span>' in profile and "width: 33%" in profile
+    assert "Masalalar kategoriyalari" in profile and '<td class="n">1</td><td class="n mute">3</td><td class="n">33%</td>' in profile
+    assert "width: 33%" in profile
 
 
 @pytest.mark.django_db

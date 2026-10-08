@@ -2,9 +2,9 @@
 today blue), the problem with its level and the way in, your streak and the next streak badge, who solved it today.
 ctx: daily, ds (apps.problems.templatetags.daily.daily_stats), daily_done.{% endcomment %}
 <section class="ca-box" aria-labelledby="daily-title">
-  <h2 class="ca-box-cap" id="daily-title">Kun masalasi
+  <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="calendar-check" class="lu" aria-hidden="true"></i></span><h2 id="daily-title">Kun masalasi
     {% if user.is_authenticated %}<span class="ca-box-tools text-mute" title="Kun masalasi seriyasi{% if ds.best %}, eng uzuni {{ ds.best }}{% endif %}"><i data-lucide="flame" class="lu{% if ds.streak %} text-gold{% endif %}" aria-hidden="true"></i><b class="text-ink">{{ ds.streak }}</b> kun</span>
-    {% else %}<small class="ca-box-tools">{{ daily.date|date:"d.m.Y" }}</small>{% endif %}</h2>
+    {% else %}<small class="ca-box-tools">{{ daily.date|date:"d.m.Y" }}</small>{% endif %}</h2></div>
   <div class="ca-box-body ca-box-pad">
     {% if user.is_authenticated %}{% include "problems/_month.html" with month=ds.month %}{% endif %}
     <div class="ca-daily">

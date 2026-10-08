@@ -9,7 +9,7 @@
 </header>
 <div class="ca-cols">
   <section class="ca-box min-w-0" aria-labelledby="lists-title">
-    <h2 class="ca-box-cap" id="lists-title">Ro‘yxatlar{% if lists %} <small class="tabular">{{ lists|length }}</small>{% endif %}</h2>
+    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="bookmark" class="lu" aria-hidden="true"></i></span><h2 id="lists-title">Ro‘yxatlar{% if lists %} <small class="tabular">{{ lists|length }}</small>{% endif %}</h2></div>
     <div class="ca-box-body">
       {% if lists %}
       <table class="ca-table">
@@ -31,7 +31,7 @@
   </section>
   <aside class="ca-aside">
     <section class="ca-box" aria-labelledby="new-list">
-      <h2 class="ca-box-cap" id="new-list">Yangi ro‘yxat</h2>
+      <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="plus" class="lu" aria-hidden="true"></i></span><h2 id="new-list">Yangi ro‘yxat</h2></div>
       <form method="post" class="ca-box-body ca-box-pad space-y-3">{% csrf_token %}
         {% if form.non_field_errors %}<div class="ca-alert ca-alert-bad" role="alert">{{ form.non_field_errors.0 }}</div>{% endif %}
         <div><label class="ca-label" for="{{ form.name.id_for_label }}">Nomi</label>{{ form.name }}{{ form.name.errors }}</div>

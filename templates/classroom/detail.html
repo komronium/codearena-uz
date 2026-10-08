@@ -23,14 +23,14 @@ teacher the whole group's grid (problems as numbered columns) with a CSV export.
 
 {% if assignment.description_md %}
 <section class="ca-box" aria-labelledby="task-title">
-  <h2 class="ca-box-cap" id="task-title">Topshiriq</h2>
+  <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="clipboard-list" class="lu" aria-hidden="true"></i></span><h2 id="task-title">Topshiriq</h2></div>
   <div class="ca-box-body ca-box-pad prose max-w-none text-sm">{{ description_html|safe }}</div>
 </section>
 {% endif %}
 
 {% if mine %}
 <section class="ca-box" aria-labelledby="mine-title">
-  <h2 class="ca-box-cap" id="mine-title">Masalalar</h2>
+  <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="list-checks" class="lu" aria-hidden="true"></i></span><h2 id="mine-title">Masalalar</h2></div>
   <div class="ca-box-body">
     <table class="ca-table">
       <thead><tr><th class="w-12 text-center">#</th><th>Masala</th><th class="hidden w-28 text-center sm:table-cell">Qiyinlik</th><th class="w-32 text-center">Holat</th></tr></thead>
@@ -51,7 +51,7 @@ teacher the whole group's grid (problems as numbered columns) with a CSV export.
 
 {% if grid is not None %}
 <section class="ca-box" aria-labelledby="grid-title">
-  <h2 class="ca-box-cap" id="grid-title">Guruh natijalari <small class="tabular">{{ grid|length }} o‘quvchi</small></h2>
+  <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="table-2" class="lu" aria-hidden="true"></i></span><h2 id="grid-title">Guruh natijalari <small class="tabular">{{ grid|length }} o‘quvchi</small></h2></div>
   <div class="ca-box-body">
     <ol class="ca-toolbar !gap-x-4 text-sm" aria-label="Ustunlardagi masalalar">
       {% for p in problems %}<li><b class="tabular text-accent">{{ forloop.counter }}.</b> <a class="ca-link !text-ink" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a></li>{% endfor %}

@@ -1,21 +1,33 @@
 {% extends "base.html" %}{% load tiers %}
 {% block title %}Reyting{% endblock %}
 {% block description %}CodeArena musobaqa reytingi: {{ total }} ishtirokchi, Elo bo‘yicha o‘rinlar va darajalar.{% endblock %}
-{% block page_title %}<h1>Reyting</h1><span class="ca-topbar-sub">{{ total }} ishtirokchi · reytingli musobaqalar natijasi bo‘yicha</span>{% endblock %}
+{% block page_title %}{% endblock %}
 {% block content %}
-{% comment %}After Codeforces' rating page: one boxed table, handles (no real names) and ratings in their tier
-colour, which also names the tier, equal ratings sharing a place; a handle search over it. On the right, in a
-wider column, your place and the way to the next tier, the tiers with their head counts, and under them every
-100 points as a bar in its tier colour.{% endcomment %}
-{% include "accounts/_board_tabs.html" %}
+{% comment %}After Codeforces' rating page, dressed like the profile: one card headed by the trophy, a handle search and a
+sort menu; handles (no real names) and ratings in their tier colour, equal ratings sharing a place, your own row
+marked "Siz". On the right, in a wider column, your place and the way to the next tier, the tiers with their head
+counts, and under them every 100 points as a bar in its tier colour.{% endcomment %}
 <div class="ca-cols ca-cols-wide">
 <div class="min-w-0">
   <section class="ca-box !mb-0" aria-labelledby="board-title">
-    <div class="ca-box-cap">
-      <h2 id="board-title">Musobaqa reytingi</h2>
-      <form method="get" class="ca-box-tools" role="search" aria-label="Foydalanuvchini qidirish">
-        <label class="ca-picker ca-picker-search !min-w-0"><i data-lucide="search" class="lu" aria-hidden="true"></i><input type="search" name="q" value="{{ q }}" placeholder="Foydalanuvchi" aria-label="Foydalanuvchi nomi"></label>
-      </form>
+    <div class="ca-box-cap ca-hd ca-hd-lg">
+      <span class="ca-hd-icon"><i data-lucide="trophy" class="lu" aria-hidden="true"></i></span>
+      <div><h1 id="board-title">Musobaqa reytingi</h1><p>{{ total }} ishtirokchi · musobaqalar natijasi bo‘yicha</p></div>
+      <div class="ca-box-tools">
+        {% include "accounts/_board_tabs.html" %}
+        <form method="get" role="search" aria-label="Foydalanuvchini qidirish">
+          {% if sort %}<input type="hidden" name="sort" value="{{ sort }}">{% endif %}
+          <label class="ca-picker ca-picker-search !min-w-0"><i data-lucide="search" class="lu" aria-hidden="true"></i><input type="search" name="q" value="{{ q }}" placeholder="Foydalanuvchi" aria-label="Foydalanuvchi nomi"></label>
+        </form>
+        <details class="ca-sort-menu ca-dropdown" data-dropdown>
+          <summary><i data-lucide="arrow-down-up" class="lu" aria-hidden="true"></i>Saralash<i data-lucide="chevron-down" class="lu" aria-hidden="true"></i></summary>
+          <div class="ca-dropdown-panel">
+            <a class="ca-dropdown-item"{% if not sort %} aria-current="true"{% endif %} href="{% querystring sort=None page=None %}">Reyting bo‘yicha</a>
+            <a class="ca-dropdown-item"{% if sort == 'delta' %} aria-current="true"{% endif %} href="{% querystring sort='delta' page=None %}">Oxirgi o‘zgarish</a>
+            <a class="ca-dropdown-item"{% if sort == 'contests' %} aria-current="true"{% endif %} href="{% querystring sort='contests' page=None %}">Musobaqalar soni</a>
+          </div>
+        </details>
+      </div>
     </div>
     <div class="ca-box-body">
     {% if q %}<p class="ca-box-pad !py-2 border-b border-line text-mute">«{{ q }}»: {{ users.paginator.count }} ta topildi · <a class="ca-link" href="{% url 'rating' %}">hammasi</a></p>{% endif %}
@@ -26,7 +38,7 @@ wider column, your place and the way to the next tier, the tiers with their head
       {% for u in users %}
       <tr{% if u == user %} class="ca-row-me" id="me"{% endif %}>
         <td class="text-center tabular">{{ u.rank }}</td>
-        <td><a class="ca-user-name{{ u.rating|lg }}" style="--tier: {{ u.rating|tier_color }}" href="{% url 'profile' u.username %}" translate="no">{{ u.username }}</a></td>
+        <td><span class="ca-who"><span class="ca-avatar{% if not u.avatar %} ca-art-{{ u.rating|tier_slug }}{% endif %}" style="--tier: {{ u.rating|tier_color }}" aria-hidden="true">{% if u.avatar %}<img src="{{ u.avatar.url }}" alt="" width="28" height="28" loading="lazy">{% else %}{{ u.username|first }}{% endif %}</span><a class="ca-user-name{{ u.rating|lg }}" style="--tier: {{ u.rating|tier_color }}" href="{% url 'profile' u.username %}" translate="no">{{ u.username }}</a>{% if u == user %}<span class="ca-you">Siz</span>{% endif %}</span></td>
         <td class="hidden text-center tabular text-mute sm:table-cell">{{ u.contest_count }}</td>
         <td class="text-center tabular font-semibold {% if u.last_delta > 0 %}text-ok{% elif u.last_delta < 0 %}text-bad{% else %}text-mute{% endif %}">{{ u.last_delta|stringformat:"+d" }}</td>
         <td class="text-center tabular font-bold"><span class="ca-tier-ink" style="--tier: {{ u.rating|tier_color }}">{{ u.rating }}</span></td>
@@ -45,7 +57,7 @@ wider column, your place and the way to the next tier, the tiers with their head
 <aside class="ca-aside" aria-label="Reyting haqida">
   {% if me %}
   <section class="ca-box" aria-labelledby="me-title" style="--tier: {{ user.rating|tier_color }}">
-    <h2 class="ca-box-cap" id="me-title">Sizning o‘rningiz</h2>
+    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="user-round" class="lu" aria-hidden="true"></i></span><h2 id="me-title">Sizning o‘rningiz</h2></div>
     <div class="ca-box-body">
       <dl class="ca-facts">
         <div><dt>O‘rin</dt><dd><b>{{ me.rank }}</b> <span class="text-mute">/ {{ total }}</span></dd></div>
@@ -64,7 +76,7 @@ wider column, your place and the way to the next tier, the tiers with their head
   </section>
   {% endif %}
   <section class="ca-box" aria-labelledby="tiers-title">
-    <h2 class="ca-box-cap" id="tiers-title">Darajalar</h2>
+    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="shield" class="lu" aria-hidden="true"></i></span><h2 id="tiers-title">Darajalar</h2></div>
     <div class="ca-box-body">
       <ul class="ca-tier-legend">
         {% for t in tiers reversed %}
@@ -75,7 +87,7 @@ wider column, your place and the way to the next tier, the tiers with their head
         </li>
         {% endfor %}
       </ul>
-      <figure class="ca-box-pad border-t border-line">
+      <figure class="ca-box-pad border-t border-line"><p class="mb-1 text-sm font-medium">Reyting taqsimoti</p>
         <svg viewBox="0 0 {{ spread.w }} {{ spread.h }}" class="w-full" role="img" aria-labelledby="spread-cap">
           <line x1="0" y1="{{ spread.base }}" x2="{{ spread.w }}" y2="{{ spread.base }}" stroke="currentColor" class="text-line" />
           {% for b in spread.bars %}{% if b.n %}

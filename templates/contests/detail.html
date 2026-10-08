@@ -14,7 +14,7 @@ it is scored, virtual participation.{% endcomment %}
 <div class="min-w-0">
   {% if contest.has_ended and leaders %}
   <section class="ca-box" aria-labelledby="final-title">
-    <h2 class="ca-box-cap" id="final-title">Yakuniy natijalar<a class="ca-box-tools ca-link" href="{% url 'contests:standings' contest.pk %}">To‘liq jadval</a></h2>
+    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="trophy" class="lu" aria-hidden="true"></i></span><h2 id="final-title">Yakuniy natijalar<a class="ca-box-tools ca-link" href="{% url 'contests:standings' contest.pk %}">To‘liq jadval</a></h2></div>
     <div class="ca-box-body">
       <table class="ca-table">
         <thead><tr>
@@ -41,7 +41,7 @@ it is scored, virtual participation.{% endcomment %}
 
   {% if description_html %}
   <section class="ca-box" aria-labelledby="about-title">
-    <h2 class="ca-box-cap" id="about-title">Musobaqa haqida</h2>
+    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="info" class="lu" aria-hidden="true"></i></span><h2 id="about-title">Musobaqa haqida</h2></div>
     <div class="ca-box-body ca-box-pad prose max-w-none">{{ description_html|safe }}</div>
   </section>
   {% endif %}
@@ -49,7 +49,7 @@ it is scored, virtual participation.{% endcomment %}
   {% if not contest.has_started %}
   {# the rules that matter before a round, each with what it is about; not a sequence, so no numbers #}
   <section class="ca-box" aria-labelledby="honor-title">
-    <h2 class="ca-box-cap" id="honor-title">Muhim qoidalar<a class="ca-box-tools ca-link" href="{% url 'honor' %}">Halollik qoidalari</a></h2>
+    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="shield-check" class="lu" aria-hidden="true"></i></span><h2 id="honor-title">Muhim qoidalar<a class="ca-box-tools ca-link" href="{% url 'honor' %}">Halollik qoidalari</a></h2></div>
     <ul class="ca-box-body ca-box-pad ca-rules">
       <li><span aria-hidden="true"><i data-lucide="code-xml" class="lu"></i></span><p><b>Kod o‘zingizniki bo‘lsin.</b> Musobaqada har qanday tashqi yordam taqiqlanadi: AI, boshqa oyna, telefon, maslahatchi.</p></li>
       <li><span aria-hidden="true"><i data-lucide="message-circle" class="lu"></i></span><p><b>Savollar «Savol-javoblar» orqali.</b> Shart tushunarsiz bo‘lsa, hakamlardan so‘rang.</p></li>
@@ -59,11 +59,11 @@ it is scored, virtual participation.{% endcomment %}
   {% endif %}
 
   <section class="ca-box" aria-labelledby="contest-problems">
-    <h2 class="ca-box-cap" id="contest-problems">Masalalar{% if problems %} <small>{{ problems|length }}</small>{% endif %}
+    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="list-checks" class="lu" aria-hidden="true"></i></span><h2 id="contest-problems">Masalalar{% if problems %} <small>{{ problems|length }}</small>{% endif %}
       <span class="ca-box-tools">
         {% if contest.type == "cf" and contest.is_running %}<small class="text-mute"><i data-lucide="info" class="lu mr-1" aria-hidden="true"></i>Baho vaqt o‘tishi bilan kamayadi, xato urinish −50</small>{% endif %}
         {% if user.is_staff %}<a class="ca-link" href="{% url 'moderation:contest_edit' contest.pk %}">Boshqaruvda tahrirlash</a>{% endif %}
-      </span></h2>
+      </span></h2></div>
     <div class="ca-box-body">
     {% if problems and not contest.has_started %}
     {# sealed until start for everyone, staff included; staff edit problems in moderation #}
@@ -135,7 +135,7 @@ it is scored, virtual participation.{% endcomment %}
 
   {% if contest.is_running and leaders %}
   <section class="ca-box" aria-labelledby="lead-title">
-    <h2 class="ca-box-cap" id="lead-title">Yetakchilar<a class="ca-box-tools ca-link" href="{% url 'contests:standings' contest.pk %}">Hammasi</a></h2>
+    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="trophy" class="lu" aria-hidden="true"></i></span><h2 id="lead-title">Yetakchilar<a class="ca-box-tools ca-link" href="{% url 'contests:standings' contest.pk %}">Hammasi</a></h2></div>
     <ol class="ca-box-body ca-board">
       {% for r in leaders|slice:":5" %}
       <li{% if r.user == user %} class="is-me"{% endif %}>{% if r.rank <= 3 and r.solved %}<span class="ca-rank ca-rank-{{ r.rank }}">{{ r.rank }}</span>{% else %}<span class="ca-rank ca-rank-n">{{ r.rank }}</span>{% endif %}{% include "accounts/_user.html" with u=r.user tier=False %}<b>{% if contest.type == "icpc" %}{{ r.solved }}{% else %}{{ r.score }}{% endif %}</b></li>
@@ -146,7 +146,7 @@ it is scored, virtual participation.{% endcomment %}
 
   {% if contest.badge %}
   <section class="ca-box" aria-labelledby="badge-title">
-    <h2 class="ca-box-cap" id="badge-title">Nishon</h2>
+    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="award" class="lu" aria-hidden="true"></i></span><h2 id="badge-title">Nishon</h2></div>
     <div class="ca-box-body ca-box-pad ca-prize">
       <span class="ca-hex{% if contest.type == 'score' %} is-score{% endif %}" aria-hidden="true"><i data-lucide="medal" class="lu"></i></span>
       <p><b>{{ contest.badge }}</b><span>Masalalar ochilgach, kamida bitta masala yechganlar profiliga qo‘shiladi. Birinchi uchtalikka medal bilan.</span></p>
@@ -156,7 +156,7 @@ it is scored, virtual participation.{% endcomment %}
 
   {% if not contest.has_started and n_participants %}
   <section class="ca-box" aria-labelledby="who-title">
-    <h2 class="ca-box-cap" id="who-title">Ro‘yxatdan o‘tganlar<small class="ca-box-tools">{{ n_participants }}</small></h2>
+    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="users" class="lu" aria-hidden="true"></i></span><h2 id="who-title">Ro‘yxatdan o‘tganlar<small class="ca-box-tools">{{ n_participants }}</small></h2></div>
     <div class="ca-box-body ca-box-pad">
       <p class="ca-faces">{% for u in registrants %}<a class="ca-avatar h-8 w-8 text-xs{% if not u.avatar %} ca-art-{{ u.rating|tier_slug }}{% endif %}" style="--tier: {{ u.rating|tier_color }}" href="{% url 'profile' u.username %}" title="{{ u.username }}" translate="no">{% if u.avatar %}<img src="{{ u.avatar.url }}" alt="">{% else %}{{ u.username|first }}{% endif %}</a>{% endfor %}{% if n_participants > 8 %}<span>+{{ n_participants|add:"-8" }}</span>{% endif %}</p>
       <p class="mt-2.5 text-xs text-mute">«Kalendarga qo‘shish» bilan saqlasangiz, kalendar bir soat oldin eslatadi.</p>
@@ -166,8 +166,8 @@ it is scored, virtual participation.{% endcomment %}
 
   {% if virtual %}
   <section class="ca-box" aria-labelledby="virtual-title">
-    <h2 class="ca-box-cap" id="virtual-title">Virtual ishtirok
-      <small class="ca-box-tools">{% if virtual.running %}<span class="tabular font-semibold text-ok" data-countdown="{{ virtual.end|date:'c' }}" data-label="" data-suffix="1"></span>{% else %}tugagan{% endif %}</small></h2>
+    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="rewind" class="lu" aria-hidden="true"></i></span><h2 id="virtual-title">Virtual ishtirok
+      <small class="ca-box-tools">{% if virtual.running %}<span class="tabular font-semibold text-ok" data-countdown="{{ virtual.end|date:'c' }}" data-label="" data-suffix="1"></span>{% else %}tugagan{% endif %}</small></h2></div>
     <div class="ca-box-body ca-box-pad">
       <p>{% if virtual.running %}Vaqt siz boshlagan paytdan hisoblanadi. Hozirgi natija bilan siz{% else %}Siz{% endif %}
         <b>{{ virtual.rank }}-o‘rin</b>da bo‘lardingiz ({{ virtual.field }} ishtirokchidan): {% if contest.type == "icpc" %}<b class="tabular">{{ virtual.solved }}</b> ta masala{% else %}ball <b class="tabular">{{ virtual.score }}</b>{% endif %}{% if contest.wrong_try_minutes is not None %}, jarima <b class="tabular">{{ virtual.penalty }}</b>{% endif %}.</p>
@@ -179,7 +179,7 @@ it is scored, virtual participation.{% endcomment %}
   </section>
   {% elif can_virtual %}
   <section class="ca-box" aria-labelledby="virtual-title">
-    <h2 class="ca-box-cap" id="virtual-title">Virtual ishtirok</h2>
+    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="rewind" class="lu" aria-hidden="true"></i></span><h2 id="virtual-title">Virtual ishtirok</h2></div>
     <form method="post" action="{% url 'contests:virtual' contest.pk %}" class="ca-box-body ca-box-pad" onsubmit="return confirm('Virtual ishtirok hozir boshlanadi va {{ contest.duration_label }} davom etadi. Boshlaysizmi?');">{% csrf_token %}
       <p class="text-mute">Musobaqani o‘z vaqtingizda, xuddi jonli kabi ishlang va haqiqiy ishtirokchilar orasida qaysi o‘rinda bo‘lishingizni ko‘ring. Reytingga ta’sir qilmaydi.</p>
       <button class="ca-btn ca-btn-primary mt-3"><i data-lucide="rewind" class="lu" aria-hidden="true"></i>Boshlash</button>
@@ -188,7 +188,7 @@ it is scored, virtual participation.{% endcomment %}
   {% endif %}
 
   <section class="ca-box" aria-labelledby="rules-title">
-    <h2 class="ca-box-cap" id="rules-title">Qanday hisoblanadi</h2>
+    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="calculator" class="lu" aria-hidden="true"></i></span><h2 id="rules-title">Qanday hisoblanadi</h2></div>
     <dl class="ca-box-body ca-facts">
       {% if contest.type == "cf" %}
       <div><dt>G‘olib</dt><dd>Eng ko‘p ball</dd></div>

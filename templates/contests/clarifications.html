@@ -6,7 +6,7 @@
 answer, they never ask); below, every question with its answer, or staff's answer field.{% endcomment %}
 {% if registered and not contest.has_ended %}
 <section class="ca-box" aria-labelledby="ask-title">
-  <h2 class="ca-box-cap" id="ask-title">Savol berish <small>Javob berilgach savol va javob barcha ishtirokchilarga ko‘rinadi</small></h2>
+  <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="message-circle-question" class="lu" aria-hidden="true"></i></span><h2 id="ask-title">Savol berish <small>Javob berilgach savol va javob barcha ishtirokchilarga ko‘rinadi</small></h2></div>
   <form method="post" action="{% url 'contests:ask_clarification' contest.pk %}" class="ca-box-body ca-box-pad space-y-3" id="ask-clar-form">
     {% csrf_token %}
     <div>
@@ -28,7 +28,7 @@ answer, they never ask); below, every question with its answer, or staff's answe
 {% endif %}
 
 <section class="ca-box" aria-labelledby="clars-title">
-  <h2 class="ca-box-cap" id="clars-title">Savol-javoblar{% if clars %} <small class="tabular">{{ clars|length }}</small>{% endif %}</h2>
+  <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="messages-square" class="lu" aria-hidden="true"></i></span><h2 id="clars-title">Savol-javoblar{% if clars %} <small class="tabular">{{ clars|length }}</small>{% endif %}</h2></div>
   <div class="ca-box-body">
   {% if clars %}
   <ol class="divide-y divide-line">

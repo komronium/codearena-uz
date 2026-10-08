@@ -1,5 +1,6 @@
 {% extends "base.html" %}{% load tiers daily %}
 {% block title %}Bosh sahifa{% endblock %}
+{% block page_icon %}<span class="ca-hd-icon"><i data-lucide="layout-dashboard" class="lu" aria-hidden="true"></i></span>{% endblock %}
 {% block page_title %}<h1>Salom, {{ user.first_name|default:user.username }}!</h1><span class="ca-topbar-sub">{{ today_label }}</span>{% endblock %}
 {% block content %}
 {% comment %}Your home, after LeetCode's: a round running now first, on its cover; then your solved problems per level
@@ -23,7 +24,7 @@ problem with this month's calendar, rounds coming up, problems to try next, duel
   <div class="ca-two">
     {% if ring %}{% url 'problems:list' as problems_url %}{% include "problems/_solved_card.html" with title="Yechilgan masalalar" more_url=problems_url more_label="Masalalar" %}{% endif %}
     <section class="ca-box" aria-labelledby="me-title" style="--tier: {{ user.rating|tier_color }}">
-      <h2 class="ca-box-cap" id="me-title">Musobaqa reytingi<a class="ca-box-tools ca-link" href="{% url 'profile' user.username %}">Profil</a></h2>
+      <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="trophy" class="lu" aria-hidden="true"></i></span><h2 id="me-title">Musobaqa reytingi<a class="ca-box-tools ca-link" href="{% url 'profile' user.username %}">Profil</a></h2></div>
       <div class="ca-box-body ca-box-pad">
         <p class="ca-rating-line"><b class="ca-tier-ink{{ user.rating|lg }}">{{ user.rating }}</b>
           {% if rating_card.delta is not None %}<span class="{% if rating_card.delta > 0 %}text-ok{% elif rating_card.delta < 0 %}text-bad{% else %}text-mute{% endif %}" title="Oxirgi reytingli musobaqada">{{ rating_card.delta|stringformat:"+d" }}</span>{% endif %}
@@ -48,7 +49,7 @@ problem with this month's calendar, rounds coming up, problems to try next, duel
 
   {% if homework %}
   <section class="ca-box" aria-labelledby="hw-title">
-    <h2 class="ca-box-cap" id="hw-title">Vazifalar<a class="ca-box-tools ca-link" href="{% url 'classroom:list' %}">Hammasi</a></h2>
+    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="notebook-pen" class="lu" aria-hidden="true"></i></span><h2 id="hw-title">Vazifalar<a class="ca-box-tools ca-link" href="{% url 'classroom:list' %}">Hammasi</a></h2></div>
     <div class="ca-box-body">
       <table class="ca-table">
         <thead><tr><th>Vazifa</th><th class="hidden sm:table-cell">Guruh</th><th class="w-28 text-right">Yechildi</th><th class="w-36 text-right">Muddat</th></tr></thead>
@@ -69,7 +70,7 @@ problem with this month's calendar, rounds coming up, problems to try next, duel
 
   {% if taught %}
   <section class="ca-box" aria-labelledby="taught-title">
-    <h2 class="ca-box-cap" id="taught-title">Men bergan vazifalar<a class="ca-box-tools ca-link" href="{% url 'classroom:new' %}">+ Yangi vazifa</a></h2>
+    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="notebook-pen" class="lu" aria-hidden="true"></i></span><h2 id="taught-title">Men bergan vazifalar<a class="ca-box-tools ca-link" href="{% url 'classroom:new' %}">+ Yangi vazifa</a></h2></div>
     <div class="ca-box-body">
       <table class="ca-table">
         <thead><tr><th>Vazifa</th><th class="hidden sm:table-cell">Guruh</th><th class="w-40 text-right">Muddat</th><th class="w-28 text-right"><span class="sr-only">Natijalar</span></th></tr></thead>
@@ -89,7 +90,7 @@ problem with this month's calendar, rounds coming up, problems to try next, duel
   {% endif %}
 
   <section class="ca-box" aria-labelledby="recent-title">
-    <h2 class="ca-box-cap" id="recent-title">So‘nggi urinishlar{% if recent %}<a class="ca-box-tools ca-link" href="{% url 'submissions:mine' %}?mine=1">Hammasi</a>{% endif %}</h2>
+    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="history" class="lu" aria-hidden="true"></i></span><h2 id="recent-title">So‘nggi urinishlar{% if recent %}<a class="ca-box-tools ca-link" href="{% url 'submissions:mine' %}?mine=1">Hammasi</a>{% endif %}</h2></div>
     <div class="ca-box-body">
     {% if recent %}
       <table class="ca-table">
@@ -117,7 +118,7 @@ problem with this month's calendar, rounds coming up, problems to try next, duel
 
   {% if upcoming %}
   <section class="ca-box" aria-labelledby="up-title">
-    <h2 class="ca-box-cap" id="up-title">Kelgusi musobaqalar<a class="ca-box-tools ca-link" href="{% url 'contests:list' %}">Hammasi</a></h2>
+    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="calendar-days" class="lu" aria-hidden="true"></i></span><h2 id="up-title">Kelgusi musobaqalar<a class="ca-box-tools ca-link" href="{% url 'contests:list' %}">Hammasi</a></h2></div>
     <ul class="ca-box-body ca-upl">
       {% for c in upcoming %}
       <li>
@@ -132,7 +133,7 @@ problem with this month's calendar, rounds coming up, problems to try next, duel
 
   {% if next_picks %}
   <section class="ca-box" aria-labelledby="next-title">
-    <h2 class="ca-box-cap" id="next-title">Keyingi masalalar{% if picks_reason %}<a class="ca-box-tools ca-link" href="{% url 'problems:list' %}?tag={{ picks_reason|urlencode }}" title="Eng kam yechgan mavzuingiz">{{ picks_reason }}</a>{% endif %}</h2>
+    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="target" class="lu" aria-hidden="true"></i></span><h2 id="next-title">Keyingi masalalar{% if picks_reason %}<a class="ca-box-tools ca-link" href="{% url 'problems:list' %}?tag={{ picks_reason|urlencode }}" title="Eng kam yechgan mavzuingiz">{{ picks_reason }}</a>{% endif %}</h2></div>
     <ul class="ca-box-body ca-facts">
       {% for p, reason in next_picks %}<li><a class="ca-link min-w-0 truncate" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a><span class="ca-diff ca-diff-{{ p.difficulty }}">{{ p.get_difficulty_display }}</span></li>{% endfor %}
     </ul>
@@ -140,7 +141,7 @@ problem with this month's calendar, rounds coming up, problems to try next, duel
   {% endif %}
 
   <section class="ca-box" aria-labelledby="duel-title">
-    <h2 class="ca-box-cap" id="duel-title">Duel<a class="ca-box-tools ca-link" href="{% url 'classroom:duels' %}">Duellar</a></h2>
+    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="swords" class="lu" aria-hidden="true"></i></span><h2 id="duel-title">Duel<a class="ca-box-tools ca-link" href="{% url 'classroom:duels' %}">Duellar</a></h2></div>
     <div class="ca-box-body">
     {% if active_duels or challenges %}
       <ul class="ca-facts">

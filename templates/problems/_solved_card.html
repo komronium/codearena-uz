@@ -2,7 +2,7 @@
 solved) with the total inside, and a row per level with its numbers, so colour is never the only key.
 ctx: ring (apps.problems.views._solved_ring), title, more_url (optional), more_label.{% endcomment %}
 <section class="ca-box" aria-labelledby="solved-title">
-  <h2 class="ca-box-cap" id="solved-title">{{ title|default:"Taraqqiyot" }}{% if more_url %}<a class="ca-box-tools ca-link" href="{{ more_url }}">{{ more_label|default:"Hammasi" }}</a>{% endif %}</h2>
+  <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="chart-pie" class="lu" aria-hidden="true"></i></span><h2 id="solved-title">{{ title|default:"Taraqqiyot" }}{% if more_url %}<a class="ca-box-tools ca-link" href="{{ more_url }}">{{ more_label|default:"Hammasi" }}</a>{% endif %}</h2></div>
   <div class="ca-box-body ca-box-pad ca-solved">
     <div class="ca-solved-ring" style="width: {{ ring.size }}px; height: {{ ring.size }}px">
       <svg viewBox="0 0 {{ ring.size }} {{ ring.size }}" aria-hidden="true">

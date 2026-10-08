@@ -1,11 +1,14 @@
 {% extends "base.html" %}{% load tiers %}
 {% block title %}Amaliyot ballari{% endblock %}
 {% block description %}Amaliyot ballari: musobaqadan tashqari yechilgan masalalar uchun {{ total }} ishtirokchining ballari.{% endblock %}
-{% block page_title %}<h1>Reyting</h1><span class="ca-topbar-sub">{{ total }} ishtirokchi · musobaqadan tashqari yechilgan masalalar ballari</span>{% endblock %}
+{% block page_title %}{% endblock %}
 {% block content %}
-{% include "accounts/_board_tabs.html" %}
 <section class="ca-box !mb-0" aria-labelledby="board-title">
-  <h2 class="ca-box-cap" id="board-title">Amaliyot ballari</h2>
+  <div class="ca-box-cap ca-hd ca-hd-lg">
+    <span class="ca-hd-icon"><i data-lucide="star" class="lu" aria-hidden="true"></i></span>
+    <div><h1 id="board-title">Amaliyot ballari</h1><p>{{ total }} ishtirokchi · musobaqadan tashqari yechilgan masalalar ballari</p></div>
+    <div class="ca-box-tools">{% include "accounts/_board_tabs.html" %}</div>
+  </div>
   <div class="ca-box-body">
   {% if users %}
   <table class="ca-table">
@@ -14,7 +17,7 @@
     {% for u in users %}
     <tr{% if u == user %} class="ca-row-me"{% endif %}>
       <td class="text-center tabular">{{ u.rank }}</td>
-      <td><a class="ca-user-name{{ u.rating|lg }}" style="--tier: {{ u.rating|tier_color }}" href="{% url 'profile' u.username %}" translate="no">{{ u.username }}</a></td>
+      <td><span class="ca-who"><span class="ca-avatar{% if not u.avatar %} ca-art-{{ u.rating|tier_slug }}{% endif %}" style="--tier: {{ u.rating|tier_color }}" aria-hidden="true">{% if u.avatar %}<img src="{{ u.avatar.url }}" alt="" width="28" height="28" loading="lazy">{% else %}{{ u.username|first }}{% endif %}</span><a class="ca-user-name{{ u.rating|lg }}" style="--tier: {{ u.rating|tier_color }}" href="{% url 'profile' u.username %}" translate="no">{{ u.username }}</a>{% if u == user %}<span class="ca-you">Siz</span>{% endif %}</span></td>
       <td class="text-center tabular text-mute">{{ u.solved_count }}</td>
       <td class="text-center tabular font-bold">{{ u.practice_points }}</td>
     </tr>

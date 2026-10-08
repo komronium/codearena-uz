@@ -8,18 +8,21 @@
 {% block content %}
 {# problem titles are secret until the start, even for registered users #}
 {% if rows %}
-<div class="mb-3 flex flex-wrap items-center gap-2">
-  <label class="relative w-full max-w-xs">
-    <span class="sr-only">Ishtirokchini qidirish</span>
-    <i data-lucide="search" class="lu pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-mute" aria-hidden="true"></i>
-    <input type="search" id="st-search" class="ca-input !py-1.5 pl-8 text-sm" placeholder="Ism yoki login…" autocomplete="off">
-  </label>
-  {% if my_row %}<button type="button" class="ca-btn ca-btn-ghost !py-1.5 text-sm" data-goto-me><i data-lucide="locate-fixed" class="lu" aria-hidden="true"></i>Mening o‘rnim</button>{% endif %}
-  {% if contest.is_running %}<span class="ca-tag ca-tag-live"><span class="ca-live-dot" aria-hidden="true"></span>Jonli · har 20 soniyada yangilanadi</span>{% endif %}
-  <span class="ml-auto hidden text-xs text-mute" id="st-scroll-hint"><i data-lucide="move-horizontal" class="lu mr-1" aria-hidden="true"></i>Jadvalni yonga suring</span>
-</div>
-
+<section class="ca-box !mb-0" aria-labelledby="st-title">
+  <div class="ca-box-cap ca-hd ca-hd-lg">
+    <span class="ca-hd-icon"><i data-lucide="trophy" class="lu" aria-hidden="true"></i></span>
+    <div><h2 id="st-title">Natijalar</h2><p>{{ rows|length }} ishtirokchi{% if contest.is_running %} · jonli, har 20 soniyada yangilanadi{% endif %}</p></div>
+    <div class="ca-box-tools">
+      {% if contest.is_running %}<span class="ca-tag ca-tag-live"><span class="ca-live-dot" aria-hidden="true"></span>Jonli</span>{% endif %}
+      <span class="hidden text-xs text-mute" id="st-scroll-hint"><i data-lucide="move-horizontal" class="lu mr-1" aria-hidden="true"></i>Jadvalni yonga suring</span>
+      {% if my_row %}<button type="button" class="ca-btn ca-btn-ghost !py-1.5 text-sm" data-goto-me><i data-lucide="locate-fixed" class="lu" aria-hidden="true"></i>Mening o‘rnim</button>{% endif %}
+      <label class="ca-picker ca-picker-search !min-w-0"><span class="sr-only">Ishtirokchini qidirish</span><i data-lucide="search" class="lu" aria-hidden="true"></i><input type="search" id="st-search" placeholder="Ism yoki login" autocomplete="off"></label>
+    </div>
+  </div>
+  <div class="ca-box-body !overflow-visible">
 {% include "contests/_standings_live.html" %}
+  </div>
+</section>
 <script>
   (() => {
     const apply = () => {

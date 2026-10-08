@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Kurslar — O‘rganish{% endblock %}
 {% block description %}Dasturlashni mavzulab o‘rganing: har kursda qisqa nazariya va osonidan qiyiniga masalalar, o‘zbek tilida.{% endblock %}
+{% block page_icon %}<span class="ca-hd-icon"><i data-lucide="graduation-cap" class="lu" aria-hidden="true"></i></span>{% endblock %}
 {% block page_title %}<h1>O‘rganish</h1><span class="ca-topbar-sub">Har kurs bitta mavzu: qisqa nazariya, keyin masalalar, osonidan qiyiniga</span>{% endblock %}
 {% block content %}
 {% comment %}After LeetCode's study plans: the course to go on with on a cover first; then each stage of the path as a grid
@@ -57,7 +58,7 @@ badge per course, lit once finished.{% endcomment %}
 <aside class="ca-aside" aria-label="Davom ettirish">
   {% if current and up_next %}
   <section class="ca-box" aria-labelledby="next-title">
-    <h2 class="ca-box-cap" id="next-title">Navbatdagi masalalar<a class="ca-box-tools ca-link" href="{% url 'learn:course' current.slug %}">Kurs</a></h2>
+    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="target" class="lu" aria-hidden="true"></i></span><h2 id="next-title">Navbatdagi masalalar<a class="ca-box-tools ca-link" href="{% url 'learn:course' current.slug %}">Kurs</a></h2></div>
     <ol class="ca-box-body ca-facts" aria-label="{{ current.title }}: navbatdagi masalalar">
       {% for p in up_next %}<li><a class="ca-link min-w-0 truncate" href="{% url 'problems:detail' p.slug %}?plan={{ current.slug }}">{{ p.title }}</a><span class="ca-diff ca-diff-{{ p.difficulty }}">{{ p.get_difficulty_display }}</span></li>{% endfor %}
     </ol>
@@ -65,7 +66,7 @@ badge per course, lit once finished.{% endcomment %}
   {% endif %}
   {% if badges and user.is_authenticated %}
   <section class="ca-box" aria-labelledby="badges-title">
-    <h2 class="ca-box-cap" id="badges-title">Nishonlar<small class="ca-box-tools tabular">{{ badges_earned }} / {{ badges|length }}</small></h2>
+    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="award" class="lu" aria-hidden="true"></i></span><h2 id="badges-title">Nishonlar<small class="ca-box-tools tabular">{{ badges_earned }} / {{ badges|length }}</small></h2></div>
     <div class="ca-box-body ca-box-pad">
       <p class="text-xs text-mute">Kursni oxirigacha yechsangiz, uning nishoni profilingizda chiqadi.</p>
       <ul class="ca-course-badges mt-2.5">
@@ -81,7 +82,7 @@ badge per course, lit once finished.{% endcomment %}
   {% endif %}
   {% if stages and not user.is_authenticated %}
   <section class="ca-box" aria-labelledby="join-title">
-    <h2 class="ca-box-cap" id="join-title">Yutuqlaringiz saqlansin</h2>
+    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="users" class="lu" aria-hidden="true"></i></span><h2 id="join-title">Yutuqlaringiz saqlansin</h2></div>
     <p class="ca-box-body ca-box-pad text-mute"><a class="ca-link" href="{% url 'register' %}">Ro‘yxatdan o‘ting</a>: yutuqlaringiz saqlanadi va har kurs uchun nishon olasiz.</p>
   </section>
   {% endif %}

@@ -6,28 +6,24 @@
 {% block structured_data %}<meta property="profile:username" content="{{ profile_user.username }}">
 {% url 'rating' as rating_url %}{% breadcrumbs_jsonld "Reyting" rating_url profile_user.username request.path %}{% profile_jsonld profile_user page_description %}{% endblock %}
 {% block content %}
-{% comment %}A profile, after LeetCode's: on the left a card with the picture, the handle in its tier colour, the tier,
-the place in the rating and the facts, then the topics as bars; on the right one row of numbers, the solved ring
-beside the badges, the rating graph and contests, the activity and the problem map. Colour only carries meaning:
-the tier colour is the person, green/red the results.{% endcomment %}
-<div class="ca-cols ca-cols-left">
-<aside class="ca-aside" aria-label="Profil">
-<section class="ca-box ca-pcard" aria-labelledby="who" style="--tier: {{ tier_color }}">
+{% comment %}A profile after the mock-up: three columns. Left: a card with the picture, the handle, the tier and the place, the
+places to go, one line of cheer. Middle: the tier banner, the solved-by-level card, badges, activity, the problem map.
+Right: six figures, the rating graph with its contests, the topics. Colour carries meaning only: the tier colour is
+the person, green/red the results, blue the way forward.{% endcomment %}
+<div class="ca-profile" style="--tier: {{ tier_color }}">
+<aside class="ca-pf-side" aria-label="Profil">
+<section class="ca-box" aria-labelledby="who">
   <div class="ca-box-body ca-box-pad">
-    <div class="flex items-center gap-4">
-      {% if profile_user.avatar %}<img src="{{ profile_user.avatar.url }}" alt="" class="h-[4.5rem] w-[4.5rem] shrink-0 rounded-2xl object-cover">
-      {% else %}<span class="ca-avatar ca-art-{{ banner.0 }} !h-[4.5rem] !w-[4.5rem] shrink-0 !rounded-2xl text-3xl" aria-hidden="true">{{ profile_user.username|slice:":1" }}</span>{% endif %}
+    <div class="flex items-center gap-3">
+      {% if profile_user.avatar %}<img src="{{ profile_user.avatar.url }}" alt="" class="h-14 w-14 shrink-0 rounded-xl object-cover">
+      {% else %}<span class="ca-avatar ca-art-{{ banner.0 }} !h-14 !w-14 shrink-0 !rounded-xl text-2xl" aria-hidden="true">{{ profile_user.username|slice:":1" }}</span>{% endif %}
       <div class="min-w-0">
-        <h1 id="who" class="ca-tier-ink truncate text-xl font-bold leading-tight{{ profile_user.rating|lg }}" translate="no">{{ profile_user.username }}</h1>
+        <p id="who" class="truncate text-base font-bold leading-tight" translate="no">{{ profile_user.username }}</p>
         {% if profile_user.get_full_name %}<p class="truncate text-sm text-mute">{{ profile_user.get_full_name }}</p>{% endif %}
-        <p class="mt-1.5">{% if rating_history %}<span class="ca-user-tier">{{ tier }}</span>{% else %}<span class="ca-tag">Reytingsiz</span>{% endif %}</p>
       </div>
     </div>
-    {% if rating_rank %}<p class="mt-4 text-sm text-mute">Reytingda <b class="text-base text-ink">{{ rating_rank }}-o‘rin</b>, {{ total_rated }} kishidan</p>{% endif %}
-    {% if user == profile_user %}
-    <a href="{% url 'profile_edit' %}" class="ca-btn ca-btn-tint mt-3 w-full"><i data-lucide="pencil" class="lu" aria-hidden="true"></i>Profilni tahrirlash</a>
-    {% if user.is_staff %}<a href="{% url 'moderation:dashboard' %}" class="ca-link mt-2 block text-center text-xs">Boshqaruv</a>{% endif %}
-    {% endif %}
+    <p class="mt-2.5">{% if rating_history %}<span class="ca-tier-chip"><i data-lucide="crown" class="lu" aria-hidden="true"></i>{{ tier }}</span>{% else %}<span class="ca-tag">Reytingsiz</span>{% endif %}</p>
+    {% if rating_rank %}<p class="mt-3 text-sm"><b>Reytingda {{ rating_rank }}-o‘rin</b> <span class="ml-1 text-mute">{{ total_rated }} kishidan</span></p>{% endif %}
     <ul class="ca-pcard-info">
       {% if profile_user.location %}<li><i data-lucide="map-pin" class="lu" aria-hidden="true"></i>{{ profile_user.location }}</li>{% endif %}
       {% if profile_user.school %}<li><i data-lucide="graduation-cap" class="lu" aria-hidden="true"></i>{{ profile_user.school }}</li>{% endif %}
@@ -36,58 +32,85 @@ the tier colour is the person, green/red the results.{% endcomment %}
     </ul>
   </div>
 </section>
-  {% if skill_groups %}
-  <section class="ca-box" aria-labelledby="skills-title">
-    <h2 class="ca-box-cap" id="skills-title">Mavzular</h2>
-    <div class="ca-box-body">
-      {% for kind, label, rows in skill_groups %}
-      {% if skill_groups|length > 1 %}<p class="ca-box-pad !pb-1 flex items-center gap-1.5 text-xs font-medium text-mute{% if not forloop.first %} border-t border-line{% endif %}"><i data-lucide="{% if kind == 'sql' %}database{% else %}code{% endif %}" class="lu" aria-hidden="true"></i>{{ label }}</p>{% endif %}
-      {# a row per topic, most problems first: its name, solved of all, and a bar filled as far #}
-      <ul class="ca-topic-bars{% if kind == 'sql' %} is-sql{% endif %}">
-        {% for r in rows %}
-        <li class="{% if r.solved == r.total %}is-done{% elif not r.solved %}is-new{% endif %}">
-          <a class="ca-link" href="{% url 'problems:list' %}?tag={{ r.tag.name|urlencode }}">{{ r.tag.name }}</a>
-          <span class="tabular text-xs"><b>{{ r.solved }}</b><span class="text-mute">/{{ r.total }}</span></span>
-          <span class="ca-topic-bar" role="img" aria-label="{{ r.tag.name }}: {{ r.total }} tadan {{ r.solved }} tasi yechilgan"><span style="width: {{ r.pct }}%"></span></span>
-        </li>
-        {% endfor %}
-      </ul>
-      {% endfor %}
-    </div>
-  </section>
-  {% endif %}
+{% if user == profile_user %}
+<section class="ca-box" aria-label="Sahifalar">
+  <nav class="ca-sidenav">
+    <a href="{% url 'profile' user.username %}" aria-current="page"><i data-lucide="user" class="lu" aria-hidden="true"></i>Profil</a>
+    <a href="{% url 'problems:list' %}"><i data-lucide="list-checks" class="lu" aria-hidden="true"></i>Masalalar</a>
+    <a href="{% url 'rating' %}"><i data-lucide="trophy" class="lu" aria-hidden="true"></i>Reyting</a>
+    <a href="{% url 'learn:hub' %}"><i data-lucide="book-open" class="lu" aria-hidden="true"></i>O‘rganish</a>
+    <a href="{% url 'contests:list' %}"><i data-lucide="users" class="lu" aria-hidden="true"></i>Musobaqalar</a>
+    <a href="{% url 'classroom:duels' %}"><i data-lucide="swords" class="lu" aria-hidden="true"></i>Duellar</a>
+    <a href="{% url 'submissions:mine' %}?mine=1"><i data-lucide="history" class="lu" aria-hidden="true"></i>Urinishlarim</a>
+  </nav>
+  {% if last_delta and last_delta > 0 %}<p class="ca-cheer"><i data-lucide="trending-up" class="lu" aria-hidden="true"></i><span><b>Yaxshilana bor!</b><span>Oxirgi musobaqada +{{ last_delta }} reyting.</span></span></p>{% endif %}
+</section>
+{% endif %}
 </aside>
 
-<div class="min-w-0">
-<section class="ca-box" aria-label="Raqamlar" style="--tier: {{ tier_color }}">
-  <div class="ca-box-body">
-    <dl class="ca-profile-stats">
-      <div><dt>Reyting</dt><dd>{% if rating_history %}<b class="ca-tier-ink">{{ profile_user.rating }}</b>{% else %}—{% endif %}</dd>
-        {% if rating_history and max_rating > profile_user.rating %}<dd class="ca-stat-note">maks. <span class="ca-tier-ink" style="--tier: {{ max_rating|tier_color }}">{{ max_rating }}</span></dd>{% endif %}</div>
-      <div><dt>Reytingda o‘rni</dt><dd>{% if rating_rank %}{{ rating_rank }}<small>/ {{ total_rated }}</small>{% else %}—{% endif %}</dd></div>
-      <div><dt>Musobaqalar</dt><dd>{{ rating_history|length }}</dd></div>
-      <div><dt>Amaliyot ball</dt><dd>{{ profile_user.practice_points }}</dd><dd class="ca-stat-note">yechilgan {{ solved|length }} ta masala uchun</dd></div>
-      <div><dt>Ballda o‘rni</dt><dd>{% if points_rank %}{{ points_rank }}<small>/ {{ total_users }}</small>{% else %}—{% endif %}</dd></div>
-      <div><dt>Kun masalasi seriyasi</dt><dd>{{ streak.0 }} kun</dd>{% if streak.1 > streak.0 %}<dd class="ca-stat-note">eng uzuni {{ streak.1 }}</dd>{% endif %}</div>
-    </dl>
+<div class="ca-pf-main min-w-0">
+<section class="ca-phero ca-banner ca-banner-{{ banner.0 }}" aria-labelledby="hero-name">
+  <div class="ca-phero-av">{% if profile_user.avatar %}<img src="{{ profile_user.avatar.url }}" alt="">{% else %}<span class="ca-avatar ca-art-{{ banner.0 }}" aria-hidden="true">{{ profile_user.username|slice:":1" }}</span>{% endif %}</div>
+  <div class="min-w-0">
+    <h1 id="hero-name" class="truncate" translate="no">{{ profile_user.username }}</h1>
+    {% if profile_user.get_full_name %}<p class="ca-phero-sub truncate">{{ profile_user.get_full_name }}</p>{% endif %}
+    <p class="mt-2">{% if rating_history %}<span class="ca-tier-chip"><i data-lucide="crown" class="lu" aria-hidden="true"></i>{{ tier }}</span>{% else %}<span class="ca-tier-chip">Reytingsiz</span>{% endif %}</p>
+    <p class="ca-phero-meta">
+      {% if profile_user.school %}<span><i data-lucide="graduation-cap" class="lu" aria-hidden="true"></i>{{ profile_user.school }}</span>{% endif %}
+      <span><i data-lucide="calendar" class="lu" aria-hidden="true"></i>{{ profile_user.date_joined|date:"d.m.Y" }} dan beri</span>
+    </p>
+  </div>
+  {% if user == profile_user %}<div class="ca-phero-tools"><a href="{% url 'profile_edit' %}"><i data-lucide="pencil" class="lu" aria-hidden="true"></i>Profilni tahrirlash</a></div>{% endif %}
+</section>
+
+{% if ring %}
+<section class="ca-box" aria-labelledby="solved-title">
+  <div class="ca-box-cap ca-hd">
+    <span class="ca-hd-icon"><i data-lucide="chart-pie" class="lu" aria-hidden="true"></i></span>
+    <h2 id="solved-title">Masalalar bo‘yicha ko‘rsatkichlar</h2>
+    <a class="ca-box-tools ca-link font-medium" href="{% url 'problems:list' %}">Barchasi<i data-lucide="arrow-right" class="lu" aria-hidden="true"></i></a>
+  </div>
+  <div class="ca-box-body ca-box-pad">
+    <div class="ca-solved-row">
+      <div class="ca-solved-ring" style="width: {{ ring.size }}px; height: {{ ring.size }}px">
+        <svg viewBox="0 0 {{ ring.size }} {{ ring.size }}" aria-hidden="true">
+          <g transform="rotate(135 {{ ring.c }} {{ ring.c }})" fill="none" stroke-width="{{ ring.stroke }}" stroke-linecap="round">
+            {% for sg in ring.segments %}
+            <circle class="trk lv-{{ sg.value }}" cx="{{ ring.c }}" cy="{{ ring.c }}" r="{{ ring.r }}" stroke-dasharray="{{ sg.track }}" stroke-dashoffset="{{ sg.offset }}"/>
+            {% if sg.done %}<circle class="val lv-{{ sg.value }}" cx="{{ ring.c }}" cy="{{ ring.c }}" r="{{ ring.r }}" stroke-dasharray="{{ sg.fill }}" stroke-dashoffset="{{ sg.offset }}"/>{% endif %}
+            {% endfor %}
+          </g>
+        </svg>
+        <p><b>{{ ring.done }}<small>/{{ ring.total }}</small></b><span><i data-lucide="check" class="lu" aria-hidden="true"></i>Yechilgan</span></p>
+      </div>
+      <ul class="ca-levels-bars">
+        {% for d in by_diff %}{% if d.total %}
+        <li class="ca-lvl" style="--c: var(--ca-lvl-{{ d.key }})"><i aria-hidden="true"></i><span class="font-medium">{{ d.label }}</span><b class="tabular">{{ d.solved }}<small>/{{ d.total }}</small></b><span role="img" aria-label="{{ d.label }}: {{ d.total }} tadan {{ d.solved }} tasi"><span style="width: {% widthratio d.solved d.total 100 %}%"></span></span></li>
+        {% endif %}{% endfor %}
+      </ul>
+    </div>
+    <div class="ca-mini-tiles">
+      <div class="ca-mini"><i data-lucide="code-xml" class="lu" aria-hidden="true"></i><span><small>Jami masalalar</small><b class="tabular">{{ total_public_problems }}</b></span></div>
+      <div class="ca-mini"><i data-lucide="circle-check" class="lu !text-ok" aria-hidden="true"></i><span><small>Yechilgan</small><b class="tabular">{{ solved_shown }}</b></span>{% if total_public_problems %}<em class="tabular">{% widthratio solved_shown total_public_problems 100 %}%</em>{% endif %}</div>
+      <div class="ca-mini"><i data-lucide="clock" class="lu" aria-hidden="true"></i><span><small>Qolgan</small><b class="tabular">{{ rest }}</b></span>{% if total_public_problems %}<em class="tabular">{% widthratio rest total_public_problems 100 %}%</em>{% endif %}</div>
+    </div>
     {% if next_tier and rating_history %}
-    <div class="ca-box-pad flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-line !py-2.5 text-xs text-mute">
-      <span><span class="ca-tier-ink font-semibold" style="--tier: {{ next_tier.color }}">{{ next_tier.name }}</span> darajasigacha <b class="tabular text-ink">{{ next_tier.need }}</b> reyting</span>
-      <div class="ca-progress min-w-[8rem] flex-1" role="progressbar" aria-label="{{ next_tier.name }} darajasigacha" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ next_tier.pct }}"><span style="width: {{ next_tier.pct }}%; background: var(--tier)"></span></div>
+    <div class="ca-next" style="--tier: {{ next_tier.color }}">
+      <i data-lucide="crown" class="lu" aria-hidden="true"></i>
+      <span><b style="color: color-mix(in oklab, var(--tier) 60%, rgb(var(--ca-ink-rgb)))">{{ next_tier.name }}</b> darajasigacha <b class="tabular">{{ next_tier.need }}</b> reyting</span>
+      <div class="ca-progress" role="progressbar" aria-label="{{ next_tier.name }} darajasigacha" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ next_tier.pct }}"><span style="width: {{ next_tier.pct }}%"></span></div>
     </div>
     {% endif %}
-  </div>
-</section>
-<div class="ca-two">
-  <div class="min-w-0">{% if ring %}{% url 'problems:list' as problems_url %}{% include "problems/_solved_card.html" with title="Yechilgan masalalar" more_url=problems_url more_label="Masalalar" %}{% endif %}
-    {% if attempting or solved_hidden > 0 %}<p class="ca-solved-notes">
+    {% if attempting or solved_hidden > 0 %}<p class="ca-solved-notes !mt-3">
       {% if attempting %}<b class="tabular text-warn">{{ attempting }}</b> ta masala urinilgan, hali yechilmagan.{% endif %}
       {% if solved_hidden > 0 %}Yana <b class="tabular text-ink">{{ solved_hidden }}</b> ta yechilgan masala hozir kelgusi musobaqada, shuning uchun yashirin.{% endif %}
     </p>{% endif %}
   </div>
+</section>
+{% endif %}
 {% if streak_badges.earned or plan_badges or contest_badges or streak_badges.next and user == profile_user %}
   <section class="ca-box" aria-labelledby="badges-title">
-    <h2 class="ca-box-cap" id="badges-title">Nishonlar</h2>
+    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="award" class="lu" aria-hidden="true"></i></span><h2 id="badges-title">Nishonlar</h2></div>
     <div class="ca-box-body ca-box-pad space-y-2">
       {% if streak_badges.earned or streak_badges.next and user == profile_user %}
       <p class="flex flex-wrap items-center gap-1.5">
@@ -109,53 +132,10 @@ the tier colour is the person, green/red the results.{% endcomment %}
     </div>
   </section>
   {% endif %}
-</div>
-{% if rating_history %}
-<section class="ca-box" aria-labelledby="hist-title">
-  <h2 class="ca-box-cap" id="hist-title">Reyting tarixi <small>{{ rating_history|length }}</small></h2>
-  <div class="ca-box-body">
-  {% if rating_history|length > 1 %}
-  <div class="ca-box-pad ca-scroll-end overflow-x-auto border-b border-line" tabindex="0" role="region" aria-label="Reyting grafigi (yon tomonga suriladi)">
-    <svg viewBox="0 0 {{ rating_chart.w }} {{ rating_chart.h }}" class="w-full" style="min-width: 480px"
-         role="img" aria-label="Reyting tarixi grafigi, {{ rating_history|length }} ta musobaqa">
-      {% for b in rating_chart.bands %}
-      <rect x="{{ rating_chart.left }}" y="{{ b.y }}" width="{{ rating_chart.width }}" height="{{ b.h }}" fill="{{ b.color }}" fill-opacity=".12" />
-      {% if b.label %}<text x="{{ rating_chart.left|add:6 }}" y="{{ b.y|add:12 }}" fill="{{ b.color }}" font-size="10" font-weight="600">{{ b.label }}</text>{% endif %}
-      {% endfor %}
-      {% for g in rating_chart.gridlines %}
-      <line x1="{{ rating_chart.left }}" y1="{{ g.y }}" x2="{{ rating_chart.right }}" y2="{{ g.y }}" stroke="currentColor" class="text-line" stroke-width="1" />
-      <text x="{{ rating_chart.left|add:-8 }}" y="{{ g.y|add:3 }}" text-anchor="end" font-size="10" class="fill-mute tabular">{{ g.value }}</text>
-      {% endfor %}
-      <polyline points="{{ rating_chart.polyline }}" fill="none" stroke="rgb(var(--ca-accent-rgb))" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" />
-      {% for pt in rating_chart.points %}
-      <circle cx="{{ pt.x }}" cy="{{ pt.y }}" r="4" fill="{{ pt.color }}" stroke="rgb(var(--ca-surface-rgb))" stroke-width="1.5" />
-      <text x="{{ pt.x }}" y="{{ rating_chart.bottom|add:16 }}" text-anchor="middle" font-size="9" class="fill-mute tabular">{{ pt.date }}</text>
-      {% endfor %}
-    </svg>
-  </div>
-  {% endif %}
-  <table class="ca-table">
-    <thead><tr><th class="w-10 text-center">#</th><th>Musobaqa</th><th class="hidden w-28 text-center sm:table-cell">Sana</th><th class="w-20 text-center">O‘rin</th><th class="w-16 text-center" title="Reyting o‘zgarishi">±</th><th class="w-20 text-center">Reyting</th></tr></thead>
-    <tbody>
-    {% for p in rating_history reversed %}
-    <tr{% if p.disqualified %} class="ca-row-dq"{% endif %}>
-      <td class="text-center tabular text-mute">{{ forloop.revcounter }}</td>
-      <td class="max-w-0 truncate"><a class="ca-link" href="{% url 'contests:standings' p.contest_id %}">{{ p.contest.title }}</a>{% if p.disqualified %} <span class="ca-tag !text-bad">DQ</span>{% endif %}</td>
-      <td class="hidden text-center tabular text-mute sm:table-cell">{{ p.contest.end|date:"d.m.Y" }}</td>
-      <td class="text-center tabular">{{ p.rank }} <span class="text-xs text-mute">/ {{ p.n_participants }}</span></td>
-      <td class="text-center tabular font-semibold {% if p.delta > 0 %}text-ok{% elif p.delta < 0 %}text-bad{% else %}text-mute{% endif %}">{{ p.delta|stringformat:"+d" }}</td>
-      <td class="text-center tabular font-semibold"><span class="ca-tier-ink" style="--tier: {{ p.rating_after|tier_color }}">{{ p.rating_after }}</span></td>
-    </tr>
-    {% endfor %}
-    </tbody>
-  </table>
-  </div>
-</section>
-{% endif %}
 
 <section class="ca-box" aria-labelledby="act-title">
-  <h2 class="ca-box-cap" id="act-title"><span><b class="tabular">{{ activity.total }}</b> ta urinish so‘nggi bir yilda</span>
-    <span class="ca-box-tools ca-heat-stats"><span>Faol kunlar: <b class="tabular text-ink">{{ activity.active_days }}</b></span><span>Eng uzun seriya: <b class="tabular text-ink">{{ activity.max_streak }}</b></span></span></h2>
+  <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="activity" class="lu" aria-hidden="true"></i></span><h2 id="act-title"><span><b class="tabular">{{ activity.total }}</b> ta urinish so‘nggi bir yilda</span>
+    <span class="ca-box-tools ca-heat-stats"><span>Faol kunlar: <b class="tabular text-ink">{{ activity.active_days }}</b></span><span>Eng uzun seriya: <b class="tabular text-ink">{{ activity.max_streak }}</b></span></span></h2></div>
   {# rtl scroller: a phone shows the latest weeks first; the map itself stays left-to-right #}
   <div class="ca-box-body ca-box-pad ca-scroll-end overflow-x-auto" tabindex="0" role="region" aria-label="Faollik xaritasi (yon tomonga suriladi)">
     <div class="min-w-[36rem]" role="img" aria-label="Faollik xaritasi: so‘nggi bir yilda {{ activity.total }} ta urinish, {{ activity.active_days }} faol kun">
@@ -172,8 +152,7 @@ the tier colour is the person, green/red the results.{% endcomment %}
     </div>
   </div>
 </section>
-
-<section class="ca-box !mb-0" aria-labelledby="map-title">
+<section class="ca-box" aria-labelledby="map-title">
   <div class="ca-box-cap">
     <h2 id="map-title">Masalalar xaritasi</h2>
     <div class="ca-box-tools ca-levels" id="pmap-filter" role="group" aria-label="Holat bo‘yicha filtr">
@@ -198,6 +177,85 @@ the tier colour is the person, green/red the results.{% endcomment %}
   {% else %}<p class="text-center text-mute">Hali ochiq masalalar yo‘q.</p>{% endif %}
   </div>
 </section>
+</div>
+
+<div class="ca-pf-right min-w-0">
+<div class="ca-figs ca-figs-2" style="--tier: {{ tier_color }}">
+  <div class="ca-fig"><p class="ca-fig-k"><i data-lucide="trophy" class="lu" aria-hidden="true"></i>Reyting</p>
+    <p class="ca-fig-v">{% if rating_history %}<span class="ca-tier-ink">{{ profile_user.rating }}</span>{% if last_delta %}<span class="ca-fig-delta{% if last_delta < 0 %} is-down{% endif %}">{{ last_delta|stringformat:"+d" }}</span>{% endif %}{% else %}—{% endif %}</p>
+    {% if rating_history and max_rating > profile_user.rating %}<p class="ca-fig-n">maks. <span class="ca-tier-ink" style="--tier: {{ max_rating|tier_color }}">{{ max_rating }}</span></p>{% endif %}
+    {% if spark %}<svg class="ca-fig-spark" viewBox="0 0 88 28" aria-hidden="true"><polyline points="{{ spark }}" fill="none" stroke="rgb(var(--ca-accent-rgb))" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/></svg>{% endif %}</div>
+  <div class="ca-fig"><p class="ca-fig-k"><i data-lucide="chart-column" class="lu" aria-hidden="true"></i>Reytingda o‘rni</p>
+    <p class="ca-fig-v">{% if rating_rank %}{{ rating_rank }}<small>/ {{ total_rated }}</small>{% else %}—{% endif %}</p>{% if top_pct %}<p class="ca-fig-n">(top {{ top_pct }}%)</p>{% endif %}</div>
+  <div class="ca-fig"><p class="ca-fig-k"><i data-lucide="users" class="lu" aria-hidden="true"></i>Musobaqalar</p><p class="ca-fig-v">{{ rating_history|length }}</p></div>
+  <div class="ca-fig"><p class="ca-fig-k"><i data-lucide="gauge" class="lu" aria-hidden="true"></i>Amaliyot ball</p><p class="ca-fig-v">{{ profile_user.practice_points }}</p><p class="ca-fig-n">yechilgan {{ solved|length }} ta masala uchun</p></div>
+  <div class="ca-fig"><p class="ca-fig-k"><i data-lucide="medal" class="lu" aria-hidden="true"></i>Ballda o‘rni</p><p class="ca-fig-v">{% if points_rank %}{{ points_rank }}<small>/ {{ total_users }}</small>{% else %}—{% endif %}</p></div>
+  <div class="ca-fig"><p class="ca-fig-k"><i data-lucide="flame" class="lu !text-warn" aria-hidden="true"></i>Kun masalasi seriyasi</p><p class="ca-fig-v">{{ streak.0 }}<small>kun</small></p>{% if streak.1 > streak.0 %}<p class="ca-fig-n">eng uzuni {{ streak.1 }}</p>{% endif %}</div>
+</div>
+{% if rating_history %}
+<section class="ca-box" aria-labelledby="hist-title">
+  <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="trending-up" class="lu" aria-hidden="true"></i></span><h2 id="hist-title">Reyting tarixi <small>{{ rating_history|length }}</small></h2></div>
+  <div class="ca-box-body">
+  {% if rating_history|length > 1 %}
+  <div class="ca-box-pad ca-scroll-end overflow-x-auto border-b border-line" tabindex="0" role="region" aria-label="Reyting grafigi (yon tomonga suriladi)">
+    <svg viewBox="0 0 {{ rating_chart.w }} {{ rating_chart.h }}" class="w-full" style="min-width: 320px"
+         role="img" aria-label="Reyting tarixi grafigi, {{ rating_history|length }} ta musobaqa">
+      {% for b in rating_chart.bands %}
+      <rect x="{{ rating_chart.left }}" y="{{ b.y }}" width="{{ rating_chart.width }}" height="{{ b.h }}" fill="{{ b.color }}" fill-opacity=".12" />
+      {% if b.label %}<text x="{{ rating_chart.left|add:6 }}" y="{{ b.y|add:12 }}" fill="{{ b.color }}" font-size="10" font-weight="600">{{ b.label }}</text>{% endif %}
+      {% endfor %}
+      {% for g in rating_chart.gridlines %}
+      <line x1="{{ rating_chart.left }}" y1="{{ g.y }}" x2="{{ rating_chart.right }}" y2="{{ g.y }}" stroke="currentColor" class="text-line" stroke-width="1" />
+      <text x="{{ rating_chart.left|add:-8 }}" y="{{ g.y|add:3 }}" text-anchor="end" font-size="10" class="fill-mute tabular">{{ g.value }}</text>
+      {% endfor %}
+      <polyline points="{{ rating_chart.polyline }}" fill="none" stroke="rgb(var(--ca-accent-rgb))" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" />
+      {% for pt in rating_chart.points %}
+      <circle cx="{{ pt.x }}" cy="{{ pt.y }}" r="4" fill="{{ pt.color }}" stroke="rgb(var(--ca-surface-rgb))" stroke-width="1.5" />
+      <text x="{{ pt.x }}" y="{{ rating_chart.bottom|add:16 }}" text-anchor="middle" font-size="9" class="fill-mute tabular">{{ pt.date }}</text>
+      {% endfor %}
+    </svg>
+  </div>
+  {% endif %}
+  <table class="ca-table">
+    <thead><tr><th>Musobaqa</th><th class="hidden w-28 text-center 2xl:table-cell">Sana</th><th class="w-20 text-center">O‘rin</th><th class="w-16 text-center" title="Reyting o‘zgarishi">±</th><th class="w-20 text-center">Reyting</th></tr></thead>
+    <tbody>
+    {% for p in rating_history reversed %}
+    <tr{% if p.disqualified %} class="ca-row-dq"{% endif %}>
+      <td class="max-w-0 truncate"><a class="ca-link" href="{% url 'contests:standings' p.contest_id %}">{{ p.contest.title }}</a>{% if p.disqualified %} <span class="ca-tag !text-bad">DQ</span>{% endif %}</td>
+      <td class="hidden text-center tabular text-mute 2xl:table-cell">{{ p.contest.end|date:"d.m.Y" }}</td>
+      <td class="text-center tabular">{{ p.rank }} <span class="text-xs text-mute">/ {{ p.n_participants }}</span></td>
+      <td class="text-center tabular font-semibold {% if p.delta > 0 %}text-ok{% elif p.delta < 0 %}text-bad{% else %}text-mute{% endif %}">{{ p.delta|stringformat:"+d" }}</td>
+      <td class="text-center tabular font-semibold"><span class="ca-tier-ink" style="--tier: {{ p.rating_after|tier_color }}">{{ p.rating_after }}</span></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</section>
+{% endif %}
+{% if topic_rows %}
+<section class="ca-box !mb-0" aria-labelledby="skills-title">
+  <div class="ca-box-cap ca-hd">
+    <span class="ca-hd-icon"><i data-lucide="tags" class="lu" aria-hidden="true"></i></span>
+    <h2 id="skills-title">Masalalar kategoriyalari</h2>
+    <a class="ca-box-tools ca-link font-medium" href="{% url 'problems:list' %}">Barchasi<i data-lucide="arrow-right" class="lu" aria-hidden="true"></i></a>
+  </div>
+  <div class="ca-box-body ca-box-pad !pt-0">
+    <table class="ca-cats">
+      <thead><tr><th>Kategoriya</th><th>Yechilgan</th><th>Jami</th><th>Foiz</th><th class="w-1/4"><span class="sr-only">Bajarilish</span></th></tr></thead>
+      <tbody>
+      {% for kind, r in topic_rows|slice:":10" %}
+      <tr class="{% if kind == 'sql' %}is-sql {% endif %}{% if r.solved == r.total %}is-done{% endif %}">
+        <td><a class="ca-link" href="{% url 'problems:list' %}?tag={{ r.tag.name|urlencode }}">{{ r.tag.name }}</a></td>
+        <td class="n">{{ r.solved }}</td><td class="n mute">{{ r.total }}</td><td class="n">{{ r.pct }}%</td>
+        <td><span class="bar" role="img" aria-label="{{ r.tag.name }}: {{ r.total }} tadan {{ r.solved }} tasi yechilgan"><span style="width: {{ r.pct }}%"></span></span></td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endif %}
 </div>
 </div>
 {% endblock %}

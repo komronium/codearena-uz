@@ -47,7 +47,7 @@ your progress, the course note and its badge on the right.{% endcomment %}
   <aside class="ca-aside" aria-label="Kurs haqida">
     {% if user.is_authenticated and progress.total %}
     <section class="ca-box" aria-labelledby="progress-title">
-      <h2 class="ca-box-cap" id="progress-title">Bajarilishi</h2>
+      <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="chart-no-axes-column" class="lu" aria-hidden="true"></i></span><h2 id="progress-title">Bajarilishi</h2></div>
       <div class="ca-box-body ca-box-pad flex items-center gap-4">
         <span class="ca-ring{% if progress.completed %} is-done{% endif %}" style="--p: {{ progress.pct }}" role="img" aria-label="{{ progress.pct }}% bajarildi"><b class="tabular">{{ progress.pct }}%</b></span>
         <div class="text-sm"><p class="tabular"><b>{{ progress.done }}</b> / {{ progress.total }} masala</p><p class="text-mute">{% if progress.completed %}Tugatildi{% else %}yechildi{% endif %}</p></div>
@@ -56,13 +56,13 @@ your progress, the course note and its badge on the right.{% endcomment %}
     {% endif %}
     {% if description_html %}
     <section class="ca-box" aria-labelledby="about-title">
-      <h2 class="ca-box-cap" id="about-title">Kurs haqida</h2>
+      <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="info" class="lu" aria-hidden="true"></i></span><h2 id="about-title">Kurs haqida</h2></div>
       <div class="ca-box-body ca-box-pad prose max-w-none text-sm">{{ description_html|safe }}</div>
     </section>
     {% endif %}
     {% if progress.total %}
     <section class="ca-box" aria-labelledby="award-title">
-      <h2 class="ca-box-cap" id="award-title">Nishon</h2>
+      <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="award" class="lu" aria-hidden="true"></i></span><h2 id="award-title">Nishon</h2></div>
       <p class="ca-box-body ca-box-pad flex items-center gap-3 text-sm"><span class="ca-award{% if not progress.completed %} is-locked{% endif %}" aria-hidden="true"><i data-lucide="{{ plan.icon }}" class="lu"></i></span>
         <span class="text-mute">{% if progress.completed %}Olingan — profilingizda ko‘rinadi.{% else %}Kursni tugatsangiz profilingizga «{{ plan.title }}» nishoni qo‘shiladi.{% endif %}</span></p>
     </section>

@@ -19,13 +19,13 @@ TIER_ORDER = {name: i for i, (_floor, _ceiling, name, _color) in enumerate(RATIN
 # Legendary names are written like Codeforces' LGM: the first letter in ink (black on light), the rest red.
 LEGENDARY = RATING_TIERS[-1][0]
 
-# Profile banner per tier: (CSS modifier, the picture's name). Styles live in app.css
+# Profile banner per tier: (CSS modifier, the insignia's name; one more mark each step up). Styles live in app.css
 # (.ca-banner-<slug> for the banner, .ca-art-<slug> for letter avatars).
 TIER_BANNERS = {
-    "Newbie": ("boshlovchi", "Yulduzli tun"), "Pupil": ("shogird", "Islimiy naqsh"),
-    "Specialist": ("mutaxassis", "Daryo"), "Expert": ("bilimdon", "Rishton koshini"),
-    "Candidate Master": ("master", "Registon girihi"), "Master": ("ustoz", "Quyosh"),
-    "Grandmaster": ("grandmaster", "Olov"), "Legendary Grandmaster": ("afsonaviy", "Toj"),
+    "Newbie": ("boshlovchi", "Chiziq"), "Pupil": ("shogird", "Bir chevron"),
+    "Specialist": ("mutaxassis", "Ikki chevron"), "Expert": ("bilimdon", "Uch chevron"),
+    "Candidate Master": ("master", "Yulduzli chevron"), "Master": ("ustoz", "Yulduzli planka"),
+    "Grandmaster": ("grandmaster", "Dafna"), "Legendary Grandmaster": ("afsonaviy", "Toj"),
 }
 
 # Daily-problem streak badges: (days, name, icon). Earned by the best run ever, kept for good.

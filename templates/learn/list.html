@@ -16,7 +16,7 @@ deletes it from the box on the side.{% endcomment %}
 </header>
 <div class="ca-cols">
   <section class="ca-box min-w-0" aria-labelledby="list-title">
-    <h2 class="ca-box-cap" id="list-title">Masalalar</h2>
+    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="list-checks" class="lu" aria-hidden="true"></i></span><h2 id="list-title">Masalalar</h2></div>
     <div class="ca-box-body">
       {% if rows %}
       <table class="ca-table">
@@ -47,7 +47,7 @@ deletes it from the box on the side.{% endcomment %}
   {% if is_owner %}
   <aside class="ca-aside">
     <section class="ca-box" aria-labelledby="settings-title">
-      <h2 class="ca-box-cap" id="settings-title">Sozlamalar</h2>
+      <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="settings" class="lu" aria-hidden="true"></i></span><h2 id="settings-title">Sozlamalar</h2></div>
       <form method="post" action="{% url 'learn:list_edit' lst.pk %}" class="ca-box-body ca-box-pad space-y-3">{% csrf_token %}
         <div><label class="ca-label" for="{{ form.name.id_for_label }}">Nomi</label>{{ form.name }}</div>
         <label class="flex items-center gap-2 text-sm">{{ form.is_public }} Havola orqali hamma ko‘ra oladi</label>

@@ -12,11 +12,11 @@
 </div>
 
 <section class="ca-box" aria-labelledby="leaders-title">
-  <h2 class="ca-box-cap" id="leaders-title">{% if by == "time" %}Eng tez{% else %}Eng qisqa{% endif %} yechimlar
+  <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="zap" class="lu" aria-hidden="true"></i></span><h2 id="leaders-title">{% if by == "time" %}Eng tez{% else %}Eng qisqa{% endif %} yechimlar
     <nav class="ca-box-tools ca-levels" aria-label="Saralash">
       <a href="?by=time{% if lang %}&lang={{ lang }}{% endif %}"{% if by == "time" %} aria-current="page"{% endif %}><i data-lucide="zap" class="lu" aria-hidden="true"></i>Eng tez</a>
       <a href="?by=length{% if lang %}&lang={{ lang }}{% endif %}"{% if by == "length" %} aria-current="page"{% endif %}><i data-lucide="scissors" class="lu" aria-hidden="true"></i>Eng qisqa</a>
-    </nav></h2>
+    </nav></h2></div>
   <div class="ca-box-body">
     {% if languages|length > 1 %}
     <div class="ca-toolbar" role="group" aria-label="Til">

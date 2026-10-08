@@ -4,6 +4,7 @@ closes it on outside click and Esc).{% endcomment %}
 <details class="ca-dropdown" data-dropdown style="--tier: {{ user.rating|tier_color }}">
   <summary class="ca-dropdown-trigger" aria-label="Hisob: {{ user.username }}" title="{{ user.username }}" translate="no">
     <span class="ca-avatar ca-user-avatar h-9 w-9 text-sm{% if not user.avatar %} ca-art-{{ user.rating|tier_slug }}{% endif %}">{% if user.avatar %}<img src="{{ user.avatar.url }}" alt="" width="36" height="36">{% else %}{{ user.username|first }}{% endif %}</span>
+    <i data-lucide="chevron-down" class="lu ca-chev" aria-hidden="true"></i>
     {% if unread_reviews %}<b class="ca-dropdown-dot" aria-label="{{ unread_reviews }} ta o‘qilmagan sharh"></b>{% elif nav.due or nav.staff.total %}<b class="ca-dropdown-dot xl:hidden" aria-hidden="true"></b>{% endif %}
   </summary>
   <div class="ca-dropdown-panel">

@@ -8,7 +8,7 @@ a grey −N, accepted / tried per problem last. Codeforces rules have no penalty
 <div id="st-live"{% if contest.is_running %} hx-get="{% url 'contests:standings' contest.pk %}" hx-trigger="every 20s [window.caStIdle ? caStIdle() : !document.hidden]" hx-swap="outerHTML"{% endif %}>
 {% if my_row %}
 {# your line, always in view: rank, score, penalty and each problem at a glance #}
-<div class="ca-st-mine mb-3{% if my_row.disqualified %} is-dq{% endif %}">
+<div class="ca-st-mine mx-4 mb-3{% if my_row.disqualified %} is-dq{% endif %}">
   {% if my_row.disqualified %}
   <span class="ca-st-mine-rank"><span aria-hidden="true">✕</span><small>diskvalifikatsiya</small></span>
   {% else %}
@@ -22,7 +22,7 @@ a grey −N, accepted / tried per problem last. Codeforces rules have no penalty
   </span>
 </div>
 {% endif %}
-<div class="overflow-x-auto rounded-[var(--ca-radius)] border border-line" id="st-scroll" tabindex="0" aria-label="Natijalar jadvali (gorizontal suriladi)">
+<div class="ca-st-wrap overflow-x-auto" id="st-scroll" tabindex="0" aria-label="Natijalar jadvali (gorizontal suriladi)">
 <table class="ca-standings">
   <thead>
     <tr>
@@ -43,9 +43,10 @@ a grey −N, accepted / tried per problem last. Codeforces rules have no penalty
   <tbody>
   {% for r in rows %}
   <tr data-name="{{ r.user.username|lower }} {{ r.user.get_full_name|lower }}" class="{% if r.user == user %}ca-row-me{% endif %}{% if r.disqualified %} ca-row-dq{% endif %}{% if r.out %} ca-row-out{% endif %}"{% if r.user == user %} id="me"{% endif %}>
-    <td class="ca-sticky ca-sticky-rank tabular">{% if r.disqualified %}<span class="text-bad" title="Diskvalifikatsiya">—</span>{% else %}{{ r.rank }}{% endif %}</td>
+    <td class="ca-sticky ca-sticky-rank tabular">{% if r.disqualified %}<span class="text-bad" title="Diskvalifikatsiya">—</span>{% else %}{% include "accounts/_rank.html" with rank=r.rank %}{% endif %}</td>
     <td class="ca-sticky ca-sticky-user">
-      <a class="ca-user-name{{ r.user.rating|lg }}" href="{% url 'profile' r.user.username %}" style="--tier: {{ r.user.rating|tier_color }}" translate="no"{% if r.user.get_full_name %} title="{{ r.user.get_full_name }}"{% endif %}>{{ r.user.username }}</a>
+      <span class="ca-who"><span class="ca-avatar{% if not r.user.avatar %} ca-art-{{ r.user.rating|tier_slug }}{% endif %}" style="--tier: {{ r.user.rating|tier_color }}" aria-hidden="true">{% if r.user.avatar %}<img src="{{ r.user.avatar.url }}" alt="" width="28" height="28" loading="lazy">{% else %}{{ r.user.username|first }}{% endif %}</span>
+      <a class="ca-user-name{{ r.user.rating|lg }}" href="{% url 'profile' r.user.username %}" style="--tier: {{ r.user.rating|tier_color }}" translate="no"{% if r.user.get_full_name %} title="{{ r.user.get_full_name }}"{% endif %}>{{ r.user.username }}</a>{% if r.user == user %}<span class="ca-you">Siz</span>{% endif %}</span>
       {% if r.disqualified %}<span class="ca-tag ml-1 !text-bad" title="{{ r.participation.disqualified_reason|default:'Diskvalifikatsiya' }}">DQ</span>
       {% elif r.out and contest.is_rated %}<span class="ca-tag ca-tag-out ml-1" title="{{ contest.get_division_display }}: natija reytingga ta’sir qilmaydi">tashqarida</span>{% endif %}
     </td>
@@ -93,7 +94,7 @@ a grey −N, accepted / tried per problem last. Codeforces rules have no penalty
   </tfoot>
 </table>
 </div>
-<p class="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs text-mute" aria-label="Belgilar izohi">
+<p class="mt-0 flex flex-wrap items-center gap-x-5 gap-y-1.5 border-t border-line px-4 py-3 text-xs text-mute" aria-label="Belgilar izohi">
   {% if contest.type == "cf" %}<span><b class="ca-cf-ac !inline">488</b> — yechildi: olingan ball (vaqt o‘tishi va har xato −50 bilan kamayadi, kamida 30%), ostida vaqt</span>
   {% elif contest.type == "icpc" %}<span><b class="ca-cf-ac !inline">+1</b> — yechildi, oldin 1 noto‘g‘ri urinish; ostida vaqt (soat:daqiqa)</span>
   {% else %}<span><b class="ca-cf-ac !inline">300</b> — yechildi: masala balli, ostida vaqt (soat:daqiqa)</span>{% endif %}

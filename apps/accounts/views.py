@@ -232,7 +232,12 @@ def rating(request):
           .filter(contest_count__gt=0).order_by("-rating", "username"))
     ratings = list(qs.values_list("rating", flat=True))  # highest first
     q = request.GET.get("q", "").strip()[:50]
-    page = Paginator(qs.filter(username__icontains=q) if q else qs, 50).get_page(request.GET.get("page"))
+    # the order of the rows only; a place is always the place by rating
+    sort = request.GET.get("sort", "")
+    order = {"delta": ("-last_delta", "-rating", "username"),
+             "contests": ("-contest_count", "-rating", "username")}.get(sort)
+    shown = qs.filter(username__icontains=q) if q else qs
+    page = Paginator(shown.order_by(*order) if order else shown, 50).get_page(request.GET.get("page"))
     for u in page:  # the place on the whole board, equal ratings sharing it, a search included
         u.rank = sum(1 for r in ratings if r > u.rating) + 1
     tiers = [{"name": n, "color": c, "floor": f, "ceiling": ce,
@@ -248,7 +253,8 @@ def rating(request):
                   "contests": rated.filter(user=request.user).count()}
     spread = _rating_spread(ratings, request.user.rating if me else None)
     return render(request, "accounts/rating.html",
-                  {"users": page, "total": len(ratings), "tiers": tiers, "spread": spread, "me": me, "q": q})
+                  {"users": page, "total": len(ratings), "tiers": tiers, "spread": spread, "me": me, "q": q,
+                   "sort": sort if order else ""})
 
 
 def _contest_badges(user) -> list[dict]:
@@ -325,6 +331,7 @@ def profile(request, username):
             rating_rank = rated.filter(rating__gt=profile_user.rating).count() + 1
 
     cur_streak, best_streak = streaks(profile_user)
+    skill_groups = _skill_groups(profile_user)
     return render(request, "accounts/profile.html", {
         "profile_user": profile_user,
         "total_users": total_users,
@@ -334,6 +341,7 @@ def profile(request, username):
         "solved": solved,
         "total_public_problems": len(problem_map),
         "solved_shown": sum(1 for _, st in problem_map if st == "solved"),
+        "rest": len(problem_map) - sum(1 for _, st in problem_map if st == "solved"),
         # solved problems an upcoming contest holds: in the points (and the count beside them),
         # hidden from the map until the contest starts
         "solved_hidden": len(solved) - sum(1 for _, st in problem_map if st == "solved"),
@@ -354,9 +362,24 @@ def profile(request, username):
         "max_rating": max((p.rating_after for p in rating_history), default=None),
         "rating_chart": _rating_chart(rating_history) if rating_history else None,
         "activity": _activity_calendar(profile_user),
-        "skill_groups": _skill_groups(profile_user),
+        "skill_groups": skill_groups,
+        # the topics table: one flat list (kind, row), the topics with most problems first
+        "topic_rows": [(kind, r) for kind, _label, rows in skill_groups for r in rows],
         "streak": (cur_streak, best_streak),
+        "last_delta": rating_history[-1].delta if rating_history else None,
+        "top_pct": round(100 * rating_rank / total_rated, 1) if rating_rank and total_rated else None,
+        "spark": _sparkline([p.rating_after for p in rating_history[-12:]]),
     })
+
+
+def _sparkline(values: list[int], w: int = 88, h: int = 28) -> str:
+    """SVG polyline points for a small trend line over `values` (needs two or more), else empty."""
+    if len(values) < 2:
+        return ""
+    lo, hi = min(values), max(values)
+    span = (hi - lo) or 1
+    step = w / (len(values) - 1)
+    return " ".join(f"{round(i * step, 1)},{round(2 + (hi - v) / span * (h - 4), 1)}" for i, v in enumerate(values))
 
 
 def _skill_groups(user) -> list[tuple[str, str, list[dict]]]:

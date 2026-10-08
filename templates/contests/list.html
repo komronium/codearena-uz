@@ -36,7 +36,7 @@ right.{% endcomment %}
 <div class="min-w-0">
   {% if not running and not upcoming %}<p class="ca-empty mb-4">Hozircha rejalashtirilgan musobaqa yo‘q. Yangi raund e’lon qilinganda shu yerda chiqadi.</p>{% endif %}
   <section class="ca-box" aria-labelledby="end-title">
-    <h2 class="ca-box-cap" id="end-title">O‘tgan musobaqalar <small>{{ ended.paginator.count }}</small></h2>
+    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="flag" class="lu" aria-hidden="true"></i></span><h2 id="end-title">O‘tgan musobaqalar <small>{{ ended.paginator.count }}</small></h2></div>
     <div class="ca-box-body">
     {% if ended.paginator.count %}
     <table class="ca-table">
@@ -83,7 +83,7 @@ right.{% endcomment %}
 <aside class="ca-aside" aria-label="Reyting">
   {% if top_rated %}
   <section class="ca-box" aria-labelledby="top-title">
-    <h2 class="ca-box-cap" id="top-title">Eng yuqori reyting<a class="ca-box-tools ca-link" href="{% url 'rating' %}">Hammasi</a></h2>
+    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="trophy" class="lu" aria-hidden="true"></i></span><h2 id="top-title">Eng yuqori reyting<a class="ca-box-tools ca-link" href="{% url 'rating' %}">Hammasi</a></h2></div>
     <ol class="ca-box-body ca-board">
       {% for u in top_rated %}
       <li{% if u == user %} class="is-me"{% endif %}>{% if forloop.counter <= 3 %}<span class="ca-rank ca-rank-{{ forloop.counter }}">{{ forloop.counter }}</span>{% else %}<span class="ca-rank ca-rank-n">{{ forloop.counter }}</span>{% endif %}{% include "accounts/_user.html" with u=u tier=False %}<b class="tabular">{{ u.rating }}</b></li>
@@ -92,7 +92,7 @@ right.{% endcomment %}
   </section>
   {% endif %}
   <section class="ca-box" aria-labelledby="how-title">
-    <h2 class="ca-box-cap" id="how-title">Qanday ishlaydi</h2>
+    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="info" class="lu" aria-hidden="true"></i></span><h2 id="how-title">Qanday ishlaydi</h2></div>
     <ul class="ca-box-body ca-box-pad ca-rules">
       <li><span aria-hidden="true"><i data-lucide="check" class="lu"></i></span><p><b>Oldindan qatnashing.</b> Kartadagi «Qatnashish» tugmasi, keyin boshlanishini kuting.</p></li>
       <li><span aria-hidden="true"><i data-lucide="trending-up" class="lu"></i></span><p><b>Reytingli raundlar</b> natijasi reytingingizni o‘zgartiradi.</p></li>

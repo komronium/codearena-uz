@@ -1,5 +1,6 @@
 {% extends "base.html" %}{% load tiers verdicts %}
 {% block title %}Urinishlar{% endblock %}
+{% block page_icon %}<span class="ca-hd-icon"><i data-lucide="history" class="lu" aria-hidden="true"></i></span>{% endblock %}
 {% block page_title %}<h1>Urinishlar</h1><span class="ca-topbar-sub">{% if own %}Yuborgan yechimlaringiz{% else %}Saytdagi barcha yechimlar{% endif %}, eng yangisi tepada</span>{% endblock %}
 {% block content %}
 {% comment %}After Codeforces' status page: one boxed table, a submission per row with its author in their

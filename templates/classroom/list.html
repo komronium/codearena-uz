@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Vazifalar{% endblock %}
+{% block page_icon %}<span class="ca-hd-icon"><i data-lucide="notebook-pen" class="lu" aria-hidden="true"></i></span>{% endblock %}
 {% block page_title %}<h1>Vazifalar</h1>{% endblock %}
 {% block content %}
 <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
@@ -60,7 +61,7 @@ groups and the assignments they set stay full width.{% endcomment %}
 <div class="{% if not can_teach %}ca-cols{% endif %}">
 <div class="min-w-0">
 <section class="ca-box" aria-labelledby="mine-title">
-  <h2 class="ca-box-cap" id="mine-title">Vazifalarim <small>{{ assignments|length }}</small></h2>
+  <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="notebook-pen" class="lu" aria-hidden="true"></i></span><h2 id="mine-title">Vazifalarim <small>{{ assignments|length }}</small></h2></div>
   <div class="ca-box-body">
   {% if assignments %}
   <ul class="ca-rows">
@@ -89,7 +90,7 @@ groups and the assignments they set stay full width.{% endcomment %}
 {% if not can_teach %}
 <aside class="ca-aside" aria-label="Guruhlar">
   <section class="ca-box" aria-labelledby="join-title">
-    <h2 class="ca-box-cap" id="join-title">Guruhga qo‘shilish</h2>
+    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="users" class="lu" aria-hidden="true"></i></span><h2 id="join-title">Guruhga qo‘shilish</h2></div>
     <form method="post" action="{% url 'classroom:group_join' %}" class="ca-box-body ca-box-pad space-y-2">{% csrf_token %}
       {% if joined_groups %}<p class="text-sm text-mute">Guruhlaringiz: {% for g in joined_groups %}<b class="font-medium text-ink">{{ g.name }}</b>{% if not forloop.last %}, {% endif %}{% endfor %}.</p>{% endif %}
       <label class="block text-sm text-mute" for="join-code">O‘qituvchi bergan 6 belgili kodni kiriting.</label>
@@ -106,7 +107,7 @@ groups and the assignments they set stay full width.{% endcomment %}
 
 {% if taught %}
 <section class="ca-box" aria-labelledby="taught-title">
-<h2 class="ca-box-cap" id="taught-title">Men bergan vazifalar <small>{{ taught|length }}</small></h2>
+<div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="notebook-pen" class="lu" aria-hidden="true"></i></span><h2 id="taught-title">Men bergan vazifalar <small>{{ taught|length }}</small></h2></div>
 <div class="ca-box-body">
 <table class="ca-table">
   <thead><tr><th>Vazifa</th><th>Guruh</th><th>Muddat</th><th class="text-right">Amal</th></tr></thead>
