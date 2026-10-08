@@ -63,7 +63,7 @@
         <p class="mt-1 text-sm text-warn">Bot bilan aloqa to‘xtatilgan. Qayta ulang yoki hisobni uzing.</p>
         {% if telegram_link.last_error %}<p class="mt-1 text-xs text-mute">Botga xabar yetkazilmadi. Telegram’da botni ochib, Start tugmasini bosing, keyin qayta ulang.</p>{% endif %}
         {% else %}
-        <p class="mt-1 max-w-xl text-sm text-mute">Telegram botni ulang: tekshiruv natijalari, kun masalasi va ro‘yxatdan o‘tgan musobaqalaringiz boshlanishi haqida xabar olasiz.</p>
+        <p class="mt-1 max-w-xl text-sm text-mute">Telegram botni ulang: kunlik masala va tavsiya, trenddagi masala, musobaqa eslatmalari va yangi vazifalar haqida xabar oling.</p>
         {% endif %}
       </div>
       {% if telegram_configured %}
@@ -82,10 +82,12 @@
     <form method="post" action="{% url 'telegram_preferences' %}" class="mt-5 border-t border-line pt-4">{% csrf_token %}
       <fieldset>
         <legend class="mb-3 text-sm font-semibold">Qaysi xabarlarni yuboraylik?</legend>
-        <div class="grid gap-2 sm:grid-cols-3">
-          <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-line p-3 text-sm"><input class="mt-0.5" type="checkbox" name="notify_submissions"{% if telegram_link.notify_submissions %} checked{% endif %}><span><b>Yechim natijalari</b><small class="mt-0.5 block text-xs text-mute">Har bir tekshirilgan urinish</small></span></label>
-          <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-line p-3 text-sm"><input class="mt-0.5" type="checkbox" name="notify_daily_problem"{% if telegram_link.notify_daily_problem %} checked{% endif %}><span><b>Kun masalasi</b><small class="mt-0.5 block text-xs text-mute">Har kuni yangi masala</small></span></label>
-          <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-line p-3 text-sm"><input class="mt-0.5" type="checkbox" name="notify_contests"{% if telegram_link.notify_contests %} checked{% endif %}><span><b>Musobaqa eslatmalari</b><small class="mt-0.5 block text-xs text-mute">Boshlanishidan 1 soat oldin</small></span></label>
+        <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-line p-3 text-sm"><input class="mt-0.5" type="checkbox" name="notify_daily_problem"{% if telegram_link.notify_daily_problem %} checked{% endif %}><span><b>📅 Kunlik masala</b><small class="mt-0.5 block text-xs text-mute">Har kuni tanlangan masala</small></span></label>
+          <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-line p-3 text-sm"><input class="mt-0.5" type="checkbox" name="notify_daily_tip"{% if telegram_link.notify_daily_tip %} checked{% endif %}><span><b>💡 Kunlik tavsiya</b><small class="mt-0.5 block text-xs text-mute">Algoritm va yechish bo‘yicha qisqa maslahat</small></span></label>
+          <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-line p-3 text-sm"><input class="mt-0.5" type="checkbox" name="notify_trending_problem"{% if telegram_link.notify_trending_problem %} checked{% endif %}><span><b>🔥 Trenddagi masala</b><small class="mt-0.5 block text-xs text-mute">So‘nggi 7 kunda ommalashgan masala</small></span></label>
+          <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-line p-3 text-sm"><input class="mt-0.5" type="checkbox" name="notify_contests"{% if telegram_link.notify_contests %} checked{% endif %}><span><b>🏆 Musobaqalar</b><small class="mt-0.5 block text-xs text-mute">Ro‘yxatdan o‘tgan musobaqa boshlanishidan 1 soat oldin</small></span></label>
+          <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-line p-3 text-sm"><input class="mt-0.5" type="checkbox" name="notify_assignments"{% if telegram_link.notify_assignments %} checked{% endif %}><span><b>📝 Vazifalar</b><small class="mt-0.5 block text-xs text-mute">Guruhingizga yangi vazifa berilganda</small></span></label>
         </div>
       </fieldset>
       <div class="mt-4 flex justify-end"><button class="ca-btn ca-btn-ghost !py-1.5 text-sm"><i data-lucide="check" class="lu" aria-hidden="true"></i>Sozlamalarni saqlash</button></div>

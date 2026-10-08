@@ -108,12 +108,17 @@ def assignment_edit(request, pk=None):
     if request.method == "POST" and form.is_valid():
         with transaction.atomic():
             a = form.save(commit=False)
-            if a.pk is None:
+            created = a.pk is None
+            if created:
                 a.created_by = request.user
             a.save()
             a.assignment_problems.all().delete()
             AssignmentProblem.objects.bulk_create(
                 AssignmentProblem(assignment=a, problem=p, order=i) for i, p in enumerate(form.cleaned_data["problems"]))
+            if created:
+                from apps.accounts.telegram import notify_assignment
+
+                transaction.on_commit(lambda assignment_id=a.pk: notify_assignment(assignment_id))
         return redirect("classroom:detail", a.pk)
     return render(request, "classroom/form.html", {"form": form, "assignment": assignment})
 

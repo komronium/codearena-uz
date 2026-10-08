@@ -48,9 +48,11 @@ class TelegramLink(models.Model):
     username = models.CharField(max_length=64, blank=True)
     connected_at = models.DateTimeField(default=timezone.now)
     is_active = models.BooleanField(default=True)
-    notify_submissions = models.BooleanField(default=True)
     notify_daily_problem = models.BooleanField(default=True)
+    notify_daily_tip = models.BooleanField(default=True)
+    notify_trending_problem = models.BooleanField(default=True)
     notify_contests = models.BooleanField(default=True)
+    notify_assignments = models.BooleanField(default=True)
     last_error = models.CharField(max_length=200, blank=True)
 
     def __str__(self):

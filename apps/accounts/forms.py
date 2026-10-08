@@ -56,4 +56,10 @@ class ProfileEditForm(forms.ModelForm):
 class TelegramPreferencesForm(forms.ModelForm):
     class Meta:
         model = TelegramLink
-        fields = ("notify_submissions", "notify_daily_problem", "notify_contests")
+        fields = (
+            "notify_daily_problem",
+            "notify_daily_tip",
+            "notify_trending_problem",
+            "notify_contests",
+            "notify_assignments",
+        )

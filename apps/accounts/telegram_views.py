@@ -48,9 +48,11 @@ def preferences(request):
     from .forms import TelegramPreferencesForm
 
     old_values = {
-        "notify_submissions": link.notify_submissions,
         "notify_daily_problem": link.notify_daily_problem,
+        "notify_daily_tip": link.notify_daily_tip,
+        "notify_trending_problem": link.notify_trending_problem,
         "notify_contests": link.notify_contests,
+        "notify_assignments": link.notify_assignments,
     }
     form = TelegramPreferencesForm(request.POST, instance=link)
     if form.is_valid():

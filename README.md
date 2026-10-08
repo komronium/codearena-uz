@@ -268,8 +268,10 @@ Deploy so migrations and the notification worker are running, then register the 
     docker compose exec web python manage.py set_telegram_webhook
 
 Users connect from **Profilni tahrirlash → Telegram bildirishnomalari**. They must press **Start**
-in the private bot chat to finish linking. The one-use link expires after 10 minutes. Each user can
-turn the three notification types on or off independently; `/stop` in the bot pauses delivery.
+in the private bot chat to finish linking. The one-use link expires after 10 minutes. Users can
+independently enable daily problems, daily tips, trending problems, contest reminders, and new
+group assignments. Trending problems are selected from the most attempted public practice problems
+in the last seven days. `/stop` in the bot pauses delivery.
 
 ## Contest clarifications
 

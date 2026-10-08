@@ -1,5 +1,6 @@
 """Telegram Bot API helpers, secure account linking, and a retryable message outbox."""
 import hashlib
+import html
 import json
 import logging
 import secrets
@@ -58,7 +59,9 @@ def bot_api(method: str, payload: dict):
 
 
 def send_chat_message(chat_id: str, text: str):
-    return bot_api("sendMessage", {"chat_id": chat_id, "text": text, "disable_web_page_preview": True})
+    return bot_api("sendMessage", {
+        "chat_id": chat_id, "text": text, "parse_mode": "HTML", "disable_web_page_preview": True,
+    })
 
 
 def issue_link_token(user):
@@ -194,14 +197,29 @@ def recover_outbox(limit: int = 500):
         dispatch_outbox(outbox_id)
 
 
-def notify_submission(submission):
-    from apps.submissions.models import VERDICT_LABELS
+def notify_assignment(assignment_id: int):
+    """Send a newly created group assignment to its students after the DB commit."""
+    from apps.classroom.models import Assignment
 
-    label = VERDICT_LABELS.get(submission.verdict, submission.get_verdict_display())
-    url = f"{settings.SITE_URL.rstrip('/')}/submissions/{submission.pk}/"
-    queue_notification(
-        submission.user_id,
-        "notify_submissions",
-        f"submission:{submission.pk}",
-        f"CodeArena · {submission.problem.title}\nNatija: {label}\n{url}",
-    )
+    try:
+        assignment = (Assignment.objects.select_related("group")
+                      .filter(pk=assignment_id).first())
+        if assignment is None:
+            return
+        when = timezone.localtime(assignment.deadline).strftime("%d.%m.%Y, %H:%M")
+        url = f"{settings.SITE_URL.rstrip('/')}/classroom/{assignment.pk}/"
+        text = (
+            f"<b>📝 Yangi vazifa</b>\n\n"
+            f"<b>{html.escape(assignment.title)}</b>\n"
+            f"Guruh: {html.escape(assignment.group.name)}\n"
+            f"Topshirish muddati: {when}\n\n"
+            f'<a href="{url}">Vazifani ochish →</a>'
+        )
+        user_ids = (assignment.group.members.filter(is_active=True)
+                    .exclude(pk=assignment.created_by_id)
+                    .filter(telegram_link__is_active=True, telegram_link__notify_assignments=True)
+                    .values_list("pk", flat=True))
+        for user_id in user_ids.iterator():
+            queue_notification(user_id, "notify_assignments", f"assignment:{assignment.pk}:created", text)
+    except Exception:
+        log.exception("Could not queue Telegram assignment notification for assignment %s", assignment_id)
