@@ -87,6 +87,7 @@ class AuditEntry(models.Model):
         RATING_RECOMPUTE = "rating_recompute", "Reyting qayta hisoblandi"
         FLAG_REVIEW = "flag_review", "O‘xshashlik ko‘rildi"
         PROBLEM_DELETE = "problem_delete", "Masala o‘chirildi"
+        DAILY_SELECT = "daily_select", "Kun masalasi tanlandi"
         CONTEST_DELETE = "contest_delete", "Musobaqa o‘chirildi"
         USER_DELETE = "user_delete", "Foydalanuvchi o‘chirildi"
         VERIFY = "verify", "Shaxsi tasdiqlandi"

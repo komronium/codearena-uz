@@ -210,6 +210,10 @@ registration.
   problem list picks from the weakest tags at the student's level.
 - **Daily problem**: picked automatically per Tashkent day; solving it on its day keeps
   the streak and gives +5 practice points.
+- **Telegram notifications**: users can privately link a Telegram bot from Profile settings and
+  independently enable submission verdicts, the daily problem, and one-hour reminders for
+  contests they joined. Delivery uses a durable outbox and a separate worker; the daily scheduler
+  retries transient failures.
 - **Virtual contests**: after a contest is published, anyone who didn't take part can
   replay it on their own clock and see where they would have placed. Unrated.
 - **Duels** (`/classroom/duels/`): 1v1 on a problem neither player tried, 30 minutes,
@@ -249,6 +253,23 @@ form level). Password reset uses Django's built-in views at
 
 No email-verification-on-signup gate — registration works with an unverified
 email, same as before. Add one later if fake/typo'd emails become a problem.
+
+## Telegram notifications
+
+Create a bot with Telegram's `@BotFather`, then set these values in the production `.env`:
+
+    TELEGRAM_BOT_TOKEN=<bot token>
+    TELEGRAM_BOT_USERNAME=<bot username, without @>
+    TELEGRAM_WEBHOOK_SECRET=<random 32+ character secret>
+    SITE_URL=https://codearena.uz
+
+Deploy so migrations and the notification worker are running, then register the webhook once:
+
+    docker compose exec web python manage.py set_telegram_webhook
+
+Users connect from **Profilni tahrirlash → Telegram bildirishnomalari**. They must press **Start**
+in the private bot chat to finish linking. The one-use link expires after 10 minutes. Each user can
+turn the three notification types on or off independently; `/stop` in the bot pauses delivery.
 
 ## Contest clarifications
 

@@ -248,8 +248,19 @@ class HintUnlock(models.Model):
 class DailyProblem(models.Model):
     """One problem for everyone per (Tashkent) day; see apps.problems.daily."""
 
+    class SelectionMethod(models.TextChoices):
+        AUTO = "auto", "Avtomatik"
+        ADMIN = "admin", "Admin tanladi"
+
     date = models.DateField(unique=True)
     problem = models.ForeignKey(Problem, on_delete=models.CASCADE, related_name="+")
+    selection_method = models.CharField(
+        max_length=8, choices=SelectionMethod.choices, default=SelectionMethod.AUTO
+    )
+    selected_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
+        related_name="selected_daily_problems",
+    )
 
     class Meta:
         ordering = ["-date"]

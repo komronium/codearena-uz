@@ -50,6 +50,9 @@ grouped by what the student is doing. Profile, settings and sign-out live in the
   <i data-lucide="inbox" class="lu" aria-hidden="true"></i>Navbat
   {% if nav.staff.queue %}<span class="ca-chip ca-chip-score ml-auto tabular" title="Ko‘rib chiqishni kutmoqda">{{ nav.staff.queue }}</span>{% endif %}
 </a>
+<a href="{% url 'moderation:daily_problem' %}" class="ca-sidebar-link {% if ns == 'moderation' and un in 'daily_problem,daily_problem_choose' %}is-active{% endif %}"{% if ns == 'moderation' and un in 'daily_problem,daily_problem_choose' %} aria-current="page"{% endif %}>
+  <i data-lucide="calendar-check" class="lu" aria-hidden="true"></i>Kun masalasi
+</a>
 <a href="{% url 'moderation:contests' %}" class="ca-sidebar-link {% if ns == 'moderation' and un in 'contests,contest_new,contest_edit,contest_official' or ns == 'integrity' and un in 'contest_report,replay' %}is-active{% endif %}"{% if ns == 'moderation' and un in 'contests,contest_new,contest_edit,contest_official' or ns == 'integrity' and un in 'contest_report,replay' %} aria-current="page"{% endif %}>
   <i data-lucide="trophy" class="lu" aria-hidden="true"></i>Musobaqalar
 </a>

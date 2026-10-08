@@ -47,8 +47,15 @@ services:
                python manage.py recalc_points;
                python manage.py recalc_difficulty;
                python manage.py flag_similarity --pending;
-               sleep 300;
+               python manage.py telegram_notifications;
+             sleep 300;
              done"
+
+  notification-worker:
+    restart: unless-stopped
+    volumes: !override
+      - "media:/app/media"
+    command: sh -c "until python manage.py migrate --check >/dev/null 2>&1; do sleep 5; done; exec python manage.py rqworker notifications"
 
 volumes:
   media:

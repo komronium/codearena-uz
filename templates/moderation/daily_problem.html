@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}Kun masalasi — boshqaruv{% endblock %}
+{% block content %}
+<div class="mb-6">
+  {% include "moderation/_header.html" with title="Kun masalasi" subtitle="Algoritm sanaga mos 5 ta variant tayyorlaydi. Admin tanlamasa, kunlik masala odatdagidek avtomatik belgilanadi." %}
+</div>
+
+{% if invalid_date %}<div class="ca-alert mb-4">Sana bugun bilan keyingi 365 kun oralig‘ida bo‘lishi kerak. Yaqin sanani tanlang.</div>{% endif %}
+
+<div class="grid gap-5 lg:grid-cols-[minmax(0,1fr)_20rem]">
+  <section class="min-w-0 space-y-5" aria-labelledby="daily-picker-title">
+    <div class="ca-panel">
+      <div class="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p class="ca-eyebrow"><i data-lucide="calendar-days" class="lu" aria-hidden="true"></i>Rejalashtirish</p>
+          <h2 id="daily-picker-title" class="mt-1 text-xl font-semibold">Qaysi kun uchun?</h2>
+          <p class="mt-1 max-w-2xl text-sm text-mute">Bugungi masala allaqachon e’lon qilingan bo‘lsa, uni almashtirib bo‘lmaydi. Ertangi yoki keyingi kunni tanlab, variantlarni oldindan belgilang.</p>
+        </div>
+        <form method="get" class="flex flex-wrap items-end gap-2">
+          <label class="text-sm font-medium" for="daily-date">Sana
+            <input id="daily-date" class="ca-input mt-1 block" type="date" name="date" value="{{ day|date:'Y-m-d' }}" min="{{ today|date:'Y-m-d' }}" max="{{ max_date|date:'Y-m-d' }}" required>
+          </label>
+          <button class="ca-btn ca-btn-ghost" type="submit"><i data-lucide="search" class="lu" aria-hidden="true"></i>Variantlarni ko‘rish</button>
+        </form>
+      </div>
+    </div>
+
+    {% if assignment %}
+    <div class="ca-panel border-ok/30">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p class="ca-eyebrow text-ok"><i data-lucide="circle-check" class="lu" aria-hidden="true"></i>{{ day|date:"d.m.Y" }} uchun tanlangan masala</p>
+          <a class="mt-1 inline-block text-lg font-semibold ca-link" href="{% url 'problems:detail' assignment.problem.slug %}">{{ assignment.problem.title }}</a>
+          <div class="mt-2 flex flex-wrap items-center gap-2">
+            <span class="ca-diff ca-diff-{{ assignment.problem.difficulty }}">{{ assignment.problem.get_difficulty_display }}</span>
+            {% if assignment.selection_method == 'admin' %}<span class="ca-chip ca-chip-rated">Admin tanladi{% if assignment.selected_by %} · {{ assignment.selected_by.username }}{% endif %}</span>
+            {% else %}<span class="ca-chip">Avtomatik tanlangan</span>{% endif %}
+          </div>
+        </div>
+        {% if day == today %}<span class="ca-chip ca-chip-score"><i data-lucide="lock-keyhole" class="lu mr-1" aria-hidden="true"></i>Bugungi tanlov yopiq</span>{% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if day == today and today_assignment %}
+    <div class="ca-empty"><i data-lucide="calendar-check" class="lu mx-auto mb-2" aria-hidden="true"></i>Bugungi masala foydalanuvchilarga ko‘rinib bo‘lgan. Streak va bonuslar o‘zgarmasligi uchun bugungi tanlovni qulfladik.</div>
+    {% else %}
+    <div>
+      <div class="mb-3 flex flex-wrap items-end justify-between gap-2">
+        <div>
+          <h2 class="text-lg font-semibold">{{ candidates|length }} ta variant</h2>
+          <p class="text-sm text-mute">Avval haftaning kuniga mos qiyinlik, keyin boshqa darajalar. Yaqinda kunlik bo‘lgan masalalar chetlatiladi.</p>
+        </div>
+        <span class="ca-chip"><i data-lucide="wand-sparkles" class="lu mr-1" aria-hidden="true"></i>Algoritm tavsiyasi</span>
+      </div>
+      {% if candidates %}
+      <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        {% for p in candidates %}
+        <article class="ca-panel flex min-w-0 flex-col{% if assignment and assignment.problem_id == p.pk %} border-accent/50{% endif %}">
+          <div class="flex items-start justify-between gap-2">
+            <span class="ca-chip !bg-ink/5 text-mute">Variant {{ forloop.counter }}</span>
+            {% if assignment and assignment.problem_id == p.pk %}<span class="ca-chip ca-chip-rated"><i data-lucide="check" class="lu mr-1" aria-hidden="true"></i>Tanlangan</span>{% endif %}
+          </div>
+          <a class="ca-link mt-3 text-lg font-semibold" href="{% url 'problems:detail' p.slug %}" target="_blank" rel="noopener">{{ p.title }}<i data-lucide="arrow-up-right" class="lu ml-1 text-mute" aria-hidden="true"></i></a>
+          <div class="mt-2 flex flex-wrap items-center gap-2">
+            <span class="ca-diff ca-diff-{{ p.difficulty }}">{{ p.get_difficulty_display }}</span>
+            <span class="ca-chip">{{ p.get_kind_display }}</span>
+            {% if p.rating %}<span class="ca-chip">{{ p.rating }} rating</span>{% endif %}
+          </div>
+          {% with tags=p.tags.all %}{% if tags %}<div class="mt-3 flex flex-wrap gap-1.5">{% for tag in tags|slice:":3" %}<span class="ca-chip !bg-ink/5 text-mute">{{ tag.name }}</span>{% endfor %}</div>{% endif %}{% endwith %}
+          <form method="post" action="{% url 'moderation:daily_problem_choose' %}" class="mt-auto pt-5"{% if assignment and assignment.problem_id != p.pk %} onsubmit="return confirm('{{ day|date:'d.m.Y' }} uchun tanlangan masala ‘{{ assignment.problem.title|escapejs }}’ o‘rniga ‘{{ p.title|escapejs }}’ bo‘ladi. Davom etasizmi?');"{% endif %}>{% csrf_token %}
+            <input type="hidden" name="date" value="{{ day|date:'Y-m-d' }}">
+            <input type="hidden" name="problem_id" value="{{ p.pk }}">
+            <button class="ca-btn w-full {% if assignment and assignment.problem_id == p.pk %}ca-btn-ghost{% else %}ca-btn-primary{% endif %}" type="submit"{% if assignment and assignment.problem_id == p.pk %} disabled aria-disabled="true"{% endif %}>
+              {% if assignment and assignment.problem_id == p.pk %}<i data-lucide="check" class="lu" aria-hidden="true"></i>Hozir tanlangan{% else %}<i data-lucide="calendar-plus" class="lu" aria-hidden="true"></i>Shu masalani tanlash{% endif %}
+            </button>
+          </form>
+        </article>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="ca-empty"><i data-lucide="library" class="lu mx-auto mb-2" aria-hidden="true"></i>Hozircha mos ochiq masala topilmadi. Ochiq masalalar qo‘shilgach, variantlar shu yerda chiqadi.</div>
+      {% endif %}
+    </div>
+    {% endif %}
+  </section>
+
+  <aside class="ca-panel h-fit" aria-labelledby="schedule-title">
+    <div class="flex items-center justify-between gap-2">
+      <h2 id="schedule-title" class="font-semibold">Yaqin kunlar</h2>
+      <span class="ca-chip">15 kun</span>
+    </div>
+    <p class="mt-1 text-sm text-mute">Tanlangan va avtomatik rejalangan masalalar.</p>
+    {% if schedule %}
+    <ul class="mt-4 space-y-2">
+      {% for row in schedule %}
+      <li>
+        <a class="flex items-start justify-between gap-3 rounded-lg border border-ink/10 p-3 transition hover:border-accent/40{% if row.date == day %} border-accent/50 bg-accent/5{% endif %}" href="{% url 'moderation:daily_problem' %}?date={{ row.date|date:'Y-m-d' }}">
+          <span class="min-w-0"><span class="block text-xs text-mute">{{ row.date|date:"D · d.m.Y" }}{% if row.date == today %} · Bugun{% endif %}</span><span class="mt-0.5 block truncate text-sm font-medium">{{ row.problem.title }}</span></span>
+          {% if row.selection_method == 'admin' %}<i data-lucide="user-check" class="lu shrink-0 text-ok" aria-label="Admin tanlagan"></i>{% else %}<i data-lucide="sparkles" class="lu shrink-0 text-mute" aria-label="Avtomatik"></i>{% endif %}
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}<div class="ca-empty mt-4 !p-4">Hali yaqin kunlar uchun reja yo‘q.</div>{% endif %}
+    <div class="mt-4 border-t border-ink/10 pt-3 text-xs leading-relaxed text-mute">
+      <p><i data-lucide="info" class="lu mr-1" aria-hidden="true"></i>Tanlov bo‘lmasa, sayt birinchi murojaatda masalani avtomatik belgilaydi. Admin tanlovi esa sanaga saqlanib, hamma foydalanuvchiga bir xil ko‘rinadi.</p>
+    </div>
+  </aside>
+</div>
+{% endblock %}

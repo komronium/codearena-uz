@@ -76,7 +76,8 @@ REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
 # `default run rejudge`, so real submissions go first and a rejudge never delays them.
 RQ_QUEUES = {"default": {"URL": REDIS_URL, "DEFAULT_TIMEOUT": 600},
              "run": {"URL": REDIS_URL, "DEFAULT_TIMEOUT": 120},
-             "rejudge": {"URL": REDIS_URL, "DEFAULT_TIMEOUT": 600}}
+             "rejudge": {"URL": REDIS_URL, "DEFAULT_TIMEOUT": 600},
+             "notifications": {"URL": REDIS_URL, "DEFAULT_TIMEOUT": 60}}
 CACHES = {"default": {"BACKEND": "django.core.cache.backends.redis.RedisCache", "LOCATION": REDIS_URL}}
 
 # Host path shared between worker container and docker daemon; must be identical on both sides.
@@ -93,6 +94,12 @@ EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "1") == "1"
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@codearena.local")
 
+# Telegram Bot API: create the bot with @BotFather, then configure its webhook after deploy.
+TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
+TELEGRAM_BOT_USERNAME = os.environ.get("TELEGRAM_BOT_USERNAME", "").lstrip("@")
+TELEGRAM_WEBHOOK_SECRET = os.environ.get("TELEGRAM_WEBHOOK_SECRET", "")
+SITE_URL = os.environ.get("SITE_URL", "https://codearena.uz").rstrip("/")
+
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "Asia/Tashkent"
 USE_TZ = True
@@ -105,9 +112,6 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 PASSWORD_HASHERS = ["apps.accounts.hashers.PBKDF2Hasher300k",
                     "django.contrib.auth.hashers.PBKDF2PasswordHasher"]
-
-# A practice submission is accepted only if its code was in the site's editor (apps.integrity.practice).
-PRACTICE_REQUIRE_EDITOR = True
 
 # Search engines (apps/home/templatetags/seo.py). The HTML-tag codes of Google Search Console and Yandex
 # Webmaster, printed in every page's head; a DNS record verifies the domain without them.

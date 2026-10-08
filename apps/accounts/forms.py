@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 
-from .models import User
+from .models import TelegramLink, User
 
 _CA_INPUT = {"class": "ca-input"}
 
@@ -51,3 +51,9 @@ class ProfileEditForm(forms.ModelForm):
             "location": forms.TextInput(attrs=_CA_INPUT),
             "school": forms.TextInput(attrs=_CA_INPUT),
         }
+
+
+class TelegramPreferencesForm(forms.ModelForm):
+    class Meta:
+        model = TelegramLink
+        fields = ("notify_submissions", "notify_daily_problem", "notify_contests")

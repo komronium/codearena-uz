@@ -3,6 +3,7 @@ import secrets
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.utils import timezone
 
 
 class User(AbstractUser):
@@ -35,6 +36,64 @@ class User(AbstractUser):
         "self", null=True, blank=True, on_delete=models.SET_NULL, related_name="verified_users",
     )
     verified_note = models.CharField(max_length=200, blank=True)
+
+
+class TelegramLink(models.Model):
+    """A user's private Telegram chat and their notification preferences."""
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="telegram_link"
+    )
+    chat_id = models.CharField(max_length=32, unique=True)
+    username = models.CharField(max_length=64, blank=True)
+    connected_at = models.DateTimeField(default=timezone.now)
+    is_active = models.BooleanField(default=True)
+    notify_submissions = models.BooleanField(default=True)
+    notify_daily_problem = models.BooleanField(default=True)
+    notify_contests = models.BooleanField(default=True)
+    last_error = models.CharField(max_length=200, blank=True)
+
+    def __str__(self):
+        return f"Telegram: {self.user.username}"
+
+
+class TelegramLinkToken(models.Model):
+    """Hashed, single-use deep-link credential with a short expiry."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="telegram_link_tokens"
+    )
+    token_hash = models.CharField(max_length=64, unique=True)
+    expires_at = models.DateTimeField()
+    consumed_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class TelegramOutbox(models.Model):
+    """Durable notification queue; Redis delivery is fast, this row allows retry after outages."""
+
+    class Status(models.TextChoices):
+        PENDING = "pending", "Kutilmoqda"
+        SENDING = "sending", "Yuborilmoqda"
+        SENT = "sent", "Yuborildi"
+        FAILED = "failed", "Xato"
+
+    link = models.ForeignKey(TelegramLink, on_delete=models.CASCADE, related_name="outbox")
+    event_key = models.CharField(max_length=160)
+    preference = models.CharField(max_length=32)
+    text = models.TextField()
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDING)
+    attempts = models.PositiveSmallIntegerField(default=0)
+    available_at = models.DateTimeField(default=timezone.now)
+    queued_at = models.DateTimeField(null=True, blank=True)
+    claimed_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    sent_at = models.DateTimeField(null=True, blank=True)
+    last_error = models.CharField(max_length=300, blank=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["link", "event_key"], name="telegram_outbox_event_once")]
+        indexes = [models.Index(fields=["status", "available_at"], name="accounts_tg_status_avail_idx")]
 
 
 _CODE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"

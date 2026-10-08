@@ -7,6 +7,7 @@ from django.contrib.auth import views as auth_views
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.db import IntegrityError, transaction
 from django.db.models import Count, F, OuterRef, Q, Subquery
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
@@ -25,13 +26,14 @@ from apps.problems.skills import skill_map
 from apps.submissions.models import Submission
 
 from .forms import ProfileEditForm, RegisterForm
-from .models import User
+from .models import TelegramLink, User
 
 from .tiers import RATING_TIERS as _RATING_TIERS
 from .tiers import next_tier as _next_tier
 from .tiers import rating_tier
 from .tiers import streak_badges, tier_banner
 from .tiers import tier_color as _tier_color
+from .telegram import bot_configured
 
 _CHART_W, _CHART_H = 700, 190
 _CHART_L, _CHART_R = 56, 680
@@ -144,11 +146,23 @@ def register(request):
     form = RegisterForm(request.POST or None)
     nxt = _safe_next(request)
     if request.method == "POST" and form.is_valid():
-        user = form.save()
-        login(request, user)
-        if user.teacher_requested:
-            messages.success(request, "Xush kelibsiz! O‘qituvchi so‘rovingiz adminga yuborildi — tasdiqlangach, «Vazifalar» bo‘limida guruh ochasiz.")
-        return redirect(nxt or "home")
+        try:
+            with transaction.atomic():
+                user = form.save()
+        except IntegrityError:
+            # A concurrent signup can pass the form's uniqueness checks before the other
+            # request commits. Turn that race into an ordinary validation error, not a 500.
+            if User.objects.filter(username__iexact=form.cleaned_data["username"]).exists():
+                form.add_error("username", "Bu foydalanuvchi nomi band.")
+            elif User.objects.filter(email__iexact=form.cleaned_data["email"]).exists():
+                form.add_error("email", "Bu email allaqachon ro‘yxatdan o‘tgan.")
+            else:
+                form.add_error(None, "Ro‘yxatdan o‘tishda xatolik yuz berdi. Qayta urinib ko‘ring.")
+        else:
+            login(request, user)
+            if user.teacher_requested:
+                messages.success(request, "Xush kelibsiz! O‘qituvchi so‘rovingiz adminga yuborildi — tasdiqlangach, «Vazifalar» bo‘limida guruh ochasiz.")
+            return redirect(nxt or "home")
     return render(request, "registration/register.html", {"form": form, "next": nxt})
 
 
@@ -175,7 +189,11 @@ def profile_edit(request):
     if request.method == "POST" and form.is_valid():
         form.save()
         return redirect("profile", request.user.username)
-    return render(request, "accounts/profile_edit.html", {"form": form})
+    return render(request, "accounts/profile_edit.html", {
+        "form": form,
+        "telegram_link": TelegramLink.objects.filter(user=request.user).first(),
+        "telegram_configured": bot_configured(),
+    })
 
 
 def _ranked(page):

@@ -1,6 +1,7 @@
 """The daily problem: one open problem a day for everyone, a streak for solving it on
 its day, and a small practice-points bonus per such day."""
 import datetime
+import hashlib
 import random
 
 from django.db import IntegrityError, transaction
@@ -36,6 +37,38 @@ def daily_for(day: datetime.date | None = None) -> DailyProblem | None:
     except IntegrityError:
         pass  # a concurrent request made it first
     return DailyProblem.objects.select_related("problem").get(date=day)
+
+
+def daily_candidates(day: datetime.date, count: int = 5) -> list[Problem]:
+    """Stable, varied choices for staff scheduling a future daily problem.
+
+    Prefer the weekday's usual difficulty, fill any shortfall from other levels, and
+    avoid problems used within the freshness window. If the catalog is exhausted, allow
+    repeats just as the automatic picker does.
+    """
+    window = (
+        day - datetime.timedelta(days=FRESH_DAYS),
+        day + datetime.timedelta(days=FRESH_DAYS),
+    )
+    recent = DailyProblem.objects.filter(date__range=window).exclude(date=day).values("problem_id")
+    pool = open_problems().exclude(pk__in=recent)
+    rows = list(pool.order_by("pk").values_list("pk", "difficulty"))
+    preferred = [pk for pk, difficulty in rows if difficulty == WEEKDAY_LEVEL[day.weekday()]]
+    all_ids = [pk for pk, _difficulty in rows]
+    preferred_set = set(preferred)
+    fallback = [pk for pk in all_ids if pk not in preferred_set]
+    if not all_ids:
+        fallback = list(open_problems().order_by("pk").values_list("pk", flat=True))
+    if not preferred and not fallback:
+        return []
+    # Hash ordering is stable across workers and page refreshes, unlike process-randomized hash().
+    order = lambda pk: hashlib.sha256(f"{day.isoformat()}:{pk}".encode()).digest()
+    preferred.sort(key=order)
+    fallback.sort(key=order)
+    chosen = (preferred + fallback)[:count]
+    by_id = Problem.objects.filter(pk__in=chosen).select_related("author").prefetch_related("tags")
+    problems = {problem.pk: problem for problem in by_id}
+    return [problems[pk] for pk in chosen]
 
 
 def _day_bounds(day: datetime.date):

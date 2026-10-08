@@ -36,6 +36,15 @@ services:
     networks:
       - codearena-net
 
+  notification-worker:
+    build: .
+    env_file: .env
+    command: python manage.py rqworker notifications
+    volumes: [".:/app"]
+    depends_on: [db, redis]
+    networks:
+      - codearena-net
+
 volumes:
   pgdata:
 

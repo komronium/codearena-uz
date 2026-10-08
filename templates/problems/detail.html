@@ -787,8 +787,8 @@ resolves their bare imports so @codemirror/state loads once — two copies break
       if (typed.reduce((a, [, n]) => a + n, 0) > 200) bulk();
     });
 
-    // The editor's code every 10 s when it changed and at each submit: lets the server tell code
-    // written here from code that arrived some other way.
+    // Keep periodic editor snapshots for integrity reports. Submission itself does not wait on
+    // this telemetry, so a slow or unavailable snapshot endpoint cannot block a user's code.
     let sent = null;
     const snap = () => {
       if (!window.caCode) return Promise.resolve();
@@ -800,17 +800,6 @@ resolves their bare imports so @codemirror/state loads once — two copies break
     };
     setInterval(snap, 10000);
     window.addEventListener("pagehide", snap);
-    // The server accepts a practice submission only if its code reached it from this editor:
-    // save it first, then let the submit go on.
-    let passing = false;
-    document.addEventListener("submit", (e) => {
-      if (e.target.id !== "submit-form") return;
-      if (passing) { passing = false; return; }
-      e.preventDefault(); e.stopImmediatePropagation();
-      const form = e.target, by = e.submitter;
-      snap().finally(() => { passing = true; form.requestSubmit(by || undefined); });
-    }, true);
-
     // Time in another window or tab, reported on the way back.
     let leftAt = 0;
     const leave = () => { if (!leftAt) leftAt = Date.now(); };

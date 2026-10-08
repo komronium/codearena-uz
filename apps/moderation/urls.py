@@ -5,6 +5,8 @@ from . import views
 app_name = "moderation"
 urlpatterns = [
     path("", views.dashboard, name="dashboard"),
+    path("daily-problem/", views.daily_problem, name="daily_problem"),
+    path("daily-problem/choose/", views.daily_problem_choose, name="daily_problem_choose"),
     path("queue/", views.queue, name="queue"),
     path("<int:pk>/approve/", views.approve, name="approve"),
     path("<int:pk>/reject/", views.reject, name="reject"),

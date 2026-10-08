@@ -52,6 +52,46 @@
       <button type="submit" class="ca-btn ca-btn-primary"><i data-lucide="check" class="lu" aria-hidden="true"></i>Saqlash</button>
     </div>
   </form>
+  <section class="ca-panel mt-6" aria-labelledby="telegram-title">
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <div class="min-w-0">
+        <h2 id="telegram-title" class="flex items-center gap-2 font-semibold"><i data-lucide="send" class="lu text-accent" aria-hidden="true"></i>Telegram bildirishnomalari</h2>
+        {% if telegram_link and telegram_link.is_active %}
+        <p class="mt-1 text-sm text-ok"><i data-lucide="circle-check" class="lu mr-1" aria-hidden="true"></i>Ulangan{% if telegram_link.username %} · @{{ telegram_link.username }}{% endif %}</p>
+        {% if telegram_link.last_error %}<p class="mt-1 text-sm text-warn">Oxirgi yuborishda xato bo‘ldi. Tizim keyinroq qayta urinadi.</p>{% endif %}
+        {% elif telegram_link %}
+        <p class="mt-1 text-sm text-warn">Bot bilan aloqa to‘xtatilgan. Qayta ulang yoki hisobni uzing.</p>
+        {% if telegram_link.last_error %}<p class="mt-1 text-xs text-mute">Botga xabar yetkazilmadi. Telegram’da botni ochib, Start tugmasini bosing, keyin qayta ulang.</p>{% endif %}
+        {% else %}
+        <p class="mt-1 max-w-xl text-sm text-mute">Telegram botni ulang: tekshiruv natijalari, kun masalasi va ro‘yxatdan o‘tgan musobaqalaringiz boshlanishi haqida xabar olasiz.</p>
+        {% endif %}
+      </div>
+      {% if telegram_configured %}
+        {% if telegram_link and telegram_link.is_active %}
+        <form method="post" action="{% url 'telegram_disconnect' %}" onsubmit="return confirm('Telegram hisobingizni CodeArena’dan uzasizmi?');">{% csrf_token %}<button class="ca-btn ca-btn-ghost !py-1.5 text-sm"><i data-lucide="unlink" class="lu" aria-hidden="true"></i>Uzish</button></form>
+        {% else %}
+        <form method="post" action="{% url 'telegram_connect' %}">{% csrf_token %}<button class="ca-btn ca-btn-primary !py-1.5 text-sm"><i data-lucide="send" class="lu" aria-hidden="true"></i>{% if telegram_link %}Qayta ulash{% else %}Telegramni ulash{% endif %}</button></form>
+        {% endif %}
+      {% endif %}
+    </div>
+    {% if not telegram_configured %}
+    <div class="ca-alert mt-4">Telegram bot hozircha sozlanmagan. Administrator bot tokeni va webhook sozlamalarini qo‘shgach, bu yerdan ulashingiz mumkin.</div>
+    {% elif not telegram_link or not telegram_link.is_active %}
+    <p class="mt-3 text-xs leading-relaxed text-mute">Ulash tugmasidan keyin Telegram’da <b>Start</b> ni bosing. So‘ng shu sahifaga qaytib, yangilang. Kod 10 daqiqa ichida ishlatilishi va faqat bir marta qo‘llanishi mumkin.</p>
+    {% else %}
+    <form method="post" action="{% url 'telegram_preferences' %}" class="mt-5 border-t border-line pt-4">{% csrf_token %}
+      <fieldset>
+        <legend class="mb-3 text-sm font-semibold">Qaysi xabarlarni yuboraylik?</legend>
+        <div class="grid gap-2 sm:grid-cols-3">
+          <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-line p-3 text-sm"><input class="mt-0.5" type="checkbox" name="notify_submissions"{% if telegram_link.notify_submissions %} checked{% endif %}><span><b>Yechim natijalari</b><small class="mt-0.5 block text-xs text-mute">Har bir tekshirilgan urinish</small></span></label>
+          <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-line p-3 text-sm"><input class="mt-0.5" type="checkbox" name="notify_daily_problem"{% if telegram_link.notify_daily_problem %} checked{% endif %}><span><b>Kun masalasi</b><small class="mt-0.5 block text-xs text-mute">Har kuni yangi masala</small></span></label>
+          <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-line p-3 text-sm"><input class="mt-0.5" type="checkbox" name="notify_contests"{% if telegram_link.notify_contests %} checked{% endif %}><span><b>Musobaqa eslatmalari</b><small class="mt-0.5 block text-xs text-mute">Boshlanishidan 1 soat oldin</small></span></label>
+        </div>
+      </fieldset>
+      <div class="mt-4 flex justify-end"><button class="ca-btn ca-btn-ghost !py-1.5 text-sm"><i data-lucide="check" class="lu" aria-hidden="true"></i>Sozlamalarni saqlash</button></div>
+    </form>
+    {% endif %}
+  </section>
   {% if user.role == "student" and not user.is_staff %}
   <section class="ca-panel mt-6 flex flex-wrap items-center justify-between gap-3" aria-labelledby="teacher-title">
     <div class="min-w-0">

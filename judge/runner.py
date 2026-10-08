@@ -1,4 +1,5 @@
 import os
+import logging
 import shutil
 import tempfile
 
@@ -14,6 +15,7 @@ from judge.compare import outputs_match
 
 
 TRIAL_OUTPUT_CHARS = 4000
+log = logging.getLogger(__name__)
 
 
 def run_trial(lang_code: str, source: str, inputs: list[str], expected: list[str] | None,
@@ -66,6 +68,13 @@ def run_submission(submission_id: int) -> None:
     refresh_solves(sub.problem_id, [sub.user_id])
     sub.refresh_from_db(fields=["verdict"])
     settle_for_submission(sub)
+    try:
+        from apps.accounts.telegram import notify_submission
+
+        notify_submission(sub)
+    except Exception:
+        # Notifications must never turn a successful judge run into a failed submission.
+        log.exception("Could not queue Telegram verdict notification for submission %s", sub.pk)
 
 
 def _run_code_submission(sub: Submission) -> None:

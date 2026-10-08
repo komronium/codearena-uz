@@ -1,8 +1,10 @@
+import datetime
+
 import django_rq
 from django.contrib import messages
 from django.core.management import CommandError, call_command
 from django.core.paginator import Paginator
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.db.models import Count, OuterRef, Q, Subquery
 from django.db.models.functions import Coalesce
 from django.http import HttpResponseBadRequest
@@ -17,7 +19,8 @@ from apps.accounts.models import Group, User
 from apps.contests.models import Contest, Participation
 from apps.contests.rating import recalc_official, review_queue
 from apps.contests.services import reuse_reason
-from apps.problems.models import Problem, Tag, TestCase
+from apps.problems.daily import daily_candidates, refresh_daily
+from apps.problems.models import DailyProblem, Problem, Tag, TestCase
 from apps.submissions.models import VERDICT_LABELS, Submission, TestResult, UserProblemSolved
 from apps.submissions.solves import refresh_solves
 from apps.integrity import audit
@@ -65,6 +68,101 @@ def dashboard(request):
             "teacher_requests": User.objects.filter(teacher_requested=True).count(),
         },
     })
+
+
+@staff_required
+def daily_problem(request):
+    """Staff picker for scheduling a daily problem without changing a published day."""
+    today = timezone.localdate()
+    today_assignment = DailyProblem.objects.filter(date=today).select_related("problem").first()
+    default_date = today + datetime.timedelta(days=1) if today_assignment else today
+    raw_date = request.GET.get("date", "")
+    malformed_date = False
+    try:
+        day = datetime.date.fromisoformat(raw_date) if raw_date else default_date
+    except ValueError:
+        day = default_date
+        malformed_date = True
+    max_date = today + datetime.timedelta(days=365)
+    invalid_date = malformed_date or day < today or day > max_date
+    if invalid_date:
+        day = default_date
+
+    assignment = DailyProblem.objects.filter(date=day).select_related(
+        "problem", "selected_by"
+    ).first()
+    candidates = daily_candidates(day)
+    schedule = (DailyProblem.objects.filter(
+        date__gte=today, date__lte=today + datetime.timedelta(days=14)
+    ).select_related("problem").order_by("date"))
+    return render(request, "moderation/daily_problem.html", {
+        "today": today,
+        "max_date": max_date,
+        "day": day,
+        "assignment": assignment,
+        "today_assignment": today_assignment,
+        "candidates": candidates,
+        "schedule": schedule,
+        "invalid_date": invalid_date,
+    })
+
+
+@staff_required
+@require_POST
+def daily_problem_choose(request):
+    today = timezone.localdate()
+    try:
+        day = datetime.date.fromisoformat(request.POST.get("date", ""))
+        problem_id = int(request.POST.get("problem_id", ""))
+    except (TypeError, ValueError):
+        messages.error(request, "Sana yoki masala noto‘g‘ri tanlandi.")
+        return redirect("moderation:daily_problem")
+
+    if day < today or day > today + datetime.timedelta(days=365):
+        messages.error(request, "Faqat bugun yoki keyingi 365 kun uchun masala tanlash mumkin.")
+        return redirect("moderation:daily_problem")
+    if day == today and DailyProblem.objects.filter(date=today).exists():
+        messages.error(request, "Bugungi masala allaqachon e’lon qilingan va almashtirilmaydi.")
+        return redirect("moderation:daily_problem")
+
+    candidate_ids = {problem.pk for problem in daily_candidates(day)}
+    if problem_id not in candidate_ids:
+        messages.error(request, "Bu masala tanlov ro‘yxatida yo‘q. Sahifani yangilab, variantlardan birini tanlang.")
+        return redirect(f"{reverse('moderation:daily_problem')}?date={day.isoformat()}")
+
+    problem = Problem.objects.get(pk=problem_id)
+    try:
+        with transaction.atomic():
+            assignment = DailyProblem.objects.select_for_update().filter(date=day).first()
+            if day == timezone.localdate() and assignment:
+                messages.error(request, "Bugungi masala tanlov paytida e’lon qilindi va endi almashtirilmaydi.")
+                return redirect(f"{reverse('moderation:daily_problem')}?date={day.isoformat()}")
+            if assignment:
+                assignment.problem = problem
+                assignment.selection_method = DailyProblem.SelectionMethod.ADMIN
+                assignment.selected_by = request.user
+                assignment.save(update_fields=["problem", "selection_method", "selected_by"])
+            else:
+                # Create rather than get_or_create: if automatic selection wins a concurrent
+                # insert, keep that published choice instead of silently replacing it.
+                assignment = DailyProblem.objects.create(
+                    date=day,
+                    problem=problem,
+                    selection_method=DailyProblem.SelectionMethod.ADMIN,
+                    selected_by=request.user,
+                )
+            audit.record(
+                request, audit.Action.DAILY_SELECT,
+                note=f"{day.isoformat()}: {problem.slug} — {problem.title}",
+            )
+    except IntegrityError:
+        messages.error(request, "Bu sana uchun masala boshqa so‘rovda tanlandi. Sahifani yangilang.")
+        return redirect(f"{reverse('moderation:daily_problem')}?date={day.isoformat()}")
+    if day == today:
+        # If today's assignment was still unset, account for accepted runs already made today.
+        refresh_daily(problem.pk, None)
+    messages.success(request, f"{day:%d.%m.%Y} kuniga «{problem.title}» tanlandi.")
+    return redirect(f"{reverse('moderation:daily_problem')}?date={assignment.date.isoformat()}")
 
 
 # ---- problems ----------------------------------------------------------------
