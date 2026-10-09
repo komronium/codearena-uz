@@ -8,7 +8,7 @@ Scope: all first-party CodeArena pages and shared navigation, desktop and mobile
 
 Redesign CodeArena's complete interface so students, teachers, and staff can find the next action quickly and understand dense programming-contest information without visual clutter. Preserve the platform's Uzbek-first purpose, real data, current routes, permissions, judging behavior, and other established functionality.
 
-The screenshot in the request shows the sample input/output component. Treat it as a content reference within the problem-solving flow, not as a constraint on the shape of the rest of the site.
+The provided screenshots are visual references: the first shows the paired sample input/output component; the second shows a profile composition with identity/navigation, progress, metric summaries, rating history, and topic performance. Reuse these cues where they fit existing content, not as constraints on unrelated pages.
 
 ## Design principles
 
@@ -31,9 +31,9 @@ The screenshot in the request shows the sample input/output component. Treat it 
 
 ### Color and surfaces
 
-- Keep a light neutral canvas and high-contrast ink for text. Important descriptions, labels, values, and navigation should remain readable without relying on grey-on-grey.
+- Use crisp white surfaces on a very light cool blue canvas, with high-contrast navy ink and blue-gray secondary text/borders. Important descriptions, labels, values, and navigation should not rely on pale grey text.
 - Use CodeArena cobalt (`#2557E2`) for primary actions, active navigation, links, and focus states; tune its dark-theme token for contrast.
-- Keep semantic colors for success, warning, and failure; do not use them as decoration.
+- Keep green for positive movement/success; reserve tier hues for rating/tier information and charts. Warning and failure colors stay semantic. Do not use status colors as decoration.
 - Define matching dark-theme tokens with equivalent contrast.
 - Prefer hairline borders and surface separation. Avoid gradients, heavy shadows, glass effects, and card grids that do not clarify grouping.
 
@@ -84,7 +84,7 @@ The screenshot in the request shows the sample input/output component. Treat it 
 
 ### People, ratings, and trust
 
-- Profile pages should lead with identity and current rating/progress, then explain activity charts and solved-problem breakdowns.
+- Profile pages should lead with identity and current rating/progress, then explain activity charts and solved-problem breakdowns. Use the supplied profile screenshot as a composition reference: compact identity/navigation, a strong profile summary, scannable metric groups, rating history, and topic performance, adapted to data the product actually has.
 - Rating and practice leaderboards should be scan-friendly and clearly distinguish their ranking metric.
 - Honor/trust pages should explain expectations using the current policy content and point to relevant evidence or actions.
 
@@ -128,7 +128,7 @@ The implementation plan will enumerate concrete template files and route/role co
 ## Self-review
 
 - Scope includes public, authenticated, teacher, and staff routes; no page family is implicitly excluded.
-- The design keeps the established Manrope choice and full dark-theme support while addressing the request for stronger text contrast.
+- The design keeps the established Manrope choice and full dark-theme support while addressing the request for stronger text contrast. Both supplied screenshots are mapped to relevant page patterns without making unrelated pages look identical.
 - The proposal changes information hierarchy and page patterns, not only decorative styling.
 - Backend contracts and user-visible functionality are explicit implementation constraints.
 - No placeholder content, new feature assumptions, or unresolved design choices remain in this draft.
