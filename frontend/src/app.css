@@ -4,7 +4,7 @@
  * (e.g. [hidden] { display: none }) and utilities win. Everything here is kept whole:
  * class names built in templates (ca-verdict-{{ v }}) are invisible to Tailwind's scan. */
 
-/* Inter for words, JetBrains Mono for data (clocks, ranks, scores, counts) and code. Both are
+/* Manrope for words, JetBrains Mono for data (clocks, ranks, scores, counts) and code. Both are
    vendored by build.mjs; Lilex, Fira Code and Anthropic Mono stay as editor font options. */
 @font-face { font-family: "Anthropic Mono"; font-weight: 400; font-style: normal; font-display: swap; src: url("../fonts/AnthropicMono-Regular.otf") format("opentype"); }
 @font-face { font-family: "Anthropic Mono"; font-weight: 400; font-style: italic; font-display: swap; src: url("../fonts/AnthropicMono-Italic.otf") format("opentype"); }
@@ -17,8 +17,8 @@
   --ca-radius: 14px;      /* cards */
   --ca-radius-sm: 8px;    /* controls and rows inside them */
   --ca-nav-h: 3.5rem;
-  --ca-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  /* the interface's numbers (scores, clocks, counts) are Inter with tabular figures, set on body: bold
+  --ca-sans: "Manrope", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* the interface's numbers (scores, clocks, counts) are Manrope with tabular figures, set on body: bold
      monospace digits read as ugly beside the text. Code, the console and keys keep JetBrains Mono. */
   --ca-mono: var(--ca-sans);
   --ca-code: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;

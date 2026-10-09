@@ -1,7 +1,7 @@
 // Builds CodeArena's static assets from the versions pinned in package.json. The outputs
 // are committed, so the Django image never needs Node:
 //   static/css/app.css         Tailwind (scans templates + apps) + src/app.css + @font-face
-//   static/fonts/*.woff2       Inter, Lilex, JetBrains Mono, Fira Code (SIL Open Font License); the
+//   static/fonts/*.woff2       Manrope, Lilex, JetBrains Mono, Fira Code (SIL Open Font License); the
 //                              project's own .otf fonts there are not built and are left alone
 //   static/vendor/*            htmx, Lucide icons, highlight.js
 //   static/vendor/esm/*.js     one ES module per CodeMirror package; every bare import stays
@@ -49,7 +49,7 @@ const esmFile = (spec) => spec.replace(/^@/, "").replaceAll("/", "-") + ".js";
 // [family we declare, fontsource stylesheets]; only these scripts' subsets are shipped,
 // each fetched by the browser only when the page uses its characters (unicode-range).
 const FONTS = [
-  ["Inter", ["@fontsource-variable/inter/wght.css"]],
+  ["Manrope", ["@fontsource-variable/manrope/wght.css"]],
   ["Lilex", ["@fontsource-variable/lilex/wght.css"]],
   ["JetBrains Mono", ["400", "400-italic", "500", "700"].map((w) => `@fontsource/jetbrains-mono/${w}.css`)],
   ["Fira Code", ["400", "500"].map((w) => `@fontsource/fira-code/${w}.css`)],
@@ -76,7 +76,7 @@ const VENDOR_FONTS = {
 };
 const LICENSED = [
   "htmx.org", "lucide", "@highlightjs/cdn-assets", "katex", "easymde", "@fortawesome/fontawesome-free",
-  "tailwindcss", "@fontsource-variable/inter", "@fontsource-variable/lilex",
+  "tailwindcss", "@fontsource-variable/manrope", "@fontsource-variable/lilex",
   "@fontsource/jetbrains-mono", "@fontsource/fira-code", "@babel/runtime",
   ...ESM.filter((s) => !s.startsWith("@babel/")),
 ];
