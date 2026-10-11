@@ -14,10 +14,11 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils import timezone
 
-from apps.contests.models import Contest, ContestProblem
+from apps.contests.models import LEVEL_POINTS, Contest, ContestProblem
 from apps.problems.models import Problem, Tag, TestCase
 
-POINTS = {"beginner": 100, "easy": 200, "medium": 300, "hard": 500}
+PRACTICE_POINTS = {"beginner": 100, "easy": 200, "medium": 300, "hard": 500}  # a new problem's practice price
+POINTS = LEVEL_POINTS  # its points in the round when the spec sets none: at least 200 (apps.contests.models)
 
 
 def _lines(*rows) -> str:
@@ -316,7 +317,7 @@ class Command(BaseCommand):
             problem = Problem.objects.create(
                 slug=spec["slug"], title=spec["title"], statement_md=spec["statement"],
                 input_md=spec["input"], output_md=spec["output"], difficulty=spec["difficulty"],
-                tl_ms=spec.get("tl_ms", 1000), ml_mb=self.ml_mb, points=POINTS[spec["difficulty"]],
+                tl_ms=spec.get("tl_ms", 1000), ml_mb=self.ml_mb, points=PRACTICE_POINTS[spec["difficulty"]],
                 is_public=False, status=Problem.Status.APPROVED, author=author,
             )
             for name in spec["tags"]:

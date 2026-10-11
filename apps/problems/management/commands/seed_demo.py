@@ -7,11 +7,13 @@ from django.db import transaction
 from django.utils import timezone
 
 from apps.accounts.models import User
-from apps.contests.models import Clarification, Contest, ContestProblem, Participation
+from apps.contests.models import LEVEL_POINTS, Clarification, Contest, ContestProblem, Participation
 from apps.integrity.models import FocusEvent, SimilarityFlag
 from apps.problems.models import Language, Problem, Tag, TestCase
 from apps.submissions.models import Submission, UserProblemSolved
 from apps.submissions.solves import sync_practice_points
+
+LEVELS = Problem.Difficulty.values  # easiest first
 
 TAGS = ["arrays", "graphs", "dynamic-programming", "math", "strings",
         "brute-force", "greedy", "sorting", "recursion", "binary-search"]
@@ -152,9 +154,12 @@ class Command(BaseCommand):
                     start=start, end=end, is_rated=is_rated,
                     rating_applied=is_rated))
                 contests.append(c)
-                for i, p in enumerate(random.sample(problems, k=4)):
+                # easiest first, each worth what its level is worth in a real round (a beginner one 250 ... a hard one 1000)
+                picked = sorted(random.sample(problems, k=4), key=lambda p: (LEVELS.index(p.difficulty), p.pk))
+                for i, p in enumerate(picked):
                     ContestProblem.objects.get_or_create(
-                        contest=c, label=chr(ord("A") + i), defaults=dict(problem=p, order=i, points=100))
+                        contest=c, label=chr(ord("A") + i),
+                        defaults=dict(problem=p, order=i, points=LEVEL_POINTS[p.difficulty]))
 
             ended_contests = contests[:5]
             for u in users:

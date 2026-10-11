@@ -9,7 +9,7 @@ from django.utils import timezone
 
 from apps.accounts.forms import validate_public_username
 from apps.accounts.models import Group, User
-from apps.contests.models import Contest, ContestProblem
+from apps.contests.models import MIN_POINTS, Contest, ContestProblem
 from apps.contests.services import reuse_reason
 from apps.learn.models import RESERVED_SLUGS, StudyPlan
 from apps.problems.models import MAX_HINT_PCT, Problem, ProblemHint, SQLDataset, Tag, TestCase
@@ -233,7 +233,7 @@ ContestProblemFormSet = inlineformset_factory(
     widgets={
         "label": forms.TextInput(attrs={"class": "ca-input w-16 text-center", "maxlength": 2}),
         "problem": forms.Select(attrs={"class": "ca-select"}),
-        "points": forms.NumberInput(attrs={"class": "ca-input w-24"}),
+        "points": forms.NumberInput(attrs={"class": "ca-input w-24", "min": MIN_POINTS, "step": 50}),
         "order": forms.NumberInput(attrs={"class": "ca-input w-20"}),
     },
 )

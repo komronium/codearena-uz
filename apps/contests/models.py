@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils import timezone
 
@@ -107,12 +108,21 @@ class Contest(models.Model):
         return timezone.now() >= self.start
 
 
+# A round's problem is worth at least 200: under Codeforces rules each wrong try costs 50 and a solve never
+# drops below 30%, so a 100-point problem is at its floor after two wrong tries and the scores stop meaning
+# anything. By level, the Codeforces scale the rounds so far have used.
+MIN_POINTS = 200
+LEVEL_POINTS = {"beginner": 250, "easy": 500, "medium": 750, "hard": 1000}
+
+
 class ContestProblem(models.Model):
     contest = models.ForeignKey(Contest, on_delete=models.CASCADE, related_name="contest_problems")
     problem = models.ForeignKey(Problem, on_delete=models.CASCADE)
     label = models.CharField(max_length=2)
     order = models.IntegerField(default=0)
-    points = models.IntegerField(default=100)
+    points = models.IntegerField(default=500, validators=[MinValueValidator(
+        MIN_POINTS, f"Kamida {MIN_POINTS} ball: har noto‘g‘ri urinish −50, 100 ballik masala ikki xatodan keyin "
+                    "eng past bahoga tushadi.")])
 
     class Meta:
         ordering = ["order"]

@@ -1065,7 +1065,7 @@ def test_add_class_contests_creates_two_contests_with_hidden_problems_once():
     ca4, mini = Contest.objects.get(title="CodeArena #4"), Contest.objects.get(title="Mini Contest #1")
     assert (timezone.localtime(ca4.start).strftime("%H:%M"), ca4.duration_label) == ("11:45", "1 soat")
     assert timezone.localtime(mini.start).strftime("%H:%M") == "15:10"
-    assert [cp.points for cp in ca4.contest_problems.all()] == [100, 100, 100, 200, 200, 200, 300, 300]
+    assert [cp.points for cp in ca4.contest_problems.all()] == [250, 250, 250, 500, 500, 500, 750, 750]  # by level, never under 200
     assert [cp.label for cp in mini.contest_problems.all()] == list("ABCD")
     problems = Problem.objects.filter(contests__in=[ca4, mini])
     assert problems.count() == 12 and not problems.exclude(is_public=False, ml_mb=64).exists()
@@ -1529,3 +1529,20 @@ def test_calendar_file_is_the_round_with_a_reminder_an_hour_before(client, conte
     import datetime
     assert f"DTSTART:{contest.start.astimezone(datetime.timezone.utc):%Y%m%dT%H%M%SZ}" in body
     assert f"/contests/{contest.pk}/" in body
+
+
+@pytest.mark.django_db
+def test_a_rounds_problem_is_worth_at_least_200(contest, problem_a):
+    """Under Codeforces rules a wrong try costs 50 and a solve keeps 30%: a 100-point problem hits its floor
+    after two wrong tries, so staff can't save one under 200, and a new one starts at 500."""
+    from django.core.exceptions import ValidationError
+
+    from apps.contests.models import MIN_POINTS, ContestProblem
+
+    cp = ContestProblem(contest=contest, problem=problem_a, label="Z", points=MIN_POINTS - 50)
+    with pytest.raises(ValidationError, match="Kamida 200 ball"):
+        cp.full_clean()
+    cp.points = MIN_POINTS
+    cp.full_clean()
+    assert ContestProblem(contest=contest, problem=problem_a, label="Y").points == 500
+

@@ -233,7 +233,7 @@ def test_staff_can_create_contest_with_problems(client):
     data = {"title": "Round 1", "description_md": "", "start": "2030-01-01T10:00", "end": "2030-01-01T12:00",
             "is_rated": "on", "allowed_ip_prefix": "", "require_group": "",
             "cp-TOTAL_FORMS": "1", "cp-INITIAL_FORMS": "0", "cp-MIN_NUM_FORMS": "0", "cp-MAX_NUM_FORMS": "1000",
-            "cp-0-label": "A", "cp-0-problem": str(p.pk), "cp-0-points": "100", "cp-0-order": "0"}
+            "cp-0-label": "A", "cp-0-problem": str(p.pk), "cp-0-points": "500", "cp-0-order": "0"}
     assert client.post(reverse("moderation:contest_new"), data).status_code == 302
     contest = Contest.objects.get(title="Round 1")
     assert list(contest.contest_problems.values_list("label", "problem_id")) == [("A", p.pk)]
@@ -509,7 +509,7 @@ def _contest_data(problem, rated=True):
     data = {"title": "Round", "description_md": "", "start": "2030-01-01T10:00", "end": "2030-01-01T12:00",
             "allowed_ip_prefix": "", "require_group": "",
             "cp-TOTAL_FORMS": "1", "cp-INITIAL_FORMS": "0", "cp-MIN_NUM_FORMS": "0", "cp-MAX_NUM_FORMS": "1000",
-            "cp-0-label": "A", "cp-0-problem": str(problem.pk), "cp-0-points": "100", "cp-0-order": "0"}
+            "cp-0-label": "A", "cp-0-problem": str(problem.pk), "cp-0-points": "500", "cp-0-order": "0"}
     if rated:
         data["is_rated"] = "on"
     return data
@@ -721,7 +721,7 @@ def test_rated_freshness_check_follows_the_stored_contest_not_the_posted_dates(c
                                      end=now + timezone.timedelta(hours=1))
     ended_early = timezone.localtime(now - timezone.timedelta(minutes=10)).strftime(fmt)
     r = post(running, end=ended_early, **{"cp-TOTAL_FORMS": "1", "cp-0-label": "A", "cp-0-problem": str(public.pk),
-                                          "cp-0-points": "100", "cp-0-order": "0"})
+                                          "cp-0-points": "500", "cp-0-order": "0"})
     assert r.status_code == 200 and not running.contest_problems.exists()
 
     unrated = Contest.objects.create(title="Past", start=now - timezone.timedelta(hours=3),
