@@ -27,7 +27,7 @@ def test_guests_get_the_landing_page(client, world):
     assert "Ro‘yxatdan o‘tish" in page and "Keyingi raund" in page and "0 ishtirokchi" in page
     assert r.context["daily"] is not None and r.context["stats"]["problems"] == 4
     # the decorative code sample scrolls on a phone; inert keeps it out of the tab order, aria-hidden alone does not
-    assert '<div class="relative mx-auto w-full min-w-0 max-w-lg lg:mr-0" inert>' in page
+    assert '<div class="ca7-arena" inert>' in page
 
 
 
@@ -115,7 +115,7 @@ def test_landing_podium_is_the_last_rated_contests_real_standings(client, world)
                                       source="x", verdict="AC")
         Submission.objects.filter(pk=s.pk).update(created=c.start + timezone.timedelta(minutes=minutes))
     r = client.get("/")
-    assert r.context["last_rated"] == c and len(r.context["podium"]) == 3
+    assert r.context["last_rated"] == c and len(r.context["podium"]) == 4  # the top five, here all four
     assert [row["user"].username for row in r.context["podium"][:2]] == ["a3", "a2"]
     assert "1-raund" in r.content.decode()
 

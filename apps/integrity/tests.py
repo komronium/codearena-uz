@@ -290,7 +290,7 @@ def test_report_lists_too_fast_and_back_and_solve(client, flag_contest, flag_pro
     _ac(back, flag_problem, flag_contest, flag_python, LONG_SOURCE)
     client.force_login(staff)
     html = client.get(reverse("integrity:contest_report", args=[flag_contest.pk])).content.decode()
-    section = html[html.index("Shubhali yechimlar"):html.index("O‘xshash kodlar")]
+    section = html[html.index('id="suspicious"'):html.index('id="flags"')]
     assert "quick" in section and "ochilgandan" in section
     assert "returner" in section and "95 s tashqarida" in section
 
@@ -803,7 +803,7 @@ def test_staff_tabs_show_on_integrity_pages_with_the_current_one_marked(client):
     client.force_login(User.objects.create_user("tabs-boss", password="x", is_staff=True))
     body = client.get(reverse("integrity:practice_report")).content.decode()
     assert 'aria-label="Boshqaruv bo‘limlari"' in body
-    assert f'aria-current="page" href="{reverse("integrity:practice_report")}"' in body
+    assert f'href="{reverse("integrity:practice_report")}" aria-current="page"' in body
     assert 'aria-label="Boshqaruv bo‘limlari"' not in client.get(reverse("home")).content.decode()
 
 

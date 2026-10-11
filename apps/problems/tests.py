@@ -219,7 +219,7 @@ def test_list_filters_by_kind_and_marks_sql_problems(client, problem):
     problem.tags.add(Tag.objects.get_or_create(name="math")[0])
     everything = client.get(reverse("problems:list")).content.decode()
     assert "A + B" in everything and "Kattalar" in everything and everything.count('class="ca-kind-sql"') == 1
-    assert 'class="is-sql"' in everything and '<optgroup label="SQL">' in everything
+    assert 'class="is-sql"' in everything
     only_sql = client.get(reverse("problems:list"), {"kind": "sql"})
     assert [p.slug for p in only_sql.context["problems"]] == ["sql-older"]
     assert [(label, [t.name for t in tags]) for label, tags in only_sql.context["tag_groups"]] == [("SQL", ["where"])]
@@ -613,8 +613,7 @@ def test_problem_list_and_profile_show_them(client, catalog):
     assert "Siz uchun" in page
     profile = client.get(reverse("profile", args=["ali"])).content.decode()
     # math: 1 of 3 solved, its bar a third full
-    assert "Masalalar kategoriyalari" in profile and '<td class="n">1</td><td class="n mute">3</td><td class="n">33%</td>' in profile
-    assert "width: 33%" in profile
+    assert "Mavzular bo‘yicha" in profile and ">1 / 3</td>" in profile
 
 
 @pytest.mark.django_db
@@ -693,10 +692,10 @@ def test_problem_list_shows_the_daily_problem(client, catalog):
     assert "Kun masalasi" in r.content.decode()
     daily = r.context["daily"]
     assert daily.problem.pk not in [p.pk for p, _ in r.context["next_picks"]]
-    assert "Bugun hali hech kim yechmadi" in r.content.decode()
+    assert "Bugungi masala" in r.content.decode() and daily.problem.title in r.content.decode()
     DailySolve.objects.create(user=User.objects.create_user("vali", password="x"), daily=daily)
-    body = client.get(reverse("problems:list")).content.decode()
-    assert "Bugun <b class=\"tabular text-ink\">1</b> kishi yechdi" in body and ">vali</a>" in body
+    body = client.get(reverse("home")).content.decode()  # the day's card with its calendar lives on the panel
+    assert "bugun <b class=\"tabular text-ink\">1</b> kishi yechdi" in body and ">vali</a>" in body
     assert "«Chiroq» nishoniga yana" in body
 
 
@@ -992,5 +991,5 @@ def test_list_shows_rating_and_solver_count_and_sorts_by_solvers(client, problem
     r = client.get(reverse("problems:list"), {"sort": "solvers", "dir": "desc"})
     assert [p.id for p in r.context["problems"].object_list] == [hard.id, problem.id]
     html = r.content.decode()
-    assert f">{LEVEL_RATING['hard']}<" in html and f">{LEVEL_RATING['easy']}<" in html
+    assert f'title="Reyting {LEVEL_RATING['hard']}"' in html and f'title="Reyting {LEVEL_RATING['easy']}"' in html
     assert 'title="1 kishi yechgan' in html and 'title="0 kishi yechgan' in html

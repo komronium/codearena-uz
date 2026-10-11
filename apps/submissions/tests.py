@@ -103,7 +103,7 @@ def test_status_partial_polls_until_terminal(client, problem, python, user):
     s.verdict, s.mem_kb = "AC", 9216
     s.save()
     r = client.get(reverse("submissions:status", args=[s.pk]))
-    assert b"hx-trigger" not in r.content and b"ca-verdict-ac" in r.content
+    assert b"hx-trigger" not in r.content and b'ca7-vhero is-ac' in r.content
     assert b"9 MB" in r.content
 
 
@@ -121,7 +121,7 @@ def test_status_compact_poll_stays_compact(client, problem, python, user):
     full = client.get(reverse("submissions:status", args=[s.pk])).content
     assert b"ca-test-WA" not in compact and b"ca-verdict-bad" in compact
     assert "Noto‘g‘ri javob 1-testda" in compact.decode()  # Codeforces' "Wrong answer on test 1"
-    assert b"ca-test-WA" in full
+    assert b'class="ca7-vhero is-bad"' in full and b"ca-test-WA" not in full
 
 
 def test_tables_print_the_verdict_code_and_keep_the_words_for_the_tooltip(client, problem, python, user):
@@ -130,9 +130,9 @@ def test_tables_print_the_verdict_code_and_keep_the_words_for_the_tooltip(client
     client.force_login(user)
     html = client.get(reverse("submissions:mine")).content.decode()
     # the judge stops at the first failing test: 2 passed, so it fell on the 3rd
-    assert ('title="Noto‘g‘ri javob 3-testda"><span aria-hidden="true">WA<small>3</small></span>'
-            '<span class="sr-only">Noto‘g‘ri javob 3-testda</span>') in html
-    assert 'title="Qabul qilindi"><span aria-hidden="true">AC</span>' in html
+    assert ('<span class="ca-vd is-bad"><code translate="no">WA</code>Noto‘g‘ri javob</span>'
+            '<span class="ca-vd-at">3-testda</span>') in html
+    assert '<span class="ca-vd is-ac"><code translate="no">AC</code>Qabul qilindi</span>' in html
 
 
 def test_ole_verdict_shows_as_output_limit(client, problem, python, user):
@@ -142,8 +142,8 @@ def test_ole_verdict_shows_as_output_limit(client, problem, python, user):
     TestResult.objects.create(submission=s, testcase=problem.testcases.first(), verdict="OLE")
     client.force_login(user)
     status = client.get(reverse("submissions:status", args=[s.pk])).content
-    assert b'ca-verdict-warn" title="OLE"' in status and "Chiqish juda katta" in status.decode()
-    assert b"ca-test-OLE" in status
+    assert b'class="ca7-vhero is-warn"' in status and "Chiqish juda katta" in status.decode()
+    assert '<code translate="no">OLE</code>Chiqish juda katta' in status.decode()  # the test row
     mine = client.get(reverse("submissions:mine") + "?verdict=OLE")
     assert list(mine.context["subs"]) == [s] and ("OLE", "Chiqish juda katta") in mine.context["verdicts"]
     detail = client.get(reverse("problems:detail", args=[problem.slug])).content

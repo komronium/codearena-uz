@@ -446,7 +446,7 @@ def test_contest_detail_shows_my_rank_and_solved_marks(client, contest, problem_
     client.force_login(ali)
     r = client.get(reverse("contests:detail", args=[contest.pk]))
     html = r.content.decode()
-    assert "Sizning natijangiz" in html and "<dd>2<small>/ 2</small></dd>" in html  # bob solved A earlier -> lower penalty
+    assert "Sizning holatingiz" in html and "<dd>2<small>/ 2</small></dd>" in html  # bob solved A earlier -> lower penalty
     assert 'title="Yechilgan: 00:10, 1 ta xatodan keyin"' in html  # hh:mm from the start, as Codeforces prints it
     assert r.context["problems"][0].solved_count == 2 and r.context["problems"][1].solved_count == 0
 
@@ -1515,7 +1515,7 @@ def test_a_published_round_with_a_badge_marks_its_solvers_profiles(client, probl
     assert [(b["medal"], b["solved"]) for b in badges("fourth")] == [(None, 1)]
     assert badges("none") == [] and badges("cheat") == []
     page = client.get(reverse("profile", args=["fourth"])).content.decode()
-    assert "Marathon #1 · 1/2" in page and "ca-badge-contest" in page
+    assert "Marathon #1" in page and " · 1/2" in page and "ca-badge-contest" in page
     assert "ca-badge-medal-1" in client.get(reverse("profile", args=["first"])).content.decode()
 
 
