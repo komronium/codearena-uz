@@ -1,5 +1,6 @@
 """Server-side evidence for the contest report: what a participant can't hide by blocking
 the browser tracker. Each piece is a hint for staff, never a verdict on its own."""
+import re
 from dataclasses import dataclass, field
 from datetime import timedelta
 from itertools import combinations
@@ -15,8 +16,8 @@ UNSEEN_LOOKBACK = timedelta(minutes=10)
 UNSEEN_MIN_SIMILARITY = 0.9
 JUMP_CHARS = 150          # appeared between two snapshots (at most one ~10 s tick of editing)
 
-WEIGHTS = {"silent": 6, "unseen": 8, "jump": 3, "shared_device": 10, "multi_device": 5, "similar": 8}
-LABELS = {"silent": "Tracker o‘chiq", "unseen": "Muharrirda yozilmagan", "jump": "Kod sakrashi",
+WEIGHTS = {"ai_mark": 15, "silent": 6, "unseen": 8, "jump": 3, "shared_device": 10, "multi_device": 5, "similar": 8}
+LABELS = {"ai_mark": "AI belgisi", "silent": "Tracker o‘chiq", "unseen": "Muharrirda yozilmagan", "jump": "Kod sakrashi",
           "shared_device": "Umumiy qurilma", "multi_device": "Ikki qurilma", "similar": "O‘xshash kod"}
 
 
@@ -71,6 +72,7 @@ def contest_evidence(contest) -> dict[int, list[Evidence]]:
             out.setdefault(user_id, []).append(Evidence(
                 "jump", f"{labels.get(problem_id, '?')}: {grew} belgi birdaniga paydo bo‘lgan", problem_id))
 
+    _ai_marks(contest, labels, subs, out)
     _devices(contest, subs, out)
     _similar(contest, labels, out)
     order = list(WEIGHTS)
@@ -143,3 +145,23 @@ def _similar(contest, labels, out):
                 continue  # a prior solution's author isn't a participant of this contest
             out.setdefault(me.user_id, []).append(Evidence(
                 "similar", f"{label}: {other.user.username} bilan {pct}% o‘xshash", a.problem_id, me))
+
+
+def _ai_marks(contest, labels, subs, out):
+    """A submission whose code carries a name a statement's hidden AI note asked for (apps.problems.ai_marks):
+    the statement went to an AI and its answer came back. One line per problem, with its last such submission."""
+    from apps.problems.ai_marks import tokens
+    from apps.problems.models import Problem
+
+    wanted = {p.pk: tokens(p.statement_md, p.input_md, p.output_md)
+              for p in Problem.objects.filter(pk__in=list(labels)).only("statement_md", "input_md", "output_md")}
+    hits: dict[tuple[int, int], tuple[list[Submission], set[str]]] = {}
+    for sub in subs:
+        found = {t for t in wanted.get(sub.problem_id, ()) if re.search(rf"\b{re.escape(t)}\b", sub.source)}
+        if found:
+            bad, names = hits.setdefault((sub.user_id, sub.problem_id), ([], set()))
+            bad.append(sub)
+            names |= found
+    for (user_id, problem_id), (bad, names) in hits.items():
+        out.setdefault(user_id, []).append(Evidence(
+            "ai_mark", f"{labels.get(problem_id, '?')}: kodda «{', '.join(sorted(names))}»", problem_id, bad[-1]))

@@ -45,6 +45,7 @@ from .models import (
     ProblemRating,
     Tag,
 )
+from . import ai_marks
 from .skills import next_problems, shared_reason
 
 # Markdown itself passes raw HTML straight through; sanitize the rendered
@@ -97,7 +98,8 @@ def _render_statement(statement_md: str) -> str:
     # paragraph with no blank line — as the editor's own live preview renders it —
     # is recognized here too, instead of collapsing into the paragraph's text.
     html = _markdown(statement_md)
-    return bleach.clean(html, tags=_ALLOWED_TAGS, attributes=_ALLOWED_ATTRS)
+    # an [[ai: …]] note becomes its hidden span after sanitizing (apps.problems.ai_marks)
+    return ai_marks.render(bleach.clean(html, tags=_ALLOWED_TAGS, attributes=_ALLOWED_ATTRS))
 
 
 # Clickable column -> ordering expression. Difficulty is the problem's rating (difficulty.py).

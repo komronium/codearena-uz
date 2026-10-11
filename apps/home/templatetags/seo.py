@@ -26,7 +26,9 @@ _JSON_IN_SCRIPT = {ord("<"): "\\u003C", ord(">"): "\\u003E", ord("&"): "\\u0026"
 @register.filter
 def plain(html: str, length: int = 155) -> str:
     """Rendered markdown as one line of text for a meta description (about what a result shows)."""
-    return Truncator(" ".join(unescape(strip_tags(html)).split())).chars(length)
+    from apps.problems.ai_marks import strip as strip_ai_marks  # a statement's hidden AI note stays out of it
+
+    return Truncator(" ".join(unescape(strip_tags(strip_ai_marks(html))).split())).chars(length)
 
 
 def _plain_page(request) -> str:
