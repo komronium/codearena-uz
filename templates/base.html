@@ -5,8 +5,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
-  <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#151921" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#132A6B" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0A1228" media="(prefers-color-scheme: dark)">
   {# Google's result icon is a PNG or ICO (it reads no SVG): the 96px PNG; browsers take the SVG #}
   <link rel="icon" href="{% url 'favicon' %}" sizes="16x16 32x32 48x48">
   <link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
@@ -34,7 +34,7 @@
   <meta property="og:image:alt" content="CodeArena — o‘zbek tilida dasturlash masalalari, kurslar va musobaqalar">
   <meta name="twitter:card" content="summary_large_image">
   {% block structured_data %}{% endblock %}
-  <link rel="preload" href="{% static 'fonts/manrope-latin-wght-normal.woff2' %}" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="{% static 'fonts/plus-jakarta-sans-latin-wght-normal.woff2' %}" as="font" type="font/woff2" crossorigin>
   <script>
     try { const t = localStorage.getItem("ca-theme"); if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch {}
   </script>

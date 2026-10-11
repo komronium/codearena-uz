@@ -4,7 +4,7 @@
  * (e.g. [hidden] { display: none }) and utilities win. Everything here is kept whole:
  * class names built in templates (ca-verdict-{{ v }}) are invisible to Tailwind's scan. */
 
-/* Manrope for words, JetBrains Mono for data (clocks, ranks, scores, counts) and code. Both are
+/* Plus Jakarta Sans for words, JetBrains Mono for data (clocks, ranks, scores, counts) and code. Both are
    vendored by build.mjs; Lilex, Fira Code and Anthropic Mono stay as editor font options. */
 @font-face { font-family: "Anthropic Mono"; font-weight: 400; font-style: normal; font-display: swap; src: url("../fonts/AnthropicMono-Regular.otf") format("opentype"); }
 @font-face { font-family: "Anthropic Mono"; font-weight: 400; font-style: italic; font-display: swap; src: url("../fonts/AnthropicMono-Italic.otf") format("opentype"); }
@@ -17,90 +17,105 @@
   --ca-radius: 14px;      /* cards */
   --ca-radius-sm: 8px;    /* controls and rows inside them */
   --ca-nav-h: 3.5rem;
-  --ca-sans: "Manrope", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  /* the interface's numbers (scores, clocks, counts) are Manrope with tabular figures, set on body: bold
+  --ca-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* the interface's numbers (scores, clocks, counts) are the sans with tabular figures, set on body: bold
      monospace digits read as ugly beside the text. Code, the console and keys keep JetBrains Mono. */
   --ca-mono: var(--ca-sans);
   --ca-code: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    --ca-paper-rgb: 244 247 252;       /* the page: a pale blue under white cards */
+    --ca-paper-rgb: 255 255 255;       /* the page: white, #7 panels are grey on it */
+    --ca-panel-rgb: 244 246 250;       /* #7 panels: side cards, wells */
+    --ca-panel-line: #E3E8F1; --ca-soft: #EAEEF5; --ca-hover: #F7F9FD;
     --ca-surface-rgb: 255 255 255;
     --ca-field-rgb: 255 255 255;
     --ca-sunk-rgb: 247 249 253;        /* wells and every other table row */
-    --ca-ink-rgb: 22 34 66;
-    --ca-mute-rgb: 69 83 111;
-    --ca-line-rgb: 228 233 243;
-    --ca-frame-rgb: 237 241 249;       /* soft fills: secondary buttons, chips, tracks */
-    --ca-accent-rgb: 37 87 226;
-    --ca-accent-hover-rgb: 28 70 190;
-    --ca-accent-fill-rgb: 37 87 226;
-    --ca-accent-fill-hover-rgb: 28 70 190;
+    --ca-ink-rgb: 20 30 58;
+    --ca-mute-rgb: 86 98 122;
+    --ca-line-rgb: 221 227 238;
+    --ca-frame-rgb: 234 238 245;       /* soft fills: secondary buttons, chips, tracks */
+    --ca-accent-rgb: 29 58 143;        /* lapis: links, active, focus */
+    --ca-accent-hover-rgb: 19 42 107;
+    --ca-accent-fill-rgb: 29 58 143;
+    --ca-accent-fill-hover-rgb: 19 42 107;
     --ca-on-fill-rgb: 255 255 255;
-    --ca-ok-rgb: 8 112 56;             /* accepted, as text: 4.5:1 even on its own 16% tint over a grey row */
-    --ca-ok-fill-rgb: 14 128 66;       /* accepted, as a fill */
-    --ca-bad-rgb: 197 34 31;
-    --ca-warn-rgb: 122 80 0;           /* amber, as text: 4.5:1 on its own tint over a box frame */
+    --ca-ok-rgb: 10 107 79;            /* accepted, as text */
+    --ca-ok-fill-rgb: 11 127 95;       /* accepted, as a fill */
+    --ca-bad-rgb: 184 23 79;
+    --ca-warn-rgb: 122 80 0;           /* amber, as text */
     --ca-info-rgb: 7 100 126;
-    --ca-gold-rgb: 242 169 0;          /* medals, the streak; never text */
+    --ca-gold-rgb: 242 181 58;         /* the one main action per screen, medals, the streak */
     --ca-clock-rgb: 229 57 53;         /* the round clock's progress line */
-    /* difficulty, after LeetCode: bright fills for dots, rings and bars, darker inks for the words (4.5:1 on white) */
-    --ca-lvl-beginner: #38B2EC; --ca-lvl-easy: #00B8A3; --ca-lvl-medium: #FFB800; --ca-lvl-hard: #FF375F;
-    --ca-lvl-beginner-ink: #0B78B0; --ca-lvl-easy-ink: #007F73; --ca-lvl-medium-ink: #A36500; --ca-lvl-hard-ink: #D92D3F;
+    --ca-navy-rgb: 19 42 107;          /* the top bar, both themes keep it navy */
+    --ca-hud-rgb: 29 58 143;           /* the lapis page band */
+    --ca-spec-rgb: 47 196 185;         /* teal: the logo star, the rating line */
+    /* difficulty, atlas colours: fills for dots, bars and the band's strip, darker inks for the words (4.5:1 on white) */
+    --ca-lvl-beginner: #1F78C8; --ca-lvl-easy: #0B7F5F; --ca-lvl-medium: #D9A21B; --ca-lvl-hard: #B8174F;
+    --ca-lvl-beginner-ink: #1A6DB8; --ca-lvl-easy-ink: #0A7457; --ca-lvl-medium-ink: #946300; --ca-lvl-hard-ink: #B8174F;
     --ca-sql-rgb: 123 47 190;          /* SQL problems and their topics */
     --ca-shadow: 0 0 0 1px rgb(37 60 120 / .06), 0 1px 2px rgb(37 60 120 / .04), 0 8px 24px -14px rgb(37 60 120 / .14);
     --ca-shadow-lift: 0 12px 32px -10px rgb(22 27 38 / .22), 0 2px 6px rgb(22 27 38 / .08);
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --ca-paper-rgb: 13 16 22;
-    --ca-surface-rgb: 21 25 33;
-    --ca-field-rgb: 26 31 41;
-    --ca-sunk-rgb: 17 21 28;
-    --ca-ink-rgb: 231 234 240;
-    --ca-mute-rgb: 176 186 203;
-    --ca-line-rgb: 40 47 60;
-    --ca-frame-rgb: 33 39 50;
-    --ca-accent-rgb: 125 162 255;
-    --ca-accent-hover-rgb: 160 188 255;
-    --ca-accent-fill-rgb: 125 162 255;
-    --ca-accent-fill-hover-rgb: 160 188 255;
-    --ca-on-fill-rgb: 13 16 22;
-    --ca-ok-rgb: 63 208 127;
-    --ca-ok-fill-rgb: 63 208 127;
-    --ca-bad-rgb: 255 122 115;
-    --ca-warn-rgb: 245 194 91;
+    --ca-paper-rgb: 11 18 38;
+    --ca-panel-rgb: 18 28 56;
+    --ca-panel-line: rgb(255 255 255 / .07); --ca-soft: rgb(255 255 255 / .06); --ca-hover: rgb(255 255 255 / .035);
+    --ca-surface-rgb: 18 28 56;
+    --ca-field-rgb: 22 33 63;
+    --ca-sunk-rgb: 14 22 46;
+    --ca-ink-rgb: 227 233 247;
+    --ca-mute-rgb: 154 167 196;
+    --ca-line-rgb: 38 48 76;
+    --ca-frame-rgb: 28 39 70;
+    --ca-accent-rgb: 143 176 255;
+    --ca-accent-hover-rgb: 179 202 255;
+    --ca-accent-fill-rgb: 143 176 255;
+    --ca-accent-fill-hover-rgb: 179 202 255;
+    --ca-on-fill-rgb: 11 18 38;
+    --ca-ok-rgb: 52 200 138;
+    --ca-ok-fill-rgb: 52 200 138;
+    --ca-bad-rgb: 240 98 140;
+    --ca-warn-rgb: 247 203 107;
     --ca-info-rgb: 100 205 235;
-    --ca-gold-rgb: 242 169 0;
+    --ca-gold-rgb: 242 181 58;
     --ca-clock-rgb: 255 107 99;
-    --ca-lvl-beginner: #38B2EC; --ca-lvl-easy: #00B8A3; --ca-lvl-medium: #FFB800; --ca-lvl-hard: #FF375F;
-    --ca-lvl-beginner-ink: #5CC4F5; --ca-lvl-easy-ink: #2DD4BF; --ca-lvl-medium-ink: #FFC01E; --ca-lvl-hard-ink: #FF6B81;
+    --ca-navy-rgb: 10 18 40;
+    --ca-hud-rgb: 22 41 106;
+    --ca-spec-rgb: 47 196 185;
+    --ca-lvl-beginner: #5AB4F5; --ca-lvl-easy: #34C88A; --ca-lvl-medium: #F2B53A; --ca-lvl-hard: #F0628C;
+    --ca-lvl-beginner-ink: #5AB4F5; --ca-lvl-easy-ink: #34C88A; --ca-lvl-medium-ink: #F2B53A; --ca-lvl-hard-ink: #F0628C;
     --ca-sql-rgb: 201 162 255;
     --ca-shadow: 0 0 0 1px rgb(255 255 255 / .06);
     --ca-shadow-lift: 0 14px 34px -10px rgb(0 0 0 / .7), 0 2px 6px rgb(0 0 0 / .4);
   }
 }
 :root[data-theme="dark"] {
-    --ca-paper-rgb: 13 16 22;
-    --ca-surface-rgb: 21 25 33;
-    --ca-field-rgb: 26 31 41;
-    --ca-sunk-rgb: 17 21 28;
-    --ca-ink-rgb: 231 234 240;
-    --ca-mute-rgb: 176 186 203;
-    --ca-line-rgb: 40 47 60;
-    --ca-frame-rgb: 33 39 50;
-    --ca-accent-rgb: 125 162 255;
-    --ca-accent-hover-rgb: 160 188 255;
-    --ca-accent-fill-rgb: 125 162 255;
-    --ca-accent-fill-hover-rgb: 160 188 255;
-    --ca-on-fill-rgb: 13 16 22;
-    --ca-ok-rgb: 63 208 127;
-    --ca-ok-fill-rgb: 63 208 127;
-    --ca-bad-rgb: 255 122 115;
-    --ca-warn-rgb: 245 194 91;
+    --ca-paper-rgb: 11 18 38;
+    --ca-panel-rgb: 18 28 56;
+    --ca-panel-line: rgb(255 255 255 / .07); --ca-soft: rgb(255 255 255 / .06); --ca-hover: rgb(255 255 255 / .035);
+    --ca-surface-rgb: 18 28 56;
+    --ca-field-rgb: 22 33 63;
+    --ca-sunk-rgb: 14 22 46;
+    --ca-ink-rgb: 227 233 247;
+    --ca-mute-rgb: 154 167 196;
+    --ca-line-rgb: 38 48 76;
+    --ca-frame-rgb: 28 39 70;
+    --ca-accent-rgb: 143 176 255;
+    --ca-accent-hover-rgb: 179 202 255;
+    --ca-accent-fill-rgb: 143 176 255;
+    --ca-accent-fill-hover-rgb: 179 202 255;
+    --ca-on-fill-rgb: 11 18 38;
+    --ca-ok-rgb: 52 200 138;
+    --ca-ok-fill-rgb: 52 200 138;
+    --ca-bad-rgb: 240 98 140;
+    --ca-warn-rgb: 247 203 107;
     --ca-info-rgb: 100 205 235;
-    --ca-gold-rgb: 242 169 0;
+    --ca-gold-rgb: 242 181 58;
     --ca-clock-rgb: 255 107 99;
-    --ca-lvl-beginner: #38B2EC; --ca-lvl-easy: #00B8A3; --ca-lvl-medium: #FFB800; --ca-lvl-hard: #FF375F;
-    --ca-lvl-beginner-ink: #5CC4F5; --ca-lvl-easy-ink: #2DD4BF; --ca-lvl-medium-ink: #FFC01E; --ca-lvl-hard-ink: #FF6B81;
+    --ca-navy-rgb: 10 18 40;
+    --ca-hud-rgb: 22 41 106;
+    --ca-spec-rgb: 47 196 185;
+    --ca-lvl-beginner: #5AB4F5; --ca-lvl-easy: #34C88A; --ca-lvl-medium: #F2B53A; --ca-lvl-hard: #F0628C;
+    --ca-lvl-beginner-ink: #5AB4F5; --ca-lvl-easy-ink: #34C88A; --ca-lvl-medium-ink: #F2B53A; --ca-lvl-hard-ink: #F0628C;
     --ca-sql-rgb: 201 162 255;
     --ca-shadow: 0 0 0 1px rgb(255 255 255 / .06);
     --ca-shadow-lift: 0 14px 34px -10px rgb(0 0 0 / .7), 0 2px 6px rgb(0 0 0 / .4);

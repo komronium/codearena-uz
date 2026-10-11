@@ -23,7 +23,7 @@ module.exports = {
         warn: { DEFAULT: "rgb(var(--ca-warn-rgb) / <alpha-value>)", soft: "rgb(var(--ca-warn-rgb) / .12)" },
       },
       fontFamily: {
-        sans: ["Manrope", "ui-sans-serif", "system-ui", "-apple-system", "Segoe UI", "sans-serif"],
+        sans: ["Plus Jakarta Sans", "ui-sans-serif", "system-ui", "-apple-system", "Segoe UI", "sans-serif"],
         mono: ["JetBrains Mono", "ui-monospace", "monospace"],
       },
     },
