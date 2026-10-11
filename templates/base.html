@@ -57,7 +57,7 @@
 <a class="ca-skip" href="#main">Asosiy tarkibga o‘tish</a>
 <header class="ca-nav">{% include "_navbar.html" %}</header>
 {% block band %}{% endblock %}
-<main id="main" class="ca-main">
+<main id="main" class="{% block main_class %}ca-main{% endblock %}">
   {% if user.is_staff and request.resolver_match.namespace == "moderation" or user.is_staff and request.resolver_match.namespace == "integrity" %}{% include "_mod_tabs.html" %}{% endif %}
   {% if messages %}
   <div class="mb-6 space-y-2" role="status" aria-live="polite">

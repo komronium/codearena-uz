@@ -1,0 +1,10 @@
+{% comment %}A band's "today's problem" box: the problem, its level, and the day's one gold button (or "Yechildi").
+ctx: daily, daily_done.{% endcomment %}
+<div class="ca-hud-today">
+  <div class="min-w-0">
+    <p class="ca-hud-lbl">Bugungi masala</p>
+    <b><a class="ca-hud-title" href="{% url 'problems:detail' daily.problem.slug %}">{{ daily.problem.title }}</a></b><span class="ca-hud-lv is-{{ daily.problem.difficulty }}">{{ daily.problem.get_difficulty_display }}</span>
+  </div>
+  {% if daily_done %}<span class="ca-hud-done"><i data-lucide="check" class="lu" aria-hidden="true"></i>Yechildi</span>
+  {% else %}<a class="ca-btn ca-btn-gold" href="{% url 'problems:detail' daily.problem.slug %}">Yechish</a>{% endif %}
+</div>

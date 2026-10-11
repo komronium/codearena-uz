@@ -49,6 +49,24 @@ def _current(user, plans):
     return open_courses[0] if open_courses else None
 
 
+def continue_course(user) -> dict | None:
+    """The dashboard's "keep learning": the course the hub would continue, its progress and its
+    next unsolved problem."""
+    stage_rank = {v: i for i, v in enumerate(StudyPlan.Stage.values)}
+    plans = sorted(_plans_for(user), key=lambda p: (stage_rank.get(p.stage, len(stage_rank)), p.order, p.pk))
+    progress = plan_progress(user, plans)
+    ids = {plan_id: [i for i, _ in rows] for plan_id, rows in course_rows(plans).items()}
+    for number, p in enumerate(plans, 1):
+        p.number, p.progress, p.problem_ids = number, progress[p.pk], ids[p.pk]
+    current = _current(user, plans)
+    if current is None:
+        return None
+    solved = solved_ids(user, current.problem_ids)
+    next_id = next((i for i in current.problem_ids if i not in solved), None)
+    return {"plan": current, "progress": current.progress,
+            "next": Problem.objects.filter(pk=next_id).first() if next_id else None}
+
+
 def hub(request):
     """O‘rganish: every course on one path, chapter by chapter (StudyPlan.Stage), numbered in
     path order, plus one "continue" card with the next problem to solve."""

@@ -1,158 +1,191 @@
-{% extends "base.html" %}{% load tiers daily static %}
+{% extends "base.html" %}{% load tiers daily %}
 {% block title %}Bosh sahifa{% endblock %}
-{% block head %}<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">{% endblock %}
-{% block page_icon %}{% endblock %}
-{% block page_title %}
-<div class="ca-dashboard-heading">
-  <span class="ca-dashboard-mark"><i data-lucide="layout-dashboard" class="lu" aria-hidden="true"></i></span>
-  <div class="min-w-0">
-    <p class="ca-dashboard-kicker">CODEARENA <span aria-hidden="true">/</span> SHAXSIY PANEL</p>
-    <h1>Salom, {{ user.first_name|default:user.username }}!</h1>
-    <p class="ca-dashboard-date">{{ today_label }} <span aria-hidden="true">·</span> Bugungi natijalaringiz va keyingi qadamlaringiz</p>
+{% block band %}
+{# #7 panel: the band says hello, the rating and how far the next tier is, and today's problem with the day's one gold button #}
+<section class="ca-hud" aria-label="Holatingiz">
+  <div class="ca-hud-in">
+    {% if is_new %}
+    <div>
+      <h1>Xush kelibsiz, {{ user.first_name|default:user.username }}</h1>
+      <p class="ca-hud-sub">Reytingingiz birinchi musobaqadan keyin paydo bo‘ladi. Hozircha masala yechib mashq qiling.</p>
+    </div>
+    {% if first_problem %}
+    <div class="ca-hud-today">
+      <div class="min-w-0">
+        <p class="ca-hud-lbl">Birinchi qadam</p>
+        <b><a class="ca-hud-title" href="{% url 'problems:detail' first_problem.slug %}">{{ first_problem.title }}</a></b><span class="ca-hud-lv is-{{ first_problem.difficulty }}">{{ first_problem.get_difficulty_display }}</span>
+      </div>
+      <a class="ca-btn ca-btn-gold" href="{% url 'problems:detail' first_problem.slug %}">Yechish</a>
+    </div>
+    {% endif %}
+    {% else %}
+    <div>
+      <h1>Salom, {{ user.first_name|default:user.username }}</h1>
+      <p class="ca-hud-sub">{{ today_label }}</p>
+    </div>
+    <div class="ca-hud-rt">
+      <b class="tabular">{{ user.rating }}</b>
+      <div>
+        <p class="ca-hud-lbl">Reyting · <span class="ca-hud-tier">{{ user.rating|tier_name }}</span>{% if rating_card.delta is not None %} <span title="Oxirgi reytingli musobaqada">{{ rating_card.delta|stringformat:"+d" }}</span>{% endif %}</p>
+        {% if rating_card.next %}
+        <span class="ca-hud-pg" role="progressbar" aria-valuenow="{{ rating_card.next.pct }}" aria-valuemin="0" aria-valuemax="100" aria-label="{{ rating_card.next.name }} darajasigacha"><i style="width: {{ rating_card.next.pct }}%"></i></span>
+        <p class="ca-hud-lbl"><span class="font-semibold text-white">{{ rating_card.next.name }}</span> darajasigacha {{ rating_card.next.need }} ball</p>
+        {% endif %}
+      </div>
+    </div>
+    {% if daily %}{% include "home/_hud_today.html" %}{% endif %}
+    {% endif %}
   </div>
-  {% if daily %}<a class="ca-dashboard-primary" href="{% url 'problems:detail' daily.problem.slug %}"><i data-lucide="calendar-check" class="lu" aria-hidden="true"></i><span><small>BUGUNGI MASALA</small><b>{{ daily.problem.title }}</b></span><i data-lucide="arrow-up-right" class="lu ca-dashboard-arrow" aria-hidden="true"></i></a>{% endif %}
-</div>
+</section>
 {% endblock %}
 {% block content %}
+{% if is_new %}{% include "home/_dash_new.html" %}{% else %}
 {% if daily %}{% daily_stats daily user as ds %}{% endif %}
-<div class="ca-dashboard">
-{% if live %}
-<section class="ca-live-strip ca-dashboard-live{% if live.contest.type == 'score' %} is-score{% elif live.contest.type == 'icpc' %} is-icpc{% endif %}" aria-labelledby="live-title">
-  <svg class="ca-band-mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M31 16l-4.39 4.39v6.22h-6.22L16 31l-4.39-4.39H5.39v-6.22L1 16l4.39-4.39V5.39h6.22L16 1l4.39 4.39h6.22v6.22z"/></svg>
-  <span class="ca-tag ca-tag-live"><span class="ca-live-dot" aria-hidden="true"></span>Jonli</span>
-  <div class="min-w-0 flex-1">
-    <h2 id="live-title"><a href="{% url 'contests:detail' live.contest.pk %}">{{ live.contest.title }}</a></h2>
-    <p>{% if live.joined %}Siz <b>{{ live.rank }}-o‘rin</b>dasiz, {{ live.n_problems }} masaladan {{ live.solved }} tasi yechilgan.{% else %}{{ live.n_problems }} ta masala. Hali qatnashmagansiz.{% endif %}</p>
-  </div>
-  <p class="ca-live-clock"><span>Tugashiga</span><b class="tabular" data-countdown="{{ live.contest.end|date:'c' }}" data-label="" data-suffix="1"></b></p>
-  <a class="ca-btn ca-btn-primary" href="{% url 'contests:detail' live.contest.pk %}">{% if live.joined %}Davom etish{% else %}Qatnashish{% endif %}</a>
-</section>
-{% endif %}
-<div class="ca-dashboard-overview">
-  {% if ring %}{% url 'problems:list' as problems_url %}{% include "problems/_solved_card.html" with title="Yechilgan masalalar" more_url=problems_url more_label="Masalalar" %}{% endif %}
-  <section class="ca-box ca-dashboard-rating" aria-labelledby="me-title" style="--tier: {{ user.rating|tier_color }}">
-      <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="trophy" class="lu" aria-hidden="true"></i></span><h2 id="me-title">Musobaqa reytingi<a class="ca-box-tools ca-link" href="{% url 'profile' user.username %}">Profil</a></h2></div>
-      <div class="ca-box-body ca-box-pad">
-        <p class="ca-rating-line"><b class="ca-tier-ink{{ user.rating|lg }}">{{ user.rating }}</b>
-          {% if rating_card.delta is not None %}<span class="{% if rating_card.delta > 0 %}text-ok{% elif rating_card.delta < 0 %}text-bad{% else %}text-mute{% endif %}" title="Oxirgi reytingli musobaqada">{{ rating_card.delta|stringformat:"+d" }}</span>{% endif %}
-          <span class="ca-tier">{{ user.rating|tier_name }}</span></p>
-        <p class="mt-1 text-xs text-mute">{% if rating_card.rank %}Reytingda <b class="text-ink">{{ rating_card.rank }}</b>-o‘rin, {{ rating_card.total }} kishidan.{% else %}Birinchi reytingli musobaqadan keyin o‘rningiz chiqadi.{% endif %}{% if rating_card.next %} <span class="ca-tier-ink font-semibold" style="--tier: {{ rating_card.next.color }}">{{ rating_card.next.name }}</span> darajasigacha <b class="text-ink">{{ rating_card.next.need }}</b> ball.{% endif %}</p>
-        {% if spark %}
-        <svg class="ca-spark" viewBox="0 0 {{ spark.w }} {{ spark.h }}" preserveAspectRatio="none" role="img" aria-label="So‘nggi {{ spark.n }} reytingli musobaqa: {{ spark.first }} dan {{ user.rating }} gacha">
-          <polygon points="{{ spark.area }}" class="area"/>
-          <polyline points="{{ spark.line }}" class="ln" vector-effect="non-scaling-stroke"/>
-        </svg>
-        {% elif rating_card.next %}
-        <span class="ca-progress mt-3 block" aria-hidden="true"><span style="width: {{ rating_card.next.pct }}%"></span></span>
-        {% endif %}
-        <dl class="ca-stat-tiles mt-3">
-          <div><dt>Yechilgan</dt><dd>{{ solved_count }}</dd></div>
-          <div><dt>Amaliyot balli</dt><dd>{{ user.practice_points }}</dd></div>
-          <div><dt>Seriya</dt><dd>{{ streak }}<small>kun</small></dd></div>
-        </dl>
-      </div>
+<div class="ca7">
+<div class="ca7-col">
+  {% if live %}
+  <section class="ca-live-strip ca-dashboard-live{% if live.contest.type == 'score' %} is-score{% elif live.contest.type == 'icpc' %} is-icpc{% endif %}" aria-labelledby="live-title">
+    <span class="ca-tag ca-tag-live"><span class="ca-live-dot" aria-hidden="true"></span>Jonli</span>
+    <div class="min-w-0 flex-1">
+      <h2 id="live-title"><a href="{% url 'contests:detail' live.contest.pk %}">{{ live.contest.title }}</a></h2>
+      <p>{% if live.joined %}Siz <b>{{ live.rank }}-o‘rin</b>dasiz, {{ live.n_problems }} masaladan {{ live.solved }} tasi yechilgan.{% else %}{{ live.n_problems }} ta masala. Hali qatnashmagansiz.{% endif %}</p>
+    </div>
+    <p class="ca-live-clock"><span>Tugashiga</span><b class="tabular" data-countdown="{{ live.contest.end|date:'c' }}" data-label="" data-suffix="1"></b></p>
+    <a class="ca-btn ca-btn-primary" href="{% url 'contests:detail' live.contest.pk %}">{% if live.joined %}Davom etish{% else %}Qatnashish{% endif %}</a>
   </section>
-</div>
+  {% endif %}
 
-<div class="ca-dashboard-grid">
-<div class="ca-dashboard-primary-column">
+  {% with c=upcoming.0 %}{% if c or learning %}
+  <section class="ca7-mis{% if c and learning %} is-two{% endif %}" aria-label="Keyingi qadamlar">
+    {% if c %}
+    <div>
+      <span class="ca7-mis-ico" aria-hidden="true"><i data-lucide="trophy" class="lu"></i></span>
+      <div class="min-w-0 flex-1">
+        <small>Kelgusi musobaqa</small>
+        <a class="ca-link ca7-mis-t" href="{% url 'contests:detail' c.pk %}">{{ c.title }}</a>
+        <small>{{ c.start|date:"d.m, H:i" }} · {{ c.duration_label }} · {% if c.is_rated %}reytingli{% else %}reytingga ta’sir qilmaydi{% endif %}</small>
+        <div class="ca7-mis-f">
+          {% if c.pk in registered %}<span class="ca-tag"><i data-lucide="check" class="lu" aria-hidden="true"></i>Ro‘yxatdasiz</span>
+          {% elif not user.is_staff %}<form method="post" action="{% url 'contests:register' c.pk %}">{% csrf_token %}<button class="ca-btn ca-btn-soft">Ro‘yxatdan o‘tish</button></form>{% endif %}
+          <b class="tabular" data-countdown="{{ c.start|date:'c' }}" data-label="" data-suffix="1"></b>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+    {% if learning %}
+    <div>
+      <span class="ca7-mis-ico is-learn" aria-hidden="true"><i data-lucide="book-open" class="lu"></i></span>
+      <div class="min-w-0 flex-1">
+        <small>O‘rganishda davom etish</small>
+        <a class="ca-link ca7-mis-t" href="{% url 'learn:course' learning.plan.slug %}">{{ learning.plan.title }}</a>
+        <span class="ca7-pg" role="progressbar" aria-valuenow="{{ learning.progress.pct }}" aria-valuemin="0" aria-valuemax="100" aria-label="Kurs bajarilishi"><i style="width: {{ learning.progress.pct }}%"></i></span>
+        <small>{{ learning.progress.done }} / {{ learning.progress.total }} masala{% if learning.next %} · keyingisi: {{ learning.next.title }}{% endif %}</small>
+        <div class="ca7-mis-f">
+          <a class="ca-btn ca-btn-soft" href="{% if learning.next %}{% url 'problems:detail' learning.next.slug %}?plan={{ learning.plan.slug|urlencode }}{% else %}{% url 'learn:course' learning.plan.slug %}{% endif %}">Davom etish</a>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </section>
+  {% endif %}{% endwith %}
 
   {% if homework %}
-  <section class="ca-box ca-dashboard-box" aria-labelledby="hw-title">
-    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="notebook-pen" class="lu" aria-hidden="true"></i></span><h2 id="hw-title">Vazifalar<a class="ca-box-tools ca-link" href="{% url 'classroom:list' %}">Hammasi</a></h2></div>
-    <div class="ca-box-body">
-      <table class="ca-table">
-        <thead><tr><th>Vazifa</th><th class="hidden sm:table-cell">Guruh</th><th class="w-28 text-right">Yechildi</th><th class="w-36 text-right">Muddat</th></tr></thead>
-        <tbody>
-        {% for a in homework %}
-        <tr>
-          <td><a class="ca-link" href="{% url 'classroom:detail' a.pk %}">{{ a.title }}</a></td>
-          <td class="hidden text-mute sm:table-cell">{{ a.group.name }}</td>
-          <td class="text-right tabular {% if a.my_solved == a.my_total %}font-semibold text-ok{% endif %}">{{ a.my_solved }} / {{ a.my_total }}</td>
-          <td class="text-right tabular" data-countdown="{{ a.deadline|date:'c' }}" data-label="" data-suffix="1"></td>
-        </tr>
-        {% endfor %}
-        </tbody>
-      </table>
-    </div>
+  <section aria-labelledby="hw-title">
+    <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span><h2 id="hw-title">Vazifalar</h2><a class="ca-link" href="{% url 'classroom:list' %}">Hammasi</a></div>
+    <table class="ca-table ca-table-flat">
+      <thead><tr><th>Vazifa</th><th class="hidden sm:table-cell">Guruh</th><th class="w-28 text-right">Yechildi</th><th class="w-36 text-right">Muddat</th></tr></thead>
+      <tbody>
+      {% for a in homework %}
+      <tr>
+        <td><a class="ca-link" href="{% url 'classroom:detail' a.pk %}">{{ a.title }}</a></td>
+        <td class="hidden text-mute sm:table-cell">{{ a.group.name }}</td>
+        <td class="text-right tabular {% if a.my_solved == a.my_total %}font-semibold text-ok{% endif %}">{{ a.my_solved }} / {{ a.my_total }}</td>
+        <td class="text-right tabular" data-countdown="{{ a.deadline|date:'c' }}" data-label="" data-suffix="1"></td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
   </section>
   {% endif %}
 
   {% if taught %}
-  <section class="ca-box ca-dashboard-box" aria-labelledby="taught-title">
-    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="notebook-pen" class="lu" aria-hidden="true"></i></span><h2 id="taught-title">Men bergan vazifalar<a class="ca-box-tools ca-link" href="{% url 'classroom:new' %}">+ Yangi vazifa</a></h2></div>
-    <div class="ca-box-body">
-      <table class="ca-table">
-        <thead><tr><th>Vazifa</th><th class="hidden sm:table-cell">Guruh</th><th class="w-40 text-right">Muddat</th><th class="w-28 text-right"><span class="sr-only">Natijalar</span></th></tr></thead>
-        <tbody>
-        {% for a in taught %}
-        <tr>
-          <td><a class="ca-link" href="{% url 'classroom:detail' a.pk %}">{{ a.title }}</a></td>
-          <td class="hidden text-mute sm:table-cell">{{ a.group.name }}</td>
-          <td class="text-right tabular text-mute">{{ a.deadline|date:"d.m.Y H:i" }}</td>
-          <td class="text-right"><a class="ca-btn ca-btn-ghost ca-btn-xs" href="{% url 'classroom:detail' a.pk %}">Natijalar</a></td>
-        </tr>
-        {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </section>
-  {% endif %}
-
-  <section class="ca-box ca-dashboard-box ca-dashboard-recent" aria-labelledby="recent-title">
-    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="history" class="lu" aria-hidden="true"></i></span><h2 id="recent-title">So‘nggi urinishlar{% if recent %}<a class="ca-box-tools ca-link" href="{% url 'submissions:mine' %}?mine=1">Hammasi</a>{% endif %}</h2></div>
-    <div class="ca-box-body">
-    {% if recent %}
-      <table class="ca-table">
-        <thead><tr><th>Masala</th><th class="w-44">Natija</th><th class="hidden w-36 sm:table-cell">Til</th><th class="w-32 text-right">Yuborilgan</th></tr></thead>
-        <tbody>
-        {% for s in recent %}
-        <tr>
-          <td class="max-w-0 truncate"><a class="ca-link" href="{% url 'submissions:detail' s.pk %}">{{ s.problem.title }}</a></td>
-          <td>{% include "submissions/_verdict.html" with v=s.verdict sub=s brief=True %}</td>
-          <td class="hidden whitespace-nowrap text-mute sm:table-cell">{{ s.language.name }}</td>
-          <td class="text-right tabular text-mute"><time datetime="{{ s.created|date:'c' }}">{{ s.created|date:"d.m H:i" }}</time></td>
-        </tr>
-        {% endfor %}
-        </tbody>
-      </table>
-    {% else %}
-      <p class="ca-box-pad text-mute">Hali urinish yo‘q. <a class="ca-link" href="{% url 'problems:list' %}">Birinchi masalani tanlang</a>: kodingiz darhol tekshiriladi.</p>
-    {% endif %}
-    </div>
-  </section>
-</div>
-
-<aside class="ca-dashboard-aside" aria-label="Qo‘shimcha">
-  {% if daily %}{% include "problems/_daily_card.html" %}{% endif %}
-
-  {% if upcoming %}
-  <section class="ca-box" aria-labelledby="up-title">
-    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="calendar-days" class="lu" aria-hidden="true"></i></span><h2 id="up-title">Kelgusi musobaqalar<a class="ca-box-tools ca-link" href="{% url 'contests:list' %}">Hammasi</a></h2></div>
-    <ul class="ca-box-body ca-upl">
-      {% for c in upcoming %}
-      <li>
-        <span class="ca-thumb{% if c.type == 'score' %} is-score{% elif c.type == 'icpc' %} is-icpc{% endif %}" aria-hidden="true">{{ c.start|date:"d" }}</span>
-        <span class="min-w-0 flex-1"><a class="ca-link block truncate" href="{% url 'contests:detail' c.pk %}" title="{{ c.title }}">{{ c.title }}</a><span class="block text-xs text-mute">{{ c.start|date:"d.m H:i" }}, {{ c.duration_label }}{% if c.is_rated %}, reytingli{% endif %}</span></span>
-        <b class="tabular shrink-0 text-xs text-mute" data-countdown="{{ c.start|date:'c' }}" data-label="" data-suffix="1"></b>
-      </li>
+  <section aria-labelledby="taught-title">
+    <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span><h2 id="taught-title">Men bergan vazifalar</h2><a class="ca-link" href="{% url 'classroom:new' %}">+ Yangi vazifa</a></div>
+    <table class="ca-table ca-table-flat">
+      <thead><tr><th>Vazifa</th><th class="hidden sm:table-cell">Guruh</th><th class="w-40 text-right">Muddat</th><th class="w-28 text-right"><span class="sr-only">Natijalar</span></th></tr></thead>
+      <tbody>
+      {% for a in taught %}
+      <tr>
+        <td><a class="ca-link" href="{% url 'classroom:detail' a.pk %}">{{ a.title }}</a></td>
+        <td class="hidden text-mute sm:table-cell">{{ a.group.name }}</td>
+        <td class="text-right tabular text-mute">{{ a.deadline|date:"d.m.Y H:i" }}</td>
+        <td class="text-right"><a class="ca-link" href="{% url 'classroom:detail' a.pk %}">Natijalar</a></td>
+      </tr>
       {% endfor %}
-    </ul>
+      </tbody>
+    </table>
   </section>
   {% endif %}
+
+  <section aria-labelledby="recent-title">
+    <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-hard)" aria-hidden="true"></span><h2 id="recent-title">So‘nggi urinishlar</h2>{% if recent %}<a class="ca-link" href="{% url 'submissions:mine' %}?mine=1">Barcha urinishlar</a>{% endif %}</div>
+    {% if recent %}
+    <div class="overflow-x-auto">
+    <table class="ca-table ca-table-flat">
+      <thead><tr><th>Natija</th><th>Masala</th><th class="hidden sm:table-cell">Til</th><th class="hidden text-right md:table-cell">Vaqt</th><th class="text-right">Yuborilgan</th></tr></thead>
+      <tbody>
+      {% for s in recent %}
+      <tr>
+        <td class="whitespace-nowrap"><a href="{% url 'submissions:detail' s.pk %}" class="no-underline">{% include "submissions/_vd.html" with v=s.verdict sub=s %}</a></td>
+        <td><a class="ca-link" href="{% url 'problems:detail' s.problem.slug %}">{{ s.problem.title }}</a></td>
+        <td class="hidden whitespace-nowrap text-mute sm:table-cell">{{ s.language.name }}</td>
+        <td class="hidden text-right tabular md:table-cell">{% if s.verdict == "CE" or s.verdict == "PENDING" or s.verdict == "RUNNING" %}<span class="text-mute">—</span>{% else %}{{ s.exec_ms }}&nbsp;ms{% endif %}</td>
+        <td class="text-right tabular text-mute"><time datetime="{{ s.created|date:'c' }}">{{ s.created|date:"d.m H:i" }}</time></td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+    {% else %}
+    <p class="ca7-empty"><b>Hali urinish yo‘q</b><a class="ca-link" href="{% url 'problems:list' %}">Birinchi masalani tanlang</a>: kodingiz darhol tekshiriladi.</p>
+    {% endif %}
+  </section>
 
   {% if next_picks %}
-  <section class="ca-box" aria-labelledby="next-title">
-    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="target" class="lu" aria-hidden="true"></i></span><h2 id="next-title">Keyingi masalalar{% if picks_reason %}<a class="ca-box-tools ca-link" href="{% url 'problems:list' %}?tag={{ picks_reason|urlencode }}" title="Eng kam yechgan mavzuingiz">{{ picks_reason }}</a>{% endif %}</h2></div>
-    <ul class="ca-box-body ca-facts">
-      {% for p, reason in next_picks %}<li><a class="ca-link min-w-0 truncate" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a><span class="ca-diff ca-diff-{{ p.difficulty }}">{{ p.get_difficulty_display }}</span></li>{% endfor %}
-    </ul>
+  <section aria-labelledby="next-title">
+    <div class="ca7-sec-h"><span class="ca-star" aria-hidden="true"></span><h2 id="next-title">Siz uchun</h2><a class="ca-link" href="{% url 'problems:list' %}{% if picks_reason %}?tag={{ picks_reason|urlencode }}{% endif %}">Masalalar</a></div>
+    <p class="ca7-sec-sub">{% if picks_reason %}Eng kam yechgan mavzuingiz <b class="text-ink">{{ picks_reason }}</b>. Shu masalalar aynan shu mavzuni mashq qildiradi.{% else %}Siz ko‘p yechadigan qiyinlikdagi, hali yechilmagan masalalar.{% endif %}</p>
+    <table class="ca-table ca-table-flat">
+      <thead><tr><th class="w-16">#</th><th>Masala</th><th class="hidden sm:table-cell">Mavzu</th><th class="text-right">Qiyinlik</th></tr></thead>
+      <tbody>
+      {% for p, reason in next_picks %}
+      <tr>
+        <td class="ca-pid">{{ p.pk|stringformat:"04d" }}</td>
+        <td><a class="ca-link" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a></td>
+        <td class="hidden text-mute sm:table-cell">{% for t in p.tags.all|slice:":3" %}{{ t.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+        <td class="text-right"><span class="ca-diff ca-diff-{{ p.difficulty }}">{{ p.get_difficulty_display }}</span></td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
   </section>
   {% endif %}
+</div>
+
+<aside class="ca7-aside" aria-label="Qo‘shimcha">
+  {% if daily %}{% include "problems/_daily_card.html" %}{% endif %}
+  {% if ring %}{% url 'problems:list' as problems_url %}{% include "problems/_solved_card.html" with title="Yechilgan masalalar" more_url=problems_url %}{% endif %}
+
+  <section class="ca-box" aria-labelledby="pts-title">
+    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" style="--c: rgb(var(--ca-spec-rgb))" aria-hidden="true"></span><h2 id="pts-title">Ballaringiz</h2><a class="ca-box-tools ca-link" href="{% url 'profile' user.username %}">Profil</a></div>
+    <div class="ca7-kv"><span>Reyting</span><b class="tabular">{{ user.rating }}</b>
+      <small>Musobaqalardan keladi.{% if rating_card.delta is not None %} Oxirgisida {{ rating_card.delta|stringformat:"+d" }}{% if best_rating %}, eng yuqorisi {{ best_rating }}{% endif %}{% if rating_card.rank %}, umumiy ro‘yxatda {{ rating_card.rank }}-o‘rin{% endif %}.{% else %} Birinchi reytingli musobaqadan keyin o‘rningiz chiqadi.{% endif %}</small></div>
+    <div class="ca7-kv"><span>Amaliyot balli</span><b class="tabular">{{ user.practice_points }}</b>
+      <small>Har bir yechilgan masala uchun beriladi, reytingga ta’sir qilmaydi.</small></div>
+  </section>
 
   <section class="ca-box" aria-labelledby="duel-title">
-    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="swords" class="lu" aria-hidden="true"></i></span><h2 id="duel-title">Duel<a class="ca-box-tools ca-link" href="{% url 'classroom:duels' %}">Duellar</a></h2></div>
-    <div class="ca-box-body">
+    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span><h2 id="duel-title">Duel</h2><a class="ca-box-tools ca-link" href="{% url 'classroom:duels' %}">Duellar</a></div>
     {% if active_duels or challenges %}
       <ul class="ca-facts">
         {% for d in active_duels %}
@@ -170,14 +203,13 @@
         {% endfor %}
       </ul>
     {% else %}
-      <div class="ca-box-pad">
-        <p class="text-mute">Bitta masala, har kimga 30 daqiqa. Tezroq yechgan g‘olib.</p>
-        <a class="ca-btn ca-btn-ghost mt-2.5" href="{% url 'classroom:duels' %}"><i data-lucide="swords" class="lu" aria-hidden="true"></i>Duel boshlash</a>
+      <div class="ca7-pad">
+        <p>Bitta masala, har kimga 30 daqiqa. Kim birinchi yechsa, o‘sha g‘olib.</p>
+        <a class="ca-btn ca-btn-soft" href="{% url 'classroom:duels' %}">Raqib topish</a>
       </div>
     {% endif %}
-    </div>
   </section>
 </aside>
 </div>
-</div>
+{% endif %}
 {% endblock %}

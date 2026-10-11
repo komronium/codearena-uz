@@ -3,116 +3,134 @@
 {% block description %}{{ statement_html|plain }}{% endblock %}
 {% block structured_data %}{% if not contest %}{% url 'problems:list' as list_url %}{% breadcrumbs_jsonld "Masalalar" list_url problem.title request.path %}{% endif %}{% endblock %}
 
+{% block main_class %}ca-main ca-main-ws{% endblock %}
 {% block content %}
-{% include "contests/_dq_banner.html" with participation=my_participation %}
-{% if duel %}
-<a href="{% url 'classroom:duel' duel.pk %}" class="ca-alert ca-alert-warn mb-6 flex flex-wrap items-center justify-between gap-2">
-  <span><i data-lucide="swords" class="lu mr-1.5" aria-hidden="true"></i><b>Duel:</b> vaqtingiz ketmoqda — tezroq yechgan g‘olib. Maslahatlar yopiq.</span>
-  <span class="tabular font-bold" data-countdown="{{ duel.my_end|date:'c' }}" data-label="" data-suffix="1"></span>
-</a>
-{% endif %}
-<div class="mb-5 flex flex-wrap items-center justify-between gap-3 text-sm">
-  {% if contest %}
-  <a class="ca-link text-mute" href="{% url 'contests:detail' contest.pk %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>{{ contest.title }}</a>
-  <span class="inline-flex items-center gap-2 rounded-full bg-warn-soft px-3 py-1 text-xs font-medium text-warn">
-    <i data-lucide="lock-keyhole" class="lu" aria-hidden="true"></i>Musobaqa rejimi · sahifadan chiqish qayd etiladi
-    <span data-leaves-wrap class="!hidden font-semibold text-bad">· chiqishlar: <b class="tabular" data-leaves>0</b></span>
-    <span class="tabular font-semibold" data-countdown="{{ contest.end|date:'c' }}" data-label="Tugashiga"></span>
-  </span>
-  {% if contest_problems|length > 1 %}
-  <nav class="flex w-full flex-wrap gap-1.5 sm:order-last" aria-label="Musobaqa masalalari">
-    {% for cp in contest_problems %}
-    <a href="{% url 'problems:detail' cp.problem.slug %}" class="ca-filter{% if cp.problem_id == problem.pk %} is-active{% endif %}"{% if cp.problem_id == problem.pk %} aria-current="page"{% endif %} title="{{ cp.problem.title }}"><span><b>{{ cp.label }}</b><span class="hidden sm:inline">. {{ cp.problem.title|truncatechars:22 }}</span></span></a>
-    {% endfor %}
-  </nav>
-  {% endif %}
-  {% else %}
-  {% if plan_nav %}{% include "learn/_plan_strip.html" with nav=plan_nav %}
-  {% else %}<a class="ca-link text-mute" href="{% url 'problems:list' %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>Masalalar</a>{% endif %}
-  <div class="flex flex-wrap items-center gap-1">
-    {% if save_lists is not None %}{% include "learn/_save_menu.html" %}{% endif %}
-    {% if show_leaders %}
-    <button type="button" class="ca-btn ca-btn-ghost !py-1.5" data-dialog="rate-dialog" aria-haspopup="dialog">
-      <i data-lucide="star" class="lu text-warn {% if problem.n_ratings %}fill-current{% endif %}" aria-hidden="true"></i>
-      {% if problem.n_ratings %}<b class="tabular">{{ problem.avg_stars|floatformat:1 }}</b><span class="tabular font-normal text-mute">({{ problem.n_ratings }})</span>{% else %}<span class="hidden sm:inline">Baholash</span><span class="sr-only sm:hidden">Baholash</span>{% endif %}
-    </button>
-    <button type="button" class="ca-btn ca-btn-ghost !py-1.5" data-dialog="leaders-dialog" aria-haspopup="dialog" title="Eng yaxshi yechimlar"><i data-lucide="trophy" class="lu text-accent" aria-hidden="true"></i><span class="hidden sm:inline">Eng yaxshi yechimlar</span><span class="sr-only sm:hidden">Eng yaxshi yechimlar</span></button>
-    <span class="mx-1.5 h-5 w-px bg-line" aria-hidden="true"></span>
+{% comment %}#7 workspace, after LeetCode's: a work bar (the way back, the problem's number and name, its neighbours,
+saving and rating), then the statement and the editor side by side, each scrolling on its own. The statement has
+tabs (the problem, the best solutions, your tries); the editor stays dark in both site themes, with its toolbar,
+the console (samples, your own input, the run's result) and the one gold "Yuborish". Phones show one pane at a time.{% endcomment %}
+<div class="ca-wbar">
+  <div class="ca-wbar-l">
+    {% if contest %}
+    <a class="ca-btn ca-btn-soft ca-btn-wb" href="{% url 'contests:detail' contest.pk %}"><i data-lucide="chevron-left" class="lu" aria-hidden="true"></i><span class="max-w-[14rem] truncate">{{ contest.title }}</span></a>
+    {% if contest_problems|length > 1 %}
+    <nav class="ca-wbar-letters" aria-label="Musobaqa masalalari">
+      {% for cp in contest_problems %}<a href="{% url 'problems:detail' cp.problem.slug %}" class="ca-letter{% if cp.problem_id == problem.pk %} is-current{% endif %}"{% if cp.problem_id == problem.pk %} aria-current="page"{% endif %} title="{{ cp.label }}. {{ cp.problem.title }}">{{ cp.label }}</a>{% endfor %}
+    </nav>
     {% endif %}
-    {% if plan_nav %}
-    {% with p=plan_nav.plan %}
-    {% if plan_nav.prev %}<a class="ca-btn ca-btn-ghost !px-2.5 !py-1.5" href="{% url 'problems:detail' plan_nav.prev.slug %}?plan={{ p.slug }}" title="{{ plan_nav.prev.title }}" aria-label="Kursdagi oldingi masala"><i data-lucide="chevron-left" class="lu" aria-hidden="true"></i></a>{% endif %}
-    <span class="tabular text-xs text-mute" title="Kursdagi o‘rni">{{ plan_nav.position }} / {{ plan_nav.total }}</span>
-    {% if plan_nav.next %}<a class="ca-btn ca-btn-ghost !px-2.5 !py-1.5" href="{% url 'problems:detail' plan_nav.next.slug %}?plan={{ p.slug }}" title="{{ plan_nav.next.title }}" aria-label="Kursdagi keyingi masala"><i data-lucide="chevron-right" class="lu" aria-hidden="true"></i></a>{% endif %}
-    {% endwith %}
-    {% else %}
-    {% if prev_problem %}<a class="ca-btn ca-btn-ghost !px-2.5 !py-1.5" href="{% url 'problems:detail' prev_problem.slug %}" title="{{ prev_problem.title }}" aria-label="Oldingi masala"><i data-lucide="chevron-left" class="lu" aria-hidden="true"></i></a>{% endif %}
-    <span class="tabular text-xs text-mute">{{ problem.id|stringformat:"04d" }}</span>
-    {% if next_problem %}<a class="ca-btn ca-btn-ghost !px-2.5 !py-1.5" href="{% url 'problems:detail' next_problem.slug %}" title="{{ next_problem.title }}" aria-label="Keyingi masala"><i data-lucide="chevron-right" class="lu" aria-hidden="true"></i></a>{% endif %}
+    {% elif plan_nav %}{% include "learn/_plan_strip.html" with nav=plan_nav %}
+    {% else %}<a class="ca-btn ca-btn-soft ca-btn-wb" href="{% url 'problems:list' %}"><i data-lucide="chevron-left" class="lu" aria-hidden="true"></i>Masalalar</a>{% endif %}
+    {% if not contest %}<span class="ca-pid">{{ problem.id|stringformat:"04d" }}</span>{% endif %}
+    <b class="ca-wbar-t">{% if contest_problem %}{{ contest_problem.label }}. {% endif %}{{ problem.title }}</b>
+    {% if is_daily %}<span class="ca-chip">Bugungi masala</span>{% endif %}
+    {% if not contest %}
+    <span class="ca-wbar-nav">
+    {% if plan_nav %}{% with p=plan_nav.plan %}
+      {% if plan_nav.prev %}<a class="ca-btn ca-btn-soft ca-btn-wb ca-btn-sq" href="{% url 'problems:detail' plan_nav.prev.slug %}?plan={{ p.slug }}" title="{{ plan_nav.prev.title }}" aria-label="Kursdagi oldingi masala"><i data-lucide="chevron-left" class="lu" aria-hidden="true"></i></a>{% endif %}
+      <span class="tabular text-xs text-mute" title="Kursdagi o‘rni">{{ plan_nav.position }} / {{ plan_nav.total }}</span>
+      {% if plan_nav.next %}<a class="ca-btn ca-btn-soft ca-btn-wb ca-btn-sq" href="{% url 'problems:detail' plan_nav.next.slug %}?plan={{ p.slug }}" title="{{ plan_nav.next.title }}" aria-label="Kursdagi keyingi masala"><i data-lucide="chevron-right" class="lu" aria-hidden="true"></i></a>{% endif %}
+    {% endwith %}{% else %}
+      {% if prev_problem %}<a class="ca-btn ca-btn-soft ca-btn-wb ca-btn-sq" href="{% url 'problems:detail' prev_problem.slug %}" title="{{ prev_problem.title }}" aria-label="Oldingi masala"><i data-lucide="chevron-left" class="lu" aria-hidden="true"></i></a>{% endif %}
+      {% if next_problem %}<a class="ca-btn ca-btn-soft ca-btn-wb ca-btn-sq" href="{% url 'problems:detail' next_problem.slug %}" title="{{ next_problem.title }}" aria-label="Keyingi masala"><i data-lucide="chevron-right" class="lu" aria-hidden="true"></i></a>{% endif %}
+    {% endif %}
+    </span>
     {% endif %}
   </div>
-  {% endif %}
+  <div class="ca-wbar-r">
+    {% if contest %}
+    <span class="ca-wbar-lock"><i data-lucide="lock-keyhole" class="lu" aria-hidden="true"></i><span class="hidden xl:inline">Musobaqa rejimi · sahifadan chiqish qayd etiladi</span>
+      <span data-leaves-wrap class="!hidden font-semibold text-bad">· chiqishlar: <b class="tabular" data-leaves>0</b></span></span>
+    <span class="ca-wbar-clock tabular" data-countdown="{{ contest.end|date:'c' }}" data-label="Tugashiga"></span>
+    {% else %}
+    {% if save_lists is not None %}{% include "learn/_save_menu.html" %}{% endif %}
+    {% if show_leaders %}
+    <button type="button" class="ca-btn ca-btn-soft ca-btn-wb" data-dialog="rate-dialog" aria-haspopup="dialog">
+      <i data-lucide="star" class="lu text-warn {% if problem.n_ratings %}fill-current{% endif %}" aria-hidden="true"></i>
+      {% if problem.n_ratings %}<b class="tabular">{{ problem.avg_stars|floatformat:1 }}</b><span class="tabular font-normal text-mute">({{ problem.n_ratings }})</span>{% else %}Baholash{% endif %}
+    </button>
+    {% endif %}
+    {% endif %}
+  </div>
 </div>
 
-{% if open_contest %}
-<div class="ca-alert mb-5 flex flex-wrap items-center justify-between gap-3" role="status">
-  <span><i data-lucide="trophy" class="lu mr-1.5" aria-hidden="true"></i>Bu masala hozir <strong>«{{ open_contest.title }}»</strong> musobaqasida. Natijalar jadvalida ko‘rinish uchun avval ro‘yxatdan o‘ting — aks holda yechim amaliyot sifatida hisoblanadi.</span>
-  <form method="post" action="{% url 'contests:register' open_contest.pk %}">{% csrf_token %}<button class="ca-btn ca-btn-primary !py-1.5">Musobaqaga qo‘shilish</button></form>
-</div>
-{% endif %}
-{% comment %}AI penalty: staff struck this participant's result on this problem; it counts as a
-wrong try and the problem stays blocked until the round ends{% endcomment %}
-{% if contest_blocked %}
-<div class="ca-alert ca-alert-bad mb-5" role="alert">
-  <p class="font-semibold"><i data-lucide="shield-alert" class="lu mr-1.5" aria-hidden="true"></i>Bu masala siz uchun bloklangan.</p>
-  <p class="mt-1 text-sm">Musobaqadagi yechimingiz bekor qilingan va xato urinish hisoblandi. Musobaqa tugaguncha bu masalaga yechim yuborish mumkin emas. Xato deb hisoblasangiz, o‘qituvchingizga murojaat qiling.</p>
-</div>
-{% endif %}
 {# phones and tablets: one pane at a time, so the editor isn't a long scroll below the statement #}
-<div class="ca-seg sticky top-[calc(var(--ca-nav-h)+.5rem)] z-30 mb-4 lg:hidden" role="group" aria-label="Ko‘rinish">
+<div class="ca-seg sticky top-[calc(var(--ca-nav-h)+.5rem)] z-30 mx-4 my-3 lg:hidden" role="group" aria-label="Ko‘rinish">
   <button type="button" data-pane-tab="statement" aria-pressed="true" aria-controls="statement-pane"><i data-lucide="file-text" class="lu mr-1.5" aria-hidden="true"></i>Masala</button>
   <button type="button" data-pane-tab="solve" aria-pressed="false" aria-controls="solve-pane"><i data-lucide="code" class="lu mr-1.5" aria-hidden="true"></i>Yechim</button>
 </div>
-<div id="panes" data-pane="statement" class="grid gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:items-start">
-  <section class="relative" id="statement-pane" aria-label="Masala matni">
-    <div class="ca-panel !p-0 overflow-hidden">
-      <div class="border-b border-line px-6 py-5">
-        <h1 class="ca-page-title">{% if contest_problem %}<span class="text-accent">{{ contest_problem.label }}.</span> {% endif %}{{ problem.title }}</h1>
-        {# LeetCode's chips under the title: the level (and rating), what a solve is worth, the limits #}
-        <div class="ca-pchips">
+<div id="panes" data-pane="statement" class="ca-ws">
+  <section class="ca-ws-doc" id="statement-pane" aria-label="Masala matni">
+    {% if show_leaders or my_subs %}
+    <div class="ca-doc-tabs" role="tablist" aria-label="Masala bo‘limlari">
+      <button type="button" role="tab" id="tab-doc-statement" aria-controls="doc-statement" aria-selected="true" data-doc-tab="statement">Shart</button>
+      {% if show_leaders %}<button type="button" role="tab" id="tab-doc-leaders" aria-controls="doc-leaders" aria-selected="false" tabindex="-1" data-doc-tab="leaders">Eng yaxshi yechimlar</button>{% endif %}
+      {% if my_subs %}<button type="button" role="tab" id="tab-doc-mine" aria-controls="doc-mine" aria-selected="false" tabindex="-1" data-doc-tab="mine">Urinishlarim <em class="tabular">{{ my_subs_n }}</em></button>{% endif %}
+    </div>
+    {% endif %}
+    <div class="ca-doc" id="doc-statement" role="tabpanel" aria-labelledby="tab-doc-statement">
+      {% include "contests/_dq_banner.html" with participation=my_participation %}
+      {% if duel %}
+      <a href="{% url 'classroom:duel' duel.pk %}" class="ca-alert ca-alert-warn mb-4 flex flex-wrap items-center justify-between gap-2">
+        <span><i data-lucide="swords" class="lu mr-1.5" aria-hidden="true"></i><b>Duel:</b> vaqtingiz ketmoqda — tezroq yechgan g‘olib. Maslahatlar yopiq.</span>
+        <span class="tabular font-bold" data-countdown="{{ duel.my_end|date:'c' }}" data-label="" data-suffix="1"></span>
+      </a>
+      {% endif %}
+      {% if open_contest %}
+      <div class="ca-alert mb-4 flex flex-wrap items-center justify-between gap-3" role="status">
+        <span><i data-lucide="trophy" class="lu mr-1.5" aria-hidden="true"></i>Bu masala hozir <strong>«{{ open_contest.title }}»</strong> musobaqasida. Natijalar jadvalida ko‘rinish uchun avval ro‘yxatdan o‘ting — aks holda yechim amaliyot sifatida hisoblanadi.</span>
+        <form method="post" action="{% url 'contests:register' open_contest.pk %}">{% csrf_token %}<button class="ca-btn ca-btn-primary !py-1.5">Musobaqaga qo‘shilish</button></form>
+      </div>
+      {% endif %}
+      {% comment %}AI penalty: staff struck this participant's result on this problem; it counts as a
+      wrong try and the problem stays blocked until the round ends{% endcomment %}
+      {% if contest_blocked %}
+      <div class="ca-alert ca-alert-bad mb-4" role="alert">
+        <p class="font-semibold"><i data-lucide="shield-alert" class="lu mr-1.5" aria-hidden="true"></i>Bu masala siz uchun bloklangan.</p>
+        <p class="mt-1 text-sm">Musobaqadagi yechimingiz bekor qilingan va xato urinish hisoblandi. Musobaqa tugaguncha bu masalaga yechim yuborish mumkin emas. Xato deb hisoblasangiz, o‘qituvchingizga murojaat qiling.</p>
+      </div>
+      {% endif %}
+      <div class="ca-problem-heading">
+        <div class="ca-problem-title-row">
+          {% if contest_problem %}<span class="ca-problem-letter" aria-hidden="true">{{ contest_problem.label }}</span>{% endif %}
+          <div class="min-w-0">
+            {% if contest_problem %}<p class="ca-problem-eyebrow">{{ contest.title }} · {{ contest_problem.label }} masala</p>{% endif %}
+            <h1 class="ca-page-title">{{ problem.title }}</h1>
+          </div>
+        </div>
+        {# the facts under the title: the level (and rating), what a solve is worth, the limits, the topics #}
+        <div class="ca-facts7">
           {% if contest_problem %}
-          {% if contest.type != "icpc" %}<span class="ca-pchip"{% if contest.type == "cf" %} title="Boshlang‘ich ball: vaqt o‘tishi va noto‘g‘ri urinishlar bilan kamayadi"{% endif %}><i data-lucide="star" class="lu text-warn" aria-hidden="true"></i><b class="tabular">{{ contest_problem.points }}</b> ball</span>{% endif %}
+          {% if contest.type != "icpc" %}<span{% if contest.type == "cf" %} title="Boshlang‘ich ball: vaqt o‘tishi va noto‘g‘ri urinishlar bilan kamayadi"{% endif %}><i data-lucide="star" class="lu" aria-hidden="true"></i><b class="tabular">{{ contest_problem.points }}</b> ball</span>{% endif %}
           {% else %}
-          <span class="ca-diff ca-diff-chip ca-diff-{{ problem.difficulty }}" title="Masala reytingi: reytingi shu songa teng o‘quvchi uni taxminan yarim holda yechadi">{{ problem.get_difficulty_display }}<span class="ml-1.5 font-medium opacity-80 tabular">{{ problem.rating }}</span></span>
+          <span class="ca-diff ca-diff-{{ problem.difficulty }}" title="Masala reytingi {{ problem.rating }}: reytingi shu songa teng o‘quvchi uni taxminan yarim holda yechadi">{{ problem.get_difficulty_display }}</span>
           {% if voided == "held" %}
-          <span class="font-medium text-warn" title="Yechim qanday yozilgani shubhali ko‘rindi, shuning uchun ball o‘qituvchi ko‘rib chiqquncha ushlab turilibdi. O‘zingiz yozgan bo‘lsangiz, ball qaytariladi."><i data-lucide="hourglass" class="lu mr-1.5" aria-hidden="true"></i>Ball tekshiruvda</span>
+          <span class="font-medium text-warn" title="Yechim qanday yozilgani shubhali ko‘rindi, shuning uchun ball o‘qituvchi ko‘rib chiqquncha ushlab turilibdi. O‘zingiz yozgan bo‘lsangiz, ball qaytariladi."><i data-lucide="hourglass" class="lu" aria-hidden="true"></i>Ball tekshiruvda</span>
           {% elif voided %}
-          <span class="font-medium text-bad" title="O‘qituvchi bu yechimni ko‘chirilgan deb belgiladi, shuning uchun amaliyot baliga qo‘shilmadi. Savol bo‘lsa, o‘qituvchingizga murojaat qiling."><i data-lucide="shield-alert" class="lu mr-1.5" aria-hidden="true"></i>Ball berilmadi</span>
+          <span class="font-medium text-bad" title="O‘qituvchi bu yechimni ko‘chirilgan deb belgiladi, shuning uchun amaliyot baliga qo‘shilmadi. Savol bo‘lsa, o‘qituvchingizga murojaat qiling."><i data-lucide="shield-alert" class="lu" aria-hidden="true"></i>Ball berilmadi</span>
           {% else %}
-          <span class="ca-pchip" title="Yechsangiz amaliyot balingizga qo‘shiladi. Ko‘p odam yechgan masala biroz arzonlashadi."><i data-lucide="star" class="lu text-warn" aria-hidden="true"></i><b class="tabular">{{ problem.points }}</b> ball</span>
+          <span title="Yechsangiz amaliyot balingizga qo‘shiladi. Ko‘p odam yechgan masala biroz arzonlashadi."><i data-lucide="star" class="lu" aria-hidden="true"></i><b class="tabular">{{ problem.points }}</b> ball</span>
           {% endif %}
           {% endif %}
           {% if problem.kind == "sql" %}<span class="ca-kind-sql"><i data-lucide="database" class="lu" aria-hidden="true"></i>SQL</span>{% endif %}
-          <span class="ca-pchip" title="Vaqt chegarasi"><i data-lucide="clock" class="lu" aria-hidden="true"></i><b class="tabular">{{ problem.tl_ms }}</b> ms</span>
-          {% if problem.kind != "sql" %}<span class="ca-pchip" title="Xotira chegarasi"><i data-lucide="cpu" class="lu" aria-hidden="true"></i><b class="tabular">{{ problem.ml_mb }}</b> MB</span>{% endif %}
+          <span title="Vaqt chegarasi"><i data-lucide="clock" class="lu" aria-hidden="true"></i><b class="tabular">{% if problem.tl_ms >= 1000 and problem.tl_ms|divisibleby:1000 %}{% widthratio problem.tl_ms 1000 1 %} s{% else %}{{ problem.tl_ms }} ms{% endif %}</b></span>
+          {% if problem.kind != "sql" %}<span title="Xotira chegarasi"><b class="tabular">{{ problem.ml_mb }} MB</b></span>{% endif %}
           {% if not contest and problem.n_ratings %}
-          <button type="button" class="ca-pchip ca-stars-sum" data-dialog="rate-dialog" title="{{ problem.n_ratings }} ta baho"><i data-lucide="star" class="lu" aria-hidden="true"></i><b class="tabular text-ink">{{ problem.avg_stars|floatformat:1 }}</b><span class="sr-only">/5,</span> <span class="tabular">({{ problem.n_ratings }})</span></button>
+          <button type="button" class="ca-stars-sum" data-dialog="rate-dialog" title="{{ problem.n_ratings }} ta baho"><i data-lucide="star" class="lu" aria-hidden="true"></i><b class="tabular text-ink">{{ problem.avg_stars|floatformat:1 }}</b><span class="sr-only">/5,</span> <span class="tabular text-mute">({{ problem.n_ratings }})</span></button>
+          {% endif %}
+          {% if not contest and problem.tags.all %}
+          <span class="text-mute">mavzu: {% for t in problem.tags.all|slice:":3" %}<a class="ca-facts7-tag{% if t.kind == 'sql' %} is-sql{% endif %}" href="{% url 'problems:list' %}?tag={{ t.name|urlencode }}">{{ t.name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</span>
           {% endif %}
           {% if not contest %}
-          <span class="ca-pchip"><i data-lucide="user" class="lu" aria-hidden="true"></i><a class="ca-tier-ink font-semibold{{ problem.author.rating|lg }}" href="{% url 'profile' problem.author.username %}" translate="no" style="--tier: {{ problem.author.rating|tier_color }}">{{ problem.author.username }}</a></span>
+          <span class="text-mute">muallif: <a class="ca-tier-ink font-semibold{{ problem.author.rating|lg }}" href="{% url 'profile' problem.author.username %}" translate="no" style="--tier: {{ problem.author.rating|tier_color }}">{{ problem.author.username }}</a></span>
           {% endif %}
         </div>
-        {% if not contest and problem.tags.all %}
-        <div class="mt-2.5 flex flex-wrap gap-1.5">{% for t in problem.tags.all|slice:":3" %}<a class="ca-chip{% if t.kind == 'sql' %} ca-chip-sql{% endif %}" href="{% url 'problems:list' %}?tag={{ t.name|urlencode }}">{{ t.name }}</a>{% endfor %}</div>
-        {% endif %}
       </div>
 
-      <div class="ca-statement space-y-6 px-6 py-5">
+      <div class="ca-statement">
         <div class="prose max-w-none">{{ statement_html|safe }}</div>
         {% if problem.statement_image %}
         <img class="w-full rounded-[var(--ca-radius)] border border-line" src="{{ problem.statement_image.url }}" alt="«{{ problem.title }}» masalasining rasmi" loading="lazy">
         {% endif %}
-
         {% if problem.kind == "sql" %}
         <div>
           <h2 class="ca-statement-h">Namunaviy ma’lumotlar</h2>
@@ -162,25 +180,30 @@ wrong try and the problem stays blocked until the round ends{% endcomment %}
           <div class="prose max-w-none">{{ output_html|safe }}</div>
         </div>
         {% endif %}
-        <div>
-          <h2 class="ca-statement-h">Misollar</h2>
+        <div class="ca-examples-section">
+          <div class="ca-examples-title">
+            <div><h2 class="ca-statement-h">Misollar</h2><p>Namuna qiymatlari va kutilgan natija</p></div>
+          </div>
           {% for t in problem.samples %}
-          <div class="mb-3 grid gap-3 sm:grid-cols-2">
+          <article class="ca-example">
+            <div class="ca-example-head"><span>Misol {{ forloop.counter }}</span><span class="ca-example-hint">Kirish yoki chiqishni alohida nusxalash mumkin</span></div>
+            <div class="ca-example-grid">
             <div class="ca-sample">
               <div class="ca-sample-head">
-                <span>Kirish</span>
+                <span><i data-lucide="arrow-down-to-line" class="lu" aria-hidden="true"></i>Kirish</span>
                 <button type="button" class="ca-copy-btn" data-copy-target="sample-in-{{ forloop.counter }}" title="Nusxalash" aria-label="Kirishni nusxalash"><i data-lucide="copy" class="lu" aria-hidden="true"></i></button>
               </div>
               <pre id="sample-in-{{ forloop.counter }}">{{ t.input }}</pre>
             </div>
             <div class="ca-sample">
               <div class="ca-sample-head">
-                <span>Chiqish</span>
+                <span><i data-lucide="arrow-up-from-line" class="lu" aria-hidden="true"></i>Chiqish</span>
                 <button type="button" class="ca-copy-btn" data-copy-target="sample-out-{{ forloop.counter }}" title="Nusxalash" aria-label="Chiqishni nusxalash"><i data-lucide="copy" class="lu" aria-hidden="true"></i></button>
               </div>
               <pre id="sample-out-{{ forloop.counter }}">{{ t.expected }}</pre>
             </div>
-          </div>
+            </div>
+          </article>
           {% empty %}
           <div class="ca-empty text-sm">Misol yo‘q.</div>
           {% endfor %}
@@ -194,9 +217,8 @@ wrong try and the problem stays blocked until the round ends{% endcomment %}
         </dl>
         {% endif %}
       </div>
-    </div>
     {% if hints or editorial_html or problem.editorial_md %}
-    <div class="ca-panel mt-6 space-y-3" id="hints">
+    <div class="ca-doc-help space-y-3" id="hints">
       <div class="flex flex-wrap items-center justify-between gap-2">
         <h2 class="text-sm font-semibold"><i data-lucide="lightbulb" class="lu mr-1.5 text-warn" aria-hidden="true"></i>Yordam</h2>
         {% if help_locked %}<span class="text-xs text-mute">{{ help_locked }}</span>
@@ -227,126 +249,147 @@ wrong try and the problem stays blocked until the round ends{% endcomment %}
       {% endif %}
     </div>
     {% endif %}
-
+    </div>
+    {% if show_leaders %}
+    <div class="ca-doc" id="doc-leaders" role="tabpanel" aria-labelledby="tab-doc-leaders" hidden>
+      <h2 class="sr-only">Eng yaxshi yechimlar</h2>
+      {% include "problems/_leaders_mini.html" with title="Eng tez" icon="zap" rows=fastest by="time" %}
+      {% include "problems/_leaders_mini.html" with title="Eng qisqa" icon="scissors" rows=shortest by="length" %}
+    </div>
+    {% endif %}
     {% if my_subs %}
-    <div class="ca-panel mt-6 !p-0 overflow-hidden">
-      <div class="flex items-center justify-between border-b border-line px-4 py-2.5">
-        <h2 class="text-sm font-semibold">Mening urinishlarim</h2>
-        <a class="ca-link text-xs" href="{% url 'submissions:mine' %}?mine=1">Barchasi</a>
-      </div>
-      <ul class="divide-y divide-line px-4 text-sm">
+    <div class="ca-doc" id="doc-mine" role="tabpanel" aria-labelledby="tab-doc-mine" hidden>
+      <div class="ca7-sec-h"><h2>Urinishlarim</h2><a class="ca-link" href="{% url 'submissions:mine' %}?mine=1">Barchasi</a></div>
+      <table class="ca-table ca-table-flat">
+        <thead><tr><th>Natija</th><th class="hidden sm:table-cell">Til</th><th class="text-right">Vaqt</th><th class="text-right">Yuborilgan</th></tr></thead>
+        <tbody>
         {% for s in my_subs %}
-        <li class="py-2.5">
-          <div class="flex items-center justify-between gap-3">
-            <a class="ca-link tabular text-mute" href="{% url 'submissions:detail' s.pk %}">#{{ s.pk|stringformat:"06d" }} · {{ s.language.name }}</a>
-            <span class="tabular text-xs text-mute">{{ s.created|date:"d.m H:i" }}</span>
-          </div>
-          <div class="mt-1.5">{% include "submissions/_status.html" with compact=True %}</div>
-        </li>
+        <tr>
+          <td class="whitespace-nowrap"><a href="{% url 'submissions:detail' s.pk %}" class="no-underline" title="#{{ s.pk|stringformat:'06d' }}">{% include "submissions/_vd.html" with v=s.verdict sub=s %}</a></td>
+          <td class="hidden whitespace-nowrap text-mute sm:table-cell">{{ s.language.name }}</td>
+          <td class="whitespace-nowrap text-right tabular">{% if s.is_terminal and s.verdict != "CE" %}{{ s.exec_ms }}&nbsp;ms{% else %}<span class="text-mute">—</span>{% endif %}</td>
+          <td class="whitespace-nowrap text-right tabular text-mute">{{ s.created|date:"d.m H:i" }}</td>
+        </tr>
         {% endfor %}
-      </ul>
+        </tbody>
+      </table>
     </div>
     {% endif %}
   </section>
 
-  <section class="lg:sticky lg:top-20" id="solve-pane" aria-label="Yechim yuborish">
+  <section class="ca-ws-ed" id="solve-pane" aria-label="Yechim yuborish">
     {% if user.is_authenticated %}
-    <form method="post" action="{% url 'submissions:submit' problem.slug %}" id="submit-form" class="ca-panel ca-ide !p-0">
+    <form method="post" action="{% url 'submissions:submit' problem.slug %}" id="submit-form" class="ca-ide">
       {% csrf_token %}
     {% else %}
     {# guests write here too; the code stays in this browser and "send" goes through sign-up and back #}
-    <form method="get" action="{% url 'register' %}" id="submit-form" class="ca-panel ca-ide !p-0">
+    <form method="get" action="{% url 'register' %}" id="submit-form" class="ca-ide">
       <input type="hidden" name="next" value="{{ request.path }}#yechim">
     {% endif %}
-      <div class="relative flex flex-wrap items-center justify-between gap-2 border-b border-line px-4 py-2.5">
-        <label class="flex items-center gap-2 text-sm text-mute">
-          <i data-lucide="code" class="lu" aria-hidden="true"></i>
-          <select {% if user.is_authenticated %}name="language" {% endif %}id="language" class="ca-select !w-auto !py-1.5 text-sm" aria-label="Dasturlash tili">
+      <div class="ca-edbar">
+        <label class="ca-edsel"><span class="sr-only">Dasturlash tili</span>
+          <select {% if user.is_authenticated %}name="language" {% endif %}id="language" aria-label="Dasturlash tili">
             {% for l in languages %}<option value="{{ l.code }}">{{ l.name }}</option>{% endfor %}
-          </select>
+          </select><i data-lucide="chevron-down" class="lu" aria-hidden="true"></i>
         </label>
-        <div class="flex items-center gap-1">
-          <button type="button" id="editor-reset" class="ca-btn ca-btn-ghost !px-2.5 !py-1.5 text-xs" title="Tozalash" aria-label="Kodni tozalash"><i data-lucide="undo-2" class="lu" aria-hidden="true"></i></button>
-          <button type="button" id="editor-full" class="ca-btn ca-btn-ghost !px-2.5 !py-1.5 text-xs" title="To‘liq ekran" aria-label="To‘liq ekran" aria-pressed="false"><i data-lucide="maximize-2" class="lu" aria-hidden="true"></i></button>
-          <details class="sm:relative" id="editor-prefs" data-dropdown>
-            <summary class="ca-btn ca-btn-ghost !px-2.5 !py-1.5 cursor-pointer list-none text-xs" title="Muharrir sozlamalari"><i data-lucide="settings-2" class="lu" aria-hidden="true"></i></summary>
-            {# phones: the toolbar wraps, so the panel spans the toolbar instead of hanging off the button #}
-            <div class="ca-panel ca-prefs absolute inset-x-2 top-full z-20 mt-1 !p-0 text-sm sm:inset-x-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-72">
-              <label class="ca-pref"><span>Ranglar</span>
-                <select data-pref="theme" class="ca-select !w-40 !py-1 text-sm">
-                  <option value="auto">Standart (qorong‘i)</option>
-                  <optgroup label="Qorong‘i">
-                    <option value="dark">One Dark</option><option value="vscode-dark">VS Code Dark</option><option value="github-dark">GitHub Dark</option>
-                    <option value="tokyo-night">Tokyo Night</option><option value="tokyo-night-storm">Tokyo Night Storm</option>
-                    <option value="dracula">Dracula</option><option value="monokai">Monokai</option><option value="material-dark">Material</option>
-                    <option value="atomone">Atom One</option><option value="gruvbox-dark">Gruvbox</option><option value="nord">Nord</option>
-                    <option value="xcode-dark">Xcode Dark</option><option value="sublime">Sublime</option><option value="aura">Aura</option>
-                    <option value="copilot">Copilot</option><option value="andromeda">Andromeda</option><option value="solarized-dark">Solarized Dark</option>
-                  </optgroup>
-                  <optgroup label="Yorug‘">
-                    <option value="light">Oddiy</option><option value="vscode-light">VS Code Light</option><option value="github-light">GitHub Light</option>
-                    <option value="xcode-light">Xcode Light</option><option value="material-light">Material Light</option>
-                    <option value="gruvbox-light">Gruvbox Light</option><option value="solarized-light">Solarized Light</option>
-                  </optgroup>
-                </select></label>
-              <label class="ca-pref"><span>Shrift</span>
-                <select data-pref="font" class="ca-select !w-40 !py-1 text-sm">
-                  <option value="jetbrains">JetBrains Mono</option><option value="lilex">Lilex</option><option value="fira">Fira Code</option><option value="anthropic">Anthropic Mono</option><option value="system">Tizim</option>
-                </select></label>
-              <label class="ca-pref"><span>O‘lcham</span>
-                <input type="range" data-pref="size" min="12" max="22" step="1" class="min-w-0 flex-1">
-                <span class="w-9 text-right text-mute tabular"><span id="pref-size-val">14</span>px</span></label>
-              <div class="ca-pref"><span id="pref-tab-label">Chekinish<small class="block text-xs font-normal text-mute">bo‘sh joy soni</small></span>
-                <div class="ca-seg ca-seg-sm w-40" role="radiogroup" aria-labelledby="pref-tab-label">
-                  <label><input type="radio" name="pref-tab" value="2" data-pref="tab" class="sr-only"><span>2</span></label>
-                  <label><input type="radio" name="pref-tab" value="4" data-pref="tab" class="sr-only"><span>4</span></label>
-                </div></div>
-              <div class="mt-1 border-t border-line pt-1">
-                <label class="ca-pref"><span>Uzun qatorlarni o‘rash</span><input type="checkbox" role="switch" class="ca-switch" data-pref="wrap"></label>
-                <label class="ca-pref"><span>Vim rejimi</span><input type="checkbox" role="switch" class="ca-switch" data-pref="vim"></label>
-                <label class="ca-pref"><span>Til shabloni<small class="block text-xs font-normal text-mute">Muharrir bo‘sh bo‘lsa qo‘yiladi</small></span><input type="checkbox" role="switch" class="ca-switch" data-pref="starter"></label>
-              </div>
-            </div>
-          </details>
-          <span class="mx-1 h-5 w-px bg-line" aria-hidden="true"></span>
-          {% if user.is_authenticated %}
-          {% if contest_blocked %}
-          <button type="button" id="trial-btn" class="ca-btn ca-btn-ghost !py-1.5 opacity-50 cursor-not-allowed" disabled title="Masala bloklangan — musobaqa tugaguncha sinab bo‘lmaydi"><i data-lucide="play" class="lu" aria-hidden="true"></i>Sinab ko‘rish</button>
-          <button type="button" id="submit-btn" class="ca-btn ca-btn-success !py-1.5 opacity-50 cursor-not-allowed" disabled title="Masala bloklangan — musobaqa tugaguncha yechim yuborish mumkin emas"><i data-lucide="cloud-upload" class="lu" aria-hidden="true"></i>Yuborish</button>
-          {% else %}
-          <button type="button" id="trial-btn" class="ca-btn ca-btn-ghost !py-1.5" title="{% if problem.kind == 'sql' %}So‘rovni namunaviy ma’lumotlarda ishga tushirish{% else %}Namunaviy testlarda sinash{% endif %} — urinish hisoblanmaydi (Ctrl+')"><i data-lucide="play" class="lu" aria-hidden="true"></i>Sinab ko‘rish</button>
-          <button type="submit" id="submit-btn" class="ca-btn ca-btn-success !py-1.5" title="Yuborish (Ctrl+Enter)"><i data-lucide="cloud-upload" class="lu" aria-hidden="true"></i>Yuborish</button>
-          {% endif %}
-          {% else %}
-          <a class="ca-btn ca-btn-ghost !py-1.5" href="{% url 'login' %}?next={{ request.path|urlencode }}%23yechim"><i data-lucide="log-in" class="lu" aria-hidden="true"></i>Kirish</a>
-          <button type="submit" id="submit-btn" class="ca-btn ca-btn-success !py-1.5"><i data-lucide="user-plus" class="lu" aria-hidden="true"></i>Ro‘yxatdan o‘tib yuborish</button>
-          {% endif %}
-        </div>
+        <span class="ca-edbar-state" id="draft-state" aria-live="polite"></span>
+        <button type="button" id="editor-reset" class="ca-edb ca-edb-sq" title="Tozalash" aria-label="Kodni tozalash"><i data-lucide="undo-2" class="lu" aria-hidden="true"></i></button>
+        <details class="ca-edprefs" id="editor-prefs" data-dropdown>
+          <summary class="ca-edb ca-edb-sq" title="Muharrir sozlamalari" aria-label="Muharrir sozlamalari"><i data-lucide="sliders-horizontal" class="lu" aria-hidden="true"></i></summary>
+          <div class="ca-prefs">
+            <label class="ca-pref"><span>Shrift</span>
+              <select data-pref="font" class="ca-pref-sel">
+                <option value="jetbrains">JetBrains Mono</option><option value="lilex">Lilex</option><option value="fira">Fira Code</option><option value="anthropic">Anthropic Mono</option><option value="system">Tizim</option>
+              </select></label>
+            <label class="ca-pref"><span>Mavzu</span>
+              <select data-pref="theme" class="ca-pref-sel">
+                <option value="auto">CodeArena</option>
+                <optgroup label="Tungi">
+                  <option value="dark">One Dark</option><option value="vscode-dark">VS Code Dark</option><option value="github-dark">GitHub Dark</option>
+                  <option value="tokyo-night">Tokyo Night</option><option value="tokyo-night-storm">Tokyo Night Storm</option>
+                  <option value="dracula">Dracula</option><option value="monokai">Monokai</option><option value="material-dark">Material</option>
+                  <option value="atomone">Atom One</option><option value="gruvbox-dark">Gruvbox</option><option value="nord">Nord</option>
+                  <option value="xcode-dark">Xcode Dark</option><option value="sublime">Sublime</option><option value="aura">Aura</option>
+                  <option value="copilot">Copilot</option><option value="andromeda">Andromeda</option><option value="solarized-dark">Solarized Dark</option>
+                </optgroup>
+                <optgroup label="Kunduzgi">
+                  <option value="light">Oddiy</option><option value="vscode-light">VS Code Light</option><option value="github-light">GitHub Light</option>
+                  <option value="xcode-light">Xcode Light</option><option value="material-light">Material Light</option>
+                  <option value="gruvbox-light">Gruvbox Light</option><option value="solarized-light">Solarized Light</option>
+                </optgroup>
+              </select></label>
+            <div class="ca-pref"><span id="pref-size-label">Shrift o‘lchami</span>
+              <span class="ca-stepper" role="group" aria-labelledby="pref-size-label">
+                <button type="button" data-size-step="-1" aria-label="Kichraytirish">−</button>
+                <b class="tabular" id="pref-size-val">14</b>
+                <button type="button" data-size-step="1" aria-label="Kattalashtirish">+</button>
+                <input type="range" data-pref="size" min="12" max="22" step="1" class="sr-only" tabindex="-1" aria-hidden="true">
+              </span></div>
+            <div class="ca-pref"><span id="pref-tab-label">Tab kengligi</span>
+              <div class="ca-edseg" role="radiogroup" aria-labelledby="pref-tab-label">
+                <label><input type="radio" name="pref-tab" value="2" data-pref="tab" class="sr-only"><span>2</span></label>
+                <label><input type="radio" name="pref-tab" value="4" data-pref="tab" class="sr-only"><span>4</span></label>
+              </div></div>
+            <label class="ca-pref"><span>Vim klaviaturasi</span><input type="checkbox" role="switch" class="ca-switch" data-pref="vim"></label>
+            <label class="ca-pref"><span>Uzun qatorlarni o‘rash</span><input type="checkbox" role="switch" class="ca-switch" data-pref="wrap"></label>
+            <label class="ca-pref"><span>Til shabloni<small>Muharrir bo‘sh bo‘lsa qo‘yiladi</small></span><input type="checkbox" role="switch" class="ca-switch" data-pref="starter"></label>
+          </div>
+        </details>
+        <button type="button" id="editor-full" class="ca-edb ca-edb-sq" title="To‘liq ekran" aria-label="To‘liq ekran" aria-pressed="false"><i data-lucide="maximize" class="lu" aria-hidden="true"></i></button>
       </div>
       <div id="editor">
         <textarea {% if user.is_authenticated %}name="source" {% endif %}id="source" class="ca-editor-fallback" spellcheck="false" aria-label="Kod muharriri" placeholder="Kodni shu yerga yozing…"></textarea>
       </div>
-      {% if not user.is_authenticated %}
-      <div class="border-t border-line px-4 py-2.5 text-xs text-mute"><i data-lucide="save" class="lu mr-1" aria-hidden="true"></i>Kodingiz shu brauzerda saqlanadi. Yuborish uchun ro‘yxatdan o‘ting.</div>
-      {% else %}
-      {# the keys and the practice note under the editor; the buttons sit in the bar above it #}
-      <div class="flex items-center gap-3 border-t border-line px-4 py-2.5">
-        <span class="min-w-0 truncate text-xs text-mute"><kbd class="ca-kbd">Ctrl</kbd>+<kbd class="ca-kbd">Enter</kbd> yuborish{% if contest %} · <kbd class="ca-kbd">Ctrl</kbd>+<kbd class="ca-kbd">'</kbd> sinash{% else %}<span title="Mashqda kod qanday yozilgani (uzun kod qo‘yish, boshqa oynaga o‘tish) o‘qituvchingizga ko‘rinadi. Ko‘chirilgan yechim uchun ball berilmaydi."> · {% if problem.difficulty == "beginner" or problem.difficulty == "easy" %}uzun kod qo‘yish yopiq{% else %}o‘qituvchi ko‘radi{% endif %} <i data-lucide="info" class="lu" aria-hidden="true"></i></span>{% endif %}</span>
-      </div>
-      {% endif %}
-      {% if problem.kind != "sql" and user.is_authenticated %}
-      <details id="trial-custom" class="border-t border-line">
-        <summary class="flex cursor-pointer list-none items-center gap-2 px-4 py-2 text-xs text-mute"><i data-lucide="terminal" class="lu" aria-hidden="true"></i>O‘z inputim bilan sinash</summary>
-        <div class="px-4 pb-3">
-          <textarea id="trial-stdin" rows="4" class="ca-input w-full font-mono text-sm" spellcheck="false" aria-label="Sinov uchun kirish ma’lumoti" placeholder="Bo‘sh qoldirilsa — namunaviy testlarda sinaladi"></textarea>
+      {# the console: the samples, your own input, the run's result #}
+      <div class="ca-con" id="console">
+        <div class="ca-con-tabs" role="tablist" aria-label="Konsol">
+          {% if problem.kind != "sql" %}
+          <button type="button" role="tab" id="con-tab-samples" aria-controls="con-samples" aria-selected="true" data-con-tab="samples">Misollar</button>
+          {% if user.is_authenticated %}<button type="button" role="tab" id="con-tab-custom" aria-controls="con-custom" aria-selected="false" tabindex="-1" data-con-tab="custom">O‘z kiritishim</button>{% endif %}
+          {% endif %}
+          {% if user.is_authenticated %}<button type="button" role="tab" id="con-tab-result" aria-controls="con-result" aria-selected="{% if problem.kind == 'sql' %}true{% else %}false{% endif %}"{% if problem.kind != "sql" %} tabindex="-1"{% endif %} data-con-tab="result">Natija</button>{% endif %}
         </div>
-      </details>
-      {% endif %}
-      <div id="trial-out" class="border-t border-line px-4 py-3 text-sm" aria-live="polite" hidden></div>
+        {% if problem.kind != "sql" %}
+        <div class="ca-con-body" id="con-samples" role="tabpanel" aria-labelledby="con-tab-samples">
+          {% for t in problem.samples %}
+          <div class="ca-con-io">
+            <div><p>Kirish · Misol {{ forloop.counter }}</p><pre>{{ t.input }}</pre></div>
+            <div><p>Kutilgan natija</p><pre>{{ t.expected }}</pre></div>
+          </div>
+          {% empty %}<p class="ca-con-note">Misol yo‘q.</p>{% endfor %}
+        </div>
+        {% if user.is_authenticated %}
+        <div class="ca-con-body" id="con-custom" role="tabpanel" aria-labelledby="con-tab-custom" hidden>
+          <textarea id="trial-stdin" rows="4" class="ca-con-in" spellcheck="false" aria-label="Sinov uchun kirish ma’lumoti" placeholder="Kirish ma’lumotini yozing. «Sinab ko‘rish» shu kirish bilan ishga tushiradi."></textarea>
+        </div>
+        {% endif %}
+        {% endif %}
+        {% if user.is_authenticated %}
+        <div class="ca-con-body" id="con-result" role="tabpanel" aria-labelledby="con-tab-result"{% if problem.kind != "sql" %} hidden{% endif %}>
+          <p class="ca-con-note" id="trial-empty">«Sinab ko‘rish» natijasi shu yerda chiqadi. Sinov urinish hisoblanmaydi.</p>
+          <div id="trial-out" aria-live="polite" hidden></div>
+        </div>
+        {% endif %}
+      </div>
+      <div class="ca-act">
+        {% if user.is_authenticated %}
+        <span class="ca-act-keys"><kbd class="ca-kbd">Ctrl</kbd>+<kbd class="ca-kbd">Enter</kbd> yuborish{% if contest %} · <kbd class="ca-kbd">Ctrl</kbd>+<kbd class="ca-kbd">'</kbd> sinash{% else %}<span class="hidden xl:inline" title="Mashqda kod qanday yozilgani (uzun kod qo‘yish, boshqa oynaga o‘tish) o‘qituvchingizga ko‘rinadi. Ko‘chirilgan yechim uchun ball berilmaydi."> · {% if problem.difficulty == "beginner" or problem.difficulty == "easy" %}uzun kod qo‘yish yopiq{% else %}o‘qituvchi ko‘radi{% endif %} <i data-lucide="info" class="lu" aria-hidden="true"></i></span>{% endif %}</span>
+        {% if contest_blocked %}
+        <button type="button" id="trial-btn" class="ca-edb opacity-50 cursor-not-allowed" disabled title="Masala bloklangan — musobaqa tugaguncha sinab bo‘lmaydi"><i data-lucide="play" class="lu" aria-hidden="true"></i>Sinab ko‘rish</button>
+        <button type="button" id="submit-btn" class="ca-btn ca-btn-gold ca-btn-go opacity-50 cursor-not-allowed" disabled title="Masala bloklangan — musobaqa tugaguncha yechim yuborish mumkin emas"><i data-lucide="send" class="lu" aria-hidden="true"></i>Yuborish</button>
+        {% else %}
+        <button type="button" id="trial-btn" class="ca-edb" title="{% if problem.kind == 'sql' %}So‘rovni namunaviy ma’lumotlarda ishga tushirish{% else %}Namunaviy testlarda sinash{% endif %} — urinish hisoblanmaydi (Ctrl+')"><i data-lucide="play" class="lu" aria-hidden="true"></i>Sinab ko‘rish</button>
+        <button type="submit" id="submit-btn" class="ca-btn ca-btn-gold ca-btn-go" title="Yuborish (Ctrl+Enter)"><i data-lucide="send" class="lu" aria-hidden="true"></i>Yuborish</button>
+        {% endif %}
+        {% else %}
+        <span class="ca-act-keys"><i data-lucide="save" class="lu" aria-hidden="true"></i> Kodingiz shu brauzerda saqlanadi</span>
+        <a class="ca-edb" href="{% url 'login' %}?next={{ request.path|urlencode }}%23yechim"><i data-lucide="log-in" class="lu" aria-hidden="true"></i>Kirish</a>
+        <button type="submit" id="submit-btn" class="ca-btn ca-btn-gold ca-btn-go"><i data-lucide="user-plus" class="lu" aria-hidden="true"></i>Ro‘yxatdan o‘tib yuborish</button>
+        {% endif %}
+      </div>
     </form>
   </section>
 </div>
-
 <link rel="stylesheet" href="{% static 'vendor/katex/katex.min.css' %}">
 <script defer src="{% static 'vendor/katex/katex.min.js' %}"></script>
 <script defer src="{% static 'vendor/katex/auto-render.min.js' %}"
@@ -365,6 +408,34 @@ wrong try and the problem stays blocked until the round ends{% endcomment %}
     try { saved = sessionStorage.getItem(key); } catch {}
     if (location.hash === "#yechim" || saved === "solve") show("solve");  // a reload after submitting stays on the code
   })();
+</script>
+<script>
+  // the statement's tabs and the console's: one panel shown, arrows move between tabs
+  const caTabs = (attr, onShow) => {
+    const tabs = [...document.querySelectorAll(`[${attr}]`)];
+    const show = (tab) => {
+      tabs.forEach((t) => {
+        const on = t === tab;
+        t.setAttribute("aria-selected", String(on)); t.tabIndex = on ? 0 : -1;
+        document.getElementById(t.getAttribute("aria-controls")).hidden = !on;
+      });
+      onShow?.(tab);
+    };
+    tabs.forEach((t, i) => {
+      t.addEventListener("click", () => show(t));
+      t.addEventListener("keydown", (e) => {
+        const d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+        if (!d) return;
+        const next = tabs[(i + d + tabs.length) % tabs.length];
+        next.focus(); show(next);
+      });
+    });
+    return (name) => { const t = tabs.find((x) => x.getAttribute(attr) === name); if (t) show(t); };
+  };
+  caTabs("data-doc-tab", () => document.getElementById("statement-pane").scrollTo({ top: 0 }));
+  // a run takes the input of the last input tab you were on (the samples or your own), even from "Natija"
+  window.caInput = "samples";
+  window.caConsole = caTabs("data-con-tab", (tab) => { if (tab.dataset.conTab !== "result") window.caInput = tab.dataset.conTab; });
 </script>
 <script>
   document.querySelectorAll(".ca-copy-btn").forEach((btn) => {
@@ -386,7 +457,8 @@ resolves their bare imports so @codemirror/state loads once — two copies break
   import { EditorView, basicSetup } from "codemirror";
   import { Compartment, EditorState, Transaction } from "@codemirror/state";
   import { keymap } from "@codemirror/view";
-  import { indentUnit } from "@codemirror/language";
+  import { indentUnit, syntaxHighlighting, HighlightStyle } from "@codemirror/language";
+  import { tags } from "@lezer/highlight";
   import { indentWithTab } from "@codemirror/commands";
   import { snippetCompletion as snip, completeFromList, acceptCompletion } from "@codemirror/autocomplete";
   import { oneDark } from "@codemirror/theme-one-dark";
@@ -484,6 +556,31 @@ resolves their bare imports so @codemirror/state loads once — two copies break
       S("binsearch", "binar qidiruv", "let lo = ${0}, hi = ${n};\nwhile (lo < hi) {\n\tconst mid = (lo + hi) >> 1;\n\tif (${check(mid)}) hi = mid;\n\telse lo = mid + 1;\n}"),
     ],
   };
+  // "CodeArena": the #7 navy, the khatam palette for the syntax (keywords rose, calls sky, strings gold)
+  const caTheme = [EditorView.theme({
+    "&": { color: "#D7DEEF", backgroundColor: "transparent" },
+    ".cm-content": { caretColor: "#8FB0FF" },
+    ".cm-cursor, .cm-dropCursor": { borderLeftColor: "#8FB0FF" },
+    "&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection": { backgroundColor: "#2A3D7A" },
+    ".cm-gutters": { backgroundColor: "transparent", color: "#5B6788", border: "none" },
+    ".cm-activeLine": { backgroundColor: "rgba(143,176,255,.05)" },
+    ".cm-activeLineGutter": { backgroundColor: "transparent", color: "#C8D3F2" },
+    ".cm-matchingBracket, .cm-nonmatchingBracket": { backgroundColor: "rgba(47,196,185,.18)", outline: "none" },
+    ".cm-searchMatch": { backgroundColor: "rgba(242,181,58,.25)" },
+    ".cm-tooltip": { backgroundColor: "#16224A", color: "#D7DEEF", border: "1px solid rgba(255,255,255,.12)" },
+    ".cm-tooltip-autocomplete > ul > li[aria-selected]": { backgroundColor: "#2A3D7A", color: "#fff" },
+    ".cm-panels": { backgroundColor: "#121C38", color: "#D7DEEF" },
+  }, { dark: true }), syntaxHighlighting(HighlightStyle.define([
+    { tag: [tags.keyword, tags.controlKeyword, tags.moduleKeyword, tags.operatorKeyword, tags.processingInstruction], color: "#FF8FA8" },
+    { tag: [tags.function(tags.variableName), tags.function(tags.propertyName), tags.macroName], color: "#7CC8FF" },
+    { tag: [tags.string, tags.special(tags.string), tags.character, tags.regexp], color: "#F7CB6B" },
+    { tag: [tags.number, tags.bool, tags.null, tags.atom], color: "#C9AEF7" },
+    { tag: [tags.typeName, tags.className, tags.namespace, tags.standard(tags.variableName)], color: "#5FD8CD" },
+    { tag: [tags.comment, tags.lineComment, tags.blockComment], color: "#6E7FA3", fontStyle: "italic" },
+    { tag: [tags.operator, tags.punctuation, tags.bracket], color: "#AEB9D6" },
+    { tag: [tags.propertyName, tags.attributeName], color: "#BFD3FF" },
+    { tag: tags.invalid, color: "#FF6B63" },
+  ]))];
   const isStarter = (text) => !text.trim() || Object.values(STARTERS).includes(text);
   const tabExt = () => [indentUnit.of(" ".repeat(+prefs.tab)), EditorState.tabSize.of(+prefs.tab)];
   const wrapExt = () => (prefs.wrap ? EditorView.lineWrapping : []);
@@ -491,9 +588,10 @@ resolves their bare imports so @codemirror/state loads once — two copies break
   const themeExt = async () => {
     const load = THEMES[prefs.theme];
     if (load) return load();
-    return prefs.theme === "light" ? [] : oneDark;  // the solve pane is dark in both site themes
+    if (prefs.theme === "dark") return oneDark;
+    return prefs.theme === "light" ? [] : caTheme;  // the solve pane is dark in both site themes
   };
-  const editorEl = document.getElementById("editor");
+  const editorEl = document.getElementById("editor"), draftState = document.getElementById("draft-state");
   const applyPrefs = () => {
     editorEl.style.setProperty("--ed-font", FONTS[prefs.font] || FONTS.jetbrains);
     editorEl.style.setProperty("--ed-size", prefs.size + "px");
@@ -513,7 +611,7 @@ resolves their bare imports so @codemirror/state loads once — two copies break
       langC.of([]), themeC.of([]),
       EditorView.updateListener.of((u) => {
         if (!u.docChanged) return;
-        try { localStorage.setItem(draftKey, u.state.doc.toString()); } catch {}
+        try { localStorage.setItem(draftKey, u.state.doc.toString()); draftState.textContent = "Qoralama saqlandi"; } catch {}
         // Only keystrokes count: our own starter/reset edits and snippet completions are not pastes.
         if (!u.transactions.some((t) => t.annotation(Transaction.userEvent) && !t.isUserEvent("input.complete"))) return;
         let inserted = 0;
@@ -544,6 +642,11 @@ resolves their bare imports so @codemirror/state loads once — two copies break
   syncTheme();
   const syncVim = async () => view.dispatch({ effects: vimC.reconfigure(await vimExt()) });
   if (prefs.vim) syncVim();
+  document.querySelectorAll("[data-size-step]").forEach((b) => b.addEventListener("click", () => {
+    const range = document.querySelector('#editor-prefs [data-pref="size"]');
+    range.value = Math.min(22, Math.max(12, Number(range.value) + Number(b.dataset.sizeStep)));
+    range.dispatchEvent(new Event("input"));
+  }));
   document.querySelectorAll("#editor-prefs [data-pref]").forEach((el) => {
     const key = el.dataset.pref;
     if (el.type === "checkbox") el.checked = !!prefs[key];
@@ -564,7 +667,7 @@ resolves their bare imports so @codemirror/state loads once — two copies break
     pane.classList.toggle("ca-ed-full", on);
     document.body.classList.toggle("overflow-hidden", on);
     fullBtn.setAttribute("aria-pressed", on);
-    fullBtn.innerHTML = `<i data-lucide="${on ? "minimize-2" : "maximize-2"}" class="lu" aria-hidden="true"></i>`;
+    fullBtn.innerHTML = `<i data-lucide="${on ? "minimize" : "maximize"}" class="lu" aria-hidden="true"></i>`;
     window.caIcons?.();
     view.focus();
   };
@@ -604,7 +707,8 @@ resolves their bare imports so @codemirror/state loads once — two copies break
                 RE: ["bad", "triangle-alert", "Dastur xatosi"], CE: ["mute", "code", "Kompilyatsiya xatosi"], IE: ["mute", "circle-alert", "Xato"] };
     const chip = (v) => { const [c, i, t] = V[v] || V.IE; return `<span class="ca-verdict ca-verdict-${c}"><i data-lucide="${i}" class="lu" aria-hidden="true"></i>${t}</span>`; };
     const box = (label, text) => `<div class="ca-sample"><div class="ca-sample-head"><span>${label}</span></div><pre class="max-h-48">${text ? esc(text) : '<span class="text-mute">(bo‘sh)</span>'}</pre></div>`;
-    const show = (html) => { out.hidden = false; out.innerHTML = html; window.caIcons?.(); };
+    const empty = document.getElementById("trial-empty");
+    const show = (html) => { out.hidden = false; if (empty) empty.hidden = true; out.innerHTML = html; window.caIcons?.(); window.caConsole?.("result"); };
     const HINT = { TLE: "Vaqt chegarasi oshdi.", MLE: "Xotira chegarasi oshdi.", OLE: "Chiqish hajmi chegarasi oshdi.",
                    RE: "Dastur xato bilan tugadi." };
     const grid = (cols, rows) => `<div class="ca-sql-table overflow-x-auto"><table class="ca-table">${cols.length ? `<thead><tr>${cols.map((c) => `<th>${esc(c)}</th>`).join("")}</tr></thead>` : ""}<tbody>${
@@ -648,7 +752,9 @@ resolves their bare imports so @codemirror/state loads once — two copies break
       busy(true);
       show('<p class="text-mute">Navbatda…</p>');
       try {
-        const body = new URLSearchParams({ source: view.state.doc.toString(), language: langSel.value, stdin: stdinEl?.value ?? "" });
+        // your own input only from its tab; from the others the run takes the samples
+        const custom = window.caInput === "custom";
+        const body = new URLSearchParams({ source: view.state.doc.toString(), language: langSel.value, stdin: custom ? stdinEl?.value ?? "" : "" });
         const res = await fetch("{% url 'submissions:trial' problem.slug %}", { method: "POST", headers: { "X-CSRFToken": "{{ csrf_token }}" }, body });
         const data = await res.json().catch(() => ({ error: "Server javob bermadi" }));
         if (!res.ok) return show(`<p class="text-bad">${esc(data.error)}</p>`);
@@ -885,16 +991,6 @@ resolves their bare imports so @codemirror/state loads once — two copies break
   </div>
 </dialog>
 
-<dialog id="leaders-dialog" class="ca-dialog" aria-labelledby="leaders-dialog-title">
-  <div class="ca-dialog-head">
-    <h2 id="leaders-dialog-title">Eng yaxshi yechimlar</h2>
-    <form method="dialog"><button class="ca-dialog-x" aria-label="Yopish"><i data-lucide="x" class="lu" aria-hidden="true"></i></button></form>
-  </div>
-  <div class="divide-y divide-line">
-    {% include "problems/_leaders_mini.html" with title="Eng tez" icon="zap" rows=fastest by="time" %}
-    {% include "problems/_leaders_mini.html" with title="Eng qisqa" icon="scissors" rows=shortest by="length" %}
-  </div>
-</dialog>
 <script>
   document.addEventListener("click", (e) => {
     const t = e.target.closest("[data-dialog]");

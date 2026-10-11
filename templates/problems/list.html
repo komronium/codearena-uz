@@ -1,166 +1,149 @@
 {% extends "base.html" %}
-{% load pagination daily tiers %}
+{% load daily tiers numbers %}
 {% block title %}Masalalar{% endblock %}
 {% block description %}{{ total }} ta dasturlash masalasi: boshlang‘ichdan qiyingacha, mavzular bo‘yicha. Yeching — kodingiz serverda shu zahoti testlanadi.{% endblock %}
-{% block page_title %}{% endblock %}
-{% block content %}
-{% comment %}The problem set, after LeetCode's with Codeforces' habits kept. On top, while browsing, three courses as
-a way in; the biggest topics with their counts; the kind pills. Then one card: the levels with their counts, the
-filters, and the list (your mark, number, name with its topics, level and rating, acceptance, solvers, stars), every
-other row on a soft fill, the day's problem pinned first. On the right: the day's problem with this month's calendar,
-your progress per level, picks for you.{% endcomment %}
-{% if daily %}{% daily_stats daily user as ds %}{% endif %}
-<div class="ca-cols">
-<div class="min-w-0">
-  <section class="ca-box ca-pl-head" aria-labelledby="pl-title">
-    <div class="ca-box-cap ca-hd ca-hd-lg">
-      <span class="ca-hd-icon"><i data-lucide="list-checks" class="lu" aria-hidden="true"></i></span>
-      <div><h1 id="pl-title">Masalalar</h1><p>{{ total }} ta ochiq masala{% if progress %} · <b class="font-semibold text-ink">{{ progress.done }}</b> tasini yechgansiz{% endif %}</p></div>
-      <div class="ca-box-tools">
-        <nav class="ca-seg ca-seg-sm" aria-label="Masala turi">
-          <a href="{% querystring kind=None page=None %}"{% if not selected_kind %} aria-current="true"{% endif %}><i data-lucide="layout-grid" class="lu" aria-hidden="true"></i>Hammasi</a>
-          {% for value, label in kinds %}<a href="{% querystring kind=value page=None tag=None %}"{% if value == selected_kind %} aria-current="true"{% endif %}><i data-lucide="{% if value == 'sql' %}database{% else %}braces{% endif %}" class="lu" aria-hidden="true"></i>{{ label }}</a>{% endfor %}
-        </nav>
-        {% if user.is_authenticated %}<a href="{% url 'learn:lists' %}" class="ca-btn ca-btn-ghost !py-1.5" title="Saqlangan masalalar"><i data-lucide="bookmark" class="lu" aria-hidden="true"></i>Ro‘yxatlarim</a>{% endif %}
-        {% if user.is_staff %}<a href="{% url 'moderation:submit' %}" class="ca-btn ca-btn-ghost !py-1.5"><i data-lucide="plus" class="lu" aria-hidden="true"></i>Masala</a>{% endif %}
-        <a href="{% querystring random=1 page=None %}" class="ca-btn ca-btn-primary !py-1.5" title="Shu filtrdan tasodifiy {% if user.is_authenticated %}yechilmagan {% endif %}masala" rel="nofollow"><i data-lucide="shuffle" class="lu" aria-hidden="true"></i>Tasodifiy masala</a>
-      </div>
+{% block band %}
+{% comment %}#7 problem set: the band names the page, shows how much of it you solved (a bar per level, solved part in
+its colour) and today's problem; below, the search, the level, your marks and the topics as filters over one flat
+table; on the right your progress per level, picks for you and, while browsing, the first courses.{% endcomment %}
+<section class="ca-hud" aria-labelledby="pl-title">
+  <div class="ca-hud-in">
+    <div>
+      <h1 id="pl-title">Masalalar</h1>
+      <p class="ca-hud-sub">{% if progress %}Oson masaladan boshlang, qiyinlari reytingga tayyorlaydi.{% else %}{{ total }} ta ochiq masala: boshlang‘ichdan qiyingacha, mavzular bo‘yicha.{% endif %}</p>
     </div>
-    {% if progress %}
-    <div class="ca-pl-prog">
-      <div class="ca-progress" role="progressbar" aria-label="Yechilgan masalalar" aria-valuemin="0" aria-valuemax="{{ progress.total }}" aria-valuenow="{{ progress.done }}"><span style="width: {% widthratio progress.done progress.total 100 %}%"></span></div>
-      <span class="tabular"><b>{{ progress.done }}</b> / {{ progress.total }} yechilgan</span>
+    {% if progress and ring %}
+    <div aria-label="{{ progress.total }} dan {{ progress.done }} tasi yechilgan">
+      <p class="flex items-baseline gap-1.5"><b class="text-[1.375rem] font-bold leading-none tabular">{{ progress.done }}</b><span class="ca-hud-lbl">/ {{ progress.total }} yechilgan</span></p>
+      <span class="ca-hud-lvbar" aria-hidden="true">{% for s in ring.segments %}{% if s.done %}<i class="is-{{ s.value }}" style="flex: {{ s.done }}"></i>{% endif %}{% if s.total > s.done %}<i style="flex-grow: calc({{ s.total }} - {{ s.done }})"></i>{% endif %}{% endfor %}</span>
     </div>
     {% endif %}
-  </section>
-  {% if plans %}
-  <nav class="ca-plans" aria-label="Kurslar">
-    {% for plan in plans %}
-    <a class="ca-plan" href="{% url 'learn:course' plan.slug %}">
-      <b>{{ plan.title }}</b>
-      {% if plan.summary %}<span class="ca-plan-sub">{{ plan.summary }}</span>{% endif %}
-      {% if plan.progress and plan.progress.total %}<span class="ca-plan-prog"><i style="--w: {{ plan.progress.pct }}%" aria-hidden="true"></i><span>{{ plan.progress.done }} / {{ plan.progress.total }}<span class="sr-only"> masala yechilgan</span></span></span>{% endif %}
-      <span class="ca-plan-icon" aria-hidden="true"><i data-lucide="{{ plan.icon }}" class="lu"></i></span>
-    </a>
-    {% endfor %}
-  </nav>
-  {% endif %}
-
-  <section class="ca-box !mb-0" aria-labelledby="ps-title">
-    <div class="ca-box-cap">
-      <h2 id="ps-title" class="sr-only">Masalalar to‘plami</h2>
-      <nav class="ca-levels" aria-label="Qiyinlik">
-        <a href="{% querystring difficulty=None page=None %}"{% if not selected_difficulty %} aria-current="true"{% endif %}>Hammasi <span>{{ level_total }}</span></a>
-        {% for c in level_chips %}
-        <a href="{% querystring difficulty=c.value page=None %}"{% if c.value == selected_difficulty %} aria-current="true"{% endif %}><span class="ca-level-dot ca-level-{{ c.value }}" aria-hidden="true"></span>{{ c.label }} <span>{{ c.n }}</span></a>
-        {% endfor %}
-      </nav>
-    </div>
-    <div class="ca-box-body">
-{% if top_topics %}
-  <div class="ca-topic-row ca-box-pad !mb-0 !pb-3">
-    <nav aria-label="Mavzular">
-      {% for t in top_topics %}<a href="{% querystring tag=t.name page=None %}"{% if t.name == selected_tag %} aria-current="true"{% endif %}{% if t.kind == "sql" %} class="is-sql"{% endif %}>{{ t.name }}<span>{{ t.n }}</span></a>{% endfor %}
-    </nav>
-    {% if more_topics %}
-    <details class="ca-topic-more">
-      <summary>Hammasi <span class="sr-only">mavzular</span><i data-lucide="chevron-down" class="lu" aria-hidden="true"></i></summary>
-      <div>{% for t in more_topics %}<a href="{% querystring tag=t.name page=None %}"{% if t.name == selected_tag %} aria-current="true"{% endif %}{% if t.kind == "sql" %} class="is-sql"{% endif %}>{{ t.name }}<span>{{ t.n }}</span></a>{% endfor %}</div>
-    </details>
-    {% endif %}
+    {% if daily %}{% include "home/_hud_today.html" %}{% endif %}
   </div>
-  {% endif %}
-
-      <form method="get" class="ca-toolbar" role="search" aria-label="Masalalarni saralash">
+</section>
+{% endblock %}
+{% block content %}
+<div class="ca7">
+<section class="min-w-0" aria-labelledby="ps-title">
+  <h2 id="ps-title" class="sr-only">Masalalar ro‘yxati</h2>
+  <div class="ca7-tools">
+    <div class="ca7-trow">
+      <form method="get" class="ca7-search" role="search" aria-label="Masala qidirish">
         {% if selected_difficulty %}<input type="hidden" name="difficulty" value="{{ selected_difficulty }}">{% endif %}
         {% if selected_kind %}<input type="hidden" name="kind" value="{{ selected_kind }}">{% endif %}
+        {% if selected_tag %}<input type="hidden" name="tag" value="{{ selected_tag }}">{% endif %}
+        {% if selected_status %}<input type="hidden" name="status" value="{{ selected_status }}">{% endif %}
         {% if sort != "id" or dir == "desc" %}<input type="hidden" name="sort" value="{{ sort }}"><input type="hidden" name="dir" value="{{ dir }}">{% endif %}
-        <label class="ca-picker ca-picker-search"><i data-lucide="search" class="lu" aria-hidden="true"></i><input type="search" name="q" value="{{ q }}" placeholder="Masala nomi" aria-label="Masala nomi bo‘yicha qidirish"></label>
-        {% comment %}A filter shows only its name until it is set, then "Name: value" in the accent colour. Its first,
-        hidden option is that closed-state name; "Barchasi" in the list clears it.{% endcomment %}
-        <label class="ca-picker{% if selected_tag %} is-set{% endif %}"><span{% if not selected_tag %} class="sr-only"{% endif %}>Mavzu:</span>
-          <select name="tag" onchange="this.form.submit()">
-            <option value="" hidden>Mavzu</option><option value="">Barchasi</option>
-            {% for label, tags in tag_groups %}{% if tags %}<optgroup label="{{ label }}">{% for t in tags %}<option value="{{ t.name }}" {% if t.name == selected_tag %}selected{% endif %}>{{ t.name }}</option>{% endfor %}</optgroup>{% endif %}{% endfor %}
-          </select><i data-lucide="chevron-down" class="lu ca-picker-caret" aria-hidden="true"></i>
-        </label>
-        {% if user.is_authenticated %}
-        <label class="ca-picker{% if selected_status %} is-set{% endif %}"><span{% if not selected_status %} class="sr-only"{% endif %}>Holat:</span>
-          <select name="status" onchange="this.form.submit()">
-            <option value="" hidden>Holat</option><option value="">Barchasi</option>
-            <option value="unsolved" {% if selected_status == "unsolved" %}selected{% endif %}>yechilmagan</option>
-            <option value="solved" {% if selected_status == "solved" %}selected{% endif %}>yechilgan</option>
-          </select><i data-lucide="chevron-down" class="lu ca-picker-caret" aria-hidden="true"></i>
-        </label>
-        {% endif %}
-        {% if q or selected_tag or selected_difficulty or selected_status or selected_kind %}<a href="{% url 'problems:list' %}" class="ca-link" title="Filtrni tozalash">Tozalash</a>{% endif %}
+        <i data-lucide="search" class="lu" aria-hidden="true"></i>
+        <input class="ca7-fld" type="search" name="q" value="{{ q }}" placeholder="Masala nomi bo‘yicha qidirish…" aria-label="Masala nomi bo‘yicha qidirish" autocomplete="off" spellcheck="false">
       </form>
-      {% if q %}<p class="ca-box-pad !py-2 text-mute">«{{ q }}» bo‘yicha: {{ problems.paginator.count }} ta masala</p>{% endif %}
-      {% if problems %}
-      <table class="ca-table ca-ps">
-        <thead>
-          <tr>
-            <th class="w-9"><span class="sr-only">Holat</span></th>
-            <th class="w-16">{% include "problems/_sort_th.html" with key="id" label="#" %}</th>
-            <th>{% include "problems/_sort_th.html" with key="title" label="Masala" %}</th>
-            <th class="w-36" title="Masala reytingi, Codeforces’dagidek: reytingi shu songa teng o‘quvchi uni taxminan yarim holda yechadi. Kim urinib, kim yechganiga qarab yangilanib boradi.">{% include "problems/_sort_th.html" with key="difficulty" label="Qiyinlik" %}</th>
-            <th class="hidden w-20 text-right lg:table-cell" title="Urinishlarning necha foizi qabul qilingan">Qabul</th>
-            <th class="w-24 text-right">{% include "problems/_sort_th.html" with key="solvers" label="Yechganlar" %}</th>
-            {% if any_rated %}<th class="hidden w-20 text-center lg:table-cell">{% include "problems/_sort_th.html" with key="rating" label="Baho" %}</th>{% endif %}
-          </tr>
-        </thead>
-        <tbody>
-        {% if daily %}
-        {# the day's problem first, as LeetCode pins its daily challenge #}
-        <tr class="ca-row-daily">
-          <td class="text-center"><span class="ca-st-mark is-day" title="Kun masalasi"><i data-lucide="calendar-days" class="lu" aria-hidden="true"></i><span class="sr-only">Kun masalasi</span></span></td>
-          <td><a class="ca-id" href="{% url 'problems:detail' daily.problem.slug %}" tabindex="-1">{{ daily.problem.id|stringformat:"04d" }}</a></td>
-          <td><span class="flex min-w-0 items-center gap-2"><a class="ca-link truncate" href="{% url 'problems:detail' daily.problem.slug %}">{{ daily.problem.title }}</a><span class="ca-chip">Kun masalasi</span></span></td>
-          <td>{% include "problems/_difficulty.html" with p=daily.problem %}</td>
-          <td class="hidden lg:table-cell"></td>
-          <td class="text-right text-mute" title="Bugun yechganlar">{% if ds.solvers %}bugun {{ ds.solvers }}{% else %}—{% endif %}</td>
-          {% if any_rated %}<td class="hidden lg:table-cell"></td>{% endif %}
-        </tr>
-        {% endif %}
-        {% for p in problems %}
-        <tr>
-          <td class="text-center">{% if p.id in solved_ids %}<span class="ca-st-mark is-ok" title="Yechilgan"><i data-lucide="circle-check" class="lu" aria-hidden="true"></i><span class="sr-only">Yechilgan</span></span>{% elif p.id in tried_ids %}<span class="ca-st-mark is-try" title="Urinilgan, hali yechilmagan"><span class="sr-only">Urinilgan</span></span>{% endif %}</td>
-          <td><a class="ca-id" href="{% url 'problems:detail' p.slug %}" tabindex="-1">{{ p.id|stringformat:"04d" }}</a></td>
-          <td>
-            <div class="flex min-w-0 items-center gap-2">
-              <a class="ca-link truncate" href="{% url 'problems:detail' p.slug %}" title="{{ p.title }}">{{ p.title }}</a>
-              {% if p.kind == "sql" %}<span class="ca-kind-sql" title="SQL so‘rov masalasi"><i data-lucide="database" class="lu" aria-hidden="true"></i>SQL</span>{% endif %}
-              {% with tags=p.tags.all %}{% if tags %}<span class="ca-topics">{% for t in tags|slice:":2" %}<a{% if t.kind == "sql" %} class="is-sql"{% endif %} href="{% querystring tag=t.name page=None %}">{{ t.name }}</a>{% endfor %}</span>{% endif %}{% endwith %}
-            </div>
-          </td>
-          <td>{% include "problems/_difficulty.html" %}</td>
-          <td class="hidden text-right text-mute lg:table-cell">{% if p.attempts %}{% widthratio p.ac_count p.attempts 100 %}%{% else %}—{% endif %}</td>
-          <td class="text-right" title="{{ p.solvers }} kishi yechgan, {{ p.ac_count }} / {{ p.attempts }} urinish qabul qilingan">{{ p.solvers }}</td>
-          {% if any_rated %}<td class="hidden text-center lg:table-cell">{% if p.avg_stars %}<span class="ca-stars-sum" title="O‘rtacha baho"><i data-lucide="star" class="lu" aria-hidden="true"></i><span class="tabular">{{ p.avg_stars|floatformat:1 }}</span></span>{% else %}<span class="text-mute" aria-hidden="true">—</span><span class="sr-only">baho yo‘q</span>{% endif %}</td>{% endif %}
-        </tr>
-        {% endfor %}
-        </tbody>
-      </table>
-      {% else %}
-      <div class="ca-box-pad py-8 text-center text-mute">
-        {% if q or selected_tag or selected_difficulty or selected_status or selected_kind %}
-        <p>Bu filtr bo‘yicha masala topilmadi. Boshqa mavzu yoki qiyinlikni tanlang yoki <a class="ca-link" href="{% url 'problems:list' %}">filtrni tozalang</a>.</p>
-        {% else %}<p>Hali ochiq masala yo‘q.{% if user.is_staff %} <a class="ca-link" href="{% url 'moderation:submit' %}">Birinchi masalani qo‘shing</a>{% endif %}</p>{% endif %}
+      <nav class="ca7-seg" aria-label="Qiyinlik">
+        <a href="{% querystring difficulty=None page=None %}"{% if not selected_difficulty %} aria-current="true"{% endif %}>Hammasi <em>{{ level_total }}</em></a>
+        {% for c in level_chips %}<a href="{% querystring difficulty=c.value page=None %}"{% if c.value == selected_difficulty %} aria-current="true"{% endif %}>{{ c.label }} <em>{{ c.n }}</em></a>{% endfor %}
+      </nav>
+      <div class="ca7-tools-r">
+        {% if not status_chips %}{% if kinds %}<nav class="ca7-seg" aria-label="Masala turi">
+          <a href="{% querystring kind=None page=None %}"{% if not selected_kind %} aria-current="true"{% endif %}>Hammasi</a>
+          {% for value, label in kinds %}<a href="{% querystring kind=value page=None tag=None %}"{% if value == selected_kind %} aria-current="true"{% endif %}>{{ label }}</a>{% endfor %}
+        </nav>{% endif %}{% endif %}
+        <a href="{% querystring random=1 page=None %}" class="ca-btn ca-btn-soft" title="Shu filtrdan tasodifiy {% if user.is_authenticated %}yechilmagan {% endif %}masala" rel="nofollow"><i data-lucide="shuffle" class="lu" aria-hidden="true"></i>Tasodifiy</a>
+        {% if user.is_authenticated %}<a href="{% url 'learn:lists' %}" class="ca-btn ca-btn-soft" title="Saqlangan masalalar"><i data-lucide="bookmark" class="lu" aria-hidden="true"></i><span class="sr-only">Ro‘yxatlarim</span></a>{% endif %}
+        {% if user.is_staff %}<a href="{% url 'moderation:submit' %}" class="ca-btn ca-btn-soft" title="Masala qo‘shish"><i data-lucide="plus" class="lu" aria-hidden="true"></i><span class="sr-only">Masala qo‘shish</span></a>{% endif %}
       </div>
-      {% endif %}
     </div>
-  </section>
-  {% include "_pagination.html" with page=problems %}
-</div>
+    {% if status_chips %}
+    <div class="ca7-trow">
+      {% if status_chips %}
+      <span class="ca7-k">Holat</span>
+      <nav class="ca7-seg" aria-label="Holat">
+        <a href="{% querystring status=None page=None %}"{% if not selected_status %} aria-current="true"{% endif %}>Hammasi</a>
+        {% for c in status_chips %}<a href="{% querystring status=c.value page=None %}"{% if c.value == selected_status %} aria-current="true"{% endif %}><span class="ca-st is-{{ c.value }}" aria-hidden="true"></span>{{ c.label }} <em>{{ c.n }}</em></a>{% endfor %}
+      </nav>
+      {% endif %}
+      <div class="ca7-tools-r">
+        {% if kinds %}<nav class="ca7-seg" aria-label="Masala turi">
+          <a href="{% querystring kind=None page=None %}"{% if not selected_kind %} aria-current="true"{% endif %}>Hammasi</a>
+          {% for value, label in kinds %}<a href="{% querystring kind=value page=None tag=None %}"{% if value == selected_kind %} aria-current="true"{% endif %}>{{ label }}</a>{% endfor %}
+        </nav>{% endif %}
+      </div>
+    </div>
+    {% endif %}
+    {% if top_topics %}
+    <div class="ca7-trow is-top">
+      <span class="ca7-k">Mavzu</span>
+      <nav class="ca7-tags" aria-label="Mavzular">
+        {% if selected_tag %}<a href="{% querystring tag=None page=None %}" class="is-clear"><i data-lucide="x" class="lu" aria-hidden="true"></i>{{ selected_tag }}</a>{% endif %}
+        {% for t in top_topics %}{% if t.name != selected_tag %}<a href="{% querystring tag=t.name page=None %}"{% if t.kind == "sql" %} class="is-sql"{% endif %}>{{ t.name }} <em>{{ t.n }}</em></a>{% endif %}{% endfor %}
+        {% if more_topics %}
+        <details class="ca7-more">
+          <summary>yana {{ more_topics|length }} ta<i data-lucide="chevron-down" class="lu" aria-hidden="true"></i></summary>
+          <div>{% for t in more_topics %}<a href="{% querystring tag=t.name page=None %}"{% if t.name == selected_tag %} aria-current="true"{% endif %}{% if t.kind == "sql" %} class="is-sql"{% endif %}>{{ t.name }} <em>{{ t.n }}</em></a>{% endfor %}</div>
+        </details>
+        {% endif %}
+      </nav>
+    </div>
+    {% endif %}
+  </div>
+  {% if q or selected_tag or selected_difficulty or selected_status or selected_kind %}
+  <p class="ca7-found">{% if q %}«{{ q }}» bo‘yicha: {% endif %}{{ problems.paginator.count }} ta masala · <a class="ca-link" href="{% url 'problems:list' %}">Filtrni tozalash</a></p>
+  {% endif %}
 
-<aside class="ca-aside" aria-label="Tavsiyalar">
-  {% if daily %}{% include "problems/_daily_card.html" %}{% endif %}
-  {% if ring %}{% url 'profile' user.username as profile_url %}{% include "problems/_solved_card.html" with title="Taraqqiyot" more_url=profile_url more_label="Profil" %}{% endif %}
+  {% if problems %}
+  <div class="overflow-x-auto">
+  <table class="ca-table ca-table-flat ca-ps">
+    <thead>
+      <tr>
+        <th class="w-8"><span class="sr-only">Holat</span></th>
+        <th class="w-16">{% include "problems/_sort_th.html" with key="id" label="#" %}</th>
+        <th>{% include "problems/_sort_th.html" with key="title" label="Masala" %}</th>
+        <th class="hidden lg:table-cell">Mavzu</th>
+        <th class="w-28" title="Masala reytingi, Codeforces’dagidek: reytingi shu songa teng o‘quvchi uni taxminan yarim holda yechadi.">{% include "problems/_sort_th.html" with key="difficulty" label="Qiyinlik" %}</th>
+        <th class="hidden w-24 text-right md:table-cell" title="Yuborilgan yechimlarning necha foizi qabul qilingan">Qabul %</th>
+        <th class="w-28 text-right">{% include "problems/_sort_th.html" with key="solvers" label="Yechganlar" %}</th>
+        {% if any_rated %}<th class="hidden w-20 text-right xl:table-cell">{% include "problems/_sort_th.html" with key="rating" label="Baho" %}</th>{% endif %}
+      </tr>
+    </thead>
+    <tbody>
+    {% for p in problems %}
+    <tr>
+      <td>{% if p.id in solved_ids %}<span class="ca-st is-solved" title="Yechilgan"></span><span class="sr-only">Yechilgan</span>{% elif p.id in tried_ids %}<span class="ca-st is-tried" title="Urinilgan, hali yechilmagan"></span><span class="sr-only">Urinilgan</span>{% elif user.is_authenticated %}<span class="ca-st is-new" title="Hali urinilmagan"></span><span class="sr-only">Yangi</span>{% endif %}</td>
+      <td class="ca-pid">{{ p.id|stringformat:"04d" }}</td>
+      <td><a class="ca-link" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a>{% if p.id == daily.problem_id %} <span class="ca-chip">Kun masalasi</span>{% endif %}{% if p.kind == "sql" %} <span class="ca-kind-sql" title="SQL so‘rov masalasi"><i data-lucide="database" class="lu" aria-hidden="true"></i>SQL</span>{% endif %}</td>
+      <td class="hidden lg:table-cell"><span class="ca7-ptags">{% for t in p.tags.all|slice:":2" %}<a{% if t.kind == "sql" %} class="is-sql"{% endif %} href="{% querystring tag=t.name page=None %}">{{ t.name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</span></td>
+      <td><span class="ca-diff ca-diff-{{ p.difficulty }}" title="Reyting {{ p.rating }}">{{ p.get_difficulty_display }}</span></td>
+      <td class="hidden text-right md:table-cell">{% if p.attempts %}{% widthratio p.ac_count p.attempts 100 %}%{% else %}<span class="text-mute">—</span>{% endif %}</td>
+      <td class="text-right" title="{{ p.solvers }} kishi yechgan, {{ p.ac_count }} / {{ p.attempts }} urinish qabul qilingan">{{ p.solvers|kplus }}</td>
+      {% if any_rated %}<td class="hidden text-right xl:table-cell">{% if p.avg_stars %}<span class="ca-stars-sum" title="O‘rtacha baho"><i data-lucide="star" class="lu" aria-hidden="true"></i><span class="tabular">{{ p.avg_stars|floatformat:1 }}</span></span>{% else %}<span class="text-mute" aria-hidden="true">—</span><span class="sr-only">baho yo‘q</span>{% endif %}</td>{% endif %}
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% include "_pagination.html" with page=problems %}
+  {% else %}
+  <p class="ca7-empty">
+    {% if q or selected_tag or selected_difficulty or selected_status or selected_kind %}<b>Bu filtr bo‘yicha masala topilmadi</b>Boshqa mavzu yoki qiyinlikni tanlang yoki <a class="ca-link" href="{% url 'problems:list' %}">filtrni tozalang</a>.
+    {% else %}<b>Hali ochiq masala yo‘q</b>{% if user.is_staff %}<a class="ca-link" href="{% url 'moderation:submit' %}">Birinchi masalani qo‘shing</a>.{% endif %}{% endif %}
+  </p>
+  {% endif %}
+</section>
+
+<aside class="ca7-aside" aria-label="Tavsiyalar">
+  {% if ring %}{% url 'profile' user.username as profile_url %}{% include "problems/_solved_card.html" with title="Taraqqiyot" more_url=profile_url %}{% endif %}
   {% if next_picks %}
   <section class="ca-box" aria-labelledby="picks-title">
-    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="sparkles" class="lu" aria-hidden="true"></i></span><h2 id="picks-title">Siz uchun{% if picks_reason %} <a class="ca-box-tools ca-link" href="{% querystring tag=picks_reason page=None %}" title="Eng kam yechgan mavzuingiz">{{ picks_reason }}</a>{% endif %}</h2></div>
-    <ul class="ca-box-body ca-facts">
-      {% for p, reason in next_picks %}<li><a class="ca-link min-w-0 truncate" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a><span class="ca-diff ca-diff-{{ p.difficulty }}">{{ p.get_difficulty_display }}</span></li>{% endfor %}
+    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" aria-hidden="true"></span><h2 id="picks-title">Siz uchun</h2>{% if picks_reason %}<a class="ca-box-tools ca-link" href="{% querystring tag=picks_reason page=None %}" title="Eng kam yechgan mavzuingiz">{{ picks_reason }}</a>{% endif %}</div>
+    <ul class="ca7-links">
+      {% for p, reason in next_picks %}<li><a class="ca-link" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a><span class="ca-diff ca-diff-{{ p.difficulty }}">{{ p.get_difficulty_display }}</span></li>{% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+  {% if plans %}
+  <section class="ca-box" aria-labelledby="plans-title">
+    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" style="--c: rgb(var(--ca-spec-rgb))" aria-hidden="true"></span><h2 id="plans-title">Boshlovchilar uchun</h2><a class="ca-box-tools ca-link" href="{% url 'learn:hub' %}">O‘rganish</a></div>
+    <div class="ca7-pad !pb-2"><p>Masala qiyin tuyulsa, avval O‘rganish bo‘limidagi mavzulardan o‘ting.</p></div>
+    <ul class="ca7-links">
+      {% for plan in plans %}<li><a class="ca-link" href="{% url 'learn:course' plan.slug %}">{{ plan.title }}</a>{% if plan.progress and plan.progress.total %}<span class="tabular text-mute">{{ plan.progress.done }} / {{ plan.progress.total }}<span class="sr-only"> masala yechilgan</span></span>{% endif %}</li>{% endfor %}
     </ul>
   </section>
   {% endif %}

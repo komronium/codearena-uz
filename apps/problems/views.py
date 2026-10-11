@@ -37,6 +37,7 @@ from judge import sql_judge
 from .daily import daily_for, streaks
 from .progress import level_progress as levels_of, solved_ring
 from .models import (
+    DailyProblem,
     DailySolve,
     HintUnlock,
     Language,
@@ -224,13 +225,27 @@ def problem_list(request):
     else:
         kind = ""
     status = request.GET.get("status", "").strip()
-    if status in ("solved", "unsolved") and request.user.is_authenticated:
-        solved_q = Q(userproblemsolved__user=request.user)
-        problems = (
-            problems.filter(solved_q)
-            if status == "solved"
-            else problems.exclude(solved_q)
-        )
+    status_chips = None
+    if request.user.is_authenticated:
+        # your own marks: solved, tried and not solved yet, never tried; each counted over what the
+        # other filters (the level too) leave, so each number is what a click shows
+        mine_solved = set(UserProblemSolved.objects.filter(user=request.user).values_list("problem_id", flat=True))
+        mine_tried = set(Submission.objects.filter(user=request.user).values_list("problem_id", flat=True)) - mine_solved
+        level = request.GET.get("difficulty", "").strip()
+        shown = set((problems.filter(difficulty=level) if level in Problem.Difficulty.values else problems)
+                    .values_list("id", flat=True))
+        n_solved, n_tried = len(shown & mine_solved), len(shown & mine_tried)
+        status_chips = [{"value": "solved", "label": "Yechilgan", "n": n_solved},
+                        {"value": "tried", "label": "Urinilgan", "n": n_tried},
+                        {"value": "new", "label": "Yangi", "n": len(shown) - n_solved - n_tried}]
+        if status == "solved":
+            problems = problems.filter(pk__in=mine_solved)
+        elif status == "tried":
+            problems = problems.filter(pk__in=mine_tried)
+        elif status == "new":
+            problems = problems.exclude(pk__in=mine_solved | mine_tried)
+        elif status == "unsolved":  # the old filter's links
+            problems = problems.exclude(pk__in=mine_solved)
     # the difficulty chips count what the other filters leave, so each number is what a click shows
     by_level = dict(
         problems.order_by()
@@ -331,6 +346,7 @@ def problem_list(request):
             "tried_ids": tried_ids,
             "total": total,
             "level_chips": level_chips,
+            "status_chips": status_chips,
             "level_total": sum(by_level.values()),
             "any_rated": any(p.avg_stars for p in page),
             "next_picks": next_picks,
@@ -437,12 +453,13 @@ def problem_detail(request, slug):
         languages = Language.objects.filter(is_active=True, code="sql")
     else:
         languages = Language.objects.filter(is_active=True).exclude(code="sql")
-    my_subs = []
+    my_subs, my_subs_n = [], 0
     if request.user.is_authenticated:
         subs = Submission.objects.filter(user=request.user, problem=problem)
         if contest is not None:
             subs = subs.filter(contest=contest)  # in a contest, only what counts for it
         my_subs = list(subs.select_related("language")[:5])
+        my_subs_n = len(my_subs) if len(my_subs) < 5 else subs.count()
     # Running contest that has this problem but the user hasn't joined: solving now
     # would count as practice, not for the standings — tell them before they submit.
     open_contest = None
@@ -557,6 +574,9 @@ def problem_detail(request, slug):
             "contest_blocked": contest_blocked,
             "problem": problem,
             "my_subs": my_subs,
+            "my_subs_n": my_subs_n,
+            # only a look: daily_for() would pick the day's problem as a side effect
+            "is_daily": contest is None and DailyProblem.objects.filter(date=timezone.localdate(), problem=problem).exists(),
             "stats": _problem_stats(problem) if contest is None else None,
             "prev_problem": public.filter(id__lt=problem.id).order_by("-id").first(),
             "next_problem": public.filter(id__gt=problem.id).order_by("id").first(),

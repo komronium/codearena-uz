@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import redirect_to_login
 from django.core.paginator import Paginator
+from django.db.models import Q
 from django.http import Http404, HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -309,6 +310,7 @@ def _results_ctx(s):
         "s": s,
         "results": results,
         "first_fail": first_fail,
+        "slowest": max((r.exec_ms for r in results), default=None),
         "beats": _beats(s) if s.verdict == "AC" else None,
         "progress": {
             "done": len(results),
@@ -322,6 +324,12 @@ def _results_ctx(s):
 def detail(request, pk):
     s = _own(request, pk)
     ctx = _results_ctx(s)
+    # the code with its line numbers beside it, and after an accept the next problem to try
+    ctx["line_numbers"] = range(1, len(s.source.splitlines()) + 1)
+    if s.user_id == request.user.pk and s.verdict == Submission.Verdict.AC and s.contest_id is None:
+        from apps.problems.skills import next_problems
+        picks = next_problems(request.user, n=1, exclude=(s.problem_id,))
+        ctx["next_pick"] = picks[0] if picks else None
     if can_review(request.user, s):
         reviews = list(s.reviews.select_related("author"))
         lines = s.source.splitlines()
@@ -355,13 +363,32 @@ def mine(request):
         qs = qs.filter(problem__is_public=True, user__is_active=True).exclude(
             problem__contests__end__gt=timezone.now()
         )
+    # the band's figures, over the whole list (yours or everyone's) before the filters
+    total = qs.count()
+    accepted = qs.filter(verdict=Submission.Verdict.AC).count()
+    stats = {"total": total, "today": qs.filter(created__date=timezone.localdate()).count(),
+             "ac_pct": round(100 * accepted / total) if total else None}
+    contest_id = request.GET.get("contest", "")
+    if own and contest_id.isdigit():  # a round's "Urinishlarim" tab: your tries in that round
+        qs = qs.filter(contest_id=int(contest_id))
     verdict = request.GET.get("verdict", "")
     if verdict in Submission.TERMINAL:
         qs = qs.filter(verdict=verdict)
+    q = request.GET.get("q", "").strip()[:60]
+    if q:
+        qs = qs.filter(Q(problem__title__icontains=q) | Q(user__username__icontains=q)) if not own \
+            else qs.filter(problem__title__icontains=q)
+    languages = list(Language.objects.filter(is_active=True).order_by("name"))
+    lang = request.GET.get("lang", "")
+    if lang.isdigit() and any(str(x.pk) == lang for x in languages):
+        qs = qs.filter(language_id=int(lang))
+    else:
+        lang = ""
     page = Paginator(qs, 50).get_page(request.GET.get("page"))
     verdicts = list(VERDICT_LABELS.items())
     return render(
         request,
         "submissions/list.html",
-        {"subs": page, "verdict": verdict, "verdicts": verdicts, "own": own},
+        {"subs": page, "verdict": verdict, "verdicts": verdicts, "own": own, "stats": stats,
+         "q": q, "languages": languages, "lang": lang},
     )

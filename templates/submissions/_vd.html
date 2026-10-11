@@ -1,0 +1,6 @@
+{% load verdicts %}{% comment %}A verdict as #7 shows it in a table: the judge's code, then the Uzbek words, on a tint (green accepted,
+red a wrong answer, violet a crash, amber a broken limit, grey the rest), and the failing test beside it.
+ctx: v (the verdict code), sub (the submission, for the test number: the judge stops at the first failing test).{% endcomment %}
+{% if v == "RUNNING" %}<span class="ca-vd"><i data-lucide="loader-circle" class="lu ca-spin" aria-hidden="true"></i>Tekshirilmoqda</span>
+{% elif v == "PENDING" or not v %}<span class="ca-vd"><i data-lucide="hourglass" class="lu" aria-hidden="true"></i>Navbatda</span>
+{% else %}<span class="ca-vd{% if v == 'AC' %} is-ac{% elif v == 'WA' %} is-bad{% elif v == 'RE' %} is-re{% elif v == 'TLE' or v == 'MLE' or v == 'OLE' %} is-warn{% endif %}"><code translate="no">{{ v }}</code>{{ v|verdict_words }}</span>{% if sub.total and v != 'CE' and v != 'AC' and sub.passed < sub.total %}<span class="ca-vd-at">{{ sub.passed|add:1 }}-testda</span>{% endif %}{% endif %}

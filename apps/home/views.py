@@ -14,6 +14,8 @@ from apps.classroom import duels
 from apps.classroom.models import Assignment, Duel
 from apps.contests.models import Contest, Participation
 from apps.contests.views import _standings  # cached, the standings page's own numbers
+from apps.learn.models import StudyPlan
+from apps.learn.views import continue_course
 from apps.problems.daily import daily_for, streaks, week_strip
 from apps.problems.models import DailySolve, Language, Problem
 from apps.problems.progress import level_progress, solved_ring
@@ -79,12 +81,13 @@ def home(request):
         # the latest rated contest whose ratings are applied: its real top three, not a mock-up
         last_rated = (Contest.objects.filter(is_rated=True, end__lte=now, participations__rating_after__isnull=False)
                       .order_by("-end").distinct().first())
-        podium = [r for r in _standings(last_rated) if not r["disqualified"]][:3] if last_rated else []
+        board = [r for r in _standings(last_rated) if not r["disqualified"]] if last_rated else []
+        podium = board[:5]
         # the hero's first line: the round running now, else the next one, that anyone may enter
         next_round = next((c for c in running + upcoming if not c.require_group_id), None)
         return render(request, "home/landing.html", {
             "daily": daily, "running": running, "upcoming": upcoming, "next_round": next_round,
-            "last_rated": last_rated, "podium": podium,
+            "last_rated": last_rated, "podium": podium, "n_last": len(board),
             "languages": list(Language.objects.filter(is_active=True).order_by("id").values_list("name", flat=True)),
             "stats": {"problems": open_problems().count(), "users": User.objects.filter(is_active=True).count(),
                       "contests": Contest.objects.count(), "submissions": Submission.objects.count()},
@@ -106,7 +109,17 @@ def home(request):
     current, best = streaks(user)
     next_picks = next_problems(user, exclude=(daily.problem_id,) if daily else ())
     today = timezone.localdate()
+    # a newcomer (nothing sent, no rated round) gets the first steps instead of an empty dashboard
+    is_new = not Submission.objects.filter(user=user).exists() and not Participation.objects.filter(
+        user=user, rating_after__isnull=False).exists()
+    first_problem = None
+    if is_new:
+        first_problem = (open_problems().filter(difficulty=Problem.Difficulty.BEGINNER).order_by("pk").first()
+                         or open_problems().order_by("pk").first())
     return render(request, "home/dashboard.html", {
+        "is_new": is_new, "first_problem": first_problem,
+        "n_courses": StudyPlan.objects.filter(is_public=True).count() if is_new else 0,
+        "joined_any": Participation.objects.filter(user=user).exists() if is_new else False,
         "daily": daily,
         "daily_done": bool(daily) and DailySolve.objects.filter(user=user, daily=daily).exists(),
         "streak": current, "best_streak": best, "week": week_strip(user),
@@ -122,7 +135,12 @@ def home(request):
         # LeetCode's ring of solved problems per level, out of the open problems
         "ring": solved_ring(level_progress(user, open_problems())),
         "next_picks": next_picks, "picks_reason": shared_reason(next_picks),
+        "registered": set(Participation.objects.filter(user=user, contest__in=upcoming)
+                          .values_list("contest_id", flat=True)),
+        "learning": continue_course(user),
         "recent": list(Submission.objects.filter(user=user).select_related("problem", "language")[:5]),
+        "best_rating": max(Participation.objects.filter(user=user, rating_after__isnull=False)
+                           .values_list("rating_after", flat=True), default=None),
         "taught": list(Assignment.objects.filter(group__teacher=user).select_related("group")
                        .order_by("-deadline")[:3]),
     })

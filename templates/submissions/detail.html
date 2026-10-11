@@ -1,42 +1,47 @@
 {% extends "base.html" %}{% load static %}
 {% block title %}Urinish #{{ s.pk|stringformat:"06d" }}{% endblock %}
-{% block content %}
-<div class="mb-6 flex flex-wrap items-start justify-between gap-3">
-  <div>
-    {% if s.user_id == user.pk %}
-    <a class="ca-link mb-2 inline-block text-sm text-mute" href="{% url 'submissions:mine' %}?mine=1"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>Urinishlar</a>
-    {% elif user.is_staff %}
-    <a class="ca-link mb-2 inline-block text-sm text-mute" href="{% url 'moderation:submissions' %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>Barcha urinishlar</a>
-    {% else %}
-    <a class="ca-link mb-2 inline-block text-sm text-mute" href="{% url 'problems:leaders' s.problem.slug %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>Eng yaxshi yechimlar</a>
-    {% endif %}
-    <h1 class="ca-page-title">Urinish <span class="tabular">#{{ s.pk|stringformat:"06d" }}</span></h1>
-    <p class="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-mute">
-      {% if s.user_id != user.pk %}{% include "accounts/_user.html" with u=s.user tier=False %}{% endif %}
-      <a class="ca-link" href="{% url 'problems:detail' s.problem.slug %}"><i data-lucide="list-checks" class="lu mr-1" aria-hidden="true"></i>{{ s.problem.title }}</a>
-      <span><i data-lucide="code" class="lu mr-1" aria-hidden="true"></i>{{ s.language.name }}</span>
-      <time datetime="{{ s.created|date:'c' }}"><i data-lucide="clock" class="lu mr-1" aria-hidden="true"></i>{{ s.created|date:"d.m.Y H:i" }}</time>
-      {% if s.contest %}<a class="ca-link" href="{% url 'contests:standings' s.contest.pk %}"><i data-lucide="trophy" class="lu mr-1" aria-hidden="true"></i>{{ s.contest.title }}</a>{% endif %}
-    </p>
+{% block band %}
+{% comment %}#7 submission: the band names it (problem, language, when, practice or the round) with the way back; the
+verdict card and the tests on the left, then the code with its line numbers and the review; on the right how fast it
+is among the accepted ones and the next step.{% endcomment %}
+<section class="ca-hud" aria-labelledby="sub-title">
+  <div class="ca-hud-in">
+    <div class="min-w-0">
+      <p class="ca7-crumb">{% if s.user_id == user.pk %}<a href="{% url 'submissions:mine' %}?mine=1">Urinishlarim</a>{% elif user.is_staff %}<a href="{% url 'moderation:submissions' %}">Barcha urinishlar</a>{% else %}<a href="{% url 'problems:leaders' s.problem.slug %}">Eng yaxshi yechimlar</a>{% endif %} / #{{ s.pk|stringformat:"06d" }}</p>
+      <h1 id="sub-title">Urinish <span class="font-mono tabular">#{{ s.pk|stringformat:"06d" }}</span></h1>
+      <p class="ca7-bmeta">
+        {% if s.user_id != user.pk %}<span>{{ s.user.username }}</span>{% endif %}
+        <a class="text-white hover:underline" href="{% url 'problems:detail' s.problem.slug %}">{{ s.problem.title }}</a>
+        <span>{{ s.language.name }}</span>
+        <time class="tabular" datetime="{{ s.created|date:'c' }}">{{ s.created|date:"d.m.Y H:i" }}</time>
+        {% if s.contest %}<a class="text-white hover:underline" href="{% url 'contests:standings' s.contest.pk %}">{{ s.contest.title }}</a>{% else %}<span>mashq</span>{% endif %}
+      </p>
+    </div>
+    {% if s.user_id == user.pk %}<a class="ca-btn ca-btn-gold ml-auto" href="{% url 'problems:detail' s.problem.slug %}">Masalaga qaytish</a>{% endif %}
   </div>
-  {% if s.user_id == user.pk %}<a class="ca-btn ca-btn-primary" href="{% url 'problems:detail' s.problem.slug %}"><i data-lucide="arrow-left" class="lu" aria-hidden="true"></i>Masalaga qaytish</a>{% endif %}
-</div>
-
-<div class="ca-panel mb-6" id="status" hx-get="{% url 'submissions:status' s.pk %}" hx-trigger="load">
-  {% include "submissions/_status.html" %}
-</div>
-
-<section class="ca-panel !p-0 overflow-hidden">
-  <div class="flex items-center justify-between border-b border-line px-4 py-2.5">
-    <h2 class="text-sm font-semibold">Kod</h2>
-    <span class="text-xs text-mute">{{ s.source|length }} belgi</span>
-  </div>
-  <pre class="ca-terminal !rounded-none overflow-x-auto p-4" translate="no"><code class="language-{{ s.language.code }}">{{ s.source }}</code></pre>
 </section>
+{% endblock %}
+{% block content %}
+<div class="ca7">
+<div class="min-w-0">
+  <div id="status" hx-get="{% url 'submissions:status' s.pk %}" hx-trigger="load">
+    {% include "submissions/_status.html" %}
+  </div>
+
+  <section class="mt-9" aria-labelledby="code-title">
+    <div class="ca7-sec-h"><span class="ca-star" aria-hidden="true"></span><h2 id="code-title">Kod</h2>
+      <span class="ca7-r flex items-center gap-3 text-sm text-mute">{{ s.language.name }} · {{ s.source|length }} belgi
+        <button type="button" class="ca-btn ca-btn-soft ca-btn-wb" data-copy-code><i data-lucide="copy" class="lu" aria-hidden="true"></i>Nusxalash</button></span></div>
+    <div class="ca7-code" translate="no">
+      <pre class="ca7-code-ln" aria-hidden="true">{% for n in line_numbers %}{{ n }}
+{% endfor %}</pre>
+      <pre class="ca7-code-src"><code class="language-{{ s.language.code }}">{{ s.source }}</code></pre>
+    </div>
+  </section>
 
 {% if can_review %}
-<section class="ca-panel mt-6 space-y-4" id="review">
-  <h2 class="ca-section-title !mb-0"><i data-lucide="message-square-code" class="lu mr-1.5" aria-hidden="true"></i>Kod sharhi</h2>
+<section class="mt-9 space-y-4" id="review" aria-labelledby="review-title">
+  <div class="ca7-sec-h !mb-0"><span class="ca-star" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span><h2 id="review-title">Kod sharhi</h2></div>
   {% for r in reviews %}
   <article class="rounded-[var(--ca-radius)] border border-line px-4 py-3{% if r.author_id == s.user_id %} bg-ink/[.025]{% endif %}">
     <p class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-mute">
@@ -57,12 +62,41 @@
   </form>
 </section>
 {% endif %}
+</div>
+
+<aside class="ca7-aside" aria-label="Qo‘shimcha">
+  {% if beats %}
+  <section class="ca-box" aria-labelledby="speed-title">
+    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" style="--c: rgb(var(--ca-spec-rgb))" aria-hidden="true"></span><h2 id="speed-title">Tezlik</h2></div>
+    <div class="ca7-pad">
+      <svg class="ca-hist" viewBox="-6 -30 {{ beats.vb_w }} {{ beats.vb_h }}" role="img" aria-label="Qabul qilingan {{ beats.n }} ta yechimning ishlash vaqti taqsimoti; sizniki {{ s.exec_ms }} ms">
+        {% for b in beats.bars %}<rect x="{{ b.x }}" y="{{ b.y }}" width="{{ beats.bw }}" height="{{ b.h }}" rx="3"{% if b.me %} class="is-me"{% endif %}/>{% endfor %}
+      </svg>
+      <p class="mt-2">Siz <b class="text-ink tabular">{{ s.exec_ms }} ms</b>: {{ s.language.name }} dagi {{ beats.n }} ta qabul qilingan yechimning <b class="text-ink tabular">{{ beats.time|floatformat:0 }}%</b> idan tezroq.{% if beats.mem is not None %} Xotira {{ beats.mem|floatformat:0 }}% idan kam.{% endif %}</p>
+    </div>
+  </section>
+  {% endif %}
+  <section class="ca-box" aria-labelledby="next-title">
+    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span><h2 id="next-title">Keyingi qadam</h2></div>
+    <div class="ca7-pad">
+      {% if next_pick %}{% with p=next_pick.0 %}
+      <p>{% if next_pick.1 %}Shu mavzudagi keyingi masala ({{ next_pick.1 }}):{% else %}Darajangizga mos keyingi masala:{% endif %}</p>
+      <a class="ca-link font-medium" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a> <span class="ca-diff ca-diff-{{ p.difficulty }} !text-xs">{{ p.get_difficulty_display }}</span>
+      {% endwith %}{% elif s.verdict == "AC" %}<p>Qabul qilindi. <a class="ca-link" href="{% url 'problems:list' %}">Masalalar ro‘yxatiga</a> qayting.</p>
+      {% else %}<p>Xato topilgan testni qayta ko‘ring, keyin <a class="ca-link" href="{% url 'problems:detail' s.problem.slug %}">masalada</a> tuzatib qayta yuboring.</p>{% endif %}
+    </div>
+  </section>
+</aside>
+</div>
 
 <link rel="stylesheet" href="{% static 'vendor/highlight-github-dark.min.css' %}">
 <script src="{% static 'vendor/highlight.min.js' %}"></script>
 <script>
   // language.code "node" -> hljs "javascript"; others match hljs names already
-  const code = document.querySelector("pre code");
+  const code = document.querySelector(".ca7-code-src code");
+  document.querySelector("[data-copy-code]")?.addEventListener("click", async (e) => {
+    try { await navigator.clipboard.writeText(code.textContent); e.currentTarget.classList.add("text-ok"); } catch {}
+  });
   if (code.classList.contains("language-node")) code.className = "language-javascript";
   hljs.highlightElement(code);
 </script>

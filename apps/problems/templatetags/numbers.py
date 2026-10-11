@@ -15,3 +15,12 @@ def compact(n) -> str:
         value, unit = n / 1_000_000, "mln"
     text = f"{value:.1f}" if value < 10 else f"{round(value)}"
     return f"{text.replace('.', ',').removesuffix(',0')} {unit}"
+
+
+@register.filter
+def kplus(n) -> str:
+    """A count for a table cell: 874, then 1K+, 12K+, 2M+; the exact number goes in the title."""
+    n = int(n or 0)
+    if n < 1000:
+        return str(n)
+    return f"{n // 1000}K+" if n < 1_000_000 else f"{n // 1_000_000}M+"
