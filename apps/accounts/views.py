@@ -350,6 +350,8 @@ def profile(request, username):
 
     cur_streak, best_streak = streaks(profile_user)
     skill_groups = _skill_groups(profile_user)
+    topic_rows = [(kind, r) for kind, _label, rows in skill_groups for r in rows]
+    topic_map, weakest = _topic_map(topic_rows, problem_map)
     return render(request, "accounts/profile.html", {
         "profile_user": profile_user,
         "total_users": total_users,
@@ -382,12 +384,37 @@ def profile(request, username):
         "activity": _activity_calendar(profile_user),
         "skill_groups": skill_groups,
         # the topics table: one flat list (kind, row), the topics with most problems first
-        "topic_rows": [(kind, r) for kind, _label, rows in skill_groups for r in rows],
+        "topic_rows": topic_rows,
+        # the topics again, each with its problems as marks (tried first, then new, then solved) and the next to solve
+        "topic_map": topic_map, "weakest": weakest,
         "streak": (cur_streak, best_streak),
         "last_delta": rating_history[-1].delta if rating_history else None,
         "top_pct": round(100 * rating_rank / total_rated, 1) if rating_rank and total_rated else None,
         "spark": _sparkline([p.rating_after for p in rating_history[-12:]]),
     })
+
+
+def _topic_map(topic_rows, problem_map, n: int = 10):
+    """The profile's topics: per topic (the ten biggest) its problems with the user's mark and the next one to
+    solve (a tried one first, else the easiest new one); and the weakest topic with a try in it."""
+    status = {pr.id: (pr, st) for pr, st in problem_map}
+    tags_of: dict[int, list[int]] = {}
+    for problem_id, tag_id in Problem.tags.through.objects.filter(problem_id__in=list(status)).values_list("problem_id", "tag_id"):
+        tags_of.setdefault(tag_id, []).append(problem_id)
+    order = {"attempted": 0, "todo": 1, "solved": 2}
+    levels = {v: i for i, v in enumerate(Problem.Difficulty.values)}
+    rows = []
+    for kind, r in topic_rows[:n]:
+        marks = sorted((status[i] for i in tags_of.get(r["tag"].pk, []) if i in status),
+                       key=lambda m: (order[m[1]], levels.get(m[0].difficulty, 9), m[0].pk))
+        todo = [pr for pr, st in marks if st != "solved"]
+        tried = sum(1 for _, st in marks if st == "attempted")
+        rows.append({"kind": kind, "row": r, "marks": marks, "tried": tried,
+                     "next": todo[0] if todo else None,
+                     "easiest": min(todo, key=lambda pr: (levels.get(pr.difficulty, 9), pr.pk)) if todo else None})
+    open_rows = [x for x in rows if x["row"]["solved"] < x["row"]["total"] and (x["tried"] or x["row"]["solved"])]
+    weakest = min(open_rows, key=lambda x: (x["row"]["solved"] / x["row"]["total"], -x["tried"])) if open_rows else None
+    return rows, weakest
 
 
 def _sparkline(values: list[int], w: int = 88, h: int = 28) -> str:

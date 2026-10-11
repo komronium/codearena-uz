@@ -1,33 +1,50 @@
 {% extends "base.html" %}
 {% block title %}{{ contest.title }} — Nazorat hisoboti{% endblock %}
 
+{% block band %}
+{% comment %}#7 integrity report: the band with the round and the four figures staff act on (pairs not yet reviewed,
+participants with events, suspiciously fast solves, decisions in the journal) and the sections as tabs; below, the
+participants by risk, the similar code pairs, the fast solves and the journal.{% endcomment %}
+<section class="ca-band" aria-labelledby="rep-title">
+  <div class="ca-band-in">
+    <div class="ca-band-top">
+      <div class="min-w-0">
+        <p class="ca7-crumb"><a href="{% url 'moderation:dashboard' %}">Boshqaruv</a> / <a href="{% url 'moderation:contests' %}">Musobaqalar</a> / #{{ contest.pk|stringformat:"03d" }}</p>
+        <h1 id="rep-title" class="!text-[1.6rem] font-bold">Nazorat hisoboti</h1>
+        <p class="ca7-bmeta"><span>{{ contest.title }}</span><span class="tabular">{{ contest.start|date:"d.m.Y H:i" }}</span><span>{{ rows|length }} ishtirokchida hodisa</span>
+          <a class="text-white hover:underline" href="{% url 'contests:standings' contest.pk %}">Natijalar</a><a class="text-white hover:underline" href="{% url 'contests:submissions' contest.pk %}">Urinishlar</a></p>
+      </div>
+      <dl class="ca-hud-stats">
+        <div><dt><small>Ko‘rilmagan juftlik</small></dt><dd><b class="tabular{% if open_flags %} text-[#F7CB6B]{% endif %}">{{ open_flags }}</b></dd></div>
+        <div><dt><small>Hodisasi bor</small></dt><dd><b class="tabular">{{ rows|length }}</b></dd></div>
+        <div><dt><small>Shubhali tez yechim</small></dt><dd><b class="tabular">{{ suspicious|length }}</b></dd></div>
+        <div><dt><small>Qaror jurnalda</small></dt><dd><b class="tabular">{{ audit|length }}</b></dd></div>
+      </dl>
+    </div>
+    <nav class="ca-band-tabs" aria-label="Hisobot bo‘limlari"><div class="ca-contest-tabs">
+      <a href="#people" aria-current="true">Ishtirokchilar <span>{{ rows|length }}</span></a>
+      <a href="#flags">O‘xshash kodlar{% if open_flags %} <span>{{ open_flags }} yangi</span>{% endif %}</a>
+      <a href="#suspicious">Shubhali yechimlar <span>{{ suspicious|length }}</span></a>
+      <a href="#journal">Amallar jurnali <span>{{ audit|length }}</span></a>
+    </div></nav>
+  </div>
+</section>
+{% endblock %}
 {% block content %}
-<div class="mb-6 flex flex-wrap items-start justify-between gap-3">
-  <div>
-    <h1 class="ca-page-title">Nazorat hisoboti</h1>
-    <p class="mt-1 text-sm text-mute">#{{ contest.pk|stringformat:"03d" }} · {{ contest.title }} · {{ contest.start|date:"d.m.Y H:i" }}</p>
-  </div>
-  <div class="flex gap-2">
-    <a href="{% url 'contests:standings' contest.pk %}" class="ca-btn ca-btn-ghost !py-1.5"><i data-lucide="table" class="lu" aria-hidden="true"></i>Natijalar</a>
-    <a href="{% url 'contests:submissions' contest.pk %}" class="ca-btn ca-btn-ghost !py-1.5"><i data-lucide="history" class="lu" aria-hidden="true"></i>Urinishlar</a>
-    <a href="{% url 'moderation:contests' %}" class="ca-btn ca-btn-ghost !py-1.5">Orqaga</a>
-  </div>
-</div>
-
-<section class="mb-8">
+<section class="mb-10 scroll-mt-20" id="people">
   <div class="mb-3 flex flex-wrap items-end justify-between gap-2">
-    <h2 class="ca-section-title !mb-0">Xatti-harakat hodisalari</h2>
+    <h2 class="ca7-h"><span class="ca-star" style="--c: var(--ca-lvl-hard)" aria-hidden="true"></span>Xavf bo‘yicha saralangan</h2>
     <p class="text-xs text-mute">Chiqish — musobaqa sahifalaridan tashqariga (boshqa oyna, varaq yoki saytning boshqa sahifasi) · Tashqarida — jami vaqt · Paste — muharrirga qo‘yish urinishi · Tez — g‘ayrioddiy tez matn kiritish · Nusxa — shart matnidan nusxa. Dalillar — serverda tekshirilgani, brauzerda o‘chirib bo‘lmaydi: tracker o‘chiq (×6), muharrirda yozilmagan kod (×8), kod sakrashi (×3), umumiy qurilma (×10), ikki qurilma (×5), o‘xshash kod (×8). Xavf = paste×5 + tez×3 + nusxa×2 + chiqish + tashqarida daqiqa + shubhali yechim×4 + dalillar.</p>
   </div>
-  <div class="ca-panel !p-0 overflow-x-auto">
-  <table class="ca-table">
+  <div class="overflow-x-auto">
+  <table class="ca-table ca-table-flat">
     <thead>
       <tr><th>Ishtirokchi</th><th class="text-right">Chiqish</th><th class="text-right">Tashqarida</th><th class="text-right">Paste</th><th class="text-right">Tez</th><th class="text-right">Nusxa</th><th>Dalillar</th><th class="text-right">Xavf</th><th class="hidden md:table-cell">Oxirgi hodisa</th><th class="text-right">Amal</th></tr>
     </thead>
     <tbody>
     {% for user, c in rows %}
     <tr>
-      <td>{% include "accounts/_user.html" with u=user tier=False %}</td>
+      <td>{% include "accounts/_u7.html" with u=user you=False %}</td>
       <td class="tabular text-right {% if c.blur > 5 %}text-warn font-semibold{% endif %}">{{ c.blur }}</td>
       <td class="tabular text-right whitespace-nowrap {% if c.away_ms >= 120000 %}text-warn font-semibold{% endif %}">{% if c.away_ms %}{% widthratio c.away_ms 60000 1 %} daq{% else %}—{% endif %}</td>
       <td class="tabular text-right {% if c.paste %}text-bad font-semibold{% endif %}">{{ c.paste }}</td>
@@ -63,7 +80,7 @@
         </div>
         {% endif %}
       </td>
-      <td class="text-right"><span class="ca-chip {% if c.risk >= 15 %}text-bad{% elif c.risk >= 6 %}text-warn{% else %}text-mute{% endif %} tabular font-semibold">{{ c.risk }}</span></td>
+      <td class="whitespace-nowrap text-right"><span class="ca7-risk {% if c.risk >= 15 %}is-hi{% elif c.risk >= 6 %}is-mid{% endif %}"><i style="width: {% if c.risk >= 50 %}100{% else %}{% widthratio c.risk 50 100 %}{% endif %}%"></i></span><b class="tabular {% if c.risk >= 15 %}text-bad{% elif c.risk >= 6 %}text-warn{% else %}text-mute{% endif %}">{{ c.risk }}</b></td>
       <td class="hidden md:table-cell tabular text-xs text-mute">{{ c.last|date:"d.m H:i:s" }}</td>
       <td class="text-right">
         {% if c.participation %}
@@ -92,9 +109,9 @@
   </div>
 </section>
 
-<section class="mb-8">
+<section class="mb-10 scroll-mt-20" id="suspicious">
   <div class="mb-3 flex flex-wrap items-end justify-between gap-2">
-    <h2 class="ca-section-title !mb-0">Shubhali yechimlar {% if suspicious %}<span class="ca-chip ca-chip-score ml-1">{{ suspicious|length }}</span>{% endif %}</h2>
+    <h2 class="ca7-h"><span class="ca-star" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span>Shubhali yechimlar {% if suspicious %}<span class="ca-chip ca-chip-score ml-1">{{ suspicious|length }}</span>{% endif %}</h2>
     <p class="text-xs text-mute">Juda tez — masala ochilgandan AC gacha: Easy &lt; {{ speed_limits.easy }} s, Medium &lt; {{ speed_limits.medium }} s, Hard &lt; {{ speed_limits.hard }} s. Chiqib-qaytib — {{ min_away_s }}+ s tashqarida bo‘lib, qaytgach {{ quick_after_return_s }} s ichida AC.</p>
   </div>
   {% if suspicious %}
@@ -124,9 +141,9 @@
   {% endif %}
 </section>
 
-<section id="flags">
+<section id="flags" class="scroll-mt-20">
   <div class="mb-3 flex flex-wrap items-end justify-between gap-2">
-    <h2 class="ca-section-title !mb-0">O‘xshash kodlar {% if open_flags %}<span class="ca-chip ca-chip-score ml-1">{{ open_flags }} ko‘rilmagan</span>{% endif %}</h2>
+    <h2 class="ca7-h"><span class="ca-star" aria-hidden="true"></span>O‘xshash kodlar {% if open_flags %}<span class="ca-chip ca-chip-score ml-1">{{ open_flags }} ko‘rilmagan</span>{% endif %}</h2>
     <p class="max-w-2xl text-xs text-mute">Bir masala, bir til, kamida {{ min_lines }} qator kod, o‘xshashlik ≥ {{ threshold }}%. AC yechimlar, AC olmaganlarning oxirgi urinishi, va musobaqadan oldingi yechimlar (amaliyot, oldingi musobaqalar, muallif) solishtiriladi; ishtirokchi qatoridagi <i data-lucide="scan-search" class="lu" aria-hidden="true"></i> chuqur tekshiruv esa uning barcha urinishlarini solishtiradi. O‘zgaruvchi nomlari va izohlar hisobga olinmaydi. <span class="ca-cmp-key"></span> — ikkala kodda ham bor qatorlar.
       {% if contest.similarity_checked_at and contest.similarity_checked_at > contest.end %}<b class="text-ink">Barcha masalalar avtomatik tekshirildi: {{ contest.similarity_checked_at|date:"d.m H:i" }}.</b>{% elif not contest.similarity_checked_at %}<b class="text-ink">Musobaqa tugaganidan 10 daqiqa o‘tib barcha masalalar avtomatik tekshiriladi.</b>{% endif %}</p>
   </div>
@@ -220,9 +237,9 @@
   {% endif %}
 </section>
 
-<section class="mt-8">
+<section class="mt-10 scroll-mt-20" id="journal">
   <div class="mb-3 flex flex-wrap items-end justify-between gap-2">
-    <h2 class="ca-section-title !mb-0">Amallar jurnali</h2>
+    <h2 class="ca7-h"><span class="ca-star" style="--c: var(--ca-lvl-easy)" aria-hidden="true"></span>Amallar jurnali</h2>
     <a class="ca-link text-sm" href="{% url 'integrity:audit' %}?contest={{ contest.pk }}">Hammasi »</a>
   </div>
   {% include "integrity/_audit_rows.html" with entries=audit %}

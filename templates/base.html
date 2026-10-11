@@ -58,7 +58,7 @@
 <header class="ca-nav">{% include "_navbar.html" %}</header>
 {% block band %}{% endblock %}
 <main id="main" class="{% block main_class %}ca-main{% endblock %}">
-  {% if user.is_staff and request.resolver_match.namespace == "moderation" or user.is_staff and request.resolver_match.namespace == "integrity" %}{% include "_mod_tabs.html" %}{% endif %}
+  {% if user.is_staff and request.resolver_match.namespace == "moderation" or user.is_staff and request.resolver_match.namespace == "integrity" %}<div class="ca7-admin">{% include "_mod_tabs.html" %}<div class="min-w-0">{% endif %}
   {% if messages %}
   <div class="mb-6 space-y-2" role="status" aria-live="polite">
     {% for m in messages %}
@@ -68,7 +68,9 @@
   {% endif %}
   <div class="ca-pagehead">{% block page_icon %}{% endblock %}{% block page_title %}{% endblock %}</div>
   {% block content %}{% endblock %}
+  {% if user.is_staff and request.resolver_match.namespace == "moderation" or user.is_staff and request.resolver_match.namespace == "integrity" %}</div></div>{% endif %}
 </main>
+{% block after_main %}{% endblock %}
 {# the public places once more, as plain links: for the end of a long page, and for crawlers #}
 <footer class="ca-footer">
   <div class="ca-footer-in">
@@ -153,10 +155,11 @@ A native dialog gives focus trapping and Esc for free.{% endcomment %}
           if (el.dataset.ended !== undefined) {
             el.textContent = el.dataset.ended;
             el.closest("[data-live-pill]")?.classList.add("is-ended");
-          } else el.textContent = el.dataset.suffix ? "" : el.dataset.label + ": 00:00:00";
+          } else el.textContent = el.dataset.suffix ? "" : (el.dataset.label ? el.dataset.label + ": " : "") + "00:00:00";
           return;
         }
-        el.textContent = el.dataset.suffix ? fmt(left) + " " + el.dataset.label : el.dataset.label + ": " + fmt(left);
+        const label = el.dataset.label || "";
+        el.textContent = el.dataset.suffix ? (fmt(left) + " " + label).trim() : label ? label + ": " + fmt(left) : fmt(left);
       });
       // a round's clock in three boxes: days, hours, minutes a day or more away, then hours, minutes, seconds
       document.querySelectorAll("[data-cd-boxes]").forEach((el) => {
@@ -167,6 +170,12 @@ A native dialog gives focus trapping and Esc for free.{% endcomment %}
           box.firstElementChild.textContent = String(parts[i][0]).padStart(2, "0");
           box.lastElementChild.textContent = parts[i][1];
         });
+      });
+      // a round's time gone out of its length, "1:47 / 3:00"
+      document.querySelectorAll("[data-elapsed-from]").forEach((el) => {
+        const from = new Date(el.dataset.elapsedFrom), to = new Date(el.dataset.elapsedTo);
+        const hm = (ms) => { const m = Math.max(0, Math.floor(ms / 60000)); return Math.floor(m / 60) + ":" + String(m % 60).padStart(2, "0"); };
+        el.textContent = hm(Math.min(now, to) - from) + " / " + hm(to - from);
       });
       // a round's clock line: the share of [from, to] already gone
       document.querySelectorAll("[data-span-from]").forEach((el) => {

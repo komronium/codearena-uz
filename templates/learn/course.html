@@ -2,69 +2,65 @@
 {% block title %}{{ plan.title }} — kurs{% endblock %}
 {% block description %}{% if plan.summary %}{{ plan.summary }}{% else %}{{ theory_html|plain }}{% endif %}{% endblock %}
 {% block structured_data %}{% url 'learn:hub' as hub_url %}{% breadcrumbs_jsonld "O‘rganish" hub_url plan.title request.path %}{% endblock %}
-{% block content %}
-{% comment %}A course, boxed like the course list it opens from: the theory and one box per difficulty on the left;
-your progress, the course note and its badge on the right.{% endcomment %}
-<a class="ca-link mb-4 inline-block text-sm text-mute" href="{% url 'learn:hub' %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>O‘rganish</a>
-
-<header class="ca-course-hero mb-6">
-  <span class="ca-course-art ca-course-art-lg" aria-hidden="true"><i data-lucide="{{ plan.icon }}" class="lu"></i></span>
-  <div class="min-w-0 flex-1">
-    <p class="text-sm text-mute">{{ plan.get_stage_display }}{% if plan.summary %} · {{ plan.summary }}{% endif %}</p>
-    <h1 class="ca-page-title mt-1">{{ plan.title }}</h1>
-    <p class="mt-2 flex flex-wrap items-center gap-2 text-sm text-mute">
-      <span class="ca-diff ca-diff-{{ plan.level }}">{{ plan.get_level_display }}</span>
-      {% if progress.total %}<span class="tabular">{{ progress.total }} masala</span>{% endif %}
-      {% if not plan.is_public %}<span class="ca-chip text-mute">Yashirin</span>{% endif %}
-      {% if user.is_staff %}<a class="ca-link" href="{% url 'moderation:plan_edit' plan.pk %}"><i data-lucide="pencil" class="lu mr-1" aria-hidden="true"></i>Tahrirlash</a>{% endif %}
-    </p>
-    {% if next_problem %}<a class="ca-btn ca-btn-primary mt-4" href="{% url 'problems:detail' next_problem.slug %}?plan={{ plan.slug }}"><i data-lucide="play" class="lu" aria-hidden="true"></i>{% if progress.done %}Davom etish{% else %}Boshlash{% endif %}</a>
-    {% elif progress.completed %}<p class="mt-4 font-semibold text-ok"><i data-lucide="check" class="lu mr-1" aria-hidden="true"></i>Kurs tugatildi</p>{% endif %}
+{% block band %}
+{% comment %}#7 course: the band with the way back, the stage, the title, its level and size, and the one gold way in;
+then the theory (open until the first solve) and one flat table per difficulty; on the right your progress, the
+course note and its khatam badge.{% endcomment %}
+<section class="ca-hud" aria-labelledby="course-title">
+  <div class="ca-hud-in">
+    <div class="min-w-0">
+      <p class="ca-hud-lbl"><a class="text-white no-underline hover:underline" href="{% url 'learn:hub' %}">O‘rganish</a> / {{ plan.get_stage_display }}</p>
+      <h1 id="course-title">{{ plan.title }}</h1>
+      <p class="ca-hud-sub">{% if plan.summary %}{{ plan.summary }} · {% endif %}<span class="ca-hud-lv is-{{ plan.level }} !ml-0">{{ plan.get_level_display }}</span>{% if progress.total %} · {{ progress.total }} masala{% endif %}{% if not plan.is_public %} · yashirin{% endif %}
+        {% if user.is_staff %} · <a class="text-white underline" href="{% url 'moderation:plan_edit' plan.pk %}">Tahrirlash</a>{% endif %}</p>
+    </div>
+    {% if next_problem %}<a class="ca-btn ca-btn-gold ml-auto" href="{% url 'problems:detail' next_problem.slug %}?plan={{ plan.slug }}">{% if progress.done %}Davom etish{% else %}Boshlash{% endif %}</a>
+    {% elif progress.completed %}<span class="ca-hud-done ml-auto"><i data-lucide="check" class="lu" aria-hidden="true"></i>Kurs tugatildi</span>{% endif %}
   </div>
-</header>
-
-<div class="ca-cols">
-  <div class="min-w-0">
+</section>
+{% endblock %}
+{% block content %}
+<div class="ca7">
+  <div class="ca7-col">
     {% if theory_html %}
     {# Open until the first solve: then the problems come first and the theory is one click away. #}
-    <details class="ca-box ca-theory"{% if not progress.done %} open{% endif %}>
-      <summary class="ca-box-cap"><h2><i data-lucide="book-open" class="lu mr-1.5 text-accent" aria-hidden="true"></i>Nazariya</h2><i data-lucide="chevron-down" class="lu ca-theory-chevron ml-auto text-mute" aria-hidden="true"></i></summary>
-      <div class="ca-box-body prose max-w-none px-5 py-4">{{ theory_html|safe }}</div>
+    <details class="ca7-theory"{% if not progress.done %} open{% endif %}>
+      <summary class="ca7-sec-h"><span class="ca-star" style="--c: rgb(var(--ca-spec-rgb))" aria-hidden="true"></span><h2>Nazariya</h2><i data-lucide="chevron-down" class="lu ca7-r ca-theory-chevron" aria-hidden="true"></i></summary>
+      <div class="prose max-w-none">{{ theory_html|safe }}</div>
     </details>
     {% endif %}
 
     {% for g in groups %}
-    <section class="ca-box" aria-labelledby="lvl-{{ g.level }}">
-      <h2 class="ca-box-cap" id="lvl-{{ g.level }}"><span class="ca-diff ca-diff-{{ g.level }}">{{ g.label }}</span> masalalar
-        <small class="ca-box-tools tabular{% if g.done == g.problems|length %} font-semibold !text-ok{% endif %}">{% if user.is_authenticated %}{{ g.done }}/{% endif %}{{ g.problems|length }}</small></h2>
-      <div class="ca-box-body">{% include "learn/_problem_rows.html" with rows=g.problems %}</div>
+    <section aria-labelledby="lvl-{{ g.level }}">
+      <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-{{ g.level }})" aria-hidden="true"></span><h2 id="lvl-{{ g.level }}"><span>{{ g.label }}</span> masalalar</h2>
+        <span class="ca7-r tabular{% if g.done == g.problems|length %} font-semibold text-ok{% else %} text-mute{% endif %}">{% if user.is_authenticated %}{{ g.done }}/{% endif %}{{ g.problems|length }}</span></div>
+      {% include "learn/_problem_rows.html" with rows=g.problems %}
     </section>
     {% empty %}
-    <p class="ca-empty"><i data-lucide="clock" class="lu mr-1.5" aria-hidden="true"></i>{% if plan.tags.exists %}Bu kurs uchun masalalar tayyorlanmoqda — hozircha nazariyani o‘qing.{% else %}Bu kurs — faqat nazariya.{% endif %}</p>
+    <p class="ca7-empty"><b>{% if plan.tags.exists %}Masalalar tayyorlanmoqda{% else %}Bu kurs faqat nazariya{% endif %}</b>{% if plan.tags.exists %}Hozircha nazariyani o‘qing.{% endif %}</p>
     {% endfor %}
   </div>
 
-  <aside class="ca-aside" aria-label="Kurs haqida">
+  <aside class="ca7-aside" aria-label="Kurs haqida">
     {% if user.is_authenticated and progress.total %}
     <section class="ca-box" aria-labelledby="progress-title">
-      <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="chart-no-axes-column" class="lu" aria-hidden="true"></i></span><h2 id="progress-title">Bajarilishi</h2></div>
-      <div class="ca-box-body ca-box-pad flex items-center gap-4">
-        <span class="ca-ring{% if progress.completed %} is-done{% endif %}" style="--p: {{ progress.pct }}" role="img" aria-label="{{ progress.pct }}% bajarildi"><b class="tabular">{{ progress.pct }}%</b></span>
-        <div class="text-sm"><p class="tabular"><b>{{ progress.done }}</b> / {{ progress.total }} masala</p><p class="text-mute">{% if progress.completed %}Tugatildi{% else %}yechildi{% endif %}</p></div>
+      <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" style="--c: var(--ca-lvl-easy)" aria-hidden="true"></span><h2 id="progress-title">Bajarilishi</h2><span class="ca-box-tools tabular">{{ progress.pct }}%</span></div>
+      <div class="ca7-pad">
+        <p class="!mb-2"><b class="text-2xl font-bold text-ink tabular">{{ progress.done }}</b> / {{ progress.total }} masala {% if progress.completed %}— tugatildi{% else %}yechildi{% endif %}</p>
+        <span class="ca7-pg" role="progressbar" aria-valuenow="{{ progress.pct }}" aria-valuemin="0" aria-valuemax="100" aria-label="Kurs bajarilishi"><i style="width: {{ progress.pct }}%"></i></span>
       </div>
     </section>
     {% endif %}
     {% if description_html %}
     <section class="ca-box" aria-labelledby="about-title">
-      <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="info" class="lu" aria-hidden="true"></i></span><h2 id="about-title">Kurs haqida</h2></div>
-      <div class="ca-box-body ca-box-pad prose max-w-none text-sm">{{ description_html|safe }}</div>
+      <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" aria-hidden="true"></span><h2 id="about-title">Kurs haqida</h2></div>
+      <div class="ca7-pad prose max-w-none text-sm">{{ description_html|safe }}</div>
     </section>
     {% endif %}
     {% if progress.total %}
     <section class="ca-box" aria-labelledby="award-title">
-      <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="award" class="lu" aria-hidden="true"></i></span><h2 id="award-title">Nishon</h2></div>
-      <p class="ca-box-body ca-box-pad flex items-center gap-3 text-sm"><span class="ca-award{% if not progress.completed %} is-locked{% endif %}" aria-hidden="true"><i data-lucide="{{ plan.icon }}" class="lu"></i></span>
-        <span class="text-mute">{% if progress.completed %}Olingan — profilingizda ko‘rinadi.{% else %}Kursni tugatsangiz profilingizga «{{ plan.title }}» nishoni qo‘shiladi.{% endif %}</span></p>
+      <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span><h2 id="award-title">Nishon</h2></div>
+      <ul class="ca7-pad">{% if progress.completed %}{% include "accounts/_badge7.html" with tone="lapis" icon=plan.icon title=plan.title sub="Olingan — profilingizda ko‘rinadi" href=None total=None %}{% else %}{% include "accounts/_badge7.html" with tone="locked" icon=plan.icon title=plan.title sub="Kursni tugatsangiz profilingizga qo‘shiladi" href=None done=progress.done total=progress.total %}{% endif %}</ul>
     </section>
     {% endif %}
   </aside>

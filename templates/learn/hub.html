@@ -1,91 +1,105 @@
 {% extends "base.html" %}
 {% block title %}Kurslar — O‘rganish{% endblock %}
 {% block description %}Dasturlashni mavzulab o‘rganing: har kursda qisqa nazariya va osonidan qiyiniga masalalar, o‘zbek tilida.{% endblock %}
-{% block page_icon %}<span class="ca-hd-icon"><i data-lucide="graduation-cap" class="lu" aria-hidden="true"></i></span>{% endblock %}
-{% block page_title %}<h1>O‘rganish</h1><span class="ca-topbar-sub">Har kurs bitta mavzu: qisqa nazariya, keyin masalalar, osonidan qiyiniga</span>{% endblock %}
-{% block content %}
-{% comment %}After LeetCode's study plans: the course to go on with on a cover first; then each stage of the path as a grid
-of course tiles (icon, name, one line, level, your progress or the way in); on the right the next few problems and a
-badge per course, lit once finished.{% endcomment %}
-<div class="ca-cols">
-<div class="min-w-0">
-  {% if current %}
-  <section class="ca-resume" aria-labelledby="current-title">
-    <svg class="ca-band-mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M31 16l-4.39 4.39v6.22h-6.22L16 31l-4.39-4.39H5.39v-6.22L1 16l4.39-4.39V5.39h6.22L16 1l4.39 4.39h6.22v6.22z"/></svg>
-    <span class="ca-resume-icon" aria-hidden="true"><i data-lucide="{{ current.icon }}" class="lu"></i></span>
-    <div class="min-w-0 flex-1">
-      <p class="ca-resume-k">{% if current.progress.done %}Davom ettirish{% else %}Shu yerdan boshlang{% endif %}</p>
-      <h2 id="current-title"><a href="{% url 'learn:course' current.slug %}">{{ current.title }}</a></h2>
-      {% if next_problem %}<p class="ca-resume-sub">Keyingi masala: {{ next_problem.title }}</p>{% elif current.summary %}<p class="ca-resume-sub">{{ current.summary }}</p>{% endif %}
-      {% if user.is_authenticated and current.progress.total %}<span class="ca-plan-prog" role="progressbar" aria-valuenow="{{ current.progress.pct }}" aria-valuemin="0" aria-valuemax="100" aria-label="{{ current.title }}: {{ current.progress.pct }}%"><i style="--w: {{ current.progress.pct }}%" aria-hidden="true"></i><span>{{ current.progress.done }} / {{ current.progress.total }} masala</span></span>{% endif %}
+{% block band %}
+{% comment %}#7 learn: the band with a filter over the courses; on the left the path's stages to jump to and the course
+badges; on the right the course to go on with, then each stage as a flat list (name and one line, level, your
+progress or where it stands).{% endcomment %}
+<section class="ca-hud" aria-labelledby="learn-title">
+  <div class="ca-hud-in">
+    <div>
+      <h1 id="learn-title">O‘rganish</h1>
+      <p class="ca-hud-sub">Har kurs bitta mavzu: qisqa nazariya, keyin osonidan qiyinga masalalar.</p>
     </div>
-    {% if next_problem %}<a class="ca-btn ca-btn-primary" href="{% url 'problems:detail' next_problem.slug %}?plan={{ current.slug }}"><i data-lucide="play" class="lu" aria-hidden="true"></i>{% if current.progress.done %}Davom etish{% else %}Boshlash{% endif %}</a>{% endif %}
+    {% if stages %}<label class="ca7-hsearch ml-auto"><span class="sr-only">Kurslarni filtrlash</span><i data-lucide="search" class="lu" aria-hidden="true"></i><input type="search" id="course-filter" placeholder="Kurs yoki mavzu…" autocomplete="off" spellcheck="false"></label>{% endif %}
+  </div>
+</section>
+{% endblock %}
+{% block content %}
+<div class="ca7 ca7-left">
+<aside class="ca7-aside" aria-label="Bo‘limlar">
+  {% if stages %}
+  <nav class="ca-box ca7-side" aria-label="Yo‘l bosqichlari">
+    {% for s in stages %}<a href="#stage-{{ s.stage }}"{% if forloop.first %} aria-current="true"{% endif %}>{{ s.label }} <span class="tabular">{{ s.courses|length }}</span></a>{% endfor %}
+  </nav>
+  {% endif %}
+  {% if badges and user.is_authenticated %}
+  <section class="ca-box" aria-labelledby="badges-title">
+    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span><h2 id="badges-title">Nishonlar</h2><span class="ca-box-tools tabular">{{ badges_earned }} / {{ badges|length }}</span></div>
+    <div class="ca7-pad">
+      <p>Kursni oxirigacha yechsangiz, nishoni profilingizda chiqadi.</p>
+      <ul class="ca7-earned">
+        {% for p in badges %}{% if p.progress.completed %}<li><i data-lucide="check" class="lu" aria-hidden="true"></i><a href="{% url 'learn:course' p.slug %}">{{ p.title }}</a></li>{% endif %}{% endfor %}
+      </ul>
+    </div>
+  </section>
+  {% elif stages and not user.is_authenticated %}
+  <section class="ca-box" aria-labelledby="join-title">
+    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" aria-hidden="true"></span><h2 id="join-title">Yutuqlaringiz saqlansin</h2></div>
+    <div class="ca7-pad"><p><a class="ca-link" href="{% url 'register' %}">Ro‘yxatdan o‘ting</a>: yutuqlaringiz saqlanadi va har kurs uchun nishon olasiz.</p></div>
+  </section>
+  {% endif %}
+</aside>
+
+<div class="ca7-col">
+  {% if current %}
+  <section class="ca7-mis" aria-labelledby="current-title">
+    <div>
+      <span class="ca7-mis-ico is-learn" aria-hidden="true"><i data-lucide="{{ current.icon }}" class="lu"></i></span>
+      <div class="min-w-0 flex-1">
+        <small>{% if current.progress.done %}Davom ettirish{% else %}Shu yerdan boshlang{% endif %}{% if user.is_authenticated and current.progress.total %} · {{ current.progress.done }} / {{ current.progress.total }} masala{% endif %}</small>
+        <a class="ca-link ca7-mis-t" id="current-title" href="{% url 'learn:course' current.slug %}">{{ current.title }}</a>
+        {% if user.is_authenticated and current.progress.total %}<span class="ca7-pg max-w-[16rem]" role="progressbar" aria-valuenow="{{ current.progress.pct }}" aria-valuemin="0" aria-valuemax="100" aria-label="{{ current.title }}: {{ current.progress.pct }}%"><i style="width: {{ current.progress.pct }}%"></i></span>{% endif %}
+        {% if next_problem %}<small>Keyingi masala: {{ next_problem.title }} · <span class="ca-diff ca-diff-{{ next_problem.difficulty }} !text-xs">{{ next_problem.get_difficulty_display }}</span></small>{% elif current.summary %}<small>{{ current.summary }}</small>{% endif %}
+      </div>
+      {% if next_problem %}<a class="ca-btn ca-btn-gold self-center" href="{% url 'problems:detail' next_problem.slug %}?plan={{ current.slug }}">{% if current.progress.done %}Davom etish{% else %}Boshlash{% endif %}</a>{% endif %}
+    </div>
   </section>
   {% endif %}
 
   {% for s in stages %}
-  <section class="ca-stage" aria-labelledby="stage-{{ s.stage }}">
-    <h2 class="ca-stage-title" id="stage-{{ s.stage }}">{{ s.label }}<small>{{ s.courses|length }} ta kurs</small></h2>
-    <ul class="ca-ltiles">
+  <section class="ca7-stage" aria-labelledby="stage-{{ s.stage }}" data-stage>
+    <div class="ca7-sec-h"><span class="ca-star" aria-hidden="true"></span><h2 id="stage-{{ s.stage }}">{{ s.label }}</h2><span class="ca7-r text-mute">{{ s.courses|length }} kurs</span></div>
+    <ul class="ca7-courses">
       {% for p in s.courses %}
-      <li>
-        <a class="ca-ltile{% if p.progress.completed %} is-done{% elif p == here %} is-here{% elif not p.progress.total %} is-soon{% endif %}" href="{% url 'learn:course' p.slug %}">
-          <span class="ca-ltile-icon {% cycle 'is-a' 'is-b' 'is-c' %}" aria-hidden="true"><i data-lucide="{{ p.icon }}" class="lu"></i></span>
-          <span class="ca-ltile-body">
-            <b>{{ p.title }}</b>
-            {% if p.summary %}<span class="ca-ltile-sub">{{ p.summary }}</span>{% endif %}
-            <span class="ca-ltile-meta">
-              <span class="ca-diff ca-diff-{{ p.level }}">{{ p.get_level_display }}</span>
-              {% if p.progress.total %}<span>{{ p.progress.total }} masala</span>{% endif %}
-              {% if not p.is_public %}<span class="ca-tag">Yashirin</span>{% endif %}
-              {% if p == here %}<span class="ca-tag ca-tag-soon">Siz shu yerdasiz</span>{% endif %}
-            </span>
-            {% if p.progress.completed %}<span class="ca-ltile-done"><i data-lucide="check" class="lu" aria-hidden="true"></i>Tugatildi</span>
-            {% elif not p.progress.total %}<span class="ca-ltile-note">{% if p.n_tags %}Tayyorlanmoqda{% else %}Nazariya{% endif %}</span>
-            {% elif user.is_authenticated and p.progress.done %}<span class="ca-ltile-prog" title="{{ p.progress.done }} / {{ p.progress.total }} yechilgan"><i style="--w: {{ p.progress.pct }}%" aria-hidden="true"></i><span>{{ p.progress.done }} / {{ p.progress.total }}</span></span>
-            {% else %}<span class="ca-ltile-start">Boshlash<i data-lucide="chevron-right" class="lu" aria-hidden="true"></i></span>{% endif %}
-          </span>
-        </a>
+      <li data-course="{{ p.title|lower }} {{ p.summary|lower }}" class="{% if p == here %}is-here{% elif not p.progress.total and not p.progress.completed %}is-soon{% endif %}">
+        <div class="min-w-0">
+          <a class="{% if p.progress.total or p.progress.completed %}ca-link{% else %}ca7-soon-link{% endif %}" href="{% url 'learn:course' p.slug %}">{{ p.title }}</a>{% if not p.is_public %} <span class="ca-tag">Yashirin</span>{% endif %}
+          {% if p.summary %}<small>{{ p.summary }}</small>{% endif %}
+        </div>
+        <span class="ca-diff ca-diff-{{ p.level }}">{{ p.get_level_display }}</span>
+        <span class="ca7-cstate">
+          {% if p.progress.completed %}<span class="font-semibold text-ok"><i data-lucide="check" class="lu" aria-hidden="true"></i> tugatildi</span>
+          {% elif p == here and user.is_authenticated %}<span class="ca-you">Siz shu yerdasiz · {{ p.progress.done }}/{{ p.progress.total }}</span>
+          {% elif not p.progress.total %}{% if p.n_tags %}<span class="text-mute">Tayyorlanmoqda</span>{% else %}<span class="ca7-pill">Nazariya</span>{% endif %}
+          {% elif user.is_authenticated and p.progress.done %}<span class="ca7-cprog" title="{{ p.progress.done }} / {{ p.progress.total }} yechilgan"><span class="ca7-pg"><i style="width: {{ p.progress.pct }}%"></i></span><b class="tabular">{{ p.progress.done }}/{{ p.progress.total }}</b></span>
+          {% else %}<span class="tabular text-mute">{{ p.progress.total }} masala</span>{% endif %}
+        </span>
       </li>
       {% endfor %}
     </ul>
   </section>
   {% empty %}
-  <div class="ca-empty">Hali kurs yo‘q.{% if user.is_staff %} <a class="ca-link" href="{% url 'moderation:plan_new' %}">Birinchisini tuzing</a>{% endif %}</div>
+  <p class="ca7-empty"><b>Hali kurs yo‘q</b>{% if user.is_staff %}<a class="ca-link" href="{% url 'moderation:plan_new' %}">Birinchisini tuzing</a>.{% endif %}</p>
   {% endfor %}
+  <p class="ca7-empty" id="course-none" hidden><b>Bunday kurs topilmadi</b>Boshqa so‘z bilan qidirib ko‘ring.</p>
 </div>
-
-<aside class="ca-aside" aria-label="Davom ettirish">
-  {% if current and up_next %}
-  <section class="ca-box" aria-labelledby="next-title">
-    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="target" class="lu" aria-hidden="true"></i></span><h2 id="next-title">Navbatdagi masalalar<a class="ca-box-tools ca-link" href="{% url 'learn:course' current.slug %}">Kurs</a></h2></div>
-    <ol class="ca-box-body ca-facts" aria-label="{{ current.title }}: navbatdagi masalalar">
-      {% for p in up_next %}<li><a class="ca-link min-w-0 truncate" href="{% url 'problems:detail' p.slug %}?plan={{ current.slug }}">{{ p.title }}</a><span class="ca-diff ca-diff-{{ p.difficulty }}">{{ p.get_difficulty_display }}</span></li>{% endfor %}
-    </ol>
-  </section>
-  {% endif %}
-  {% if badges and user.is_authenticated %}
-  <section class="ca-box" aria-labelledby="badges-title">
-    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="award" class="lu" aria-hidden="true"></i></span><h2 id="badges-title">Nishonlar<small class="ca-box-tools tabular">{{ badges_earned }} / {{ badges|length }}</small></h2></div>
-    <div class="ca-box-body ca-box-pad">
-      <p class="text-xs text-mute">Kursni oxirigacha yechsangiz, uning nishoni profilingizda chiqadi.</p>
-      <ul class="ca-course-badges mt-2.5">
-        {% for p in badges %}
-        <li><a class="{% if p.progress.completed %}is-earned{% endif %}" href="{% url 'learn:course' p.slug %}" title="{{ p.title }}: {% if p.progress.completed %}olingan{% else %}{{ p.progress.done }}/{{ p.progress.total }} yechilgan{% endif %}" aria-label="{{ p.title }}{% if p.progress.completed %}, olingan{% endif %}">
-          <i data-lucide="{{ p.icon }}" class="lu" aria-hidden="true"></i>{% if not p.progress.completed and p.progress.done %}<span class="ca-course-badge-pct" style="--p: {{ p.progress.pct }}%"></span>{% endif %}
-        </a></li>
-        {% endfor %}
-      </ul>
-    </div>
-    <a class="ca-box-more ca-link" href="{% url 'profile' user.username %}">Profilimdagi nishonlar</a>
-  </section>
-  {% endif %}
-  {% if stages and not user.is_authenticated %}
-  <section class="ca-box" aria-labelledby="join-title">
-    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="users" class="lu" aria-hidden="true"></i></span><h2 id="join-title">Yutuqlaringiz saqlansin</h2></div>
-    <p class="ca-box-body ca-box-pad text-mute"><a class="ca-link" href="{% url 'register' %}">Ro‘yxatdan o‘ting</a>: yutuqlaringiz saqlanadi va har kurs uchun nishon olasiz.</p>
-  </section>
-  {% endif %}
-</aside>
 </div>
+<script>
+  // the band's filter: hides the courses (and the stages left empty) that don't match
+  (() => {
+    const input = document.getElementById("course-filter");
+    if (!input) return;
+    input.addEventListener("input", () => {
+      const q = input.value.trim().toLowerCase();
+      let any = false;
+      document.querySelectorAll("[data-stage]").forEach((s) => {
+        let shown = 0;
+        s.querySelectorAll("[data-course]").forEach((li) => { li.hidden = !!q && !li.dataset.course.includes(q); shown += !li.hidden; });
+        s.hidden = !shown; any ||= !!shown;
+      });
+      document.getElementById("course-none").hidden = any;
+    });
+  })();
+</script>
 {% endblock %}

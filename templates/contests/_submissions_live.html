@@ -6,7 +6,7 @@ re-fetches itself every 15 s with the same filters; the view answers an htmx req
   <div class="ca-box-body">
   {% if page.object_list %}
   <table class="ca-table">
-    <thead><tr><th class="w-16 text-center sm:w-20">#</th><th class="w-16 text-center" title="Musobaqa boshlanganidan beri (soat:daqiqa)">Qachon</th><th>Ishtirokchi</th><th class="w-14 text-center">Masala</th><th class="hidden w-32 text-center md:table-cell">Til</th><th class="w-28 text-center">Natija</th><th class="hidden w-24 text-center sm:table-cell">Vaqt</th><th class="w-20"><span class="sr-only">Kod va yozilishi</span></th></tr></thead>
+    <thead><tr><th class="w-16 text-center sm:w-20">#</th><th class="w-16 text-center" title="Musobaqa boshlanganidan beri (soat:daqiqa)">Qachon</th><th>Ishtirokchi</th><th class="w-14 text-center">Masala</th><th class="hidden w-32 text-center md:table-cell">Til</th><th>Natija</th><th class="hidden w-24 text-center sm:table-cell">Vaqt</th><th class="w-20"><span class="sr-only">Kod va yozilishi</span></th></tr></thead>
     <tbody>
     {% for s in page %}
     <tr>
@@ -15,7 +15,7 @@ re-fetches itself every 15 s with the same filters; the view answers an htmx req
       <td class="max-w-0 truncate"><a class="ca-user-name{{ s.user.rating|lg }}" style="--tier: {{ s.user.rating|tier_color }}" href="{% querystring user=s.user.username page=None %}" title="Faqat {{ s.user.username }} urinishlari" translate="no">{{ s.user.username }}</a></td>
       <td class="text-center"><a class="ca-link font-semibold" href="{% querystring problem=s.label page=None %}" title="{{ s.problem.title }}: faqat shu masala">{{ s.label }}</a></td>
       <td class="hidden text-center text-mute md:table-cell">{{ s.language.name }}</td>
-      <td class="text-center">{% include "submissions/_verdict.html" with v=s.verdict sub=s brief=True %}</td>
+      <td class="whitespace-nowrap">{% include "submissions/_vd.html" with v=s.verdict sub=s %}</td>
       <td class="hidden text-center tabular text-mute sm:table-cell">{% if s.is_terminal and s.verdict != "CE" %}{{ s.exec_ms }} ms{% endif %}</td>
       <td class="whitespace-nowrap text-right">
         <a class="ca-btn ca-btn-ghost !px-2 !py-1" href="{% url 'submissions:detail' s.pk %}" title="Kodni ko‘rish" aria-label="Kodni ko‘rish: #{{ s.pk }}"><i data-lucide="code" class="lu" aria-hidden="true"></i></a>

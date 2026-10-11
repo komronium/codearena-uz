@@ -19,7 +19,7 @@ from apps.accounts.models import Group, User
 from apps.contests.models import Contest, Participation
 from apps.contests.rating import recalc_official, review_queue
 from apps.contests.services import reuse_reason
-from apps.problems.daily import daily_candidates, refresh_daily
+from apps.problems.daily import daily_candidates, daily_for, refresh_daily
 from apps.problems.models import DailyProblem, Problem, Tag, TestCase
 from apps.submissions.models import VERDICT_LABELS, Submission, TestResult, UserProblemSolved
 from apps.submissions.solves import refresh_solves
@@ -67,6 +67,9 @@ def dashboard(request):
             "groups": Group.objects.count(),
             "teacher_requests": User.objects.filter(teacher_requested=True).count(),
         },
+        # the decisions waiting first: the newest problems in the queue, and today's problem
+        "pending": list(Problem.objects.filter(status=Problem.Status.PENDING).select_related("author").order_by("-pk")[:5]),
+        "daily": daily_for(),
     })
 
 

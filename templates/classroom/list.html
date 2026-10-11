@@ -1,133 +1,148 @@
 {% extends "base.html" %}
 {% block title %}Vazifalar{% endblock %}
-{% block page_icon %}<span class="ca-hd-icon"><i data-lucide="notebook-pen" class="lu" aria-hidden="true"></i></span>{% endblock %}
-{% block page_title %}<h1>Vazifalar</h1>{% endblock %}
-{% block content %}
-<div class="mb-5 flex flex-wrap items-center justify-between gap-3">
-  <p class="text-sm text-mute">{% if can_teach %}Guruh oching, kodini o‘quvchilarga bering va vazifa bering. Muddatgacha yechilgani «o‘z vaqtida» hisoblanadi.{% else %}Guruhingiz o‘qituvchisi bergan uy vazifalari. Muddatgacha yechilgani «o‘z vaqtida» hisoblanadi.{% endif %}</p>
-  <div class="flex flex-wrap gap-2">
-  {% if can_teach %}<a href="{% url 'integrity:practice_report' %}" class="ca-btn ca-btn-ghost"><i data-lucide="shield-alert" class="lu" aria-hidden="true"></i>Mashq nazorati</a>{% endif %}
-  {% if can_create %}<a href="{% url 'classroom:new' %}" class="ca-btn ca-btn-primary"><i data-lucide="plus" class="lu" aria-hidden="true"></i>Vazifa berish</a>{% endif %}
-  </div>
-</div>
-
-{% if can_teach %}
-<section class="mb-8" aria-labelledby="my-groups-title">
-  <h2 id="my-groups-title" class="ca-section-title">Guruhlarim</h2>
-  <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-    {% for g in my_groups %}
-    <div class="ca-panel !p-4">
-      <div class="flex items-start justify-between gap-2">
-        <div class="min-w-0">
-          <p class="truncate font-semibold">{{ g.name }}</p>
-          <p class="text-xs text-mute tabular">{{ g.members.all|length }} ta o‘quvchi</p>
-        </div>
-        <div class="text-right">
-          <p class="text-xs text-mute">Qo‘shilish kodi</p>
-          <button type="button" class="font-mono text-lg font-bold tracking-widest text-accent" data-copy-code="{{ g.join_code }}" title="Nusxalash" translate="no">{{ g.join_code }}</button>
-        </div>
-      </div>
-      {% if g.members.all %}
-      <details class="mt-3 text-sm">
-        <summary class="cursor-pointer text-mute">O‘quvchilar</summary>
-        <ul class="mt-2 divide-y divide-line">
-          {% for m in g.members.all %}
-          <li class="flex items-center justify-between gap-2 py-1.5">
-            {% include "accounts/_user.html" with u=m tier=False %}
-            <form method="post" action="{% url 'classroom:group_remove' g.pk m.pk %}">{% csrf_token %}<button class="ca-link text-xs text-mute" title="Guruhdan chiqarish" aria-label="{{ m.username }} ni guruhdan chiqarish">Chiqarish</button></form>
-          </li>
-          {% endfor %}
-        </ul>
-      </details>
-      {% else %}
-      <p class="mt-3 text-xs text-mute">Hali o‘quvchi yo‘q. Kodni sinfga ayting — ular «Vazifalar» sahifasida kiritadi.</p>
-      {% endif %}
+{% block band %}
+{% comment %}#7 class: the band says what the page is; homework and duels as tabs. A student sees their assignments as
+one flat table (or how joining works) and joins a group on the right; a teacher sees their groups with join codes,
+a new-group form and the assignments they set.{% endcomment %}
+<section class="ca-hud" aria-labelledby="class-title">
+  <div class="ca-hud-in">
+    <div>
+      <h1 id="class-title">Vazifalar</h1>
+      <p class="ca-hud-sub">{% if can_teach %}Guruh oching, kodini o‘quvchilarga bering va muddatli vazifa bering.{% else %}O‘qituvchi bergan vazifalar va sinfdoshlar bilan duellar.{% endif %}</p>
     </div>
-    {% endfor %}
-    <form method="post" action="{% url 'classroom:group_new' %}" class="ca-panel flex flex-col justify-center gap-2 border-dashed !p-4">{% csrf_token %}
-      <label class="ca-label !mb-0" for="new-group-name">Yangi guruh</label>
-      <div class="flex gap-2">
-        <input id="new-group-name" name="name" maxlength="100" required class="ca-input !py-1.5 text-sm" placeholder="Masalan: 201-guruh">
-        <button class="ca-btn ca-btn-primary !py-1.5 shrink-0"><i data-lucide="plus" class="lu" aria-hidden="true"></i>Ochish</button>
-      </div>
-    </form>
+    {% if can_teach or can_create %}
+    <div class="ml-auto flex flex-wrap gap-2">
+      {% if can_teach %}<a href="{% url 'integrity:practice_report' %}" class="ca7-hbtn is-wide"><i data-lucide="shield-alert" class="lu" aria-hidden="true"></i>Mashq nazorati</a>{% endif %}
+      {% if can_create %}<a href="{% url 'classroom:new' %}" class="ca-btn ca-btn-gold"><i data-lucide="plus" class="lu" aria-hidden="true"></i>Vazifa berish</a>{% endif %}
+    </div>
+    {% endif %}
   </div>
 </section>
-{% endif %}
-
-{% comment %}A student sees their assignments in one box and joins a group from the side; a teacher's
-groups and the assignments they set stay full width.{% endcomment %}
-{% if assignments or not can_teach %}
-<div class="{% if not can_teach %}ca-cols{% endif %}">
-<div class="min-w-0">
-<section class="ca-box" aria-labelledby="mine-title">
-  <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="notebook-pen" class="lu" aria-hidden="true"></i></span><h2 id="mine-title">Vazifalarim <small>{{ assignments|length }}</small></h2></div>
-  <div class="ca-box-body">
-  {% if assignments %}
-  <ul class="ca-rows">
-    {% for a in assignments %}
-    <li class="ca-row">
-      <div class="ca-row-main">
-        <a class="ca-row-title ca-link" href="{% url 'classroom:detail' a.pk %}">{{ a.title }}</a>
-        <div class="ca-row-meta">
-          <span><i data-lucide="users" class="lu" aria-hidden="true"></i>{{ a.group.name }}</span>
-          <span class="tabular {% if a.my_solved == a.my_total %}font-semibold text-ok{% endif %}">{{ a.my_solved }} / {{ a.my_total }} yechilgan</span>
+{% endblock %}
+{% block content %}
+{% include "classroom/_tabs.html" with active="tasks" n=assignments|length %}
+<div class="ca7{% if can_teach %} ca7-one{% endif %}">
+<div class="ca7-col">
+  {% if can_teach %}
+  <section aria-labelledby="my-groups-title">
+    <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-easy)" aria-hidden="true"></span><h2 id="my-groups-title">Guruhlarim</h2><span class="ca7-r text-mute">{{ my_groups|length }} ta</span></div>
+    <div class="ca7-groups">
+      {% for g in my_groups %}
+      <div class="ca-box">
+        <div class="ca7-group-h">
+          <div class="min-w-0"><b class="block truncate">{{ g.name }}</b><small class="tabular">{{ g.members.all|length }} ta o‘quvchi</small></div>
+          <div class="text-right"><small>Qo‘shilish kodi</small><button type="button" class="ca7-code" data-copy-code="{{ g.join_code }}" title="Nusxalash" translate="no">{{ g.join_code }}</button></div>
         </div>
+        {% if g.members.all %}
+        <details class="ca7-group-m">
+          <summary>O‘quvchilar<i data-lucide="chevron-down" class="lu" aria-hidden="true"></i></summary>
+          <ul>
+            {% for m in g.members.all %}
+            <li>{% include "accounts/_u7.html" with u=m you=False %}
+              <form method="post" action="{% url 'classroom:group_remove' g.pk m.pk %}">{% csrf_token %}<button class="ca-link text-xs text-mute" title="Guruhdan chiqarish" aria-label="{{ m.username }} ni guruhdan chiqarish">Chiqarish</button></form></li>
+            {% endfor %}
+          </ul>
+        </details>
+        {% else %}<p class="ca7-group-m text-xs text-mute">Hali o‘quvchi yo‘q. Kodni sinfga ayting: ular shu sahifada kiritadi.</p>{% endif %}
       </div>
-      <div class="ca-row-side text-sm">
-        {% if a.deadline > now %}<span class="text-mute">Muddatgacha</span> <span class="tabular font-semibold" data-countdown="{{ a.deadline|date:'c' }}" data-label="" data-suffix="1"></span>
-        {% else %}<span class="text-mute">Muddat o‘tgan · {{ a.deadline|date:"d.m.Y H:i" }}</span>{% endif %}
-      </div>
-    </li>
-    {% endfor %}
-  </ul>
-  {% else %}
-  <p class="ca-box-pad py-8 text-center text-mute">Hozircha vazifa yo‘q. O‘qituvchi guruhingizga vazifa berganda shu yerda ko‘rinadi.</p>
+      {% endfor %}
+      <form method="post" action="{% url 'classroom:group_new' %}" class="ca-box ca7-group-new">{% csrf_token %}
+        <label for="new-group-name">Yangi guruh</label>
+        <div class="flex gap-2">
+          <input id="new-group-name" name="name" maxlength="100" required class="ca7-fld !pl-3" placeholder="Masalan: 201-guruh">
+          <button class="ca-btn ca-btn-primary shrink-0"><i data-lucide="plus" class="lu" aria-hidden="true"></i>Ochish</button>
+        </div>
+      </form>
+    </div>
+  </section>
   {% endif %}
-  </div>
-</section>
+
+  {% if assignments or not can_teach %}
+  <section aria-labelledby="mine-title">
+    <div class="ca7-sec-h"><span class="ca-star" aria-hidden="true"></span><h2 id="mine-title">Vazifalarim</h2><span class="ca7-r text-mute">{{ assignments|length }} ta</span></div>
+    {% if assignments %}
+    <div class="overflow-x-auto">
+    <table class="ca-table ca-table-flat">
+      <thead><tr><th>Vazifa</th><th class="hidden sm:table-cell">Guruh</th><th class="w-28 text-right">Masalalar</th><th class="w-40 text-right">Muddat</th><th class="w-32 text-right">Holat</th></tr></thead>
+      <tbody>
+      {% for a in assignments %}
+      <tr>
+        <td><a class="ca-link" href="{% url 'classroom:detail' a.pk %}">{{ a.title }}</a></td>
+        <td class="hidden text-mute sm:table-cell">{{ a.group.name }}</td>
+        <td class="text-right tabular {% if a.my_solved == a.my_total %}font-semibold text-ok{% endif %}">{{ a.my_solved }} / {{ a.my_total }}</td>
+        <td class="text-right tabular">{% if a.deadline > now %}<span data-countdown="{{ a.deadline|date:'c' }}" data-label="qoldi" data-suffix="1"></span>{% else %}<span class="text-mute">{{ a.deadline|date:"d.m.Y H:i" }}</span>{% endif %}</td>
+        <td class="text-right">{% if a.my_solved == a.my_total and a.my_total %}<span class="ca7-pill is-ok">Bajarildi</span>{% elif a.deadline > now %}<span class="ca7-pill is-warn">Jarayonda</span>{% else %}<span class="ca7-pill is-bad">Muddat o‘tgan</span>{% endif %}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+    {% else %}
+    <p class="ca7-empty"><b>Hozircha vazifa yo‘q</b>O‘qituvchi guruhingizga vazifa berganda shu yerda muddati bilan chiqadi. Muddatgacha yechilgani «o‘z vaqtida» hisoblanadi.</p>
+    {% endif %}
+  </section>
+  {% if not assignments and not joined_groups %}
+  <section aria-labelledby="how-title">
+    <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span><h2 id="how-title">Qanday qo‘shiladi</h2></div>
+    <ol class="ca7-howto">
+      <li><b>Kod oling</b><span>O‘qituvchingizdan 6 belgili guruh kodini so‘rang.</span></li>
+      <li><b>Guruhga qo‘shiling</b><span>Kodni o‘ngdagi maydonga kiriting.</span></li>
+      <li><b>Vazifani yeching</b><span>Kim qachon yechgani jadvalda ko‘rinadi, o‘qituvchi kodga izoh yozadi.</span></li>
+    </ol>
+  </section>
+  {% endif %}
+  {% endif %}
+
+  {% if taught %}
+  <section aria-labelledby="taught-title">
+    <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span><h2 id="taught-title">Men bergan vazifalar</h2><span class="ca7-r text-mute">{{ taught|length }} ta</span></div>
+    <div class="overflow-x-auto">
+    <table class="ca-table ca-table-flat">
+      <thead><tr><th>Vazifa</th><th>Guruh</th><th class="w-40 text-right">Muddat</th><th class="w-24 text-right"><span class="sr-only">Amal</span></th></tr></thead>
+      <tbody>
+      {% for a in taught %}
+      <tr>
+        <td><a class="ca-link" href="{% url 'classroom:detail' a.pk %}">{{ a.title }}</a></td>
+        <td class="text-mute">{{ a.group.name }}</td>
+        <td class="text-right tabular">{{ a.deadline|date:"d.m.Y H:i" }}</td>
+        <td class="text-right"><a class="ca-btn ca-btn-soft ca-btn-wb ca-btn-sq" href="{% url 'classroom:edit' a.pk %}" title="Tahrirlash" aria-label="Tahrirlash: {{ a.title }}"><i data-lucide="pencil" class="lu" aria-hidden="true"></i></a></td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </section>
+  {% endif %}
 </div>
+
 {% if not can_teach %}
-<aside class="ca-aside" aria-label="Guruhlar">
+<aside class="ca7-aside" aria-label="Guruhlar">
   <section class="ca-box" aria-labelledby="join-title">
-    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="users" class="lu" aria-hidden="true"></i></span><h2 id="join-title">Guruhga qo‘shilish</h2></div>
-    <form method="post" action="{% url 'classroom:group_join' %}" class="ca-box-body ca-box-pad space-y-2">{% csrf_token %}
-      {% if joined_groups %}<p class="text-sm text-mute">Guruhlaringiz: {% for g in joined_groups %}<b class="font-medium text-ink">{{ g.name }}</b>{% if not forloop.last %}, {% endif %}{% endfor %}.</p>{% endif %}
-      <label class="block text-sm text-mute" for="join-code">O‘qituvchi bergan 6 belgili kodni kiriting.</label>
-      <div class="flex gap-2">
-        <input id="join-code" name="code" maxlength="8" required autocomplete="off" spellcheck="false" class="ca-input !py-1.5 font-mono uppercase tracking-widest" placeholder="AB3K9P">
-        <button class="ca-btn ca-btn-primary !py-1.5 shrink-0"><i data-lucide="log-in" class="lu" aria-hidden="true"></i>Qo‘shilish</button>
-      </div>
+    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" style="--c: var(--ca-lvl-easy)" aria-hidden="true"></span><h2 id="join-title">Guruhga qo‘shilish</h2></div>
+    <form method="post" action="{% url 'classroom:group_join' %}" class="ca7-pad ca7-join">{% csrf_token %}
+      {% if joined_groups %}<p>Guruhlaringiz: {% for g in joined_groups %}<b class="font-semibold text-ink">{{ g.name }}</b>{% if not forloop.last %}, {% endif %}{% endfor %}.</p>{% endif %}
+      <label for="join-code">Guruh kodi</label>
+      <input id="join-code" name="code" maxlength="8" required autocomplete="off" spellcheck="false" class="ca7-fld ca7-codefld" placeholder="AB3K9P" aria-describedby="join-hint">
+      <small id="join-hint">6 ta harf va raqam.</small>
+      <button class="ca-btn ca-btn-gold">Qo‘shilish</button>
     </form>
   </section>
+  {% if user.role == "student" and not user.is_staff %}
+  <section class="ca-box" aria-labelledby="teach-title">
+    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" aria-hidden="true"></span><h2 id="teach-title">O‘qituvchimisiz?</h2></div>
+    <div class="ca7-pad">
+      {% if user.teacher_requested %}<p>So‘rovingiz yuborilgan. Admin tasdiqlagach, shu yerda guruh ochasiz.</p>
+      {% else %}<p>So‘rov yuboring. Admin tasdiqlagach, o‘z guruhingizni ochib muddatli vazifa berasiz va yechimlarga izoh yozasiz.</p>
+      <form method="post" action="{% url 'teacher_request' %}">{% csrf_token %}<button class="ca-btn ca-btn-soft">O‘qituvchi bo‘lish so‘rovi</button></form>{% endif %}
+    </div>
+  </section>
+  {% endif %}
 </aside>
 {% endif %}
 </div>
-{% endif %}
-
-{% if taught %}
-<section class="ca-box" aria-labelledby="taught-title">
-<div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="notebook-pen" class="lu" aria-hidden="true"></i></span><h2 id="taught-title">Men bergan vazifalar <small>{{ taught|length }}</small></h2></div>
-<div class="ca-box-body">
-<table class="ca-table">
-  <thead><tr><th>Vazifa</th><th>Guruh</th><th>Muddat</th><th class="text-right">Amal</th></tr></thead>
-  <tbody>
-  {% for a in taught %}
-  <tr>
-    <td><a class="ca-link font-medium" href="{% url 'classroom:detail' a.pk %}">{{ a.title }}</a></td>
-    <td>{{ a.group.name }}</td>
-    <td class="tabular text-sm">{{ a.deadline|date:"d.m.Y H:i" }}</td>
-    <td class="text-right"><a class="ca-btn ca-btn-ghost !px-2 !py-1.5 text-xs" href="{% url 'classroom:edit' a.pk %}" title="Tahrirlash" aria-label="Tahrirlash: {{ a.title }}"><i data-lucide="pencil" class="lu" aria-hidden="true"></i></a></td>
-  </tr>
-  {% endfor %}
-  </tbody>
-</table>
-</div>
-</section>
-{% endif %}
 <script>
   document.querySelectorAll("[data-copy-code]").forEach((b) => b.addEventListener("click", async () => {
-    try { await navigator.clipboard.writeText(b.dataset.copyCode); b.classList.add("text-ok"); setTimeout(() => b.classList.remove("text-ok"), 900); } catch {}
+    try { await navigator.clipboard.writeText(b.dataset.copyCode); b.classList.add("is-copied"); setTimeout(() => b.classList.remove("is-copied"), 900); } catch {}
   }));
 </script>
 {% endblock %}

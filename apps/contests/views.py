@@ -31,7 +31,12 @@ def contest_list(request):
     contests = Contest.objects.annotate(n_participants=Count("participations")).order_by("-start")
     running = [c for c in contests if c.start <= now < c.end]
     upcoming = sorted((c for c in contests if c.start > now), key=lambda c: c.start)
-    ended = Paginator([c for c in contests if c.end <= now], 20).get_page(request.GET.get("page"))
+    past = [c for c in contests if c.end <= now]
+    only_mine = request.GET.get("mine") == "1" and request.user.is_authenticated
+    if only_mine:  # "Men qatnashgan": the past rounds you took part in
+        joined = set(Participation.objects.filter(user=request.user).values_list("contest_id", flat=True))
+        past = [c for c in past if c.pk in joined]
+    ended = Paginator(past, 20).get_page(request.GET.get("page"))
     shown = [*running, *upcoming, *ended]
     mine = {}
     if request.user.is_authenticated:
@@ -41,6 +46,8 @@ def contest_list(request):
         c.me = mine.get(c.pk)
         c.my_delta = (c.me.rating_after - c.me.rating_before
                       if c.me and c.me.rating_after is not None and c.me.rating_before is not None else None)
+    for c in upcoming:
+        c.n_problems = c.contest_problems.count()
     for c in running:
         c.elapsed_pct = round(100 * (now - c.start) / (c.end - c.start))
         c.n_problems = c.contest_problems.count()
@@ -60,7 +67,9 @@ def contest_list(request):
               "attended": Participation.objects.filter(user=request.user, contest__end__lte=now).count()}
     return render(request, "contests/list.html", {"running": running, "upcoming": upcoming, "ended": ended,
                                                   "next_contest": next(iter([*running, *upcoming]), None),
-                                                  "top_rated": top_rated, "me": me})
+                                                  "top_rated": top_rated, "me": me, "only_mine": only_mine,
+                                                  # your own row under the top ten, when you are not in it
+                                                  "me_below": me and me["rated"] and me["place"] > len(top_rated)})
 
 
 def _standings(contest, problems=None):
@@ -115,6 +124,9 @@ def contest_detail(request, pk):
         "description_html": _render_statement(contest.description_md) if contest.description_md else "",
         "my_participation": me,
         "n_participants": contest.participations.count(),
+        # the board's latest answered questions (what every participant sees), for the overview
+        "clars": (list(contest.clarifications.exclude(answer="").select_related("user", "problem", "answered_by")
+                       .order_by("-pk")[:3]) if registered or request.user.is_staff else []),
         **_virtual_ctx(request, contest),
     })
 
@@ -177,6 +189,19 @@ def standings(request, pk):
     my_row = next((r for r in rows if r["user"].pk == request.user.pk), None) if me is not None else None
     ctx = {"contest": contest, "rows": rows, "problems": problems, "registered": me is not None,
            "my_participation": me, "my_row": my_row}
+    if request.GET.get("format") == "csv":  # the table for a spreadsheet: one row per participant
+        import csv
+        from django.http import HttpResponse
+        resp = HttpResponse(content_type="text/csv; charset=utf-8")
+        resp["Content-Disposition"] = f'attachment; filename="natijalar-{contest.pk}.csv"'
+        resp.write("\ufeff")  # Excel reads the BOM as UTF-8
+        out = csv.writer(resp)
+        out.writerow(["O‘rin", "Login", "Ball", "Yechildi", "Jarima", *[cp.label for cp in problems], "Reyting ±"])
+        for r in rows:
+            cells = [(c["mark"] if c["solved"] else (f"-{c['wrong']}" if c["wrong"] else "")) for c in r["cells"]]
+            out.writerow(["DQ" if r["disqualified"] else r["rank"], r["user"].username, r["score"], r["solved"],
+                          r["penalty"], *cells, "" if r.get("rating_delta") is None else r["rating_delta"]])
+        return resp
     # the live refresh asks for the table only: no header, menu or streak queries per poll
     template = "contests/_standings_live.html" if request.headers.get("HX-Request") else "contests/standings.html"
     return render(request, template, ctx)

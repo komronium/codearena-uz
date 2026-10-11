@@ -5,7 +5,7 @@
 {% comment %}Staff only: the round's submissions, newest first, during the round too (the public status page hides
 them). The filters narrow it to a problem, a participant or a verdict; a standings cell opens one participant's
 one problem here, and a row's handle or letter narrows the list to it.{% endcomment %}
-<form method="get" class="mb-4 flex flex-wrap items-end gap-3">
+<form method="get" class="ca7-filters mb-5 flex flex-wrap items-end gap-3">
   <div>
     <label class="ca-label" for="f-problem">Masala</label>
     <select id="f-problem" name="problem" class="ca-select !w-auto max-w-[16rem] !py-1.5 text-sm">
@@ -24,7 +24,7 @@ one problem here, and a row's handle or letter narrows the list to it.{% endcomm
       {% for v, label in verdicts %}<option value="{{ v }}"{% if v == f.verdict %} selected{% endif %}>{{ label }}</option>{% endfor %}
     </select>
   </div>
-  <button class="ca-btn ca-btn-ghost !py-1.5"><i data-lucide="list-filter" class="lu" aria-hidden="true"></i>Filtrlash</button>
+  <button class="ca-btn ca-btn-primary"><i data-lucide="list-filter" class="lu" aria-hidden="true"></i>Filtrlash</button>
   {% if f.problem or f.user or f.verdict %}<a class="ca-link text-sm" href="{% url 'contests:submissions' contest.pk %}">Tozalash</a>{% endif %}
 </form>
 {% if participant %}{% with p=participant.participation %}

@@ -3,44 +3,48 @@
 {% block title %}Musobaqalar{% endblock %}
 {% block description %}CodeArena musobaqalari: Codeforces va ICPC qoidalari, jonli natijalar jadvali va Elo reyting. Kelgusi va o‘tgan raundlar.{% endblock %}
 {% block band %}
-{% comment %}After LeetCode's contest page: a dark cover with your rating, the live and coming rounds as cards lifted onto
-its edge, the past ones under them grouped by month (your place and rating change), the top of the rating on the
-right.{% endcomment %}
-<section class="ca-band ca-band-hero{% if running or upcoming %} has-cards{% endif %}" aria-labelledby="contests-title">
-  <svg class="ca-band-mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M31 16l-4.39 4.39v6.22h-6.22L16 31l-4.39-4.39H5.39v-6.22L1 16l4.39-4.39V5.39h6.22L16 1l4.39 4.39h6.22v6.22z"/></svg>
-  <div class="ca-band-in">
-    <div class="ca-band-top">
-      <div class="min-w-0">
-        <h1 id="contests-title">Musobaqalar</h1>
-        <p class="ca-band-lead">Jonli musobaqada masala yeching va reytingingizni oshiring. Har musobaqaning qoidasi kartasida yozilgan.</p>
-      </div>
-      {% if me %}
-      <dl class="ca-band-stats">
-        <div><dt>Reytingingiz</dt><dd class="tabular">{{ me.rating }}</dd></div>
-        {% if me.place %}<div><dt>Reytingdagi o‘rningiz</dt><dd class="tabular">{{ me.place }}<small>/ {{ me.pool }}</small></dd></div>{% endif %}
-        <div><dt>Qatnashgansiz</dt><dd class="tabular">{{ me.attended }}</dd></div>
-      </dl>
-      {% endif %}
+{% comment %}#7 contests: the band with your rating, place and rounds; the live and coming rounds as lapis cards; the past
+ones grouped by month (your place and rating change), all or only yours; the top of the rating and how it works on
+the right.{% endcomment %}
+<section class="ca-hud" aria-labelledby="contests-title">
+  <div class="ca-hud-in">
+    <div>
+      <h1 id="contests-title">Musobaqalar</h1>
+      <p class="ca-hud-sub">Jonli raundda masala yeching va reytingingizni oshiring.</p>
     </div>
+    {% if me %}
+    <dl class="ca-hud-stats">
+      <div><dt><small>Reytingingiz</small></dt><dd><b class="tabular">{{ me.rating }}</b></dd></div>
+      {% if me.place %}<div><dt><small>O‘rningiz</small></dt><dd><b class="tabular">{{ me.place }} / {{ me.pool }}</b></dd></div>{% endif %}
+      <div><dt><small>Qatnashgan</small></dt><dd><b class="tabular">{{ me.attended }}</b></dd></div>
+    </dl>
+    {% endif %}
   </div>
 </section>
 {% endblock %}
 {% block content %}
-{% if running or upcoming %}
-<div class="ca-ccards">
-  {% for c in running %}{% include "contests/_card.html" with state="running" %}{% endfor %}
-  {% for c in upcoming %}{% include "contests/_card.html" with state="upcoming" %}{% endfor %}
-</div>
-{% endif %}
-<div class="ca-cols">
-<div class="min-w-0">
-  {% if not running and not upcoming %}<p class="ca-empty mb-4">Hozircha rejalashtirilgan musobaqa yo‘q. Yangi raund e’lon qilinganda shu yerda chiqadi.</p>{% endif %}
-  <section class="ca-box" aria-labelledby="end-title">
-    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="flag" class="lu" aria-hidden="true"></i></span><h2 id="end-title">O‘tgan musobaqalar <small>{{ ended.paginator.count }}</small></h2></div>
-    <div class="ca-box-body">
+<div class="ca7">
+<div class="ca7-col">
+  {% if running or upcoming %}
+  <section class="ca7-ccards" aria-label="Jonli va kelgusi musobaqalar">
+    {% for c in running %}{% include "contests/_card.html" with state="running" %}{% endfor %}
+    {% for c in upcoming %}{% include "contests/_card.html" with state="upcoming" %}{% endfor %}
+  </section>
+  {% else %}
+  <p class="ca7-empty"><b>Hozircha rejalashtirilgan musobaqa yo‘q</b>Yangi raund e’lon qilinganda shu yerda chiqadi.</p>
+  {% endif %}
+
+  <section aria-labelledby="end-title">
+    <div class="ca7-sec-h"><span class="ca-star" aria-hidden="true"></span><h2 id="end-title">O‘tgan musobaqalar</h2>
+      {% if user.is_authenticated %}<nav class="ca7-seg ca7-r" aria-label="Qaysi musobaqalar">
+        <a href="{% querystring mine=None page=None %}"{% if not only_mine %} aria-current="true"{% endif %}>Hammasi</a>
+        <a href="{% querystring mine=1 page=None %}"{% if only_mine %} aria-current="true"{% endif %}>Men qatnashgan</a>
+      </nav>{% endif %}</div>
     {% if ended.paginator.count %}
-    <table class="ca-table">
+    <div class="overflow-x-auto">
+    <table class="ca-table ca-table-flat ca7-past">
       <thead><tr>
+        <th class="w-16">Sana</th>
         <th>Musobaqa</th>
         <th class="hidden w-28 text-right md:table-cell">Ishtirokchi</th>
         {% if user.is_authenticated %}<th class="w-24 text-right">O‘rningiz</th><th class="w-24 text-right">Reyting</th>{% endif %}
@@ -49,55 +53,54 @@ right.{% endcomment %}
       {% regroup ended by start_month as months %}
       {% for m in months %}
       <tbody>
-      <tr class="ca-month"><th colspan="{% if user.is_authenticated %}5{% else %}3{% endif %}" scope="rowgroup">{{ m.grouper }}</th></tr>
+      <tr class="ca-month"><th colspan="{% if user.is_authenticated %}6{% else %}4{% endif %}" scope="rowgroup">{{ m.grouper }}</th></tr>
       {% for c in m.list %}
       <tr>
-        <td>
-          <div class="flex min-w-0 items-center gap-3">
-            <span class="ca-thumb{% if c.type == 'score' %} is-score{% elif c.type == 'icpc' %} is-icpc{% endif %}" aria-hidden="true">{{ c.start|date:"d" }}</span>
-            <div class="min-w-0">
-              <a class="ca-link" href="{% url 'contests:detail' c.pk %}">{{ c.title }}</a>{% include "contests/_tags.html" %}
-              <span class="block text-xs text-mute"><span class="tabular">{{ c.start|date:"d.m.Y H:i" }}</span>, {{ c.duration_label }}</span>
-            </div>
-          </div>
-        </td>
-        <td class="hidden text-right text-mute md:table-cell">{{ c.n_participants }}</td>
+        <td><span class="ca7-date" aria-hidden="true"><b>{{ c.start|date:"d" }}</b>{{ c.start_month_short }}</span><span class="sr-only">{{ c.start|date:"d.m.Y" }}</span></td>
+        <td><a class="ca-link" href="{% url 'contests:detail' c.pk %}">{{ c.title }}</a>{% include "contests/_tags.html" %}
+          <span class="block text-xs text-mute"><span class="tabular">{{ c.start|date:"H:i" }}</span> · {{ c.duration_label }}</span></td>
+        <td class="hidden text-right tabular md:table-cell">{{ c.n_participants }}</td>
         {% if user.is_authenticated %}
-        <td class="text-right">{% if c.me and c.me.rank %}<b class="font-semibold">{{ c.me.rank }}</b>{% elif c.me %}<span class="text-mute">qatnashgan</span>{% else %}<span class="text-mute">—</span>{% endif %}</td>
-        <td class="text-right">{% if c.my_delta is not None %}<b class="font-semibold {% if c.my_delta > 0 %}text-ok{% elif c.my_delta < 0 %}text-bad{% else %}text-mute{% endif %}">{{ c.my_delta|stringformat:"+d" }}</b>{% elif c.me and not c.is_rated %}<span class="text-mute">reytingsiz</span>{% else %}<span class="text-mute">—</span>{% endif %}</td>
+        <td class="text-right">{% if c.me and c.me.rank %}<b class="font-semibold tabular">{{ c.me.rank }}</b>{% elif c.me %}<span class="text-mute">qatnashgan</span>{% else %}<span class="text-mute">—</span>{% endif %}</td>
+        <td class="text-right">{% if c.my_delta is not None %}<b class="font-semibold tabular {% if c.my_delta > 0 %}text-ok{% elif c.my_delta < 0 %}text-bad{% else %}text-mute{% endif %}">{{ c.my_delta|stringformat:"+d" }}</b>{% elif c.me and not c.is_rated %}<span class="text-mute">reytingsiz</span>{% else %}<span class="text-mute">—</span>{% endif %}</td>
         {% endif %}
-        <td class="text-right"><a class="ca-btn ca-btn-ghost ca-btn-xs" href="{% url 'contests:standings' c.pk %}">Natijalar</a></td>
+        <td class="text-right"><a class="ca-btn ca-btn-soft ca-btn-wb" href="{% url 'contests:standings' c.pk %}">Natijalar</a></td>
       </tr>
       {% endfor %}
       </tbody>
       {% endfor %}
     </table>
-    {% else %}
-    <p class="ca-box-pad text-center text-mute">Hali tugagan musobaqa yo‘q.</p>
-    {% endif %}
     </div>
+    <p class="ca7-foot-note">Musobaqa nomini bosing: natijalar jadvali ochiladi. O‘tgan raundni virtual ishlab ko‘rish mumkin.</p>
+    {% else %}
+    <p class="ca7-empty">{% if only_mine %}<b>Siz hali musobaqada qatnashmagansiz</b>Kelgusi raundga ro‘yxatdan o‘ting.{% else %}<b>Hali tugagan musobaqa yo‘q</b>Birinchi raund tugagach shu yerda chiqadi.{% endif %}</p>
+    {% endif %}
+    {% include "_pagination.html" with page=ended %}
   </section>
-  {% include "_pagination.html" with page=ended %}
 </div>
 
-<aside class="ca-aside" aria-label="Reyting">
+<aside class="ca7-aside" aria-label="Reyting">
   {% if top_rated %}
   <section class="ca-box" aria-labelledby="top-title">
-    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="trophy" class="lu" aria-hidden="true"></i></span><h2 id="top-title">Eng yuqori reyting<a class="ca-box-tools ca-link" href="{% url 'rating' %}">Hammasi</a></h2></div>
-    <ol class="ca-box-body ca-board">
+    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span><h2 id="top-title">Eng yuqori reyting</h2><a class="ca-box-tools ca-link" href="{% url 'rating' %}">Hammasi</a></div>
+    <table class="ca-table ca7-top">
+      <thead><tr><th class="w-10 text-center">#</th><th>Ishtirokchi</th><th class="text-right">Reyting</th></tr></thead>
+      <tbody>
       {% for u in top_rated %}
-      <li{% if u == user %} class="is-me"{% endif %}>{% if forloop.counter <= 3 %}<span class="ca-rank ca-rank-{{ forloop.counter }}">{{ forloop.counter }}</span>{% else %}<span class="ca-rank ca-rank-n">{{ forloop.counter }}</span>{% endif %}{% include "accounts/_user.html" with u=u tier=False %}<b class="tabular">{{ u.rating }}</b></li>
+      <tr{% if u == user %} class="ca-row-me"{% endif %}><td class="text-center">{% if forloop.counter <= 3 %}<span class="ca7-medal m{{ forloop.counter }}">{{ forloop.counter }}</span>{% else %}<span class="tabular text-mute">{{ forloop.counter }}</span>{% endif %}</td><td>{% include "accounts/_u7.html" with u=u you=False %}</td><td class="text-right font-bold tabular">{{ u.rating }}</td></tr>
       {% endfor %}
-    </ol>
+      {% if me_below %}<tr class="ca-row-me"><td class="text-center font-bold tabular">{{ me.place }}</td><td>{% include "accounts/_u7.html" with u=user you=True %}</td><td class="text-right font-bold tabular">{{ user.rating }}</td></tr>{% endif %}
+      </tbody>
+    </table>
   </section>
   {% endif %}
   <section class="ca-box" aria-labelledby="how-title">
-    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="info" class="lu" aria-hidden="true"></i></span><h2 id="how-title">Qanday ishlaydi</h2></div>
-    <ul class="ca-box-body ca-box-pad ca-rules">
-      <li><span aria-hidden="true"><i data-lucide="check" class="lu"></i></span><p><b>Oldindan qatnashing.</b> Kartadagi «Qatnashish» tugmasi, keyin boshlanishini kuting.</p></li>
-      <li><span aria-hidden="true"><i data-lucide="trending-up" class="lu"></i></span><p><b>Reytingli raundlar</b> natijasi reytingingizni o‘zgartiradi.</p></li>
-      <li><span aria-hidden="true"><i data-lucide="rewind" class="lu"></i></span><p><b>O‘tib ketganini</b> virtual ishlab ko‘ring: musobaqa sahifasida.</p></li>
-    </ul>
+    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" aria-hidden="true"></span><h2 id="how-title">Qanday ishlaydi</h2></div>
+    <ol class="ca7-steps">
+      <li><b>Oldindan ro‘yxatdan o‘ting,</b> keyin boshlanishini kuting.</li>
+      <li><b>Reytingli raundlar</b> natijasi reytingingizni o‘zgartiradi.</li>
+      <li><b>O‘tib ketganini</b> virtual ishlab ko‘ring: musobaqa sahifasida.</li>
+    </ol>
   </section>
 </aside>
 </div>

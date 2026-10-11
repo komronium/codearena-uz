@@ -1,0 +1,13 @@
+{% comment %}A badge as #7 draws it: an eight-pointed khatam star with the badge's icon, lapis for courses, gold for rounds
+and streaks, grey and with a progress bar while still locked. ctx: tone ("lapis" | "gold" | "locked"), icon, title,
+sub, medal or of_solved / of_total (optional: a round's place or its problems solved), href (optional), done / total (optional, a locked badge's progress).{% endcomment %}
+<li class="ca7-badge is-{{ tone }}{% if kind %} {{ kind }}{% endif %}{% if medal %} ca-badge-medal-{{ medal }}{% endif %}">
+  {% if href %}<a href="{{ href }}">{% endif %}
+  <span class="ca7-badge-art" aria-hidden="true">
+    <svg viewBox="0 0 64 64"><path d="M62 32l-8.78 8.78v12.44H40.78L32 62l-8.78-8.78H10.78V40.78L2 32l8.78-8.78V10.78h12.44L32 2l8.78 8.78h12.44v12.44z"/><path class="in" d="M53 32l-6.15 6.15v8.7h-8.7L32 53l-6.15-6.15h-8.7v-8.7L11 32l6.15-6.15v-8.7h8.7L32 11l6.15 6.15h8.7v8.7z"/></svg>
+    <i data-lucide="{{ icon }}" class="lu"></i>
+  </span>
+  <b>{{ title }}</b><small>{{ sub }}{% if medal %} · {{ medal }}-o‘rin{% elif of_total %} · {{ of_solved }}/{{ of_total }}{% endif %}</small>
+  {% if total %}<span class="ca7-badge-pg" role="progressbar" aria-valuenow="{{ done }}" aria-valuemin="0" aria-valuemax="{{ total }}" aria-label="{{ title }}: {{ done }} / {{ total }}"><i style="width: {% widthratio done total 100 %}%"></i></span><small class="tabular">{{ done }} / {{ total }}</small>{% endif %}
+  {% if href %}</a>{% endif %}
+</li>

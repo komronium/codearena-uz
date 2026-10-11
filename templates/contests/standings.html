@@ -8,18 +8,18 @@
 {% block content %}
 {# problem titles are secret until the start, even for registered users #}
 {% if rows %}
-<section class="ca-box !mb-0" aria-labelledby="st-title">
-  <div class="ca-box-cap ca-hd ca-hd-lg">
-    <span class="ca-hd-icon"><i data-lucide="trophy" class="lu" aria-hidden="true"></i></span>
-    <div><h2 id="st-title">Natijalar</h2><p>{{ rows|length }} ishtirokchi{% if contest.is_running %} · jonli, har 20 soniyada yangilanadi{% endif %}</p></div>
-    <div class="ca-box-tools">
+<section aria-labelledby="st-title">
+  <div class="ca7-sec-h ca7-st-h">
+    <h2 id="st-title">{% if contest.has_ended %}Yakuniy natijalar{% else %}Natijalar{% endif %}</h2><span class="text-sm text-mute">{{ rows|length }} ishtirokchi{% if contest.is_running %} · har 20 soniyada yangilanadi{% endif %}</span>
+    <div class="ca7-r flex flex-wrap items-center gap-2">
       {% if contest.is_running %}<span class="ca-tag ca-tag-live"><span class="ca-live-dot" aria-hidden="true"></span>Jonli</span>{% endif %}
       <span class="hidden text-xs text-mute" id="st-scroll-hint"><i data-lucide="move-horizontal" class="lu mr-1" aria-hidden="true"></i>Jadvalni yonga suring</span>
-      {% if my_row %}<button type="button" class="ca-btn ca-btn-ghost !py-1.5 text-sm" data-goto-me><i data-lucide="locate-fixed" class="lu" aria-hidden="true"></i>Mening o‘rnim</button>{% endif %}
-      <label class="ca-picker ca-picker-search !min-w-0"><span class="sr-only">Ishtirokchini qidirish</span><i data-lucide="search" class="lu" aria-hidden="true"></i><input type="search" id="st-search" placeholder="Ism yoki login" autocomplete="off"></label>
+      <label class="ca7-search !w-64"><span class="sr-only">Ishtirokchini qidirish</span><i data-lucide="search" class="lu" aria-hidden="true"></i><input class="ca7-fld" type="search" id="st-search" placeholder="Ism yoki login…" autocomplete="off"></label>
+      {% if my_row %}<button type="button" class="ca-btn ca-btn-soft" data-goto-me>Mening o‘rnim</button>{% endif %}
+      <a class="ca-btn ca-btn-soft" href="?format=csv" download><i data-lucide="download" class="lu" aria-hidden="true"></i>CSV</a>
     </div>
   </div>
-  <div class="ca-box-body !overflow-visible">
+  <div>
 {% include "contests/_standings_live.html" %}
   </div>
 </section>
@@ -60,6 +60,6 @@
   })();
 </script>
 {% else %}
-<div class="ca-empty">Hali ishtirokchi yo‘q.</div>
+<p class="ca7-empty"><b>Hali ishtirokchi yo‘q</b>Ro‘yxatdan o‘tganlar musobaqa boshlangach shu yerda chiqadi.</p>
 {% endif %}
 {% endblock %}

@@ -1,1 +1,18 @@
-<a href="{% url 'home' %}" class="ca-auth-brand" aria-label="CodeArena bosh sahifa">{% include "_brand_mark.html" %}</a>
+{% load sitestats numbers %}{% comment %}The sign-in pages' lapis side (#7): what CodeArena is in one line, three promises and the site's figures.
+On a phone it shrinks to the logo.{% endcomment %}{% site_counts as n %}
+<div class="ca-auth-side ca-khatam">
+  <a href="{% url 'home' %}" class="ca-auth-brand" aria-label="CodeArena bosh sahifa">{% include "_brand_mark.html" %}</a>
+  <div class="ca-auth-pitch">
+    <p class="ca-auth-h">Masala yeching, bellashing, reytingda ko‘tariling</p>
+    <ul>
+      <li><i data-lucide="check" class="lu" aria-hidden="true"></i>Kod serverda darhol testlanadi: javob, vaqt, xotira</li>
+      <li><i data-lucide="check" class="lu" aria-hidden="true"></i>Reytingli musobaqalar va 1 ga 1 duellar</li>
+      <li><i data-lucide="check" class="lu" aria-hidden="true"></i>O‘qituvchidan muddatli vazifa va kodga izoh</li>
+    </ul>
+    <dl>
+      <div><dd>{{ n.problems|compact }}</dd><dt>masala</dt></div>
+      <div><dd>{{ n.contests|compact }}</dd><dt>musobaqa</dt></div>
+      <div><dd>{{ n.submissions|compact }}</dd><dt>tekshirilgan yechim</dt></div>
+    </dl>
+  </div>
+</div>

@@ -1,5 +1,5 @@
-{% comment %}The two boards as a small switch in a card head.{% endcomment %}
-<nav class="ca-seg ca-seg-sm" aria-label="Reyting turlari">
-  <a href="{% url 'rating' %}"{% if request.resolver_match.url_name == 'rating' %} aria-current="page"{% endif %}><i data-lucide="trophy" class="lu" aria-hidden="true"></i>Musobaqa</a>
-  <a href="{% url 'top' %}"{% if request.resolver_match.url_name == 'top' %} aria-current="page"{% endif %}><i data-lucide="star" class="lu" aria-hidden="true"></i>Amaliyot</a>
+{% comment %}The two boards as a switch on the band: the contest rating and the practice points.{% endcomment %}
+<nav class="ca7-hseg ml-auto" aria-label="Reyting turlari">
+  <a href="{% url 'rating' %}"{% if request.resolver_match.url_name == 'rating' %} aria-current="page"{% endif %}>Musobaqa reytingi</a>
+  <a href="{% url 'top' %}"{% if request.resolver_match.url_name == 'top' %} aria-current="page"{% endif %}>Amaliyot balli</a>
 </nav>

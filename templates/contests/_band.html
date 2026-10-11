@@ -8,33 +8,37 @@ and optionally problems, n_participants, next_cp (the first problem you have not
   <div class="ca-band-in">
     <div class="ca-band-top">
       <div class="min-w-0">
-        <a class="ca-band-crumb" href="{% url 'contests:list' %}">Musobaqalar<i data-lucide="chevron-right" class="lu" aria-hidden="true"></i></a>
-        <p class="ca-band-kicker">
-          {% if contest.is_running %}<span class="ca-tag ca-tag-live"><span class="ca-live-dot" aria-hidden="true"></span>Jonli</span>
-          {% elif contest.has_ended %}<span class="ca-tag"><i data-lucide="flag" class="lu" aria-hidden="true"></i>Tugagan</span>
-          {% else %}<span class="ca-tag ca-tag-soon"><i data-lucide="hourglass" class="lu" aria-hidden="true"></i>Kutilmoqda</span>{% endif %}
-          <span class="ca-tag" title="{{ contest.get_type_display }}">{% if contest.type == "cf" %}Codeforces qoidasi{% elif contest.type == "icpc" %}ICPC qoidasi{% else %}Ball qoidasi{% endif %}</span>
-          {% if contest.division %}<span class="ca-tag" title="{{ contest.get_division_display }}">Div. {{ contest.division }}</span>{% endif %}
-          {% if contest.is_rated %}<span class="ca-tag ca-tag-rated" title="Natija reytingga ta’sir qiladi"><i data-lucide="trending-up" class="lu" aria-hidden="true"></i>Reytingli</span>{% else %}<span class="ca-tag" title="Natija reytingga ta’sir qilmaydi">Reytingsiz</span>{% endif %}
-          {% if registered %}<span class="ca-tag"><i data-lucide="check" class="lu" aria-hidden="true"></i>{% if contest.has_ended %}Qatnashgansiz{% else %}Ro‘yxatdasiz{% endif %}</span>{% endif %}
+        <p class="ca7-crumb"><a href="{% url 'contests:list' %}">Musobaqalar</a> / #{{ contest.pk|stringformat:"03d" }}</p>
+        <p class="ca7-ccard-tags">
+          {% if contest.is_running %}<span class="ca7-htag"><span class="ca-live-dot" aria-hidden="true"></span>Jonli</span>
+          {% elif contest.has_ended %}<span class="ca7-htag">Tugagan</span>
+          {% else %}<span class="ca7-htag">Kelgusi</span>{% endif %}
+          <span class="ca7-htag" title="{{ contest.get_type_display }}">{% if contest.type == "cf" %}Codeforces qoidasi{% elif contest.type == "icpc" %}ICPC qoidasi{% else %}Ball qoidasi{% endif %}</span>
+          {% if contest.division %}<span class="ca7-htag" title="{{ contest.get_division_display }}">Div. {{ contest.division }}</span>{% endif %}
+          <span class="ca7-htag">{% if contest.is_rated %}Reytingli{% else %}Reytingga ta’sir qilmaydi{% endif %}</span>
+          {% if registered %}<span class="ca7-htag"><i data-lucide="check" class="lu" aria-hidden="true"></i>{% if contest.has_ended %}Qatnashgansiz{% elif contest.is_running %}Qatnashyapsiz{% else %}Ro‘yxatdasiz{% endif %}</span>{% endif %}
         </p>
         <h1 id="round-title">{{ contest.title }}</h1>
-        <p class="ca-band-meta">
-          <span><i data-lucide="calendar" class="lu" aria-hidden="true"></i><span class="tabular">{{ contest.start|date:"d.m.Y H:i" }}–{% if contest.start|date:"Ymd" != contest.end|date:"Ymd" %}{{ contest.end|date:"d.m.Y H:i" }}{% else %}{{ contest.end|date:"H:i" }}{% endif %}</span></span>
+        <p class="ca7-bmeta tabular">
+          <span><i data-lucide="calendar" class="lu" aria-hidden="true"></i>{{ contest.start|date:"d.m.Y · H:i" }}–{% if contest.start|date:"Ymd" != contest.end|date:"Ymd" %}{{ contest.end|date:"d.m.Y H:i" }}{% else %}{{ contest.end|date:"H:i" }}{% endif %}</span>
           <span><i data-lucide="hourglass" class="lu" aria-hidden="true"></i>{{ contest.duration_label }}</span>
-          {% if problems %}<span><i data-lucide="list-checks" class="lu" aria-hidden="true"></i>{{ problems|length }} ta masala</span>{% endif %}
+          {% if problems %}<span><i data-lucide="list" class="lu" aria-hidden="true"></i>{{ problems|length }} masala</span>{% endif %}
           {% if n_participants is not None %}<span><i data-lucide="users" class="lu" aria-hidden="true"></i>{{ n_participants }} ishtirokchi</span>{% endif %}
         </p>
       </div>
       <div class="ca-band-side">
+        {% if contest.has_ended and my_row and not my_row.disqualified %}
+        <dl class="ca7-band-me">
+          <div><dt>O‘rningiz</dt><dd class="tabular">{{ my_row.rank }}{% if n_participants %} <small>/ {{ n_participants }}</small>{% endif %}</dd></div>
+          {% if my_row.rating_delta is not None and my_participation.rating_after is not None %}<div><dt>Reyting</dt><dd class="tabular"><span class="{% if my_row.rating_delta >= 0 %}is-up{% else %}is-down{% endif %}">{{ my_row.rating_delta|stringformat:"+d" }}</span> → {{ my_participation.rating_after }}</dd></div>{% endif %}
+        </dl>
+        {% endif %}
         {% if not contest.has_ended %}
-        {# three boxes for the eye; the screen reader gets the same time as one phrase #}
-        <div class="ca-clock">
-          <span class="ca-clock-label">{% if contest.is_running %}Tugashiga{% else %}Boshlanishiga{% endif %}</span>
-          <span class="ca-clock-boxes" data-cd-boxes="{% if contest.is_running %}{{ contest.end|date:'c' }}{% else %}{{ contest.start|date:'c' }}{% endif %}" aria-hidden="true">
-            <span data-cd><b class="tabular">00</b><i>soat</i></span><span data-cd><b class="tabular">00</b><i>daqiqa</i></span><span data-cd><b class="tabular">00</b><i>soniya</i></span>
-          </span>
-          <span class="sr-only" role="timer" data-countdown="{% if contest.is_running %}{{ contest.end|date:'c' }}{% else %}{{ contest.start|date:'c' }}{% endif %}" data-label="qoldi" data-suffix="1"></span>
+        {# the clock as #7 draws it: one big time, how much of the round is gone, a line of it #}
+        <div class="ca7-clock">
+          <p><span>{% if contest.is_running %}Tugashiga{% else %}Boshlanishiga{% endif %}</span>{% if contest.is_running %}<span class="tabular" data-elapsed-from="{{ contest.start|date:'c' }}" data-elapsed-to="{{ contest.end|date:'c' }}" title="O‘tgan vaqt / davomiyligi"></span>{% endif %}</p>
+          <b class="tabular" role="timer" data-countdown="{% if contest.is_running %}{{ contest.end|date:'c' }}{% else %}{{ contest.start|date:'c' }}{% endif %}" data-label=""></b>
+          {% if contest.is_running %}<span class="ca7-clock-bar" aria-hidden="true"><i data-span-from="{{ contest.start|date:'c' }}" data-span-to="{{ contest.end|date:'c' }}" style="width: 0"></i></span>{% endif %}
         </div>
         {% endif %}
         {% if active == "overview" %}
@@ -57,7 +61,7 @@ and optionally problems, n_participants, next_cp (the first problem you have not
               });
             </script>
           {% elif contest.is_running and next_cp %}
-            <a class="ca-btn ca-btn-primary" href="{% url 'problems:detail' next_cp.problem.slug %}"><i data-lucide="play" class="lu" aria-hidden="true"></i>{{ next_cp.label }} masalasini ochish</a>
+            <a class="ca-btn ca-btn-primary" href="{% url 'problems:detail' next_cp.problem.slug %}">Masalalarni yechish</a>
           {% endif %}
           {% if not contest.has_started %}<a class="ca-btn ca-btn-ghost" href="{% url 'contests:calendar' contest.pk %}" download><i data-lucide="calendar-plus" class="lu" aria-hidden="true"></i>Kalendarga qo‘shish</a>{% endif %}
           {% if contest.is_running and registered %}<span data-leaves-wrap class="!hidden text-sm text-bad">Sahifadan chiqishlar: <b class="tabular" data-leaves>0</b></span>{% endif %}
@@ -66,14 +70,14 @@ and optionally problems, n_participants, next_cp (the first problem you have not
       </div>
     </div>
   </div>
-  {% if contest.is_running %}<div class="ca-clock-bar" aria-hidden="true"><span data-span-from="{{ contest.start|date:'c' }}" data-span-to="{{ contest.end|date:'c' }}" style="width: 0"></span></div>{% endif %}
+  <nav class="ca-band-tabs" aria-label="Musobaqa bo‘limlari">
+    <div class="ca-contest-tabs">
+      <a href="{% url 'contests:detail' contest.pk %}"{% if active == "overview" %} aria-current="page"{% endif %}>Umumiy</a>
+      <a href="{% url 'contests:detail' contest.pk %}#contest-problems">Masalalar{% if problems %} <span>{{ problems|length }}</span>{% endif %}</a>
+      <a href="{% url 'contests:standings' contest.pk %}"{% if active == "scoreboard" %} aria-current="page"{% endif %}>Natijalar</a>
+      {% if registered or user.is_staff %}<a href="{% url 'contests:clarifications' contest.pk %}"{% if active == "questions" %} aria-current="page"{% endif %}>Savol-javoblar</a>{% endif %}
+      {% if user.is_staff %}<a href="{% url 'contests:submissions' contest.pk %}"{% if active == "submissions" %} aria-current="page"{% endif %}>Urinishlar</a>
+    {% elif registered and contest.has_started %}<a href="{% url 'submissions:mine' %}?mine=1&amp;contest={{ contest.pk }}">Urinishlarim</a>{% endif %}
+    </div>
+  </nav>
 </section>
-<nav class="ca-band-tabs" aria-label="Musobaqa bo‘limlari">
-  <div class="ca-contest-tabs">
-    <a href="{% url 'contests:detail' contest.pk %}"{% if active == "overview" %} aria-current="page"{% endif %}>Umumiy</a>
-    <a href="{% url 'contests:detail' contest.pk %}#contest-problems">Masalalar{% if problems %} <span>{{ problems|length }}</span>{% endif %}</a>
-    <a href="{% url 'contests:standings' contest.pk %}"{% if active == "scoreboard" %} aria-current="page"{% endif %}>Natijalar</a>
-    {% if registered or user.is_staff %}<a href="{% url 'contests:clarifications' contest.pk %}"{% if active == "questions" %} aria-current="page"{% endif %}>Savol-javoblar</a>{% endif %}
-    {% if user.is_staff %}<a href="{% url 'contests:submissions' contest.pk %}"{% if active == "submissions" %} aria-current="page"{% endif %}>Urinishlar</a>{% endif %}
-  </div>
-</nav>
