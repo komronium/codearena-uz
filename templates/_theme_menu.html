@@ -1,0 +1,10 @@
+{% comment %}The theme menu beside the search, for guests and members alike: follow the device, or pin light or
+dark. base.html keeps the choice in localStorage, swaps the button's icon and closes the menu on a pick.{% endcomment %}
+<details class="ca-dropdown ca-theme-menu" data-dropdown>
+  <summary id="theme-toggle" class="ca-icon-btn" aria-label="Ko‘rinish: tizim, kunduzgi yoki tungi" title="Ko‘rinish"><i data-lucide="sun-moon" class="lu" aria-hidden="true"></i></summary>
+  <div class="ca-dropdown-panel ca-theme-panel" role="group" aria-label="Ko‘rinish">
+    <button type="button" class="ca-dropdown-item" data-theme-set="system" aria-pressed="false"><i data-lucide="monitor" class="lu" aria-hidden="true"></i><span>Tizim bo‘yicha<small>qurilma sozlamasiga ergashadi</small></span></button>
+    <button type="button" class="ca-dropdown-item" data-theme-set="light" aria-pressed="false"><i data-lucide="sun" class="lu" aria-hidden="true"></i><span>Kunduzgi</span></button>
+    <button type="button" class="ca-dropdown-item" data-theme-set="dark" aria-pressed="false"><i data-lucide="moon" class="lu" aria-hidden="true"></i><span>Tungi</span></button>
+  </div>
+</details>

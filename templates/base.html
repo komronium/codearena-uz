@@ -115,9 +115,9 @@ A native dialog gives focus trapping and Esc for free.{% endcomment %}
     <div class="mt-3 flex items-center justify-between gap-3 border-t border-line px-1 pt-3">
       <span id="sheet-theme-label" class="text-sm font-medium text-mute">Ko‘rinish</span>
       <div class="ca-seg ca-seg-sm" role="group" aria-labelledby="sheet-theme-label">
-        <button type="button" data-theme-set="system" aria-pressed="false" aria-label="Tizimdagidek"><i data-lucide="monitor" class="lu" aria-hidden="true"></i></button>
-        <button type="button" data-theme-set="light" aria-pressed="false" aria-label="Yorug‘"><i data-lucide="sun" class="lu" aria-hidden="true"></i></button>
-        <button type="button" data-theme-set="dark" aria-pressed="false" aria-label="Qorong‘i"><i data-lucide="moon" class="lu" aria-hidden="true"></i></button>
+        <button type="button" data-theme-set="system" aria-pressed="false" aria-label="Tizim bo‘yicha"><i data-lucide="monitor" class="lu" aria-hidden="true"></i></button>
+        <button type="button" data-theme-set="light" aria-pressed="false" aria-label="Kunduzgi"><i data-lucide="sun" class="lu" aria-hidden="true"></i></button>
+        <button type="button" data-theme-set="dark" aria-pressed="false" aria-label="Tungi"><i data-lucide="moon" class="lu" aria-hidden="true"></i></button>
       </div>
     </div>
     {% if user.is_authenticated %}
@@ -189,11 +189,10 @@ A native dialog gives focus trapping and Esc for free.{% endcomment %}
     if (pre.scrollWidth > pre.clientWidth || pre.scrollHeight > pre.clientHeight) pre.tabIndex = 0;
   });
   (() => {
-    // Theme: "system" follows the OS. Guests cycle it with the header button; signed-in
-    // users pick it in the account menu.
-    const order = ["system", "light", "dark"];
+    // Theme: "system" follows the OS. The header's theme menu (_theme_menu.html) and the phone sheet
+    // pick it; the menu's button shows the current choice.
     const icons = { system: "sun-moon", light: "sun", dark: "moon" };
-    const labels = { system: "Ko‘rinish: tizim", light: "Ko‘rinish: yorug‘", dark: "Ko‘rinish: qorong‘i" };
+    const labels = { system: "Ko‘rinish: tizim bo‘yicha", light: "Ko‘rinish: kunduzgi", dark: "Ko‘rinish: tungi" };
     const btn = document.getElementById("theme-toggle");
     let cur = "system";
     try { cur = localStorage.getItem("ca-theme") || "system"; } catch {}
@@ -215,8 +214,10 @@ A native dialog gives focus trapping and Esc for free.{% endcomment %}
     };
     apply();
     window.caSetTheme = set;  // the command palette's "Ko‘rinish" actions
-    btn?.addEventListener("click", () => set(order[(order.indexOf(cur) + 1) % order.length]));
-    document.querySelectorAll("[data-theme-set]").forEach((b) => b.addEventListener("click", () => set(b.dataset.themeSet)));
+    document.querySelectorAll("[data-theme-set]").forEach((b) => b.addEventListener("click", () => {
+      set(b.dataset.themeSet);
+      b.closest("details[data-dropdown]")?.removeAttribute("open");
+    }));
   })();
   (() => {
     // Dropdowns (<details data-dropdown>): one open at a time, closed by an outside click or Esc.
@@ -272,9 +273,9 @@ from /problems/suggest/. "go" is the second key of a "g <key>" shortcut.{% endco
   {"group": "Admin", "icon": "school", "label": "Guruhlar", "words": "groups", "url": "{% url 'moderation:groups' %}"},
   {"group": "Admin", "icon": "scroll-text", "label": "Amallar jurnali", "words": "audit log", "url": "{% url 'integrity:audit' %}"},
   {% endif %}
-  {"group": "Amallar", "icon": "sun", "label": "Ko‘rinish: yorug‘", "words": "theme light mavzu", "action": "theme:light"},
-  {"group": "Amallar", "icon": "moon", "label": "Ko‘rinish: qorong‘i", "words": "theme dark tungi", "action": "theme:dark"},
-  {"group": "Amallar", "icon": "monitor", "label": "Ko‘rinish: tizimdagidek", "words": "theme system auto", "action": "theme:system"},
+  {"group": "Amallar", "icon": "sun", "label": "Ko‘rinish: kunduzgi", "words": "theme light mavzu", "action": "theme:light"},
+  {"group": "Amallar", "icon": "moon", "label": "Ko‘rinish: tungi", "words": "theme dark tungi", "action": "theme:dark"},
+  {"group": "Amallar", "icon": "monitor", "label": "Ko‘rinish: tizim bo‘yicha", "words": "theme system auto", "action": "theme:system"},
   {"group": "Amallar", "icon": "keyboard", "label": "Klaviatura yorliqlari", "words": "shortcuts keys hotkeys", "keys": "?", "action": "keys"}
 ]}</script>
 <dialog id="ca-keys" class="ca-dialog" aria-labelledby="ca-keys-title">

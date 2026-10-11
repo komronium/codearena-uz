@@ -35,6 +35,7 @@ code reviews, the staff queue.{% endcomment %}
       <i data-lucide="search" class="lu" aria-hidden="true"></i><span>Qidirish…</span><kbd class="ca-kbd" aria-hidden="true">Ctrl K</kbd>
     </button>
     <button type="button" class="ca-icon-btn lg:hidden" data-palette-open aria-label="Qidirish"><i data-lucide="search" class="lu" aria-hidden="true"></i></button>
+    <span class="hidden md:block">{% include "_theme_menu.html" %}</span>
     {% if user.is_authenticated %}
     {% with s=streak_pill %}{% if s.daily %}
     <a href="{% url 'problems:detail' s.daily.problem.slug %}" class="ca-streak{% if s.done %} is-done{% elif s.current %} is-risk{% endif %}"
@@ -45,7 +46,6 @@ code reviews, the staff queue.{% endcomment %}
     {% endif %}{% endwith %}
     <span class="hidden md:block">{% include "_user_menu.html" %}</span>
     {% else %}
-    <button type="button" id="theme-toggle" class="ca-icon-btn hidden md:grid" title="Ko‘rinish" aria-label="Ko‘rinishni almashtirish (yorug‘ / qorong‘i)"><i data-lucide="sun-moon" class="lu" aria-hidden="true"></i></button>
     <a href="{% url 'login' %}" class="ca-btn ca-btn-ghost !py-1.5">Kirish</a>
     <a href="{% url 'register' %}" class="ca-btn ca-btn-primary hidden !py-1.5 sm:inline-flex">Ro‘yxatdan o‘tish</a>
     {% endif %}
