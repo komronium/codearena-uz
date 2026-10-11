@@ -1,4 +1,4 @@
-{% comment %}A round's header, after LeetCode's contest pages: a dark cover whose colour says the rules (Codeforces blue,
+{% load gcal %}{% comment %}A round's header, after LeetCode's contest pages: a dark cover whose colour says the rules (Codeforces blue,
 points teal, ICPC violet), the state, title and facts on the left, the clock in three boxes and the one main action on
 the right, a green line of the time already gone along its bottom edge; the round's tabs on a white strip below. Goes
 in base.html's band block. ctx: contest, active ("overview" | "scoreboard" | "questions" | "submissions"), registered,
@@ -63,7 +63,7 @@ and optionally problems, n_participants, next_cp (the first problem you have not
           {% elif contest.is_running and next_cp %}
             <a class="ca-btn ca-btn-primary" href="{% url 'problems:detail' next_cp.problem.slug %}">Masalalarni yechish</a>
           {% endif %}
-          {% if not contest.has_started %}<a class="ca-btn ca-btn-ghost" href="{% url 'contests:calendar' contest.pk %}" download><i data-lucide="calendar-plus" class="lu" aria-hidden="true"></i>Kalendarga qo‘shish</a>{% endif %}
+          {% if not contest.has_started %}<a class="ca-btn ca-btn-ghost" href="{% google_calendar_url contest %}" target="_blank" rel="noopener"><i data-lucide="calendar-plus" class="lu" aria-hidden="true"></i>Google Kalendarga qo‘shish</a>{% endif %}
           {% if contest.is_running and registered %}<span data-leaves-wrap class="!hidden text-sm text-bad">Sahifadan chiqishlar: <b class="tabular" data-leaves>0</b></span>{% endif %}
         </div>
         {% endif %}

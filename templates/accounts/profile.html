@@ -10,7 +10,7 @@
 figures; then the rating history beside the problems per level, the year of activity across the page, the topics with
 each problem as a mark (green solved, amber tried, grey new) and the next to solve, and the badges as khatam stars.
 Colour carries meaning only: the tier colour is the person, green/red the results, lapis the way forward.{% endcomment %}
-<section class="ca-hud" aria-labelledby="hero-name" style="--tier: {{ tier_color }}">
+<section class="ca-hud ca7-ptier-band" aria-labelledby="hero-name" style="--tier: {{ tier_color }}">
   <div class="ca-hud-in ca7-phud">
     <div class="ca7-pwho">
       <span class="ca7-pav{% if not profile_user.avatar %} ca-art-{{ banner.0 }}{% endif %}">{% if profile_user.avatar %}<img src="{{ profile_user.avatar.url }}" alt="">{% else %}<span aria-hidden="true">{{ profile_user.username|slice:":1"|upper }}</span>{% endif %}</span>
@@ -44,23 +44,53 @@ Colour carries meaning only: the tier colour is the person, green/red the result
     <div class="ca7-sec-h"><span class="ca-star" style="--c: rgb(var(--ca-spec-rgb))" aria-hidden="true"></span><h2 id="hist-title">Reyting tarixi</h2>{% if rating_history %}<span class="ca7-r text-mute">{{ rating_history|length }} musobaqa</span>{% endif %}</div>
     {% if rating_history %}
     {% if rating_history|length > 1 %}
-    <div class="ca7-chart ca-scroll-end overflow-x-auto" tabindex="0" role="region" aria-label="Reyting grafigi (yon tomonga suriladi)">
-      <svg viewBox="0 0 {{ rating_chart.w }} {{ rating_chart.h }}" class="w-full" style="min-width: 320px" role="img" aria-label="Reyting tarixi grafigi, {{ rating_history|length }} ta musobaqa">
+    <div class="ca7-chart" id="rchart">
+      <svg viewBox="0 0 {{ rating_chart.w }} {{ rating_chart.h }}" class="w-full" role="img" aria-label="Reyting tarixi grafigi, {{ rating_history|length }} ta musobaqa">
         {% for b in rating_chart.bands %}
         <rect x="{{ rating_chart.left }}" y="{{ b.y }}" width="{{ rating_chart.width }}" height="{{ b.h }}" fill="{{ b.color }}" fill-opacity=".1" />
-        {% if b.label %}<text x="{{ rating_chart.left|add:6 }}" y="{{ b.y|add:12 }}" fill="currentColor" class="fill-mute" font-size="10" font-weight="600">{{ b.label }}</text>{% endif %}
+        {% if b.label %}<text x="{{ rating_chart.left|add:8 }}" y="{{ b.y|add:15 }}" fill="currentColor" class="fill-mute" font-size="11.5" font-weight="600">{{ b.label }}</text>{% endif %}
         {% endfor %}
         {% for g in rating_chart.gridlines %}
         <line x1="{{ rating_chart.left }}" y1="{{ g.y }}" x2="{{ rating_chart.right }}" y2="{{ g.y }}" stroke="currentColor" class="text-line" stroke-width="1" />
-        <text x="{{ rating_chart.left|add:-8 }}" y="{{ g.y|add:3 }}" text-anchor="end" font-size="10" class="fill-mute tabular">{{ g.value }}</text>
+        <text x="{{ rating_chart.left|add:-8 }}" y="{{ g.y|add:4 }}" text-anchor="end" font-size="11.5" class="fill-mute tabular">{{ g.value }}</text>
         {% endfor %}
-        <polyline points="{{ rating_chart.polyline }}" fill="none" stroke="rgb(var(--ca-accent-rgb))" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" />
+        <polyline points="{{ rating_chart.polyline }}" fill="none" stroke="rgb(var(--ca-accent-rgb))" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" />
         {% for pt in rating_chart.points %}
-        <circle cx="{{ pt.x }}" cy="{{ pt.y }}" r="4" fill="rgb(var(--ca-paper-rgb))" stroke="rgb(var(--ca-accent-rgb))" stroke-width="2" />
-        <text x="{{ pt.x }}" y="{{ rating_chart.bottom|add:16 }}" text-anchor="middle" font-size="9" class="fill-mute tabular">{{ pt.date }}</text>
+        <text x="{{ pt.x }}" y="{{ rating_chart.bottom|add:20 }}" text-anchor="middle" font-size="11" class="fill-mute tabular">{{ pt.date }}</text>
+        <g class="ca7-pt" tabindex="0" role="button" aria-label="{{ pt.title }}: {{ pt.rank }}-o‘rin{% if pt.of %} {{ pt.of }} tadan{% endif %}, {{ pt.delta|stringformat:'+d' }}, reyting {{ pt.rating }}"
+           data-title="{{ pt.title }}" data-date="{{ pt.date }}" data-rank="{{ pt.rank }}" data-of="{{ pt.of|default:'' }}" data-delta="{{ pt.delta|stringformat:'+d' }}" data-rating="{{ pt.rating }}" data-x="{{ pt.x }}" data-y="{{ pt.y }}">
+          <circle cx="{{ pt.x }}" cy="{{ pt.y }}" r="14" fill="transparent" />
+          <circle class="dot" cx="{{ pt.x }}" cy="{{ pt.y }}" r="5.5" fill="rgb(var(--ca-paper-rgb))" stroke="{{ pt.color }}" stroke-width="2.5" />
+        </g>
         {% endfor %}
       </svg>
+      <div class="ca7-tip-card" role="status" hidden></div>
     </div>
+    <script>
+      // the rating chart's points: a card with the round, the place, the change and the rating, on hover or focus
+      (() => {
+        const box = document.getElementById("rchart"), card = box.querySelector(".ca7-tip-card"), svg = box.querySelector("svg");
+        const show = (g) => {
+          const d = g.dataset, up = d.delta.startsWith("+") && d.delta !== "+0";
+          card.innerHTML = "";
+          const b = document.createElement("b"); b.textContent = d.title;
+          const meta = document.createElement("span"); meta.textContent = `${d.date} · ${d.rank}-o‘rin${d.of ? " / " + d.of : ""}`;
+          const r = document.createElement("span"); r.className = "ca7-tip-r";
+          const delta = document.createElement("em"); delta.textContent = d.delta; delta.className = up ? "is-up" : d.delta.startsWith("-") ? "is-down" : "";
+          r.append(delta, ` → ${d.rating}`);
+          card.append(b, meta, r);
+          const scale = svg.getBoundingClientRect().width / svg.viewBox.baseVal.width;
+          card.hidden = false;
+          const x = +d.x * scale, y = +d.y * scale, w = card.offsetWidth;
+          card.style.left = Math.min(Math.max(x - w / 2, 4), box.clientWidth - w - 4) + "px";
+          card.style.top = Math.max(y - card.offsetHeight - 14, 4) + "px";
+        };
+        box.querySelectorAll(".ca7-pt").forEach((g) => {
+          g.addEventListener("mouseenter", () => show(g)); g.addEventListener("focus", () => show(g));
+          g.addEventListener("mouseleave", () => { card.hidden = true; }); g.addEventListener("blur", () => { card.hidden = true; });
+        });
+      })();
+    </script>
     {% endif %}
     <table class="ca-table ca-table-flat mt-3">
       <thead><tr><th>Musobaqa</th><th class="w-24 text-right">O‘rin</th><th class="w-16 text-right" title="Reyting o‘zgarishi">±</th><th class="w-20 text-right">Reyting</th></tr></thead>
@@ -123,24 +153,22 @@ Colour carries meaning only: the tier colour is the person, green/red the result
   {% if weakest and user == profile_user %}
   <div class="ca7-tip">
     <span class="ca7-tip-ico" aria-hidden="true"><i data-lucide="target" class="lu"></i></span>
-    <p><b>Eng zaif mavzu: {{ weakest.row.tag.name }}</b> · {{ weakest.row.total }} tadan {{ weakest.row.solved }} tasi yechilgan{% if weakest.tried %}, {{ weakest.tried }} tasida urinish bor{% endif %}.
+    <p><b>Eng zaif mavzu: {{ weakest.row.tag.name }}</b> · {{ weakest.total }} tadan {{ weakest.solved }} tasi yechilgan{% if weakest.tried %}, {{ weakest.tried }} tasida urinish bor{% endif %}.
       {% if weakest.easiest %}<br>Osonidan boshlang: <a class="ca-link" href="{% url 'problems:detail' weakest.easiest.slug %}"><span class="ca-pid">{{ weakest.easiest.pk|stringformat:"04d" }}</span> {{ weakest.easiest.title }}</a> <span class="ca-diff ca-diff-{{ weakest.easiest.difficulty }}">{{ weakest.easiest.get_difficulty_display }}</span>{% endif %}</p>
   </div>
   {% endif %}
-  <div class="overflow-x-auto">
-  <table class="ca-table ca-table-flat ca7-tmap">
-    <thead><tr><th class="w-40">Mavzu</th><th>Masalalar <span class="font-normal">· yashil yechilgan, sariq urinilgan, kulrang yangi</span></th><th class="w-24 text-right">Yechilgan</th><th class="w-32 text-right"><span class="sr-only">Keyingisi</span></th></tr></thead>
-    <tbody>
+  <div class="ca7-topics" aria-label="Mavzular: yechilgan, urinilgan, qolgan">
     {% for t in topic_map %}
-    <tr>
-      <td><a class="ca-link{% if t.kind == 'sql' %} !text-[rgb(var(--ca-sql-rgb))]{% endif %}" href="{% url 'problems:list' %}?tag={{ t.row.tag.name|urlencode }}">{{ t.row.tag.name }}</a></td>
-      <td><span class="ca7-marks">{% for pr, st in t.marks %}<a class="ca7-mark is-{{ st }}" href="{% url 'problems:detail' pr.slug %}" title="{{ pr.title }} · {{ pr.get_difficulty_display }} · {% if st == 'solved' %}yechilgan{% elif st == 'attempted' %}urinilgan{% else %}yangi{% endif %}">{{ pr.pk|stringformat:"02d" }}</a>{% endfor %}</span></td>
-      <td class="text-right tabular font-semibold">{{ t.row.solved }} / {{ t.row.total }}</td>
-      <td class="text-right">{% if t.next %}<a class="ca-link text-sm" href="{% url 'problems:detail' t.next.slug %}" title="{{ t.next.title }}">Keyingisi: {{ t.next.pk|stringformat:"04d" }}</a>{% else %}<span class="text-sm font-semibold text-ok"><i data-lucide="check" class="lu" aria-hidden="true"></i> hammasi</span>{% endif %}</td>
-    </tr>
+    {% if forloop.counter == 6 %}<details class="ca7-topics-more"><summary>Barcha mavzular <span class="tabular">({{ topic_map|length }})</span><i data-lucide="chevron-down" class="lu" aria-hidden="true"></i></summary>{% endif %}
+    <div class="ca7-topic">
+      <a class="ca-link{% if t.kind == 'sql' %} !text-[rgb(var(--ca-sql-rgb))]{% endif %}" href="{% url 'problems:list' %}?tag={{ t.row.tag.name|urlencode }}">{{ t.row.tag.name }}</a>
+      <span class="ca7-topic-bar" role="img" aria-label="{{ t.total }} tadan {{ t.solved }} tasi yechilgan, {{ t.tried }} tasida urinish bor"><i class="is-solved" style="width: {{ t.pct_solved }}%"></i><i class="is-tried" style="width: {{ t.pct_tried }}%"></i></span>
+      <b class="tabular">{{ t.solved }} / {{ t.total }}</b>
+      <span class="ca7-topic-next">{% if t.next %}<a class="ca-link" href="{% url 'problems:detail' t.next.slug %}" title="{{ t.next.title }}">Keyingisi: {{ t.next.pk|stringformat:"04d" }}</a>{% else %}<span class="font-semibold text-ok"><i data-lucide="check" class="lu" aria-hidden="true"></i> hammasi</span>{% endif %}</span>
+    </div>
+    {% if forloop.last and forloop.counter > 5 %}</details>{% endif %}
     {% endfor %}
-    </tbody>
-  </table>
+    <p class="ca7-topics-key" aria-hidden="true"><i class="is-solved"></i>yechilgan <i class="is-tried"></i>urinilgan <i></i>qolgan</p>
   </div>
 </section>
 {% endif %}

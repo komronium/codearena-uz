@@ -1546,3 +1546,21 @@ def test_a_rounds_problem_is_worth_at_least_200(contest, problem_a):
     cp.full_clean()
     assert ContestProblem(contest=contest, problem=problem_a, label="Y").points == 500
 
+
+@pytest.mark.django_db
+def test_add_to_calendar_opens_google_calendar_not_a_download(client, contest):
+    """The coming round's card and cover link to Google Calendar's new-event form, filled in: nothing downloads."""
+    from urllib.parse import parse_qs, urlparse
+
+    from apps.contests.models import Contest
+
+    Contest.objects.filter(pk=contest.pk).update(start=timezone.now() + timezone.timedelta(days=2),
+                                                 end=timezone.now() + timezone.timedelta(days=2, hours=2))
+    for url in (reverse("contests:list"), reverse("contests:detail", args=[contest.pk])):
+        html = client.get(url).content.decode()
+        assert 'href="https://calendar.google.com/calendar/render?action=TEMPLATE' in html
+        assert "download" not in html.split("calendar.google.com", 1)[1].split(">", 1)[0]
+    link = next(h for h in client.get(reverse("contests:list")).content.decode().split('"') if h.startswith("https://calendar.google.com"))
+    q = parse_qs(urlparse(link.replace("&amp;", "&")).query)
+    assert q["text"] == [f"{contest.title} — CodeArena"] and q["dates"][0].endswith("Z") and "/" in q["dates"][0]
+

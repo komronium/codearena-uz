@@ -35,9 +35,9 @@ from .tiers import streak_badges, tier_banner
 from .tiers import tier_color as _tier_color
 from .telegram import bot_configured
 
-_CHART_W, _CHART_H = 700, 190
-_CHART_L, _CHART_R = 56, 680
-_CHART_TOP, _CHART_BOTTOM = 10, 165
+_CHART_W, _CHART_H = 640, 300
+_CHART_L, _CHART_R = 46, 600
+_CHART_TOP, _CHART_BOTTOM = 14, 268
 
 
 def _rating_chart(history: list) -> dict:
@@ -80,6 +80,9 @@ def _rating_chart(history: list) -> dict:
             "x": round(x, 1), "y": round(y_for(p.rating_after), 1),
             "color": _tier_color(p.rating_after),
             "date": p.contest.end.strftime("%d.%m.%y"),
+            # what the point's hover card says: the round, the place, the change, the rating after it
+            "title": getattr(p.contest, "title", ""), "rank": getattr(p, "rank", None), "of": getattr(p, "n_participants", None),
+            "delta": p.rating_after - getattr(p, "rating_before", p.rating_after), "rating": p.rating_after,
         })
     polyline = " ".join(f"{pt['x']},{pt['y']}" for pt in points)
 
@@ -385,7 +388,7 @@ def profile(request, username):
         "skill_groups": skill_groups,
         # the topics table: one flat list (kind, row), the topics with most problems first
         "topic_rows": topic_rows,
-        # the topics again, each with its problems as marks (tried first, then new, then solved) and the next to solve
+        # the topics again, most solved first: one bar each (solved, tried, left) and the next to solve
         "topic_map": topic_map, "weakest": weakest,
         "streak": (cur_streak, best_streak),
         "last_delta": rating_history[-1].delta if rating_history else None,
@@ -394,9 +397,9 @@ def profile(request, username):
     })
 
 
-def _topic_map(topic_rows, problem_map, n: int = 10):
-    """The profile's topics: per topic (the ten biggest) its problems with the user's mark and the next one to
-    solve (a tried one first, else the easiest new one); and the weakest topic with a try in it."""
+def _topic_map(topic_rows, problem_map):
+    """The profile's topics, most solved first: per topic how many problems are solved, tried and left (one bar),
+    and the next to solve (a tried one first, else the easiest new one); and the weakest topic with a try in it."""
     status = {pr.id: (pr, st) for pr, st in problem_map}
     tags_of: dict[int, list[int]] = {}
     for problem_id, tag_id in Problem.tags.through.objects.filter(problem_id__in=list(status)).values_list("problem_id", "tag_id"):
@@ -404,16 +407,23 @@ def _topic_map(topic_rows, problem_map, n: int = 10):
     order = {"attempted": 0, "todo": 1, "solved": 2}
     levels = {v: i for i, v in enumerate(Problem.Difficulty.values)}
     rows = []
-    for kind, r in topic_rows[:n]:
+    for kind, r in topic_rows:
         marks = sorted((status[i] for i in tags_of.get(r["tag"].pk, []) if i in status),
                        key=lambda m: (order[m[1]], levels.get(m[0].difficulty, 9), m[0].pk))
+        if not marks:
+            continue
         todo = [pr for pr, st in marks if st != "solved"]
         tried = sum(1 for _, st in marks if st == "attempted")
-        rows.append({"kind": kind, "row": r, "marks": marks, "tried": tried,
+        total = len(marks)
+        solved = total - len(todo)
+        rows.append({"kind": kind, "row": r, "tried": tried, "solved": solved, "total": total,
+                     # the bar's three parts, in percent of the topic
+                     "pct_solved": round(100 * solved / total), "pct_tried": round(100 * tried / total),
                      "next": todo[0] if todo else None,
                      "easiest": min(todo, key=lambda pr: (levels.get(pr.difficulty, 9), pr.pk)) if todo else None})
-    open_rows = [x for x in rows if x["row"]["solved"] < x["row"]["total"] and (x["tried"] or x["row"]["solved"])]
-    weakest = min(open_rows, key=lambda x: (x["row"]["solved"] / x["row"]["total"], -x["tried"])) if open_rows else None
+    rows.sort(key=lambda x: (-x["solved"], -x["total"], x["row"]["tag"].name))
+    open_rows = [x for x in rows if x["solved"] < x["total"] and (x["tried"] or x["solved"])]
+    weakest = min(open_rows, key=lambda x: (x["solved"] / x["total"], -x["tried"])) if open_rows else None
     return rows, weakest
 
 

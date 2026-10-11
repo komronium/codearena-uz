@@ -173,7 +173,7 @@ it is scored, virtual participation.{% endcomment %}
     <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="users" class="lu" aria-hidden="true"></i></span><h2 id="who-title">Ro‘yxatdan o‘tganlar<small class="ca-box-tools">{{ n_participants }}</small></h2></div>
     <div class="ca-box-body ca-box-pad">
       <p class="ca-faces">{% for u in registrants %}<a class="ca-avatar h-8 w-8 text-xs{% if not u.avatar %} ca-art-{{ u.rating|tier_slug }}{% endif %}" style="--tier: {{ u.rating|tier_color }}" href="{% url 'profile' u.username %}" title="{{ u.username }}" translate="no">{% if u.avatar %}<img src="{{ u.avatar.url }}" alt="">{% else %}{{ u.username|first }}{% endif %}</a>{% endfor %}{% if n_participants > 8 %}<span>+{{ n_participants|add:"-8" }}</span>{% endif %}</p>
-      <p class="mt-2.5 text-xs text-mute">«Kalendarga qo‘shish» bilan saqlasangiz, kalendar bir soat oldin eslatadi.</p>
+      <p class="mt-2.5 text-xs text-mute">«Google Kalendarga qo‘shish» bilan saqlasangiz, Google Kalendar sizning odatdagi eslatmangiz bilan eslatadi.</p>
     </div>
   </section>
   {% endif %}

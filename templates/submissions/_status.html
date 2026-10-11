@@ -1,6 +1,7 @@
 {% comment %}A submission's result, #7: a verdict card (the words, how many tests passed, time, memory, the limits, the
 level) tinted by the verdict, a hint after a failure, the compiler's log, then every test as a row; while it is judged
-the card polls itself every second. compact=True: the verdict chip only.{% endcomment %}
+the card polls itself every second; below it only the test it stopped on, not a row per test.
+compact=True: the verdict chip only.{% endcomment %}
 <div data-verdict="{{ s.verdict }}" {% if not s.is_terminal %}hx-get="{% url 'submissions:status' s.pk %}{% if compact %}?compact=1{% endif %}" hx-trigger="every 1s" hx-swap="outerHTML"{% endif %}
      role="status" aria-live="polite" aria-busy="{% if not s.is_terminal %}true{% else %}false{% endif %}">
 {% if compact %}{% include "submissions/_verdict.html" with v=s.verdict sub=s %}
@@ -29,33 +30,18 @@ the card polls itself every second. compact=True: the verdict chip only.{% endco
   {% if s.verdict == 'CE' %}<pre class="ca7-vhero-log">{{ s.compile_log|default:"Kompilyator izoh bermadi." }}</pre>{% endif %}
 </section>
 
-{% if results and s.is_terminal %}
-<section class="mt-9" aria-labelledby="tests-title">
-  <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-easy)" aria-hidden="true"></span><h2 id="tests-title">Testlar</h2>{% if slowest is not None %}<span class="ca7-r text-mute tabular">eng sekini {{ slowest }} ms</span>{% endif %}</div>
-  <table class="ca-table ca-table-flat">
-    <thead><tr><th class="w-20">Test</th><th>Natija</th><th class="w-28 text-right">Vaqt</th><th class="w-28 text-right">Xotira</th></tr></thead>
-    <tbody>
-    {% for r in results %}
-    <tr>
-      <td class="ca-pid">#{{ forloop.counter }}</td>
-      <td>{% include "submissions/_vd.html" with v=r.verdict sub=None %}</td>
-      <td class="text-right tabular">{{ r.exec_ms }} ms</td>
-      <td class="text-right tabular text-mute">{% if r.mem_kb %}{% widthratio r.mem_kb 1024 1 %} MB{% else %}—{% endif %}</td>
-    </tr>
-    {% if r == first_fail %}
-    <tr class="ca7-tfail"><td></td><td colspan="3">
-      {% if r.testcase.is_sample %}
-      <div class="ca7-tfail-io">
-        <div><p>Kirish</p><pre>{{ r.testcase.input }}</pre></div>
-        <div><p>Kutilgan</p><pre>{{ r.testcase.expected }}</pre></div>
-        <div><p>Sizning chiqishingiz</p><pre>{{ r.stdout_excerpt|default:"—" }}</pre></div>
-      </div>
-      {% else %}<p class="text-sm text-mute">Yashirin test: kirish ma’lumotlari ko‘rsatilmaydi.</p>{% endif %}
-    </td></tr>
-    {% endif %}
-    {% endfor %}
-    </tbody>
-  </table>
+{% if first_fail and s.is_terminal %}
+{# not a row per test: how many passed is in the card; only the test it stopped on, with its data if it is a sample #}
+<section class="mt-9" aria-labelledby="fail-title">
+  <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-hard)" aria-hidden="true"></span><h2 id="fail-title">{{ first_fail.index }}-test</h2>
+    <span class="ca7-r flex items-center gap-3 text-sm text-mute">{% include "submissions/_vd.html" with v=first_fail.verdict sub=None %}<span class="tabular">{{ first_fail.exec_ms }} ms{% if first_fail.mem_kb %} · {% widthratio first_fail.mem_kb 1024 1 %} MB{% endif %}</span></span></div>
+  {% if first_fail.testcase.is_sample %}
+  <div class="ca7-tfail-io">
+    <div><p>Kirish</p><pre>{{ first_fail.testcase.input }}</pre></div>
+    <div><p>Kutilgan</p><pre>{{ first_fail.testcase.expected }}</pre></div>
+    <div><p>Sizning chiqishingiz</p><pre>{{ first_fail.stdout_excerpt|default:"—" }}</pre></div>
+  </div>
+  {% else %}<p class="text-sm text-mute">Yashirin test: kirish ma’lumotlari ko‘rsatilmaydi.</p>{% endif %}
 </section>
 {% endif %}
 {% endif %}

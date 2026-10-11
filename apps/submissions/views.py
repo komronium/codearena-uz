@@ -120,7 +120,7 @@ def submit(request, slug):
         **telemetry,
     )
     django_rq.enqueue(run_submission, sub.pk)
-    return redirect("problems:detail", problem.slug)
+    return redirect("submissions:detail", sub.pk)  # the result as it comes in; "Masalaga qaytish" leads back
 
 
 @login_required

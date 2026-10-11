@@ -89,6 +89,11 @@ is among the accepted ones and the next step.{% endcomment %}
 </aside>
 </div>
 
+{% if s.contest and s.contest.is_running and s.user_id == user.pk %}
+{% comment %}A live round: this page is part of the workspace, so going submit → result → problem is not a leave,
+and leaving from here counts like leaving the problem.{% endcomment %}
+{% with contest=s.contest %}{% include "integrity/_tracker.html" with problem_id=s.problem_id %}{% endwith %}
+{% endif %}
 <link rel="stylesheet" href="{% static 'vendor/highlight-github-dark.min.css' %}">
 <script src="{% static 'vendor/highlight.min.js' %}"></script>
 <script>
