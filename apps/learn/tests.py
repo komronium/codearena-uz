@@ -33,6 +33,20 @@ def _course(slug, *tags, title="Kurs", **kw):
     return course
 
 
+@pytest.fixture(autouse=True)
+def any_size_course(monkeypatch):
+    """Most tests here build courses of a few problems: they run with the 10-15 rule off; the rule's own
+    tests below turn it back on (course_size)."""
+    monkeypatch.setattr("apps.learn.progress.COURSE_MIN", 1)
+    monkeypatch.setattr("apps.learn.progress.COURSE_MAX", 1000)
+
+
+@pytest.fixture
+def course_size(monkeypatch):
+    monkeypatch.setattr("apps.learn.progress.COURSE_MIN", 10)
+    monkeypatch.setattr("apps.learn.progress.COURSE_MAX", 15)
+
+
 @pytest.fixture
 def staff():
     return User.objects.create_user("admin", password="x", is_staff=True)
@@ -475,3 +489,35 @@ def test_saved_lists_sit_under_masalalar(client, ali):
     assert reverse("learn:lists") in client.get(reverse("problems:list")).content.decode()
     body = client.get(reverse("learn:lists")).content.decode()
     assert f'href="{reverse("problems:list")}" class="ca-sidebar-link is-active"' in body
+
+
+# ---- course size -------------------------------------------------------------
+
+@pytest.mark.django_db
+def test_a_course_under_ten_problems_is_being_prepared_and_one_over_fifteen_takes_fifteen(client, staff, ali, course_size):
+    from apps.learn.progress import course_rows
+
+    for i in range(9):
+        _problem(f"s{i}", staff, "small")
+    small = _course("small", "small", title="Kichik kurs")
+    levels = [Problem.Difficulty.BEGINNER] * 14 + [Problem.Difficulty.EASY] * 4 + [Problem.Difficulty.MEDIUM] * 2
+    big_problems = [_problem(f"b{i:02d}", staff, "big", difficulty=lv) for i, lv in enumerate(levels)]
+    big = _course("big", "big", title="Katta kurs")
+
+    rows = course_rows([small, big])
+    assert rows[small.pk] == []  # 9 open: still being prepared
+    kept = rows[big.pk]
+    assert len(kept) == 15 and [lv for _, lv in kept] == sorted([lv for _, lv in kept], key=Problem.Difficulty.values.index)
+    by_level = {lv: sum(1 for _, x in kept if x == lv) for lv in ("beginner", "easy", "medium")}
+    assert by_level == {"beginner": 10, "easy": 3, "medium": 2}  # 14:4:2 kept as near as 15 allows
+    assert [i for i, lv in kept if lv == "beginner"] == [p.pk for p in big_problems[:10]]  # the oldest first
+    assert len(course_rows([big], raw=True)[big.pk]) == 20
+
+    _solve(ali, Problem.objects.get(slug="s0"))
+    assert plan_progress(ali, [small])[small.pk]["completed"] is False
+    page = client.get(reverse("learn:hub")).content.decode()
+    hub_small = page[page.index("Kichik kurs"):page.index("Kichik kurs") + 600]
+    assert "Tayyorlanmoqda" in hub_small and "15 masala" in page
+    assert "Masalalar tayyorlanmoqda" in client.get(reverse("learn:course", args=["small"])).content.decode()
+    _problem("s9", staff, "small")  # the tenth: the course opens
+    assert len(course_rows([small])[small.pk]) == 10

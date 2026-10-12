@@ -19,7 +19,7 @@
       <div class="ca-row-meta">
         <span>{{ p.get_stage_display }}</span>
         <span class="ca-diff ca-diff-{{ p.level }}">{{ p.get_level_display }}</span>
-        <span>{{ p.n_tags }} teg · {% if p.n_open %}{{ p.n_open }} masala{% elif p.n_tags %}<span class="text-warn">masala yo‘q</span>{% else %}faqat nazariya{% endif %}</span>
+        <span>{{ p.n_tags }} teg · {% if p.n_open %}{{ p.n_open }} masala{% if p.n_open < course_min %} · <span class="text-warn">tayyorlanmoqda: kamida {{ course_min }} ta kerak</span>{% elif p.n_open > course_max %} · <span class="text-mute">kursda {{ course_max }} tasi</span>{% endif %}{% elif p.n_tags %}<span class="text-warn">masala yo‘q</span>{% else %}faqat nazariya{% endif %}</span>
       </div>
     </div>
     <div class="ca-row-side">

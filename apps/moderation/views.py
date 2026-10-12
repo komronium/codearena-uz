@@ -26,7 +26,7 @@ from apps.submissions.solves import refresh_solves
 from apps.integrity import audit
 from apps.integrity.models import SimilarityFlag
 from apps.learn.models import StudyPlan
-from apps.learn.progress import plan_problem_ids
+from apps.learn.progress import COURSE_MAX, COURSE_MIN, plan_problem_ids
 from judge.runner import run_submission
 
 from .ai import MAX_COUNT, AIGenerationError, generate_problems
@@ -389,10 +389,10 @@ def tag_delete(request, pk):
 @staff_required
 def plans(request):
     qs = StudyPlan.objects.annotate(n_tags=Count("tags", distinct=True)).order_by("order", "id")
-    open_counts = {k: len(v) for k, v in plan_problem_ids(qs).items()}
+    open_counts = {k: len(v) for k, v in plan_problem_ids(qs, raw=True).items()}
     for p in qs:
         p.n_open = open_counts[p.pk]
-    return render(request, "moderation/plans.html", {"plans": qs})
+    return render(request, "moderation/plans.html", {"plans": qs, "course_min": COURSE_MIN, "course_max": COURSE_MAX})
 
 
 @staff_required

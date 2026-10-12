@@ -8,11 +8,35 @@ from apps.submissions.models import UserProblemSolved
 from .models import ProblemListItem, StudyPlan
 
 LEVELS = Problem.Difficulty.values  # easiest first
+# A course is 10-15 problems: under COURSE_MIN open it is still being prepared (it shows none, so it
+# reads "Tayyorlanmoqda" and can't be finished); over COURSE_MAX it takes that many, keeping its mix.
+COURSE_MIN, COURSE_MAX = 10, 15
 
 
-def course_rows(plans) -> dict[int, list[tuple[int, str]]]:
+def _trim(rows: list[tuple[int, str]]) -> list[tuple[int, str]]:
+    """COURSE_MAX of `rows` (easiest first): each level keeps its share (largest remainder, at least one),
+    the oldest problems of a level first, so a new problem rarely changes the course."""
+    by_level: dict[str, list[int]] = {}
+    for problem_id, level in rows:
+        by_level.setdefault(level, []).append(problem_id)
+    exact = {lv: len(ids) * COURSE_MAX / len(rows) for lv, ids in by_level.items()}
+    quota = {lv: max(1, int(x)) for lv, x in exact.items()}
+    # the leftover seats by largest remainder; a tie goes to the level with fewer, so harder ones aren't squeezed out
+    for lv in sorted(exact, key=lambda lv: (exact[lv] - int(exact[lv]), -quota[lv]), reverse=True):
+        if sum(quota.values()) >= COURSE_MAX:
+            break
+        if quota[lv] < len(by_level[lv]):
+            quota[lv] += 1
+    while sum(quota.values()) > COURSE_MAX:  # the at-least-one rule overshot: take from the biggest
+        quota[max(quota, key=quota.get)] -= 1
+    keep = {i for lv, ids in by_level.items() for i in sorted(ids)[:quota[lv]]}
+    return [r for r in rows if r[0] in keep]
+
+
+def course_rows(plans, raw: bool = False) -> dict[int, list[tuple[int, str]]]:
     """Course id -> (problem id, difficulty) of its open problems: any of the course's tags,
-    easiest first, then oldest first. A problem may sit in several courses."""
+    easiest first, then oldest first, cut to COURSE_MIN..COURSE_MAX (none below it) unless `raw`.
+    A problem may sit in several courses."""
     courses_of: dict[int, list[int]] = {}
     for plan_id, tag_id in (StudyPlan.tags.through.objects.filter(studyplan__in=[p.pk for p in plans])
                             .values_list("studyplan_id", "tag_id")):
@@ -24,13 +48,17 @@ def course_rows(plans) -> dict[int, list[tuple[int, str]]]:
         for plan_id in courses_of[tag_id]:
             found[plan_id][problem_id] = difficulty
     rank = {v: i for i, v in enumerate(LEVELS)}
-    return {plan_id: sorted(rows.items(), key=lambda r: (rank.get(r[1], len(LEVELS)), r[0]))
-            for plan_id, rows in found.items()}
+    out = {plan_id: sorted(rows.items(), key=lambda r: (rank.get(r[1], len(LEVELS)), r[0]))
+           for plan_id, rows in found.items()}
+    if raw:
+        return out
+    return {plan_id: [] if len(rows) < COURSE_MIN else _trim(rows) if len(rows) > COURSE_MAX else rows
+            for plan_id, rows in out.items()}
 
 
-def plan_problem_ids(plans) -> dict[int, list[int]]:
-    """Course id -> its open problems' ids, in course order."""
-    return {plan_id: [i for i, _ in rows] for plan_id, rows in course_rows(plans).items()}
+def plan_problem_ids(plans, raw: bool = False) -> dict[int, list[int]]:
+    """Course id -> its open problems' ids, in course order (`raw`: all of them, uncut)."""
+    return {plan_id: [i for i, _ in rows] for plan_id, rows in course_rows(plans, raw).items()}
 
 
 def solved_ids(user, ids) -> set[int]:
