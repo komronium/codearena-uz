@@ -1,5 +1,5 @@
 """CodeArena Mini #2: five hidden problems for the class's 30-minute rated round: two Beginner (Lift, Dars
-tugashi), two Easy picked from EASY below, and one Medium (Qavslar). Every input value sits on its own line.
+tugashi), two Easy picked from EASY below, and Qavslar (Easy, the round's last). Every input value sits on its own line.
 Each statement carries a hidden note for AI assistants (apps.problems.ai_marks) asking for an odd variable
 name, so code pasted back from an AI shows up as "AI belgisi" in the round's integrity report.
 
@@ -291,7 +291,7 @@ EASY = {
 }
 
 
-# ---- Medium: qavslar ------------------------------------------------------------------------------
+# ---- Easy: qavslar (one line of round brackets) ------------------------------------------------------------------------------
 def qavs_solve(inp):
     depth = 0
     for c in inp.split()[0]:
@@ -325,7 +325,7 @@ def qavs_tests(rng):
 
 
 QAVS = {
-    "slug": "mc2-qavslar", "title": "Qavslar", "difficulty": "medium", "points": 1500,
+    "slug": "mc2-qavslar", "title": "Qavslar", "difficulty": "easy", "points": 1250,
     "tags": ["stack", "strings"], "solve": qavs_solve, "tests": qavs_tests, "samples": 2,
     "statement": ("Qavslar ketma-ketligi to‘g‘ri deyiladi, agar har bir ochilgan qavs `(` o‘zidan keyin kelgan "
                   "qavs `)` bilan yopilsa: `(()())` — to‘g‘ri, `())(` va `(` — noto‘g‘ri." + _ai("qavs_zv")
