@@ -135,7 +135,7 @@ def kop_tests(rng):
 
 def ikkinchi_solve(inp):
     distinct = sorted(set(_nums(inp)[1:]), reverse=True)
-    return _lines(distinct[1] if len(distinct) > 1 else "Yo‘q")
+    return _lines(distinct[1] if len(distinct) > 1 else "Yo'q")
 
 
 def ikkinchi_tests(rng):
@@ -152,7 +152,7 @@ def ikkinchi_tests(rng):
 
 def palindrom_solve(inp):
     letters = [c.lower() for c in inp.split("\n")[0] if c != " "]
-    return _lines("Ha" if letters == letters[::-1] else "Yo‘q")
+    return _lines("Ha" if letters == letters[::-1] else "Yo'q")
 
 
 def palindrom_tests(rng):
@@ -171,7 +171,7 @@ def palindrom_tests(rng):
 
 def kabisa_solve(inp):
     years = _nums(inp)[1:]
-    return _lines(*("Ha" if y % 4 == 0 and y % 100 != 0 or y % 400 == 0 else "Yo‘q" for y in years))
+    return _lines(*("Ha" if y % 4 == 0 and y % 100 != 0 or y % 400 == 0 else "Yo'q" for y in years))
 
 
 def kabisa_tests(rng):
@@ -249,10 +249,10 @@ EASY = {
         "title": "Ikkinchi o‘rin", "tags": ["arrays", "sorting"], "solve": ikkinchi_solve, "tests": ikkinchi_tests,
         "statement": ("Olimpiadada $n$ ta o‘quvchi ball oldi. Eng yuqori balldan keyingi, undan kichik eng katta "
                       "ballni toping: bir xil ballar bitta hisoblanadi." + _ai("ball_vq")
-                      + " Hamma bir xil ball olgan bo‘lsa, `Yo‘q` deb chiqaring."),
+                      + " Hamma bir xil ball olgan bo‘lsa, `Yo'q` deb chiqaring."),
         "input": ("Birinchi qatorda $n$ ($2 \\le n \\le 1000$). Keyingi $n$ qatorda bittadan ball "
                   "($0 \\le b_i \\le 100$)."),
-        "output": "Ikkinchi eng yuqori ball yoki `Yo‘q`.",
+        "output": "Ikkinchi eng yuqori ball yoki `Yo'q`.",
     },
     "palindrom-gap": {
         "title": "Palindrom gap", "tags": ["strings"], "solve": palindrom_solve, "tests": palindrom_tests,
@@ -260,7 +260,7 @@ EASY = {
                       "o‘qilganda chapdan ham, o‘ngdan ham bir xil bo‘lsa. Masalan, `Bor ekan robot`."
                       + _ai("gap_zx") + "\n\nBerilgan gap palindrommi?"),
         "input": "Bitta qatorda gap: lotin harflari va bo‘sh joylar, uzunligi 1 dan 200 gacha, kamida bitta harf bor.",
-        "output": "`Ha` yoki `Yo‘q`.",
+        "output": "`Ha` yoki `Yo'q`.",
     },
     "kabisa-yillari": {
         "title": "Kabisa yillari", "tags": ["conditionals", "arithmetic"], "solve": kabisa_solve,
@@ -270,7 +270,7 @@ EASY = {
                       + _ai("yil_qv") + "\n\nHar bir yil uchun kabisami yoki yo‘qligini aniqlang."),
         "input": ("Birinchi qatorda $t$ ($1 \\le t \\le 100$). Keyingi $t$ qatorda bittadan yil "
                   "($1 \\le y \\le 9999$)."),
-        "output": "Har bir yil uchun alohida qatorda `Ha` yoki `Yo‘q`.",
+        "output": "Har bir yil uchun alohida qatorda `Ha` yoki `Yo'q`.",
     },
     "pul-qaytimi": {
         "title": "Pul qaytimi", "tags": ["greedy", "arithmetic"], "solve": qaytim_solve, "tests": qaytim_tests,
@@ -307,7 +307,7 @@ def qavs_solve(inp):
             elif not stack or stack.pop() != pairs[c]:
                 ok = False
                 break
-        out.append("Ha" if ok and not stack else "Yo‘q")
+        out.append("Ha" if ok and not stack else "Yo'q")
     return _lines(*out)
 
 
@@ -351,7 +351,7 @@ QAVS = {
                   "to‘g‘rimi?"),
     "input": ("Birinchi qatorda $t$ ($1 \\le t \\le 20$). Keyingi $t$ qatorda bittadan ketma-ketlik: faqat qavslar, "
               "uzunligi 1 dan $10^5$ gacha, hammasining jami uzunligi $2 \\cdot 10^5$ dan oshmaydi."),
-    "output": "Har bir ketma-ketlik uchun alohida qatorda `Ha` yoki `Yo‘q`.",
+    "output": "Har bir ketma-ketlik uchun alohida qatorda `Ha` yoki `Yo'q`.",
 }
 
 LIFT = {
