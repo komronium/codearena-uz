@@ -262,17 +262,16 @@ def test_problem_page_ignores_bad_plan_param(client, staff, ali):
 
 
 @pytest.mark.django_db
-def test_profile_shows_completed_course_badge(client, staff, ali):
+def test_a_finished_course_lifts_the_bilimdon_badge(client, staff, ali):
     a = _problem("a1", staff, "a")
     _problem("b1", staff, "b")
     _course("p", "a", title="Birinchi qadam")
     _course("q", "b", title="Tugamagan kurs")
     _course("r", title="Faqat nazariya")
     url = reverse("profile", args=[ali.username])
-    assert "Birinchi qadam" not in client.get(url).content.decode()
+    assert "Bilimdon I" not in client.get(url).content.decode()
     _solve(ali, a)
-    body = client.get(url).content.decode()
-    assert "Birinchi qadam" in body and "Tugamagan kurs" not in body and "Faqat nazariya" not in body
+    assert "Bilimdon I" in client.get(url).content.decode()  # one course of three finished: level I
 
 
 # ---- my lists ----------------------------------------------------------------

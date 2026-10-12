@@ -17,8 +17,6 @@ from django.views.decorators.http import require_POST
 
 from apps.contests.models import _UZ_MONTHS_SHORT, Participation
 from apps.contests.views import _standings  # cached, the standings page's own rows
-from apps.learn.models import StudyPlan
-from apps.learn.progress import plan_progress
 from apps.problems.models import Problem, Tag
 from apps.problems.daily import streaks
 from apps.problems.progress import solved_ring
@@ -31,9 +29,8 @@ from .models import TelegramLink, User
 from .tiers import RATING_TIERS as _RATING_TIERS
 from .tiers import next_tier as _next_tier
 from .tiers import rating_tier
-from apps.classroom.duel_badges import duel_badges
-
-from .tiers import streak_badges, tier_banner
+from . import badges as badge_system
+from .tiers import tier_banner
 from .tiers import tier_color as _tier_color
 from .telegram import bot_configured
 
@@ -294,11 +291,19 @@ def _contest_badges(user) -> list[dict]:
     return badges
 
 
-def _plan_badges(user) -> list:
-    """Public study plans the user finished: the quest's earned stages and other plans."""
-    plans = list(StudyPlan.objects.filter(is_public=True))
-    done = plan_progress(user, plans)
-    return [p for p in plans if done[p.pk]["completed"]]
+def _badges(user, owner: bool) -> dict:
+    """The profile's badges by group: every family for the owner (the ones not reached yet locked, with the
+    way to level I), only the reached ones for anyone else."""
+    board = badge_system.board(user)
+    groups = []
+    for b in board:
+        if not (b["tier"] or owner):
+            continue
+        if not groups or groups[-1]["label"] != b["group_label"]:
+            groups.append({"label": b["group_label"], "badges": []})
+        groups[-1]["badges"].append(b)
+    return {"badge_groups": groups, "badge_owner": owner, "badges_total": len(board),
+            "badges_earned": sum(1 for b in board if b["tier"]), "levels_earned": sum(b["tier"] for b in board)}
 
 
 def profile(request, username):
@@ -379,10 +384,8 @@ def profile(request, username):
         "tier": rating_tier(profile_user.rating),
         "banner": tier_banner(profile_user.rating),
         "next_tier": _next_tier(profile_user.rating),
-        "streak_badges": streak_badges(cur_streak, best_streak),
-        "plan_badges": _plan_badges(profile_user),
+        **_badges(profile_user, request.user == profile_user),
         "contest_badges": _contest_badges(profile_user),
-        "duel_badges": duel_badges(profile_user),
         "tier_color": _tier_color(profile_user.rating),
         "rating_history": rating_history,
         "max_rating": max((p.rating_after for p in rating_history), default=None),

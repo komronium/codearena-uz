@@ -28,10 +28,6 @@ TIER_BANNERS = {
     "Grandmaster": ("grandmaster", "Dafna"), "Legendary Grandmaster": ("afsonaviy", "Toj"),
 }
 
-# Daily-problem streak badges: (days, name, icon). Earned by the best run ever, kept for good.
-STREAK_BADGES = [(7, "Chiroq", "lamp"), (30, "Mash’al", "flame"), (100, "Quyosh", "sun")]
-
-
 def _band(rating: int) -> tuple:
     for band in RATING_TIERS:
         floor, ceiling = band[0], band[1]
@@ -67,12 +63,3 @@ def next_tier(rating: int) -> dict | None:
             pct = max(0, round(100 * (rating - floor) / (ceiling - floor)))
             return {"name": name, "color": color, "need": ceiling - rating, "pct": pct}
     return None
-
-
-def streak_badges(current: int, best: int) -> dict:
-    """Badges earned by the best run ever; the next one counts from the current run, since
-    it needs that many days in a row from now on."""
-    earned = [{"days": d, "name": n, "icon": i} for d, n, i in STREAK_BADGES if best >= d]
-    nxt = next(({"days": d, "name": n, "icon": i, "left": d - current}
-                for d, n, i in STREAK_BADGES if best < d), None)
-    return {"best": best, "earned": earned, "next": nxt}

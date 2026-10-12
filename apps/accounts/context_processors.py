@@ -26,3 +26,24 @@ def tier_up(request):
     if not (user and user.is_authenticated) or request.headers.get("HX-Request"):
         return {}
     return {"tier_up": SimpleLazyObject(lambda: _claim_tier_up(user))}
+
+
+def new_badges(request):
+    """{"new_badges": [...]}: badge levels the user reached and hasn't been shown, for base.html's toast;
+    lazy, so only a page that draws it pays. Levels are worked out again at most every SYNC_EVERY seconds
+    per user (the pages that show badges sync on their own)."""
+    user = getattr(request, "user", None)
+    if not (user and user.is_authenticated) or request.headers.get("HX-Request"):
+        return {}
+
+    def claim():
+        from django.core.cache import cache
+
+        from . import badges
+        if cache.add(f"badges-sync:{user.pk}", 1, SYNC_EVERY):
+            badges.sync(user)
+        return badges.unseen(user)
+    return {"new_badges": SimpleLazyObject(claim)}
+
+
+SYNC_EVERY = 30

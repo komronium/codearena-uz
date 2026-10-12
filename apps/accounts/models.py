@@ -122,3 +122,16 @@ class Group(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class UserBadge(models.Model):
+    """One level (tier) of a badge family a user reached (apps.accounts.badges), kept for good: a level once
+    earned stays even if what earned it changes later. `seen` is for the "new badge" toast."""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="badges")
+    family = models.CharField(max_length=30)
+    tier = models.PositiveSmallIntegerField()
+    earned_at = models.DateTimeField(auto_now_add=True)
+    seen = models.BooleanField(default=False)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["user", "family", "tier"], name="one_row_per_badge_tier")]

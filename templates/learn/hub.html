@@ -26,8 +26,9 @@ progress or where it stands).{% endcomment %}
   {% if badges and user.is_authenticated %}
   <section class="ca-box" aria-labelledby="badges-title">
     <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span><h2 id="badges-title">Nishonlar</h2><span class="ca-box-tools tabular">{{ badges_earned }} / {{ badges|length }}</span></div>
+    {% if course_badge %}<ul class="ca7-badges ca7-badges-tight ca7-badges-one">{% include "accounts/_tbadge.html" with b=course_badge owner=True %}</ul>{% endif %}
     <div class="ca7-pad">
-      <p>Kursni oxirigacha yechsangiz, nishoni profilingizda chiqadi.</p>
+      <p>Har bir tugatilgan kurs «Bilimdon» nishonini keyingi bosqichga ko‘taradi.</p>
       <ul class="ca7-earned">
         {% for p in badges %}{% if p.progress.completed %}<li><i data-lucide="check" class="lu" aria-hidden="true"></i><a href="{% url 'learn:course' p.slug %}">{{ p.title }}</a></li>{% endif %}{% endfor %}
       </ul>

@@ -97,7 +97,10 @@ def hub(request):
         stages[-1]["courses"].append(p)
     # a course badge per finished course; the ones with problems still to earn show locked
     badges = [p for p in plans if p.progress["total"] and p.is_public]
+    from apps.accounts.badges import board as badge_board
+
     return render(request, "learn/hub.html", {
+        "course_badge": badge_board(request.user, {"learn"})[0] if request.user.is_authenticated else None,
         "stages": stages, "current": current, "next_problem": next_problem, "up_next": up_next,
         "here": current if request.user.is_authenticated else None,
         "badges": badges, "badges_earned": sum(1 for p in badges if p.progress["completed"])})

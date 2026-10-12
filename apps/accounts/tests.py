@@ -364,11 +364,10 @@ def test_tier_up_congratulates_once_and_first_visit_only_records(client):
 
 
 def test_next_streak_badge_counts_from_the_current_run():
-    from apps.accounts.tiers import streak_badges
-    b = streak_badges(current=0, best=6)
-    assert b["earned"] == [] and b["next"]["name"] == "Chiroq" and b["next"]["left"] == 7
-    b = streak_badges(current=3, best=40)
-    assert [x["name"] for x in b["earned"]] == ["Chiroq", "Mash’al"] and b["next"]["left"] == 97
+    from apps.accounts.badges import next_streak
+    assert next_streak(current=0, best=6) == {"name": "Olov II", "icon": "flame", "days": 7, "left": 7}
+    assert next_streak(current=3, best=40)["name"] == "Olov IV" and next_streak(current=3, best=40)["left"] == 97
+    assert next_streak(current=400, best=400) is None  # level V is the top
 
 
 @pytest.mark.django_db
@@ -403,3 +402,54 @@ def test_profile_gives_no_points_place_without_points(client):
     assert client.get(reverse("profile", args=["scorer"])).context["points_rank"] == 1
     # everyone at 0 would share the place after the last scorer: "2 / 34" with no points at all
     assert client.get(reverse("profile", args=["fresh"])).context["points_rank"] is None
+
+
+
+# ---- badges ------------------------------------------------------------------
+
+@pytest.mark.django_db
+def test_a_badge_climbs_its_levels_and_keeps_them(client):
+    from unittest.mock import patch
+
+    from apps.accounts import badges
+    from apps.accounts.models import User as U, UserBadge
+
+    u = U.objects.create_user("ali", password="x")
+    with patch.object(badges, "metrics", return_value={"wins": 12, "solved": 3}):
+        board = {b["key"]: b for b in badges.board(u, {"duels", "problems"})}
+    duelchi = board["duelchi"]
+    assert (duelchi["tier"], duelchi["title"], duelchi["sub"], duelchi["pips"]) == (2, "Duelchi II", "10 ta g‘alaba",
+                                                                                  [True, True, False, False, False])
+    assert duelchi["next"] == {"roman": "III", "at": 50, "done": 2, "total": 40, "shown": "12 / 50"}
+    assert board["yechuvchi"]["tier"] == 0 and board["yechuvchi"]["next"]["shown"] == "3 / 10"
+    assert set(UserBadge.objects.filter(user=u).values_list("family", "tier")) == {("duelchi", 1), ("duelchi", 2)}
+    # the count drops (say, a rejudge): the level stays
+    with patch.object(badges, "metrics", return_value={"wins": 1}):
+        assert {b["key"]: b for b in badges.board(u, {"duels"})}["duelchi"]["tier"] == 2
+    toast = badges.unseen(u)
+    assert [b["title"] for b in toast] == ["Duelchi II"] and badges.unseen(u) == []  # once
+
+
+@pytest.mark.django_db
+def test_new_level_toast_shows_once_and_the_profile_groups_badges(client):
+    from unittest.mock import patch
+
+    from apps.accounts import badges
+    from apps.accounts.models import User as U
+
+    from django.core.cache import cache
+
+    cache.clear()  # the toast's sync throttle is a cache key
+    u = U.objects.create_user("ali", password="x")
+    other = U.objects.create_user("vali", password="x")
+    client.force_login(u)
+    with patch.object(badges, "metrics", side_effect=lambda user, only=None: {"wins": 5} if user == u else {}):
+        page = client.get("/").content.decode()
+        assert "Yangi nishon!" in page and "Duelchi I" in page
+        assert "Yangi nishon!" not in client.get("/").content.decode()
+        mine = client.get(reverse("profile", args=["ali"]))
+        groups = {g["label"]: [b["title"] for b in g["badges"]] for g in mine.context["badge_groups"]}
+        assert "Duelchi I" in groups["Duellar"] and "Yechuvchi" in groups["Masalalar"]  # the owner sees locked ones too
+        client.force_login(other)
+        theirs = client.get(reverse("profile", args=["ali"])).context["badge_groups"]
+        assert [(g["label"], [b["title"] for b in g["badges"]]) for g in theirs] == [("Duellar", ["Duelchi I"])]

@@ -548,34 +548,23 @@ def test_duel_finder_offers_classmates_and_rivals_then_searches_every_handle(cli
 
 
 @pytest.mark.django_db
-def test_duel_badges_count_wins_runs_the_best_rating_and_perfect_quiz_runs(bank):
-    from .duel_badges import duel_badges
+def test_duel_stats_count_wins_runs_the_best_rating_and_perfect_quiz_runs(bank):
+    from .duel_badges import duel_stats
     from .duels import accept, challenge
     from .models import Duel
 
     p1, p2 = _players()
-    names = lambda: [b["name"] for b in duel_badges(p1)["earned"]]  # noqa: E731
-    assert names() == []
-    nxt = {b["name"]: b for b in duel_badges(p1)["next"]}
-    assert (nxt["Birinchi g‘alaba"]["done"], nxt["Birinchi g‘alaba"]["total"]) == (0, 1)
-    assert (nxt["Tajribali"]["done"], nxt["Tajribali"]["shown"]) == (0, "1200 / 1300")
-    assert duel_badges(p1)["total"] == 11
-
+    assert duel_stats(p1) == {"wins": 0, "win_run": 0, "duel_peak": 1200, "perfect": 0, "lightning": 0, "languages": 0}
     duel, _ = challenge(p1, "p2", "python", "easy")
     _play(duel, p1, right=5, secs=2)  # all five in 10 s
     accept(duel, p2)
     _play(duel, p2, right=1)
-    assert names() == ["Birinchi g‘alaba", "Mukammal", "Chaqmoq"]
-    assert {b["name"]: b["done"] for b in duel_badges(p1)["next"]}["Poliglot"] == 1
-    assert [b["name"] for b in duel_badges(p2)["earned"]] == []
-
-    # three wins in a row and a rating past 1300, from older duels: the badges stay once earned
-    for _ in range(2):
-        Duel.objects.create(challenger=p1, opponent=p2, difficulty="easy", status="finished", winner=p1,
-                            mode="code", challenger_delta=45, opponent_delta=-45)
-    Duel.objects.create(challenger=p1, opponent=p2, difficulty="easy", status="finished", winner=p2,
-                        mode="code", challenger_delta=-40, opponent_delta=40)
-    assert {"Zanjir", "Tajribali"} <= set(names())
+    assert duel_stats(p1) == {"wins": 1, "win_run": 1, "duel_peak": 1220, "perfect": 1, "lightning": 1, "languages": 1}
+    for winner, delta in ((p1, 45), (p1, 45), (p2, -40)):
+        Duel.objects.create(challenger=p1, opponent=p2, difficulty="easy", status="finished", winner=winner,
+                            mode="code", challenger_delta=delta, opponent_delta=-delta)
+    stats = duel_stats(p1)
+    assert (stats["wins"], stats["win_run"], stats["duel_peak"]) == (3, 3, 1310)
 
 
 @pytest.mark.django_db
@@ -588,13 +577,15 @@ def test_an_answer_gets_only_its_verdict_then_the_next_question(client, bank):
     url = reverse("classroom:duel_play", args=[duel.pk])
     q = client.get(url).context["q"]
     r = client.post(url, {"index": "0", "answer": q.answer}, HTTP_X_DUEL_ANSWER="1")
-    assert r.json() == {"verdict": "ok", "next": url}  # never the right answer
+    assert r.json() == {"verdict": "ok", "next": url, "ghost": None}  # never the right answer; no opponent yet
     q = client.get(url).context["q"]
     assert client.post(url, {"index": "1", "answer": "nope"}, HTTP_X_DUEL_ANSWER="1").json()["verdict"] == "bad"
     client.get(url)
     assert client.post(url, {"index": "2", "answer": ""}, HTTP_X_DUEL_ANSWER="1").json()["verdict"] == "late"
     page = client.get(url + "?after=1").content.decode()  # the page without script: the verdict alone, then on
-    assert "Noto‘g‘ri" in page and 'http-equiv="refresh"' in page and q.answer not in page.split("<main", 1)[1]
+    card = page[page.index('<section class="ca-quiz-card'):page.index("</section>", page.index('<section class="ca-quiz-card'))]
+    assert "Noto‘g‘ri" in card and 'http-equiv="refresh"' in page and f"<code>{q.answer}</code>" not in card
+    assert "To‘g‘ri javob" not in card
     for i in (3, 4):
         client.get(url)
         last = client.post(url, {"index": str(i), "answer": "x"}, HTTP_X_DUEL_ANSWER="1").json()
@@ -622,3 +613,33 @@ def test_staff_see_every_duels_result_and_both_players_answers(client, bank):
     assert client.get(reverse("moderation:duels"), {"user": "nobody"}).context["page"].object_list == []
     review = client.get(reverse("classroom:duel", args=[duel.pk])).context["review"]
     assert len(review) == 5 and [s["label"] for s in review[0]["answers"]] == ["p1", "p2"]
+
+
+@pytest.mark.django_db
+def test_the_second_player_races_the_firsts_ghost_question_by_question(client, bank):
+    from .duels import accept, challenge
+
+    p1, p2 = _players()
+    duel, _ = challenge(p1, "p2", "python", "easy")
+    _play(duel, p1, right=1, secs=6)  # the first right in 6 s, then four wrong
+    accept(duel, p2)
+    client.force_login(p2)
+    url = reverse("classroom:duel_play", args=[duel.pk])
+    g = client.get(url).context["ghost"]
+    assert (g["name"], g["absent"], g["past"], g["right"]) == ("p1", False, [], 0)
+    assert (g["now"]["state"], g["now"]["took_ms"], g["now"]["secs"]) == ("ok", 6000, "6,0")  # never their answer
+    assert "answer" not in g["now"]
+    j = client.post(url, {"index": "0", "answer": "nope"}, HTTP_X_DUEL_ANSWER="1").json()
+    assert j["verdict"] == "bad" and j["ghost"]["state"] == "ok"
+    g = client.get(url).context["ghost"]
+    assert [c["state"] for c in g["past"]] == ["ok"] and g["right"] == 1 and g["now"]["state"] == "bad"
+    assert client.get(url, {"ghost": "1"}).json()["state"] == "bad"
+    assert client.get(url, {"ghost": "4"}).json() == {"state": "none"}  # a question not shown to you yet
+
+    # the first player, while the second hasn't started: the ghost is absent
+    p3 = User.objects.create_user("p3", password="x")
+    duel, _ = challenge(p3, "p1", "python", "medium")
+    client.force_login(p3)
+    url = reverse("classroom:duel_play", args=[duel.pk])
+    g = client.get(url).context["ghost"]
+    assert g["absent"] is True and "p1 hali o‘ynamagan" in client.get(url).content.decode()

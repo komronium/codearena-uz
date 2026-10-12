@@ -50,6 +50,7 @@ TEMPLATES = [{
         "apps.classroom.context_processors.unread_reviews",
         "apps.problems.context_processors.streak",
         "apps.accounts.context_processors.tier_up",
+        "apps.accounts.context_processors.new_badges",
         "apps.home.context_processors.nav",
     ]},
 }]

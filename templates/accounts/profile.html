@@ -173,16 +173,27 @@ Colour carries meaning only: the tier colour is the person, green/red the result
 </section>
 {% endif %}
 
-{% if streak_badges.earned or plan_badges or contest_badges or duel_badges.earned or streak_badges.next and user == profile_user %}
+{% if badge_groups or contest_badges %}
 <section aria-labelledby="badges-title">
-  <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span><h2 id="badges-title">Nishonlar</h2></div>
-  <ul class="ca7-badges">
-    {% for p in plan_badges %}{% url 'learn:course' p.slug as plan_url %}{% include "accounts/_badge7.html" with tone="lapis" icon=p.icon title=p.title sub="Kurs tugatildi" href=plan_url done=None total=None %}{% endfor %}
-    {% for b in contest_badges %}{% url 'contests:standings' b.contest.pk as round_url %}{% if b.medal %}{% include "accounts/_badge7.html" with tone="gold" icon="medal" title=b.name sub=b.contest.title medal=b.medal href=round_url done=None total=None kind="ca-badge-contest" %}{% else %}{% include "accounts/_badge7.html" with tone="gold" icon="flag" title=b.name sub=b.contest.title of_solved=b.solved of_total=b.total medal=None href=round_url done=None total=None kind="ca-badge-contest" %}{% endif %}{% endfor %}
-    {% for b in streak_badges.earned %}{% with sub=b.days|stringformat:"d"|add:" kun ketma-ket" %}{% include "accounts/_badge7.html" with tone="gold" icon=b.icon title=b.name sub=sub href=None done=None total=None %}{% endwith %}{% endfor %}
-    {% for b in duel_badges.earned %}{% url 'classroom:duels' as duels_url %}{% include "accounts/_badge7.html" with tone="duel" icon=b.icon title=b.name sub=b.sub href=duels_url done=None total=None %}{% endfor %}
-    {% if streak_badges.next and user == profile_user %}{% with n=streak_badges.next %}{% with sub=n.days|stringformat:"d"|add:" kun ketma-ket yeching" %}{% include "accounts/_badge7.html" with tone="locked" icon=n.icon title="«"|add:n.name|add:"»" sub=sub href=None done=streak.0 total=n.days %}{% endwith %}{% endwith %}{% endif %}
-  </ul>
+  <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span><h2 id="badges-title">Nishonlar</h2><span class="ca7-r text-mute tabular">{{ badges_earned }} / {{ badges_total }} nishon · {{ levels_earned }} bosqich</span></div>
+  {% comment %}Each group's families: the owner sees every one (the ones not reached yet grey, with the way to level I),
+  a visitor only the reached ones. Round badges (Contest.badge) follow, coloured by place.{% endcomment %}
+  <div class="ca-tb-groups">
+  {% for g in badge_groups %}
+  <div class="ca-tb-group">
+    <h3>{{ g.label }}</h3>
+    <ul>{% for b in g.badges %}{% include "accounts/_tbadge.html" with owner=badge_owner %}{% endfor %}</ul>
+  </div>
+  {% endfor %}
+  {% if contest_badges %}
+  <div class="ca-tb-group">
+    <h3>Musobaqa nishonlari</h3>
+    <ul>
+      {% for b in contest_badges %}{% url 'contests:standings' b.contest.pk as round_url %}{% if b.medal %}{% include "accounts/_badge7.html" with tone="medal" icon="medal" title=b.name sub=b.contest.title medal=b.medal href=round_url done=None total=None kind="ca-badge-contest" %}{% else %}{% include "accounts/_badge7.html" with tone="lapis" icon="flag" title=b.name sub=b.contest.title of_solved=b.solved of_total=b.total medal=None href=round_url done=None total=None kind="ca-badge-contest" %}{% endif %}{% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+  </div>
 </section>
 {% endif %}
 </div>

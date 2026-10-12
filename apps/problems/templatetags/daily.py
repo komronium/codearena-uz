@@ -1,6 +1,6 @@
 from django import template
 
-from apps.accounts.tiers import streak_badges
+from apps.accounts.badges import next_streak
 
 from ..daily import month_strip, streaks, week_strip
 from ..models import DailySolve
@@ -17,5 +17,5 @@ def daily_stats(daily, user) -> dict:
     if user.is_authenticated:
         cur, best = streaks(user)
         out.update(streak=cur, best=best, week=week_strip(user), month=month_strip(user),
-                   next_badge=streak_badges(cur, best)["next"])
+                   next_badge=next_streak(cur, best))
     return out

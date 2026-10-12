@@ -19,7 +19,7 @@ from apps.problems.views import _render_statement
 from apps.submissions.models import Submission
 
 from . import duels
-from .duel_badges import duel_badges
+from apps.accounts.badges import board as badge_board
 from .access import can_review
 from .forms import AssignmentForm
 from .models import Assignment, AssignmentProblem, Duel, DuelAnswer, DuelQuestion, ReviewComment
@@ -223,7 +223,7 @@ def duel_list(request):
         "history": [d for d in mine if d.status not in duels.OPEN and d.opponent_id][:30],
         "error": error, "languages": duels.LANGUAGES, "levels": duels.LEVELS, "joinable": joinable,
         "form": request.POST if error else {}, "per_question": int(duels.PER_QUESTION.total_seconds()),
-        "n_questions": duels.QUESTIONS, "badges": duel_badges(request.user),
+        "n_questions": duels.QUESTIONS, "badges": badge_board(request.user, {"duels"}),
     })
 
 
@@ -371,8 +371,16 @@ def duel_play(request, pk):
             if a is None:
                 return JsonResponse({"next": play_url})
             verdict = _verdict(duel, request.user, a)
-            return JsonResponse({"verdict": verdict["state"], "next": verdict["next"]})
+            ghost = _ghost(duel, request.user, a.index)
+            return JsonResponse({"verdict": verdict["state"], "next": verdict["next"],
+                                 "ghost": ghost["now"] if ghost else None})
         return redirect(play_url + f"?after={index}")
+    asked = request.GET.get("ghost")
+    if asked is not None and asked.isdigit():
+        if not DuelAnswer.objects.filter(duel=duel, user=request.user, index=int(asked)).exists():
+            return JsonResponse({"state": "none"})  # only a question you have been shown
+        ghost = _ghost(duel, request.user, int(asked))
+        return JsonResponse(ghost["now"] if ghost else {"state": "none"})
     after = request.GET.get("after")
     if after is not None and after.isdigit():
         a = DuelAnswer.objects.filter(duel=duel, user=request.user, index=int(after)).first()
@@ -392,7 +400,34 @@ def duel_play(request, pk):
         "per_question": int(duels.PER_QUESTION.total_seconds()),
         "options": _shuffled(q.options, f"{duel.pk}-{request.user.pk}-{current.index}"),
         "cells": _my_cells(r), "language": duel.get_language_display(),
+        "my_right": r.right, "ghost": _ghost(duel, request.user, current.index),
     })
+
+
+def _ghost(duel, me, index: int) -> dict | None:
+    """The opponent as a ghost beside your run: how they did on the questions before this one (right,
+    wrong, or not there yet) and on this one, when they answered it, so the page can show it as your clock
+    reaches that moment. Never their answer, only right or wrong and the time. None with no opponent."""
+    other = duel.opponent if me.pk == duel.challenger_id else duel.challenger
+    if other is None:
+        return None
+    r = duels.run(duel, other.pk)
+    if r is None:
+        return {"name": other.username, "absent": True, "past": [], "right": 0, "now": {"state": "absent"}}
+    now = timezone.now()
+    by_index = {a.index: a for a in r.answers}
+
+    def cell(i):
+        a = by_index.get(i)
+        if a is None or not r.closed(a, now):
+            return {"state": "bad" if r.over(now) else "wait"}  # a question they never saw counts wrong
+        late = a.answered_at is None or a.answered_at > a.shown_at + duels.PER_QUESTION + duels.GRACE
+        took = min(a.answered_at - a.shown_at, duels.PER_QUESTION) if a.answered_at else duels.PER_QUESTION
+        return {"state": "ok" if a.correct else ("late" if late or not a.answer else "bad"),
+                "took_ms": int(took.total_seconds() * 1000), "secs": f"{took.total_seconds():.1f}".replace(".", ",")}
+    past = [cell(i) for i in range(index)]
+    return {"name": other.username, "absent": False, "past": past,
+            "right": sum(1 for c in past if c["state"] == "ok"), "now": cell(index)}
 
 
 def _verdict(duel, user, a) -> dict:

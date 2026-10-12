@@ -1,0 +1,16 @@
+{% comment %}One badge family at its level, the same everywhere (apps.accounts.badges): a khatam star in the level's metal
+(I bronze, II silver, III gold, IV platinum, V diamond) with the family's icon and the level's numeral, the title
+("Duelchi III"), what the level took, pips for the levels, and for its owner how far the next one is. A family not
+reached yet is grey. ctx: b (a board() entry), owner (bool).{% endcomment %}
+<li class="ca7-badge ca-tb ca-t{{ b.tier }}{% if not b.tier %} is-locked{% endif %}"{% if b.earned_at %} title="{{ b.metal|capfirst }} · {{ b.earned_at|date:'d.m.Y' }}da olingan"{% endif %}>
+  <span class="ca7-badge-art" aria-hidden="true">
+    <svg viewBox="0 0 64 64"><path d="M62 32l-8.78 8.78v12.44H40.78L32 62l-8.78-8.78H10.78V40.78L2 32l8.78-8.78V10.78h12.44L32 2l8.78 8.78h12.44v12.44z"/><path class="in" d="M53 32l-6.15 6.15v8.7h-8.7L32 53l-6.15-6.15h-8.7v-8.7L11 32l6.15-6.15v-8.7h8.7L32 11l6.15 6.15h8.7v8.7z"/></svg>
+    <i data-lucide="{{ b.icon }}" class="lu"></i>
+    {% if b.tier %}<span class="ca-tb-num">{{ b.roman }}</span>{% endif %}
+  </span>
+  <b>{{ b.title }}</b>
+  <small>{{ b.sub }}</small>
+  <span class="ca-tb-pips" role="img" aria-label="{{ b.tier }} / {{ b.max }} bosqich">{% for on in b.pips %}<i{% if on %} class="on"{% endif %}></i>{% endfor %}</span>
+  {% if owner and b.next %}<span class="ca7-badge-pg" role="progressbar" aria-valuenow="{{ b.next.done }}" aria-valuemin="0" aria-valuemax="{{ b.next.total }}" aria-label="{{ b.name }} {{ b.next.roman }}: {{ b.next.shown }}"><i style="width: {% widthratio b.next.done b.next.total 100 %}%"></i></span><small class="tabular">{{ b.next.roman }}: {{ b.next.shown }}</small>
+  {% elif owner and b.tier and not b.next %}<small class="ca-tb-max">Eng yuqori bosqich</small>{% endif %}
+</li>
