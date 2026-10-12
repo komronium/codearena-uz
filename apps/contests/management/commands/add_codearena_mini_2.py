@@ -97,6 +97,22 @@ def iliq_tests(rng):
     return tests
 
 
+def qadam_solve(inp):
+    v = _nums(inp)
+    return _lines(sum(1 for x in v[1:] if x >= 10000))
+
+
+def qadam_tests(rng):
+    def case(a):
+        return _rows(len(a), *a)
+    tests = [case([8500, 10000, 12000, 9999, 10001, 3000, 15000]), case([10000]), case([9999]), case([10000] * 7),
+             case([0]), case([50000, 0, 10000, 9999]), case([9999] * 30), case([10000, 10000, 9999, 10001])]
+    while len(tests) < 22:
+        n = rng.choice([1, 7, 30, 365, 1000])
+        tests.append(case([rng.choice([10000, 9999, 10001, rng.randint(0, 50000), rng.randint(5000, 15000)]) for _ in range(n)]))
+    return tests
+
+
 def marsh_solve(inp):
     v = _nums(inp)
     now = best = 0
@@ -279,6 +295,15 @@ EASY = {
                   "haroratlar ($-50 \\le t_i \\le 50$)."),
         "output": "Bitta son — oldingi kundan iliqroq bo‘lgan kunlar soni.",
     },
+    "qadamlar": {
+        "title": "Qadamlar", "tags": ["for-loop", "conditionals"], "solve": qadam_solve, "tests": qadam_tests,
+        "statement": ("15 yoshli Ali 7-sinfda o‘qiydi va telefonidagi ilova bilan har kuni qadamlarini sanaydi. Shifokor "
+                      "unga kuniga kamida 10 000 qadam yurishni maslahat berdi; maktabgacha esa 1200 qadam." + _ai2("kunlar_qz", "kun_vx")
+                      + "\n\nAli $n$ kun qadamlarini yozib bordi. Shu kunlarning nechtasida u shifokor maslahatini bajargan?"),
+        "input": ("Birinchi qatorda $n$ ($1 \\le n \\le 1000$). Keyingi $n$ qatorda bittadan son — o‘sha kungi qadamlar "
+                  "($0 \\le$ qadamlar $\\le 50\\,000$)."),
+        "output": "Bitta son — maslahat bajarilgan kunlar soni.",
+    },
     "marshrutka": {
         "title": "Marshrutka", "tags": ["for-loop", "simulation"], "solve": marsh_solve, "tests": marsh_tests,
         "statement": ("Marshrutka bo‘sh holda yo‘lga chiqdi va $n$ ta bekatda to‘xtadi. Har bir bekatda avval bir necha "
@@ -432,7 +457,7 @@ def _easy(key: str, points: int) -> dict:
 
 
 # the round: two Beginner, the two Easy ones picked from EASY, the Medium one
-PICKED_EASY = ("musbatlar", "marshrutka")
+PICKED_EASY = ("musbatlar", "qadamlar")
 PROBLEMS = [TAKSI, UCHBURCHAK, _easy(PICKED_EASY[0], 750), _easy(PICKED_EASY[1], 1000), QAVS]
 
 
