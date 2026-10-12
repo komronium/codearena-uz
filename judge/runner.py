@@ -8,7 +8,6 @@ from django.core.cache import cache
 
 from apps.problems.models import Language, Problem
 from apps.submissions.models import Submission, TestResult
-from apps.classroom.duels import settle_for_submission
 from apps.submissions.solves import refresh_solves
 from judge import sandbox, sql_judge
 from judge.compare import outputs_match
@@ -67,7 +66,6 @@ def run_submission(submission_id: int) -> None:
     _drop_standings_cache(sub)
     refresh_solves(sub.problem_id, [sub.user_id])
     sub.refresh_from_db(fields=["verdict"])
-    settle_for_submission(sub)
 def _run_code_submission(sub: Submission) -> None:
     lang = sub.language
     problem = sub.problem

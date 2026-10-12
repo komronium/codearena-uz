@@ -101,11 +101,11 @@ def home(request):
         ids = [ap.problem_id for ap in a.assignment_problems.all()]
         a.my_total, a.my_solved = len(ids), sum(1 for i in ids if i in solved)
     duels.settle_open(user)
-    mine = Duel.objects.filter(Q(challenger=user) | Q(opponent=user)).select_related("challenger", "opponent", "problem")
+    mine = Duel.objects.filter(Q(challenger=user) | Q(opponent=user)).select_related("challenger", "opponent")
     live = list(mine.filter(status__in=duels.OPEN).exclude(status=Duel.Status.PENDING, opponent=user)[:3])
-    for d in live:  # your own clock, if it still runs
-        clock = d.clock(user.pk)
-        d.my_end = clock[1] if clock and clock[1] > now else None
+    for d in live:  # your own run, if it still goes on
+        r = duels.run(d, user.pk) if d.mode == Duel.Mode.QUIZ else None
+        d.my_end = r.end if r is not None and not r.over(now) else None
     current, best = streaks(user)
     next_picks = next_problems(user, exclude=(daily.problem_id,) if daily else ())
     today = timezone.localdate()

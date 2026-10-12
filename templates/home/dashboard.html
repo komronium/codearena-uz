@@ -190,11 +190,11 @@
       <ul class="ca-facts">
         {% for d in active_duels %}
         <li><a class="ca-link min-w-0 truncate" href="{% url 'classroom:duel' d.pk %}">{% if d.opponent %}{{ d.challenger.username }} vs {{ d.opponent.username }}{% else %}Ochiq duel, raqib kutilmoqda{% endif %}</a>
-          {% if d.my_end %}<b class="tabular shrink-0 text-xs text-ok" data-countdown="{{ d.my_end|date:'c' }}" data-label="" data-suffix="1"></b>{% endif %}</li>
+          {% if d.my_end %}<a class="ca-btn ca-btn-gold ca-btn-xs shrink-0" href="{% url 'classroom:duel_play' d.pk %}">Davom etish</a>{% endif %}</li>
         {% endfor %}
         {% for d in challenges %}
         <li class="flex-wrap">
-          <span><b>{{ d.challenger.username }}</b> <span class="text-mute">sizni chaqirdi, {{ d.get_difficulty_display }}</span></span>
+          <span><b>{{ d.challenger.username }}</b> <span class="text-mute">sizni chaqirdi, {{ d.get_language_display }} · {{ d.get_difficulty_display }}</span></span>
           <span class="flex gap-1.5">
             <form method="post" action="{% url 'classroom:duel_answer' d.pk %}">{% csrf_token %}<input type="hidden" name="accept" value="1"><button class="ca-btn ca-btn-primary ca-btn-xs">Qabul qilish</button></form>
             <form method="post" action="{% url 'classroom:duel_answer' d.pk %}">{% csrf_token %}<button class="ca-btn ca-btn-ghost ca-btn-xs">Rad etish</button></form>
@@ -204,7 +204,7 @@
       </ul>
     {% else %}
       <div class="ca7-pad">
-        <p>Bitta masala, har kimga 30 daqiqa. Kim birinchi yechsa, o‘sha g‘olib.</p>
+        <p>Kod beriladi: nima chiqaradi yoki bo‘sh joyga nima yoziladi? 5 ta savol, har biriga 20 soniya.</p>
         <a class="ca-btn ca-btn-soft" href="{% url 'classroom:duels' %}">Raqib topish</a>
       </div>
     {% endif %}

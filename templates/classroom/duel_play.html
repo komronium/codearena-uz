@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Duel · {{ n }}/{{ n_questions }}-savol{% endblock %}
+{% block content %}
+{% comment %}One question of your run at a time. Its time runs on the server from when it was first shown; the
+bar here only shows it, and at zero the form sends itself (an empty answer counts as wrong). Copying out of
+the question is blocked, so it can't be pasted into an AI or a compiler in the 20 seconds.{% endcomment %}
+<div class="ca-quiz" data-nocopy>
+  <div class="ca-quiz-top">
+    <a class="ca-link text-sm text-mute" href="{% url 'classroom:duel' duel.pk %}"><i data-lucide="swords" class="lu mr-1" aria-hidden="true"></i>{{ duel.challenger.username }} vs {{ duel.opponent.username|default:"?" }}</a>
+    <ol class="ca-quiz-steps" aria-label="Savollar">
+      {% for c in cells %}<li class="{% if c %}is-{{ c }}{% endif %}{% if forloop.counter == n %} is-here{% endif %}"><span class="sr-only">{{ forloop.counter }}-savol: {% if c == "ok" %}to‘g‘ri{% elif c == "bad" %}noto‘g‘ri{% elif c == "now" %}hozirgi{% else %}hali yo‘q{% endif %}</span></li>{% endfor %}
+    </ol>
+    <span class="ca-quiz-meta"><b>{{ language }}</b> · {{ duel.get_difficulty_display }}</span>
+  </div>
+
+  <section class="ca-quiz-card" aria-labelledby="quiz-ask">
+    <div class="ca-quiz-head"><p class="ca-quiz-n">{{ n }}-savol, {{ n_questions }} tadan</p>{% if not feedback %}<b class="ca-quiz-secs tabular" id="quiz-secs" aria-hidden="true">{% widthratio remaining_ms 1000 1 %}</b>{% endif %}</div>
+    {% if feedback %}
+    <div class="ca-quiz-verdict {% if feedback.correct %}is-ok{% else %}is-bad{% endif %}" role="status">
+      <i data-lucide="{% if feedback.correct %}check{% elif timed_out %}timer-off{% else %}x{% endif %}" class="lu" aria-hidden="true"></i>
+      <b id="quiz-ask">{% if feedback.correct %}To‘g‘ri!{% elif timed_out %}Vaqt tugadi{% else %}Noto‘g‘ri{% endif %}</b>
+    </div>
+    <p class="ca-quiz-ask">{% include "classroom/_quiz_ask.html" %}</p>
+    {% include "classroom/_quiz_code.html" %}
+    <dl class="ca-quiz-answers">
+      <div><dt>To‘g‘ri javob</dt><dd><code>{{ q.answer }}</code></dd></div>
+      {% if not feedback.correct and feedback.answer %}<div><dt>Siz</dt><dd><code class="is-bad">{{ feedback.answer }}</code></dd></div>{% endif %}
+    </dl>
+    {% if q.explain %}<p class="ca-quiz-explain">{{ q.explain }}</p>{% endif %}
+    <div class="ca-quiz-go">
+      {% if last %}<a class="ca-btn ca-btn-primary" href="{% url 'classroom:duel' duel.pk %}" autofocus>Natijani ko‘rish<kbd>Enter</kbd></a>
+      {% else %}<a class="ca-btn ca-btn-primary" href="{% url 'classroom:duel_play' duel.pk %}" autofocus>Keyingi savol<kbd>Enter</kbd></a>
+      <small>Keyingi savolning {{ per_question|default:20 }} soniyasi ochilganda boshlanadi.</small>{% endif %}
+    </div>
+    {% else %}
+    <div class="ca-quiz-clock" aria-hidden="true"><i id="quiz-bar"></i></div>
+    <p class="ca-quiz-ask" id="quiz-ask">{% include "classroom/_quiz_ask.html" %}</p>
+    {% if q.in_main %}<p class="ca-quiz-note"><code>main()</code> ichidagi kod{% if q.language == "cpp" %}, <code>bits/stdc++.h</code> va <code>using namespace std</code> bilan{% else %}, <code>java.util.*</code> bilan{% endif %}.</p>{% endif %}
+    {% include "classroom/_quiz_code.html" %}
+    <form method="post" id="quiz-form" autocomplete="off">{% csrf_token %}
+      <input type="hidden" name="index" value="{{ a.index }}">
+      {% if options %}
+      <div class="ca-quiz-options">
+        {% for o in options %}<button name="answer" value="{{ o }}" class="ca-quiz-option"><kbd>{{ forloop.counter }}</kbd><code>{{ o }}</code></button>{% endfor %}
+      </div>
+      {% if q.has_error_option %}<p class="ca-quiz-note">«Xato» — dastur xato bilan to‘xtaydi yoki kompilyatsiya qilinmaydi.</p>{% endif %}
+      {% else %}
+      <div class="ca-quiz-type">
+        <label class="sr-only" for="quiz-answer">Javob</label>
+        <input id="quiz-answer" name="answer" class="ca7-fld !pl-3 font-mono" autofocus autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="200" placeholder="Javobni yozing">
+        <button class="ca-btn ca-btn-primary">Javob berish</button>
+      </div>
+      <p class="ca-quiz-note">Bo‘sh joylar hisobga olinmaydi; katta-kichik harf hisobga olinadi.</p>
+      {% endif %}
+    </form>
+    {% endif %}
+  </section>
+</div>
+<script>
+(() => {
+  const root = document.querySelector("[data-nocopy]");
+  // copying, cutting, dragging and the context menu are off inside the question (typing the answer isn't)
+  for (const ev of ["copy", "cut", "contextmenu", "dragstart", "selectstart"]) {
+    root.addEventListener(ev, (e) => { if (!e.target.closest("input")) e.preventDefault(); });
+  }
+  const go = document.querySelector(".ca-quiz-go a");
+  if (go) {
+    document.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.repeat) { e.preventDefault(); go.click(); } });
+    return;
+  }
+  const form = document.getElementById("quiz-form"), bar = document.getElementById("quiz-bar"),
+        secs = document.getElementById("quiz-secs"), all = {{ per_question }} * 1000,
+        end = performance.now() + {{ remaining_ms }};
+  let sent = false;
+  form.addEventListener("submit", () => { sent = true; form.querySelectorAll("button").forEach((b) => b.setAttribute("aria-disabled", "true")); });
+  const tick = () => {
+    const left = Math.max(0, end - performance.now());
+    bar.style.width = (left / all * 100) + "%";
+    bar.classList.toggle("is-low", left < 5000);
+    secs.textContent = Math.ceil(left / 1000);
+    if (left <= 0) { if (!sent) { sent = true; form.requestSubmit(); } return; }
+    requestAnimationFrame(tick);
+  };
+  tick();
+  const options = [...form.querySelectorAll(".ca-quiz-option")];
+  if (options.length) {
+    document.addEventListener("keydown", (e) => {
+      const i = Number(e.key) - 1;
+      if (!sent && i >= 0 && i < options.length && !e.ctrlKey && !e.metaKey && !e.altKey) { e.preventDefault(); options[i].click(); }
+    });
+  }
+})();
+</script>
+{% endblock %}

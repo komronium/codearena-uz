@@ -3,6 +3,7 @@
   <div class="ca-row-main">
     <a class="ca-row-title ca-link" href="{% url 'classroom:duel' d.pk %}">{% if d.opponent %}{{ d.challenger.username }} <span class="text-mute">vs</span> {{ d.opponent.username }}{% else %}Ochiq duel{% endif %}</a>
     <div class="ca-row-meta">
+      {% if d.mode == "quiz" %}<span>{{ d.get_language_display }}</span>{% endif %}
       <span class="ca-diff ca-diff-{{ d.difficulty }}">{{ d.get_difficulty_display }}</span>
       <span>{{ d.get_status_display }}</span>
       <time datetime="{{ d.created|date:'c' }}">{{ d.created|date:"d.m H:i" }}</time>

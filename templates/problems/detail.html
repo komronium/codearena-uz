@@ -69,12 +69,6 @@ the console (samples, your own input, the run's result) and the one gold "Yubori
     {% endif %}
     <div class="ca-doc" id="doc-statement" role="tabpanel" aria-labelledby="tab-doc-statement">
       {% include "contests/_dq_banner.html" with participation=my_participation %}
-      {% if duel %}
-      <a href="{% url 'classroom:duel' duel.pk %}" class="ca-alert ca-alert-warn mb-4 flex flex-wrap items-center justify-between gap-2">
-        <span><i data-lucide="swords" class="lu mr-1.5" aria-hidden="true"></i><b>Duel:</b> vaqtingiz ketmoqda — tezroq yechgan g‘olib. Maslahatlar yopiq.</span>
-        <span class="tabular font-bold" data-countdown="{{ duel.my_end|date:'c' }}" data-label="" data-suffix="1"></span>
-      </a>
-      {% endif %}
       {% if open_contest %}
       <div class="ca-alert mb-4 flex flex-wrap items-center justify-between gap-3" role="status">
         <span><i data-lucide="trophy" class="lu mr-1.5" aria-hidden="true"></i>Bu masala hozir <strong>«{{ open_contest.title }}»</strong> musobaqasida. Natijalar jadvalida ko‘rinish uchun avval ro‘yxatdan o‘ting — aks holda yechim amaliyot sifatida hisoblanadi.</span>
