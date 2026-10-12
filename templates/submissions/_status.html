@@ -21,7 +21,7 @@ compact=True: the verdict chip only.{% endcomment %}
   <dl class="ca7-vhero-nums">
     <div><dt>Vaqt</dt><dd class="tabular">{% if s.is_terminal and s.verdict != 'CE' %}{{ s.exec_ms }} ms{% else %}—{% endif %}</dd></div>
     <div><dt>Xotira</dt><dd class="tabular">{% if s.is_terminal and s.verdict != 'CE' and s.mem_kb %}{% widthratio s.mem_kb 1024 1 %} MB{% else %}—{% endif %}</dd></div>
-    <div><dt>Cheklov</dt><dd class="tabular">{% if s.problem.tl_ms >= 1000 and s.problem.tl_ms|divisibleby:1000 %}{% widthratio s.problem.tl_ms 1000 1 %} s{% else %}{{ s.problem.tl_ms }} ms{% endif %}{% if s.problem.kind != "sql" %} · {{ s.problem.ml_mb }} MB{% endif %}</dd></div>
+    <div><dt>Cheklov</dt><dd class="tabular">{{ s.problem.tl_ms }} ms{% if s.problem.kind != "sql" %} · {{ s.problem.ml_mb }} MB{% endif %}</dd></div>
     <div><dt>Masala</dt><dd><span class="ca-diff ca-diff-{{ s.problem.difficulty }} !text-[1.05rem]">{{ s.problem.get_difficulty_display }}</span></dd></div>
   </dl>
   {% if s.is_terminal and s.verdict != 'AC' %}

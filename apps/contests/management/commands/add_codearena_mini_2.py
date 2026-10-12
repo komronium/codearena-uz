@@ -293,69 +293,49 @@ EASY = {
 
 # ---- Medium: qavslar ------------------------------------------------------------------------------
 def qavs_solve(inp):
-    pairs = {")": "(", "]": "[", "}": "{"}
-    out = []
-    for s in inp.split("\n")[1:]:
-        s = s.strip()
-        if not s:
-            continue
-        stack = []
-        ok = True
-        for c in s:
-            if c in "([{":
-                stack.append(c)
-            elif not stack or stack.pop() != pairs[c]:
-                ok = False
-                break
-        out.append("Ha" if ok and not stack else "Yo'q")
-    return _lines(*out)
+    depth = 0
+    for c in inp.split()[0]:
+        depth += 1 if c == "(" else -1
+        if depth < 0:
+            break
+    return _lines("Ha" if depth == 0 else "Yo'q")
 
 
 def qavs_tests(rng):
-    def good(n):
-        s, stack = [], []
-        while len(s) + len(stack) < n:
-            if stack and (rng.random() < .5 or len(s) + 2 * len(stack) >= n):
-                s.append({"(": ")", "[": "]", "{": "}"}[stack.pop()])
+    def good(n):  # a correct sequence of n pairs
+        s, open_ = [], 0
+        while len(s) < 2 * n:
+            if open_ and (rng.random() < .5 or len(s) + open_ >= 2 * n):
+                s.append(")")
+                open_ -= 1
             else:
-                c = rng.choice("([{")
-                stack.append(c)
-                s.append(c)
-        return "".join(s) + "".join({"(": ")", "[": "]", "{": "}"}[c] for c in reversed(stack))
+                s.append("(")
+                open_ += 1
+        return "".join(s)
 
     def spoil(s):
         i = rng.randrange(len(s))
-        return s[:i] + rng.choice("()[]{}") + s[i + 1:]
-
-    def case(ss):
-        return _rows(len(ss), *ss)
-    tests = [case(["([]){}", "([)]", "((", "{[()()]}"]), case(["()", ")(", "]", "[[]]{}()"]),
-             case(["(" * 10 + ")" * 10]), case(["(" * 50000 + ")" * 49999]), case([")" + "()" * 1000])]
-    while len(tests) < 20:
-        ss = []
-        for _ in range(rng.randint(1, 20)):
-            s = good(rng.choice([2, 10, 100, 1000]))
-            ss.append(spoil(s) if rng.random() < .5 else s)
-        tests.append(case(ss))
-    for _ in range(3):  # long lines: the total stays within 2·10^5
-        tests.append(case([good(100000), spoil(good(99998))]))
+        return s[:i] + (")" if s[i] == "(" else "(") + s[i + 1:]
+    tests = ["(()())", "())(", "(", ")", "()", ")(", "((()))", "(()", "())", "()()()",
+             "(" * 50000 + ")" * 50000, "(" * 50000 + ")" * 49999 + "(", ")" + "()" * 49999 + "("]
+    while len(tests) < 22:
+        s = good(rng.choice([2, 10, 100, 1000, 50000]))
+        tests.append(spoil(s) if rng.random() < .5 else s)
     return tests
 
 
 QAVS = {
     "slug": "mc2-qavslar", "title": "Qavslar", "difficulty": "medium", "points": 1500,
     "tags": ["stack", "strings"], "solve": qavs_solve, "tests": qavs_tests, "samples": 2,
-    "statement": ("Qavslar ketma-ketligi to‘g‘ri deyiladi, agar har bir ochilgan qavs o‘zi turidagi qavs bilan "
-                  "yopilsa va qavslar bir-birining ichida to‘g‘ri joylashsa: `([]){}` — to‘g‘ri, `([)]` va `((` — "
-                  "noto‘g‘ri." + _ai("qavs_zv") + "\n\nUch xil qavs bor: `()`, `[]` va `{}`. Har bir ketma-ketlik "
-                  "to‘g‘rimi?"),
-    "input": ("Birinchi qatorda $t$ ($1 \\le t \\le 20$). Keyingi $t$ qatorda bittadan ketma-ketlik: faqat qavslar, "
-              "uzunligi 1 dan $10^5$ gacha, hammasining jami uzunligi $2 \\cdot 10^5$ dan oshmaydi."),
-    "output": "Har bir ketma-ketlik uchun alohida qatorda `Ha` yoki `Yo'q`.",
+    "statement": ("Qavslar ketma-ketligi to‘g‘ri deyiladi, agar har bir ochilgan qavs `(` o‘zidan keyin kelgan "
+                  "qavs `)` bilan yopilsa: `(()())` — to‘g‘ri, `())(` va `(` — noto‘g‘ri." + _ai("qavs_zv")
+                  + "\n\nBerilgan ketma-ketlik to‘g‘rimi?"),
+    "input": "Bitta qatorda faqat `(` va `)` belgilaridan iborat ketma-ketlik, uzunligi 1 dan $10^5$ gacha.",
+    "output": "`Ha` yoki `Yo'q`.",
 }
 
 LIFT = {
-    "slug": "mc2-lift", "title": "Lift", "difficulty": "beginner", "points": 500,
+    "slug": "mc2-lift", "title": "Lift", "difficulty": "beginner", "points": 500, "tl_ms": 500,
     "tags": ["arithmetic", "input-output"], "solve": lift_solve, "tests": lift_tests, "samples": 2,
     "statement": ("Lift $c$-qavatda turibdi. Siz $a$-qavatda liftni chaqirasiz va $b$-qavatga borasiz. Lift bir "
                   "qavatdan qo‘shni qavatga 3 soniyada o‘tadi; sizning qavatingizda va $b$-qavatda eshik ochilib "
@@ -367,7 +347,7 @@ LIFT = {
 }
 
 DARS = {
-    "slug": "mc2-dars-tugashi", "title": "Dars tugashi", "difficulty": "beginner", "points": 500,
+    "slug": "mc2-dars-tugashi", "title": "Dars tugashi", "difficulty": "beginner", "points": 500, "tl_ms": 500,
     "tags": ["arithmetic", "input-output"], "solve": dars_solve, "tests": dars_tests, "samples": 2,
     "statement": ("Dars $h$ soat $m$ daqiqada boshlanadi va $d$ daqiqa davom etadi. Dars soat nechada tugaydi?"
                   + _ai("tugash_zq") + "\n\nVaqtni 24 soatlik `SS:DD` ko‘rinishida chiqaring: soat ham, daqiqa "
@@ -380,7 +360,7 @@ DARS = {
 
 def _easy(key: str, points: int) -> dict:
     spec = EASY[key]
-    return {**spec, "slug": f"mc2-{key}", "difficulty": "easy", "points": points, "samples": 2}
+    return {"tl_ms": 500, **spec, "slug": f"mc2-{key}", "difficulty": "easy", "points": points, "samples": 2}
 
 
 # the round: two Beginner, the two Easy ones picked from EASY, the Medium one
@@ -390,7 +370,7 @@ PROBLEMS = [LIFT, DARS, _easy(PICKED_EASY[0], 750), _easy(PICKED_EASY[1], 1000),
 
 class Command(WeekendCommand):
     help = "Attaches CodeArena Mini #2's five problems (hidden) to the contest as A..E."
-    ml_mb = 256
+    ml_mb = 64  # the solutions here use under 15 MB
     min_tests = 20
 
     def add_arguments(self, parser):

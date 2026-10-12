@@ -112,7 +112,7 @@ the console (samples, your own input, the run's result) and the one gold "Yubori
           {% endif %}
           {% endif %}
           {% if problem.kind == "sql" %}<span class="ca-kind-sql"><i data-lucide="database" class="lu" aria-hidden="true"></i>SQL</span>{% endif %}
-          <span title="Vaqt chegarasi"><i data-lucide="clock" class="lu" aria-hidden="true"></i><b class="tabular">{% if problem.tl_ms >= 1000 and problem.tl_ms|divisibleby:1000 %}{% widthratio problem.tl_ms 1000 1 %} s{% else %}{{ problem.tl_ms }} ms{% endif %}</b></span>
+          <span title="Vaqt chegarasi"><i data-lucide="clock" class="lu" aria-hidden="true"></i><b class="tabular">{{ problem.tl_ms }} ms</b></span>
           {% if problem.kind != "sql" %}<span title="Xotira chegarasi"><b class="tabular">{{ problem.ml_mb }} MB</b></span>{% endif %}
           {% if not contest and problem.n_ratings %}
           <button type="button" class="ca-stars-sum" data-dialog="rate-dialog" title="{{ problem.n_ratings }} ta baho"><i data-lucide="star" class="lu" aria-hidden="true"></i><b class="tabular text-ink">{{ problem.avg_stars|floatformat:1 }}</b><span class="sr-only">/5,</span> <span class="tabular text-mute">({{ problem.n_ratings }})</span></button>
