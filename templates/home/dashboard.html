@@ -174,6 +174,25 @@
 
 <aside class="ca7-aside" aria-label="Qo‘shimcha">
   {% if daily %}{% include "problems/_daily_card.html" %}{% endif %}
+  <section class="ca-box" aria-labelledby="bcard-title">
+    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span><h2 id="bcard-title">Nishonlar</h2><a class="ca-box-tools ca-link tabular" href="{% url 'badges' %}">{{ badge_card.earned }} / {{ badge_card.total }}</a></div>
+    <div class="ca7-pad ca-bcard">
+      {% with b=badge_card.latest %}{% if b %}
+      <a class="ca-bcard-row" href="{% url 'profile' user.username %}#badges-title">
+        <span class="ca7-badge-art ca-t{{ b.tier }}" aria-hidden="true"><svg viewBox="0 0 64 64"><path d="M62 32l-8.78 8.78v12.44H40.78L32 62l-8.78-8.78H10.78V40.78L2 32l8.78-8.78V10.78h12.44L32 2l8.78 8.78h12.44v12.44z"/><path class="in" d="M53 32l-6.15 6.15v8.7h-8.7L32 53l-6.15-6.15h-8.7v-8.7L11 32l6.15-6.15v-8.7h8.7L32 11l6.15 6.15h8.7v8.7z"/></svg><i data-lucide="{{ b.icon }}" class="lu"></i><span class="ca-tb-num">{{ b.roman }}</span></span>
+        <span class="min-w-0"><small>Oxirgi nishon · {{ badge_card.latest_at|date:"d.m" }}</small><b>{{ b.title }}</b><small>{{ b.sub }}</small></span>
+      </a>
+      {% endif %}{% endwith %}
+      {% with b=badge_card.near %}{% if b %}
+      <a class="ca-bcard-row is-next" href="{% url 'badges' %}">
+        <span class="ca7-badge-art{% if b.tier %} ca-t{{ b.tier }}{% else %} is-locked{% endif %}" aria-hidden="true"><svg viewBox="0 0 64 64"><path d="M62 32l-8.78 8.78v12.44H40.78L32 62l-8.78-8.78H10.78V40.78L2 32l8.78-8.78V10.78h12.44L32 2l8.78 8.78h12.44v12.44z"/><path class="in" d="M53 32l-6.15 6.15v8.7h-8.7L32 53l-6.15-6.15h-8.7v-8.7L11 32l6.15-6.15v-8.7h8.7L32 11l6.15 6.15h8.7v8.7z"/></svg><i data-lucide="{{ b.icon }}" class="lu"></i></span>
+        <span class="min-w-0 flex-1"><small>Eng yaqini</small><b>{{ b.name }} {{ b.next.roman }}</b>
+          <span class="ca7-badge-pg" role="progressbar" aria-valuenow="{{ b.next.done }}" aria-valuemin="0" aria-valuemax="{{ b.next.total }}" aria-label="{{ b.name }} {{ b.next.roman }}: {{ b.next.shown }}"><i style="width: {% widthratio b.next.done b.next.total 100 %}%"></i></span>
+          <small class="tabular">{{ b.next.shown }}</small></span>
+      </a>
+      {% endif %}{% endwith %}
+    </div>
+  </section>
   {% if ring %}{% url 'problems:list' as problems_url %}{% include "problems/_solved_card.html" with title="Yechilgan masalalar" more_url=problems_url %}{% endif %}
 
   <section class="ca-box" aria-labelledby="pts-title">

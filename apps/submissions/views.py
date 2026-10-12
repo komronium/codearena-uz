@@ -343,8 +343,14 @@ def detail(request, pk):
 
 @login_required
 def status(request, pk):
-    ctx = _results_ctx(_own(request, pk))
+    s = _own(request, pk)
+    ctx = _results_ctx(s)
     ctx["compact"] = request.GET.get("compact") == "1"
+    if s.user_id == request.user.pk and s.verdict == Submission.Verdict.AC:
+        # the accept may have lifted a badge: say so here and now, with the verdict, not on some later page
+        from apps.accounts import badges
+        badges.award(request.user, {"problems", "learn"})
+        ctx["new_badges"] = badges.unseen(request.user)
     return render(request, "submissions/_status.html", ctx)
 
 

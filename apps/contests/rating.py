@@ -115,6 +115,9 @@ def apply_rating(contest) -> bool:
 
         contest.rating_applied = True
         contest.save(update_fields=["rating_applied"])
+    from apps.accounts.badges import award  # a rated round can lift Musobaqachi and Sovrindor
+    for row in rows:
+        award(row["user"], {"contests"})
     return True
 
 

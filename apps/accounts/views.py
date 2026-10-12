@@ -258,8 +258,10 @@ def rating(request):
              "contests": ("-contest_count", "-rating", "username")}.get(sort)
     shown = qs.filter(username__icontains=q) if q else qs
     page = Paginator(shown.order_by(*order) if order else shown, 50).get_page(request.GET.get("page"))
+    sums = badge_system.summaries([u.pk for u in page])
     for u in page:  # the place on the whole board, equal ratings sharing it, a search included
         u.rank = sum(1 for r in ratings if r > u.rating) + 1
+        u.badge_sum = sums.get(u.pk)
     tiers = [{"name": n, "color": c, "floor": f, "ceiling": ce,
               "count": sum(1 for r in ratings if (f is None or r >= f) and (ce is None or r < ce))}
              for f, ce, n, c in _RATING_TIERS]
@@ -275,6 +277,54 @@ def rating(request):
     return render(request, "accounts/rating.html",
                   {"users": page, "total": len(ratings), "tiers": tiers, "spread": spread, "me": me, "q": q,
                    "sort": sort if order else ""})
+
+
+def badges_page(request):
+    """Nishonlar: every badge with all its levels, what each takes and how rare it is; for a signed-in user
+    where they stand and their place on the badge board."""
+    families = badge_system.ladders(request.user)
+    groups = []
+    for f in families:
+        if not groups or groups[-1]["label"] != f["group_label"]:
+            groups.append({"label": f["group_label"], "families": []})
+        groups[-1]["families"].append(f)
+    me = None
+    if request.user.is_authenticated:
+        mine = badge_system.summaries([request.user.pk]).get(request.user.pk, {"count": 0, "levels": 0})
+        board = _badge_ranking()
+        me = {**mine, "rank": next((r["rank"] for r in board if r["user"] == request.user.pk), None),
+              "max_levels": sum(len(f.levels) for f in badge_system.FAMILIES)}
+    return render(request, "accounts/badges.html", {"groups": groups, "me": me, "n_families": len(families)})
+
+
+def _badge_ranking() -> list[dict]:
+    """Everyone with a badge, by levels earned, then badges held, then who got there first; equal levels and
+    badges share a place."""
+    from django.db.models import Max
+
+    from .models import UserBadge
+
+    rows = list(UserBadge.objects.filter(user__is_active=True, user__is_staff=False).values("user")
+                .annotate(levels=Count("id"), families=Count("family", distinct=True), last=Max("earned_at"))
+                .order_by("-levels", "-families", "last", "user"))
+    for i, r in enumerate(rows):
+        same = i and (rows[i - 1]["levels"], rows[i - 1]["families"]) == (r["levels"], r["families"])
+        r["rank"] = rows[i - 1]["rank"] if same else i + 1
+    return rows
+
+
+def badge_board(request):
+    """The rating by badges: levels earned across all badges, each player's best badges beside them."""
+    rows = _badge_ranking()
+    page = Paginator(rows, 50).get_page(request.GET.get("page"))
+    users = User.objects.in_bulk([r["user"] for r in page])
+    sums = badge_system.summaries(users)
+    for r in page:
+        r["u"], r["badges"] = users[r["user"]], sums.get(r["user"], {}).get("badges", [])
+    me = next((r for r in rows if request.user.is_authenticated and r["user"] == request.user.pk), None)
+    return render(request, "accounts/badge_board.html", {
+        "rows": page, "total": len(rows), "me": me, "me_page": (rows.index(me) // 50 + 1) if me else None,
+        "max_levels": sum(len(f.levels) for f in badge_system.FAMILIES)})
 
 
 def _contest_badges(user) -> list[dict]:
@@ -302,7 +352,8 @@ def _badges(user, owner: bool) -> dict:
         if not groups or groups[-1]["label"] != b["group_label"]:
             groups.append({"label": b["group_label"], "badges": []})
         groups[-1]["badges"].append(b)
-    return {"badge_groups": groups, "badge_owner": owner, "badges_total": len(board),
+    earned = sorted((b for b in board if b["tier"]), key=lambda b: -b["tier"])
+    return {"badge_groups": groups, "badge_owner": owner, "badges_total": len(board), "top_badges": earned[:6],
             "badges_earned": sum(1 for b in board if b["tier"]), "levels_earned": sum(b["tier"] for b in board)}
 
 

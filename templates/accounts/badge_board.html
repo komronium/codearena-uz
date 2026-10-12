@@ -1,0 +1,48 @@
+{% extends "base.html" %}{% load tiers %}
+{% block title %}Nishonlar reytingi{% endblock %}
+{% block description %}Nishonlar bo‘yicha reyting: {{ total }} o‘yinchi, olingan bosqichlar soni bo‘yicha.{% endblock %}
+{% block band %}
+<section class="ca-hud" aria-labelledby="board-title">
+  <div class="ca-hud-in">
+    <div>
+      <h1 id="board-title">Nishonlar reytingi</h1>
+      <p class="ca-hud-sub">{{ total }} o‘yinchi · har bir nishonning har bir bosqichi bitta ball</p>
+    </div>
+    {% include "accounts/_board_tabs.html" %}
+  </div>
+</section>
+{% endblock %}
+{% block content %}
+{% comment %}The rating by badges: levels earned across all badges (of {{ max_levels }}), then badges held, then who got
+there first; each player's badges beside them, best first.{% endcomment %}
+<p class="ca7-foot-note !mt-0 mb-4">Har bir nishon 5 bosqichdan iborat: bronza, kumush, oltin, platina, olmos. Bosqich qancha ko‘p bo‘lsa, o‘rin shuncha yuqori.{% if me %} Siz <b class="text-ink">{{ me.rank }}</b>-o‘rindasiz{% if me_page %} — <a class="ca-link" href="{% querystring page=me_page %}#me">jadvalda</a>{% endif %}.{% endif %} <a class="ca-link" href="{% url 'badges' %}">Barcha nishonlar</a></p>
+{% if rows %}
+<div class="overflow-x-auto">
+<table class="ca-table ca-table-flat">
+  <thead><tr><th class="w-16 text-center">#</th><th>Foydalanuvchi</th><th>Nishonlar</th><th class="w-24 text-right">Nishon</th><th class="w-28 text-right" title="Olingan bosqichlar, {{ max_levels }} tadan">Bosqich</th></tr></thead>
+  <tbody>
+  {% for r in rows %}
+  <tr{% if r.u == user %} class="ca-row-me" id="me"{% endif %}>
+    <td class="text-center">{% if r.rank <= 3 %}<span class="ca7-medal m{{ r.rank }}">{{ r.rank }}</span>{% else %}<span class="tabular text-mute">{{ r.rank }}</span>{% endif %}</td>
+    <td>{% if r.u == user %}{% include "accounts/_u7.html" with u=r.u you=True %}{% else %}{% include "accounts/_u7.html" with u=r.u you=False %}{% endif %}</td>
+    <td><span class="ca-bminis">{% for b in r.badges|slice:":8" %}{% include "accounts/_bmini.html" %}{% endfor %}{% if r.badges|length > 8 %}<small>+{{ r.badges|length|add:"-8" }}</small>{% endif %}</span></td>
+    <td class="text-right tabular">{{ r.families }}</td>
+    <td class="text-right tabular font-bold">{{ r.levels }}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% if rows.has_other_pages %}
+<nav class="mt-4 flex items-center justify-between text-sm" aria-label="Sahifalar">
+  <span class="tabular text-mute">{{ rows.start_index }}–{{ rows.end_index }} / {{ total }}</span>
+  <div class="flex gap-2">
+    {% if rows.has_previous %}<a class="ca-btn ca-btn-ghost !py-1.5" href="{% querystring page=rows.previous_page_number %}"><i data-lucide="chevron-left" class="lu" aria-hidden="true"></i>Oldingi</a>{% endif %}
+    {% if rows.has_next %}<a class="ca-btn ca-btn-ghost !py-1.5" href="{% querystring page=rows.next_page_number %}">Keyingi<i data-lucide="chevron-right" class="lu" aria-hidden="true"></i></a>{% endif %}
+  </div>
+</nav>
+{% endif %}
+{% else %}
+<p class="ca7-empty"><b>Hali nishon olgan yo‘q</b>Masala yeching, duel o‘ynang — birinchi nishonlar shu yerda chiqadi.</p>
+{% endif %}
+{% endblock %}

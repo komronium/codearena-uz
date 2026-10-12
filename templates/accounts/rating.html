@@ -50,12 +50,13 @@ own row marked.{% endcomment %}
   {% if users %}
   <div class="overflow-x-auto">
   <table class="ca-table ca-table-flat">
-    <thead><tr><th class="w-16 text-center">#</th><th>Foydalanuvchi</th><th class="hidden w-32 text-right sm:table-cell">Musobaqalar</th><th class="w-28 text-right" title="Oxirgi reytingli musobaqadagi o‘zgarish">Oxirgi ±</th><th class="w-28 text-right">Reyting</th></tr></thead>
+    <thead><tr><th class="w-16 text-center">#</th><th>Foydalanuvchi</th><th class="hidden md:table-cell"><a class="ca-link !font-normal" href="{% url 'badge_board' %}">Nishonlar</a></th><th class="hidden w-32 text-right sm:table-cell">Musobaqalar</th><th class="w-28 text-right" title="Oxirgi reytingli musobaqadagi o‘zgarish">Oxirgi ±</th><th class="w-28 text-right">Reyting</th></tr></thead>
     <tbody>
     {% for u in users %}
     <tr{% if u == user %} class="ca-row-me" id="me"{% endif %}>
       <td class="text-center">{% if u.rank <= 3 and not q %}<span class="ca7-medal m{{ u.rank }}">{{ u.rank }}</span>{% else %}<span class="tabular text-mute">{{ u.rank }}</span>{% endif %}</td>
       <td>{% if u == user %}{% include "accounts/_u7.html" with u=u you=True %}{% else %}{% include "accounts/_u7.html" with u=u you=False %} <span class="text-xs text-mute">{{ u.rating|tier_name }}</span>{% endif %}</td>
+      <td class="hidden md:table-cell">{% if u.badge_sum %}<span class="ca-bminis">{% for b in u.badge_sum.badges|slice:":4" %}{% include "accounts/_bmini.html" %}{% endfor %}{% if u.badge_sum.count > 4 %}<small>+{{ u.badge_sum.count|add:"-4" }}</small>{% endif %}</span>{% endif %}</td>
       <td class="hidden text-right tabular sm:table-cell">{{ u.contest_count }}</td>
       <td class="text-right tabular font-semibold {% if u.last_delta > 0 %}text-ok{% elif u.last_delta < 0 %}text-bad{% else %}text-mute{% endif %}">{{ u.last_delta|stringformat:"+d" }}</td>
       <td class="text-right tabular font-bold"><span class="ca-tier-ink" style="--tier: {{ u.rating|tier_color }}">{{ u.rating }}</span></td>

@@ -310,25 +310,7 @@ from /problems/suggest/. "go" is the second key of a "g <key>" shortcut.{% endco
   </dl>
 </dialog>
 <script src="{% static 'js/palette.js' %}" defer></script>
-{% if new_badges %}
-{# a badge reached a new level: the highest one says so for a few seconds; the others are on the profile #}
-{% with b=new_badges.0 %}
-<div class="ca-tb-toast ca-t{{ b.tier }}" id="ca-tb-toast" role="status" aria-live="polite">
-  <span class="ca7-badge-art" aria-hidden="true">
-    <svg viewBox="0 0 64 64"><path d="M62 32l-8.78 8.78v12.44H40.78L32 62l-8.78-8.78H10.78V40.78L2 32l8.78-8.78V10.78h12.44L32 2l8.78 8.78h12.44v12.44z"/><path class="in" d="M53 32l-6.15 6.15v8.7h-8.7L32 53l-6.15-6.15h-8.7v-8.7L11 32l6.15-6.15v-8.7h8.7L32 11l6.15 6.15h8.7v8.7z"/></svg>
-    <i data-lucide="{{ b.icon }}" class="lu"></i><span class="ca-tb-num">{{ b.roman }}</span>
-  </span>
-  <div class="min-w-0">
-    <small>Yangi nishon!{% if b.tier > 1 %} Bosqich oshdi{% endif %}</small>
-    <b>{{ b.title }}</b>
-    <span>{{ b.sub }}{% if new_badges|length > 1 %} · yana {{ new_badges|length|add:"-1" }} ta{% endif %}</span>
-    <a class="ca-link" href="{% url 'profile' user.username %}#badges-title">Nishonlarni ko‘rish</a>
-  </div>
-  <button type="button" class="ca-tb-toast-x" aria-label="Yopish" onclick="this.parentElement.remove()"><i data-lucide="x" class="lu" aria-hidden="true"></i></button>
-</div>
-<script>setTimeout(() => document.getElementById("ca-tb-toast")?.classList.add("is-out"), 8000);</script>
-{% endwith %}
-{% endif %}
+{% if new_badges %}{% include "accounts/_badge_award.html" %}{% endif %}
 {% if tier_up %}
 {# rating moved the user into a higher tier: once, with the new banner as the picture #}
 <dialog id="ca-tier-up" class="ca-dialog !max-w-md !p-0 overflow-hidden" aria-labelledby="ca-tier-up-title">

@@ -153,6 +153,71 @@ def unseen(user) -> list[dict]:
     for r in rows:
         if r.family in BY_KEY and r.family not in best:
             f = BY_KEY[r.family]
-            best[r.family] = {"title": f"{f.name} {ROMAN[r.tier]}", "icon": f.icon, "tier": r.tier, "roman": ROMAN[r.tier],
-                              "metal": METALS[r.tier], "sub": f.unit.format(n=f.levels[r.tier - 1])}
-    return sorted(best.values(), key=lambda b: -b["tier"])
+            best[r.family] = {"key": r.family, "title": f"{f.name} {ROMAN[r.tier]}", "icon": f.icon, "tier": r.tier,
+                              "roman": ROMAN[r.tier], "metal": METALS[r.tier], "sub": f.unit.format(n=f.levels[r.tier - 1]),
+                              "next": (f"{f.name} {ROMAN[r.tier + 1]}: {f.unit.format(n=f.levels[r.tier])}"
+                                       if r.tier < len(f.levels) else "")}
+    out = sorted(best.values(), key=lambda b: -b["tier"])
+    rare = rarity([(b["key"], b["tier"]) for b in out])
+    for b in out:
+        b["pct"] = rare[(b["key"], b["tier"])]
+    return out
+
+
+def award(user, groups: set[str]) -> None:
+    """Store the levels of some groups right after what can change them (an accept, a finished duel, a rated
+    round), so the award shows on the very next page. Never lets a badge error break the caller."""
+    try:
+        sync(user, metrics(user, groups))
+    except Exception:  # noqa: BLE001 - a badge is a nicety; judging, duels and ratings must go on
+        import logging
+        logging.getLogger(__name__).exception("badge award failed for user %s", getattr(user, "pk", user))
+
+
+def rarity(pairs=None) -> dict[tuple[str, int], int]:
+    """(family, level) -> the percent of active players (anyone who sent code or holds a badge) holding it,
+    at least 1 when anyone does."""
+    from django.db.models import Count
+
+    from .models import User, UserBadge
+
+    players = max(1, User.objects.filter(is_active=True).filter(Q(submissions__isnull=False) | Q(badges__isnull=False))
+                  .distinct().count())
+    rows = UserBadge.objects.filter(user__is_active=True).values("family", "tier").annotate(n=Count("user", distinct=True))
+    out = {(r["family"], r["tier"]): max(1, round(100 * r["n"] / players)) for r in rows}
+    return {p: out.get(p, 0) for p in pairs} if pairs is not None else out
+
+
+def summaries(user_ids) -> dict[int, dict]:
+    """For lists of users: per user the badges held (each family at its best level, highest first), how many
+    and the levels in all."""
+    from .models import UserBadge
+
+    best: dict[int, dict[str, int]] = {}
+    for uid, fam, tier in UserBadge.objects.filter(user_id__in=list(user_ids)).values_list("user_id", "family", "tier"):
+        if fam in BY_KEY and tier > best.setdefault(uid, {}).get(fam, 0):
+            best[uid][fam] = tier
+    out = {}
+    for uid, fams in best.items():
+        held = sorted(({"key": f, "icon": BY_KEY[f].icon, "tier": t, "roman": ROMAN[t],
+                        "title": f"{BY_KEY[f].name} {ROMAN[t]}"} for f, t in fams.items()),
+                      key=lambda b: (-b["tier"], [x.key for x in FAMILIES].index(b["key"])))
+        out[uid] = {"badges": held, "count": len(held), "levels": sum(fams.values())}
+    return out
+
+
+def ladders(user=None) -> list[dict]:
+    """The badges page: every family with all its levels (what each takes, how rare it is, reached or not),
+    and for a signed-in user where they stand."""
+    mine = {b["key"]: b for b in board(user)} if user is not None and user.is_authenticated else {}
+    rare = rarity()
+    out = []
+    for f in FAMILIES:
+        b = mine.get(f.key)
+        tier = b["tier"] if b else 0
+        out.append({"key": f.key, "name": f.name, "icon": f.icon, "group_label": GROUPS[f.group], "tier": tier,
+                    "title": f"{f.name} {ROMAN[tier]}" if tier else f.name, "roman": ROMAN[tier], "mine": b,
+                    "levels": [{"tier": i, "roman": ROMAN[i], "metal": METALS[i], "at": at, "sub": f.unit.format(n=at),
+                                "pct": rare.get((f.key, i), 0), "done": i <= tier}
+                               for i, at in enumerate(f.levels, start=1)]})
+    return out

@@ -46,3 +46,4 @@ compact=True: the verdict chip only.{% endcomment %}
 {% endif %}
 {% endif %}
 </div>
+{% if new_badges %}<div hx-swap-oob="beforeend:body">{% include "accounts/_badge_award.html" %}</div>{% endif %}

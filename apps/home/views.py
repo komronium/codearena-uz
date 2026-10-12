@@ -71,6 +71,23 @@ def _live(user, running) -> dict | None:
             "solved": row and row["solved"], "n_problems": contest.contest_problems.count()}
 
 
+
+def _badge_card(user) -> dict:
+    """The dashboard's badge box: the latest level earned, and the badge closest to its next level (the
+    biggest share of the way there) with what it still needs."""
+    from apps.accounts import badges
+    from apps.accounts.models import UserBadge
+
+    board = badges.board(user)
+    last = UserBadge.objects.filter(user=user).order_by("-earned_at", "-tier").first()
+    latest = next((b for b in board if last and b["key"] == last.family), None)
+    started = [b for b in board if b["next"] and b["next"]["done"]]
+    near = max(started, key=lambda b: b["next"]["done"] / b["next"]["total"], default=None)
+    if near is None:
+        near = next((b for b in board if b["next"]), None)
+    return {"latest": latest, "latest_at": last.earned_at if last else None, "near": near,
+            "earned": sum(1 for b in board if b["tier"]), "total": len(board)}
+
 def home(request):
     now = timezone.now()
     daily = daily_for()
@@ -127,6 +144,7 @@ def home(request):
         "solved_count": Problem.objects.filter(userproblemsolved__user=user, is_public=True).count(),
         "homework": homework,
         "challenges": list(mine.filter(status=Duel.Status.PENDING, opponent=user)[:3]),
+        "badge_card": _badge_card(user),
         "active_duels": live,
         "running": running, "upcoming": upcoming, "live": _live(user, running),
         "today_label": f"{_WEEKDAYS[today.weekday()]}, {today.day}-{_MONTHS[today.month - 1]}",

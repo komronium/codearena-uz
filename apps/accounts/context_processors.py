@@ -29,11 +29,15 @@ def tier_up(request):
 
 
 def new_badges(request):
-    """{"new_badges": [...]}: badge levels the user reached and hasn't been shown, for base.html's toast;
-    lazy, so only a page that draws it pays. Levels are worked out again at most every SYNC_EVERY seconds
-    per user (the pages that show badges sync on their own)."""
+    """{"new_badges": [...]}: badge levels the user reached and hasn't been shown, for the award window in
+    base.html; lazy, so only a page that draws it pays. The events that lift a badge store it at once
+    (badges.award); a full recount here, at most every SYNC_EVERY seconds, catches anything else. A duel
+    question's page never shows it: the award waits for the result page."""
     user = getattr(request, "user", None)
     if not (user and user.is_authenticated) or request.headers.get("HX-Request"):
+        return {}
+    match = getattr(request, "resolver_match", None)
+    if match is not None and match.url_name == "duel_play":
         return {}
 
     def claim():
@@ -46,4 +50,4 @@ def new_badges(request):
     return {"new_badges": SimpleLazyObject(claim)}
 
 
-SYNC_EVERY = 30
+SYNC_EVERY = 300

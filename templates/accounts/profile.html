@@ -22,6 +22,7 @@ Colour carries meaning only: the tier colour is the person, green/red the result
           <span><i data-lucide="calendar" class="lu" aria-hidden="true"></i>{{ profile_user.date_joined|date:"d.m.Y" }} dan beri</span>
           {% if profile_user.is_staff %}<span><i data-lucide="shield-check" class="lu" aria-hidden="true"></i>Moderator</span>{% endif %}
         </p>
+        {% if top_badges %}<a class="ca7-pbadges" href="#badges-title" title="Nishonlar">{% for b in top_badges %}{% include "accounts/_bmini.html" %}{% endfor %}<span><b class="tabular">{{ badges_earned }}</b> nishon · <b class="tabular">{{ levels_earned }}</b> bosqich</span></a>{% endif %}
       </div>
       {% if user == profile_user %}<a class="ca7-hbtn is-wide ml-auto" href="{% url 'profile_edit' %}"><i data-lucide="pencil" class="lu" aria-hidden="true"></i>Profilni tahrirlash</a>{% endif %}
     </div>

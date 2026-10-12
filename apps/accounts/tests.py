@@ -445,11 +445,49 @@ def test_new_level_toast_shows_once_and_the_profile_groups_badges(client):
     client.force_login(u)
     with patch.object(badges, "metrics", side_effect=lambda user, only=None: {"wins": 5} if user == u else {}):
         page = client.get("/").content.decode()
-        assert "Yangi nishon!" in page and "Duelchi I" in page
-        assert "Yangi nishon!" not in client.get("/").content.decode()
+        assert "Nishonni qo‘lga kiritdingiz!" in page and "Duelchi I" in page and 'id="ca-award"' in page
+        assert 'id="ca-award"' not in client.get("/").content.decode()  # once
         mine = client.get(reverse("profile", args=["ali"]))
         groups = {g["label"]: [b["title"] for b in g["badges"]] for g in mine.context["badge_groups"]}
         assert "Duelchi I" in groups["Duellar"] and "Yechuvchi" in groups["Masalalar"]  # the owner sees locked ones too
         client.force_login(other)
         theirs = client.get(reverse("profile", args=["ali"])).context["badge_groups"]
         assert [(g["label"], [b["title"] for b in g["badges"]]) for g in theirs] == [("Duellar", ["Duelchi I"])]
+
+
+@pytest.mark.django_db
+def test_the_badges_page_and_the_badge_board_rank_by_levels(client):
+    from apps.accounts.models import User as U, UserBadge
+
+    a, b, c = (U.objects.create_user(n, password="x") for n in ("ali", "vali", "sami"))
+    for user, rows in ((a, [("duelchi", 1), ("duelchi", 2), ("yechuvchi", 1)]), (b, [("olov", 1), ("olov", 2), ("olov", 3)]),
+                       (c, [("choqqi", 1)])):
+        for fam, tier in rows:
+            UserBadge.objects.create(user=user, family=fam, tier=tier, seen=True)
+    r = client.get(reverse("badge_board"))
+    assert [(x["u"].username, x["rank"], x["levels"], x["families"]) for x in r.context["rows"]] == [
+        ("ali", 1, 3, 2), ("vali", 2, 3, 1), ("sami", 3, 1, 1)]  # equal levels: more badges first
+    assert [x["title"] for x in r.context["rows"][0]["badges"]] == ["Duelchi II", "Yechuvchi I"]
+    client.force_login(c)
+    page = client.get(reverse("badges"))
+    assert page.context["me"]["rank"] == 3 and page.context["me"]["levels"] == 1
+    duel = next(f for g in page.context["groups"] for f in g["families"] if f["key"] == "duelchi")
+    assert [(l["at"], l["pct"]) for l in duel["levels"]][:3] == [(5, 33), (10, 33), (50, 0)]  # 1 of 3 players
+
+
+@pytest.mark.django_db
+def test_an_accept_awards_its_badge_on_the_submission_page_at_once(client):
+    from apps.accounts.models import UserBadge
+    from apps.problems.models import Language, Problem
+    from apps.submissions.models import Submission, UserProblemSolved
+
+    u = User.objects.create_user("ali", password="x")
+    lang = Language.objects.create(code="python", name="Python 3", docker_image="x", run_cmd="x")
+    problem = Problem.objects.create(slug="p", title="P", statement_md="x", author=u, difficulty="hard")
+    s = Submission.objects.create(user=u, problem=problem, language=lang, source="x", verdict="AC")
+    UserProblemSolved.objects.create(user=u, problem=problem, first_ac_submission=s)
+    client.force_login(u)
+    part = client.get(reverse("submissions:status", args=[s.pk])).content.decode()
+    assert 'hx-swap-oob="beforeend:body"' in part and "Cho‘qqi I" in part  # the first Hard solve
+    assert UserBadge.objects.filter(user=u, family="choqqi", tier=1, seen=True).exists()
+    assert "ca-award" not in client.get(reverse("submissions:status", args=[s.pk])).content.decode()

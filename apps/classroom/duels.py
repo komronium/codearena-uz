@@ -311,6 +311,9 @@ def settle(duel) -> None:
         duel.save(update_fields=["status", "winner", "challenger_delta", "opponent_delta"])
         User.objects.filter(pk=a.pk).update(duel_rating=F("duel_rating") + da)
         User.objects.filter(pk=b.pk).update(duel_rating=F("duel_rating") + db)
+    from apps.accounts.badges import award  # a finished duel can lift both players' duel badges
+    for player in (a, b):
+        award(player, {"duels"})
 
 
 def settle_open(user) -> None:

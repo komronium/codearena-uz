@@ -66,6 +66,9 @@ def run_submission(submission_id: int) -> None:
     _drop_standings_cache(sub)
     refresh_solves(sub.problem_id, [sub.user_id])
     sub.refresh_from_db(fields=["verdict"])
+    if sub.verdict == Submission.Verdict.AC:  # a solve can lift a badge: store it now, so it shows at once
+        from apps.accounts.badges import award
+        award(sub.user, {"problems", "learn"})
 def _run_code_submission(sub: Submission) -> None:
     lang = sub.language
     problem = sub.problem

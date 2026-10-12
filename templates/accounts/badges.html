@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Nishonlar{% endblock %}
+{% block description %}CodeArena nishonlari: har biri 5 bosqichli — bronza, kumush, oltin, platina, olmos. Har bosqich nimani talab qilishi va qanchalik kamyobligi.{% endblock %}
+{% block band %}
+<section class="ca-hud" aria-labelledby="badges-title">
+  <div class="ca-hud-in">
+    <div>
+      <h1 id="badges-title">Nishonlar</h1>
+      <p class="ca-hud-sub">{{ n_families }} ta nishon, har biri 5 bosqichli: bronza, kumush, oltin, platina, olmos</p>
+    </div>
+    {% if me %}
+    <dl class="ca-hud-stats">
+      <div><dt><small>Nishonlar</small></dt><dd><b class="tabular">{{ me.count }}</b><small> / {{ n_families }}</small></dd></div>
+      <div><dt><small>Bosqichlar</small></dt><dd><b class="tabular">{{ me.levels }}</b><small> / {{ me.max_levels }}</small></dd></div>
+      <div><dt><small>O‘rin</small></dt><dd><b class="tabular">{% if me.rank %}{{ me.rank }}{% else %}—{% endif %}</b></dd></div>
+    </dl>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
+{% block content %}
+{% comment %}Every badge with its whole ladder: the star at your level (grey when not reached), what the next level asks,
+then the five levels as stars in their metal, each with what it takes and the share of players who hold it.{% endcomment %}
+<p class="ca7-foot-note !mt-0 mb-5">Nishon qo‘lga kiritilishi bilan ekranda chiqadi va profilingizda abadiy qoladi. <a class="ca-link" href="{% url 'badge_board' %}">Nishonlar reytingi</a>{% if user.is_authenticated %} · <a class="ca-link" href="{% url 'profile' user.username %}#badges-title">Profilimda</a>{% endif %}</p>
+{% for g in groups %}
+<section class="mb-7" aria-labelledby="g-{{ forloop.counter }}">
+  <div class="ca7-sec-h"><span class="ca-star" aria-hidden="true"></span><h2 id="g-{{ forloop.counter }}">{{ g.label }}</h2></div>
+  <ul class="ca-bfams">
+    {% for f in g.families %}
+    <li class="ca-bfam{% if f.tier %} ca-t{{ f.tier }}{% endif %}">
+      <div class="ca-bfam-head">
+        <span class="ca7-badge-art{% if not f.tier %} is-locked{% endif %}" aria-hidden="true">
+          <svg viewBox="0 0 64 64"><path d="M62 32l-8.78 8.78v12.44H40.78L32 62l-8.78-8.78H10.78V40.78L2 32l8.78-8.78V10.78h12.44L32 2l8.78 8.78h12.44v12.44z"/><path class="in" d="M53 32l-6.15 6.15v8.7h-8.7L32 53l-6.15-6.15h-8.7v-8.7L11 32l6.15-6.15v-8.7h8.7L32 11l6.15 6.15h8.7v8.7z"/></svg>
+          <i data-lucide="{{ f.icon }}" class="lu"></i>{% if f.tier %}<span class="ca-tb-num">{{ f.roman }}</span>{% endif %}
+        </span>
+        <div class="min-w-0">
+          <b>{{ f.title }}</b>
+          {% if f.mine and f.mine.next %}<small>{{ f.mine.next.roman }}-bosqichgacha: <span class="tabular">{{ f.mine.next.shown }}</span></small>
+          <span class="ca7-badge-pg" role="progressbar" aria-valuenow="{{ f.mine.next.done }}" aria-valuemin="0" aria-valuemax="{{ f.mine.next.total }}" aria-label="{{ f.name }} {{ f.mine.next.roman }}"><i style="width: {% widthratio f.mine.next.done f.mine.next.total 100 %}%"></i></span>
+          {% elif f.mine and f.tier %}<small class="ca-tb-max">Eng yuqori bosqich olingan</small>
+          {% else %}<small>{{ f.levels.0.sub }} — birinchi bosqich</small>{% endif %}
+        </div>
+      </div>
+      <ol class="ca-bladder">
+        {% for l in f.levels %}
+        <li class="ca-t{{ l.tier }}{% if l.done %} is-done{% endif %}">
+          <span class="ca-bmini{% if not l.done %} is-off{% endif %}" aria-hidden="true"><svg viewBox="0 0 64 64"><path d="M62 32l-8.78 8.78v12.44H40.78L32 62l-8.78-8.78H10.78V40.78L2 32l8.78-8.78V10.78h12.44L32 2l8.78 8.78h12.44v12.44z"/></svg><b>{{ l.roman }}</b></span>
+          <span class="ca-bladder-at">{{ l.sub }}</span>
+          <small>{% if l.pct %}{{ l.pct }}% o‘yinchida{% else %}hali hech kimda{% endif %}</small>
+        </li>
+        {% endfor %}
+      </ol>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endfor %}
+{% endblock %}
