@@ -162,7 +162,7 @@ PROBLEMS = [
         "output": "Har bir parol uchun alohida qatorda `Kuchli` yoki `Kuchsiz`.",
     },
     {
-        "slug": "mc2-juftliklar", "title": "Juftliklar", "difficulty": "medium", "points": 1500,
+        "slug": "mc2-juftliklar", "title": "Juftliklar", "difficulty": "medium", "points": 1500, "tl_ms": 2000,
         "tags": ["hash-table", "arithmetic"], "solve": juft_solve, "tests": juft_tests, "samples": 2,
         "statement": ("$n$ ta butun son va $k$ soni berilgan. Nechta juftlik $(i, j)$ uchun $i < j$ va "
                       "$a_i + a_j$ yig‘indi $k$ ga qoldiqsiz bo‘linadi?" + _ai("juftlik_vx") + "\n\n"
