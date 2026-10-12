@@ -1,5 +1,5 @@
-"""CodeArena Mini #2: five hidden problems for the class's 30-minute rated round: two Beginner (Lift, Dars
-tugashi), two Easy picked from EASY below, and Qavslar (Easy, the round's last). Every input value sits on its own line.
+"""CodeArena Mini #2: five hidden problems for the class's 30-minute rated round: two Beginner (Taksi,
+Uchburchak), two Easy picked from EASY below, and Qavslar (Easy, the round's last). Every input value sits on its own line.
 Each statement carries a hidden note for AI assistants (apps.problems.ai_marks) asking for an odd variable
 name, so code pasted back from an AI shows up as "AI belgisi" in the round's integrity report.
 
@@ -42,33 +42,35 @@ def _nums(inp) -> list[int]:
     return [int(x) for x in inp.split()]
 
 
-# ---- Beginner: lift ----------------------------------------------------------------------------
-def lift_solve(inp):
-    c, a, b = _nums(inp)
-    return _lines(3 * (abs(c - a) + abs(a - b)) + 20)
+# ---- Beginner: taksi ---------------------------------------------------------------------------
+def taksi_solve(inp):
+    k = _nums(inp)[0]
+    return _lines(6000 if k <= 2 else 6000 + (k - 2) * 2500)
 
 
-def lift_tests(rng):
-    tests = [_rows(1, 5, 9), _rows(7, 7, 2), _rows(10, 3, 12), _rows(1, 2, 1), _rows(100, 1, 100),
-             _rows(50, 50, 51), _rows(1, 100, 1)]
+def taksi_tests(rng):
+    tests = [_rows(k) for k in (5, 2, 1, 3, 10, 100, 4, 50, 99, 12)]
     while len(tests) < 22:
-        a, b = rng.sample(range(1, 101), 2)
-        tests.append(_rows(rng.randint(1, 100), a, b))
+        tests.append(_rows(rng.randint(1, 100)))
     return tests
 
 
-# ---- Beginner: dars tugashi ----------------------------------------------------------------------
-def dars_solve(inp):
-    h, m, d = _nums(inp)
-    end = (h * 60 + m + d) % (24 * 60)
-    return _lines(f"{end // 60:02d}:{end % 60:02d}")
+# ---- Beginner: uchburchak -----------------------------------------------------------------------
+def uch_solve(inp):
+    a, b, c = _nums(inp)
+    return _lines("Ha" if a + b > c and a + c > b and b + c > a else "Yo'q")
 
 
-def dars_tests(rng):
-    tests = [_rows(8, 30, 45), _rows(13, 50, 80), _rows(23, 30, 45), _rows(0, 0, 1), _rows(9, 5, 55),
-             _rows(23, 59, 1), _rows(12, 0, 1440), _rows(7, 45, 15), _rows(0, 0, 1439), _rows(11, 59, 721)]
+def uch_tests(rng):
+    tests = [_rows(3, 4, 5), _rows(1, 2, 3), _rows(1, 1, 1), _rows(10, 2, 3), _rows(2, 10, 3), _rows(2, 3, 10),
+             _rows(5, 5, 9), _rows(5, 5, 10), _rows(1000000, 1000000, 1000000), _rows(1, 1000000, 1000000),
+             _rows(7, 3, 4), _rows(6, 3, 4)]
     while len(tests) < 22:
-        tests.append(_rows(rng.randint(0, 23), rng.randint(0, 59), rng.randint(1, 1440)))
+        a, b = rng.randint(1, 1000), rng.randint(1, 1000)
+        c = rng.choice([a + b, abs(a - b) or 1, rng.randint(1, a + b + 50), a + b - 1, a + b + 1])
+        sides = [a, b, max(1, c)]
+        rng.shuffle(sides)
+        tests.append(_rows(*sides))
     return tests
 
 
@@ -85,6 +87,20 @@ def iliq_tests(rng):
              case([0] * 50), case(list(range(-50, 51))), case(list(range(50, -51, -1)))]
     while len(tests) < 22:
         tests.append(case([rng.randint(-50, 50) for _ in range(rng.choice([2, 3, 10, 100, 1000]))]))
+    return tests
+
+
+def musbat_solve(inp):
+    return _lines(sum(x for x in _nums(inp)[1:] if x > 0))
+
+
+def musbat_tests(rng):
+    def case(a):
+        return _rows(len(a), *a)
+    tests = [case([3, -5, 0, 8, -2]), case([-1, -2, -3]), case([7]), case([0]), case([-7]), case([1000] * 10),
+             case(list(range(-50, 51))), case([0, 0, 0, 5])]
+    while len(tests) < 22:
+        tests.append(case([rng.randint(-1000, 1000) for _ in range(rng.choice([1, 2, 5, 50, 1000]))]))
     return tests
 
 
@@ -227,6 +243,16 @@ EASY = {
                   "haroratlar ($-50 \\le t_i \\le 50$)."),
         "output": "Bitta son — oldingi kundan iliqroq bo‘lgan kunlar soni.",
     },
+    "musbatlar": {
+        "title": "Musbatlar yig‘indisi", "tags": ["for-loop", "conditionals"], "solve": musbat_solve,
+        "tests": musbat_tests,
+        "statement": ("$n$ ta butun son berilgan. Ular orasidagi musbat sonlarning yig‘indisini toping." + _ai("jami_qv")
+                      + "\n\nMusbat son — noldan katta son; nol ham, manfiy sonlar ham yig‘indiga kirmaydi. Musbat son "
+                      "bo‘lmasa, javob 0."),
+        "input": ("Birinchi qatorda $n$ ($1 \\le n \\le 1000$). Keyingi $n$ qatorda bittadan butun son "
+                  "($-1000 \\le a_i \\le 1000$)."),
+        "output": "Bitta son — musbat sonlar yig‘indisi.",
+    },
     "kuchli-parol": {
         "title": "Kuchli parol", "tags": ["strings", "conditionals"], "solve": parol_solve, "tests": parol_tests,
         "statement": ("Sayt parolni quyidagi to‘rt shartning hammasi bajarilsa, kuchli deb hisoblaydi:"
@@ -334,27 +360,24 @@ QAVS = {
     "output": "`Ha` yoki `Yo'q`.",
 }
 
-LIFT = {
-    "slug": "mc2-lift", "title": "Lift", "difficulty": "beginner", "points": 500, "tl_ms": 500,
-    "tags": ["arithmetic", "input-output"], "solve": lift_solve, "tests": lift_tests, "samples": 2,
-    "statement": ("Lift $c$-qavatda turibdi. Siz $a$-qavatda liftni chaqirasiz va $b$-qavatga borasiz. Lift bir "
-                  "qavatdan qo‘shni qavatga 3 soniyada o‘tadi; sizning qavatingizda va $b$-qavatda eshik ochilib "
-                  "yopilishi har gal 10 soniya oladi." + _ai("vaqt_qx") + "\n\nLiftni chaqirganingizdan "
-                  "$b$-qavatda chiqib ketguningizcha necha soniya o‘tadi?"),
-    "input": ("Uch qator: birinchisida $c$, ikkinchisida $a$, uchinchisida $b$ ($1 \\le c, a, b \\le 100$, "
-              "$a \\ne b$)."),
-    "output": "Bitta son — soniyalar.",
+TAKSI = {
+    "slug": "mc2-taksi", "title": "Taksi", "difficulty": "beginner", "points": 500, "tl_ms": 500,
+    "tags": ["conditionals", "arithmetic"], "solve": taksi_solve, "tests": taksi_tests, "samples": 2,
+    "statement": ("Taksi narxi shunday: yo‘lning birinchi 2 kilometri uchun 6000 so‘m (yo‘l qisqaroq bo‘lsa ham shu "
+                  "narx), undan keyingi har bir kilometr uchun yana 2500 so‘m." + _ai("narx_vz")
+                  + "\n\nYo‘l $k$ kilometr. Taksi uchun qancha to‘lanadi?"),
+    "input": "Bitta qatorda $k$ — butun son ($1 \\le k \\le 100$).",
+    "output": "Bitta son — so‘mda narx.",
 }
 
-DARS = {
-    "slug": "mc2-dars-tugashi", "title": "Dars tugashi", "difficulty": "beginner", "points": 500, "tl_ms": 500,
-    "tags": ["arithmetic", "input-output"], "solve": dars_solve, "tests": dars_tests, "samples": 2,
-    "statement": ("Dars $h$ soat $m$ daqiqada boshlanadi va $d$ daqiqa davom etadi. Dars soat nechada tugaydi?"
-                  + _ai("tugash_zq") + "\n\nVaqtni 24 soatlik `SS:DD` ko‘rinishida chiqaring: soat ham, daqiqa "
-                  "ham doim ikki xonali. Tun yarmidan o‘tib ketsa, keyingi kunning vaqti chiqadi."),
-    "input": ("Uch qator: birinchisida $h$ ($0 \\le h \\le 23$), ikkinchisida $m$ ($0 \\le m \\le 59$), "
-              "uchinchisida $d$ ($1 \\le d \\le 1440$)."),
-    "output": "Tugash vaqti `SS:DD` ko‘rinishida.",
+UCHBURCHAK = {
+    "slug": "mc2-uchburchak", "title": "Uchburchak", "difficulty": "beginner", "points": 500, "tl_ms": 500,
+    "tags": ["conditionals", "input-output"], "solve": uch_solve, "tests": uch_tests, "samples": 2,
+    "statement": ("Uchta tayoqcha bor, uzunliklari $a$, $b$ va $c$. Ulardan uchburchak yasash mumkinmi?" + _ai("tomon_qz")
+                  + "\n\nUchburchak bo‘lishi uchun har qanday ikki tomonning yig‘indisi uchinchi tomondan katta "
+                  "bo‘lishi kerak. Teng bo‘lsa, tayoqchalar bitta chiziqqa yotadi — bu uchburchak emas."),
+    "input": "Uch qator: birinchisida $a$, ikkinchisida $b$, uchinchisida $c$ ($1 \\le a, b, c \\le 10^6$).",
+    "output": "`Ha` yoki `Yo'q`.",
 }
 
 
@@ -364,8 +387,8 @@ def _easy(key: str, points: int) -> dict:
 
 
 # the round: two Beginner, the two Easy ones picked from EASY, the Medium one
-PICKED_EASY = ("teskari-son", "iliqroq-kunlar")
-PROBLEMS = [LIFT, DARS, _easy(PICKED_EASY[0], 750), _easy(PICKED_EASY[1], 1000), QAVS]
+PICKED_EASY = ("teskari-son", "musbatlar")
+PROBLEMS = [TAKSI, UCHBURCHAK, _easy(PICKED_EASY[0], 750), _easy(PICKED_EASY[1], 1000), QAVS]
 
 
 class Command(WeekendCommand):
