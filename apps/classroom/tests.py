@@ -545,3 +545,34 @@ def test_duel_finder_offers_classmates_and_rivals_then_searches_every_handle(cli
     # the exact handle, then those starting with it, then the rest; never a blocked user or yourself
     assert [name for name, _ in found("VALI")] == ["vali", "valijon", "avali"]
     assert "ali" not in [name for name, _ in found("ali")]
+
+
+@pytest.mark.django_db
+def test_duel_badges_count_wins_runs_the_best_rating_and_perfect_quiz_runs(bank):
+    from .duel_badges import duel_badges
+    from .duels import accept, challenge
+    from .models import Duel
+
+    p1, p2 = _players()
+    names = lambda: [b["name"] for b in duel_badges(p1)["earned"]]  # noqa: E731
+    assert names() == []
+    nxt = {b["name"]: b for b in duel_badges(p1)["next"]}
+    assert (nxt["Birinchi g‘alaba"]["done"], nxt["Birinchi g‘alaba"]["total"]) == (0, 1)
+    assert (nxt["Tajribali"]["done"], nxt["Tajribali"]["shown"]) == (0, "1200 / 1300")
+    assert duel_badges(p1)["total"] == 11
+
+    duel, _ = challenge(p1, "p2", "python", "easy")
+    _play(duel, p1, right=5, secs=2)  # all five in 10 s
+    accept(duel, p2)
+    _play(duel, p2, right=1)
+    assert names() == ["Birinchi g‘alaba", "Mukammal", "Chaqmoq"]
+    assert {b["name"]: b["done"] for b in duel_badges(p1)["next"]}["Poliglot"] == 1
+    assert [b["name"] for b in duel_badges(p2)["earned"]] == []
+
+    # three wins in a row and a rating past 1300, from older duels: the badges stay once earned
+    for _ in range(2):
+        Duel.objects.create(challenger=p1, opponent=p2, difficulty="easy", status="finished", winner=p1,
+                            mode="code", challenger_delta=45, opponent_delta=-45)
+    Duel.objects.create(challenger=p1, opponent=p2, difficulty="easy", status="finished", winner=p2,
+                        mode="code", challenger_delta=-40, opponent_delta=40)
+    assert {"Zanjir", "Tajribali"} <= set(names())

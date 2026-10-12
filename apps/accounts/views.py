@@ -31,6 +31,8 @@ from .models import TelegramLink, User
 from .tiers import RATING_TIERS as _RATING_TIERS
 from .tiers import next_tier as _next_tier
 from .tiers import rating_tier
+from apps.classroom.duel_badges import duel_badges
+
 from .tiers import streak_badges, tier_banner
 from .tiers import tier_color as _tier_color
 from .telegram import bot_configured
@@ -380,6 +382,7 @@ def profile(request, username):
         "streak_badges": streak_badges(cur_streak, best_streak),
         "plan_badges": _plan_badges(profile_user),
         "contest_badges": _contest_badges(profile_user),
+        "duel_badges": duel_badges(profile_user),
         "tier_color": _tier_color(profile_user.rating),
         "rating_history": rating_history,
         "max_rating": max((p.rating_after for p in rating_history), default=None),

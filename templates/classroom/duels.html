@@ -127,6 +127,13 @@ The duel rating is its own Elo and never touches the contest rating.{% endcommen
       <p class="mt-3">Duel reytingi alohida hisoblanadi, musobaqa reytingiga ta’sir qilmaydi. Hamma 1200 dan boshlaydi; birinchi 30 duelda tez o‘zgaradi (K = 40), keyin sekinroq (20, 2000 dan yuqorida 10).</p>
     </div>
   </section>
+  <section class="ca-box" aria-labelledby="dbadges-title">
+    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" style="--c: var(--ca-lvl-hard)" aria-hidden="true"></span><h2 id="dbadges-title">Duel nishonlari</h2><span class="ca-box-tools tabular">{{ badges.earned|length }} / {{ badges.total }}</span></div>
+    <ul class="ca7-badges ca7-badges-tight">
+      {% for b in badges.earned %}{% include "accounts/_badge7.html" with tone="duel" icon=b.icon title=b.name sub=b.sub href=None done=None total=None %}{% endfor %}
+      {% for b in badges.next %}{% include "accounts/_badge7.html" with tone="locked" icon=b.icon title=b.name sub=b.sub href=None done=b.done total=b.total shown=b.shown %}{% endfor %}
+    </ul>
+  </section>
   <section class="ca-box" aria-labelledby="board-title">
     <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" aria-hidden="true"></span><h2 id="board-title">Duel reytingi</h2></div>
     {% if board %}

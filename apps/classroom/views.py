@@ -19,6 +19,7 @@ from apps.problems.views import _render_statement
 from apps.submissions.models import Submission
 
 from . import duels
+from .duel_badges import duel_badges
 from .access import can_review
 from .forms import AssignmentForm
 from .models import Assignment, AssignmentProblem, Duel, DuelAnswer, DuelQuestion, ReviewComment
@@ -222,7 +223,7 @@ def duel_list(request):
         "history": [d for d in mine if d.status not in duels.OPEN and d.opponent_id][:30],
         "error": error, "languages": duels.LANGUAGES, "levels": duels.LEVELS, "joinable": joinable,
         "form": request.POST if error else {}, "per_question": int(duels.PER_QUESTION.total_seconds()),
-        "n_questions": duels.QUESTIONS,
+        "n_questions": duels.QUESTIONS, "badges": duel_badges(request.user),
     })
 
 
