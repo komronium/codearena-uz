@@ -1033,6 +1033,15 @@ section.ca-ed-full #editor .cm-editor { height: calc(100vh - 9.5rem); }
 }
 .ca-level-count:focus-within { border-color: rgb(var(--ca-accent-rgb)); }
 .ca-level-count .ca-input { padding: .35rem .55rem; }
+/* staff: every duel, the two players face to face with the score between them */
+.ca-aduels td { vertical-align: middle; }
+.ca-aduels-p small { display: block; margin-top: .15rem; font-size: .75rem; color: rgb(var(--ca-mute-rgb)); }
+.ca-aduels-p.is-won .ca-u7 b, .ca-aduels-p.is-won a { font-weight: 700; }
+.ca-aduels-p svg.lucide { width: .9rem; height: .9rem; color: rgb(var(--ca-gold-rgb)); }
+.ca-aduels-score { text-align: center; white-space: nowrap; font-size: 1.05rem; color: rgb(var(--ca-mute-rgb)); }
+.ca-aduels-score b { font-weight: 700; color: rgb(var(--ca-ink-rgb)); }
+.ca-aduels-score b.is-won { color: rgb(var(--ca-ok-rgb)); }
+.ca-aduels-score span { margin: 0 .3rem; }
 /* duels: each player's card */
 .ca-duelist {
   display: flex; align-items: center; gap: .85rem; padding: 1rem 1.1rem; border-radius: var(--ca-radius);
@@ -1076,6 +1085,8 @@ section.ca-ed-full #editor .cm-editor { height: calc(100vh - 9.5rem); }
   margin: 0 0 1.1rem; padding: .95rem 1.1rem; border: 1px solid rgb(var(--ca-line-rgb)); border-radius: 10px;
   background: rgb(var(--ca-field-rgb)); color: rgb(var(--ca-ink-rgb)); font-size: .95rem; line-height: 1.6; white-space: pre; overflow-x: auto; tab-size: 4;
 }
+/* the code reads exactly as typed: no => arrow or == bar from the font's ligatures */
+.ca-quiz-code, .ca-quiz-option code, .ca-quiz-answers code, .ca-quiz-want { font-variant-ligatures: none; font-feature-settings: "calt" 0, "liga" 0; }
 .ca-quiz-note { margin: .6rem 0 0; font-size: .78rem; color: rgb(var(--ca-mute-rgb)); }
 .ca-quiz-card > .ca-quiz-note { margin: -.5rem 0 .5rem; }
 .ca-quiz-options { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; }
@@ -1093,10 +1104,36 @@ section.ca-ed-full #editor .cm-editor { height: calc(100vh - 9.5rem); }
 .ca-quiz-option code { font-size: .95rem; color: rgb(var(--ca-ink-rgb)); white-space: pre-wrap; word-break: break-word; }
 .ca-quiz-type { display: flex; gap: .6rem; }
 .ca-quiz-type input { flex: 1; height: 2.75rem; font-size: 1rem; }
-.ca-quiz-verdict { display: flex; align-items: center; gap: .5rem; margin-bottom: .75rem; font-size: 1.25rem; }
-.ca-quiz-verdict svg.lucide { width: 1.4rem; height: 1.4rem; }
-.ca-quiz-verdict.is-ok { color: rgb(var(--ca-ok-rgb)); }
-.ca-quiz-verdict.is-bad { color: rgb(var(--ca-bad-rgb)); }
+/* the verdict: the card rings in its colour, the pick keeps it, and a stamp says it over the card while a thin
+bar runs to the next question; never the right answer, which waits for the review */
+.ca-quiz-card { --v: rgb(var(--ca-accent-rgb)); --v-ink: rgb(var(--ca-accent-rgb)); transition: box-shadow .15s; }
+.ca-quiz-card.is-ok { --v: rgb(var(--ca-ok-fill-rgb)); --v-ink: rgb(var(--ca-ok-rgb)); }
+.ca-quiz-card:is(.is-bad, .is-late) { --v: rgb(var(--ca-bad-rgb)); --v-ink: rgb(var(--ca-bad-rgb)); }
+.ca-quiz-card:is(.is-ok, .is-bad, .is-late) { box-shadow: 0 0 0 2px var(--v), var(--ca-shadow); }
+.ca-quiz-card.is-sent .ca-quiz-option:not(.is-picked) { opacity: .4; }
+.ca-quiz-card.is-sent .ca-quiz-option.is-picked { border-color: var(--v); background: color-mix(in srgb, var(--v) 12%, rgb(var(--ca-surface-rgb))); opacity: 1; }
+.ca-quiz-option.is-picked kbd { color: #fff; border-color: transparent; background: var(--v); }
+.ca-quiz-card:is(.is-ok, .is-bad, .is-late) .ca-quiz-type input { border-color: var(--v); box-shadow: 0 0 0 1px var(--v); }
+.ca-quiz-flash {
+  position: absolute; inset: 0; z-index: 2; display: grid; place-content: center; justify-items: center; gap: .65rem;
+  background: rgb(var(--ca-surface-rgb) / .8); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
+  opacity: 0; visibility: hidden; transition: opacity .14s ease-out, visibility .14s;
+}
+.ca-quiz-flash.is-on { opacity: 1; visibility: visible; }
+.ca-quiz-flash-ico { display: grid; place-items: center; width: 4.75rem; height: 4.75rem; border-radius: 50%; color: #fff; background: var(--v);
+  box-shadow: 0 10px 30px -8px var(--v); transform: scale(.55); transition: transform .32s cubic-bezier(.34, 1.56, .64, 1); }
+.ca-quiz-flash.is-on .ca-quiz-flash-ico { transform: scale(1); }
+.ca-quiz-flash-ico svg.lucide { width: 2.5rem; height: 2.5rem; stroke-width: 3; }
+.ca-quiz-flash-ico [hidden] { display: none; }
+.ca-quiz-flash b { font-size: 1.75rem; font-weight: 800; letter-spacing: -.02em; color: var(--v-ink); }
+.ca-quiz-flash-go { width: 7.5rem; height: 4px; overflow: hidden; border-radius: 2px; background: rgb(var(--ca-ink-rgb) / .1); }
+.ca-quiz-flash-go i { display: block; width: 0; height: 100%; background: var(--v); }
+.ca-quiz-flash.is-on .ca-quiz-flash-go i { width: 100%; transition: width var(--pause, 1s) linear; }
+.ca-quiz-card > .ca-quiz-flash:only-child { position: static; padding: 2.5rem 0 1.5rem; background: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+@media (prefers-reduced-motion: reduce) {
+  .ca-quiz-flash, .ca-quiz-flash-ico { transition: none; }
+  .ca-quiz-flash-ico { transform: none; }
+}
 .ca-quiz-answers { display: flex; flex-wrap: wrap; gap: .5rem 1.75rem; margin: 0 0 .75rem; }
 .ca-quiz-answers dt { font-size: .72rem; font-weight: 600; color: rgb(var(--ca-mute-rgb)); }
 .ca-quiz-answers dd { display: flex; align-items: center; gap: .35rem; margin: .15rem 0 0; font-size: .875rem; }
@@ -1104,9 +1141,6 @@ section.ca-ed-full #editor .cm-editor { height: calc(100vh - 9.5rem); }
 .ca-quiz-answers code.is-ok { color: rgb(var(--ca-ok-rgb)); background: rgb(var(--ca-ok-rgb) / .1); }
 .ca-quiz-answers code.is-bad { color: rgb(var(--ca-bad-rgb)); background: rgb(var(--ca-bad-rgb) / .08); }
 .ca-quiz-explain { margin: 0; padding: .6rem .8rem; border-radius: 8px; font-size: .875rem; color: rgb(var(--ca-ink-rgb)); background: rgb(var(--ca-accent-rgb) / .07); }
-.ca-quiz-go { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem; margin-top: 1.1rem; }
-.ca-quiz-go kbd { margin-left: .5rem; font-size: .7rem; opacity: .7; }
-.ca-quiz-go small { font-size: .78rem; color: rgb(var(--ca-mute-rgb)); }
 .ca-quiz-review { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 30rem), 1fr)); gap: .9rem; margin: 0; padding: 0; list-style: none; }
 .ca-quiz-review > li { display: flex; flex-direction: column; }
 .ca-quiz-review .ca-quiz-explain { margin-top: auto; }

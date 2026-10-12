@@ -576,3 +576,49 @@ def test_duel_badges_count_wins_runs_the_best_rating_and_perfect_quiz_runs(bank)
     Duel.objects.create(challenger=p1, opponent=p2, difficulty="easy", status="finished", winner=p2,
                         mode="code", challenger_delta=-40, opponent_delta=40)
     assert {"Zanjir", "Tajribali"} <= set(names())
+
+
+@pytest.mark.django_db
+def test_an_answer_gets_only_its_verdict_then_the_next_question(client, bank):
+    from .duels import find_opponent
+
+    p1, _ = _players()
+    duel, _ = find_opponent(p1, "python", "easy")
+    client.force_login(p1)
+    url = reverse("classroom:duel_play", args=[duel.pk])
+    q = client.get(url).context["q"]
+    r = client.post(url, {"index": "0", "answer": q.answer}, HTTP_X_DUEL_ANSWER="1")
+    assert r.json() == {"verdict": "ok", "next": url}  # never the right answer
+    q = client.get(url).context["q"]
+    assert client.post(url, {"index": "1", "answer": "nope"}, HTTP_X_DUEL_ANSWER="1").json()["verdict"] == "bad"
+    client.get(url)
+    assert client.post(url, {"index": "2", "answer": ""}, HTTP_X_DUEL_ANSWER="1").json()["verdict"] == "late"
+    page = client.get(url + "?after=1").content.decode()  # the page without script: the verdict alone, then on
+    assert "Noto‘g‘ri" in page and 'http-equiv="refresh"' in page and q.answer not in page.split("<main", 1)[1]
+    for i in (3, 4):
+        client.get(url)
+        last = client.post(url, {"index": str(i), "answer": "x"}, HTTP_X_DUEL_ANSWER="1").json()
+    assert last["next"] == reverse("classroom:duel", args=[duel.pk])  # the run is over: to the results
+
+
+@pytest.mark.django_db
+def test_staff_see_every_duels_result_and_both_players_answers(client, bank):
+    from .duels import accept, challenge
+
+    p1, p2 = _players()
+    duel, _ = challenge(p1, "p2", "python", "easy")
+    _play(duel, p1, right=4)
+    accept(duel, p2)
+    _play(duel, p2, right=2)
+    admin = User.objects.create_user("boss", password="x", is_staff=True)
+    client.force_login(p1)
+    assert client.get(reverse("moderation:duels")).status_code in (302, 403)
+    client.force_login(admin)
+    r = client.get(reverse("moderation:duels"))
+    page = r.content.decode()
+    d = r.context["page"][0]
+    assert [(s["user"].username, s["right"], s["won"]) for s in d.sides] == [("p1", 4, True), ("p2", 2, False)]
+    assert "4/5 to‘g‘ri" in page and "+20" in page and r.context["counts"]["finished"] == 1
+    assert client.get(reverse("moderation:duels"), {"user": "nobody"}).context["page"].object_list == []
+    review = client.get(reverse("classroom:duel", args=[duel.pk])).context["review"]
+    assert len(review) == 5 and [s["label"] for s in review[0]["answers"]] == ["p1", "p2"]

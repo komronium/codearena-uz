@@ -59,6 +59,9 @@ grouped by what the student is doing. Profile, settings and sign-out live in the
 <a href="{% url 'moderation:submissions' %}" class="ca-sidebar-link {% if ns == 'moderation' and un == 'submissions' %}is-active{% endif %}"{% if ns == 'moderation' and un == 'submissions' %} aria-current="page"{% endif %}>
   <i data-lucide="history" class="lu" aria-hidden="true"></i>Barcha urinishlar
 </a>
+<a href="{% url 'moderation:duels' %}" class="ca-sidebar-link {% if ns == 'moderation' and un == 'duels' %}is-active{% endif %}"{% if ns == 'moderation' and un == 'duels' %} aria-current="page"{% endif %}>
+  <i data-lucide="swords" class="lu" aria-hidden="true"></i>Duellar
+</a>
 <a href="{% url 'moderation:users' %}" class="ca-sidebar-link {% if ns == 'moderation' and un in 'users,user_edit' %}is-active{% endif %}"{% if ns == 'moderation' and un in 'users,user_edit' %} aria-current="page"{% endif %}>
   <i data-lucide="users-round" class="lu" aria-hidden="true"></i>Foydalanuvchilar
   {% if nav.staff.requests %}<span class="ca-chip ca-chip-score ml-auto tabular" title="O‘qituvchi so‘rovlari">{{ nav.staff.requests }}</span>{% endif %}

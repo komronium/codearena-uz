@@ -17,8 +17,7 @@
       {% include "classroom/_quiz_code.html" with q=r.q %}
       <dl class="ca-quiz-answers">
         <div><dt>To‘g‘ri javob</dt><dd><code>{{ r.q.answer }}</code></dd></div>
-        <div><dt>Siz</dt><dd>{% include "classroom/_quiz_given.html" with a=r.me %}</dd></div>
-        <div><dt>Raqib</dt><dd>{% if r.them_pending %}<span class="text-mute">hali o‘ynamadi</span>{% else %}{% include "classroom/_quiz_given.html" with a=r.them %}{% endif %}</dd></div>
+        {% for s in r.answers %}<div><dt>{{ s.label }}</dt><dd>{% if s.pending %}<span class="text-mute">hali o‘ynamadi</span>{% elif s.unseen and not s.a %}<span class="text-mute">ko‘rilmagan</span>{% else %}{% include "classroom/_quiz_given.html" with a=s.a %}{% endif %}</dd></div>{% endfor %}
       </dl>
       {% if r.q.explain %}<p class="ca-quiz-explain">{{ r.q.explain }}</p>{% endif %}
     </li>

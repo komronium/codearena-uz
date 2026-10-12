@@ -574,6 +574,48 @@ def submissions(request):
 
 
 @staff_required
+def duels(request):
+    """Every duel, newest first, each player with their score: right answers and time for a quiz, the
+    rating change once it's over. Filters live in the query string, like the submissions list."""
+    from apps.classroom.duels import QUESTIONS, run
+    from apps.classroom.models import Duel, DuelQuestion
+
+    qs = Duel.objects.select_related("challenger", "opponent", "winner")
+    f = {k: request.GET.get(k, "").strip() for k in ("user", "status", "language")}
+    if f["user"]:
+        qs = qs.filter(Q(challenger__username=f["user"]) | Q(opponent__username=f["user"]))
+    if f["status"] in Duel.Status.values:
+        qs = qs.filter(status=f["status"])
+    if f["language"] in DuelQuestion.Lang.values:
+        qs = qs.filter(language=f["language"])
+    page = Paginator(qs.order_by("-pk"), 50).get_page(request.GET.get("page"))
+    now = timezone.now()
+    for d in page:
+        d.sides = []
+        for u, delta in ((d.challenger, d.challenger_delta), (d.opponent, d.opponent_delta)):
+            r = run(d, u.pk) if u and d.mode == Duel.Mode.QUIZ else None
+            d.sides.append({"user": u, "delta": delta, "won": u is not None and d.winner_id == u.pk,
+                            "right": r.right if r else None, "seen": len(r.answers) if r else 0,
+                            "over": r is not None and r.over(now),
+                            "spent": f"{r.spent(now).total_seconds():.1f}".replace(".", ",") if r and r.over(now) else ""})
+    today = timezone.localtime(now).replace(hour=0, minute=0, second=0, microsecond=0)
+    all_duels = Duel.objects.all()
+    counts = {
+        "all": all_duels.count(),
+        "finished": all_duels.filter(status=Duel.Status.FINISHED).count(),
+        "playing": all_duels.filter(status=Duel.Status.ACTIVE).count(),
+        "waiting": all_duels.filter(status=Duel.Status.PENDING).count(),
+        "today": all_duels.filter(created__gte=today).count(),
+        "players": len(set(all_duels.values_list("challenger_id", flat=True))
+                       | set(all_duels.exclude(opponent=None).values_list("opponent_id", flat=True))),
+    }
+    return render(request, "moderation/duels.html", {
+        "page": page, "f": f, "counts": counts, "n_questions": QUESTIONS,
+        "statuses": Duel.Status.choices, "languages": DuelQuestion.Lang.choices,
+    })
+
+
+@staff_required
 def users(request):
     q = request.GET.get("q", "").strip()
     requests_only = request.GET.get("requests") == "1"

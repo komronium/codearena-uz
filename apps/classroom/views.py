@@ -319,19 +319,23 @@ def _duel_board(duel, viewer) -> dict:
     mine = runs.get(viewer.pk)
     my_over = mine is not None and mine.over(now)
     review = []
-    if duel.mode == Duel.Mode.QUIZ and (my_over or viewer.is_staff and duel.status == Duel.Status.FINISHED):
-        other = duel.opponent_id if viewer.pk == duel.challenger_id else duel.challenger_id
-        theirs = runs.get(other)
-        show_theirs = theirs is not None and theirs.over(now)
-        by_index = lambda r: {a.index: a for a in r.answers} if r else {}
-        me_by, them_by = by_index(mine), by_index(theirs)
+    watcher = viewer.is_staff and viewer.pk not in duel.players()  # staff sees both players' answers any time
+    if duel.mode == Duel.Mode.QUIZ and (my_over or watcher):
+        if watcher:
+            sides = [(u.username, runs.get(u.pk)) for u in (duel.challenger, duel.opponent) if u]
+        else:
+            other = duel.opponent if viewer.pk == duel.challenger_id else duel.challenger
+            sides = [("Siz", mine), ("Raqib" if other is None else other.username, runs.get(other.pk) if other else None)]
+        sides = [(label, r, {a.index: a for a in r.answers} if r else {}, r is not None and r.over(now) or watcher)
+                 for label, r in sides]
         questions = DuelQuestion.objects.in_bulk(duel.questions)
         for i, qid in enumerate(duel.questions):
             q = questions.get(qid)
             if q is None:
                 continue
-            review.append({"n": i + 1, "q": q, "me": me_by.get(i), "them": them_by.get(i) if show_theirs else None,
-                           "them_pending": not show_theirs})
+            review.append({"n": i + 1, "q": q, "answers": [
+                {"label": label, "a": by_index.get(i), "pending": not shown, "unseen": r is None or i >= len(r.answers)}
+                for label, r, by_index, shown in sides]})
     return {
         "players": rows, "review": review, "my_over": my_over,
         "my_playing": mine is not None and not my_over,
@@ -350,29 +354,33 @@ def _shuffled(options, seed) -> list:
 @login_required
 def duel_play(request, pk):
     """Your run: one question at a time with its own 20 seconds (from when the server first showed it, so a
-    reload doesn't reset it), then a moment to see if you were right before the next one."""
+    reload doesn't reset it). An answer gets only its verdict, right or wrong (never the right answer: that
+    waits for the review after the run), and the next question follows by itself. The page sends answers
+    with fetch and gets the verdict as JSON; without script, the verdict page moves on with a refresh."""
     duel = _my_duel(request, pk)
     if duel.mode != Duel.Mode.QUIZ or request.user.pk not in duel.players():
         return redirect("classroom:duel", duel.pk)
+    play_url = reverse("classroom:duel_play", args=[duel.pk])
     if request.method == "POST":
         try:
             index = int(request.POST.get("index", ""))
         except ValueError:
             return HttpResponseBadRequest()
-        duels.answer(duel, request.user, index, request.POST.get("answer", ""))
-        return redirect(reverse("classroom:duel_play", args=[duel.pk]) + f"?after={index}")
+        a = duels.answer(duel, request.user, index, request.POST.get("answer", ""))
+        if request.headers.get("X-Duel-Answer") == "1":
+            if a is None:
+                return JsonResponse({"next": play_url})
+            verdict = _verdict(duel, request.user, a)
+            return JsonResponse({"verdict": verdict["state"], "next": verdict["next"]})
+        return redirect(play_url + f"?after={index}")
     after = request.GET.get("after")
     if after is not None and after.isdigit():
-        a = (DuelAnswer.objects.select_related("question")
-             .filter(duel=duel, user=request.user, index=int(after)).first())
+        a = DuelAnswer.objects.filter(duel=duel, user=request.user, index=int(after)).first()
         r = duels.run(duel, request.user.pk)
         if a is not None and r is not None and r.closed(a, timezone.now()):
-            late = a.answered_at is None or a.answered_at > a.shown_at + duels.PER_QUESTION + duels.GRACE
             return render(request, "classroom/duel_play.html", {
-                "duel": duel, "feedback": a, "q": a.question, "n": a.index + 1, "n_questions": duels.QUESTIONS,
-                "timed_out": late or not a.answer,
-                "last": a.index + 1 >= duels.QUESTIONS or r.over(timezone.now()),
-                "cells": _my_cells(r), "language": duel.get_language_display()})
+                "duel": duel, "verdict": _verdict(duel, request.user, a), "n": a.index + 1,
+                "n_questions": duels.QUESTIONS, "cells": _my_cells(r), "language": duel.get_language_display()})
     current = duels.current(duel, request.user)
     if current is None:
         return redirect("classroom:duel", duel.pk)
@@ -385,6 +393,16 @@ def duel_play(request, pk):
         "options": _shuffled(q.options, f"{duel.pk}-{request.user.pk}-{current.index}"),
         "cells": _my_cells(r), "language": duel.get_language_display(),
     })
+
+
+def _verdict(duel, user, a) -> dict:
+    """How an answered (or timed out) question went, and where the run goes next."""
+    late = a.answered_at is None or a.answered_at > a.shown_at + duels.PER_QUESTION + duels.GRACE
+    state = "ok" if a.correct else ("late" if late or not a.answer else "bad")
+    r = duels.run(duel, user.pk)
+    over = r is None or r.over(timezone.now())
+    return {"state": state, "last": over,
+            "next": reverse("classroom:duel", args=[duel.pk]) if over else reverse("classroom:duel_play", args=[duel.pk])}
 
 
 def _my_cells(r) -> list[str]:

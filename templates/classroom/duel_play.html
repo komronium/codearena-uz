@@ -1,9 +1,12 @@
 {% extends "base.html" %}
 {% block title %}Duel · {{ n }}/{{ n_questions }}-savol{% endblock %}
+{% block head %}{% if verdict %}<meta http-equiv="refresh" content="1;url={{ verdict.next }}">{% endif %}{% endblock %}
 {% block content %}
-{% comment %}One question of your run at a time. Its time runs on the server from when it was first shown; the
-bar here only shows it, and at zero the form sends itself (an empty answer counts as wrong). Copying out of
-the question is blocked, so it can't be pasted into an AI or a compiler in the 20 seconds.{% endcomment %}
+{% comment %}One question of your run at a time. Its time runs on the server from when it was first shown; the bar here
+only shows it, and at zero the form sends itself (an empty answer counts as wrong). An answer goes by fetch: the
+card says right or wrong on the spot (never the right answer, which waits for the review after the run) and
+the next question opens by itself. Without script the post lands on the verdict page, which moves on after a
+second. Copying out of the question is blocked, so it can't be pasted into an AI or a compiler.{% endcomment %}
 <div class="ca-quiz" data-nocopy>
   <div class="ca-quiz-top">
     <a class="ca-link text-sm text-mute" href="{% url 'classroom:duel' duel.pk %}"><i data-lucide="swords" class="lu mr-1" aria-hidden="true"></i>{{ duel.challenger.username }} vs {{ duel.opponent.username|default:"?" }}</a>
@@ -13,27 +16,19 @@ the question is blocked, so it can't be pasted into an AI or a compiler in the 2
     <span class="ca-quiz-meta"><b>{{ language }}</b> · {{ duel.get_difficulty_display }}</span>
   </div>
 
-  <section class="ca-quiz-card" aria-labelledby="quiz-ask">
-    <div class="ca-quiz-head"><p class="ca-quiz-n">{{ n }}-savol, {{ n_questions }} tadan</p>{% if not feedback %}<b class="ca-quiz-secs tabular" id="quiz-secs" aria-hidden="true">{% widthratio remaining_ms 1000 1 %}</b>{% endif %}</div>
-    {% if feedback %}
-    <div class="ca-quiz-verdict {% if feedback.correct %}is-ok{% else %}is-bad{% endif %}" role="status">
-      <i data-lucide="{% if feedback.correct %}check{% elif timed_out %}timer-off{% else %}x{% endif %}" class="lu" aria-hidden="true"></i>
-      <b id="quiz-ask">{% if feedback.correct %}To‘g‘ri!{% elif timed_out %}Vaqt tugadi{% else %}Noto‘g‘ri{% endif %}</b>
+  {% if verdict %}
+  {# no script: the verdict alone, then on by the refresh above #}
+  <section class="ca-quiz-card is-{{ verdict.state }}" aria-live="polite">
+    <div class="ca-quiz-flash is-on">
+      <span class="ca-quiz-flash-ico" aria-hidden="true"><i data-lucide="{% if verdict.state == 'ok' %}check{% elif verdict.state == 'late' %}timer-off{% else %}x{% endif %}" class="lu"></i></span>
+      <b>{% if verdict.state == "ok" %}To‘g‘ri!{% elif verdict.state == "late" %}Vaqt tugadi{% else %}Noto‘g‘ri{% endif %}</b>
+      <a class="ca-link text-sm" href="{{ verdict.next }}">{% if verdict.last %}Natijaga o‘tish{% else %}Keyingi savol{% endif %}</a>
     </div>
-    <p class="ca-quiz-ask">{% include "classroom/_quiz_ask.html" %}</p>
-    {% include "classroom/_quiz_code.html" %}
-    <dl class="ca-quiz-answers">
-      <div><dt>To‘g‘ri javob</dt><dd><code>{{ q.answer }}</code></dd></div>
-      {% if not feedback.correct and feedback.answer %}<div><dt>Siz</dt><dd><code class="is-bad">{{ feedback.answer }}</code></dd></div>{% endif %}
-    </dl>
-    {% if q.explain %}<p class="ca-quiz-explain">{{ q.explain }}</p>{% endif %}
-    <div class="ca-quiz-go">
-      {% if last %}<a class="ca-btn ca-btn-primary" href="{% url 'classroom:duel' duel.pk %}" autofocus>Natijani ko‘rish<kbd>Enter</kbd></a>
-      {% else %}<a class="ca-btn ca-btn-primary" href="{% url 'classroom:duel_play' duel.pk %}" autofocus>Keyingi savol<kbd>Enter</kbd></a>
-      <small>Keyingi savolning {{ per_question|default:20 }} soniyasi ochilganda boshlanadi.</small>{% endif %}
-    </div>
-    {% else %}
+  </section>
+  {% else %}
+  <section class="ca-quiz-card" id="quiz-card" aria-labelledby="quiz-ask">
     <div class="ca-quiz-clock" aria-hidden="true"><i id="quiz-bar"></i></div>
+    <div class="ca-quiz-head"><p class="ca-quiz-n">{{ n }}-savol, {{ n_questions }} tadan</p><b class="ca-quiz-secs tabular" id="quiz-secs" aria-hidden="true">{% widthratio remaining_ms 1000 1 %}</b></div>
     <p class="ca-quiz-ask" id="quiz-ask">{% include "classroom/_quiz_ask.html" %}</p>
     {% if q.in_main %}<p class="ca-quiz-note"><code>main()</code> ichidagi kod{% if q.language == "cpp" %}, <code>bits/stdc++.h</code> va <code>using namespace std</code> bilan{% else %}, <code>java.util.*</code> bilan{% endif %}.</p>{% endif %}
     {% include "classroom/_quiz_code.html" %}
@@ -53,9 +48,16 @@ the question is blocked, so it can't be pasted into an AI or a compiler in the 2
       <p class="ca-quiz-note">Bo‘sh joylar hisobga olinmaydi; katta-kichik harf hisobga olinadi.</p>
       {% endif %}
     </form>
-    {% endif %}
+    {# the verdict, drawn over the card once the answer is in #}
+    <div class="ca-quiz-flash" id="quiz-flash" role="status" aria-live="assertive">
+      <span class="ca-quiz-flash-ico" aria-hidden="true"><i data-lucide="check" class="lu" data-v="ok"></i><i data-lucide="x" class="lu" data-v="bad"></i><i data-lucide="timer-off" class="lu" data-v="late"></i></span>
+      <b id="quiz-flash-text"></b>
+      <span class="ca-quiz-flash-go" aria-hidden="true"><i></i></span>
+    </div>
   </section>
+  {% endif %}
 </div>
+{% if not verdict %}
 <script>
 (() => {
   const root = document.querySelector("[data-nocopy]");
@@ -63,32 +65,62 @@ the question is blocked, so it can't be pasted into an AI or a compiler in the 2
   for (const ev of ["copy", "cut", "contextmenu", "dragstart", "selectstart"]) {
     root.addEventListener(ev, (e) => { if (!e.target.closest("input")) e.preventDefault(); });
   }
-  const go = document.querySelector(".ca-quiz-go a");
-  if (go) {
-    document.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.repeat) { e.preventDefault(); go.click(); } });
-    return;
-  }
-  const form = document.getElementById("quiz-form"), bar = document.getElementById("quiz-bar"),
-        secs = document.getElementById("quiz-secs"), all = {{ per_question }} * 1000,
-        end = performance.now() + {{ remaining_ms }};
+  const form = document.getElementById("quiz-form"), card = document.getElementById("quiz-card"),
+        bar = document.getElementById("quiz-bar"), secs = document.getElementById("quiz-secs"),
+        flash = document.getElementById("quiz-flash"), all = {{ per_question }} * 1000,
+        end = performance.now() + {{ remaining_ms }}, here = document.querySelector(".ca-quiz-steps .is-here");
+  const WORDS = { ok: "To‘g‘ri!", bad: "Noto‘g‘ri", late: "Vaqt tugadi" };
+  const PAUSE = { ok: 800, bad: 1100, late: 1100 };
   let sent = false;
-  form.addEventListener("submit", () => { sent = true; form.querySelectorAll("button").forEach((b) => b.setAttribute("aria-disabled", "true")); });
+
+  const show = (state, picked, next) => {
+    card.classList.add(`is-${state}`);
+    if (picked) picked.classList.add("is-picked");
+    const input = form.querySelector("input[name=answer]");
+    if (input) input.setAttribute("aria-invalid", state === "ok" ? "false" : "true");
+    if (here) here.className = state === "ok" ? "is-ok is-here" : "is-bad is-here";
+    // the icons are SVG by now, which has no .hidden: set the attribute
+    flash.querySelectorAll("[data-v]").forEach((i) => i.toggleAttribute("hidden", i.dataset.v !== state));
+    document.getElementById("quiz-flash-text").textContent = WORDS[state];
+    flash.style.setProperty("--pause", `${PAUSE[state]}ms`);
+    flash.classList.add("is-on");
+    setTimeout(() => location.replace(next), PAUSE[state]);
+  };
+
+  const send = (picked) => {
+    if (sent) return;
+    sent = true;
+    card.classList.add("is-sent");
+    form.querySelectorAll("button, input").forEach((el) => { if (el.type !== "hidden") el.setAttribute("aria-disabled", "true"); });
+    const data = new FormData(form);
+    if (picked) data.set("answer", picked.value);
+    fetch(location.pathname, { method: "POST", body: data, headers: { "X-Duel-Answer": "1" }, credentials: "same-origin" })
+      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+      .then((j) => (j.verdict ? show(j.verdict, picked, j.next) : location.replace(j.next)))
+      .catch(() => location.reload());  // the server has the answer or the clock: the page picks up from there
+  };
+
+  form.addEventListener("submit", (e) => { e.preventDefault(); send(e.submitter && e.submitter.name === "answer" ? e.submitter : null); });
+
   const tick = () => {
+    if (sent) return;
     const left = Math.max(0, end - performance.now());
     bar.style.width = (left / all * 100) + "%";
     bar.classList.toggle("is-low", left < 5000);
     secs.textContent = Math.ceil(left / 1000);
-    if (left <= 0) { if (!sent) { sent = true; form.requestSubmit(); } return; }
+    if (left <= 0) { send(null); return; }
     requestAnimationFrame(tick);
   };
   tick();
+
   const options = [...form.querySelectorAll(".ca-quiz-option")];
   if (options.length) {
     document.addEventListener("keydown", (e) => {
       const i = Number(e.key) - 1;
-      if (!sent && i >= 0 && i < options.length && !e.ctrlKey && !e.metaKey && !e.altKey) { e.preventDefault(); options[i].click(); }
+      if (!sent && i >= 0 && i < options.length && !e.ctrlKey && !e.metaKey && !e.altKey) { e.preventDefault(); send(options[i]); }
     });
   }
 })();
 </script>
+{% endif %}
 {% endblock %}

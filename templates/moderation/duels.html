@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Duellar — boshqaruv{% endblock %}
+{% block content %}
+{% comment %}Every duel for staff: the two players face to face with their scores (right answers out of five and the time
+spent, the rating change once it's over), the score between them, then language, level and state. A duel's page opens
+for staff too, with every question and both players' answers.{% endcomment %}
+<div class="mb-5">{% include "moderation/_header.html" with title="Duellar" subtitle="Har bir duel natijasi: kim nechta to‘g‘ri javob berdi, qancha vaqtda, reyting qanchaga o‘zgardi" %}</div>
+
+<dl class="ca7-nums mb-5">
+  <a href="{% url 'moderation:duels' %}"><dd class="tabular">{{ counts.all }}</dd><dt>Jami duel</dt></a>
+  <a href="?status=finished"><dd class="tabular">{{ counts.finished }}</dd><dt>Tugagan</dt></a>
+  <a href="?status=active"><dd class="tabular">{{ counts.playing }}</dd><dt>Davom etmoqda</dt></a>
+  <a href="?status=pending"><dd class="tabular">{{ counts.waiting }}</dd><dt>Raqib kutmoqda</dt></a>
+  <a href="{% url 'moderation:duels' %}"><dd class="tabular">{{ counts.today }}</dd><dt>Bugun</dt></a>
+  <a href="{% url 'classroom:duels' %}"><dd class="tabular">{{ counts.players }}</dd><dt>O‘yinchilar</dt></a>
+</dl>
+
+<form method="get" class="mb-4 flex flex-wrap items-end gap-3">
+  <div class="w-full max-w-[12rem]">
+    <label class="ca-label" for="f-user">Foydalanuvchi</label>
+    <input id="f-user" name="user" value="{{ f.user }}" class="ca-input !py-1.5 text-sm" placeholder="login…" autocomplete="off" spellcheck="false">
+  </div>
+  <div>
+    <label class="ca-label" for="f-status">Holat</label>
+    <select id="f-status" name="status" class="ca-select !w-auto !py-1.5 text-sm">
+      <option value="">Hammasi</option>
+      {% for v, label in statuses %}<option value="{{ v }}"{% if v == f.status %} selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+  </div>
+  <div>
+    <label class="ca-label" for="f-lang">Til</label>
+    <select id="f-lang" name="language" class="ca-select !w-auto !py-1.5 text-sm">
+      <option value="">Hammasi</option>
+      {% for v, label in languages %}<option value="{{ v }}"{% if v == f.language %} selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+  </div>
+  <button class="ca-btn ca-btn-ghost !py-1.5"><i data-lucide="list-filter" class="lu" aria-hidden="true"></i>Filtrlash</button>
+  {% if f.user or f.status or f.language %}<a class="ca-link text-sm" href="{% url 'moderation:duels' %}">Tozalash</a>{% endif %}
+</form>
+
+{% if page.object_list %}
+<div class="overflow-x-auto">
+<table class="ca-table ca-table-flat ca-aduels">
+  <thead><tr><th class="w-14">#</th><th>Chaqirgan</th><th class="text-center">Hisob</th><th>Raqib</th><th>Duel</th><th>Holat</th><th class="text-right">Sana</th></tr></thead>
+  <tbody>
+  {% for d in page %}
+  <tr>
+    <td><a class="ca-link tabular text-sm" href="{% url 'classroom:duel' d.pk %}">{{ d.pk }}</a></td>
+    {% for s in d.sides %}
+    {% if forloop.last %}<td class="ca-aduels-score tabular">{% with a=d.sides.0 b=d.sides.1 %}{% if d.mode == "quiz" and a.right is not None %}<b class="{% if a.won %}is-won{% endif %}">{% if a.over %}{{ a.right }}{% else %}…{% endif %}</b><span>:</span><b class="{% if b.won %}is-won{% endif %}">{% if b.user and b.over %}{{ b.right }}{% elif b.user %}…{% else %}–{% endif %}</b>{% elif d.mode == "code" %}<span class="text-xs text-mute">masala</span>{% else %}–{% endif %}{% endwith %}</td>{% endif %}
+    <td class="ca-aduels-p{% if s.won %} is-won{% endif %}">
+      {% if s.user %}
+      <span class="flex items-center gap-1.5">{% include "accounts/_u7.html" with u=s.user you=False %}{% if s.won %}<i data-lucide="trophy" class="lu text-gold" aria-label="g‘olib"></i>{% endif %}</span>
+      <small>{% if d.mode == "quiz" and s.over %}{{ s.right }}/{{ n_questions }} to‘g‘ri · {{ s.spent }} s{% elif d.mode == "quiz" and s.seen %}o‘ynamoqda · {{ s.seen }}/{{ n_questions }}{% elif d.mode == "quiz" and d.status == "pending" and forloop.last %}qabul qilmagan{% endif %}{% if s.delta is not None %} <b class="{% if s.delta > 0 %}text-ok{% elif s.delta < 0 %}text-bad{% endif %}">{{ s.delta|stringformat:"+d" }}</b>{% endif %}</small>
+      {% else %}<span class="text-mute">raqib kutilmoqda</span>{% endif %}
+    </td>
+    {% endfor %}
+    <td class="whitespace-nowrap text-sm">{% if d.mode == "quiz" %}{{ d.get_language_display }}{% else %}Masala{% endif %} <span class="ca-diff ca-diff-{{ d.difficulty }} !text-xs">{{ d.get_difficulty_display }}</span></td>
+    <td>{% if d.status == "finished" %}<span class="ca7-pill is-ok">{% if d.winner %}Tugagan{% else %}Durang{% endif %}</span>{% elif d.status == "active" %}<span class="ca7-pill is-warn">Davom etmoqda</span>{% elif d.status == "pending" %}<span class="ca7-pill">Kutmoqda</span>{% else %}<span class="ca7-pill is-bad">{{ d.get_status_display }}</span>{% endif %}</td>
+    <td class="whitespace-nowrap text-right tabular text-sm text-mute">{{ d.created|date:"d.m H:i" }}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% include "_pagination.html" with page=page %}
+{% else %}
+<div class="ca-empty">Bu filtr bo‘yicha duel yo‘q.</div>
+{% endif %}
+{% endblock %}
