@@ -1,6 +1,7 @@
-{% comment %}The three boards as a switch on the band: the contest rating, the practice points and the badges.{% endcomment %}
+{% comment %}The boards as a switch on the band: the contest rating, the practice points, the duel rating and the badges.{% endcomment %}
 <nav class="ca7-hseg ml-auto" aria-label="Reyting turlari">
   <a href="{% url 'rating' %}"{% if request.resolver_match.url_name == 'rating' %} aria-current="page"{% endif %}>Musobaqa reytingi</a>
   <a href="{% url 'top' %}"{% if request.resolver_match.url_name == 'top' %} aria-current="page"{% endif %}>Amaliyot balli</a>
+  <a href="{% url 'duel_board' %}"{% if request.resolver_match.url_name == 'duel_board' %} aria-current="page"{% endif %}>Duel</a>
   <a href="{% url 'badge_board' %}"{% if request.resolver_match.url_name == 'badge_board' %} aria-current="page"{% endif %}>Nishonlar</a>
 </nav>

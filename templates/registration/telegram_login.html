@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Telegram orqali kirish{% endblock %}
+{% block content %}
+<div class="ca-auth">
+  {% include "registration/_auth_brand.html" %}
+  <div class="ca-panel ca-auth-card space-y-4" aria-live="polite">
+    <div>
+      <h1 class="text-xl font-bold">Telegramda tasdiqlang</h1>
+      <p class="mt-1 text-sm text-mute">@{{ bot }} ochilgach, <b>Start</b> tugmasini bosing. Shu oyna o‘zi kirib oladi.</p>
+    </div>
+    <a class="ca-btn ca-btn-primary w-full !py-2.5" href="{{ bot_url }}" target="_blank" rel="noopener"><i data-lucide="send" class="lu" aria-hidden="true"></i>Telegramni ochish</a>
+    <p class="text-center text-sm text-mute" id="tg-state">Kutilmoqda…</p>
+    <p class="text-center text-xs text-mute">Hisob Telegramga ulanmagan bo‘lsa, <a class="ca-link" href="{% url 'login' %}">parol bilan kiring</a>. Kod 5 daqiqa amal qiladi.</p>
+  </div>
+</div>
+<script>
+(() => {
+  const state = document.getElementById("tg-state");
+  let tries = 0;
+  const tick = async () => {
+    if (++tries > 100) { state.textContent = "Vaqt tugadi. Sahifani yangilab, qaytadan urinib ko‘ring."; return; }
+    try {
+      const r = await fetch("{% url 'telegram_login_status' %}", { headers: { Accept: "application/json" }, credentials: "same-origin" });
+      const d = await r.json();
+      if (d.ok) { state.textContent = "Kirildi…"; location.href = d.next || "/"; return; }
+      if (!d.waiting) { state.textContent = "So‘rov eskirgan. Kirish sahifasidan qayta boshlang."; return; }
+    } catch {}
+    setTimeout(tick, 3000);
+  };
+  setTimeout(tick, 2000);
+})();
+</script>
+{% endblock %}

@@ -5,14 +5,19 @@ from . import views
 from . import telegram_views
 
 urlpatterns = [
-    path("login/", auth_views.LoginView.as_view(), name="login"),
+    path("login/", views.Login.as_view(), name="login"),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
     path("register/", views.register, name="register"),
     path("top/", views.top, name="top"),
     path("rating/", views.rating, name="rating"),
+    path("friends/", views.feed, name="feed"),
+    path("profile/<str:username>/follow/", views.follow_toggle, name="follow"),
+    path("rating/duels/", views.duel_board, name="duel_board"),
     path("rating/badges/", views.badge_board, name="badge_board"),
     path("badges/", views.badges_page, name="badges"),
     path("profile/edit/", views.profile_edit, name="profile_edit"),
+    path("telegram/login/", telegram_views.login_start, name="telegram_login"),
+    path("telegram/login/status/", telegram_views.login_status, name="telegram_login_status"),
     path("telegram/connect/", telegram_views.connect, name="telegram_connect"),
     path("telegram/disconnect/", telegram_views.disconnect, name="telegram_disconnect"),
     path("telegram/preferences/", telegram_views.preferences, name="telegram_preferences"),

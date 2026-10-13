@@ -8,7 +8,8 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db import IntegrityError, transaction
-from django.db.models import Count, F, OuterRef, Q, Subquery
+from django.db.models import Count, F, OuterRef, Q, Subquery, Window
+from django.db.models.functions import Rank
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.utils import timezone
@@ -24,7 +25,7 @@ from apps.problems.skills import skill_map
 from apps.submissions.models import Submission
 
 from .forms import ProfileEditForm, RegisterForm
-from .models import TelegramLink, User
+from .models import Follow, TelegramLink, User
 
 from .tiers import RATING_TIERS as _RATING_TIERS
 from .tiers import next_tier as _next_tier
@@ -168,6 +169,14 @@ def register(request):
     return render(request, "registration/register.html", {"form": form, "next": nxt})
 
 
+class Login(auth_views.LoginView):
+    """The sign-in page, with "Telegram orqali kirish" offered once the bot is set up."""
+
+    def get_context_data(self, **kwargs):
+        from .telegram import bot_configured
+        return super().get_context_data(**kwargs, telegram_login=bot_configured())
+
+
 class PasswordChange(SuccessMessageMixin, auth_views.PasswordChangeView):
     """Knowing the old password is enough — no email round trip."""
     success_url = reverse_lazy("profile_edit")
@@ -212,10 +221,77 @@ def practice_board():
 
 
 def top(request):
-    qs = (practice_board().annotate(solved_count=Count("userproblemsolved", distinct=True))
+    """The practice-points board. Equal points share a place (two people on 1650 are both 4th), and a search shows
+    each match with the place they hold on the whole board."""
+    q = request.GET.get("q", "").strip()[:40]
+    board = practice_board()
+    qs = (board.annotate(solved_count=Count("userproblemsolved", distinct=True),
+                         rank=Window(expression=Rank(), order_by=F("practice_points").desc()))
           .order_by("-practice_points", "username"))
+    if q:
+        found = list(qs.filter(username__icontains=q)[:50])
+        for u in found:  # the window ran over the filtered rows: count the places above on the whole board
+            u.rank = board.filter(practice_points__gt=u.practice_points).count() + 1
+        return render(request, "accounts/top.html", {"users": found, "total": board.count(), "q": q, "found": len(found)})
     page = Paginator(qs, 50).get_page(request.GET.get("page"))
-    return render(request, "accounts/top.html", {"users": _ranked(page), "total": qs.count()})
+    return render(request, "accounts/top.html", {"users": page, "total": qs.count(), "q": ""})
+
+
+@login_required
+def feed(request):
+    """Do‘stlar: what the people you follow and your classmates did in the last two weeks."""
+    from . import feed as feeds
+
+    people = feeds.circle(request.user)
+    suggestions = (User.objects.filter(is_active=True, is_staff=False).exclude(pk__in=people | {request.user.pk})
+                   .order_by("-rating")[:5]) if len(people) < 5 else []
+    return render(request, "accounts/feed.html", {"events": feeds.events(request.user), "n_circle": len(people),
+                                                 "suggestions": suggestions, "days": feeds.DAYS})
+
+
+@login_required
+@require_POST
+def follow_toggle(request, username):
+    from .models import Follow
+
+    target = get_object_or_404(User, username=username, is_active=True)
+    if target.pk == request.user.pk:
+        return redirect("profile", username)
+    link, created = Follow.objects.get_or_create(user=request.user, target=target)
+    if not created:
+        link.delete()
+    return redirect("profile", username)
+
+
+def duel_board(request):
+    """Everyone with a finished duel, by duel rating (its own Elo; the contest rating is untouched). The rating is the
+    one for the running season: a month that began since someone's last duel has already pulled theirs back."""
+    from collections import Counter
+
+    from apps.classroom import duels as duel_rules
+    from apps.classroom.models import Duel, DuelSeasonResult
+    duel_rules.close_seasons()
+    season = duel_rules.current_season()
+    played, wins = Counter(), Counter()
+    for challenger, opponent, winner in Duel.objects.filter(status=Duel.Status.FINISHED, mode=Duel.Mode.QUIZ).values_list(
+            "challenger_id", "opponent_id", "winner_id"):
+        played.update((challenger, opponent))
+        if winner:
+            wins[winner] += 1
+    played.pop(None, None)
+    people = list(User.objects.filter(pk__in=played, is_active=True))
+    for u in people:
+        u.eff = duel_rules.carried(u.duel_rating, u.duel_season, season)
+    people.sort(key=lambda u: (-u.eff, u.username))
+    page = Paginator(people, 50).get_page(request.GET.get("page"))
+    users = _ranked(page)
+    for u in users:
+        u.duels, u.wins = played[u.pk], wins[u.pk]
+    podium_season = (DuelSeasonResult.objects.filter(rank__gt=0).order_by("-season").values_list("season", flat=True).first())
+    podium = list(DuelSeasonResult.objects.filter(season=podium_season, rank__gt=0).select_related("user")) if podium_season else []
+    return render(request, "accounts/duel_board.html", {
+        "users": users, "total": len(people), "season": season, "season_ends": duel_rules.season_ends(),
+        "podium": podium, "podium_season": podium_season, "min_duels": duel_rules.SEASON_MIN_DUELS})
 
 
 def _rating_spread(ratings: list[int], mine: int | None) -> dict:
@@ -269,6 +345,11 @@ def rating(request):
     if request.user.is_authenticated:
         mine = rated.filter(user=request.user).order_by("-contest__end").first()
         if mine is not None:
+            for t in tiers:  # how far through your own tier you are, for the bar in its tile
+                lo, hi = t["floor"] or 0, t["ceiling"]
+                if request.user.rating >= lo and (hi is None or request.user.rating < hi):
+                    t["here"] = True
+                    t["pct"] = round(100 * (request.user.rating - lo) / (hi - lo)) if hi else 100
             row = list(qs.values_list("pk", flat=True)).index(request.user.pk)
             me = {"rank": sum(1 for r in ratings if r > request.user.rating) + 1, "page": row // 50 + 1,
                   "delta": mine.rating_after - mine.rating_before, "next": _next_tier(request.user.rating),
@@ -413,7 +494,13 @@ def profile(request, username):
     skill_groups = _skill_groups(profile_user)
     topic_rows = [(kind, r) for kind, _label, rows in skill_groups for r in rows]
     topic_map, weakest = _topic_map(topic_rows, problem_map)
+    h2h, is_following = None, False
+    if request.user.is_authenticated and request.user != profile_user:
+        from apps.classroom.views import _rival
+        h2h = _rival(request.user, profile_user)
+        is_following = Follow.objects.filter(user=request.user, target=profile_user).exists()
     return render(request, "accounts/profile.html", {
+        "h2h": h2h, "is_following": is_following,
         "profile_user": profile_user,
         "total_users": total_users,
         "total_rated": total_rated,

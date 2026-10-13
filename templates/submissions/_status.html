@@ -17,6 +17,7 @@ compact=True: the verdict chip only.{% endcomment %}
         {% elif progress %}{{ progress.done }}/{{ progress.total }} test tekshirildi{% else %}Tez orada boshlanadi{% endif %}</p>
     </div>
   </div>
+  {% if s.is_terminal and s.verdict != 'CE' and strip|length > 1 %}<ol class="ca7-vstrip" aria-label="Testlar: {{ s.passed }} / {{ s.total }} o‘tdi">{% for c in strip %}<li class="is-{{ c }}" title="{{ forloop.counter }}-test: {% if c == 'ok' %}o‘tdi{% elif c == 'bad' %}xato{% else %}tekshirilmadi{% endif %}"><i data-lucide="{% if c == 'ok' %}check{% elif c == 'bad' %}x{% else %}minus{% endif %}" class="lu" aria-hidden="true"></i><span class="sr-only">{{ forloop.counter }}-test {% if c == 'ok' %}o‘tdi{% elif c == 'bad' %}xato{% else %}tekshirilmadi{% endif %}</span></li>{% endfor %}</ol>{% endif %}
   {% if s.verdict == 'RUNNING' and progress %}<span class="ca7-pg max-w-sm" aria-hidden="true"><i style="width: {{ progress.pct }}%"></i></span>{% endif %}
   <dl class="ca7-vhero-nums">
     <div><dt>Vaqt</dt><dd class="tabular">{% if s.is_terminal and s.verdict != 'CE' %}{{ s.exec_ms }} ms{% else %}—{% endif %}</dd></div>
@@ -27,7 +28,7 @@ compact=True: the verdict chip only.{% endcomment %}
   {% if s.is_terminal and s.verdict != 'AC' %}
   <p class="ca7-vhero-hint"><i data-lucide="lightbulb" class="lu" aria-hidden="true"></i>{% if s.verdict == 'WA' %}Dastur ishladi, lekin javob kutilganidan farq qildi. Chegaraviy holatlarni (0, 1, eng katta qiymat) va chiqish formatini tekshiring.{% elif s.verdict == 'TLE' %}Dastur vaqt chegarasiga sig‘madi. Tezroq algoritm kerak — masalan, ichma-ich sikllarni kamaytiring.{% elif s.verdict == 'MLE' %}Dastur ruxsat etilganidan ko‘p xotira ishlatdi. Katta massivlar va rekursiya chuqurligini tekshiring.{% elif s.verdict == 'OLE' %}Dastur juda ko‘p narsa chiqardi. Ortiqcha yoki sikl ichidagi chiqarishlarni olib tashlang.{% elif s.verdict == 'RE' %}Dastur xato bilan to‘xtadi: nolga bo‘lish, massiv chegarasidan chiqish yoki noto‘g‘ri kiritishni o‘qish bo‘lishi mumkin.{% elif s.verdict == 'CE' %}Kod kompilyatsiya bo‘lmadi. Til to‘g‘ri tanlanganini va sintaksisni tekshiring.{% else %}Tekshiruvda xato yuz berdi. Qayta yuborib ko‘ring.{% endif %}</p>
   {% endif %}
-  {% if s.verdict == 'CE' %}<pre class="ca7-vhero-log">{{ s.compile_log|default:"Kompilyator izoh bermadi." }}</pre>{% endif %}
+  {% if s.verdict == 'CE' %}<pre class="ca7-vhero-log">{{ s.compile_log|default:"Kompilyator izoh bermadi. Ko‘pincha til noto‘g‘ri tanlangan yoki qavs/ikki nuqta tushib qolgan bo‘ladi: kodni muharrirda ochib, tilni tekshiring." }}</pre>{% endif %}
 </section>
 
 {% if first_fail and s.is_terminal %}

@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base.html" %}{% load tagnames uzdates %}
 {% block title %}Kun masalasi — boshqaruv{% endblock %}
 {% block content %}
 <div class="mb-6">
@@ -13,7 +13,7 @@
       <div class="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p class="ca-eyebrow"><i data-lucide="calendar-days" class="lu" aria-hidden="true"></i>Rejalashtirish</p>
-          <h2 id="daily-picker-title" class="mt-1 text-xl font-semibold">Qaysi kun uchun?</h2>
+          <h2 id="daily-picker-title" class="mt-1 text-[1.0625rem] font-bold">Qaysi kun uchun?</h2>
           <p class="mt-1 max-w-2xl text-sm text-mute">Bugungi masala allaqachon e’lon qilingan bo‘lsa, uni almashtirib bo‘lmaydi. Ertangi yoki keyingi kunni tanlab, variantlarni oldindan belgilang.</p>
         </div>
         <form method="get" class="flex flex-wrap items-end gap-2">
@@ -48,7 +48,7 @@
     <div>
       <div class="mb-3 flex flex-wrap items-end justify-between gap-2">
         <div>
-          <h2 class="text-lg font-semibold">{{ candidates|length }} ta variant</h2>
+          <h2 class="text-[1.0625rem] font-bold">{{ candidates|length }} ta variant</h2>
           <p class="text-sm text-mute">Avval haftaning kuniga mos qiyinlik, keyin boshqa darajalar. Yaqinda kunlik bo‘lgan masalalar chetlatiladi.</p>
         </div>
         <span class="ca-chip"><i data-lucide="wand-sparkles" class="lu mr-1" aria-hidden="true"></i>Algoritm tavsiyasi</span>
@@ -67,7 +67,7 @@
             <span class="ca-chip">{{ p.get_kind_display }}</span>
             {% if p.rating %}<span class="ca-chip">{{ p.rating }} rating</span>{% endif %}
           </div>
-          {% with tags=p.tags.all %}{% if tags %}<div class="mt-3 flex flex-wrap gap-1.5">{% for tag in tags|slice:":3" %}<span class="ca-chip !bg-ink/5 text-mute">{{ tag.name }}</span>{% endfor %}</div>{% endif %}{% endwith %}
+          {% with tags=p.tags.all %}{% if tags %}<div class="mt-3 flex flex-wrap gap-1.5">{% for tag in tags|slice:":3" %}<span class="ca-chip !bg-ink/5 text-mute">{{ tag.name|tag_uz }}</span>{% endfor %}</div>{% endif %}{% endwith %}
           <form method="post" action="{% url 'moderation:daily_problem_choose' %}" class="mt-auto pt-5"{% if assignment and assignment.problem_id != p.pk %} onsubmit="return confirm('{{ day|date:'d.m.Y' }} uchun tanlangan masala ‘{{ assignment.problem.title|escapejs }}’ o‘rniga ‘{{ p.title|escapejs }}’ bo‘ladi. Davom etasizmi?');"{% endif %}>{% csrf_token %}
             <input type="hidden" name="date" value="{{ day|date:'Y-m-d' }}">
             <input type="hidden" name="problem_id" value="{{ p.pk }}">
@@ -87,7 +87,7 @@
 
   <aside class="ca-panel h-fit" aria-labelledby="schedule-title">
     <div class="flex items-center justify-between gap-2">
-      <h2 id="schedule-title" class="font-semibold">Yaqin kunlar</h2>
+      <h2 id="schedule-title" class="text-[1.0625rem] font-bold">Yaqin kunlar</h2>
       <span class="ca-chip">15 kun</span>
     </div>
     <p class="mt-1 text-sm text-mute">Tanlangan va avtomatik rejalangan masalalar.</p>
@@ -96,7 +96,7 @@
       {% for row in schedule %}
       <li>
         <a class="flex items-start justify-between gap-3 rounded-lg border border-ink/10 p-3 transition hover:border-accent/40{% if row.date == day %} border-accent/50 bg-accent/5{% endif %}" href="{% url 'moderation:daily_problem' %}?date={{ row.date|date:'Y-m-d' }}">
-          <span class="min-w-0"><span class="block text-xs text-mute">{{ row.date|date:"D · d.m.Y" }}{% if row.date == today %} · Bugun{% endif %}</span><span class="mt-0.5 block truncate text-sm font-medium">{{ row.problem.title }}</span></span>
+          <span class="min-w-0"><span class="block text-xs text-mute">{{ row.date|weekday_uz }} · {{ row.date|date:"d.m.Y" }}{% if row.date == today %} · Bugun{% endif %}</span><span class="mt-0.5 block truncate text-sm font-medium">{{ row.problem.title }}</span></span>
           {% if row.selection_method == 'admin' %}<i data-lucide="user-check" class="lu shrink-0 text-ok" aria-label="Admin tanlagan"></i>{% else %}<i data-lucide="sparkles" class="lu shrink-0 text-mute" aria-label="Avtomatik"></i>{% endif %}
         </a>
       </li>

@@ -28,14 +28,14 @@ the next round) and one closing call.{% endcomment %}
     {# what a solve looks like; decorative, so inert #}
     <div class="ca7-arena" inert>
       <div class="ca7-term">
-        <div class="ca7-term-h"><i></i><i></i><i></i><span>main.py</span></div>
+        <div class="ca7-term-h"><i></i><i></i><i></i><span>main.py · namuna</span></div>
         <pre><span class="ln">1</span>n = <span class="f">int</span>(<span class="f">input</span>())
 <span class="ln">2</span>a = <span class="f">list</span>(<span class="f">map</span>(<span class="f">int</span>, <span class="f">input</span>().split()))
 <span class="ln">3</span><span class="f">print</span>(<span class="f">max</span>(a) - <span class="f">min</span>(a))</pre>
         <div class="ca7-term-f"><span><i data-lucide="check" class="lu"></i>Qabul qilindi</span><span class="text-white/70">12/12 test</span><span class="ml-auto text-white/60">48 ms</span></div>
       </div>
-      <div class="ca7-float is-a"><i data-lucide="flame" class="lu" style="color: #E8590C"></i>7 kunlik seriya</div>
-      <div class="ca7-float is-b"><i data-lucide="trending-up" class="lu text-ok"></i>Reyting <b class="tabular">1112</b><span class="ca7-pill is-ok">+61</span></div>
+      <div class="ca7-float is-a"><i data-lucide="flame" class="lu" style="color: #E8590C"></i>7 kunlik Olov<small class="ca7-float-n">namuna</small></div>
+      <div class="ca7-float is-b"><i data-lucide="trending-up" class="lu text-ok"></i>Reyting <b class="tabular">1112</b><span class="ca7-pill is-ok">+61</span><small class="ca7-float-n">namuna</small></div>
     </div>
   </div>
 </section>
@@ -57,11 +57,29 @@ the next round) and one closing call.{% endcomment %}
   <ul class="ca7-feats">
     <li><span class="ca7-fi" aria-hidden="true"><i data-lucide="trophy" class="lu"></i></span><div><h3>Reytingli musobaqalar</h3><p>Jonli natijalar jadvali va Elo reyting. Reytingli raundda faqat hech kim ko‘rmagan masalalar beriladi.</p></div></li>
     <li><span class="ca7-fi" aria-hidden="true"><i data-lucide="swords" class="lu"></i></span><div><h3>1 ga 1 duellar</h3><p>Sinfdoshingizni chaqiring: Python, C++, Java yoki JavaScript kodi — nima chiqaradi? 5 ta savol, har biriga 20 soniya.</p></div></li>
-    <li><span class="ca7-fi" aria-hidden="true"><i data-lucide="calendar-check" class="lu"></i></span><div><h3>Kun masalasi</h3><p>Har kuni bitta masala. Kunida yechsangiz seriya o‘sadi va +5 bonus ball olasiz.</p></div></li>
+    <li><span class="ca7-fi" aria-hidden="true"><i data-lucide="calendar-check" class="lu"></i></span><div><h3>Kun masalasi</h3><p>Har kuni bitta masala. Kunida yechsangiz Olov o‘sadi va +5 bonus ball olasiz.</p></div></li>
     <li><span class="ca7-fi" aria-hidden="true"><i data-lucide="notebook-pen" class="lu"></i></span><div><h3>Uy vazifalari</h3><p>O‘qituvchi guruhga muddatli vazifa beradi, kim qachon yechganini ko‘radi va kodga satrma-satr izoh yozadi.</p></div></li>
     <li><span class="ca7-fi" aria-hidden="true"><i data-lucide="code" class="lu"></i></span><div><h3>{{ languages|length }} ta til</h3><p>{{ languages|join:", " }}. Har bir yechim cheklangan muhitda barcha testlarda tekshiriladi.</p></div></li>
     <li><span class="ca7-fi" aria-hidden="true"><i data-lucide="shield-check" class="lu"></i></span><div><h3>Halol natijalar</h3><p>Musobaqadagi har bir yechim dalillar bilan tekshiriladi. Shubha bo‘lsa, qarorni odam qabul qiladi va u jurnalga yoziladi.</p></div></li>
   </ul>
+</section>
+
+<section aria-labelledby="paths-title">
+  <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-hard)" aria-hidden="true"></span><h2 id="paths-title">Kim uchun</h2></div>
+  <div class="ca7-paths">
+    <article>
+      <span class="ca7-fi" aria-hidden="true"><i data-lucide="graduation-cap" class="lu"></i></span>
+      <h3>O‘quvchi uchun</h3>
+      <ul><li>Oson masaladan boshlang, darajangizga mos keyingisi tavsiya qilinadi</li><li>Kun masalasi va Olov bilan har kuni mashq qiling</li><li>Sinfdoshingiz bilan duelda bellashing</li></ul>
+      <a class="ca-btn ca-btn-gold" href="{% url 'register' %}">Bepul boshlash</a>
+    </article>
+    <article>
+      <span class="ca7-fi" aria-hidden="true"><i data-lucide="users" class="lu"></i></span>
+      <h3>O‘qituvchi uchun</h3>
+      <ul><li>Sinf oching, o‘quvchilar kod bilan qo‘shiladi</li><li>Muddatli vazifa bering, kim topshirgani bir qarashda ko‘rinadi</li><li>Kodga satrma-satr izoh yozing, orqada qolganlarga Telegramda eslatma yuboring</li></ul>
+      <a class="ca-btn ca-btn-soft" href="{% url 'register' %}">O‘qituvchi sifatida boshlash</a>
+    </article>
+  </div>
 </section>
 
 <section aria-labelledby="now-title">

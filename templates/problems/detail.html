@@ -1,4 +1,4 @@
-{% extends "base.html" %}{% load static tiers seo %}
+{% extends "base.html" %}{% load static tiers seo tagnames %}
 {% block title %}{% if contest_problem %}{{ contest_problem.label }}. {% endif %}{{ problem.title }}{% endblock %}
 {% block description %}{{ statement_html|plain }}{% endblock %}
 {% block structured_data %}{% if not contest %}{% url 'problems:list' as list_url %}{% breadcrumbs_jsonld "Masalalar" list_url problem.title request.path %}{% endif %}{% endblock %}
@@ -63,6 +63,7 @@ the console (samples, your own input, the run's result) and the one gold "Yubori
     {% if show_leaders or my_subs %}
     <div class="ca-doc-tabs" role="tablist" aria-label="Masala bo‘limlari">
       <button type="button" role="tab" id="tab-doc-statement" aria-controls="doc-statement" aria-selected="true" data-doc-tab="statement">Shart</button>
+      {% if hints or editorial_html or problem.editorial_md %}<button type="button" role="tab" id="tab-doc-help" aria-controls="doc-help" aria-selected="false" tabindex="-1" data-doc-tab="help"><i data-lucide="lightbulb" class="lu mr-1" aria-hidden="true"></i>Yordam</button>{% endif %}
       {% if show_leaders %}<button type="button" role="tab" id="tab-doc-leaders" aria-controls="doc-leaders" aria-selected="false" tabindex="-1" data-doc-tab="leaders">Eng yaxshi yechimlar</button>{% endif %}
       {% if my_subs %}<button type="button" role="tab" id="tab-doc-mine" aria-controls="doc-mine" aria-selected="false" tabindex="-1" data-doc-tab="mine">Urinishlarim <em class="tabular">{{ my_subs_n }}</em></button>{% endif %}
     </div>
@@ -94,7 +95,7 @@ the console (samples, your own input, the run's result) and the one gold "Yubori
         {# the facts under the title: the level (and rating), what a solve is worth, the limits, the topics #}
         <div class="ca-facts7">
           {% if contest_problem %}
-          {% if contest.type != "icpc" %}<span{% if contest.type == "cf" %} title="Boshlang‘ich ball: vaqt o‘tishi va noto‘g‘ri urinishlar bilan kamayadi"{% endif %}><i data-lucide="star" class="lu" aria-hidden="true"></i><b class="tabular">{{ contest_problem.points }}</b> ball</span>{% endif %}
+          {% if contest.type != "icpc" %}<span{% if contest.type == "cf" %} title="Boshlang‘ich ball: vaqt o‘tishi va noto‘g‘ri urinishlar bilan kamayadi"{% endif %}><i data-lucide="coins" class="lu" aria-hidden="true"></i><b class="tabular">{{ contest_problem.points }}</b> ball</span>{% endif %}
           {% else %}
           <span class="ca-diff ca-diff-{{ problem.difficulty }}" title="Masala reytingi {{ problem.rating }}: reytingi shu songa teng o‘quvchi uni taxminan yarim holda yechadi">{{ problem.get_difficulty_display }}</span>
           {% if voided == "held" %}
@@ -102,7 +103,7 @@ the console (samples, your own input, the run's result) and the one gold "Yubori
           {% elif voided %}
           <span class="font-medium text-bad" title="O‘qituvchi bu yechimni ko‘chirilgan deb belgiladi, shuning uchun amaliyot baliga qo‘shilmadi. Savol bo‘lsa, o‘qituvchingizga murojaat qiling."><i data-lucide="shield-alert" class="lu" aria-hidden="true"></i>Ball berilmadi</span>
           {% else %}
-          <span title="Yechsangiz amaliyot balingizga qo‘shiladi. Ko‘p odam yechgan masala biroz arzonlashadi."><i data-lucide="star" class="lu" aria-hidden="true"></i><b class="tabular">{{ problem.points }}</b> ball</span>
+          <span title="Yechsangiz amaliyot balingizga qo‘shiladi. Ko‘p odam yechgan masala biroz arzonlashadi."><i data-lucide="coins" class="lu" aria-hidden="true"></i><b class="tabular">+{{ problem.points }}</b> ball</span>
           {% endif %}
           {% endif %}
           {% if problem.kind == "sql" %}<span class="ca-kind-sql"><i data-lucide="database" class="lu" aria-hidden="true"></i>SQL</span>{% endif %}
@@ -112,7 +113,7 @@ the console (samples, your own input, the run's result) and the one gold "Yubori
           <button type="button" class="ca-stars-sum" data-dialog="rate-dialog" title="{{ problem.n_ratings }} ta baho"><i data-lucide="star" class="lu" aria-hidden="true"></i><b class="tabular text-ink">{{ problem.avg_stars|floatformat:1 }}</b><span class="sr-only">/5,</span> <span class="tabular text-mute">({{ problem.n_ratings }})</span></button>
           {% endif %}
           {% if not contest and problem.tags.all %}
-          <span class="text-mute">mavzu: {% for t in problem.tags.all|slice:":3" %}<a class="ca-facts7-tag{% if t.kind == 'sql' %} is-sql{% endif %}" href="{% url 'problems:list' %}?tag={{ t.name|urlencode }}">{{ t.name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</span>
+          <span class="text-mute">mavzu: {% for t in problem.tags.all|slice:":3" %}<a class="ca-facts7-tag{% if t.kind == 'sql' %} is-sql{% endif %}" href="{% url 'problems:list' %}?tag={{ t.name|urlencode }}">{{ t.name|tag_uz }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</span>
           {% endif %}
           {% if not contest %}
           <span class="text-mute">muallif: <a class="ca-tier-ink font-semibold{{ problem.author.rating|lg }}" href="{% url 'profile' problem.author.username %}" translate="no" style="--tier: {{ problem.author.rating|tier_color }}">{{ problem.author.username }}</a></span>
@@ -211,7 +212,9 @@ the console (samples, your own input, the run's result) and the one gold "Yubori
         </dl>
         {% endif %}
       </div>
+    </div>
     {% if hints or editorial_html or problem.editorial_md %}
+    <div class="ca-doc" id="doc-help" role="tabpanel" aria-labelledby="tab-doc-help" hidden>
     <div class="ca-doc-help space-y-3" id="hints">
       <div class="flex flex-wrap items-center justify-between gap-2">
         <h2 class="text-sm font-semibold"><i data-lucide="lightbulb" class="lu mr-1.5 text-warn" aria-hidden="true"></i>Yordam</h2>
@@ -242,8 +245,8 @@ the console (samples, your own input, the run's result) and the one gold "Yubori
       </details>
       {% endif %}
     </div>
-    {% endif %}
     </div>
+    {% endif %}
     {% if show_leaders %}
     <div class="ca-doc" id="doc-leaders" role="tabpanel" aria-labelledby="tab-doc-leaders" hidden>
       <h2 class="sr-only">Eng yaxshi yechimlar</h2>
@@ -332,6 +335,7 @@ the console (samples, your own input, the run's result) and the one gold "Yubori
         <button type="button" id="editor-full" class="ca-edb ca-edb-sq" title="To‘liq ekran" aria-label="To‘liq ekran" aria-pressed="false"><i data-lucide="maximize" class="lu" aria-hidden="true"></i></button>
       </div>
       <div id="editor">
+        {% if preload %}{{ preload|json_script:"preload-code" }}{% endif %}
         <textarea {% if user.is_authenticated %}name="source" {% endif %}id="source" class="ca-editor-fallback" spellcheck="false" aria-label="Kod muharriri" placeholder="Kodni shu yerga yozing…"></textarea>
       </div>
       {# the console: the samples, your own input, the run's result #}
@@ -367,7 +371,7 @@ the console (samples, your own input, the run's result) and the one gold "Yubori
       </div>
       <div class="ca-act">
         {% if user.is_authenticated %}
-        <span class="ca-act-keys"><kbd class="ca-kbd">Ctrl</kbd>+<kbd class="ca-kbd">Enter</kbd> yuborish{% if contest %} · <kbd class="ca-kbd">Ctrl</kbd>+<kbd class="ca-kbd">'</kbd> sinash{% else %}<span class="hidden xl:inline" title="Mashqda kod qanday yozilgani (uzun kod qo‘yish, boshqa oynaga o‘tish) o‘qituvchingizga ko‘rinadi. Ko‘chirilgan yechim uchun ball berilmaydi."> · {% if problem.difficulty == "beginner" or problem.difficulty == "easy" %}uzun kod qo‘yish yopiq{% else %}o‘qituvchi ko‘radi{% endif %} <i data-lucide="info" class="lu" aria-hidden="true"></i></span>{% endif %}</span>
+        <span class="ca-act-keys"><kbd class="ca-kbd">Ctrl</kbd>+<kbd class="ca-kbd">Enter</kbd> yuborish<span class="hidden 2xl:inline"> · <kbd class="ca-kbd">Esc</kbd>, <kbd class="ca-kbd">Tab</kbd> muharrirdan chiqish</span>{% if contest %} · <kbd class="ca-kbd">Ctrl</kbd>+<kbd class="ca-kbd">'</kbd> sinash{% else %}<span class="hidden xl:inline" title="Mashqda kod qanday yozilgani (uzun kod qo‘yish, boshqa oynaga o‘tish) o‘qituvchingizga ko‘rinadi. Ko‘chirilgan yechim uchun ball berilmaydi."> · {% if problem.difficulty == "beginner" or problem.difficulty == "easy" %}uzun kod qo‘yish yopiq{% else %}o‘qituvchi ko‘radi{% endif %} <i data-lucide="info" class="lu" aria-hidden="true"></i></span>{% endif %}</span>
         {% if contest_blocked %}
         <button type="button" id="trial-btn" class="ca-edb opacity-50 cursor-not-allowed" disabled title="Masala bloklangan — musobaqa tugaguncha sinab bo‘lmaydi"><i data-lucide="play" class="lu" aria-hidden="true"></i>Sinab ko‘rish</button>
         <button type="button" id="submit-btn" class="ca-btn ca-btn-gold ca-btn-go opacity-50 cursor-not-allowed" disabled title="Masala bloklangan — musobaqa tugaguncha yechim yuborish mumkin emas"><i data-lucide="send" class="lu" aria-hidden="true"></i>Yuborish</button>
@@ -426,7 +430,8 @@ the console (samples, your own input, the run's result) and the one gold "Yubori
     });
     return (name) => { const t = tabs.find((x) => x.getAttribute(attr) === name); if (t) show(t); };
   };
-  caTabs("data-doc-tab", () => document.getElementById("statement-pane").scrollTo({ top: 0 }));
+  const docTab = caTabs("data-doc-tab", () => document.getElementById("statement-pane").scrollTo({ top: 0 }));
+  if (location.hash.startsWith("#hint")) docTab("help");  // opening a hint comes back here
   // a run takes the input of the last input tab you were on (the samples or your own), even from "Natija"
   window.caInput = "samples";
   window.caConsole = caTabs("data-con-tab", (tab) => { if (tab.dataset.conTab !== "result") window.caInput = tab.dataset.conTab; });
@@ -453,7 +458,7 @@ resolves their bare imports so @codemirror/state loads once — two copies break
   import { keymap } from "@codemirror/view";
   import { indentUnit, syntaxHighlighting, HighlightStyle } from "@codemirror/language";
   import { tags } from "@lezer/highlight";
-  import { indentWithTab } from "@codemirror/commands";
+  import { indentMore, indentLess } from "@codemirror/commands";
   import { snippetCompletion as snip, completeFromList, acceptCompletion } from "@codemirror/autocomplete";
   import { oneDark } from "@codemirror/theme-one-dark";
   const LANG_LOADERS = {
@@ -503,8 +508,11 @@ resolves their bare imports so @codemirror/state loads once — two copies break
     copilot: () => import("@uiw/codemirror-theme-copilot").then((m) => m.copilot),
     andromeda: () => import("@uiw/codemirror-theme-andromeda").then((m) => m.andromeda),
   };
-  // Boilerplate only where the language demands it (Java's class name must be Main for the judge).
+  // Boilerplate where the language demands it (Java's class name must be Main for the judge), and a short comment
+  // where it doesn't, so the editor never opens as an empty black box.
   const STARTERS = {
+    python: "# Kirishni o‘qing, masalani yeching va natijani print() bilan chiqaring.\n# Masalan: a, b = map(int, input().split())\n\n",
+    sql: "-- So‘rovingizni shu yerda yozing.\nSELECT \n",
     cpp: "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    ios::sync_with_stdio(false);\n    cin.tie(nullptr);\n\n    \n    return 0;\n}\n",
     java: "import java.util.*;\nimport java.io.*;\n\npublic class Main {\n    public static void main(String[] args) throws IOException {\n        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));\n        \n    }\n}\n",
     node: "const lines = require(\"fs\").readFileSync(0, \"utf8\").split(\"\\n\");\n\n",
@@ -597,14 +605,28 @@ resolves their bare imports so @codemirror/state loads once — two copies break
   };
   applyPrefs();
   let draft = source.value;
+  const preloadEl = document.getElementById("preload-code");
+  const preload = preloadEl ? JSON.parse(preloadEl.textContent) : null;
   try {
     draft = localStorage.getItem(draftKey) || draft;
     const savedLang = localStorage.getItem(langKey);
     if (savedLang && [...langSel.options].some((o) => o.value === savedLang)) langSel.value = savedLang;
   } catch {}
+  if (preload) {  // ?from=<try>: that try's code and language win over the saved draft
+    draft = preload.source;
+    if ([...langSel.options].some((o) => o.value === preload.language)) langSel.value = preload.language;
+    try { localStorage.setItem(draftKey, draft); localStorage.setItem(langKey, langSel.value); } catch {}
+  }
+  let tabFree = false;
   const view = new EditorView({
     doc: draft,
-    extensions: [vimC.of([]), basicSetup, tabC.of(tabExt()), wrapC.of(wrapExt()), keymap.of([{ key: "Tab", run: acceptCompletion }, indentWithTab]),
+    extensions: [vimC.of([]), basicSetup, tabC.of(tabExt()), wrapC.of(wrapExt()), keymap.of([
+      // Tab indents, so a keyboard user would be stuck here: Escape frees the next Tab to move on to the page (any other key takes it back)
+      { key: "Escape", run: () => { tabFree = true; return false; } },
+      { key: "Tab", run: (v) => (tabFree ? false : acceptCompletion(v)) },
+      { key: "Tab", run: (v) => (tabFree ? false : indentMore(v)) },
+      { key: "Shift-Tab", run: (v) => (tabFree ? false : indentLess(v)) }]),
+      EditorView.domEventHandlers({ keydown: (e) => { if (!["Escape", "Tab", "Shift"].includes(e.key)) tabFree = false; return false; }, blur: () => { tabFree = false; return false; } }),
       langC.of([]), themeC.of([]),
       EditorView.updateListener.of((u) => {
         if (!u.docChanged) return;

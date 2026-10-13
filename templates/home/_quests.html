@@ -1,0 +1,15 @@
+{% comment %}Today's three quests in the side column. Any one keeps the Olov going (like the day's problem); the rest are
+a bonus. ctx: quests (apps.problems.quests.today_quests), freezes, streak.{% endcomment %}
+<section class="ca-box" aria-labelledby="quests-title">
+  <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" style="--c: var(--ca-lvl-easy)" aria-hidden="true"></span><h2 id="quests-title">Bugungi vazifalar</h2><span class="ca-box-tools tabular">{{ quests.done }}/{{ quests.total }}</span></div>
+  <ul class="ca-quests">
+    {% for q in quests.rows %}
+    <li class="{% if q.done %}is-done{% endif %}">
+      <span class="ca-quest-ico" aria-hidden="true"><i data-lucide="{% if q.done %}check{% else %}{{ q.icon }}{% endif %}" class="lu"></i></span>
+      <div class="min-w-0 flex-1">{% if q.done %}<b>{{ q.title }}</b><small>Bajarildi</small>{% else %}<a class="ca-link" href="{{ q.href }}">{{ q.title }}</a><small>{{ q.hint }}</small>{% endif %}</div>
+    </li>
+    {% endfor %}
+  </ul>
+  <p class="ca7-note"><i data-lucide="flame" class="lu" style="color: #E8590C" aria-hidden="true"></i><span>{% if quests.safe %}Bugungi Olov saqlandi.{% else %}Bittasini bajarsangiz ham Olov o‘chmaydi.{% endif %}</span></p>
+  <p class="ca7-note"><i data-lucide="snowflake" class="lu text-accent" aria-hidden="true"></i><span>{% if freezes %}<b>{{ freezes }}</b> ta muzlatish bor: bir kunlik tanaffus Olovni o‘chirmaydi.{% else %}Har 7 kunlik Olov uchun bitta muzlatish olasiz (ko‘pi bilan 2 ta).{% endif %}</span></p>
+</section>

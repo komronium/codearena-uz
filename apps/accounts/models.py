@@ -15,6 +15,7 @@ class User(AbstractUser):
     rating = models.IntegerField(default=0, db_index=True)  # shown rating; see apps.contests.rating
     practice_points = models.IntegerField(default=0, db_index=True)
     duel_rating = models.IntegerField(default=1200)  # 1v1 duels only (apps.classroom.duels)
+    duel_season = models.CharField(max_length=7, blank=True, default="")  # the month (YYYY-MM) its rating was last softened for
     # From supervised contests only (apps.contests.rating.recalc_official); None until the first one.
     official_rating = models.IntegerField(null=True, blank=True, db_index=True)
     role = models.CharField(max_length=10, choices=Role.choices, default=Role.STUDENT)
@@ -53,6 +54,9 @@ class TelegramLink(models.Model):
     notify_trending_problem = models.BooleanField(default=True)
     notify_contests = models.BooleanField(default=True)
     notify_assignments = models.BooleanField(default=True)
+    notify_duels = models.BooleanField(default=True)  # an invite, and how a duel ended
+    notify_badges = models.BooleanField(default=True)  # a badge level reached
+    notify_streak = models.BooleanField(default=True)  # the evening before a daily streak would break
     last_error = models.CharField(max_length=200, blank=True)
 
     def __str__(self):
@@ -68,6 +72,17 @@ class TelegramLinkToken(models.Model):
     token_hash = models.CharField(max_length=64, unique=True)
     expires_at = models.DateTimeField()
     consumed_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class TelegramLoginRequest(models.Model):
+    """"Telegram orqali kirish": a browser asks, the bot confirms for the linked account, the browser that asked
+    (it holds the raw token in its session) then signs in. Hashed, short-lived, single-use."""
+
+    token_hash = models.CharField(max_length=64, unique=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.CASCADE, related_name="+")
+    expires_at = models.DateTimeField()
+    used_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
 
@@ -135,3 +150,14 @@ class UserBadge(models.Model):
 
     class Meta:
         constraints = [models.UniqueConstraint(fields=["user", "family", "tier"], name="one_row_per_badge_tier")]
+
+
+class Follow(models.Model):
+    """"Kuzatish": the feed (apps.accounts.feed) shows what the people you follow, and your classmates, did."""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="following")
+    target = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="followers")
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["user", "target"], name="one_follow_per_pair"),
+                       models.CheckConstraint(condition=~models.Q(user=models.F("target")), name="no_self_follow")]

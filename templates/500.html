@@ -9,13 +9,14 @@ app.css — so the colours are the site's tokens copied in, and the mark's paint
   <meta name="color-scheme" content="light dark">
   <title>Server xatosi — CodeArena</title>
   <style>
-    @font-face{font-family:"Plus Jakarta Sans";font-display:swap;font-style:normal;font-weight:200 800;unicode-range:u+0460-052f,u+1c80-1c8a,u+20b4,u+2de0-2dff,u+a640-a69f,u+fe2e-fe2f;src:url("{% static 'fonts/plus-jakarta-sans-cyrillic-ext-wght-normal.woff2' %}") format("woff2")}
-    @font-face{font-family:"Plus Jakarta Sans";font-display:swap;font-style:normal;font-weight:200 800;unicode-range:u+0100-02ba,u+02bd-02c5,u+02c7-02cc,u+02ce-02d7,u+02dd-02ff,u+0304,u+0308,u+0329,u+1d00-1dbf,u+1e00-1e9f,u+1ef2-1eff,u+2020,u+20a0-20ab,u+20ad-20c0,u+2113,u+2c60-2c7f,u+a720-a7ff;src:url("{% static 'fonts/plus-jakarta-sans-latin-ext-wght-normal.woff2' %}") format("woff2")}
-    @font-face{font-family:"Plus Jakarta Sans";font-display:swap;font-style:normal;font-weight:200 800;unicode-range:u+00??,u+0131,u+0152-0153,u+02bb-02bc,u+02c6,u+02da,u+02dc,u+0304,u+0308,u+0329,u+2000-206f,u+20ac,u+2122,u+2191,u+2193,u+2212,u+2215,u+feff,u+fffd;src:url("{% static 'fonts/plus-jakarta-sans-latin-wght-normal.woff2' %}") format("woff2")}
+    @font-face{font-family:"Lato";font-display:swap;font-style:normal;font-weight:400;unicode-range:u+0100-02ba,u+02bd-02c5,u+02c7-02cc,u+02ce-02d7,u+02dd-02ff,u+0304,u+0308,u+0329,u+1d00-1dbf,u+1e00-1e9f,u+1ef2-1eff,u+2020,u+20a0-20ab,u+20ad-20c0,u+2113,u+2c60-2c7f,u+a720-a7ff;src:url("{% static 'fonts/lato-latin-ext-400-normal.woff2' %}") format("woff2")}
+    @font-face{font-family:"Lato";font-display:swap;font-style:normal;font-weight:400;unicode-range:u+0000-00ff,u+0131,u+0152-0153,u+02bb-02bc,u+02c6,u+02da,u+02dc,u+0304,u+0308,u+0329,u+2000-206f,u+20ac,u+2122,u+2191,u+2193,u+2212,u+2215,u+feff,u+fffd;src:url("{% static 'fonts/lato-latin-400-normal.woff2' %}") format("woff2")}
+    @font-face{font-family:"Lato";font-display:swap;font-style:normal;font-weight:700;unicode-range:u+0100-02ba,u+02bd-02c5,u+02c7-02cc,u+02ce-02d7,u+02dd-02ff,u+0304,u+0308,u+0329,u+1d00-1dbf,u+1e00-1e9f,u+1ef2-1eff,u+2020,u+20a0-20ab,u+20ad-20c0,u+2113,u+2c60-2c7f,u+a720-a7ff;src:url("{% static 'fonts/lato-latin-ext-700-normal.woff2' %}") format("woff2")}
+    @font-face{font-family:"Lato";font-display:swap;font-style:normal;font-weight:700;unicode-range:u+0000-00ff,u+0131,u+0152-0153,u+02bb-02bc,u+02c6,u+02da,u+02dc,u+0304,u+0308,u+0329,u+2000-206f,u+20ac,u+2122,u+2191,u+2193,u+2212,u+2215,u+feff,u+fffd;src:url("{% static 'fonts/lato-latin-700-normal.woff2' %}") format("woff2")}
     :root { color-scheme: light dark; --bg: #F4F6FA; --ink: #141E3A; --mute: #56627A; --accent: #1D3A8F; --on: #FFFFFF; }
     @media (prefers-color-scheme: dark) { :root { --bg: #0B1226; --ink: #E3E9F7; --mute: #9AA7C4; --accent: #8FB0FF; --on: #0B1226; } }
     body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 1rem; background: var(--bg); color: var(--ink);
-      font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif; text-align: center; }
+      font-family: "Lato", ui-sans-serif, system-ui, sans-serif; text-align: center; }
     .ca-brand-mark { width: 3rem; height: 3rem; }
     .ca-brand-star { fill: #2FC4B9; stroke: #2FC4B9; stroke-width: 1.5; stroke-linejoin: round; }
     .ca-brand-code { fill: none; stroke: #132A6B; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }

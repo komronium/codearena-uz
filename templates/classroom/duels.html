@@ -23,10 +23,28 @@ The duel rating is its own Elo and never touches the contest rating.{% endcommen
 {% if error %}<div class="ca-alert ca-alert-bad mb-4" role="alert">{{ error }}</div>{% endif %}
 <div class="ca7">
 <div class="ca7-col">
+  {% if incoming %}
+  <section class="ca7-incoming" aria-labelledby="incoming-title">
+    <div class="ca7-sec-h"><i data-lucide="swords" class="lu" aria-hidden="true"></i><h2 id="incoming-title">{% if incoming|length == 1 %}Sizni duelga chaqirishdi{% else %}Sizni {{ incoming|length }} ta duelga chaqirishdi{% endif %}</h2></div>
+    <ul>
+      {% for d in incoming %}
+      <li>
+        <div class="min-w-0">{% include "accounts/_u7.html" with u=d.challenger you=False %} <span class="text-sm text-mute tabular">duel {{ d.challenger.duel_rating }}</span>
+          <p class="text-sm text-mute">{{ d.get_language_display }} · <span class="ca-diff ca-diff-{{ d.difficulty }}">{{ d.get_difficulty_display }}</span> · {{ n_questions }} ta savol · {{ d.created|date:"d.m H:i" }}. Qabul qilsangiz, birinchi savol ochiladi.</p></div>
+        <div class="flex shrink-0 gap-2">
+          <form method="post" action="{% url 'classroom:duel_answer' d.pk %}">{% csrf_token %}<button class="ca-btn ca-btn-ghost ca-btn-wb">Rad etish</button></form>
+          <form method="post" action="{% url 'classroom:duel_answer' d.pk %}">{% csrf_token %}<input type="hidden" name="accept" value="1"><button class="ca-btn ca-btn-gold ca-btn-wb"><i data-lucide="play" class="lu" aria-hidden="true"></i>Qabul qilish</button></form>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+
   <div class="ca7-split">
     <form method="post" aria-labelledby="quick-title">{% csrf_token %}
       <h2 id="quick-title">Tezkor duel</h2>
-      <p class="ca7-split-sub">Kod beriladi: nima chiqarishini yoki bo‘sh joyga nima yozilishini toping. {{ n_questions }} ta savol, har biriga {{ per_question }} soniya.</p>
+      <p class="ca7-split-sub">Mos raqib avtomatik topiladi. Kod beriladi: nima chiqarishini yoki bo‘sh joyga nima yozilishini toping.</p>
       <fieldset>
         <legend class="ca7-lbl">Til</legend>
         <div class="ca7-seg ca7-seg-pick" id="duel-langs">
@@ -39,47 +57,32 @@ The duel rating is its own Elo and never touches the contest rating.{% endcommen
           {% for v, label in levels %}<label><input type="radio" name="difficulty" value="{{ v }}" class="sr-only"{% if form.difficulty == v or not form.difficulty and v == "easy" %} checked{% endif %}><span>{{ label }} <em hidden></em></span></label>{% endfor %}
         </div>
       </fieldset>
-      <p class="ca7-split-note">Shu til va darajada ochiq duel bo‘lsa (raqam — nechtasi kutyapti), reytingi sizga eng yaqin o‘yinchinikiga qo‘shilasiz. Bo‘lmasa o‘zingiz ochasiz: savollarni hoziroq yechasiz, keyingi raqib aynan shularni oladi.</p>
+      <p class="ca7-split-note">Raqam shu til va darajada kutayotgan ochiq duellar soni. Ochiq duel bo‘lmasa, o‘zingiz boshlaysiz, keyingi raqib o‘sha savollarni oladi.</p>
       <button name="find" value="1" class="ca-btn ca-btn-gold"><i data-lucide="swords" class="lu" aria-hidden="true"></i>Raqib topish</button>
     </form>
     <form method="post" aria-labelledby="friend-title">{% csrf_token %}
       <h2 id="friend-title">Do‘stni chaqirish</h2>
-      <p class="ca7-split-sub">Savollarni hoziroq yechasiz; do‘stingiz 3 kun ichida qabul qilsa, unga ham o‘sha savollar beriladi.</p>
+      <p class="ca7-split-sub">Savollarni hoziroq yechasiz. Do‘stingiz 3 kun ichida qabul qilsa, o‘sha savollarni oladi.</p>
       {# a finder: on focus your classmates and past rivals, typing searches every handle; a pick fills the field #}
       <div class="relative" id="duel-finder"><label class="ca7-lbl" for="duel-opponent">Raqib</label>
         <input id="duel-opponent" name="opponent" value="{{ form.opponent|default:'' }}" class="ca7-fld !pl-3" required autocomplete="off" placeholder="Login bo‘yicha qidiring…" aria-describedby="duel-finder-help">
         <span class="sr-only" id="duel-finder-help">Yozing yoki ro‘yxatdan tanlang; pastga strelka ro‘yxatga o‘tadi.</span>
         <ul id="duel-hits" class="ca-picker-hits absolute inset-x-0 top-full z-20" aria-label="Topilgan foydalanuvchilar" hidden></ul></div>
-      <div class="grid grid-cols-2 gap-2">
-        <div><label class="ca7-lbl" for="duel-lang">Til</label>
-          <select id="duel-lang" name="language" class="ca-select w-full">{% for v, label in languages %}<option value="{{ v }}"{% if form.language == v or not form.language and v == "python" %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
-        <div><label class="ca7-lbl" for="duel-diff">Daraja</label>
-          <select id="duel-diff" name="difficulty" class="ca-select w-full">{% for v, label in levels %}<option value="{{ v }}"{% if form.difficulty == v or not form.difficulty and v == "easy" %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
-      </div>
-      <button class="ca-btn ca-btn-soft"><i data-lucide="send" class="lu" aria-hidden="true"></i>Chaqiruv yuborish</button>
+      <fieldset>
+        <legend class="ca7-lbl">Til</legend>
+        <div class="ca7-seg ca7-seg-pick">
+          {% for v, label in languages %}<label><input type="radio" name="language" value="{{ v }}" class="sr-only"{% if form.language == v or not form.language and v == "python" %} checked{% endif %}><span>{{ label }}</span></label>{% endfor %}
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend class="ca7-lbl">Daraja</legend>
+        <div class="ca7-seg ca7-seg-pick">
+          {% for v, label in levels %}<label><input type="radio" name="difficulty" value="{{ v }}" class="sr-only"{% if form.difficulty == v or not form.difficulty and v == "easy" %} checked{% endif %}><span>{{ label }}</span></label>{% endfor %}
+        </div>
+      </fieldset>
+      <button class="ca-btn ca-btn-primary"><i data-lucide="send" class="lu" aria-hidden="true"></i>Chaqiruv yuborish</button>
     </form>
   </div>
-
-  {% if incoming %}
-  <section aria-labelledby="incoming-title">
-    <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-hard)" aria-hidden="true"></span><h2 id="incoming-title">Sizni chaqirishdi</h2><span class="ca7-r text-mute">{{ incoming|length }} ta</span></div>
-    <table class="ca-table ca-table-flat">
-      <tbody>
-      {% for d in incoming %}
-      <tr>
-        <td>{% include "accounts/_u7.html" with u=d.challenger you=False %} <span class="text-sm text-mute tabular">duel {{ d.challenger.duel_rating }}</span></td>
-        <td><span class="ca-diff ca-diff-{{ d.difficulty }}">{{ d.get_difficulty_display }}</span></td>
-        <td class="text-sm text-mute">{{ d.get_language_display }} · qabul qilsangiz, birinchi savol ochiladi</td>
-        <td class="text-right"><div class="flex justify-end gap-2">
-          <form method="post" action="{% url 'classroom:duel_answer' d.pk %}">{% csrf_token %}<button class="ca-btn ca-btn-soft ca-btn-wb">Rad etish</button></form>
-          <form method="post" action="{% url 'classroom:duel_answer' d.pk %}">{% csrf_token %}<input type="hidden" name="accept" value="1"><button class="ca-btn ca-btn-gold ca-btn-wb">Qabul qilish</button></form>
-        </div></td>
-      </tr>
-      {% endfor %}
-      </tbody>
-    </table>
-  </section>
-  {% endif %}
 
   {% if open %}
   <section aria-labelledby="open-title">
@@ -124,7 +127,7 @@ The duel rating is its own Elo and never touches the contest rating.{% endcommen
         <div><dt>Durang</dt><dd>{{ record.draws }}</dd></div>
         <div><dt>O‘rin</dt><dd>{% if duel_rank %}{{ duel_rank }}<small>/ {{ duelists }}</small>{% else %}—{% endif %}</dd></div>
       </dl>
-      <p class="mt-3">Duel reytingi alohida hisoblanadi, musobaqa reytingiga ta’sir qilmaydi. Hamma 1200 dan boshlaydi; birinchi 30 duelda tez o‘zgaradi (K = 40), keyin sekinroq (20, 2000 dan yuqorida 10).</p>
+      <p class="mt-3">Duel reytingi musobaqa reytingiga ta’sir qilmaydi. Hamma 1200 dan boshlaydi; dastlabki 30 duelda tezroq o‘zgaradi, keyin sekinroq.</p>
     </div>
   </section>
   <section class="ca-box" aria-labelledby="dbadges-title">
@@ -132,7 +135,7 @@ The duel rating is its own Elo and never touches the contest rating.{% endcommen
     <ul class="ca7-badges ca7-badges-tight">{% for b in badges %}{% include "accounts/_tbadge.html" with owner=True %}{% endfor %}</ul>
   </section>
   <section class="ca-box" aria-labelledby="board-title">
-    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" aria-hidden="true"></span><h2 id="board-title">Duel reytingi</h2></div>
+    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" aria-hidden="true"></span><h2 id="board-title">Duel reytingi</h2><a class="ca-box-tools ca-link" href="{% url 'duel_board' %}">Hammasi</a></div>
     {% if board %}
     <table class="ca-table ca7-top">
       <thead><tr><th class="w-10 text-center">#</th><th>Foydalanuvchi</th><th class="text-right" title="Tugagan duellar">Duel</th><th class="text-right">Reyting</th></tr></thead>

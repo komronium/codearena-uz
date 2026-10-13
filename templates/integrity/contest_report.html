@@ -89,6 +89,7 @@ participants by risk, the similar code pairs, the fast solves and the journal.{%
         <form method="post" action="{% url 'integrity:flag_user' contest.pk user.pk %}">{% csrf_token %}
           <button class="ca-btn ca-btn-ghost !px-2 !py-1" title="Chuqur tekshirish: barcha urinishlari hammaniki va oldingi yechimlar bilan solishtiriladi" aria-label="{{ user.username }}: chuqur tekshirish"><i data-lucide="scan-search" class="lu" aria-hidden="true"></i></button>
         </form>
+        {% if c.participation.disqualified or c.advice == "dq" %}
         <form method="post" action="{% url 'contests:disqualify' contest.pk user.pk %}" {% if not c.participation.disqualified %}onsubmit="const s=prompt('Sabab (ixtiyoriy):',''); if(s===null) return false; this.reason.value=s;"{% endif %}>{% csrf_token %}
           <input type="hidden" name="back" value="report"><input type="hidden" name="reason" value=""><input type="hidden" name="disqualified" value="{% if c.participation.disqualified %}0{% else %}1{% endif %}">
           {% if c.participation.disqualified %}
@@ -97,6 +98,21 @@ participants by risk, the similar code pairs, the fast solves and the journal.{%
           <button class="ca-btn ca-btn-ghost !py-1 text-xs text-bad"><i data-lucide="ban" class="lu" aria-hidden="true"></i>Diskvalifikatsiya</button>
           {% endif %}
         </form>
+        {% else %}
+        <details class="ca-dropdown" data-dropdown>
+          <summary class="ca-btn ca-btn-ghost !px-2 !py-1" aria-label="{{ user.username }}: boshqa amallar" title="Boshqa amallar"><i data-lucide="ellipsis" class="lu" aria-hidden="true"></i></summary>
+          <div class="ca-dropdown-panel !w-60">
+        <form method="post" action="{% url 'contests:disqualify' contest.pk user.pk %}" {% if not c.participation.disqualified %}onsubmit="const s=prompt('Sabab (ixtiyoriy):',''); if(s===null) return false; this.reason.value=s;"{% endif %}>{% csrf_token %}
+          <input type="hidden" name="back" value="report"><input type="hidden" name="reason" value=""><input type="hidden" name="disqualified" value="{% if c.participation.disqualified %}0{% else %}1{% endif %}">
+          {% if c.participation.disqualified %}
+          <button class="ca-btn ca-btn-ghost !py-1 text-xs"><i data-lucide="undo-2" class="lu" aria-hidden="true"></i>DQ bekor</button>
+          {% else %}
+          <button class="ca-dropdown-item w-full text-left text-bad"><i data-lucide="ban" class="lu" aria-hidden="true"></i>Diskvalifikatsiya qilish</button>
+          {% endif %}
+        </form>
+          </div>
+        </details>
+        {% endif %}
         </div>
         {% endif %}
       </td>

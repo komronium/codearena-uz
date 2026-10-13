@@ -22,8 +22,10 @@ module.exports = {
         bad: { DEFAULT: "rgb(var(--ca-bad-rgb) / <alpha-value>)", soft: "rgb(var(--ca-bad-rgb) / .12)" },
         warn: { DEFAULT: "rgb(var(--ca-warn-rgb) / <alpha-value>)", soft: "rgb(var(--ca-warn-rgb) / .12)" },
       },
+      // one notch up: 12px captions and 14px body read clearly in both themes (Tailwind's 11.25 and 13.1 at the 15px root were too small)
+      fontSize: { xs: ["0.8125rem", { lineHeight: "1.2rem" }], sm: ["0.9375rem", { lineHeight: "1.35rem" }] },
       fontFamily: {
-        sans: ["Plus Jakarta Sans", "ui-sans-serif", "system-ui", "-apple-system", "Segoe UI", "sans-serif"],
+        sans: ["Lato", "ui-sans-serif", "system-ui", "-apple-system", "Segoe UI", "sans-serif"],
         mono: ["JetBrains Mono", "ui-monospace", "monospace"],
       },
     },

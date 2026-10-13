@@ -15,6 +15,9 @@ RATING_TIERS = [
     (1700, 1900, "Grandmaster", "#FF0000"),
     (1900, None, "Legendary Grandmaster", "#FF0000"),
 ]
+# Uzbek gloss for the Codeforces names (the names themselves stay: users.seen_tier stores them).
+TIER_UZ = {"Newbie": "Yangi", "Pupil": "Shogird", "Specialist": "Mutaxassis", "Expert": "Bilimdon",
+           "Candidate Master": "Master nomzodi", "Master": "Master", "Grandmaster": "Grossmeyster", "Legendary Grandmaster": "Afsonaviy"}
 TIER_ORDER = {name: i for i, (_floor, _ceiling, name, _color) in enumerate(RATING_TIERS)}
 # Legendary names are written like Codeforces' LGM: the first letter in ink (black on light), the rest red.
 LEGENDARY = RATING_TIERS[-1][0]

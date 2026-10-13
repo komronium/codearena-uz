@@ -77,8 +77,9 @@ def level(family: Family, value: int) -> int:
     return sum(1 for at in family.levels if value >= at)
 
 
-def sync(user, values: dict[str, int] | None = None) -> None:
-    """Store every level the user has reached and hasn't got yet (each new one unseen, for the toast)."""
+def sync(user, values: dict[str, int] | None = None) -> list[tuple[str, int]]:
+    """Store every level the user has reached and hasn't got yet (each new one unseen, for the award);
+    returns the (family, level) pairs it added."""
     from .models import UserBadge
 
     values = values if values is not None else metrics(user)
@@ -90,6 +91,7 @@ def sync(user, values: dict[str, int] | None = None) -> None:
             UserBadge.objects.bulk_create(new, ignore_conflicts=True)
         except IntegrityError:
             pass
+    return [(b.family, b.tier) for b in new]
 
 
 def board(user, groups: set[str] | None = None, store: bool = True) -> list[dict]:
@@ -168,7 +170,12 @@ def award(user, groups: set[str]) -> None:
     """Store the levels of some groups right after what can change them (an accept, a finished duel, a rated
     round), so the award shows on the very next page. Never lets a badge error break the caller."""
     try:
-        sync(user, metrics(user, groups))
+        added = sync(user, metrics(user, groups))
+        if added:  # and say so on Telegram too, for whoever turned that on
+            from django.db import transaction
+
+            from .telegram import notify_badges
+            transaction.on_commit(lambda: notify_badges(user.pk, added))
     except Exception:  # noqa: BLE001 - a badge is a nicety; judging, duels and ratings must go on
         import logging
         logging.getLogger(__name__).exception("badge award failed for user %s", getattr(user, "pk", user))

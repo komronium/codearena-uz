@@ -20,7 +20,7 @@ grouped by what the student is doing. Profile, settings and sign-out live in the
 <p class="ca-sidebar-heading">Musobaqa</p>
 <a href="{% url 'contests:list' %}" class="ca-sidebar-link {% if ns == 'contests' or ns == 'problems' and contest %}is-active{% endif %}"{% if ns == 'contests' or ns == 'problems' and contest %} aria-current="page"{% endif %}>
   <i data-lucide="trophy" class="lu" aria-hidden="true"></i>Musobaqalar
-  {% if nav.live %}<span class="ca-live-badge ml-auto !py-0.5 !text-[11px]"><span class="ca-live-dot" aria-hidden="true"></span>Jonli</span>{% endif %}
+  {% if nav.live %}<span class="ca-live-badge ml-auto !py-0.5 !text-xs"><span class="ca-live-dot" aria-hidden="true"></span>Jonli</span>{% endif %}
 </a>
 <a href="{% url 'rating' %}" class="ca-sidebar-link {% if un == 'rating' %}is-active{% endif %}"{% if un == 'rating' %} aria-current="page"{% endif %}>
   <i data-lucide="chart-column" class="lu" aria-hidden="true"></i>Reyting

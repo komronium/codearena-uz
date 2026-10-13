@@ -21,6 +21,7 @@ progress or where it stands).{% endcomment %}
   {% if stages %}
   <nav class="ca-box ca7-side" aria-label="Yo‘l bosqichlari">
     {% for s in stages %}<a href="#stage-{{ s.stage }}"{% if forloop.first %} aria-current="true"{% endif %}>{{ s.label }} <span class="tabular">{{ s.courses|length }}</span></a>{% endfor %}
+    {% if soon %}<a href="#soon">Tez orada <span class="tabular">{{ soon|length }}</span></a>{% endif %}
   </nav>
   {% endif %}
   {% if badges and user.is_authenticated %}
@@ -83,6 +84,13 @@ progress or where it stands).{% endcomment %}
   {% empty %}
   <p class="ca7-empty"><b>Hali kurs yo‘q</b>{% if user.is_staff %}<a class="ca-link" href="{% url 'moderation:plan_new' %}">Birinchisini tuzing</a>.{% endif %}</p>
   {% endfor %}
+  {% if soon %}
+  {# the courses still being filled, folded into one line so the open ones lead; each opens at 10 problems #}
+  <details class="ca7-soon" id="soon" data-stage open>
+    <summary><span class="ca-star" style="--c: rgb(var(--ca-mute-rgb))" aria-hidden="true"></span><b>Tez orada</b><span class="text-mute">{{ soon|length }} ta kurs tayyorlanmoqda — kursda 10 ta masala bo‘lganda ochiladi</span><i data-lucide="chevron-down" class="lu ml-auto" aria-hidden="true"></i></summary>
+    <ul>{% for p in soon %}<li data-course="{{ p.title|lower }} {{ p.summary|lower }}"><a class="ca7-soon-link" href="{% url 'learn:course' p.slug %}">{{ p.title }}</a><span class="ca-diff ca-diff-{{ p.level }}">{{ p.get_level_display }}</span><span class="ca7-soon-n tabular" title="Kurs 10 ta masala bo‘lganda ochiladi"><span class="ca7-pg" role="progressbar" aria-valuenow="{{ p.ready_pct }}" aria-valuemin="0" aria-valuemax="100" aria-label="Tayyorlik"><i style="width: {{ p.ready_pct }}%"></i></span>{{ p.ready }}/10 masala</span></li>{% endfor %}</ul>
+  </details>
+  {% endif %}
   <p class="ca7-empty" id="course-none" hidden><b>Bunday kurs topilmadi</b>Boshqa so‘z bilan qidirib ko‘ring.</p>
 </div>
 </div>
@@ -98,6 +106,7 @@ progress or where it stands).{% endcomment %}
         let shown = 0;
         s.querySelectorAll("[data-course]").forEach((li) => { li.hidden = !!q && !li.dataset.course.includes(q); shown += !li.hidden; });
         s.hidden = !shown; any ||= !!shown;
+        if (s.tagName === "DETAILS") s.open = !!q && !!shown;
       });
       document.getElementById("course-none").hidden = any;
     });

@@ -6,7 +6,7 @@ from django.core.management import CommandError, call_command
 from django.core.paginator import Paginator
 from django.db import IntegrityError, transaction
 from django.db.models import Count, OuterRef, Q, Subquery
-from django.db.models.functions import Coalesce
+from django.db.models.functions import Coalesce, TruncDate
 from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -70,7 +70,33 @@ def dashboard(request):
         # the decisions waiting first: the newest problems in the queue, and today's problem
         "pending": list(Problem.objects.filter(status=Problem.Status.PENDING).select_related("author").order_by("-pk")[:5]),
         "daily": daily_for(),
+        "activity": _activity(),
+        "judge": _judge_health(),
     })
+
+
+def _activity(days: int = 14) -> dict:
+    """Submissions and new users per day for the dashboard: bars scaled to the busiest day."""
+    today = timezone.localdate()
+    first = today - datetime.timedelta(days=days - 1)
+    subs = dict(Submission.objects.filter(created__date__gte=first).annotate(d=TruncDate("created"))
+                .values_list("d").annotate(n=Count("pk")))
+    joined = dict(User.objects.filter(date_joined__date__gte=first).annotate(d=TruncDate("date_joined"))
+                  .values_list("d").annotate(n=Count("pk")))
+    rows = [{"day": first + datetime.timedelta(days=i)} for i in range(days)]
+    top = max([subs.get(r["day"], 0) for r in rows] + [1])
+    for r in rows:
+        r["subs"], r["users"] = subs.get(r["day"], 0), joined.get(r["day"], 0)
+        r["pct"] = round(100 * r["subs"] / top)
+    return {"rows": rows, "subs": sum(r["subs"] for r in rows), "users": sum(r["users"] for r in rows)}
+
+
+def _judge_health() -> dict:
+    """Is the judge keeping up: submissions waiting or running for over two minutes, and when the last verdict came."""
+    stuck = Submission.objects.filter(verdict__in=[Submission.Verdict.PENDING, Submission.Verdict.RUNNING],
+                                      created__lt=timezone.now() - datetime.timedelta(minutes=2))
+    last = Submission.objects.exclude(verdict__in=[Submission.Verdict.PENDING, Submission.Verdict.RUNNING]).order_by("-created").first()
+    return {"stuck": stuck.count(), "last": last.created if last else None}
 
 
 @staff_required
@@ -262,8 +288,27 @@ def problems(request):
           .annotate(n_tests=Count("testcases"), n_subs=Coalesce(Subquery(finished), 0)).order_by("-pk"))
     if q:
         qs = qs.filter(Q(title__icontains=q) | Q(slug__icontains=q))
+    status = request.GET.get("status", "")
+    if status == "public":
+        qs = qs.filter(is_public=True)
+    elif status == "hidden":
+        qs = qs.filter(is_public=False, status=Problem.Status.APPROVED)
+    elif status == "pending":
+        qs = qs.filter(status=Problem.Status.PENDING)
+    elif status == "notests":
+        qs = qs.filter(kind=Problem.Kind.CODE, n_tests=0)
+    else:
+        status = ""
+    difficulty = request.GET.get("difficulty", "")
+    if difficulty in Problem.Difficulty.values:
+        qs = qs.filter(difficulty=difficulty)
+    else:
+        difficulty = ""
     page = Paginator(qs, 30).get_page(request.GET.get("page"))
-    return render(request, "moderation/problems.html", {"page": page, "q": q})
+    return render(request, "moderation/problems.html", {
+        "page": page, "q": q, "status": status, "difficulty": difficulty,
+        "difficulties": Problem.Difficulty.choices,
+    })
 
 
 @staff_required
@@ -504,6 +549,16 @@ def contest_apply_rating(request, pk):
 
 
 @staff_required
+@require_POST
+def contest_make_official(request, pk):
+    contest = get_object_or_404(Contest, pk=pk)
+    contest.is_official = True
+    contest.save(update_fields=["is_official"])
+    messages.success(request, f"«{contest.title}» rasmiy musobaqa deb belgilandi.")
+    return redirect("moderation:contest_official", pk=pk)
+
+
+@staff_required
 def contest_official(request, pk):
     """Official rating for one contest: the online top-N code check, then the apply button."""
     contest = get_object_or_404(Contest, pk=pk)
@@ -622,12 +677,25 @@ def users(request):
     qs = User.objects.annotate(n_subs=Count("submissions")).order_by("-teacher_requested", "-date_joined")
     if requests_only:
         qs = qs.filter(teacher_requested=True)
+    role = request.GET.get("role", "")
+    if role == "staff":
+        qs = qs.filter(is_staff=True)
+    elif role in (User.Role.STUDENT, User.Role.TEACHER):
+        qs = qs.filter(role=role, is_staff=False)
+    else:
+        role = ""
     if q:
         qs = qs.filter(Q(username__icontains=q) | Q(email__icontains=q) | Q(first_name__icontains=q)
                        | Q(last_name__icontains=q) | Q(school__icontains=q))
+    sort = request.GET.get("sort", "")
+    order = {"rating": ("-rating", "username"), "subs": ("-n_subs", "username"), "login": ("-last_login", "username")}.get(sort)
+    if order:
+        qs = qs.order_by(*order)
+    else:
+        sort = ""
     page = Paginator(qs, 30).get_page(request.GET.get("page"))
     return render(request, "moderation/users.html", {
-        "page": page, "q": q, "requests_only": requests_only,
+        "page": page, "q": q, "requests_only": requests_only, "role": role, "sort": sort,
         "n_requests": User.objects.filter(teacher_requested=True).count(),
     })
 

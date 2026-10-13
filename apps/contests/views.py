@@ -36,6 +36,15 @@ def contest_list(request):
     if only_mine:  # "Men qatnashgan": the past rounds you took part in
         joined = set(Participation.objects.filter(user=request.user).values_list("contest_id", flat=True))
         past = [c for c in past if c.pk in joined]
+    show = request.GET.get("show", "")
+    if show == "rated":
+        past = [c for c in past if c.is_rated]
+    elif show == "official":
+        past = [c for c in past if c.is_official]
+    elif show == "unrated":  # rounds that only practise
+        past = [c for c in past if not c.is_rated]
+    else:
+        show = ""
     ended = Paginator(past, 20).get_page(request.GET.get("page"))
     shown = [*running, *upcoming, *ended]
     mine = {}
@@ -67,7 +76,7 @@ def contest_list(request):
               "attended": Participation.objects.filter(user=request.user, contest__end__lte=now).count()}
     return render(request, "contests/list.html", {"running": running, "upcoming": upcoming, "ended": ended,
                                                   "next_contest": next(iter([*running, *upcoming]), None),
-                                                  "top_rated": top_rated, "me": me, "only_mine": only_mine,
+                                                  "top_rated": top_rated, "me": me, "only_mine": only_mine, "show": show,
                                                   # your own row under the top ten, when you are not in it
                                                   "me_below": me and me["rated"] and me["place"] > len(top_rated)})
 
@@ -120,7 +129,7 @@ def contest_detail(request, pk):
         registrants = [p.user for p in contest.participations.select_related("user").order_by("-registered_at")[:8]]
     return render(request, "contests/detail.html", {
         "contest": contest, "problems": problems, "registered": registered, "my_row": my_row,
-        "leaders": leaders, "next_cp": next_cp, "registrants": registrants,
+        "leaders": leaders, "leaders_any": any(r["score"] or r["solved"] for r in leaders), "next_cp": next_cp, "registrants": registrants,
         "description_html": _render_statement(contest.description_md) if contest.description_md else "",
         "my_participation": me,
         "n_participants": contest.participations.count(),

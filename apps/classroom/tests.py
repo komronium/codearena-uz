@@ -643,3 +643,31 @@ def test_the_second_player_races_the_firsts_ghost_question_by_question(client, b
     url = reverse("classroom:duel_play", args=[duel.pk])
     g = client.get(url).context["ghost"]
     assert g["absent"] is True and "p1 hali o‘ynamagan" in client.get(url).content.decode()
+
+
+@pytest.mark.django_db(transaction=True)
+def test_telegram_tells_of_a_challenge_a_duel_result_and_a_badge(bank, settings):
+    from apps.accounts.models import TelegramLink, TelegramOutbox
+
+    from .duels import accept, challenge
+
+    settings.TELEGRAM_BOT_TOKEN = "x"
+    p1, p2 = _players()
+    for u in (p1, p2):
+        TelegramLink.objects.create(user=u, chat_id=f"c{u.pk}")
+    with patch("apps.accounts.telegram.dispatch_outbox"):
+        duel, _ = challenge(p1, "p2", "python", "easy")
+        invite = TelegramOutbox.objects.get(link__user=p2, event_key=f"duel:{duel.pk}:challenge")
+        assert "p1" in invite.text and "Python" in invite.text
+        _play(duel, p1, right=5, secs=2)
+        accept(duel, p2)
+        _play(duel, p2, right=1)
+        results = {o.link.user.username: o.text for o in TelegramOutbox.objects.filter(event_key=f"duel:{duel.pk}:result")}
+        assert "G‘alaba" in results["p1"] and "5 : 1" in results["p1"] and "Mag‘lubiyat" in results["p2"]
+        badge = TelegramOutbox.objects.filter(link__user=p1, preference="notify_badges").first()
+        assert badge is not None and "Mukammal I" in badge.text  # 5/5 in a duel
+        link = TelegramLink.objects.get(user=p2)
+        link.notify_duels = False
+        link.save()
+        d2, _ = challenge(p1, "p2", "python", "medium")
+        assert not TelegramOutbox.objects.filter(event_key=f"duel:{d2.pk}:challenge").exists()  # turned off

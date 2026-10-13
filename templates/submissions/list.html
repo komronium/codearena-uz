@@ -8,7 +8,7 @@ numbers are plain text.{% endcomment %}
 <section class="ca-hud" aria-labelledby="subs-title">
   <div class="ca-hud-in">
     <div>
-      <h1 id="subs-title">Urinishlar</h1>
+      <h1 id="subs-title">{% if own %}Urinishlarim{% else %}Urinishlar{% endif %}</h1>
       <p class="ca-hud-sub">{% if own %}Yuborgan yechimlaringiz{% else %}Saytdagi barcha yechimlar{% endif %}, eng yangisi tepada</p>
     </div>
     <dl class="ca-hud-stats">
@@ -19,13 +19,13 @@ numbers are plain text.{% endcomment %}
   </div>
 </section>
 {% endblock %}
-{% block content %}
+{% block content %}{% now "Y" as cur_year %}
 <div class="ca7-tools">
   <div class="ca7-trow">
     {% if user.is_authenticated %}
     <nav class="ca7-seg" aria-label="Kimning urinishlari">
-      <a href="{% querystring mine=None page=None q=None %}"{% if not own %} aria-current="page"{% endif %}>Hamma</a>
       <a href="{% querystring mine=1 page=None q=None %}"{% if own %} aria-current="page"{% endif %}>Mening</a>
+      <a href="{% querystring mine=0 page=None q=None %}"{% if not own %} aria-current="page"{% endif %}>Hamma</a>
     </nav>
     {% endif %}
     <nav class="ca7-seg" aria-label="Natija bo‘yicha">
@@ -33,7 +33,7 @@ numbers are plain text.{% endcomment %}
       {% for v, label in verdicts %}<a href="{% querystring verdict=v page=None %}" title="{{ v|verdict_words }}"{% if verdict == v %} aria-current="true"{% endif %}><span translate="no">{{ v }}</span></a>{% endfor %}
     </nav>
     <form method="get" class="ca7-tools-r" role="search" aria-label="Urinishlarni qidirish">
-      {% if own %}<input type="hidden" name="mine" value="1">{% endif %}
+      <input type="hidden" name="mine" value="{% if own %}1{% else %}0{% endif %}">
       {% if verdict %}<input type="hidden" name="verdict" value="{{ verdict }}">{% endif %}
       <span class="ca7-search"><i data-lucide="search" class="lu" aria-hidden="true"></i><input class="ca7-fld" type="search" name="q" value="{{ q }}" placeholder="{% if own %}Masala nomi{% else %}Masala yoki foydalanuvchi{% endif %}…" aria-label="{% if own %}Masala nomi bo‘yicha{% else %}Masala yoki foydalanuvchi bo‘yicha{% endif %} qidirish" autocomplete="off" spellcheck="false"></span>
       <label class="ca7-select"><span class="sr-only">Til</span>
@@ -54,7 +54,7 @@ numbers are plain text.{% endcomment %}
   {% for s in subs %}
   <tr>
     <td>{% if s.user_id == user.pk or user.is_staff %}<a class="ca-pid ca-link" href="{% url 'submissions:detail' s.pk %}" title="Kodni ko‘rish" aria-label="Urinish #{{ s.pk }} kodi">{{ s.pk|stringformat:"06d" }}</a>{% else %}<span class="ca-pid">{{ s.pk|stringformat:"06d" }}</span>{% endif %}</td>
-    <td class="hidden whitespace-nowrap tabular text-mute sm:table-cell"><time datetime="{{ s.created|date:'c' }}" title="{{ s.created|date:'d.m.Y H:i' }}">{{ s.created|date:"d.m H:i" }}</time></td>
+    <td class="hidden whitespace-nowrap tabular text-mute sm:table-cell"><time datetime="{{ s.created|date:'c' }}" title="{{ s.created|date:'d.m.Y H:i' }}">{% if s.created|date:"Y" == cur_year %}{{ s.created|date:"d.m H:i" }}{% else %}{{ s.created|date:"d.m.y H:i" }}{% endif %}</time></td>
     {% if not own %}<td class="whitespace-nowrap">{% include "accounts/_u7.html" with u=s.user %}</td>{% endif %}
     <td><a class="ca-link" href="{% url 'problems:detail' s.problem.slug %}">{{ s.problem.title }}</a></td>
     <td class="hidden whitespace-nowrap text-mute md:table-cell">{{ s.language.name }}</td>

@@ -96,19 +96,12 @@ def refresh_daily(problem_id: int, user_ids) -> None:
 
 
 def streaks(user) -> tuple[int, int]:
-    """(current, best) runs of consecutive days solved. Today not solved yet keeps
-    yesterday's run alive."""
-    days = set(DailySolve.objects.filter(user=user).values_list("daily__date", flat=True))
-    best = run = 0
-    prev = None
-    for d in sorted(days):
-        run = run + 1 if prev is not None and d - prev == datetime.timedelta(days=1) else 1
-        best, prev = max(best, run), d
-    today = timezone.localdate()
-    cur, d = 0, today if today in days else today - datetime.timedelta(days=1)
-    while d in days:
-        cur, d = cur + 1, d - datetime.timedelta(days=1)
-    return cur, best
+    """(current, best) runs of active days: the daily problem solved, or any one daily quest done
+    (apps.problems.quests). Today still open keeps yesterday's run alive."""
+    from .quests import streak_state
+
+    state = streak_state(user)
+    return state["current"], state["best"]
 
 
 WEEKDAYS_SHORT = ["Du", "Se", "Ch", "Pa", "Ju", "Sh", "Ya"]

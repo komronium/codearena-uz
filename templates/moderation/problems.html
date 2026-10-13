@@ -8,10 +8,24 @@
     <a href="{% url 'moderation:submit' %}" class="ca-btn ca-btn-primary"><i data-lucide="circle-plus" class="lu" aria-hidden="true"></i>Masala qo‘shish</a>
   </div>
 </div>
-<form method="get" class="relative mb-4 w-full max-w-xs" role="search">
-  <i data-lucide="search" class="lu pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-mute" aria-hidden="true"></i>
-  <input type="search" name="q" value="{{ q }}" placeholder="Sarlavha yoki slug…" class="ca-input !py-1.5 pl-8 text-sm" aria-label="Masala qidirish">
-</form>
+<div class="mb-4 flex flex-wrap items-center gap-3">
+  <form method="get" class="relative w-full max-w-xs" role="search">
+    {% if status %}<input type="hidden" name="status" value="{{ status }}">{% endif %}{% if difficulty %}<input type="hidden" name="difficulty" value="{{ difficulty }}">{% endif %}
+    <i data-lucide="search" class="lu pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-mute" aria-hidden="true"></i>
+    <input type="search" name="q" value="{{ q }}" placeholder="Sarlavha yoki slug…" class="ca-input !py-1.5 pl-8 text-sm" aria-label="Masala qidirish">
+  </form>
+  <nav class="ca7-seg" aria-label="Holat">
+    <a href="{% querystring status=None page=None %}"{% if not status %} aria-current="true"{% endif %}>Hammasi</a>
+    <a href="{% querystring status='public' page=None %}"{% if status == 'public' %} aria-current="true"{% endif %}>Ochiq</a>
+    <a href="{% querystring status='hidden' page=None %}"{% if status == 'hidden' %} aria-current="true"{% endif %}>Yashirin</a>
+    <a href="{% querystring status='pending' page=None %}"{% if status == 'pending' %} aria-current="true"{% endif %}>Kutmoqda</a>
+    <a href="{% querystring status='notests' page=None %}"{% if status == 'notests' %} aria-current="true"{% endif %}>Testsiz</a>
+  </nav>
+  <nav class="ca7-seg" aria-label="Qiyinlik">
+    <a href="{% querystring difficulty=None page=None %}"{% if not difficulty %} aria-current="true"{% endif %}>Barcha darajalar</a>
+    {% for v, label in difficulties %}<a href="{% querystring difficulty=v page=None %}"{% if difficulty == v %} aria-current="true"{% endif %}>{{ label }}</a>{% endfor %}
+  </nav>
+</div>
 
 {% if page.object_list %}
 <ul class="ca-rows">
@@ -35,17 +49,23 @@
       {% elif p.status == 'rejected' %}<span class="ca-chip text-bad">Rad etilgan</span>
       {% elif p.is_public %}<span class="ca-chip ca-chip-rated"><i data-lucide="eye" class="lu mr-1" aria-hidden="true"></i>Ochiq</span>
       {% else %}<span class="ca-chip !bg-ink/5 text-mute"><i data-lucide="eye-off" class="lu mr-1" aria-hidden="true"></i>Yashirin</span>{% endif %}
-      <a href="{% url 'moderation:submissions' %}?problem={{ p.slug|urlencode }}" class="ca-btn ca-btn-ghost !px-2 !py-1.5" title="Urinishlar" aria-label="Urinishlar: {{ p.title }}"><i data-lucide="history" class="lu" aria-hidden="true"></i></a>
-      <form method="post" action="{% url 'moderation:problem_rejudge' p.pk %}" onsubmit="return confirm('«{{ p.title|escapejs }}»: {{ p.n_subs }} ta urinish qayta tekshiriladi. Davom etasizmi?');">{% csrf_token %}
-        <button class="ca-btn ca-btn-ghost !px-2 !py-1.5" title="Qayta tekshirish" aria-label="Qayta tekshirish: {{ p.title }}"{% if not p.n_subs %} disabled{% endif %}><i data-lucide="refresh-cw" class="lu" aria-hidden="true"></i></button>
-      </form>
-      <a href="{% url 'moderation:problem_edit' p.pk %}" class="ca-btn ca-btn-ghost !px-2 !py-1.5" title="Tahrirlash" aria-label="Tahrirlash: {{ p.title }}"><i data-lucide="pencil" class="lu" aria-hidden="true"></i></a>
-      <form method="post" action="{% url 'moderation:problem_toggle' p.pk %}">{% csrf_token %}
-        <button class="ca-btn ca-btn-ghost !px-2 !py-1.5" title="{% if p.is_public %}Yashirish{% else %}Ochish{% endif %}" aria-label="{% if p.is_public %}Yashirish{% else %}Ochish{% endif %}: {{ p.title }}"><i data-lucide="{% if p.is_public %}eye-off{% else %}eye{% endif %}" class="lu" aria-hidden="true"></i></button>
-      </form>
-      <form method="post" action="{% url 'moderation:problem_delete' p.pk %}" onsubmit="return confirm('«{{ p.title|escapejs }}» va barcha urinishlari o‘chiriladi. Davom etasizmi?');">{% csrf_token %}
-        <button class="ca-btn ca-btn-ghost !px-2 !py-1.5 text-bad" title="O‘chirish" aria-label="O‘chirish: {{ p.title }}"><i data-lucide="trash-2" class="lu" aria-hidden="true"></i></button>
-      </form>
+      <a href="{% url 'moderation:problem_edit' p.pk %}" class="ca-btn ca-btn-ghost !py-1.5" aria-label="Tahrirlash: {{ p.title }}"><i data-lucide="pencil" class="lu" aria-hidden="true"></i>Tahrirlash</a>
+      <details class="ca-dropdown" data-dropdown>
+        <summary class="ca-btn ca-btn-ghost !px-2 !py-1.5" aria-label="Boshqa amallar: {{ p.title }}" title="Boshqa amallar"><i data-lucide="ellipsis" class="lu" aria-hidden="true"></i></summary>
+        <div class="ca-dropdown-panel !w-60">
+          <a class="ca-dropdown-item" href="{% url 'moderation:submissions' %}?problem={{ p.slug|urlencode }}"><i data-lucide="history" class="lu" aria-hidden="true"></i>Urinishlarni ko‘rish</a>
+          <form method="post" action="{% url 'moderation:problem_rejudge' p.pk %}" onsubmit="return confirm('«{{ p.title|escapejs }}»: {{ p.n_subs }} ta urinish qayta tekshiriladi. Davom etasizmi?');">{% csrf_token %}
+            <button class="ca-dropdown-item w-full text-left"{% if not p.n_subs %} disabled{% endif %}><i data-lucide="refresh-cw" class="lu" aria-hidden="true"></i>Qayta tekshirish{% if p.n_subs %} <span class="ml-auto text-xs text-mute">{{ p.n_subs }}</span>{% endif %}</button>
+          </form>
+          <form method="post" action="{% url 'moderation:problem_toggle' p.pk %}">{% csrf_token %}
+            <button class="ca-dropdown-item w-full text-left"><i data-lucide="{% if p.is_public %}eye-off{% else %}eye{% endif %}" class="lu" aria-hidden="true"></i>{% if p.is_public %}Yashirish{% else %}Ochiq qilish{% endif %}</button>
+          </form>
+          <hr class="my-1 border-line">
+          <form method="post" action="{% url 'moderation:problem_delete' p.pk %}" onsubmit="return confirm('«{{ p.title|escapejs }}» va barcha urinishlari o‘chiriladi. Davom etasizmi?');">{% csrf_token %}
+            <button class="ca-dropdown-item w-full text-left text-bad"><i data-lucide="trash-2" class="lu" aria-hidden="true"></i>O‘chirish</button>
+          </form>
+        </div>
+      </details>
     </div>
   </li>
   {% endfor %}

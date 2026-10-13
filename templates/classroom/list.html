@@ -10,8 +10,10 @@ a new-group form and the assignments they set.{% endcomment %}
       <h1 id="class-title">Vazifalar</h1>
       <p class="ca-hud-sub">{% if can_teach %}Guruh oching, kodini o‘quvchilarga bering va muddatli vazifa bering.{% else %}O‘qituvchi bergan vazifalar va sinfdoshlar bilan duellar.{% endif %}</p>
     </div>
+    {% if not can_teach %}<div class="ml-auto"><a href="{% url 'classroom:live_join' %}" class="ca7-hbtn is-wide"><i data-lucide="presentation" class="lu" aria-hidden="true"></i>Viktorinaga qo‘shilish</a></div>{% endif %}
     {% if can_teach or can_create %}
     <div class="ml-auto flex flex-wrap gap-2">
+      {% if can_teach %}<a href="{% url 'classroom:live_new' %}" class="ca7-hbtn is-wide"><i data-lucide="presentation" class="lu" aria-hidden="true"></i>Jonli viktorina</a>{% endif %}
       {% if can_teach %}<a href="{% url 'integrity:practice_report' %}" class="ca7-hbtn is-wide"><i data-lucide="shield-alert" class="lu" aria-hidden="true"></i>Mashq nazorati</a>{% endif %}
       {% if can_create %}<a href="{% url 'classroom:new' %}" class="ca-btn ca-btn-gold"><i data-lucide="plus" class="lu" aria-hidden="true"></i>Vazifa berish</a>{% endif %}
     </div>
@@ -20,7 +22,7 @@ a new-group form and the assignments they set.{% endcomment %}
 </section>
 {% endblock %}
 {% block content %}
-{% include "classroom/_tabs.html" with active="tasks" n=assignments|length %}
+{% if can_teach %}{% include "classroom/_tabs.html" with active="tasks" n=taught|length %}{% else %}{% include "classroom/_tabs.html" with active="tasks" n=assignments|length %}{% endif %}
 <div class="ca7{% if can_teach %} ca7-one{% endif %}">
 <div class="ca7-col">
   {% if can_teach %}
@@ -31,7 +33,11 @@ a new-group form and the assignments they set.{% endcomment %}
       <div class="ca-box">
         <div class="ca7-group-h">
           <div class="min-w-0"><b class="block truncate">{{ g.name }}</b><small class="tabular">{{ g.members.all|length }} ta o‘quvchi</small></div>
-          <div class="text-right"><small>Qo‘shilish kodi</small><button type="button" class="ca7-code" data-copy-code="{{ g.join_code }}" title="Nusxalash" translate="no">{{ g.join_code }}</button></div>
+        </div>
+        <div class="ca7-joinrow">
+          <div><small>Qo‘shilish kodi</small>
+            <button type="button" class="ca7-joincode" data-copy-text="{{ g.join_code }}" title="Kodni nusxalash" translate="no"><span data-copy-label>{{ g.join_code }}</span><i data-lucide="copy" class="lu" aria-hidden="true"></i></button></div>
+          <button type="button" class="ca-btn ca-btn-ghost ca-btn-wb" data-project-code="{{ g.join_code }}" data-project-name="{{ g.name }}"><i data-lucide="maximize" class="lu" aria-hidden="true"></i>Proyektorda ko‘rsatish</button>
         </div>
         {% if g.members.all %}
         <details class="ca7-group-m">
@@ -98,14 +104,15 @@ a new-group form and the assignments they set.{% endcomment %}
     <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span><h2 id="taught-title">Men bergan vazifalar</h2><span class="ca7-r text-mute">{{ taught|length }} ta</span></div>
     <div class="overflow-x-auto">
     <table class="ca-table ca-table-flat">
-      <thead><tr><th>Vazifa</th><th>Guruh</th><th class="w-40 text-right">Muddat</th><th class="w-24 text-right"><span class="sr-only">Amal</span></th></tr></thead>
+      <thead><tr><th>Vazifa</th><th>Guruh</th><th class="w-44">Topshirdi</th><th class="w-44 text-right">Muddat</th><th class="w-24 text-right"><span class="sr-only">Amal</span></th></tr></thead>
       <tbody>
       {% for a in taught %}
       <tr>
         <td><a class="ca-link" href="{% url 'classroom:detail' a.pk %}">{{ a.title }}</a></td>
         <td class="text-mute">{{ a.group.name }}</td>
-        <td class="text-right tabular">{{ a.deadline|date:"d.m.Y H:i" }}</td>
-        <td class="text-right"><a class="ca-btn ca-btn-soft ca-btn-wb ca-btn-sq" href="{% url 'classroom:edit' a.pk %}" title="Tahrirlash" aria-label="Tahrirlash: {{ a.title }}"><i data-lucide="pencil" class="lu" aria-hidden="true"></i></a></td>
+        <td><span class="ca-hwprog"><span class="ca-progress" aria-hidden="true"><span style="width: {% widthratio a.done_n a.members_n 100 %}%"></span></span><b class="tabular">{{ a.done_n }} / {{ a.members_n }}</b></span></td>
+        <td class="text-right tabular">{% if a.deadline > now %}<span data-countdown="{{ a.deadline|date:'c' }}" data-label="qoldi" data-suffix="1"></span>{% else %}<span class="text-bad" title="{{ a.deadline|date:'d.m.Y H:i' }}">Muddat o‘tgan</span>{% endif %}</td>
+        <td class="text-right flex justify-end gap-1"><a class="ca-btn ca-btn-ghost ca-btn-wb" href="{% url 'classroom:detail' a.pk %}">Natijalar</a><a class="ca-btn ca-btn-soft ca-btn-wb ca-btn-sq" href="{% url 'classroom:edit' a.pk %}" title="Tahrirlash" aria-label="Tahrirlash: {{ a.title }}"><i data-lucide="pencil" class="lu" aria-hidden="true"></i></a></td>
       </tr>
       {% endfor %}
       </tbody>
@@ -140,9 +147,22 @@ a new-group form and the assignments they set.{% endcomment %}
 </aside>
 {% endif %}
 </div>
+{% if can_teach %}
+<dialog id="code-dialog" class="ca-codedlg" aria-labelledby="code-dlg-name">
+  <p id="code-dlg-name"></p>
+  <p>Guruhga qo‘shilish kodi. Vazifalar sahifasida «Guruhga qo‘shilish» maydoniga kiriting.</p>
+  <b id="code-dlg-code" translate="no"></b>
+  <button type="button" class="ca-btn ca-btn-gold" data-close-code>Yopish</button>
+</dialog>
 <script>
-  document.querySelectorAll("[data-copy-code]").forEach((b) => b.addEventListener("click", async () => {
-    try { await navigator.clipboard.writeText(b.dataset.copyCode); b.classList.add("is-copied"); setTimeout(() => b.classList.remove("is-copied"), 900); } catch {}
+  // "Proyektorda ko‘rsatish": the code in huge letters for a classroom wall
+  const dlg = document.getElementById("code-dialog");
+  document.querySelectorAll("[data-project-code]").forEach((b) => b.addEventListener("click", () => {
+    document.getElementById("code-dlg-name").textContent = b.dataset.projectName;
+    document.getElementById("code-dlg-code").textContent = b.dataset.projectCode;
+    dlg.showModal();
   }));
+  dlg?.addEventListener("click", (e) => { if (e.target === dlg || e.target.closest("[data-close-code]")) dlg.close(); });
 </script>
+{% endif %}
 {% endblock %}

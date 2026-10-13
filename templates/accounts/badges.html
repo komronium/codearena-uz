@@ -46,7 +46,7 @@ then the five levels as stars in their metal, each with what it takes and the sh
         <li class="ca-t{{ l.tier }}{% if l.done %} is-done{% endif %}">
           <span class="ca-bmini{% if not l.done %} is-off{% endif %}" aria-hidden="true"><svg viewBox="0 0 64 64"><path d="M62 32l-8.78 8.78v12.44H40.78L32 62l-8.78-8.78H10.78V40.78L2 32l8.78-8.78V10.78h12.44L32 2l8.78 8.78h12.44v12.44z"/></svg><b>{{ l.roman }}</b></span>
           <span class="ca-bladder-at">{{ l.sub }}</span>
-          <small>{% if l.pct %}{{ l.pct }}% o‘yinchida{% else %}hali hech kimda{% endif %}</small>
+          <small>{% if l.pct %}{{ l.pct }}% o‘yinchida{% endif %}</small>
         </li>
         {% endfor %}
       </ol>

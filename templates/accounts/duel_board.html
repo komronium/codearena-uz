@@ -1,0 +1,45 @@
+{% extends "base.html" %}{% load tiers %}
+{% block title %}Duel reytingi{% endblock %}
+{% block description %}Duel reytingi: 1 ga 1 savol duellarida {{ total }} o‘yinchining Elo reytingi.{% endblock %}
+{% block band %}
+<section class="ca-hud" aria-labelledby="board-title">
+  <div class="ca-hud-in">
+    <div>
+      <h1 id="board-title">Duel reytingi</h1>
+      <p class="ca-hud-sub">{{ total }} o‘yinchi · mavsum {{ season }}, <span class="tabular" data-countdown="{{ season_ends|date:'c' }}" data-label="" data-suffix="1" data-ended="tugadi"></span> dan keyin yangi mavsum</p>
+    </div>
+    {% include "accounts/_board_tabs.html" %}
+  </div>
+</section>
+{% endblock %}
+{% block content %}
+{% if users %}
+{% if podium %}
+<section class="ca-podium" aria-label="O‘tgan mavsum g‘oliblari">
+  <b>{{ podium_season }} mavsumi g‘oliblari</b>
+  {% for m in podium %}<span><span class="ca7-medal m{{ m.rank }}">{{ m.rank }}</span>{% include "accounts/_u7.html" with u=m.user you=False %}<small class="tabular text-mute">{{ m.rating }}</small></span>{% endfor %}
+</section>
+{% endif %}
+{% if user.is_authenticated %}<p class="mb-3 text-sm"><a class="ca-link" href="#me">Mening o‘rnimga o‘tish</a> · <a class="ca-link" href="{% url 'classroom:duels' %}">Duel boshlash</a></p>{% endif %}
+<div class="overflow-x-auto ca7-board">
+<table class="ca-table ca-table-flat">
+  <thead><tr><th class="w-16 text-center">#</th><th>Foydalanuvchi</th><th class="w-28 text-right" title="Tugagan duellar">Duel</th><th class="w-28 text-right">G‘alaba</th><th class="w-28 text-right">Reyting</th></tr></thead>
+  <tbody>
+  {% for u in users %}
+  <tr{% if u == user %} class="ca-row-me" id="me"{% endif %}>
+    <td class="text-center">{% if u.rank <= 3 %}<span class="ca7-medal m{{ u.rank }}">{{ u.rank }}</span>{% else %}<span class="tabular text-mute">{{ u.rank }}</span>{% endif %}</td>
+    <td>{% if u == user %}{% include "accounts/_u7.html" with u=u you=True %}{% else %}{% include "accounts/_u7.html" with u=u you=False %}{% endif %}</td>
+    <td class="text-right tabular text-mute">{{ u.duels }}</td>
+    <td class="text-right tabular text-ok">{{ u.wins }}</td>
+    <td class="text-right tabular font-bold">{{ u.eff }}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% else %}
+<p class="ca7-empty"><b>Hali tugagan duel yo‘q</b>Birinchi duel tugagach, o‘yinchilar shu yerda paydo bo‘ladi. <a class="ca-link" href="{% url 'classroom:duels' %}">Duel boshlash</a></p>
+{% endif %}
+<p class="mt-3 max-w-3xl text-sm text-mute">Har oy boshida reyting 1200 ga qarab yarmigacha qaytadi: hamma yangi mavsumni yaqin joydan boshlaydi. Mavsum oxirida kamida {{ min_duels }} ta duel o‘ynaganlar orasidan eng yuqori 3 kishi shu mavsum g‘olibi bo‘ladi.</p>
+{% include "accounts/_leaderboard_nav.html" %}
+{% endblock %}

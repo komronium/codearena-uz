@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Viktorinaga qo‘shilish{% endblock %}
+{% block content %}
+<div class="ca-auth">
+  <form method="post" class="ca-panel ca-auth-card space-y-4">{% csrf_token %}
+    <div><h1 class="text-xl font-bold">Viktorinaga qo‘shilish</h1><p class="mt-1 text-sm text-mute">O‘qituvchi ekranidagi 6 xonali kodni kiriting.</p></div>
+    {% if error %}<div class="ca-alert ca-alert-bad" role="alert">{{ error }}</div>{% endif %}
+    <input name="code" value="{{ code }}" class="ca-input text-center font-mono text-2xl tracking-[.3em]" inputmode="numeric" maxlength="7" autocomplete="off" autofocus placeholder="000000" aria-label="Viktorina kodi">
+    <button class="ca-btn ca-btn-primary w-full !py-2.5"><i data-lucide="log-in" class="lu" aria-hidden="true"></i>Qo‘shilish</button>
+  </form>
+</div>
+{% endblock %}

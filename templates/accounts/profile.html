@@ -1,4 +1,4 @@
-{% extends "base.html" %}{% load tiers seo %}
+{% extends "base.html" %}{% load tiers seo tagnames %}
 {% block title %}{{ profile_user.username }}{% endblock %}
 {% block description %}{{ profile_user.username }} — CodeArena’dagi profili: reyting {{ profile_user.rating }}, {{ solved|length }} ta yechilgan masala, musobaqalar tarixi.{% endblock %}
 {% block robots %}{% if not profile_user.is_active or not solved and not rating_history %}noindex, follow{% else %}{{ block.super }}{% endif %}{% endblock %}
@@ -24,7 +24,12 @@ Colour carries meaning only: the tier colour is the person, green/red the result
         </p>
         {% if top_badges %}<a class="ca7-pbadges" href="#badges-title" title="Nishonlar">{% for b in top_badges %}{% include "accounts/_bmini.html" %}{% endfor %}<span><b class="tabular">{{ badges_earned }}</b> nishon · <b class="tabular">{{ levels_earned }}</b> bosqich</span></a>{% endif %}
       </div>
-      {% if user == profile_user %}<a class="ca7-hbtn is-wide ml-auto" href="{% url 'profile_edit' %}"><i data-lucide="pencil" class="lu" aria-hidden="true"></i>Profilni tahrirlash</a>{% endif %}
+      {% if user == profile_user %}<a class="ca7-hbtn is-wide ml-auto" href="{% url 'profile_edit' %}"><i data-lucide="settings" class="lu" aria-hidden="true"></i>Sozlamalar</a>
+      {% elif user.is_authenticated %}<div class="ml-auto flex flex-wrap items-center gap-3">
+        {% if h2h and h2h.you or h2h and h2h.them %}<span class="ca7-h2h" title="Sizning o‘zaro duellaringiz"><small>Duel hisobi</small><b class="tabular">{{ h2h.you }} : {{ h2h.them }}</b></span>{% endif %}
+        <form method="post" action="{% url 'follow' profile_user.username %}">{% csrf_token %}<button class="ca-btn {% if is_following %}ca-btn-soft{% else %}ca-btn-ghost{% endif %}"><i data-lucide="{% if is_following %}user-check{% else %}user-plus{% endif %}" class="lu" aria-hidden="true"></i>{% if is_following %}Kuzatilmoqda{% else %}Kuzatish{% endif %}</button></form>
+        <a class="ca-btn ca-btn-gold" href="{% url 'classroom:duels' %}?opponent={{ profile_user.username|urlencode }}"><i data-lucide="swords" class="lu" aria-hidden="true"></i>Duelga chaqirish</a>
+      </div>{% endif %}
     </div>
     <dl class="ca7-pstats">
       <div><dt>Musobaqa reytingi</dt><dd>{% if rating_history %}<b class="ca7-prt tabular">{{ profile_user.rating }}</b>{% if last_delta %} <span class="ca7-pdelta{% if last_delta < 0 %} is-down{% endif %}">{{ last_delta|stringformat:"+d" }}</span>{% endif %}{% else %}<b>—</b>{% endif %}</dd>
@@ -33,7 +38,7 @@ Colour carries meaning only: the tier colour is the person, green/red the result
       <div><dt>Musobaqalar</dt><dd><b class="tabular">{{ rating_history|length }}</b></dd><dd><small>reytingli raundlar</small></dd></div>
       <div><dt>Amaliyot balli</dt><dd><b class="tabular">{{ profile_user.practice_points }}</b></dd><dd><small>yechilgan {{ solved|length }} ta masala uchun</small></dd></div>
       <div><dt>Ball bo‘yicha o‘rni</dt><dd>{% if points_rank %}<b class="tabular">{{ points_rank }}</b> <span class="ca7-of">/ {{ total_users }}</span>{% else %}<b>—</b>{% endif %}</dd><dd><small>amaliyot reytingi</small></dd></div>
-      <div><dt>Kun masalasi seriyasi</dt><dd><b class="tabular">{{ streak.0 }}</b> <span class="ca7-of">kun</span></dd><dd><small>eng uzuni {{ streak.1 }}</small></dd></div>
+      <div><dt>Olov</dt><dd><b class="tabular">{{ streak.0 }}</b> <span class="ca7-of">kun</span></dd><dd><small>{% if streak.1 %}eng uzuni {{ streak.1 }} kun{% else %}kun masalasini yechib boshlang{% endif %}</small></dd></div>
     </dl>
   </div>
 </section>
@@ -49,15 +54,15 @@ Colour carries meaning only: the tier colour is the person, green/red the result
       <svg viewBox="0 0 {{ rating_chart.w }} {{ rating_chart.h }}" class="w-full" role="img" aria-label="Reyting tarixi grafigi, {{ rating_history|length }} ta musobaqa">
         {% for b in rating_chart.bands %}
         <rect x="{{ rating_chart.left }}" y="{{ b.y }}" width="{{ rating_chart.width }}" height="{{ b.h }}" fill="{{ b.color }}" fill-opacity=".1" />
-        {% if b.label %}<text x="{{ rating_chart.left|add:8 }}" y="{{ b.y|add:15 }}" fill="currentColor" class="fill-mute" font-size="11.5" font-weight="600">{{ b.label }}</text>{% endif %}
+        {% if b.label %}<text x="{{ rating_chart.left|add:8 }}" y="{{ b.y|add:15 }}" fill="currentColor" class="fill-mute" font-size="12.5" font-weight="600">{{ b.label }}</text>{% endif %}
         {% endfor %}
         {% for g in rating_chart.gridlines %}
         <line x1="{{ rating_chart.left }}" y1="{{ g.y }}" x2="{{ rating_chart.right }}" y2="{{ g.y }}" stroke="currentColor" class="text-line" stroke-width="1" />
-        <text x="{{ rating_chart.left|add:-8 }}" y="{{ g.y|add:4 }}" text-anchor="end" font-size="11.5" class="fill-mute tabular">{{ g.value }}</text>
+        <text x="{{ rating_chart.left|add:-8 }}" y="{{ g.y|add:4 }}" text-anchor="end" font-size="12.5" class="fill-mute tabular">{{ g.value }}</text>
         {% endfor %}
         <polyline points="{{ rating_chart.polyline }}" fill="none" stroke="rgb(var(--ca-accent-rgb))" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" />
         {% for pt in rating_chart.points %}
-        <text x="{{ pt.x }}" y="{{ rating_chart.bottom|add:20 }}" text-anchor="middle" font-size="11" class="fill-mute tabular">{{ pt.date }}</text>
+        <text x="{{ pt.x }}" y="{{ rating_chart.bottom|add:20 }}" text-anchor="middle" font-size="12.5" class="fill-mute tabular">{{ pt.date }}</text>
         <g class="ca7-pt" tabindex="0" role="button" aria-label="{{ pt.title }}: {{ pt.rank }}-o‘rin{% if pt.of %} {{ pt.of }} tadan{% endif %}, {{ pt.delta|stringformat:'+d' }}, reyting {{ pt.rating }}"
            data-title="{{ pt.title }}" data-date="{{ pt.date }}" data-rank="{{ pt.rank }}" data-of="{{ pt.of|default:'' }}" data-delta="{{ pt.delta|stringformat:'+d' }}" data-rating="{{ pt.rating }}" data-x="{{ pt.x }}" data-y="{{ pt.y }}">
           <circle cx="{{ pt.x }}" cy="{{ pt.y }}" r="14" fill="transparent" />
@@ -113,27 +118,43 @@ Colour carries meaning only: the tier colour is the person, green/red the result
 
   <section aria-labelledby="solved-title">
     <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-easy)" aria-hidden="true"></span><h2 id="solved-title">Masalalar</h2><a class="ca-link" href="{% url 'problems:list' %}">Barchasi</a></div>
-    <div class="ca7-psolved">
-      <p><b class="tabular">{{ solved_shown }}</b> <span class="text-mute">/ {{ total_public_problems }} yechilgan</span></p>
+    <div class="ca7-psolved mb-4">
       {% if next_tier and rating_history %}<p class="text-sm text-mute"><span class="ca-tier-ink font-semibold" style="--tier: {{ next_tier.color }}">{{ next_tier.name }}</span> darajasigacha <b class="text-ink tabular">{{ next_tier.need }}</b> reyting</p>{% endif %}
     </div>
-    {% for d in by_diff %}{% if d.total %}
-    <div class="ca7-lv ca7-lv-wide" style="--lvl: var(--ca-lvl-{{ d.key }}); --lvl-ink: var(--ca-lvl-{{ d.key }}-ink)">
-      <span>{{ d.label }}</span>
-      <span class="ca7-lv-bar" role="progressbar" aria-valuenow="{{ d.solved }}" aria-valuemin="0" aria-valuemax="{{ d.total }}" aria-label="{{ d.label }}: {{ d.solved }} / {{ d.total }}"><i style="width: {% widthratio d.solved d.total 100 %}%"></i></span>
-      <b class="tabular">{{ d.solved }}/{{ d.total }}</b>
-    </div>
-    {% endif %}{% endfor %}
-    {% if attempting or solved_hidden > 0 %}<p class="ca7-foot-note">
-      {% if attempting %}<b class="tabular text-ink">{{ attempting }}</b> ta masala urinilgan, hali yechilmagan.{% endif %}
+    {% if ring %}{% include "problems/_solved_ring.html" with attempting=attempting %}{% endif %}
+    {% if solved_hidden > 0 %}<p class="ca7-foot-note">
       {% if solved_hidden > 0 %}Yana <b class="tabular text-ink">{{ solved_hidden }}</b> ta yechilgan masala hozir kelgusi musobaqada, shuning uchun yashirin.{% endif %}
     </p>{% endif %}
   </section>
 </div>
 
+{% if badge_groups or contest_badges %}
+<section aria-labelledby="badges-title">
+  <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span><h2 id="badges-title">Nishonlar</h2><span class="ca7-r text-mute tabular">{{ badges_earned }} / {{ badges_total }} nishon · {{ levels_earned }} bosqich</span></div>
+  {% comment %}Each group's families: the owner sees every one (the ones not reached yet grey, with the way to level I),
+  a visitor only the reached ones. Round badges (Contest.badge) follow, coloured by place.{% endcomment %}
+  <div class="ca-tb-groups">
+  {% for g in badge_groups %}
+  <div class="ca-tb-group" style="--n: {% if g.badges|length > 6 %}6{% else %}{{ g.badges|length|default:1 }}{% endif %}">
+    <h3>{{ g.label }}</h3>
+    <ul>{% for b in g.badges %}{% include "accounts/_tbadge.html" with owner=badge_owner %}{% endfor %}</ul>
+  </div>
+  {% endfor %}
+  {% if contest_badges %}
+  <div class="ca-tb-group" style="--n: 6">
+    <h3>Musobaqa nishonlari</h3>
+    <ul>
+      {% for b in contest_badges %}{% url 'contests:standings' b.contest.pk as round_url %}{% if b.medal %}{% include "accounts/_badge7.html" with tone="medal" icon="medal" title=b.name sub=b.contest.title medal=b.medal href=round_url done=None total=None kind="ca-badge-contest" %}{% else %}{% include "accounts/_badge7.html" with tone="lapis" icon="flag" title=b.name sub=b.contest.title of_solved=b.solved of_total=b.total medal=None href=round_url done=None total=None kind="ca-badge-contest" %}{% endif %}{% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+  </div>
+</section>
+{% endif %}
+
 <section aria-labelledby="act-title">
   <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-easy)" aria-hidden="true"></span><h2 id="act-title">Faollik</h2>
-    <span class="ca7-r text-mute">so‘nggi yilda <b class="tabular text-ink">{{ activity.total }}</b> ta urinish · faol kunlar <b class="tabular text-ink">{{ activity.active_days }}</b> · eng uzun seriya <b class="tabular text-ink">{{ activity.max_streak }}</b></span></div>
+    <span class="ca7-r text-mute">so‘nggi yilda <b class="tabular text-ink">{{ activity.total }}</b> ta urinish · faol kunlar <b class="tabular text-ink">{{ activity.active_days }}</b> · eng uzun ketma-ket faol kunlar <b class="tabular text-ink">{{ activity.max_streak }}</b></span></div>
   {# rtl scroller: a phone shows the latest weeks first; the map itself stays left-to-right #}
   <div class="ca-scroll-end overflow-x-auto" tabindex="0" role="region" aria-label="Faollik xaritasi (yon tomonga suriladi)">
     <div class="ca7-heat" role="img" aria-label="Faollik xaritasi: so‘nggi bir yilda {{ activity.total }} ta urinish, {{ activity.active_days }} faol kun">
@@ -154,7 +175,7 @@ Colour carries meaning only: the tier colour is the person, green/red the result
   {% if weakest and user == profile_user %}
   <div class="ca7-tip">
     <span class="ca7-tip-ico" aria-hidden="true"><i data-lucide="target" class="lu"></i></span>
-    <p><b>Eng zaif mavzu: {{ weakest.row.tag.name }}</b> · {{ weakest.total }} tadan {{ weakest.solved }} tasi yechilgan{% if weakest.tried %}, {{ weakest.tried }} tasida urinish bor{% endif %}.
+    <p><b>Eng zaif mavzu: {{ weakest.row.tag.name|tag_uz }}</b> · {{ weakest.total }} tadan {{ weakest.solved }} tasi yechilgan{% if weakest.tried %}, {{ weakest.tried }} tasida urinish bor{% endif %}.
       {% if weakest.easiest %}<br>Osonidan boshlang: <a class="ca-link" href="{% url 'problems:detail' weakest.easiest.slug %}"><span class="ca-pid">{{ weakest.easiest.pk|stringformat:"04d" }}</span> {{ weakest.easiest.title }}</a> <span class="ca-diff ca-diff-{{ weakest.easiest.difficulty }}">{{ weakest.easiest.get_difficulty_display }}</span>{% endif %}</p>
   </div>
   {% endif %}
@@ -162,10 +183,10 @@ Colour carries meaning only: the tier colour is the person, green/red the result
     {% for t in topic_map %}
     {% if forloop.counter == 6 %}<details class="ca7-topics-more"><summary>Barcha mavzular <span class="tabular">({{ topic_map|length }})</span><i data-lucide="chevron-down" class="lu" aria-hidden="true"></i></summary>{% endif %}
     <div class="ca7-topic">
-      <a class="ca-link{% if t.kind == 'sql' %} !text-[rgb(var(--ca-sql-rgb))]{% endif %}" href="{% url 'problems:list' %}?tag={{ t.row.tag.name|urlencode }}">{{ t.row.tag.name }}</a>
+      <a class="ca-link{% if t.kind == 'sql' %} !text-[rgb(var(--ca-sql-rgb))]{% endif %}" href="{% url 'problems:list' %}?tag={{ t.row.tag.name|urlencode }}">{{ t.row.tag.name|tag_uz }}</a>
       <span class="ca7-topic-bar" role="img" aria-label="{{ t.total }} tadan {{ t.solved }} tasi yechilgan, {{ t.tried }} tasida urinish bor"><i class="is-solved" style="width: {{ t.pct_solved }}%"></i><i class="is-tried" style="width: {{ t.pct_tried }}%"></i></span>
       <b class="tabular">{{ t.solved }} / {{ t.total }}</b>
-      <span class="ca7-topic-next">{% if t.next %}<a class="ca-link" href="{% url 'problems:detail' t.next.slug %}" title="{{ t.next.title }}">Keyingisi: {{ t.next.pk|stringformat:"04d" }}</a>{% else %}<span class="font-semibold text-ok"><i data-lucide="check" class="lu" aria-hidden="true"></i> hammasi</span>{% endif %}</span>
+      <span class="ca7-topic-next">{% if t.next %}<a class="ca-link" href="{% url 'problems:detail' t.next.slug %}" title="{{ t.next.title }}">Keyingisi: {{ t.next.title|truncatechars:16 }}</a>{% else %}<span class="font-semibold text-ok"><i data-lucide="check" class="lu" aria-hidden="true"></i> hammasi</span>{% endif %}</span>
     </div>
     {% if forloop.last and forloop.counter > 5 %}</details>{% endif %}
     {% endfor %}
@@ -174,28 +195,5 @@ Colour carries meaning only: the tier colour is the person, green/red the result
 </section>
 {% endif %}
 
-{% if badge_groups or contest_badges %}
-<section aria-labelledby="badges-title">
-  <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span><h2 id="badges-title">Nishonlar</h2><span class="ca7-r text-mute tabular">{{ badges_earned }} / {{ badges_total }} nishon · {{ levels_earned }} bosqich</span></div>
-  {% comment %}Each group's families: the owner sees every one (the ones not reached yet grey, with the way to level I),
-  a visitor only the reached ones. Round badges (Contest.badge) follow, coloured by place.{% endcomment %}
-  <div class="ca-tb-groups">
-  {% for g in badge_groups %}
-  <div class="ca-tb-group">
-    <h3>{{ g.label }}</h3>
-    <ul>{% for b in g.badges %}{% include "accounts/_tbadge.html" with owner=badge_owner %}{% endfor %}</ul>
-  </div>
-  {% endfor %}
-  {% if contest_badges %}
-  <div class="ca-tb-group">
-    <h3>Musobaqa nishonlari</h3>
-    <ul>
-      {% for b in contest_badges %}{% url 'contests:standings' b.contest.pk as round_url %}{% if b.medal %}{% include "accounts/_badge7.html" with tone="medal" icon="medal" title=b.name sub=b.contest.title medal=b.medal href=round_url done=None total=None kind="ca-badge-contest" %}{% else %}{% include "accounts/_badge7.html" with tone="lapis" icon="flag" title=b.name sub=b.contest.title of_solved=b.solved of_total=b.total medal=None href=round_url done=None total=None kind="ca-badge-contest" %}{% endif %}{% endfor %}
-    </ul>
-  </div>
-  {% endif %}
-  </div>
-</section>
-{% endif %}
 </div>
 {% endblock %}

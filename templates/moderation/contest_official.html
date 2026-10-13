@@ -7,7 +7,10 @@
 </div>
 
 {% if not contest.is_official %}
-<div class="ca-alert mb-4">Bu musobaqa rasmiy emas. <a class="ca-link" href="{% url 'moderation:contest_edit' contest.pk %}">Tahrirlashda</a> «Rasmiy musobaqa» belgisini qo‘ying.</div>
+<div class="ca-alert mb-4 items-center">
+  <p class="flex-1">Bu musobaqa rasmiy emas. Rasmiy reyting faqat tasdiqlangan ishtirokchilar uchun alohida hisoblanadi va kod tekshiruvini talab qiladi.</p>
+  <form method="post" action="{% url 'moderation:contest_make_official' contest.pk %}" onsubmit="return confirm('Musobaqa rasmiy deb belgilanadi. Davom etasizmi?');">{% csrf_token %}<button class="ca-btn ca-btn-primary !py-1.5"><i data-lucide="award" class="lu" aria-hidden="true"></i>Rasmiy qilish</button></form>
+</div>
 {% elif contest.allowed_ip_prefix %}
 <p class="mb-4 text-sm text-mute">Auditoriya musobaqasi (IP {{ contest.allowed_ip_prefix }}…): kod tekshiruvi shart emas. Cheaterlarni diskvalifikatsiya qilib, reytingni qo‘llang.</p>
 {% elif not contest.review_top_n %}

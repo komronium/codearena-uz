@@ -1,11 +1,20 @@
 {% extends "base.html" %}{% load tiers %}
-{% block title %}Profilni tahrirlash{% endblock %}
+{% block title %}Sozlamalar{% endblock %}
 
 {% block content %}
-<div class="mx-auto max-w-lg">
+<div class="mx-auto max-w-4xl">
   <a class="ca-link mb-2 inline-block text-sm text-mute" href="{% url 'profile' user.username %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>Profil</a>
-  <h1 class="ca-page-title mb-6">Profilni tahrirlash</h1>
-  <form method="post" enctype="multipart/form-data" class="ca-panel !p-0 overflow-hidden">{% csrf_token %}
+  <h1 class="ca-page-title mb-6">Sozlamalar</h1>
+  <div class="grid gap-8 lg:grid-cols-[12rem_minmax(0,1fr)]">
+  <nav class="ca-setnav" aria-label="Sozlamalar bo‘limlari">
+    <a href="#profil"><i data-lucide="user" class="lu" aria-hidden="true"></i>Profil</a>
+    <a href="#xavfsizlik"><i data-lucide="shield-check" class="lu" aria-hidden="true"></i>Xavfsizlik</a>
+    <a href="#bildirishnoma"><i data-lucide="bell" class="lu" aria-hidden="true"></i>Bildirishnomalar</a>
+    <a href="#korinish"><i data-lucide="sun-moon" class="lu" aria-hidden="true"></i>Ko‘rinish</a>
+    {% if user.role == "student" and not user.is_staff %}<a href="#oqituvchi"><i data-lucide="graduation-cap" class="lu" aria-hidden="true"></i>O‘qituvchi</a>{% endif %}
+  </nav>
+  <div class="min-w-0 max-w-lg">
+  <form method="post" enctype="multipart/form-data" class="ca-panel !p-0 overflow-hidden scroll-mt-20" id="profil">{% csrf_token %}
     <div class="flex items-center gap-5 border-b border-line px-6 py-5">
       <div class="relative shrink-0">
         {% if user.avatar %}
@@ -31,11 +40,12 @@
           {% if form.first_name.errors %}<p class="mt-1 text-sm text-bad">{{ form.first_name.errors.0 }}</p>{% endif %}
         </div>
         <div>
-          <label class="ca-label" for="id_last_name">Familiya</label>
+          <label class="ca-label" for="id_last_name">Familiya <span class="font-normal text-mute">(ixtiyoriy)</span></label>
           <input class="ca-input" type="text" name="last_name" id="id_last_name" value="{{ form.last_name.value|default:'' }}" autocomplete="family-name" maxlength="150">
           {% if form.last_name.errors %}<p class="mt-1 text-sm text-bad">{{ form.last_name.errors.0 }}</p>{% endif %}
         </div>
       </div>
+      <p class="mt-1.5 text-[0.8125rem] text-mute">Ism va familiya faqat profilingizda ko‘rinadi; reyting jadvalida foydalanuvchi nomingiz chiqadi.</p>
       <div>
         <label class="ca-label" for="id_location">Shahar</label>
         <input class="ca-input" type="text" name="location" id="id_location" value="{{ form.location.value|default:'' }}" placeholder="Toshkent" autocomplete="address-level2">
@@ -48,14 +58,21 @@
       </div>
     </div>
     <div class="flex items-center justify-between gap-3 border-t border-line bg-paper/60 px-6 py-4">
-      <a class="ca-link text-sm text-mute" href="{% url 'password_change' %}"><i data-lucide="key-round" class="lu mr-1" aria-hidden="true"></i>Parolni almashtirish</a>
+      <span></span>
       <button type="submit" class="ca-btn ca-btn-primary"><i data-lucide="check" class="lu" aria-hidden="true"></i>Saqlash</button>
     </div>
   </form>
-  <section class="ca-panel mt-6" aria-labelledby="telegram-title">
+  <section class="ca-panel mt-6 flex scroll-mt-20 flex-wrap items-center justify-between gap-3" id="xavfsizlik" aria-labelledby="security-title">
+    <div class="min-w-0">
+      <h2 id="security-title" class="text-[1.0625rem] font-bold"><i data-lucide="key-round" class="lu mr-1.5 text-accent" aria-hidden="true"></i>Xavfsizlik</h2>
+      <p class="mt-1 text-sm text-mute">Parolni almashtirish uchun joriy parol kerak.</p>
+    </div>
+    <a class="ca-btn ca-btn-ghost" href="{% url 'password_change' %}">Parolni almashtirish</a>
+  </section>
+  <section class="ca-panel mt-6 scroll-mt-20" id="bildirishnoma" aria-labelledby="telegram-title">
     <div class="flex flex-wrap items-start justify-between gap-3">
       <div class="min-w-0">
-        <h2 id="telegram-title" class="flex items-center gap-2 font-semibold"><i data-lucide="send" class="lu text-accent" aria-hidden="true"></i>Telegram bildirishnomalari</h2>
+        <h2 id="telegram-title" class="flex items-center gap-2 text-[1.0625rem] font-bold"><i data-lucide="send" class="lu text-accent" aria-hidden="true"></i>Telegram bildirishnomalari</h2>
         {% if telegram_link and telegram_link.is_active %}
         <p class="mt-1 text-sm text-ok"><i data-lucide="circle-check" class="lu mr-1" aria-hidden="true"></i>Ulangan{% if telegram_link.username %} · @{{ telegram_link.username }}{% endif %}</p>
         {% if telegram_link.last_error %}<p class="mt-1 text-sm text-warn">Oxirgi yuborishda xato bo‘ldi. Tizim keyinroq qayta urinadi.</p>{% endif %}
@@ -75,7 +92,7 @@
       {% endif %}
     </div>
     {% if not telegram_configured %}
-    <div class="ca-alert mt-4">Telegram bot hozircha sozlanmagan. Administrator bot tokeni va webhook sozlamalarini qo‘shgach, bu yerdan ulashingiz mumkin.</div>
+    <div class="ca-alert mt-4">{% if user.is_staff %}Telegram bot sozlanmagan: bot tokeni va webhook sozlamalarini qo‘shing.{% else %}Telegram bildirishnomalari hozircha ishlamayapti. Yoqilgach, shu yerdan ulashingiz mumkin.{% endif %}</div>
     {% elif not telegram_link or not telegram_link.is_active %}
     <p class="mt-3 text-xs leading-relaxed text-mute">Ulash tugmasidan keyin Telegram’da <b>Start</b> ni bosing. So‘ng shu sahifaga qaytib, yangilang. Kod 10 daqiqa ichida ishlatilishi va faqat bir marta qo‘llanishi mumkin.</p>
     {% else %}
@@ -88,16 +105,28 @@
           <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-line p-3 text-sm"><input class="mt-0.5" type="checkbox" name="notify_trending_problem"{% if telegram_link.notify_trending_problem %} checked{% endif %}><span><b>🔥 Trenddagi masala</b><small class="mt-0.5 block text-xs text-mute">So‘nggi 7 kunda ommalashgan masala</small></span></label>
           <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-line p-3 text-sm"><input class="mt-0.5" type="checkbox" name="notify_contests"{% if telegram_link.notify_contests %} checked{% endif %}><span><b>🏆 Musobaqalar</b><small class="mt-0.5 block text-xs text-mute">Ro‘yxatdan o‘tgan musobaqa boshlanishidan 1 soat oldin</small></span></label>
           <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-line p-3 text-sm"><input class="mt-0.5" type="checkbox" name="notify_assignments"{% if telegram_link.notify_assignments %} checked{% endif %}><span><b>📝 Vazifalar</b><small class="mt-0.5 block text-xs text-mute">Guruhingizga yangi vazifa berilganda</small></span></label>
+          <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-line p-3 text-sm"><input class="mt-0.5" type="checkbox" name="notify_duels"{% if telegram_link.notify_duels %} checked{% endif %}><span><b>⚔️ Duellar</b><small class="mt-0.5 block text-xs text-mute">Sizni duelga chaqirishganda va duel natijasi chiqqanda</small></span></label>
+          <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-line p-3 text-sm"><input class="mt-0.5" type="checkbox" name="notify_badges"{% if telegram_link.notify_badges %} checked{% endif %}><span><b>🏅 Nishonlar</b><small class="mt-0.5 block text-xs text-mute">Yangi nishon yoki bosqich olganingizda</small></span></label>
+          <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-line p-3 text-sm"><input class="mt-0.5" type="checkbox" name="notify_streak"{% if telegram_link.notify_streak %} checked{% endif %}><span><b>Olov</b><small class="mt-0.5 block text-xs text-mute">Kechqurun, bugungi masala yechilmagan bo‘lsa, Olov o‘chmasin</small></span></label>
         </div>
       </fieldset>
       <div class="mt-4 flex justify-end"><button class="ca-btn ca-btn-ghost !py-1.5 text-sm"><i data-lucide="check" class="lu" aria-hidden="true"></i>Sozlamalarni saqlash</button></div>
     </form>
     {% endif %}
   </section>
+  <section class="ca-panel mt-6 scroll-mt-20" id="korinish" aria-labelledby="look-title">
+    <h2 id="look-title" class="text-[1.0625rem] font-bold"><i data-lucide="sun-moon" class="lu mr-1.5 text-accent" aria-hidden="true"></i>Ko‘rinish</h2>
+    <p class="mt-1 text-sm text-mute">Bu qurilmada saqlanadi.</p>
+    <div class="ca-seg ca-seg-sm mt-3 w-fit" role="group" aria-label="Mavzu">
+      <button type="button" data-theme-set="system" aria-pressed="false"><i data-lucide="monitor" class="lu mr-1.5" aria-hidden="true"></i>Tizim</button>
+      <button type="button" data-theme-set="light" aria-pressed="false"><i data-lucide="sun" class="lu mr-1.5" aria-hidden="true"></i>Kunduzgi</button>
+      <button type="button" data-theme-set="dark" aria-pressed="false"><i data-lucide="moon" class="lu mr-1.5" aria-hidden="true"></i>Tungi</button>
+    </div>
+  </section>
   {% if user.role == "student" and not user.is_staff %}
-  <section class="ca-panel mt-6 flex flex-wrap items-center justify-between gap-3" aria-labelledby="teacher-title">
+  <section class="ca-panel mt-6 flex scroll-mt-20 flex-wrap items-center justify-between gap-3" id="oqituvchi" aria-labelledby="teacher-title">
     <div class="min-w-0">
-      <h2 id="teacher-title" class="font-semibold"><i data-lucide="graduation-cap" class="lu mr-1.5 text-accent" aria-hidden="true"></i>O‘qituvchimisiz?</h2>
+      <h2 id="teacher-title" class="text-[1.0625rem] font-bold"><i data-lucide="graduation-cap" class="lu mr-1.5 text-accent" aria-hidden="true"></i>O‘qituvchimisiz?</h2>
       {% if user.teacher_requested %}
       <p class="mt-1 text-sm text-mute">So‘rovingiz yuborilgan — admin ko‘rib chiqmoqda. Tasdiqlangach, «Vazifalar» bo‘limida guruh ochasiz.</p>
       {% else %}
@@ -109,6 +138,8 @@
     {% endif %}
   </section>
   {% endif %}
+  </div>
+  </div>
 </div>
 <script>
   document.getElementById("id_avatar").addEventListener("change", (e) => {

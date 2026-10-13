@@ -107,4 +107,25 @@ class Command(BaseCommand):
             for user_id in user_ids.iterator():
                 queue_notification(user_id, "notify_contests", f"contest:{contest.pk}:start", text)
 
+        # in the evening, a nudge to anyone whose daily streak breaks tonight: a run going, today not solved yet
+        if daily and timezone.localtime(now).hour >= 19:
+            from apps.problems.daily import streaks
+            from apps.problems.models import DailySolve
+            from apps.problems.quests import today_quests
+
+            solved_today = set(DailySolve.objects.filter(daily=daily).values_list("user_id", flat=True))
+            url = f"{site_url}/problems/{daily.problem.slug}/"
+            for link in TelegramLink.objects.filter(is_active=True, notify_streak=True, user__is_active=True
+                                                    ).select_related("user").iterator():
+                if link.user_id in solved_today or today_quests(link.user)["done"]:
+                    continue  # the day's problem or any quest already keeps the Olov
+                run = streaks(link.user)[0]
+                if run < 1:
+                    continue
+                text = (f"<b>🔥 Olov o‘chmasin!</b>\n\n"
+                        f"Ketma-ket <b>{run}</b> kun faol bo‘ldingiz. Bugun hali hech narsa qilmadingiz — "
+                        f"yarim tungacha kun masalasini yoki bitta vazifani bajarsangiz, Olov <b>{run + 1}</b> kun bo‘ladi.\n\n"
+                        f'<a href="{url}">{escape(daily.problem.title)} →</a>')
+                queue_notification(link.user_id, "notify_streak", f"streak:{day.isoformat()}", text)
+
         recover_outbox()

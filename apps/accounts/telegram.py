@@ -13,10 +13,11 @@ from django.conf import settings
 from django.db import IntegrityError, transaction
 from django.utils import timezone
 
-from .models import TelegramLink, TelegramLinkToken, TelegramOutbox
+from .models import TelegramLink, TelegramLinkToken, TelegramLoginRequest, TelegramOutbox
 
 log = logging.getLogger(__name__)
 LINK_TOKEN_TTL = timedelta(minutes=10)
+LOGIN_TTL = timedelta(minutes=5)
 OUTBOX_LEASE = timedelta(minutes=10)
 MAX_ATTEMPTS = 8
 
@@ -96,6 +97,47 @@ def consume_link_token(raw_token: str, chat_id: str, username: str = ""):
     except IntegrityError:
         return None, "already_linked"
     return link, "ok"
+
+
+def issue_login_request() -> str:
+    """A raw token for one "Telegram orqali kirish" attempt; the browser keeps it, the bot gets it in /start."""
+    raw = secrets.token_urlsafe(32)
+    now = timezone.now()
+    TelegramLoginRequest.objects.filter(expires_at__lt=now).delete()
+    TelegramLoginRequest.objects.create(token_hash=hashlib.sha256(raw.encode()).hexdigest(), expires_at=now + LOGIN_TTL)
+    return raw
+
+
+def confirm_login_request(raw_token: str, chat_id: str) -> str:
+    """The bot's side: tie an open attempt to the account linked to this chat. Staff accounts never sign in this way.
+    Returns "ok", "expired", "unlinked" or "staff"."""
+    digest = hashlib.sha256(raw_token.encode()).hexdigest()
+    with transaction.atomic():
+        req = (TelegramLoginRequest.objects.select_for_update()
+               .filter(token_hash=digest, user__isnull=True, used_at__isnull=True, expires_at__gt=timezone.now()).first())
+        if req is None:
+            return "expired"
+        link = TelegramLink.objects.select_related("user").filter(chat_id=chat_id, is_active=True).first()
+        if link is None or not link.user.is_active:
+            return "unlinked"
+        if link.user.is_staff or link.user.is_superuser:
+            return "staff"
+        req.user = link.user
+        req.save(update_fields=["user"])
+    return "ok"
+
+
+def claim_login_request(raw_token: str):
+    """The browser's side: the user the bot confirmed for this token, once; None while it waits or after expiry."""
+    digest = hashlib.sha256(raw_token.encode()).hexdigest()
+    with transaction.atomic():
+        req = (TelegramLoginRequest.objects.select_for_update().select_related("user")
+               .filter(token_hash=digest, user__isnull=False, used_at__isnull=True, expires_at__gt=timezone.now()).first())
+        if req is None:
+            return None
+        req.used_at = timezone.now()
+        req.save(update_fields=["used_at"])
+    return req.user
 
 
 def queue_notification(user_id: int, preference: str, event_key: str, text: str):
@@ -197,6 +239,27 @@ def recover_outbox(limit: int = 500):
         dispatch_outbox(outbox_id)
 
 
+def notify_assignment_reminder(assignment, user_ids) -> tuple[int, int]:
+    """The teacher's "Eslatma yuborish": one nudge per student per day, to those with Telegram on. Returns
+    (queued for, asked), so the teacher sees how many could not be reached."""
+    when = timezone.localtime(assignment.deadline).strftime("%d.%m.%Y, %H:%M")
+    url = f"{settings.SITE_URL.rstrip('/')}/classroom/{assignment.pk}/"
+    text = (
+        f"<b>⏰ Vazifa eslatmasi</b>\n\n"
+        f"<b>{html.escape(assignment.title)}</b>\n"
+        f"Guruh: {html.escape(assignment.group.name)}\n"
+        f"Muddat: {when}\n\n"
+        f'<a href="{url}">Vazifani ochish →</a>'
+    )
+    day = timezone.localdate().isoformat()
+    ids = list(user_ids)
+    reachable = list(TelegramLink.objects.filter(user_id__in=ids, is_active=True, notify_assignments=True)
+                     .values_list("user_id", flat=True))
+    for user_id in reachable:
+        queue_notification(user_id, "notify_assignments", f"assignment:{assignment.pk}:remind:{day}", text)
+    return len(reachable), len(ids)
+
+
 def notify_assignment(assignment_id: int):
     """Send a newly created group assignment to its students after the DB commit."""
     from apps.classroom.models import Assignment
@@ -223,3 +286,71 @@ def notify_assignment(assignment_id: int):
             queue_notification(user_id, "notify_assignments", f"assignment:{assignment.pk}:created", text)
     except Exception:
         log.exception("Could not queue Telegram assignment notification for assignment %s", assignment_id)
+
+
+def _site() -> str:
+    return settings.SITE_URL.rstrip("/")
+
+
+def notify_duel_challenge(duel_id: int):
+    """A friend's challenge, to the one challenged: who, which language and level, and the way in."""
+    from apps.classroom.models import Duel
+
+    try:
+        duel = Duel.objects.select_related("challenger", "opponent").filter(pk=duel_id).first()
+        if duel is None or duel.opponent_id is None:
+            return
+        text = (f"<b>⚔️ Sizni duelga chaqirishdi</b>\n\n"
+                f"<b>{html.escape(duel.challenger.username)}</b> — {duel.get_language_display()}, "
+                f"{duel.get_difficulty_display()}: 5 ta savol, har biriga 20 soniya.\n"
+                f"3 kun ichida qabul qiling.\n\n"
+                f'<a href="{_site()}/classroom/duels/{duel.pk}/">Duelni ochish →</a>')
+        queue_notification(duel.opponent_id, "notify_duels", f"duel:{duel.pk}:challenge", text)
+    except Exception:
+        log.exception("Could not queue Telegram duel challenge %s", duel_id)
+
+
+def notify_duel_result(duel_id: int):
+    """How a duel ended, to both players: won, lost or drawn, the score and the rating change."""
+    from apps.classroom import duels
+    from apps.classroom.models import Duel
+
+    try:
+        duel = Duel.objects.select_related("challenger", "opponent").filter(pk=duel_id).first()
+        if duel is None or duel.status != Duel.Status.FINISHED or duel.opponent is None:
+            return
+        right = {}
+        for player in (duel.challenger, duel.opponent):
+            r = duels.run(duel, player.pk)
+            right[player.pk] = r.right if r else 0
+        for me, them, delta in ((duel.challenger, duel.opponent, duel.challenger_delta),
+                                (duel.opponent, duel.challenger, duel.opponent_delta)):
+            head = ("🏆 G‘alaba!" if duel.winner_id == me.pk else "Durang" if duel.winner_id is None else "Mag‘lubiyat")
+            text = (f"<b>{head}</b>\n\n"
+                    f"{html.escape(them.username)} bilan duel: <b>{right[me.pk]} : {right[them.pk]}</b>\n"
+                    f"Duel reytingi: {delta:+d}\n\n"
+                    f'<a href="{_site()}/classroom/duels/{duel.pk}/">Natija va savollar →</a>')
+            queue_notification(me.pk, "notify_duels", f"duel:{duel.pk}:result", text)
+    except Exception:
+        log.exception("Could not queue Telegram duel result %s", duel_id)
+
+
+def notify_badges(user_id: int, levels: list[tuple[str, int]]):
+    """New badge levels (family, level), the highest per badge: one message."""
+    from .badges import BY_KEY, ROMAN
+
+    try:
+        best = {}
+        for fam, tier in levels:
+            if fam in BY_KEY and tier > best.get(fam, 0):
+                best[fam] = tier
+        if not best:
+            return
+        lines = "\n".join(f"• <b>{BY_KEY[f].name} {ROMAN[t]}</b> — {BY_KEY[f].unit.format(n=BY_KEY[f].levels[t - 1])}"
+                          for f, t in sorted(best.items(), key=lambda x: -x[1]))
+        key = ",".join(f"{f}{t}" for f, t in sorted(best.items()))
+        text = (f"<b>🏅 Yangi nishon!</b>\n\n{lines}\n\n"
+                f'<a href="{_site()}/accounts/badges/">Nishonlaringiz →</a>')
+        queue_notification(user_id, "notify_badges", f"badges:{key}", text)
+    except Exception:
+        log.exception("Could not queue Telegram badges for user %s", user_id)

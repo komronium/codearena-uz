@@ -37,12 +37,19 @@
         <button class="ca-btn ca-btn-primary !py-1.5 text-xs"><i data-lucide="trending-up" class="lu" aria-hidden="true"></i>Reytingni hisoblash</button>
       </form>
       {% endif %}
-      <a href="{% url 'contests:standings' c.pk %}" class="ca-btn ca-btn-ghost !px-2 !py-1.5" title="Natijalar" aria-label="Natijalar: {{ c.title }}"><i data-lucide="medal" class="lu" aria-hidden="true"></i></a>
-      <a href="{% url 'integrity:contest_report' c.pk %}" class="ca-btn ca-btn-ghost !px-2 !py-1.5" title="Halollik hisoboti" aria-label="Halollik hisoboti: {{ c.title }}"><i data-lucide="shield-alert" class="lu" aria-hidden="true"></i></a>
-      <a href="{% url 'moderation:contest_edit' c.pk %}" class="ca-btn ca-btn-ghost !px-2 !py-1.5" title="Tahrirlash" aria-label="Tahrirlash: {{ c.title }}"><i data-lucide="pencil" class="lu" aria-hidden="true"></i></a>
-      <form method="post" action="{% url 'moderation:contest_delete' c.pk %}" onsubmit="return confirm('«{{ c.title|escapejs }}» musobaqasi va natijalari o‘chiriladi. Davom etasizmi?');">{% csrf_token %}
-        <button class="ca-btn ca-btn-ghost !px-2 !py-1.5 text-bad" title="O‘chirish" aria-label="O‘chirish: {{ c.title }}"><i data-lucide="trash-2" class="lu" aria-hidden="true"></i></button>
-      </form>
+      <a href="{% url 'contests:standings' c.pk %}" class="ca-btn ca-btn-ghost !py-1.5 text-xs"><i data-lucide="medal" class="lu" aria-hidden="true"></i>Natijalar</a>
+      <a href="{% url 'integrity:contest_report' c.pk %}" class="ca-btn ca-btn-ghost !py-1.5 text-xs"><i data-lucide="shield-alert" class="lu" aria-hidden="true"></i>Halollik</a>
+      <a href="{% url 'moderation:contest_edit' c.pk %}" class="ca-btn ca-btn-ghost !py-1.5 text-xs"><i data-lucide="pencil" class="lu" aria-hidden="true"></i>Tahrirlash</a>
+      <details class="ca-dropdown" data-dropdown>
+        <summary class="ca-btn ca-btn-ghost !px-2 !py-1.5" aria-label="Boshqa amallar: {{ c.title }}" title="Boshqa amallar"><i data-lucide="ellipsis" class="lu" aria-hidden="true"></i></summary>
+        <div class="ca-dropdown-panel !w-56">
+          <a class="ca-dropdown-item" href="{% url 'moderation:contest_official' c.pk %}"><i data-lucide="award" class="lu" aria-hidden="true"></i>Rasmiy reyting</a>
+          <hr class="my-1 border-line">
+          <form method="post" action="{% url 'moderation:contest_delete' c.pk %}" onsubmit="return confirm('«{{ c.title|escapejs }}» musobaqasi va natijalari o‘chiriladi. Davom etasizmi?');">{% csrf_token %}
+            <button class="ca-dropdown-item w-full text-left text-bad"><i data-lucide="trash-2" class="lu" aria-hidden="true"></i>O‘chirish</button>
+          </form>
+        </div>
+      </details>
     </div>
   </li>
   {% endfor %}

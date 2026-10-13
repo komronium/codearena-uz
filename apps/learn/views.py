@@ -1,3 +1,4 @@
+import re
 from urllib.parse import urlencode
 
 from django.contrib import messages
@@ -6,6 +7,7 @@ from django.db.models import Count, Q
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils.text import slugify
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
@@ -15,8 +17,8 @@ from apps.problems.views import _render_statement
 from apps.submissions.models import UserProblemSolved
 
 from .forms import ListForm
-from .models import ProblemList, ProblemListItem, StudyPlan
-from .progress import course_rows, plan_progress, plan_sections, solved_ids
+from .models import PlanRead, ProblemList, ProblemListItem, StudyPlan
+from .progress import COURSE_MIN, course_rows, plan_progress, plan_sections, solved_ids
 
 # Old addresses that moved: the first study plans, and topics whose tag was renamed or that
 # have no course of their own. Any other topic goes to the course that carries its tag.
@@ -90,8 +92,16 @@ def hub(request):
         up_next = [found[i] for i in todo if i in found]
         next_problem = up_next[0] if up_next else None
     labels = dict(StudyPlan.Stage.choices)
-    stages = []
+    raw = course_rows(plans, raw=True)
+    stages, soon = [], []
     for p in plans:
+        # a course still short of problems (it has topics but under 10 open problems) waits in "Tez orada",
+        # so the open ones stand out; a theory-only course (no topics) reads now and stays
+        if p.n_tags and not p.progress["total"] and not p.progress["completed"]:
+            p.ready = min(len(raw[p.pk]), COURSE_MIN)  # how close it is to opening
+            p.ready_pct = round(100 * p.ready / COURSE_MIN)
+            soon.append(p)
+            continue
         if not stages or stages[-1]["stage"] != p.stage:
             stages.append({"stage": p.stage, "label": labels.get(p.stage, p.stage), "courses": []})
         stages[-1]["courses"].append(p)
@@ -101,7 +111,7 @@ def hub(request):
 
     return render(request, "learn/hub.html", {
         "course_badge": badge_board(request.user, {"learn"})[0] if request.user.is_authenticated else None,
-        "stages": stages, "current": current, "next_problem": next_problem, "up_next": up_next,
+        "stages": stages, "soon": soon, "current": current, "next_problem": next_problem, "up_next": up_next,
         "here": current if request.user.is_authenticated else None,
         "badges": badges, "badges_earned": sum(1 for p in badges if p.progress["completed"])})
 
@@ -123,10 +133,50 @@ def course_detail(request, slug):
         groups[-1]["done"] += p.solved
     progress = plan_progress(request.user, [plan])[plan.pk]
     next_id = next((i for i, _ in rows if i not in solved), None)
+    theory_html, toc = _with_toc(_render_statement(plan.theory_md))
+    following = _plans_for(request.user).filter(order__gt=plan.order).order_by("order", "id").first()
     return render(request, "learn/course.html", {
         "plan": plan, "groups": groups, "progress": progress, "next_problem": problems.get(next_id),
-        "theory_html": _render_statement(plan.theory_md), "description_html": _render_statement(plan.description_md),
+        "theory_html": theory_html, "toc": toc, "next_plan": following,
+        "description_html": _render_statement(plan.description_md),
     })
+
+
+CODE_LANGS = {"python", "c++", "cpp", "java", "javascript", "js", "sql", "c#"}
+
+
+def _with_toc(html: str) -> tuple[str, list[dict]]:
+    """Give the theory's h2/h3 headings anchors and list them, for the course's contents card."""
+    toc, seen = [], set()
+
+    def anchor(m):
+        level, inner = m.group(1), m.group(2)
+        text = re.sub(r"<[^>]+>", "", inner).strip()
+        base = slugify(text, allow_unicode=True) or "bo-lim"
+        slug, n = base, 2
+        while slug in seen:
+            slug, n = f"{base}-{n}", n + 1
+        seen.add(slug)
+        if text.lower() not in CODE_LANGS:  # "Python", "C++": a code block's label, not a section
+            toc.append({"id": slug, "text": text, "level": int(level)})
+        return f'<h{level} id="{slug}">{inner}</h{level}>'
+
+    return re.sub(r"<h([23])>(.*?)</h\1>", anchor, html, flags=re.S), toc
+
+
+@login_required
+@require_POST
+def course_read(request, slug):
+    """"Tushundim" / "Qaytarish": mark the course's theory as read, or undo it."""
+    plan = get_object_or_404(_plans_for(request.user), slug=slug)
+    if request.POST.get("undo"):
+        PlanRead.objects.filter(user=request.user, plan=plan).delete()
+    else:
+        PlanRead.objects.get_or_create(user=request.user, plan=plan)
+        if not plan.tags.exists():  # a theory-only course is finished by it: a badge may follow
+            from apps.accounts import badges
+            badges.award(request.user, {"learn"})
+    return redirect(reverse("learn:course", args=[slug]) + "#nazariya-tugadi")
 
 
 def plan_redirect(request, slug):
@@ -196,6 +246,7 @@ def list_detail(request, pk):
         p.solved = p.pk in solved
     return render(request, "learn/list.html", {
         "lst": lst, "rows": rows, "n_hidden": len(ids) - len(rows), "is_owner": is_owner,
+        "n_solved": sum(1 for p in rows if p.solved), "next_row": next((p for p in rows if not p.solved), None),
         "form": ListForm(instance=lst, owner=request.user) if is_owner else None,
     })
 

@@ -19,7 +19,8 @@
   <tbody>
   {% for p in problems %}
   <tr>
-    <td><a class="ca-link font-medium" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a></td>
+    <td><a class="ca-link font-medium" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a>
+      <span class="mt-0.5 block max-w-[34rem] truncate text-[0.8125rem] text-mute">{{ p.statement_md|truncatechars:140 }}</span></td>
     <td>{% include "accounts/_user.html" with u=p.author %}</td>
     <td><span class="ca-diff ca-diff-{{ p.difficulty }}">{{ p.get_difficulty_display }}</span></td>
     <td class="tabular whitespace-nowrap text-mute">{{ p.created|date:"d.m.Y H:i" }}</td>

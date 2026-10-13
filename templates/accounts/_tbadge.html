@@ -11,6 +11,6 @@ reached yet is grey. ctx: b (a board() entry), owner (bool).{% endcomment %}
   <b>{{ b.title }}</b>
   <small>{{ b.sub }}</small>
   <span class="ca-tb-pips" role="img" aria-label="{{ b.tier }} / {{ b.max }} bosqich">{% for on in b.pips %}<i{% if on %} class="on"{% endif %}></i>{% endfor %}</span>
-  {% if owner and b.next %}<span class="ca7-badge-pg" role="progressbar" aria-valuenow="{{ b.next.done }}" aria-valuemin="0" aria-valuemax="{{ b.next.total }}" aria-label="{{ b.name }} {{ b.next.roman }}: {{ b.next.shown }}"><i style="width: {% widthratio b.next.done b.next.total 100 %}%"></i></span><small class="tabular">{{ b.next.roman }}: {{ b.next.shown }}</small>
+  {% if owner and b.next %}<span class="ca7-badge-pg" role="progressbar" aria-valuenow="{{ b.next.done }}" aria-valuemin="0" aria-valuemax="{{ b.next.total }}" aria-label="{{ b.name }} {{ b.next.roman }}: {{ b.next.shown }}"><i style="width: {% widthratio b.next.done b.next.total 100 %}%"></i></span><small class="tabular">{{ b.next.roman }}-bosqich: {{ b.next.shown }}</small>
   {% elif owner and b.tier and not b.next %}<small class="ca-tb-max">Eng yuqori bosqich</small>{% endif %}
 </li>

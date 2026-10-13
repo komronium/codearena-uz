@@ -1,14 +1,8 @@
-{% comment %}Solved problems per level: a bar per level filled as far as solved, the figures beside it, the total in the
+{% comment %}Solved problems per level: the ring and level tiles of _solved_ring.html in a box, the total in the
 head; colour is never the only key, every row says its level and numbers.
 ctx: ring (apps.problems.views._solved_ring), title, more_url (optional), more_label.{% endcomment %}
 <section class="ca-box" aria-labelledby="solved-title">
   <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" style="--c: var(--ca-lvl-easy)" aria-hidden="true"></span><h2 id="solved-title">{{ title|default:"Taraqqiyot" }}</h2>
     <span class="ca-box-tools tabular">{% if more_url %}<a class="ca-link" href="{{ more_url }}">{{ ring.done }} / {{ ring.total }}</a>{% else %}{{ ring.done }} / {{ ring.total }}{% endif %}</span></div>
-  {% for s in ring.segments %}
-  <div class="ca7-lv" style="--lvl: var(--ca-lvl-{{ s.value }}); --lvl-ink: var(--ca-lvl-{{ s.value }}-ink)">
-    <span>{{ s.label }}</span>
-    <span class="ca7-lv-bar" role="progressbar" aria-valuenow="{{ s.done }}" aria-valuemin="0" aria-valuemax="{{ s.total }}" aria-label="{{ s.label }}: {{ s.done }} / {{ s.total }}"><i style="width: {% widthratio s.done s.total|default:1 100 %}%"></i></span>
-    <b class="tabular">{{ s.done }}/{{ s.total }}</b>
-  </div>
-  {% endfor %}
+  <div class="ca7-pad">{% include "problems/_solved_ring.html" %}</div>
 </section>

@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
-from django.db.models import Case, IntegerField, Q, Value, When
+from django.db.models import Case, Count, IntegerField, Q, Value, When
 from django.http import Http404, HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -18,12 +18,13 @@ from apps.accounts.tiers import tier_color
 from apps.problems.views import _render_statement
 from apps.submissions.models import Submission
 
-from . import duels
+from . import duels, live
 from apps.accounts.badges import board as badge_board
 from .access import can_review
 from .forms import AssignmentForm
-from .models import Assignment, AssignmentProblem, Duel, DuelAnswer, DuelQuestion, ReviewComment
-from .progress import cell, grid
+from .models import (Assignment, AssignmentProblem, Duel, DuelAnswer, DuelQuestion, LiveQuiz, LiveQuizAnswer,
+                     LiveQuizPlayer, ReviewComment)
+from .progress import cell, completion, grid
 
 
 def can_manage(user, group) -> bool:
@@ -48,9 +49,13 @@ def assignment_list(request):
         taught = Assignment.objects.all()
     elif request.user.taught_groups.exists():
         taught = Assignment.objects.filter(group__teacher=request.user)
+    taught = list(taught.select_related("group").prefetch_related("assignment_problems"))
+    done = completion(taught)
+    for a in taught:
+        a.done_n, a.members_n = done[a.pk]
     return render(request, "classroom/list.html", {
         "assignments": mine,
-        "taught": taught.select_related("group"),
+        "taught": taught,
         "can_create": request.user.is_staff or request.user.taught_groups.exists(),
         "can_teach": can_teach(request.user),
         "my_groups": request.user.taught_groups.prefetch_related("members").order_by("name"),
@@ -107,6 +112,8 @@ def assignment_edit(request, pk=None):
     if not (request.user.is_staff or request.user.taught_groups.exists()):
         raise PermissionDenied
     form = AssignmentForm(request.POST or None, instance=assignment, user=request.user)
+    if not assignment and request.method != "POST" and request.GET.get("group", "").isdigit():
+        form.initial["group"] = int(request.GET["group"])  # "Vazifa berish" from a class row
     if request.method == "POST" and form.is_valid():
         with transaction.atomic():
             a = form.save(commit=False)
@@ -140,13 +147,46 @@ def assignment_detail(request, pk):
         rows = grid(assignment)
         if request.GET.get("format") == "csv":
             return _csv(assignment, problems, rows)
-        ctx["grid"] = rows
+        ctx["n_behind"] = sum(1 for r in rows if not r["finished"])
+        ctx["behind_only"] = request.GET.get("behind") == "1"
+        ctx["grid"] = [r for r in rows if not r["finished"]] if ctx["behind_only"] else rows
+        ctx["n_students"] = len(rows)
+        ctx["n_done"] = len(rows) - ctx["n_behind"]
     if member:
         subs = {}
         for s in Submission.objects.filter(user=request.user, problem__in=problems).order_by("created", "id"):
             subs.setdefault(s.problem_id, []).append(s)
-        ctx["mine"] = [{"problem": p, **cell(subs.get(p.pk, []), assignment.deadline)} for p in problems]
+        mine = [{"problem": p, **cell(subs.get(p.pk, []), assignment.deadline)} for p in problems]
+        ctx["mine"] = mine
+        ctx["my_done"] = sum(1 for m in mine if m["status"] in ("ok", "late"))
+        ctx["my_total"] = len(mine)
+        ctx["next_problem"] = next((m["problem"] for m in mine if m["status"] not in ("ok", "late")), None)
+        ctx["overdue"] = timezone.now() > assignment.deadline
     return render(request, "classroom/detail.html", ctx)
+
+
+@login_required
+@require_POST
+def assignment_remind(request, pk):
+    """"Eslatma yuborish": a Telegram nudge to the group's students who have not finished (all of them, or one `user`)."""
+    from apps.accounts.telegram import notify_assignment_reminder
+    assignment = get_object_or_404(Assignment.objects.select_related("group"), pk=pk)
+    if not can_manage(request.user, assignment.group):
+        raise PermissionDenied
+    behind = [r["user"].pk for r in grid(assignment) if not r["finished"]]
+    one = request.POST.get("user", "")
+    if one:
+        behind = [pk_ for pk_ in behind if str(pk_) == one]
+    if not behind:
+        messages.info(request, "Eslatma kerak emas: hamma topshirgan.")
+    else:
+        sent, asked = notify_assignment_reminder(assignment, behind)
+        if sent:
+            messages.success(request, f"Eslatma {sent} ta o‘quvchiga yuborildi."
+                             + (f" {asked - sent} tasida Telegram ulanmagan." if asked > sent else ""))
+        else:
+            messages.warning(request, "Eslatma yuborilmadi: bu o‘quvchilarda Telegram ulanmagan.")
+    return redirect("classroom:detail", pk)
 
 
 _CSV_STATUS = {"ok": "ok", "late": "kech", "none": ""}
@@ -214,15 +254,21 @@ def duel_list(request):
         u.duels = played[u.pk]
     rank = (User.objects.filter(pk__in=played, is_active=True, duel_rating__gt=request.user.duel_rating).count() + 1
             if request.user.pk in played else None)
+    open_duels = [d for d in mine if d.status in duels.OPEN
+                  and not (d.status == Duel.Status.PENDING and d.opponent_id == request.user.pk)]
+    # how far you are through each running duel: "3 / 5 savol"
+    done = dict(DuelAnswer.objects.filter(duel__in=open_duels, user=request.user, answered_at__isnull=False)
+                .values_list("duel_id").annotate(n=Count("id")))
+    for d in open_duels:
+        d.my_done = done.get(d.pk, 0)
     return render(request, "classroom/duels.html", {
         "record": record, "board": board, "duel_rank": rank, "duelists": len(played),
         "incoming": [d for d in mine if d.status == Duel.Status.PENDING and d.opponent_id == request.user.pk],
-        "open": [d for d in mine if d.status in duels.OPEN
-                 and not (d.status == Duel.Status.PENDING and d.opponent_id == request.user.pk)],
+        "open": open_duels,
         # an open duel nobody joined was never a duel: it stays out of the record
         "history": [d for d in mine if d.status not in duels.OPEN and d.opponent_id][:30],
         "error": error, "languages": duels.LANGUAGES, "levels": duels.LEVELS, "joinable": joinable,
-        "form": request.POST if error else {}, "per_question": int(duels.PER_QUESTION.total_seconds()),
+        "form": request.POST if error else {"opponent": request.GET.get("opponent", "")[:150]}, "per_question": int(duels.PER_QUESTION.total_seconds()),
         "n_questions": duels.QUESTIONS, "badges": badge_board(request.user, {"duels"}),
     })
 
@@ -259,6 +305,22 @@ def _my_duel(request, pk):
 
 @login_required
 @require_POST
+def duel_rematch(request, pk):
+    """Revansh: the same opponent, language and level, new questions; your run starts now, as any challenge."""
+    duel = _my_duel(request, pk)
+    other = duel.opponent if request.user.pk == duel.challenger_id else duel.challenger
+    if other is None or request.user.pk not in duel.players():
+        raise Http404
+    new, error = duels.challenge(request.user, other.username, duel.language or "python",
+                                 duel.difficulty if duel.difficulty in dict(duels.LEVELS) else "easy")
+    if new is None:
+        messages.error(request, error)
+        return redirect("classroom:duel", duel.pk)
+    return redirect("classroom:duel_play", new.pk)
+
+
+@login_required
+@require_POST
 def duel_answer(request, pk):
     duel = _my_duel(request, pk)
     if request.POST.get("accept") == "1":
@@ -289,6 +351,17 @@ def duel_detail(request, pk):
     else:
         template = "classroom/duel.html"
     return render(request, template, {"duel": duel, "state": state, **board})
+
+
+def _rival(me, other) -> dict:
+    """What you know about the other player: their duel record and your score against each other."""
+    played = Duel.objects.filter(status=Duel.Status.FINISHED, mode=Duel.Mode.QUIZ).filter(
+        Q(challenger=other) | Q(opponent=other))
+    wins = played.filter(winner=other).count()
+    total = played.count()
+    h2h = played.filter(Q(challenger=me) | Q(opponent=me))
+    return {"user": other, "wins": wins, "losses": total - wins - played.filter(winner__isnull=True).count(),
+            "total": total, "you": h2h.filter(winner=me).count(), "them": h2h.filter(winner=other).count()}
 
 
 def _secs(t) -> str:
@@ -336,7 +409,24 @@ def _duel_board(duel, viewer) -> dict:
             review.append({"n": i + 1, "q": q, "answers": [
                 {"label": label, "a": by_index.get(i), "pending": not shown, "unseen": r is None or i >= len(r.answers)}
                 for label, r, by_index, shown in sides]})
+    # the end, from your side: won, lost or drawn, the score and your rating change; and a rematch either way
+    result = None
+    if duel.status == Duel.Status.FINISHED and viewer.pk in duel.players() and duel.mode == Duel.Mode.QUIZ:
+        me_row = next(r for r in rows if r["user"] and r["user"].pk == viewer.pk)
+        them = next((r for r in rows if r["user"] and r["user"].pk != viewer.pk), None)
+        other = them["user"] if them else None
+        result = {"state": "draw" if duel.winner_id is None else ("win" if duel.winner_id == viewer.pk else "loss"),
+                  "mine": me_row["right"], "theirs": them["right"] if them else 0, "delta": me_row["delta"] or 0,
+                  "other": other,
+                  "offer": (Duel.objects.filter(challenger=other, opponent=viewer, status=Duel.Status.PENDING,
+                                                created__gt=duel.created).first() if other else None),
+                  "sent": (Duel.objects.filter(challenger=viewer, opponent=other, status__in=duels.OPEN,
+                                               created__gt=duel.created).first() if other else None)}
+    rival = None
+    if duel.opponent_id and viewer.pk in duel.players() and (result or duel.status == Duel.Status.PENDING):
+        rival = _rival(viewer, duel.challenger if viewer.pk == duel.opponent_id else duel.opponent)
     return {
+        "result": result, "rival": rival,
         "players": rows, "review": review, "my_over": my_over,
         "my_playing": mine is not None and not my_over,
         "my_started": bool(mine and mine.answers),
@@ -444,3 +534,138 @@ def _my_cells(r) -> list[str]:
     now = timezone.now()
     cells = ["ok" if a.correct else ("bad" if r.closed(a, now) else "now") for a in r.answers]
     return cells + [""] * (duels.QUESTIONS - len(cells))
+
+
+# ---- live quiz ------------------------------------------------------------------------------------------
+def _host_quiz(request, code) -> LiveQuiz:
+    quiz = get_object_or_404(LiveQuiz, code=code)
+    if not (request.user.is_staff or quiz.teacher_id == request.user.pk):
+        raise PermissionDenied
+    return quiz
+
+
+@login_required
+def live_new(request):
+    if not can_teach(request.user):
+        raise PermissionDenied
+    error = ""
+    if request.method == "POST":
+        try:
+            count = int(request.POST.get("count", live.COUNTS[0]))
+        except ValueError:
+            count = live.COUNTS[0]
+        quiz, error = live.create(request.user, request.POST.get("language", ""), request.POST.get("level", ""), count,
+                                  request.POST.get("title", ""))
+        if quiz is not None:
+            return redirect("classroom:live_host", quiz.code)
+    return render(request, "classroom/live/new.html", {
+        "error": error, "languages": duels.LANGUAGES, "levels": duels.LEVELS, "counts": live.COUNTS,
+        "recent": LiveQuiz.objects.filter(teacher=request.user)[:5]})
+
+
+@login_required
+def live_join(request):
+    error = ""
+    code = (request.POST.get("code") or request.GET.get("code") or "").strip().replace(" ", "")
+    if request.method == "POST" or code:
+        quiz = live.join(request.user, code) if code else None
+        if quiz is not None:
+            return redirect("classroom:live_play", quiz.code)
+        error = "Bunday faol viktorina topilmadi. Kodni tekshiring."
+    return render(request, "classroom/live/join.html", {"error": error, "code": code})
+
+
+@login_required
+def live_host(request, code):
+    quiz = live.tick(_host_quiz(request, code))
+    return render(request, "classroom/live/host.html", {"quiz": quiz, "state_url": reverse("classroom:live_host_state", args=[code]),
+                                                       "act_url": reverse("classroom:live_act", args=[code])})
+
+
+def _host_ctx(quiz):
+    q = live.question(quiz)
+    now = timezone.now()
+    answered = LiveQuizAnswer.objects.filter(quiz=quiz, index=quiz.index).count() if q else 0
+    ctx = {"quiz": quiz, "q": q, "n": quiz.index + 1, "total": len(quiz.questions), "players": list(quiz.players.select_related("user")),
+           "answered": answered, "join_url": reverse("classroom:live_join"), "now": now}
+    ctx["n_players"] = len(ctx["players"])
+    if quiz.status == LiveQuiz.Status.QUESTION and q:
+        ctx["remaining_ms"] = max(0, int((live.deadline(quiz) - now).total_seconds() * 1000))
+        ctx["pct"] = round(100 * ctx["remaining_ms"] / (quiz.seconds * 1000))
+        ctx["options"] = _shuffled(q.options, f"live-{quiz.pk}-{quiz.index}")
+    if quiz.status == LiveQuiz.Status.REVEAL and q:
+        ctx["counts"] = live.counts(quiz, q)
+        ctx["top"] = live.board(quiz, 5)
+        ctx["last"] = quiz.index + 1 >= len(quiz.questions)
+    if quiz.status == LiveQuiz.Status.DONE:
+        ctx["top"] = live.board(quiz)
+    ctx["v"] = f"{quiz.status}-{quiz.index}-{answered}-{ctx['n_players']}"
+    return ctx
+
+
+@login_required
+def live_host_state(request, code):
+    quiz = live.tick(_host_quiz(request, code))
+    ctx = _host_ctx(quiz)
+    from django.template.loader import render_to_string
+    return JsonResponse({"v": ctx["v"], "html": render_to_string("classroom/live/_host_panel.html", ctx, request),
+                         "ms": ctx.get("remaining_ms")})
+
+
+@login_required
+@require_POST
+def live_act(request, code):
+    quiz = _host_quiz(request, code)
+    live.step(quiz, request.POST.get("action", ""))
+    return JsonResponse({"ok": True})
+
+
+def _player_quiz(request, code) -> LiveQuiz:
+    quiz = get_object_or_404(LiveQuiz, code=code)
+    if not LiveQuizPlayer.objects.filter(quiz=quiz, user=request.user).exists():
+        raise Http404
+    return quiz
+
+
+@login_required
+def live_play(request, code):
+    quiz = get_object_or_404(LiveQuiz, code=code)
+    if quiz.status == LiveQuiz.Status.LOBBY:  # opening the link in the lobby is joining
+        live.join(request.user, code)
+    quiz = _player_quiz(request, code)
+    return render(request, "classroom/live/play.html", {
+        "quiz": quiz, "state_url": reverse("classroom:live_play_state", args=[code]),
+        "answer_url": reverse("classroom:live_answer", args=[code])})
+
+
+@login_required
+def live_play_state(request, code):
+    quiz = live.tick(_player_quiz(request, code))
+    q = live.question(quiz)
+    mine = (LiveQuizAnswer.objects.filter(quiz=quiz, user=request.user, index=quiz.index).first() if q else None)
+    ctx = {"quiz": quiz, "q": q, "n": quiz.index + 1, "total": len(quiz.questions), "mine": mine,
+           "n_players": quiz.players.count()}
+    if quiz.status == LiveQuiz.Status.QUESTION and q:
+        ctx["remaining_ms"] = max(0, int((live.deadline(quiz) - timezone.now()).total_seconds() * 1000))
+        ctx["options"] = _shuffled(q.options, f"live-{quiz.pk}-{request.user.pk}-{quiz.index}")
+    if quiz.status in (LiveQuiz.Status.REVEAL, LiveQuiz.Status.DONE):
+        rows = live.board(quiz)
+        ctx["me"] = next((r for r in rows if r["user"].pk == request.user.pk), None)
+        ctx["top"] = rows[:3]
+        ctx["answer"] = q.answer if quiz.status == LiveQuiz.Status.REVEAL and q else None
+    from django.template.loader import render_to_string
+    v = f"{quiz.status}-{quiz.index}-{'a' if mine else 'n'}"
+    return JsonResponse({"v": v, "html": render_to_string("classroom/live/_play_panel.html", ctx, request),
+                         "ms": ctx.get("remaining_ms")})
+
+
+@login_required
+@require_POST
+def live_answer(request, code):
+    quiz = _player_quiz(request, code)
+    try:
+        index = int(request.POST.get("index", ""))
+    except ValueError:
+        return HttpResponseBadRequest()
+    a = live.answer(quiz, request.user, index, request.POST.get("answer", ""))
+    return JsonResponse({"ok": a is not None})

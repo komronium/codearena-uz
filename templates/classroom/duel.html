@@ -25,4 +25,15 @@
   </ol>
 </section>
 {% endif %}
+<script>
+  // the rating change counts up once, from 0 to where it landed
+  (() => {
+    const el = document.querySelector(".ca-dres-delta");
+    if (!el || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const to = Number(el.dataset.delta), t0 = performance.now();
+    const step = (now) => { const k = Math.min(1, (now - t0) / 900), v = Math.round(to * (1 - Math.pow(1 - k, 3)));
+      el.textContent = (v > 0 ? "+" : v < 0 ? "−" : "±") + Math.abs(v); if (k < 1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  })();
+</script>
 {% endblock %}

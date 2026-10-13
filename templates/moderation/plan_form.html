@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base.html" %}{% load tagnames %}
 {% block title %}{% if plan %}{{ plan.title }} — tahrirlash{% else %}Yangi kurs{% endif %}{% endblock %}
 {% block content %}
 <div class="mb-6">
@@ -23,7 +23,7 @@
       <legend class="ca-section-title !mb-3">Teglar</legend>
       {{ form.tags.errors }}
       <div class="grid gap-x-4 gap-y-1.5 text-sm sm:grid-cols-2 xl:grid-cols-3">
-        {% for cb in form.tags %}<label class="flex items-center gap-2">{{ cb.tag }} {{ cb.choice_label }}</label>{% endfor %}
+        {% for cb in form.tags %}<label class="flex items-center gap-2">{{ cb.tag }} {{ cb.choice_label|tag_uz }}</label>{% endfor %}
       </div>
     </fieldset>
   </div>

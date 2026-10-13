@@ -9,10 +9,21 @@
   </form>
 </div>
 
-<nav class="mb-4 flex flex-wrap gap-2" aria-label="Filtr">
-  <a href="{% url 'moderation:users' %}" class="ca-filter {% if not requests_only %}is-active{% endif %}"{% if not requests_only %} aria-current="true"{% endif %}>Hammasi</a>
-  <a href="?requests=1" class="ca-filter {% if requests_only %}is-active{% endif %}"{% if requests_only %} aria-current="true"{% endif %}>O‘qituvchi so‘rovlari{% if n_requests %} <b class="tabular">{{ n_requests }}</b>{% endif %}</a>
-</nav>
+<div class="mb-4 flex flex-wrap items-center gap-3">
+  <nav class="ca7-seg" aria-label="Rol">
+    <a href="{% querystring role=None requests=None page=None %}"{% if not role and not requests_only %} aria-current="true"{% endif %}>Hammasi</a>
+    <a href="{% querystring role='student' requests=None page=None %}"{% if role == 'student' %} aria-current="true"{% endif %}>O‘quvchilar</a>
+    <a href="{% querystring role='teacher' requests=None page=None %}"{% if role == 'teacher' %} aria-current="true"{% endif %}>O‘qituvchilar</a>
+    <a href="{% querystring role='staff' requests=None page=None %}"{% if role == 'staff' %} aria-current="true"{% endif %}>Adminlar</a>
+    <a href="{% querystring requests=1 role=None page=None %}"{% if requests_only %} aria-current="true"{% endif %}>So‘rovlar{% if n_requests %} <em>{{ n_requests }}</em>{% endif %}</a>
+  </nav>
+  <nav class="ca7-seg ml-auto" aria-label="Saralash">
+    <a href="{% querystring sort=None page=None %}"{% if not sort %} aria-current="true"{% endif %}>Yangi</a>
+    <a href="{% querystring sort='login' page=None %}"{% if sort == 'login' %} aria-current="true"{% endif %}>Oxirgi kirish</a>
+    <a href="{% querystring sort='rating' page=None %}"{% if sort == 'rating' %} aria-current="true"{% endif %}>Reyting</a>
+    <a href="{% querystring sort='subs' page=None %}"{% if sort == 'subs' %} aria-current="true"{% endif %}>Urinishlar</a>
+  </nav>
+</div>
 
 {% if page.object_list %}
 <ul class="ca-rows">
@@ -21,7 +32,7 @@
     <div class="ca-row-main">
       <div class="ca-row-title">
         {% include "accounts/_user.html" with tier=False %}
-        {% if u.is_staff %}<span class="ca-chip shrink-0"><i data-lucide="shield" class="lu mr-1" aria-hidden="true"></i>Admin</span>{% else %}<span class="ca-chip shrink-0 !bg-ink/5 text-mute">{{ u.get_role_display }}</span>{% endif %}
+        {% if u.is_staff %}<span class="ca-chip shrink-0"><i data-lucide="shield" class="lu mr-1" aria-hidden="true"></i>Admin</span>{% else %}<span class="ca-chip shrink-0 !bg-ink/5 text-mute">{% if u.role == "teacher" %}O‘qituvchi{% else %}O‘quvchi{% endif %}</span>{% endif %}
         {% if not u.is_active %}<span class="ca-chip shrink-0 text-bad">Bloklangan</span>{% endif %}
         {% if u.teacher_requested %}<span class="ca-chip ca-chip-score shrink-0"><i data-lucide="graduation-cap" class="lu mr-1" aria-hidden="true"></i>O‘qituvchi so‘rovi</span>{% endif %}
       </div>
@@ -29,6 +40,7 @@
         <span class="truncate" translate="no">{{ u.email|default:"email yo‘q" }}</span>
         {% if u.school %}<span class="truncate"><i data-lucide="graduation-cap" class="lu" aria-hidden="true"></i>{{ u.school }}</span>{% endif %}
         <span class="tabular"><i data-lucide="calendar" class="lu" aria-hidden="true"></i>{{ u.date_joined|date:"d.m.Y" }}</span>
+        <span class="tabular" title="Oxirgi kirish"><i data-lucide="log-in" class="lu" aria-hidden="true"></i>{% if u.last_login %}{{ u.last_login|date:"d.m.Y H:i" }}{% else %}kirmagan{% endif %}</span>
       </div>
     </div>
     <div class="ca-row-side">
@@ -40,8 +52,8 @@
       {% endif %}
       <div class="ca-row-stat"><b style="--tier: {{ u.rating|tier_color }}" class="ca-tier-ink">{{ u.rating }}</b>reyting</div>
       <div class="ca-row-stat"><b>{{ u.n_subs }}</b>urinish</div>
-      <a href="{% url 'moderation:submissions' %}?user={{ u.username|urlencode }}" class="ca-btn ca-btn-ghost !px-2 !py-1.5" title="Urinishlari" aria-label="Urinishlari: {{ u.username }}"><i data-lucide="history" class="lu" aria-hidden="true"></i></a>
-      <a href="{% url 'moderation:user_edit' u.pk %}" class="ca-btn ca-btn-ghost !px-2 !py-1.5" title="Tahrirlash" aria-label="Tahrirlash: {{ u.username }}"><i data-lucide="pencil" class="lu" aria-hidden="true"></i></a>
+      <a href="{% url 'moderation:submissions' %}?user={{ u.username|urlencode }}" class="ca-btn ca-btn-ghost !p-1.5" title="Urinishlari" aria-label="Urinishlari: {{ u.username }}"><i data-lucide="history" class="lu" aria-hidden="true"></i></a>
+      <a href="{% url 'moderation:user_edit' u.pk %}" class="ca-btn ca-btn-ghost !py-1.5 text-xs" aria-label="Tahrirlash: {{ u.username }}"><i data-lucide="pencil" class="lu" aria-hidden="true"></i>Tahrirlash</a>
     </div>
   </li>
   {% endfor %}

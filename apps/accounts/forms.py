@@ -1,5 +1,7 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import password_validation
+from django.contrib.auth.forms import BaseUserCreationForm, UserCreationForm
+from django.core.exceptions import ValidationError
 
 from .models import TelegramLink, User
 
@@ -22,6 +24,21 @@ class RegisterForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = User
         fields = ("username", "email", "first_name", "last_name")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # One password field: the eye button lets people check what they typed, and a second box costs sign-ups.
+        del self.fields["password2"]
+
+    def _post_clean(self):
+        # Skip the parent's check of password2 (gone) and validate the one password here.
+        super(BaseUserCreationForm, self)._post_clean()
+        password = self.cleaned_data.get("password1")
+        if password:
+            try:
+                password_validation.validate_password(password, self.instance)
+            except ValidationError as error:
+                self.add_error("password1", error)
 
     def clean_username(self):
         return validate_public_username(super().clean_username())
@@ -62,4 +79,7 @@ class TelegramPreferencesForm(forms.ModelForm):
             "notify_trending_problem",
             "notify_contests",
             "notify_assignments",
+            "notify_duels",
+            "notify_badges",
+            "notify_streak",
         )

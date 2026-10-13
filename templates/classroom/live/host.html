@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Viktorina {{ quiz.code }}{% endblock %}
+{% block content %}
+{% comment %}The projector screen: the lobby with the code, each question big, the results and the final board. The panel is
+drawn by the server (_host_panel.html) and swapped when its version changes; the buttons post a step to the server.{% endcomment %}
+<div class="ca-live" data-nocopy>
+  <div id="live-panel" aria-live="polite"></div>
+</div>
+<script>
+(() => {
+  const panel = document.getElementById("live-panel");
+  let v = null, endAt = 0;
+  const csrf = document.querySelector("[name=csrfmiddlewaretoken]")?.value || "{{ csrf_token }}";
+  const act = async (action) => { await fetch("{{ act_url }}", { method: "POST", headers: { "X-CSRFToken": csrf }, body: new URLSearchParams({ action }) }); poll(); };
+  const poll = async () => {
+    try {
+      const r = await fetch("{{ state_url }}", { credentials: "same-origin" }); const d = await r.json();
+      if (d.v !== v) { v = d.v; panel.innerHTML = d.html; if (window.caIcons) window.caIcons(); }
+      endAt = d.ms != null ? performance.now() + d.ms : 0;
+    } catch {}
+  };
+  panel.addEventListener("click", (e) => { const b = e.target.closest("[data-act]"); if (b) act(b.dataset.act); });
+  setInterval(poll, 1500); poll();
+  setInterval(() => {
+    const bar = panel.querySelector("[data-bar]"), secs = panel.querySelector("[data-secs]");
+    if (!bar || !endAt) return;
+    const left = Math.max(0, endAt - performance.now()), total = +bar.dataset.bar * 1000;
+    bar.style.width = (100 * left / total) + "%"; if (secs) secs.textContent = Math.ceil(left / 1000);
+  }, 200);
+})();
+</script>
+{% endblock %}

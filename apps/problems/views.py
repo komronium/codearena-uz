@@ -543,10 +543,18 @@ def problem_detail(request, slug):
         else None
     )
     voided = review and ("void" if review.reviewer_id else "held")
+    # "Muharrirda ochish" on one of your own tries: the editor starts from that code and language
+    preload = None
+    from_pk = request.GET.get("from", "")
+    if request.user.is_authenticated and from_pk.isdigit():
+        src = Submission.objects.filter(pk=int(from_pk), user=request.user, problem=problem).select_related("language").first()
+        if src is not None:
+            preload = {"source": src.source, "language": src.language.code, "id": src.pk}
     return render(
         request,
         "problems/detail.html",
         {
+            "preload": preload,
             "plan_nav": plan_nav(
                 request.user, request.GET.get("plan", "")[:50], problem.pk
             )

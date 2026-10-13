@@ -18,22 +18,32 @@ own row marked.{% endcomment %}
 {% endblock %}
 {% block content %}
 <section aria-labelledby="tiers-title">
-  <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span><h2 id="tiers-title">Darajalar</h2></div>
+  <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span><h2 id="tiers-title">Darajalar</h2>
+    {% if me %}{% for t in tiers %}{% if t.here %}
+    <div class="ca7-you ca7-r" style="--tier: {{ t.color }}" title="Reytingingiz {{ user.rating }}">
+      <span class="ca7-you-n"><b class="tabular">{{ t.floor|default:0 }}</b></span>
+      <span class="ca7-ladder-pg ca7-you-bar" role="progressbar" aria-valuenow="{{ t.pct }}" aria-valuemin="0" aria-valuemax="100" aria-label="{{ t.name }} darajasi ichidagi o‘rningiz"><i style="width: {{ t.pct }}%"></i></span>
+      <span class="ca7-you-n"><b class="tabular">{% if t.ceiling %}{{ t.ceiling }}{% else %}∞{% endif %}</b></span>
+      <span class="ca7-you-t">{% if me.next %}<b class="ca-tier-ink" style="--tier: {{ me.next.color }}">{{ me.next.name }}</b> gacha <b class="tabular">+{{ me.next.need }}</b>{% else %}Eng yuqori daraja{% endif %}</span>
+    </div>
+    {% endif %}{% endfor %}{% endif %}
+  </div>
   <ol class="ca7-ladder">
     {% for t in tiers %}
-    <li style="--tier: {{ t.color }}"{% if me and t.name == user.rating|tier_name %} class="is-me" aria-current="true"{% endif %}>
-      {% if me and t.name == user.rating|tier_name %}<span class="ca7-ladder-flag">Siz · {{ user.rating }}</span>{% endif %}
+    <li style="--tier: {{ t.color }}" class="{% if me and t.here %}is-me{% endif %}{% if not t.count %} is-empty{% endif %}"{% if me and t.here %} aria-current="true"{% endif %}>
+      {% if me and t.here %}<span class="ca7-ladder-flag">Siz · {{ user.rating }}</span>{% endif %}
       <b class="ca-tier-ink{% if not t.ceiling %} ca-lg{% endif %}">{{ t.name }}</b>
+      <small class="ca7-gloss">{{ t.name|tier_uz }}</small>
       <small class="tabular">{% if t.floor %}{{ t.floor }}{% else %}0{% endif %}{% if t.ceiling %}–{{ t.ceiling|add:"-1" }}{% else %}+{% endif %}</small>
-      <span><b class="tabular">{{ t.count }}</b> kishi</span>
+      <span class="ca7-ladder-n"><b class="tabular">{{ t.count }}</b> kishi</span>
     </li>
     {% endfor %}
   </ol>
-  <p class="ca7-foot-note">Reytingli musobaqadan keyin har bir ishtirokchining reytingi Elo usulida qayta hisoblanadi.{% if me and me.next %} <span class="ca-tier-ink font-semibold" style="--tier: {{ me.next.color }}">{{ me.next.name }}</span> darajasigacha sizga <b class="text-ink">{{ me.next.need }}</b> ball qoldi.{% endif %}{% if me and users.number != me.page or me and q %} <a class="ca-link" href="{% url 'rating' %}?page={{ me.page }}#me">Jadvalda o‘rningiz ({{ me.rank }})</a>{% endif %}</p>
+  <p class="ca7-foot-note">Reytingli musobaqadan keyin har bir ishtirokchining reytingi Elo usulida qayta hisoblanadi.{% if me and users.number != me.page or me and q %} <a class="ca-link" href="{% url 'rating' %}?page={{ me.page }}#me">Jadvalda o‘rningiz ({{ me.rank }})</a>{% endif %}</p>
 </section>
 
 <section class="mt-8" aria-label="Reyting jadvali">
-  <div class="ca7-tools">
+  <div class="ca7-tools is-board">
     <div class="ca7-trow">
       <form method="get" class="ca7-search" role="search" aria-label="Foydalanuvchini qidirish">
         {% if sort %}<input type="hidden" name="sort" value="{{ sort }}">{% endif %}
@@ -46,17 +56,17 @@ own row marked.{% endcomment %}
       </nav>
     </div>
   </div>
+  {% if user.is_authenticated and not q %}<p class="mb-2 text-sm"><a class="ca-link" href="#me">Mening o‘rnimga o‘tish</a></p>{% endif %}
   {% if q %}<p class="ca7-found">«{{ q }}»: {{ users.paginator.count }} ta topildi · <a class="ca-link" href="{% url 'rating' %}">hammasi</a></p>{% endif %}
   {% if users %}
-  <div class="overflow-x-auto">
+  <div class="overflow-x-auto ca7-board">
   <table class="ca-table ca-table-flat">
-    <thead><tr><th class="w-16 text-center">#</th><th>Foydalanuvchi</th><th class="hidden md:table-cell"><a class="ca-link !font-normal" href="{% url 'badge_board' %}">Nishonlar</a></th><th class="hidden w-32 text-right sm:table-cell">Musobaqalar</th><th class="w-28 text-right" title="Oxirgi reytingli musobaqadagi o‘zgarish">Oxirgi ±</th><th class="w-28 text-right">Reyting</th></tr></thead>
+    <thead><tr><th class="w-16 text-center">#</th><th>Foydalanuvchi</th><th class="hidden w-32 text-right sm:table-cell">Musobaqalar</th><th class="w-28 text-right" title="Oxirgi reytingli musobaqadagi o‘zgarish">Oxirgi ±</th><th class="w-28 text-right">Reyting</th></tr></thead>
     <tbody>
     {% for u in users %}
     <tr{% if u == user %} class="ca-row-me" id="me"{% endif %}>
       <td class="text-center">{% if u.rank <= 3 and not q %}<span class="ca7-medal m{{ u.rank }}">{{ u.rank }}</span>{% else %}<span class="tabular text-mute">{{ u.rank }}</span>{% endif %}</td>
-      <td>{% if u == user %}{% include "accounts/_u7.html" with u=u you=True %}{% else %}{% include "accounts/_u7.html" with u=u you=False %} <span class="text-xs text-mute">{{ u.rating|tier_name }}</span>{% endif %}</td>
-      <td class="hidden md:table-cell">{% if u.badge_sum %}<span class="ca-bminis">{% for b in u.badge_sum.badges|slice:":4" %}{% include "accounts/_bmini.html" %}{% endfor %}{% if u.badge_sum.count > 4 %}<small>+{{ u.badge_sum.count|add:"-4" }}</small>{% endif %}</span>{% endif %}</td>
+      <td>{% if u == user %}{% include "accounts/_u7.html" with u=u you=True %}{% else %}{% include "accounts/_u7.html" with u=u you=False %} <span class="text-xs text-mute">{{ u.rating|tier_name }}</span>{% endif %}{% if u.badge_sum %}<span class="ca-bminis ml-3 align-middle">{% for b in u.badge_sum.badges|slice:":4" %}{% include "accounts/_bmini.html" %}{% endfor %}{% if u.badge_sum.count > 4 %}<small>+{{ u.badge_sum.count|add:"-4" }}</small>{% endif %}</span>{% endif %}</td>
       <td class="hidden text-right tabular sm:table-cell">{{ u.contest_count }}</td>
       <td class="text-right tabular font-semibold {% if u.last_delta > 0 %}text-ok{% elif u.last_delta < 0 %}text-bad{% else %}text-mute{% endif %}">{{ u.last_delta|stringformat:"+d" }}</td>
       <td class="text-right tabular font-bold"><span class="ca-tier-ink" style="--tier: {{ u.rating|tier_color }}">{{ u.rating }}</span></td>

@@ -34,7 +34,7 @@
   <meta property="og:image:alt" content="CodeArena — o‘zbek tilida dasturlash masalalari, kurslar va musobaqalar">
   <meta name="twitter:card" content="summary_large_image">
   {% block structured_data %}{% endblock %}
-  <link rel="preload" href="{% static 'fonts/plus-jakarta-sans-latin-wght-normal.woff2' %}" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="{% static 'fonts/lato-latin-400-normal.woff2' %}" as="font" type="font/woff2" crossorigin>
   <script>
     try { const t = localStorage.getItem("ca-theme"); if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch {}
   </script>
@@ -42,6 +42,7 @@
   <script src="{% static 'vendor/lucide.min.js' %}" defer></script>
   <script src="{% static 'vendor/htmx.min.js' %}" defer></script>
   <script src="{% static 'js/celebrate.js' %}" defer></script>
+  <script src="{% static 'js/forms.js' %}" defer></script>
   <script>
     // <i data-lucide="name"> -> inline SVG, 1.5px stroke. Re-run after htmx swaps and any JS that
     // inserts icons; before the (deferred) icon script has loaded, DOMContentLoaded catches up.
@@ -92,7 +93,9 @@
   <a href="{% url 'problems:list' %}"{% if ns == 'problems' and not contest or ns == 'learn' and un == 'lists' or ns == 'learn' and un == 'list' %} class="is-active" aria-current="page"{% endif %}><span class="ca-bn-icon"><i data-lucide="list-checks" class="lu" aria-hidden="true"></i></span><span>Masalalar</span></a>
   <a href="{% url 'learn:hub' %}"{% if ns == 'learn' and un != 'lists' and un != 'list' %} class="is-active" aria-current="page"{% endif %}><span class="ca-bn-icon"><i data-lucide="graduation-cap" class="lu" aria-hidden="true"></i></span><span>O‘rganish</span></a>
   <a href="{% url 'contests:list' %}"{% if ns == 'contests' or ns == 'problems' and contest %} class="is-active" aria-current="page"{% endif %}><span class="ca-bn-icon"><i data-lucide="trophy" class="lu" aria-hidden="true"></i>{% if nav.live %}<b class="ca-badge-live"><span class="sr-only">, jonli musobaqa bor</span></b>{% endif %}</span><span>Musobaqa</span></a>
-  <a href="{% url 'rating' %}"{% if un == 'rating' or un == 'top' %} class="is-active" aria-current="page"{% endif %}><span class="ca-bn-icon"><i data-lucide="chart-column" class="lu" aria-hidden="true"></i></span><span>Reyting</span></a>
+  {# signed in, the fifth tab is the duels (played mostly on phones; the rating sits in the menu); a guest's is the rating #}
+  {% if user.is_authenticated %}<a href="{% url 'classroom:duels' %}"{% if ns == 'classroom' and 'duel' in un %} class="is-active" aria-current="page"{% endif %}><span class="ca-bn-icon"><i data-lucide="swords" class="lu" aria-hidden="true"></i>{% if nav.duels %}<b class="ca-badge-n ca-bn-badge">{{ nav.duels }}<span class="sr-only"> ta duel chaqiruvi</span></b>{% endif %}</span><span>Duel</span></a>
+  {% else %}<a href="{% url 'rating' %}"{% if un == 'rating' or un == 'top' %} class="is-active" aria-current="page"{% endif %}><span class="ca-bn-icon"><i data-lucide="chart-column" class="lu" aria-hidden="true"></i></span><span>Reyting</span></a>{% endif %}
   <button type="button" data-menu-open aria-haspopup="dialog" aria-controls="ca-menu"><span class="ca-bn-icon">{% if user.is_authenticated %}<i data-lucide="user" class="lu" aria-hidden="true"></i>{% else %}<i data-lucide="menu" class="lu" aria-hidden="true"></i>{% endif %}</span><span>{% if user.is_authenticated %}Men{% else %}Menyu{% endif %}</span>{% with n=unread_reviews|add:nav.due %}{% if n %}<b class="ca-badge-n ca-bn-badge">{{ n }}<span class="sr-only"> ta yangi: sharh yoki muddati yaqin vazifa</span></b>{% endif %}{% endwith %}</button>
   {% endwith %}
 </nav>
@@ -228,6 +231,17 @@ A native dialog gives focus trapping and Esc for free.{% endcomment %}
       b.closest("details[data-dropdown]")?.removeAttribute("open");
     }));
   })();
+  document.addEventListener("click", async (e) => {
+    // Copy buttons anywhere: <button data-copy-text="…" [data-copied="Nusxalandi"]>. The label swaps for a moment.
+    const b = e.target.closest("[data-copy-text]");
+    if (!b) return;
+    const text = b.dataset.copyText === "url" ? location.href.split("#")[0] : b.dataset.copyText;
+    try { await navigator.clipboard.writeText(text); } catch { return; }
+    const label = b.querySelector("[data-copy-label]");
+    b.classList.add("is-copied");
+    if (label) { const old = label.textContent; label.textContent = b.dataset.copied || "Nusxalandi"; setTimeout(() => { label.textContent = old; b.classList.remove("is-copied"); }, 1400); }
+    else setTimeout(() => b.classList.remove("is-copied"), 1400);
+  });
   (() => {
     // Dropdowns (<details data-dropdown>): one open at a time, closed by an outside click or Esc.
     const all = () => document.querySelectorAll("details[data-dropdown][open]");
@@ -266,7 +280,7 @@ from /problems/suggest/. "go" is the second key of a "g <key>" shortcut.{% endco
   {"group": "Sahifalar", "icon": "swords", "label": "Duellar", "words": "duel 1v1 bellashuv", "keys": "g d", "go": "d", "url": "{% url 'classroom:duels' %}"},
   {"group": "Sahifalar", "icon": "history", "label": "Urinishlarim", "words": "submissions yechimlar natijalar", "keys": "g u", "go": "u", "url": "{% url 'submissions:mine' %}?mine=1"},
   {"group": "Sahifalar", "icon": "user", "label": "Profilim", "words": "profile men", "keys": "g m", "go": "m", "url": "{% url 'profile' user.username %}"},
-  {"group": "Sahifalar", "icon": "pencil", "label": "Profilni tahrirlash", "words": "settings sozlamalar rasm avatar", "url": "{% url 'profile_edit' %}"},
+  {"group": "Sahifalar", "icon": "pencil", "label": "Sozlamalar", "words": "settings sozlamalar rasm avatar", "url": "{% url 'profile_edit' %}"},
   {"group": "Sahifalar", "icon": "key-round", "label": "Parolni almashtirish", "words": "password", "url": "{% url 'password_change' %}"},
   {% else %}
   {"group": "Sahifalar", "icon": "log-in", "label": "Kirish", "words": "login sign in", "url": "{% url 'login' %}"},

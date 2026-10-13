@@ -13,13 +13,22 @@
 </section>
 {% endblock %}
 {% block content %}
-{% if users %}
-<div class="overflow-x-auto">
+{% if users or q %}
+<div class="ca7-tools is-board">
+  <div class="ca7-trow">
+    <form method="get" class="ca7-search" role="search" aria-label="Foydalanuvchini qidirish">
+      <i data-lucide="search" class="lu" aria-hidden="true"></i><input class="ca7-fld" type="search" name="q" value="{{ q }}" placeholder="Foydalanuvchi…" aria-label="Foydalanuvchi nomi" autocomplete="off" spellcheck="false">
+    </form>
+    {% if user.is_authenticated and not q %}<a class="ca-link ml-auto" href="#me">Mening o‘rnimga o‘tish</a>{% endif %}
+  </div>
+</div>
+{% if q %}<p class="ca7-found">«{{ q }}»: {{ found }} ta topildi · <a class="ca-link" href="{% url 'top' %}">hammasi</a></p>{% endif %}
+{% if users %}<div class="overflow-x-auto ca7-board">
 <table class="ca-table ca-table-flat">
   <thead><tr><th class="w-16 text-center">#</th><th>Foydalanuvchi</th><th class="w-32 text-right">Yechilgan</th><th class="w-28 text-right">Ball</th></tr></thead>
   <tbody>
   {% for u in users %}
-  <tr{% if u == user %} class="ca-row-me"{% endif %}>
+  <tr{% if u == user %} class="ca-row-me" id="me"{% endif %}>
     <td class="text-center">{% if u.rank <= 3 %}<span class="ca7-medal m{{ u.rank }}">{{ u.rank }}</span>{% else %}<span class="tabular text-mute">{{ u.rank }}</span>{% endif %}</td>
     <td>{% if u == user %}{% include "accounts/_u7.html" with u=u you=True %}{% else %}{% include "accounts/_u7.html" with u=u you=False %}{% endif %}</td>
     <td class="text-right tabular">{{ u.solved_count }}</td>
@@ -29,6 +38,7 @@
   </tbody>
 </table>
 </div>
+{% elif q %}<p class="ca7-empty"><b>Bunday foydalanuvchi yo‘q</b><a class="ca-link" href="{% url 'top' %}">Butun ro‘yxat</a></p>{% endif %}
 {% else %}
 <p class="ca7-empty"><b>Hali reyting yo‘q</b>Birinchi masala yechilgach, bu yerda paydo bo‘ladi.</p>
 {% endif %}

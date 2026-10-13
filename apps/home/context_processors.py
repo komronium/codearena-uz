@@ -83,6 +83,12 @@ def _staff_todo() -> dict:
     return todo
 
 
+def _duel_calls(user) -> int:
+    """Duel invites waiting on the user, for the phone tab bar's badge."""
+    from apps.classroom.models import Duel
+    return Duel.objects.filter(opponent=user, status=Duel.Status.PENDING).count()
+
+
 def nav(request):
     if request.headers.get("HX-Request"):
         return {}
@@ -93,6 +99,7 @@ def nav(request):
         return {
             "live": live_contest_for(user),
             "due": _due_soon(user) if signed_in else 0,
+            "duels": _duel_calls(user) if signed_in else 0,
             "staff": _staff_todo() if signed_in and user.is_staff else {"queue": 0, "requests": 0, "total": 0},
         }
 

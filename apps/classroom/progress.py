@@ -27,6 +27,23 @@ def grid(assignment) -> list[dict]:
         rows.append({"user": u, "cells": cells,
                      "on_time": sum(c["status"] == "ok" for c in cells),
                      "solved": sum(c["status"] in ("ok", "late") for c in cells),
-                     "tried": sum(c["status"] != "none" for c in cells)})
+                     "tried": sum(c["status"] != "none" for c in cells),
+                     "finished": bool(cells) and all(c["status"] in ("ok", "late") for c in cells)})
     rows.sort(key=lambda r: (-r["on_time"], -r["solved"], -r["tried"], r["user"].username))
     return rows
+
+
+def completion(assignments) -> dict[int, tuple[int, int]]:
+    """For each assignment: (students who solved every problem, students in the group). Late solves count."""
+    from django.db.models import Count
+    out = {}
+    for a in assignments:
+        pids = [ap.problem_id for ap in a.assignment_problems.all()]
+        members = list(a.group.members.values_list("pk", flat=True))
+        if not pids or not members:
+            out[a.pk] = (0, len(members))
+            continue
+        rows = (Submission.objects.filter(user_id__in=members, problem_id__in=pids, verdict=Submission.Verdict.AC)
+                .values("user_id").annotate(n=Count("problem_id", distinct=True)))
+        out[a.pk] = (sum(1 for r in rows if r["n"] == len(pids)), len(members))
+    return out

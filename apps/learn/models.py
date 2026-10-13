@@ -98,3 +98,13 @@ class ProblemListItem(models.Model):
     class Meta:
         ordering = ["-added", "-id"]
         unique_together = ("list", "problem")
+
+
+class PlanRead(models.Model):
+    """"Tushundim": a user marked a course's theory as read. A course without problems is finished by it."""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="plan_reads")
+    plan = models.ForeignKey(StudyPlan, on_delete=models.CASCADE, related_name="reads")
+    read_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("user", "plan")

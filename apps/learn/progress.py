@@ -5,7 +5,7 @@ from apps.problems.models import Problem
 from apps.problems.skills import open_problems
 from apps.submissions.models import UserProblemSolved
 
-from .models import ProblemListItem, StudyPlan
+from .models import PlanRead, ProblemListItem, StudyPlan
 
 LEVELS = Problem.Difficulty.values  # easiest first
 # A course is 10-15 problems: under COURSE_MIN open it is still being prepared (it shows none, so it
@@ -69,15 +69,24 @@ def solved_ids(user, ids) -> set[int]:
 
 
 def plan_progress(user, plans) -> dict[int, dict]:
-    """Course id -> {"done", "total", "pct", "completed"}; a course with nothing open is never completed."""
+    """Course id -> {"done", "total", "pct", "completed", "read", "theory_only"}. A course with problems is completed
+    when all of them are solved; a theory-only course (no tags, so no problems) is completed by "Tushundim"; a course
+    that is merely still being prepared (tags, but under COURSE_MIN open problems) is never completed."""
     ids = plan_problem_ids(plans)
     solved = solved_ids(user, {i for v in ids.values() for i in v})
+    plan_pks = list(ids)
+    tagged = set(StudyPlan.tags.through.objects.filter(studyplan__in=plan_pks).values_list("studyplan_id", flat=True))
+    read = set(PlanRead.objects.filter(user=user, plan__in=plan_pks).values_list("plan_id", flat=True)) \
+        if user.is_authenticated else set()
     out = {}
     for plan_id, pids in ids.items():
         done, total = len(solved.intersection(pids)), len(pids)
+        theory_only = plan_id not in tagged
         out[plan_id] = {"done": done, "total": total, "pct": round(100 * done / total) if total else 0,
-                        "completed": total > 0 and done == total}
+                        "completed": (total > 0 and done == total) or (theory_only and plan_id in read),
+                        "read": plan_id in read, "theory_only": theory_only}
     return out
+
 
 
 def plan_sections(user, plans) -> dict[int, dict]:

@@ -26,7 +26,16 @@ course note and its khatam badge.{% endcomment %}
     {# Open until the first solve: then the problems come first and the theory is one click away. #}
     <details class="ca7-theory"{% if not progress.done %} open{% endif %}>
       <summary class="ca7-sec-h"><span class="ca-star" style="--c: rgb(var(--ca-spec-rgb))" aria-hidden="true"></span><h2>Nazariya</h2><i data-lucide="chevron-down" class="lu ca7-r ca-theory-chevron" aria-hidden="true"></i></summary>
-      <div class="prose max-w-none">{{ theory_html|safe }}</div>
+      <div class="prose max-w-none" id="theory-body">{{ theory_html|safe }}</div>
+      <div class="ca-theory-end" id="nazariya-tugadi">
+        {% if user.is_authenticated %}
+        <form method="post" action="{% url 'learn:course_read' plan.slug %}">{% csrf_token %}
+          {% if progress.read %}<span class="ca-hwbar-state is-ok"><i data-lucide="circle-check-big" class="lu" aria-hidden="true"></i>Nazariya o‘qildi</span> <button class="ca-link text-sm text-mute" name="undo" value="1">Bekor qilish</button>
+          {% else %}<button class="ca-btn ca-btn-gold"><i data-lucide="check" class="lu" aria-hidden="true"></i>Tushundim</button>{% endif %}
+        </form>
+        {% else %}<a class="ca-btn ca-btn-ghost" href="{% url 'login' %}?next={{ request.path|urlencode }}">Kirib, o‘qilgan deb belgilash</a>{% endif %}
+        {% if next_plan %}<a class="ca-link ml-auto" href="{% url 'learn:course' next_plan.slug %}">Keyingi kurs: {{ next_plan.title }}<i data-lucide="chevron-right" class="lu" aria-hidden="true"></i></a>{% endif %}
+      </div>
     </details>
     {% endif %}
 
@@ -37,12 +46,23 @@ course note and its khatam badge.{% endcomment %}
       {% include "learn/_problem_rows.html" with rows=g.problems %}
     </section>
     {% empty %}
-    <p class="ca7-empty"><b>{% if plan.tags.exists %}Masalalar tayyorlanmoqda{% else %}Bu kurs faqat nazariya{% endif %}</b>{% if plan.tags.exists %}Hozircha nazariyani o‘qing.{% endif %}</p>
+    <p class="ca7-empty"><b>{% if plan.tags.exists %}Masalalar tayyorlanmoqda{% else %}Bu kurs faqat nazariya{% endif %}</b>{% if plan.tags.exists %}Hozircha nazariyani o‘qing. Shu mavzudagi masalalar umumiy ro‘yxatda ham bor: {% for tg in plan.tags.all|slice:":3" %}<a class="ca-link" href="{% url 'problems:list' %}?tag={{ tg.name|urlencode }}">{{ tg.name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}.{% endif %}</p>
     {% endfor %}
   </div>
 
   <aside class="ca7-aside" aria-label="Kurs haqida">
-    {% if user.is_authenticated and progress.total %}
+    {% if toc|length > 1 %}
+    <section class="ca-box" aria-labelledby="toc-title">
+      <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" style="--c: rgb(var(--ca-spec-rgb))" aria-hidden="true"></span><h2 id="toc-title">Mazmun</h2></div>
+      <ol class="ca-toc">{% for h in toc %}<li class="is-l{{ h.level }}"><a href="#{{ h.id }}">{{ h.text }}</a></li>{% endfor %}</ol>
+    </section>
+    {% endif %}
+    {% if user.is_authenticated and progress.theory_only %}
+    <section class="ca-box" aria-labelledby="progress-title">
+      <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" style="--c: var(--ca-lvl-easy)" aria-hidden="true"></span><h2 id="progress-title">Bajarilishi</h2></div>
+      <div class="ca7-pad"><p>{% if progress.read %}<i data-lucide="circle-check-big" class="lu text-ok" aria-hidden="true"></i> Nazariya o‘qilgan, kurs tugatildi.{% else %}Bu kurs faqat nazariya: o‘qib bo‘lgach «Tushundim» ni bosing.{% endif %}</p></div>
+    </section>
+    {% elif user.is_authenticated and progress.total %}
     <section class="ca-box" aria-labelledby="progress-title">
       <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" style="--c: var(--ca-lvl-easy)" aria-hidden="true"></span><h2 id="progress-title">Bajarilishi</h2><span class="ca-box-tools tabular">{{ progress.pct }}%</span></div>
       <div class="ca7-pad">
@@ -65,4 +85,43 @@ course note and its khatam badge.{% endcomment %}
     {% endif %}
   </aside>
 </div>
+<script>
+(() => {
+  // Theory code: a copy button on every block, and neighbouring "Python / C++ / Java" blocks become language tabs
+  const body = document.getElementById("theory-body");
+  if (!body) return;
+  const LANGS = ["python", "c++", "cpp", "java", "javascript", "js", "sql", "c#"];
+  const labelOf = (el) => ["P", "H2", "H3", "H4"].includes(el.tagName) && el.children.length <= 1 && LANGS.includes(el.textContent.trim().toLowerCase()) ? el.textContent.trim() : null;
+  const kids = [...body.children];
+  for (let i = 0; i < kids.length - 1; i++) {
+    const group = [];
+    let j = i;
+    while (j < kids.length - 1 && labelOf(kids[j]) && kids[j + 1].tagName === "PRE") { group.push([kids[j], kids[j + 1]]); j += 2; }
+    if (group.length < 2) continue;
+    const box = document.createElement("div"); box.className = "ca-codetabs";
+    const bar = document.createElement("div"); bar.className = "ca-codetabs-bar"; bar.setAttribute("role", "tablist");
+    kids[i].before(box); box.append(bar);
+    group.forEach(([label, pre], k) => {
+      const b = document.createElement("button");
+      b.type = "button"; b.role = "tab"; b.textContent = label.textContent.trim(); b.setAttribute("aria-selected", String(k === 0));
+      pre.hidden = k !== 0; label.remove();
+      b.addEventListener("click", () => { bar.querySelectorAll("button").forEach((x, n) => { x.setAttribute("aria-selected", String(n === k)); group[n][1].hidden = n !== k; }); });
+      bar.append(b); box.append(pre);
+    });
+    i = j - 1;
+  }
+  body.querySelectorAll("pre").forEach((pre) => {
+    const host = pre.closest(".ca-codetabs") || pre;
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "ca-copy-pre"; b.setAttribute("aria-label", "Kodni nusxalash"); b.title = "Nusxalash";
+    b.innerHTML = '<i data-lucide="copy" class="lu" aria-hidden="true"></i>';
+    b.addEventListener("click", async () => {
+      const shown = host.classList.contains("ca-codetabs") ? host.querySelector("pre:not([hidden])") : pre;
+      try { await navigator.clipboard.writeText(shown.innerText); b.classList.add("is-copied"); setTimeout(() => b.classList.remove("is-copied"), 1200); } catch {}
+    });
+    if (host.classList.contains("ca-codetabs")) { if (!host.querySelector(".ca-copy-pre")) host.append(b); } else { host.style.position = "relative"; host.append(b); }
+  });
+  if (window.caIcons) window.caIcons();
+})();
+</script>
 {% endblock %}

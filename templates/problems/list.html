@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load daily tiers numbers %}
+{% load daily tiers numbers tagnames %}
 {% block title %}Masalalar{% endblock %}
 {% block description %}{{ total }} ta dasturlash masalasi: boshlang‘ichdan qiyingacha, mavzular bo‘yicha. Yeching — kodingiz serverda shu zahoti testlanadi.{% endblock %}
 {% block band %}
@@ -12,12 +12,6 @@ table; on the right your progress per level, picks for you and, while browsing, 
       <h1 id="pl-title">Masalalar</h1>
       <p class="ca-hud-sub">{% if progress %}Oson masaladan boshlang, qiyinlari reytingga tayyorlaydi.{% else %}{{ total }} ta ochiq masala: boshlang‘ichdan qiyingacha, mavzular bo‘yicha.{% endif %}</p>
     </div>
-    {% if progress and ring %}
-    <div aria-label="{{ progress.total }} dan {{ progress.done }} tasi yechilgan">
-      <p class="flex items-baseline gap-1.5"><b class="text-[1.375rem] font-bold leading-none tabular">{{ progress.done }}</b><span class="ca-hud-lbl">/ {{ progress.total }} yechilgan</span></p>
-      <span class="ca-hud-lvbar" aria-hidden="true">{% for s in ring.segments %}{% if s.done %}<i class="is-{{ s.value }}" style="flex: {{ s.done }}"></i>{% endif %}{% if s.total > s.done %}<i style="flex-grow: calc({{ s.total }} - {{ s.done }})"></i>{% endif %}{% endfor %}</span>
-    </div>
-    {% endif %}
     {% if daily %}{% include "home/_hud_today.html" %}{% endif %}
   </div>
 </section>
@@ -28,78 +22,72 @@ table; on the right your progress per level, picks for you and, while browsing, 
   <h2 id="ps-title" class="sr-only">Masalalar ro‘yxati</h2>
   <div class="ca7-tools">
     <div class="ca7-trow">
-      <form method="get" class="ca7-search" role="search" aria-label="Masala qidirish">
+      <form method="get" class="ca7-search is-short" role="search" aria-label="Masala qidirish">
         {% if selected_difficulty %}<input type="hidden" name="difficulty" value="{{ selected_difficulty }}">{% endif %}
         {% if selected_kind %}<input type="hidden" name="kind" value="{{ selected_kind }}">{% endif %}
         {% if selected_tag %}<input type="hidden" name="tag" value="{{ selected_tag }}">{% endif %}
         {% if selected_status %}<input type="hidden" name="status" value="{{ selected_status }}">{% endif %}
         {% if sort != "id" or dir == "desc" %}<input type="hidden" name="sort" value="{{ sort }}"><input type="hidden" name="dir" value="{{ dir }}">{% endif %}
         <i data-lucide="search" class="lu" aria-hidden="true"></i>
-        <input class="ca7-fld" type="search" name="q" value="{{ q }}" placeholder="Masala nomi bo‘yicha qidirish…" aria-label="Masala nomi bo‘yicha qidirish" autocomplete="off" spellcheck="false">
+        <input class="ca7-fld" type="search" name="q" value="{{ q }}" placeholder="Masala qidirish…" aria-label="Masala nomi bo‘yicha qidirish" autocomplete="off" spellcheck="false">
       </form>
       <nav class="ca7-seg" aria-label="Qiyinlik">
         <a href="{% querystring difficulty=None page=None %}"{% if not selected_difficulty %} aria-current="true"{% endif %}>Hammasi <em>{{ level_total }}</em></a>
         {% for c in level_chips %}<a href="{% querystring difficulty=c.value page=None %}"{% if c.value == selected_difficulty %} aria-current="true"{% endif %}>{{ c.label }} <em>{{ c.n }}</em></a>{% endfor %}
       </nav>
+      {% if status_chips %}
+      <details class="ca-dropdown ca7-dd{% if selected_status %} is-on{% endif %}" data-dropdown>
+        <summary class="ca7-ddb">Holat{% for c in status_chips %}{% if c.value == selected_status %}: {{ c.label }}{% endif %}{% endfor %}<i data-lucide="chevron-down" class="lu" aria-hidden="true"></i></summary>
+        <div class="ca-dropdown-panel ca7-ddp">
+          <a class="ca-dropdown-item" href="{% querystring status=None page=None %}"{% if not selected_status %} aria-current="true"{% endif %}>Hammasi</a>
+          {% for c in status_chips %}<a class="ca-dropdown-item" href="{% querystring status=c.value page=None %}"{% if c.value == selected_status %} aria-current="true"{% endif %}><span class="ca-st is-{{ c.value }}" aria-hidden="true"></span>{{ c.label }}<em>{{ c.n }}</em></a>{% endfor %}
+        </div>
+      </details>
+      {% endif %}
+      {% if top_topics or kinds %}
+      <details class="ca-dropdown ca7-dd{% if selected_tag or selected_kind %} is-on{% endif %}" data-dropdown id="tag-dd">
+        <summary class="ca7-ddb">Mavzu{% if selected_tag %}: {{ selected_tag|tag_uz }}{% else %}{% for value, label in kinds %}{% if value == selected_kind %}: {{ label }}{% endif %}{% endfor %}{% endif %}<i data-lucide="chevron-down" class="lu" aria-hidden="true"></i></summary>
+        <div class="ca-dropdown-panel ca7-ddp is-wide">
+          {% if kinds %}<nav class="ca7-seg ca7-ddk" aria-label="Masala turi">
+            <a href="{% querystring kind=None page=None %}"{% if not selected_kind %} aria-current="true"{% endif %}>Hammasi</a>
+            {% for value, label in kinds %}<a href="{% querystring kind=value page=None tag=None %}"{% if value == selected_kind %} aria-current="true"{% endif %}>{{ label }}</a>{% endfor %}
+          </nav>{% endif %}
+          {% if top_topics %}
+          <label class="ca7-ddq"><i data-lucide="search" class="lu" aria-hidden="true"></i><input id="tag-q" type="search" placeholder="Mavzu qidirish…" aria-label="Mavzu qidirish" autocomplete="off" spellcheck="false"></label>
+          <div class="ca7-ddl" id="tag-list">
+            {% if selected_tag %}<a class="ca-dropdown-item is-clear" href="{% querystring tag=None page=None %}"><i data-lucide="x" class="lu" aria-hidden="true"></i>Mavzuni tozalash</a>{% endif %}
+            {% for t in top_topics %}<a class="ca-dropdown-item{% if t.kind == 'sql' %} is-sql{% endif %}" data-name="{{ t.name|lower }} {{ t.name|tag_uz|lower }}" href="{% querystring tag=t.name page=None %}"{% if t.name == selected_tag %} aria-current="true"{% endif %}>{{ t.name|tag_uz }}<em>{{ t.n }}</em></a>{% endfor %}
+            {% for t in more_topics %}<a class="ca-dropdown-item{% if t.kind == 'sql' %} is-sql{% endif %}" data-name="{{ t.name|lower }} {{ t.name|tag_uz|lower }}" href="{% querystring tag=t.name page=None %}"{% if t.name == selected_tag %} aria-current="true"{% endif %}>{{ t.name|tag_uz }}<em>{{ t.n }}</em></a>{% endfor %}
+          </div>
+          <label class="ca7-tg ca7-ddt"><input type="checkbox" id="tags-toggle"><span>Jadvalda teglarni ko‘rsatish</span></label>
+          {% endif %}
+        </div>
+      </details>
+      {% endif %}
       <div class="ca7-tools-r">
-        {% if not status_chips %}{% if kinds %}<nav class="ca7-seg" aria-label="Masala turi">
-          <a href="{% querystring kind=None page=None %}"{% if not selected_kind %} aria-current="true"{% endif %}>Hammasi</a>
-          {% for value, label in kinds %}<a href="{% querystring kind=value page=None tag=None %}"{% if value == selected_kind %} aria-current="true"{% endif %}>{{ label }}</a>{% endfor %}
-        </nav>{% endif %}{% endif %}
         <a href="{% querystring random=1 page=None %}" class="ca-btn ca-btn-soft" title="Shu filtrdan tasodifiy {% if user.is_authenticated %}yechilmagan {% endif %}masala" rel="nofollow"><i data-lucide="shuffle" class="lu" aria-hidden="true"></i>Tasodifiy</a>
-        {% if user.is_authenticated %}<a href="{% url 'learn:lists' %}" class="ca-btn ca-btn-soft" title="Saqlangan masalalar"><i data-lucide="bookmark" class="lu" aria-hidden="true"></i><span class="sr-only">Ro‘yxatlarim</span></a>{% endif %}
+        {% if user.is_authenticated %}<a href="{% url 'learn:lists' %}" class="ca-btn ca-btn-soft" title="Keyinroq yechish uchun saqlangan masalalar"><i data-lucide="bookmark" class="lu" aria-hidden="true"></i>Saqlanganlar</a>{% endif %}
         {% if user.is_staff %}<a href="{% url 'moderation:submit' %}" class="ca-btn ca-btn-soft" title="Masala qo‘shish"><i data-lucide="plus" class="lu" aria-hidden="true"></i><span class="sr-only">Masala qo‘shish</span></a>{% endif %}
       </div>
     </div>
-    {% if status_chips %}
-    <div class="ca7-trow">
-      {% if status_chips %}
-      <span class="ca7-k">Holat</span>
-      <nav class="ca7-seg" aria-label="Holat">
-        <a href="{% querystring status=None page=None %}"{% if not selected_status %} aria-current="true"{% endif %}>Hammasi</a>
-        {% for c in status_chips %}<a href="{% querystring status=c.value page=None %}"{% if c.value == selected_status %} aria-current="true"{% endif %}><span class="ca-st is-{{ c.value }}" aria-hidden="true"></span>{{ c.label }} <em>{{ c.n }}</em></a>{% endfor %}
-      </nav>
-      {% endif %}
-      <div class="ca7-tools-r">
-        {% if kinds %}<nav class="ca7-seg" aria-label="Masala turi">
-          <a href="{% querystring kind=None page=None %}"{% if not selected_kind %} aria-current="true"{% endif %}>Hammasi</a>
-          {% for value, label in kinds %}<a href="{% querystring kind=value page=None tag=None %}"{% if value == selected_kind %} aria-current="true"{% endif %}>{{ label }}</a>{% endfor %}
-        </nav>{% endif %}
-      </div>
-    </div>
-    {% endif %}
-    {% if top_topics %}
-    <div class="ca7-trow is-top">
-      <span class="ca7-k">Mavzu</span>
-      <nav class="ca7-tags" aria-label="Mavzular">
-        {% if selected_tag %}<a href="{% querystring tag=None page=None %}" class="is-clear"><i data-lucide="x" class="lu" aria-hidden="true"></i>{{ selected_tag }}</a>{% endif %}
-        {% for t in top_topics %}{% if t.name != selected_tag %}<a href="{% querystring tag=t.name page=None %}"{% if t.kind == "sql" %} class="is-sql"{% endif %}>{{ t.name }} <em>{{ t.n }}</em></a>{% endif %}{% endfor %}
-        {% if more_topics %}
-        <details class="ca7-more">
-          <summary>yana {{ more_topics|length }} ta<i data-lucide="chevron-down" class="lu" aria-hidden="true"></i></summary>
-          <div>{% for t in more_topics %}<a href="{% querystring tag=t.name page=None %}"{% if t.name == selected_tag %} aria-current="true"{% endif %}{% if t.kind == "sql" %} class="is-sql"{% endif %}>{{ t.name }} <em>{{ t.n }}</em></a>{% endfor %}</div>
-        </details>
-        {% endif %}
-      </nav>
-    </div>
-    {% endif %}
   </div>
   {% if q or selected_tag or selected_difficulty or selected_status or selected_kind %}
   <p class="ca7-found">{% if q %}«{{ q }}» bo‘yicha: {% endif %}{{ problems.paginator.count }} ta masala · <a class="ca-link" href="{% url 'problems:list' %}">Filtrni tozalash</a></p>
   {% endif %}
 
   {% if problems %}
+  {% if user.is_authenticated %}<p class="ca7-legend" aria-hidden="true"><span><i class="ca-st is-new"></i>yechilmagan</span><span><i class="ca-st is-tried"></i>urinilgan</span><span><i class="ca-st is-solved"></i>yechilgan</span></p>{% endif %}
   <div class="overflow-x-auto">
-  <table class="ca-table ca-table-flat ca-ps">
+  <table class="ca-table ca-table-flat ca-ps" id="ps-table">
     <thead>
       <tr>
         <th class="w-8"><span class="sr-only">Holat</span></th>
-        <th class="w-16">{% include "problems/_sort_th.html" with key="id" label="#" %}</th>
+        <th class="w-12">{% include "problems/_sort_th.html" with key="id" label="#" %}</th>
         <th>{% include "problems/_sort_th.html" with key="title" label="Masala" %}</th>
-        <th class="hidden lg:table-cell">Mavzu</th>
-        <th class="w-28" title="Masala reytingi, Codeforces’dagidek: reytingi shu songa teng o‘quvchi uni taxminan yarim holda yechadi.">{% include "problems/_sort_th.html" with key="difficulty" label="Qiyinlik" %}</th>
+        <th class="ca7-col-tags">Mavzu</th>
+        <th class="w-36" title="Masala reytingi, Codeforces’dagidek: reytingi shu songa teng o‘quvchi uni taxminan yarim holda yechadi.">{% include "problems/_sort_th.html" with key="difficulty" label="Qiyinlik" %}</th>
         <th class="hidden w-24 text-right md:table-cell" title="Yuborilgan yechimlarning necha foizi qabul qilingan">Qabul %</th>
-        <th class="w-28 text-right">{% include "problems/_sort_th.html" with key="solvers" label="Yechganlar" %}</th>
+        <th class="w-28 text-right">{% include "problems/_sort_th.html" with key="solvers" label="Yechdi" %}</th>
         {% if any_rated %}<th class="hidden w-20 text-right xl:table-cell">{% include "problems/_sort_th.html" with key="rating" label="Baho" %}</th>{% endif %}
       </tr>
     </thead>
@@ -109,8 +97,8 @@ table; on the right your progress per level, picks for you and, while browsing, 
       <td>{% if p.id in solved_ids %}<span class="ca-st is-solved" title="Yechilgan"></span><span class="sr-only">Yechilgan</span>{% elif p.id in tried_ids %}<span class="ca-st is-tried" title="Urinilgan, hali yechilmagan"></span><span class="sr-only">Urinilgan</span>{% elif user.is_authenticated %}<span class="ca-st is-new" title="Hali urinilmagan"></span><span class="sr-only">Yangi</span>{% endif %}</td>
       <td class="ca-pid">{{ p.id|stringformat:"04d" }}</td>
       <td><a class="ca-link" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a>{% if p.id == daily.problem_id %} <span class="ca-chip">Kun masalasi</span>{% endif %}{% if p.kind == "sql" %} <span class="ca-kind-sql" title="SQL so‘rov masalasi"><i data-lucide="database" class="lu" aria-hidden="true"></i>SQL</span>{% endif %}</td>
-      <td class="hidden lg:table-cell"><span class="ca7-ptags">{% for t in p.tags.all|slice:":2" %}<a{% if t.kind == "sql" %} class="is-sql"{% endif %} href="{% querystring tag=t.name page=None %}">{{ t.name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</span></td>
-      <td><span class="ca-diff ca-diff-{{ p.difficulty }}" title="Reyting {{ p.rating }}">{{ p.get_difficulty_display }}</span></td>
+      <td class="ca7-col-tags"><span class="ca7-ptags">{% for t in p.tags.all|slice:":2" %}<a{% if t.kind == "sql" %} class="is-sql"{% endif %} href="{% querystring tag=t.name page=None %}">{{ t.name|tag_uz }}</a>{% if not forloop.last %}, {% endif %}{% empty %}{% if p.kind == "sql" %}<span>SQL</span>{% else %}<span aria-hidden="true">—</span>{% endif %}{% endfor %}</span></td>
+      <td>{% include "problems/_difficulty.html" %}</td>
       <td class="hidden text-right md:table-cell">{% if p.attempts %}{% widthratio p.ac_count p.attempts 100 %}%{% else %}<span class="text-mute">—</span>{% endif %}</td>
       <td class="text-right" title="{{ p.solvers }} kishi yechgan, {{ p.ac_count }} / {{ p.attempts }} urinish qabul qilingan">{{ p.solvers|kplus }}</td>
       {% if any_rated %}<td class="hidden text-right xl:table-cell">{% if p.avg_stars %}<span class="ca-stars-sum" title="O‘rtacha baho"><i data-lucide="star" class="lu" aria-hidden="true"></i><span class="tabular">{{ p.avg_stars|floatformat:1 }}</span></span>{% else %}<span class="text-mute" aria-hidden="true">—</span><span class="sr-only">baho yo‘q</span>{% endif %}</td>{% endif %}
@@ -132,7 +120,7 @@ table; on the right your progress per level, picks for you and, while browsing, 
   {% if ring %}{% url 'profile' user.username as profile_url %}{% include "problems/_solved_card.html" with title="Taraqqiyot" more_url=profile_url %}{% endif %}
   {% if next_picks %}
   <section class="ca-box" aria-labelledby="picks-title">
-    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" aria-hidden="true"></span><h2 id="picks-title">Siz uchun</h2>{% if picks_reason %}<a class="ca-box-tools ca-link" href="{% querystring tag=picks_reason page=None %}" title="Eng kam yechgan mavzuingiz">{{ picks_reason }}</a>{% endif %}</div>
+    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" aria-hidden="true"></span><h2 id="picks-title">Siz uchun</h2>{% if picks_reason %}<a class="ca-box-tools ca-link" href="{% querystring tag=picks_reason page=None %}" title="Eng kam yechgan mavzuingiz">{{ picks_reason|tag_uz }}</a>{% endif %}</div>
     <ul class="ca7-links">
       {% for p, reason in next_picks %}<li><a class="ca-link" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a><span class="ca-diff ca-diff-{{ p.difficulty }}">{{ p.get_difficulty_display }}</span></li>{% endfor %}
     </ul>
@@ -149,4 +137,25 @@ table; on the right your progress per level, picks for you and, while browsing, 
   {% endif %}
 </aside>
 </div>
+<script>
+(() => {
+  // Teglar: shown, with a switch in the Mavzu menu to hide them; the choice is remembered.
+  const table = document.getElementById("ps-table"), box = document.getElementById("tags-toggle");
+  if (box) {
+    let on = true;
+    try { on = localStorage.getItem("ca-show-tags") !== "0"; } catch {}
+    const apply = () => { box.checked = on; table?.classList.toggle("is-tags-off", !on); };
+    apply();
+    box.addEventListener("change", () => { on = box.checked; try { localStorage.setItem("ca-show-tags", on ? "1" : "0"); } catch {} apply(); });
+  }
+  const dd = document.getElementById("tag-dd"), q = document.getElementById("tag-q");
+  if (dd && q) {
+    dd.addEventListener("toggle", () => { if (dd.open) q.focus(); });
+    q.addEventListener("input", () => {
+      const v = q.value.trim().toLowerCase();
+      document.querySelectorAll("#tag-list [data-name]").forEach((a) => { a.hidden = v !== "" && !a.dataset.name.includes(v); });
+    });
+  }
+})();
+</script>
 {% endblock %}

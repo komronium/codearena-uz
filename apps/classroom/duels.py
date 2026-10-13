@@ -49,6 +49,85 @@ def elo(a: int, b: int, score: float, ka: int, kb: int) -> tuple[int, int]:
     return round(ka * (score - expected)), round(kb * ((1 - score) - (1 - expected)))
 
 
+# ---- seasons ------------------------------------------------------------------------------------------
+SEASON_KEEP = 0.5  # a new month keeps this share of how far a rating is from START_RATING
+SEASON_MIN_DUELS = 3  # the podium is for players with at least this many finished duels that month
+
+
+def season_of(moment) -> str:
+    """The month (YYYY-MM, local time) a moment falls in."""
+    return timezone.localtime(moment).strftime("%Y-%m")
+
+
+def duel_season(duel) -> str:
+    """The season a finished duel counts for: the month it ended (it created, if no clock was kept)."""
+    return season_of(max(filter(None, [duel.ends_at, duel.opponent_ends_at, duel.created])))
+
+
+def _month_no(season: str) -> int:
+    y, m = season.split("-")
+    return int(y) * 12 + int(m)
+
+
+def soften(rating: int, steps: int = 1) -> int:
+    """The rating after `steps` season changes: pulled part of the way back to START_RATING."""
+    for _ in range(max(steps, 0)):
+        rating = START_RATING + round((rating - START_RATING) * SEASON_KEEP)
+    return rating
+
+
+def carried(rating: int, was: str, now: str) -> int:
+    """A player's rating as the season `now` starts, when it was last settled in season `was` ("" = never)."""
+    return soften(rating, _month_no(now) - _month_no(was)) if was and was < now else rating
+
+
+def current_season() -> str:
+    return season_of(timezone.now())
+
+
+def season_ends():
+    """When the running season ends: the first moment of next month, local time."""
+    now = timezone.localtime()
+    y, m = (now.year + 1, 1) if now.month == 12 else (now.year, now.month + 1)
+    return timezone.make_aware(datetime(y, m, 1), timezone.get_current_timezone())
+
+
+def season_tables() -> dict[str, list[dict]]:
+    """For every season with finished duels: players' rating after their last duel in it, with how many they played.
+    One pass over the duels, applying the same month changes as settle()."""
+    rating, last, table = {}, {}, {}
+    for d in Duel.objects.filter(status=Duel.Status.FINISHED).order_by("created", "pk"):
+        season = duel_season(d)
+        for uid, delta in ((d.challenger_id, d.challenger_delta), (d.opponent_id, d.opponent_delta)):
+            r = carried(rating.get(uid, START_RATING), last.get(uid, ""), season) + (delta or 0)
+            rating[uid], last[uid] = r, season
+            row = table.setdefault(season, {}).setdefault(uid, {"user_id": uid, "rating": r, "duels": 0})
+            row["rating"], row["duels"] = r, row["duels"] + 1
+    return {s: sorted(rows.values(), key=lambda r: (-r["rating"], -r["duels"], r["user_id"])) for s, rows in table.items()}
+
+
+def close_seasons() -> None:
+    """Store the podium of every finished month that has none yet. Cheap to call: it only does the pass when a past
+    month has duels but no stored result."""
+    from .models import DuelSeasonResult
+
+    now = current_season()
+    done = set(DuelSeasonResult.objects.values_list("season", flat=True))
+    past = {duel_season(d) for d in Duel.objects.filter(status=Duel.Status.FINISHED).only(
+        "created", "ends_at", "opponent_ends_at")}
+    todo = {s for s in past if s < now and s not in done}
+    if not todo:
+        return
+    tables = season_tables()
+    for season in sorted(todo):
+        eligible = [r for r in tables.get(season, []) if r["duels"] >= SEASON_MIN_DUELS][:3]
+        for rank, r in enumerate(eligible, 1):
+            DuelSeasonResult.objects.get_or_create(season=season, rank=rank, defaults={
+                "user_id": r["user_id"], "rating": r["rating"], "duels": r["duels"]})
+        if not eligible:  # a quiet month: leave a marker, or it would be worked out again on every visit
+            DuelSeasonResult.objects.get_or_create(season=season, rank=0, defaults={"user": None, "rating": 0, "duels": 0})
+
+
 # ---- one player's run ----------------------------------------------------------------------------------
 class Run(NamedTuple):
     start: datetime
@@ -256,7 +335,10 @@ def challenge(challenger, opponent_username: str, language: str, level: str) -> 
         questions = _pick(pair, language, level)
         if questions is None:
             return None, "Bu til va darajada savollar hali yetarli emas — boshqasini tanlang."
-        return _open(challenger, language, level, questions, opponent=opponent), ""
+        duel = _open(challenger, language, level, questions, opponent=opponent)
+        from apps.accounts.telegram import notify_duel_challenge
+        transaction.on_commit(lambda: notify_duel_challenge(duel.pk))
+        return duel, ""
 
 
 def accept(duel, user) -> str:
@@ -304,16 +386,19 @@ def settle(duel) -> None:
             return
         a, b = User.objects.get(pk=duel.challenger_id), User.objects.get(pk=duel.opponent_id)
         score = 0.5 if winner == 0 else (1.0 if winner == a.pk else 0.0)
-        da, db = elo(a.duel_rating, b.duel_rating, score, k_factor(a.duel_rating, _played(a.pk)),
-                     k_factor(b.duel_rating, _played(b.pk)))
+        season = duel_season(duel)  # a new month starts everyone's rating part of the way back to the middle
+        ra, rb = carried(a.duel_rating, a.duel_season, season), carried(b.duel_rating, b.duel_season, season)
+        da, db = elo(ra, rb, score, k_factor(ra, _played(a.pk)), k_factor(rb, _played(b.pk)))
         duel.status, duel.winner_id = Duel.Status.FINISHED, winner or None
         duel.challenger_delta, duel.opponent_delta = da, db
         duel.save(update_fields=["status", "winner", "challenger_delta", "opponent_delta"])
-        User.objects.filter(pk=a.pk).update(duel_rating=F("duel_rating") + da)
-        User.objects.filter(pk=b.pk).update(duel_rating=F("duel_rating") + db)
+        User.objects.filter(pk=a.pk).update(duel_rating=ra + da, duel_season=season)
+        User.objects.filter(pk=b.pk).update(duel_rating=rb + db, duel_season=season)
     from apps.accounts.badges import award  # a finished duel can lift both players' duel badges
+    from apps.accounts.telegram import notify_duel_result
     for player in (a, b):
         award(player, {"duels"})
+    notify_duel_result(duel.pk)
 
 
 def settle_open(user) -> None:
@@ -322,18 +407,20 @@ def settle_open(user) -> None:
 
 
 def replay(duels, users) -> None:
-    """Rebuild duel ratings from START_RATING over finished duels, oldest first, with k_factor: each
-    keeps its result, the deltas are worked out again. `duels`/`users` are querysets (also historical
-    models, so a migration can call it)."""
-    rating, played = {}, {}
+    """Rebuild duel ratings from START_RATING over finished duels, oldest first, with k_factor and the monthly
+    softening: each keeps its result, the deltas are worked out again. `duels`/`users` are querysets."""
+    rating, played, season_of_user = {}, {}, {}
     for d in duels.filter(status="finished").order_by("created", "pk"):
         a, b = d.challenger_id, d.opponent_id
-        ra, rb = rating.get(a, START_RATING), rating.get(b, START_RATING)
+        season = duel_season(d)
+        ra = carried(rating.get(a, START_RATING), season_of_user.get(a, ""), season)
+        rb = carried(rating.get(b, START_RATING), season_of_user.get(b, ""), season)
         score = 0.5 if d.winner_id is None else (1.0 if d.winner_id == a else 0.0)
         da, db = elo(ra, rb, score, k_factor(ra, played.get(a, 0)), k_factor(rb, played.get(b, 0)))
         duels.filter(pk=d.pk).update(challenger_delta=da, opponent_delta=db)
         rating[a], rating[b] = ra + da, rb + db
+        season_of_user[a] = season_of_user[b] = season
         played[a], played[b] = played.get(a, 0) + 1, played.get(b, 0) + 1
-    users.exclude(pk__in=rating).exclude(duel_rating=START_RATING).update(duel_rating=START_RATING)
+    users.exclude(pk__in=rating).exclude(duel_rating=START_RATING).update(duel_rating=START_RATING, duel_season="")
     for pk, r in rating.items():
-        users.filter(pk=pk).update(duel_rating=r)
+        users.filter(pk=pk).update(duel_rating=r, duel_season=season_of_user[pk])

@@ -14,5 +14,6 @@ urlpatterns = [
     path("lists/<int:pk>/edit/", views.list_edit, name="list_edit"),
     path("lists/<int:pk>/delete/", views.list_delete, name="list_delete"),
     path("save/<slug:slug>/", views.save, name="save"),
+    path("<slug:slug>/read/", views.course_read, name="course_read"),
     path("<slug:slug>/", views.course_detail, name="course"),  # last: slugs in RESERVED_SLUGS never reach it
 ]

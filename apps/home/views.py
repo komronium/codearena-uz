@@ -12,12 +12,14 @@ from apps.accounts.models import User
 from apps.accounts.tiers import next_tier as _next_tier
 from apps.classroom import duels
 from apps.classroom.models import Assignment, Duel
+from apps.classroom.progress import completion
 from apps.contests.models import Contest, Participation
 from apps.contests.views import _standings  # cached, the standings page's own numbers
 from apps.learn.models import StudyPlan
 from apps.learn.views import continue_course
 from apps.problems.daily import daily_for, streaks, week_strip
 from apps.problems.models import DailySolve, Language, Problem
+from apps.problems.quests import streak_state, today_quests
 from apps.problems.progress import level_progress, solved_ring
 from apps.problems.skills import next_problems, open_problems, shared_reason
 from apps.submissions.models import Submission
@@ -88,6 +90,28 @@ def _badge_card(user) -> dict:
     return {"latest": latest, "latest_at": last.earned_at if last else None, "near": near,
             "earned": sum(1 for b in board if b["tier"]), "total": len(board)}
 
+def _classes(user, now):
+    """The teacher's classes for the dashboard's top: size, the work now open and how many of the class have handed
+    in its most pressing assignment. [] for everyone who teaches nothing."""
+    groups = list(user.taught_groups.annotate(n_students=Count("members", distinct=True)).order_by("name"))
+    if not groups:
+        return []
+    open_work = {}
+    for a in (Assignment.objects.filter(group__in=groups, start__lte=now, deadline__gt=now)
+              .prefetch_related("assignment_problems", "group").order_by("deadline")):
+        open_work.setdefault(a.group_id, []).append(a)
+    pending = [w[0] for w in open_work.values()]
+    done = completion(pending)
+    out = []
+    for g in groups:
+        work = open_work.get(g.pk, [])
+        row = {"group": g, "n_open": len(work), "next": work[0] if work else None}
+        if work:
+            row["done"], row["of"] = done[work[0].pk]
+        out.append(row)
+    return out
+
+
 def home(request):
     now = timezone.now()
     daily = daily_for()
@@ -123,7 +147,8 @@ def home(request):
     for d in live:  # your own run, if it still goes on
         r = duels.run(d, user.pk) if d.mode == Duel.Mode.QUIZ else None
         d.my_end = r.end if r is not None and not r.over(now) else None
-    current, best = streaks(user)
+    state = streak_state(user)
+    current, best = state["current"], state["best"]
     next_picks = next_problems(user, exclude=(daily.problem_id,) if daily else ())
     today = timezone.localdate()
     # a newcomer (nothing sent, no rated round) gets the first steps instead of an empty dashboard
@@ -133,13 +158,19 @@ def home(request):
     if is_new:
         first_problem = (open_problems().filter(difficulty=Problem.Difficulty.BEGINNER).order_by("pk").first()
                          or open_problems().order_by("pk").first())
+    taught = list(Assignment.objects.filter(group__teacher=user).select_related("group")
+                  .prefetch_related("assignment_problems").order_by("-deadline")[:3])
+    handed = completion(taught)
+    for a in taught:
+        a.done_n, a.total_n = handed[a.pk]
     return render(request, "home/dashboard.html", {
         "is_new": is_new, "first_problem": first_problem,
         "n_courses": StudyPlan.objects.filter(is_public=True).count() if is_new else 0,
         "joined_any": Participation.objects.filter(user=user).exists() if is_new else False,
         "daily": daily,
         "daily_done": bool(daily) and DailySolve.objects.filter(user=user, daily=daily).exists(),
-        "streak": current, "best_streak": best, "week": week_strip(user),
+        "streak": current, "best_streak": best, "freezes": state["freezes"], "quests": today_quests(user),
+        "week": week_strip(user),
         # the profile's count: public problems solved (what the practice points are made of)
         "solved_count": Problem.objects.filter(userproblemsolved__user=user, is_public=True).count(),
         "homework": homework,
@@ -159,8 +190,7 @@ def home(request):
         "recent": list(Submission.objects.filter(user=user).select_related("problem", "language")[:5]),
         "best_rating": max(Participation.objects.filter(user=user, rating_after__isnull=False)
                            .values_list("rating_after", flat=True), default=None),
-        "taught": list(Assignment.objects.filter(group__teacher=user).select_related("group")
-                       .order_by("-deadline")[:3]),
+        "taught": taught, "classes": _classes(user, now),
     })
 
 

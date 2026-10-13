@@ -44,14 +44,14 @@ and optionally problems, n_participants, next_cp (the first problem you have not
         {% if active == "overview" %}
         <div class="ca-band-actions">
           {% if contest.has_ended %}
-            {% if problems %}<a class="ca-btn ca-btn-ghost" href="#contest-problems"><i data-lucide="play" class="lu" aria-hidden="true"></i>Masalalarni yechish</a>{% endif %}
+            {% if problems %}<a class="ca-btn ca-btn-ghost" href="#contest-problems"><i data-lucide="list" class="lu" aria-hidden="true"></i>Masalalar ro‘yxati</a>{% endif %}
             {% if can_virtual %}<a class="ca-btn ca-btn-primary" href="#virtual-title"><i data-lucide="rewind" class="lu" aria-hidden="true"></i>Virtual qatnashish</a>{% endif %}
           {% elif not user.is_authenticated %}
             <a class="ca-btn ca-btn-primary" href="{% url 'login' %}?next={{ request.path|urlencode }}"><i data-lucide="log-in" class="lu" aria-hidden="true"></i>Kirib qatnashish</a>
           {% elif not user.is_staff and not registered %}
             <form method="post" action="{% url 'contests:register' contest.pk %}" id="contest-register-form">
               {% csrf_token %}
-              <button type="submit" class="ca-btn ca-btn-primary" id="contest-register-btn"><i data-lucide="check" class="lu" aria-hidden="true"></i>Qatnashish</button>
+              <button type="submit" class="ca-btn ca-btn-primary" id="contest-register-btn"><i data-lucide="user-plus" class="lu" aria-hidden="true"></i>Qatnashish uchun yozilish</button>
             </form>
             <script>
               document.getElementById("contest-register-form").addEventListener("submit", () => {

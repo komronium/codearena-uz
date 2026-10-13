@@ -17,7 +17,9 @@ is among the accepted ones and the next step.{% endcomment %}
         {% if s.contest %}<a class="text-white hover:underline" href="{% url 'contests:standings' s.contest.pk %}">{{ s.contest.title }}</a>{% else %}<span>mashq</span>{% endif %}
       </p>
     </div>
-    {% if s.user_id == user.pk %}<a class="ca-btn ca-btn-gold ml-auto" href="{% url 'problems:detail' s.problem.slug %}">Masalaga qaytish</a>{% endif %}
+    {% if s.user_id == user.pk %}<div class="ml-auto flex flex-wrap gap-2">
+      {% if s.contest_id is None or s.contest.has_ended %}<a class="ca-btn {% if s.verdict != 'AC' %}ca-btn-gold{% else %}ca-btn-ghost{% endif %}" href="{% url 'problems:detail' s.problem.slug %}?from={{ s.pk }}"><i data-lucide="code" class="lu" aria-hidden="true"></i>Muharrirda ochish</a>{% endif %}
+      <a class="ca-btn {% if s.verdict == 'AC' %}ca-btn-gold{% else %}ca-btn-ghost{% endif %}" href="{% url 'problems:detail' s.problem.slug %}">Masalaga qaytish</a></div>{% endif %}
   </div>
 </section>
 {% endblock %}
@@ -30,7 +32,12 @@ is among the accepted ones and the next step.{% endcomment %}
 
   <section class="mt-9" aria-labelledby="code-title">
     <div class="ca7-sec-h"><span class="ca-star" aria-hidden="true"></span><h2 id="code-title">Kod</h2>
-      <span class="ca7-r flex items-center gap-3 text-sm text-mute">{{ s.language.name }} · {{ s.source|length }} belgi
+      <span class="ca7-r flex items-center gap-3 text-sm text-mute">
+        {% if prev_sub or next_sub %}<span class="ca7-hop" aria-label="Shu masaladagi boshqa urinishlar">
+          {% if prev_sub %}<a href="{% url 'submissions:detail' prev_sub.pk %}" title="Oldingi urinish #{{ prev_sub.pk|stringformat:'06d' }}"><i data-lucide="chevron-left" class="lu" aria-hidden="true"></i>Oldingi</a>{% endif %}
+          {% if next_sub %}<a href="{% url 'submissions:detail' next_sub.pk %}" title="Keyingi urinish #{{ next_sub.pk|stringformat:'06d' }}">Keyingi<i data-lucide="chevron-right" class="lu" aria-hidden="true"></i></a>{% endif %}
+        </span>{% endif %}
+        {{ s.language.name }} · {{ s.source|length }} belgi
         <button type="button" class="ca-btn ca-btn-soft ca-btn-wb" data-copy-code><i data-lucide="copy" class="lu" aria-hidden="true"></i>Nusxalash</button></span></div>
     <div class="ca7-code" translate="no">
       <pre class="ca7-code-ln" aria-hidden="true">{% for n in line_numbers %}{{ n }}
@@ -39,7 +46,8 @@ is among the accepted ones and the next step.{% endcomment %}
     </div>
   </section>
 
-{% if can_review %}
+{# a student with no comments yet has nothing to answer: the section appears with the first one #}
+{% if can_review and reviews or can_review and s.user_id != user.pk %}
 <section class="mt-9 space-y-4" id="review" aria-labelledby="review-title">
   <div class="ca7-sec-h !mb-0"><span class="ca-star" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span><h2 id="review-title">Kod sharhi</h2></div>
   {% for r in reviews %}
@@ -55,10 +63,10 @@ is among the accepted ones and the next step.{% endcomment %}
   {% empty %}
   <p class="text-sm text-mute">Hali sharh yo‘q.{% if s.user_id != user.pk %} Qator raqamini ko‘rsatib izoh qoldiring — o‘quvchi uni kodi yonida ko‘radi.{% endif %}</p>
   {% endfor %}
-  <form method="post" action="{% url 'classroom:review' s.pk %}" class="grid gap-2 sm:grid-cols-[7rem_1fr_auto] sm:items-end">{% csrf_token %}
+  <form method="post" action="{% url 'classroom:review' s.pk %}" class="grid gap-2 sm:grid-cols-[7rem_1fr_auto] sm:items-start">{% csrf_token %}
     <div><label class="ca-label" for="review-line">Qator</label><input id="review-line" name="line" type="number" min="1" max="{{ n_lines }}" class="ca-input" placeholder="—"></div>
     <div><label class="ca-label" for="review-body">{% if s.user_id == user.pk %}Javob{% else %}Izoh{% endif %}</label><textarea id="review-body" name="body" rows="2" maxlength="2000" required class="ca-input"></textarea></div>
-    <button class="ca-btn ca-btn-primary"><i data-lucide="send" class="lu" aria-hidden="true"></i>Yuborish</button>
+    <button class="ca-btn ca-btn-primary sm:mt-[1.4rem]"><i data-lucide="send" class="lu" aria-hidden="true"></i>Yuborish</button>
   </form>
 </section>
 {% endif %}

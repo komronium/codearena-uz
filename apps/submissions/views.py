@@ -120,7 +120,9 @@ def submit(request, slug):
         **telemetry,
     )
     django_rq.enqueue(run_submission, sub.pk)
-    return redirect("submissions:detail", sub.pk)  # the result as it comes in; "Masalaga qaytish" leads back
+    return redirect(
+        "submissions:detail", sub.pk
+    )  # the result as it comes in; "Masalaga qaytish" leads back
 
 
 @login_required
@@ -306,10 +308,18 @@ def _results_ctx(s):
     if first_fail is not None:
         first_fail.index = results.index(first_fail) + 1
     total = s.total or s.problem.testcases.count()
+    # one cell per test: passed, failed or never run (the judge stops at the first failure)
+    n = min(total, 60)
+    passed = min(s.passed, n)
+    strip = ["ok"] * passed
+    if s.is_terminal and s.verdict != Submission.Verdict.AC and passed < n:
+        strip.append("bad")
+    strip += ["no"] * (n - len(strip))
     return {
         "s": s,
         "results": results,
         "first_fail": first_fail,
+        "strip": strip,
         "slowest": max((r.exec_ms for r in results), default=None),
         "beats": _beats(s) if s.verdict == "AC" else None,
         "progress": {
@@ -326,8 +336,19 @@ def detail(request, pk):
     ctx = _results_ctx(s)
     # the code with its line numbers beside it, and after an accept the next problem to try
     ctx["line_numbers"] = range(1, len(s.source.splitlines()) + 1)
-    if s.user_id == request.user.pk and s.verdict == Submission.Verdict.AC and s.contest_id is None:
+    # the neighbours among this person's attempts at the same problem, to step back and forth through them
+    mine = Submission.objects.filter(
+        user_id=s.user_id, problem_id=s.problem_id, contest_id=s.contest_id
+    )
+    ctx["prev_sub"] = mine.filter(pk__lt=s.pk).order_by("-pk").first()
+    ctx["next_sub"] = mine.filter(pk__gt=s.pk).order_by("pk").first()
+    if (
+        s.user_id == request.user.pk
+        and s.verdict == Submission.Verdict.AC
+        and s.contest_id is None
+    ):
         from apps.problems.skills import next_problems
+
         picks = next_problems(request.user, n=1, exclude=(s.problem_id,))
         ctx["next_pick"] = picks[0] if picks else None
     if can_review(request.user, s):
@@ -349,18 +370,20 @@ def status(request, pk):
     if s.user_id == request.user.pk and s.verdict == Submission.Verdict.AC:
         # the accept may have lifted a badge: say so here and now, with the verdict, not on some later page
         from apps.accounts import badges
+
         badges.award(request.user, {"problems", "learn"})
         ctx["new_badges"] = badges.unseen(request.user)
     return render(request, "submissions/_status.html", ctx)
 
 
 def mine(request):
-    """The status page, after Codeforces': everyone's submissions, newest first, or with ?mine=1 your
-    own. Other people's rows leave out anything that could give a contest away: problems that aren't
+    """The status page, after Codeforces': your own submissions, newest first (signed in), or with ?mine=0 everyone's. Other people's rows leave out anything that could give a contest away: problems that aren't
     public, and every problem a running or upcoming contest holds. Only the code stays private (_own).
     Staff see every row; a round's own list is contests:submissions."""
-    own = request.GET.get("mine") == "1"
-    if own and not request.user.is_authenticated:
+    # Signed-in people land on their own tries; "Hamma" is ?mine=0. Guests only ever see everyone's.
+    mine_arg = request.GET.get("mine")
+    own = mine_arg == "1" or (mine_arg is None and request.user.is_authenticated)
+    if mine_arg == "1" and not request.user.is_authenticated:
         return redirect_to_login(request.get_full_path())
     qs = Submission.objects.select_related("problem", "language", "user")
     if own:
@@ -372,18 +395,26 @@ def mine(request):
     # the band's figures, over the whole list (yours or everyone's) before the filters
     total = qs.count()
     accepted = qs.filter(verdict=Submission.Verdict.AC).count()
-    stats = {"total": total, "today": qs.filter(created__date=timezone.localdate()).count(),
-             "ac_pct": round(100 * accepted / total) if total else None}
+    stats = {
+        "total": total,
+        "today": qs.filter(created__date=timezone.localdate()).count(),
+        "ac_pct": round(100 * accepted / total) if total else None,
+    }
     contest_id = request.GET.get("contest", "")
-    if own and contest_id.isdigit():  # a round's "Urinishlarim" tab: your tries in that round
+    if (
+        own and contest_id.isdigit()
+    ):  # a round's "Urinishlarim" tab: your tries in that round
         qs = qs.filter(contest_id=int(contest_id))
     verdict = request.GET.get("verdict", "")
     if verdict in Submission.TERMINAL:
         qs = qs.filter(verdict=verdict)
     q = request.GET.get("q", "").strip()[:60]
     if q:
-        qs = qs.filter(Q(problem__title__icontains=q) | Q(user__username__icontains=q)) if not own \
+        qs = (
+            qs.filter(Q(problem__title__icontains=q) | Q(user__username__icontains=q))
+            if not own
             else qs.filter(problem__title__icontains=q)
+        )
     languages = list(Language.objects.filter(is_active=True).order_by("name"))
     lang = request.GET.get("lang", "")
     if lang.isdigit() and any(str(x.pk) == lang for x in languages):
@@ -395,6 +426,14 @@ def mine(request):
     return render(
         request,
         "submissions/list.html",
-        {"subs": page, "verdict": verdict, "verdicts": verdicts, "own": own, "stats": stats,
-         "q": q, "languages": languages, "lang": lang},
+        {
+            "subs": page,
+            "verdict": verdict,
+            "verdicts": verdicts,
+            "own": own,
+            "stats": stats,
+            "q": q,
+            "languages": languages,
+            "lang": lang,
+        },
     )

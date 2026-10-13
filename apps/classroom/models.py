@@ -168,3 +168,66 @@ class DuelAnswer(models.Model):
     class Meta:
         ordering = ["index"]
         constraints = [models.UniqueConstraint(fields=["duel", "user", "index"], name="one_answer_per_question")]
+
+
+class DuelSeasonResult(models.Model):
+    """A closed month's podium of the duel rating: who stood where when the season ended."""
+    season = models.CharField(max_length=7)  # YYYY-MM
+    rank = models.PositiveSmallIntegerField()
+    # rank 0 is the marker of a month with no podium (too quiet): no user
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE, related_name="duel_medals")
+    rating = models.IntegerField()
+    duels = models.PositiveIntegerField()
+
+    class Meta:
+        ordering = ["season", "rank"]
+        constraints = [models.UniqueConstraint(fields=["season", "rank"], name="one_user_per_season_rank")]
+
+
+class LiveQuiz(models.Model):
+    """A teacher's live quiz, Kahoot-style: the host screen goes on the projector, students join with a code on
+    their phones, everyone gets the same question at once and faster right answers score more. The questions come
+    from the duel bank. The state machine lives in apps.classroom.live."""
+    class Status(models.TextChoices):
+        LOBBY = "lobby", "Kutish zali"
+        QUESTION = "question", "Savol"
+        REVEAL = "reveal", "Natija"
+        DONE = "done", "Tugagan"
+
+    teacher = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="+")
+    title = models.CharField(max_length=120, blank=True)
+    code = models.CharField(max_length=6, db_index=True)
+    language = models.CharField(max_length=10, choices=DuelQuestion.Lang.choices)
+    level = models.CharField(max_length=10, choices=DuelQuestion.Level.choices)
+    questions = models.JSONField(default=list)  # DuelQuestion ids, in order
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.LOBBY)
+    index = models.IntegerField(default=-1)
+    question_started_at = models.DateTimeField(null=True, blank=True)
+    seconds = models.PositiveSmallIntegerField(default=20)
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created"]
+
+
+class LiveQuizPlayer(models.Model):
+    quiz = models.ForeignKey(LiveQuiz, on_delete=models.CASCADE, related_name="players")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="+")
+    score = models.IntegerField(default=0)
+    joined = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["quiz", "user"], name="one_player_per_live_quiz")]
+
+
+class LiveQuizAnswer(models.Model):
+    quiz = models.ForeignKey(LiveQuiz, on_delete=models.CASCADE, related_name="answers")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="+")
+    index = models.PositiveSmallIntegerField()
+    answer = models.CharField(max_length=200, blank=True)
+    correct = models.BooleanField(default=False)
+    points = models.PositiveIntegerField(default=0)
+    ms = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["quiz", "user", "index"], name="one_live_answer")]
