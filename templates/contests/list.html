@@ -62,9 +62,9 @@ the right.{% endcomment %}
       <tr class="ca-month"><th colspan="{% if user.is_authenticated %}6{% else %}4{% endif %}" scope="rowgroup">{{ m.grouper }}</th></tr>
       {% for c in m.list %}
       <tr>
-        <td><span class="ca7-date" aria-hidden="true"><b>{{ c.start|date:"d" }}</b>{{ c.start_month_short }}</span><span class="sr-only">{{ c.start|date:"d.m.Y" }}</span></td>
+        <td><span class="ca7-date{% if not c.is_rated %} is-plain{% endif %}" aria-hidden="true"><b>{{ c.start|date:"d" }}</b>{{ c.start|weekday_uz }}</span><span class="sr-only">{{ c.start|date:"d.m.Y" }}</span></td>
         <td><a class="ca-link" href="{% url 'contests:detail' c.pk %}">{{ c.title }}</a>{% include "contests/_tags.html" %}
-          <span class="block text-xs text-mute">{{ c.start|weekday_uz }} · <span class="tabular">{{ c.start|date:"H:i" }}</span> · {{ c.duration_label }}</span></td>
+          <span class="block text-xs text-mute"><span class="tabular">{{ c.start|date:"H:i" }}</span> · {{ c.duration_label }}</span></td>
         <td class="hidden text-right tabular md:table-cell">{{ c.n_participants }}</td>
         {% if user.is_authenticated %}
         <td class="text-right">{% if c.me and c.me.rank %}<b class="font-semibold tabular">{{ c.me.rank }}</b>{% elif c.me %}<span class="text-mute">qatnashgan</span>{% else %}<span class="text-mute" title="Siz bu raundda qatnashmagansiz">qatnashmagan</span>{% endif %}</td>
