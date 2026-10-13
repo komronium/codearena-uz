@@ -6,6 +6,15 @@
 
 /* Lato for words, JetBrains Mono for data (clocks, ranks, scores, counts) and code. Both are
    vendored by build.mjs; JetBrains Mono is the mono; Anthropic Mono is the editor's default; Lilex and Fira Code stay as editor options. */
+/* Lato 3 (SIL OFL 1.1, npm lato-font 3.0.0), subset: four real weights, 400/500/600/700, so medium and semibold are what the design says. */
+@font-face { font-family: "Lato"; font-style: normal; font-weight: 400; font-display: swap; unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; src: url("../fonts/lato3-400-latin-ext.woff2") format("woff2"); }
+@font-face { font-family: "Lato"; font-style: normal; font-weight: 400; font-display: swap; unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2190-2193,U+2212,U+2215,U+2248,U+2260,U+2264-2265,U+FEFF,U+FFFD; src: url("../fonts/lato3-400-latin.woff2") format("woff2"); }
+@font-face { font-family: "Lato"; font-style: normal; font-weight: 500; font-display: swap; unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; src: url("../fonts/lato3-500-latin-ext.woff2") format("woff2"); }
+@font-face { font-family: "Lato"; font-style: normal; font-weight: 500; font-display: swap; unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2190-2193,U+2212,U+2215,U+2248,U+2260,U+2264-2265,U+FEFF,U+FFFD; src: url("../fonts/lato3-500-latin.woff2") format("woff2"); }
+@font-face { font-family: "Lato"; font-style: normal; font-weight: 600; font-display: swap; unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; src: url("../fonts/lato3-600-latin-ext.woff2") format("woff2"); }
+@font-face { font-family: "Lato"; font-style: normal; font-weight: 600; font-display: swap; unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2190-2193,U+2212,U+2215,U+2248,U+2260,U+2264-2265,U+FEFF,U+FFFD; src: url("../fonts/lato3-600-latin.woff2") format("woff2"); }
+@font-face { font-family: "Lato"; font-style: normal; font-weight: 700; font-display: swap; unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; src: url("../fonts/lato3-700-latin-ext.woff2") format("woff2"); }
+@font-face { font-family: "Lato"; font-style: normal; font-weight: 700; font-display: swap; unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2190-2193,U+2212,U+2215,U+2248,U+2260,U+2264-2265,U+FEFF,U+FFFD; src: url("../fonts/lato3-700-latin.woff2") format("woff2"); }
 @font-face { font-family: "Anthropic Mono"; font-weight: 400; font-style: normal; font-display: swap; src: url("../fonts/AnthropicMono-Regular.woff2") format("woff2"); }
 @font-face { font-family: "Anthropic Mono"; font-weight: 400; font-style: italic; font-display: swap; src: url("../fonts/AnthropicMono-Italic.woff2") format("woff2"); }
 
@@ -125,7 +134,7 @@
 html { color-scheme: light dark; }
 body {
   font-family: var(--ca-sans); font-size: 0.9375rem; font-variant-numeric: tabular-nums;
-  /* Lato ships regular and bold here: 500 reads as regular and 600 as bold */
+  /* Lato 3 ships 400, 500, 600 and 700, so every weight in the CSS is the real one */
   background: rgb(var(--ca-paper-rgb));
 }
 h1, h2, h3 { letter-spacing: -.02em; }
@@ -2005,8 +2014,8 @@ section.ca-ed-full { background: rgb(13 16 22); }
 /* side cards are narrow: a slightly smaller title keeps "Kelgusi musobaqalar" on one line */
 .ca-aside .ca-box-cap.ca-hd h2 { font-size: 1.02rem; }
 
-/* problem names one notch heavier than the text around them; Lato has no 500, so a hair of stroke does it */
-td a[href^="/problems/"]:not([href="/problems/"]):not([href*="?"]), .ca-rows a[href^="/problems/"]:not([href="/problems/"]) { -webkit-text-stroke: .3px currentColor; }
+/* problem names a notch heavier than the text around them: medium */
+td a[href^="/problems/"]:not([href="/problems/"]):not([href*="?"]), .ca-rows a[href^="/problems/"]:not([href="/problems/"]) { font-weight: 500; }
 
 /* the whole interface one notch smaller on a desktop screen, like the mock-ups: every size is in rem, so one line scales all of it;
    the page keeps the same pixel width it had */
@@ -3534,10 +3543,10 @@ body .EasyMDEContainer .cm-s-easymde .cm-link, body .EasyMDEContainer .cm-s-easy
 .ca7-ladder-flag { z-index: 2; pointer-events: none; }
 .ca7-ladder li.is-sel { background: color-mix(in srgb, var(--tier) 12%, transparent); box-shadow: inset 0 -3px 0 var(--tier); }
 
-/* problems list: level words .9rem, topics a notch larger, IDs a touch heavier (Lato has no 500: a hair of stroke) */
+/* problems list: level words .9rem, topics a notch larger, IDs a touch heavier: medium */
 .ca-ps .ca-diff { font-size: .9rem; }
 .ca7-ptags { font-size: 0.9375rem; }
-.ca-pid { -webkit-text-stroke: .3px currentColor; }
+.ca-pid { font-weight: 500; }
 /* the toolbar speaks in one weight: chips, dropdown buttons and buttons are medium, the chosen chip is bold */
-.ca7-seg a, .ca7-ddb, .ca7-tools-r .ca-btn { font-weight: 500; -webkit-text-stroke: .2px currentColor; }
-.ca7-seg a[aria-current], .ca7-dd.is-on > .ca7-ddb { font-weight: 700; -webkit-text-stroke: 0; }
+.ca7-seg a, .ca7-ddb, .ca7-tools-r .ca-btn { font-weight: 500; }
+.ca7-seg a[aria-current], .ca7-dd.is-on > .ca7-ddb { font-weight: 600; }
