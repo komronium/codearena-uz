@@ -28,6 +28,7 @@ from .forms import ProfileEditForm, RegisterForm
 from .models import Follow, TelegramLink, User
 
 from .tiers import RATING_TIERS as _RATING_TIERS
+from .tiers import TIER_ICONS
 from .tiers import next_tier as _next_tier
 from .tiers import rating_tier
 from . import badges as badge_system
@@ -333,12 +334,19 @@ def rating(request):
     order = {"delta": ("-last_delta", "-rating", "username"),
              "contests": ("-contest_count", "-rating", "username")}.get(sort)
     shown = qs.filter(username__icontains=q) if q else qs
+    tier_sel = request.GET.get("tier", "")
+    band = next(((f, ce) for f, ce, n, _c in _RATING_TIERS if n == tier_sel), None)
+    if band:  # one tier's players; the places stay the places on the whole board
+        lo, hi = band
+        shown = shown.filter(rating__gte=lo if lo is not None else -10**9, rating__lt=hi if hi is not None else 10**9)
+    else:
+        tier_sel = ""
     page = Paginator(shown.order_by(*order) if order else shown, 50).get_page(request.GET.get("page"))
     sums = badge_system.summaries([u.pk for u in page])
     for u in page:  # the place on the whole board, equal ratings sharing it, a search included
         u.rank = sum(1 for r in ratings if r > u.rating) + 1
         u.badge_sum = sums.get(u.pk)
-    tiers = [{"name": n, "color": c, "floor": f, "ceiling": ce,
+    tiers = [{"name": n, "color": c, "floor": f, "ceiling": ce, "icon": TIER_ICONS.get(n, "star"),
               "count": sum(1 for r in ratings if (f is None or r >= f) and (ce is None or r < ce))}
              for f, ce, n, c in _RATING_TIERS]
     me = None
@@ -357,7 +365,7 @@ def rating(request):
     spread = _rating_spread(ratings, request.user.rating if me else None)
     return render(request, "accounts/rating.html",
                   {"users": page, "total": len(ratings), "tiers": tiers, "spread": spread, "me": me, "q": q,
-                   "sort": sort if order else ""})
+                   "sort": sort if order else "", "tier_sel": tier_sel})
 
 
 def badges_page(request):
