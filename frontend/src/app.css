@@ -3533,3 +3533,11 @@ body .EasyMDEContainer .cm-s-easymde .cm-link, body .EasyMDEContainer .cm-s-easy
 .ca7-ladder-go:focus-visible { outline: 2px solid rgb(var(--ca-accent-rgb)); outline-offset: -2px; }
 .ca7-ladder-flag { z-index: 2; pointer-events: none; }
 .ca7-ladder li.is-sel { background: color-mix(in srgb, var(--tier) 12%, transparent); box-shadow: inset 0 -3px 0 var(--tier); }
+
+/* problems list: level words .9rem, topics a notch larger, IDs a touch heavier (Lato has no 500: a hair of stroke) */
+.ca-ps .ca-diff { font-size: .9rem; }
+.ca7-ptags { font-size: 0.9375rem; }
+.ca-pid { -webkit-text-stroke: .3px currentColor; }
+/* the toolbar speaks in one weight: chips, dropdown buttons and buttons are medium, the chosen chip is bold */
+.ca7-seg a, .ca7-ddb, .ca7-tools-r .ca-btn { font-weight: 500; -webkit-text-stroke: .2px currentColor; }
+.ca7-seg a[aria-current], .ca7-dd.is-on > .ca7-ddb { font-weight: 700; -webkit-text-stroke: 0; }
