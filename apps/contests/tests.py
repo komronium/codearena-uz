@@ -1287,7 +1287,7 @@ def test_staff_see_a_running_rounds_submissions(client, contest, problem_a, prob
     assert client.get(page).status_code in (302, 403)
 
     client.force_login(User.objects.create_user("boss", password="x", is_staff=True))
-    assert client.get(reverse("submissions:mine")).context["subs"].paginator.count == 2
+    assert client.get(reverse("submissions:mine") + "?mine=0").context["subs"].paginator.count == 2  # "Hamma": staff see the round too
     r = client.get(page)
     assert [(s.label, s.verdict, s.elapsed) for s in r.context["page"]] == [("B", "AC", "00:30"), ("A", "WA", "00:05")]
     assert 'aria-current="page">Urinishlar</a>' in r.content.decode()  # the round's own tab

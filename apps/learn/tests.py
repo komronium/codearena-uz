@@ -64,7 +64,7 @@ def test_progress_ignores_hidden_problems(staff, ali):
     shown, hidden = _problem("a", staff, "t"), _problem("b", staff, "t", is_public=False)
     course = _course("c", "t")
     _solve(ali, hidden)
-    assert plan_progress(ali, [course])[course.pk] == {"done": 0, "total": 1, "pct": 0, "completed": False}
+    assert plan_progress(ali, [course])[course.pk] == {"done": 0, "total": 1, "pct": 0, "completed": False, "read": False, "theory_only": False}
     _solve(ali, shown)
     assert plan_progress(ali, [course])[course.pk]["completed"] is True
 
@@ -73,7 +73,8 @@ def test_progress_ignores_hidden_problems(staff, ali):
 def test_course_without_open_problems_is_never_completed(staff, ali):
     _problem("b", staff, "t", is_public=False)
     for course in (_course("c", "t"), _course("theory-only")):
-        assert plan_progress(ali, [course])[course.pk] == {"done": 0, "total": 0, "pct": 0, "completed": False}
+        assert plan_progress(ali, [course])[course.pk]["completed"] is False
+        assert plan_progress(ali, [course])[course.pk]["total"] == 0
 
 
 @pytest.mark.django_db
@@ -154,7 +155,7 @@ def test_course_shows_theory_before_problems_exist(client):
     assert "<strong>tez</strong>" in body and "tayyorlanmoqda" in body
     assert "faqat nazariya" in client.get(reverse("learn:course", args=["complexity"])).content.decode()
     hub = client.get(reverse("learn:hub")).content.decode()
-    assert "Tayyorlanmoqda" in hub and "Nazariya" in hub and "is-soon" in hub
+    assert "tayyorlanmoqda" in hub and "Nazariya" in hub and "is-soon" in hub
 
 
 @pytest.mark.django_db
@@ -516,7 +517,7 @@ def test_a_course_under_ten_problems_is_being_prepared_and_one_over_fifteen_take
     assert plan_progress(ali, [small])[small.pk]["completed"] is False
     page = client.get(reverse("learn:hub")).content.decode()
     hub_small = page[page.index("Kichik kurs"):page.index("Kichik kurs") + 600]
-    assert "Tayyorlanmoqda" in hub_small and "15 masala" in page
+    assert "ca7-soon-n" in hub_small and "ochiladi" in hub_small and "15 masala" in page
     assert "Masalalar tayyorlanmoqda" in client.get(reverse("learn:course", args=["small"])).content.decode()
     _problem("s9", staff, "small")  # the tenth: the course opens
     assert len(course_rows([small])[small.pk]) == 10

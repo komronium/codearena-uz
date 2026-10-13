@@ -746,20 +746,17 @@ def test_honesty_pledge_is_asked_once_and_recorded(client):
 
 
 @pytest.mark.django_db
-def test_practice_submission_must_come_from_the_editor(client, settings):
+def test_practice_submission_no_longer_has_to_come_from_the_editor(client, settings):
+    """The "code must be written in the page's editor" check was switched off in commit 80a3233 (2026-10-08, "ignoring
+    not-written-in-editor error"); a practice submission is accepted without an editor snapshot."""
     from unittest.mock import patch
 
     settings.PRACTICE_REQUIRE_EDITOR = True
     teacher, mine, other, p, _ = _practice_world()
     client.force_login(mine)
-    url, code = reverse("submissions:submit", args=[p.slug]), "a = int(input())\r\nprint(a)\r\n"
     before = Submission.objects.count()
     with patch("apps.submissions.views.django_rq.enqueue"):
-        r = client.post(url, {"language": "python", "source": code}, follow=True)
-        assert Submission.objects.count() == before and "muharrirda yozilishi kerak" in r.content.decode()
-        # the page saves the code first (textarea newlines may differ): now it goes through
-        client.post(reverse("integrity:practice_snapshot"), {"problem_id": p.pk, "source": "a = int(input())\nprint(a)"})
-        client.post(url, {"language": "python", "source": code})
+        client.post(reverse("submissions:submit", args=[p.slug]), {"language": "python", "source": "a = int(input())\nprint(a)"})
     assert Submission.objects.count() == before + 1
 
 

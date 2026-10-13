@@ -1,7 +1,7 @@
 // Builds CodeArena's static assets from the versions pinned in package.json. The outputs
 // are committed, so the Django image never needs Node:
 //   static/css/app.css         Tailwind (scans templates + apps) + src/app.css + @font-face
-//   static/fonts/*.woff2       Lilex, JetBrains Mono, Fira Code (SIL Open Font License); the
+//   static/fonts/*.woff2       Lilex, JetBrains Mono, Fira Code (SIL Open Font License), plus frontend/fonts/*.woff2 (Lato 3, Anthropic Mono); the
 //                              project's own .otf fonts there are not built and are left alone
 //   static/vendor/*            htmx, Lucide icons, highlight.js
 //   static/vendor/esm/*.js     one ES module per CodeMirror package; every bare import stays
@@ -88,6 +88,10 @@ const stripMaps = (text) => text.replace(/\n?\/\/# sourceMappingURL=\S+\s*$/m, "
 
 function fontFaces() {
   const faces = [];
+  // the fonts that are not on npm (Lato 3 with real Medium/Semibold, Anthropic Mono) live in frontend/fonts/ and are copied as they are
+  for (const f of fs.readdirSync(path.join(HERE, "fonts"))) {
+    if (f.endsWith(".woff2")) fs.copyFileSync(path.join(HERE, "fonts", f), out(`static/fonts/${f}`));
+  }
   for (const [family, sheets] of FONTS) {
     for (const sheet of sheets) {
       const css = fs.readFileSync(nm(sheet), "utf8");

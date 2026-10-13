@@ -522,7 +522,8 @@ def test_status_page_shows_everyone_but_never_a_contests_problems_or_others_code
     r = client.get(reverse("submissions:mine"))  # guests see the board too
     assert list(r.context["subs"]) == [mine, theirs]
     client.force_login(user)
-    body = client.get(reverse("submissions:mine")).content.decode()
+    assert list(client.get(reverse("submissions:mine")).context["subs"]) == [mine]  # signed in: your own tries first
+    body = client.get(reverse("submissions:mine") + "?mine=0").content.decode()  # "Hamma": everyones
     assert reverse("submissions:detail", args=[mine.pk]) in body
     assert reverse("submissions:detail", args=[theirs.pk]) not in body and ">other</a>" in body
     assert list(client.get(reverse("submissions:mine") + "?mine=1").context["subs"]) == [mine]

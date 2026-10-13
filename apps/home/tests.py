@@ -49,7 +49,7 @@ def test_landing_hero_announces_the_running_or_next_round(client, world):
 def test_daily_box_shows_no_zero_streak_records(client, world):
     client.force_login(User.objects.create_user("yangi", password="x"))
     page = client.get("/").content.decode()
-    assert "Bugun yechsangiz, seriya boshlanadi" in page and "eng uzuni 0" not in page.lower()
+    assert "Bugun yechsangiz, Olov yonadi" in page and "eng uzuni 0" not in page.lower()
 
 @pytest.mark.django_db
 def test_signed_in_home_gathers_what_to_do_next(client, world):

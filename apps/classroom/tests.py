@@ -646,17 +646,19 @@ def test_the_second_player_races_the_firsts_ghost_question_by_question(client, b
 
 
 @pytest.mark.django_db(transaction=True)
-def test_telegram_tells_of_a_challenge_a_duel_result_and_a_badge(bank, settings):
+def test_telegram_tells_of_a_challenge_a_duel_result_and_a_badge(bank, settings, django_capture_on_commit_callbacks):
     from apps.accounts.models import TelegramLink, TelegramOutbox
 
     from .duels import accept, challenge
 
     settings.TELEGRAM_BOT_TOKEN = "x"
+    settings.TELEGRAM_BOT_USERNAME = "codearena_bot"  # the bot counts as set up only with both
     p1, p2 = _players()
     for u in (p1, p2):
         TelegramLink.objects.create(user=u, chat_id=f"c{u.pk}")
     with patch("apps.accounts.telegram.dispatch_outbox"):
-        duel, _ = challenge(p1, "p2", "python", "easy")
+        with django_capture_on_commit_callbacks(execute=True):  # the notice goes out once the duel is committed
+            duel, _ = challenge(p1, "p2", "python", "easy")
         invite = TelegramOutbox.objects.get(link__user=p2, event_key=f"duel:{duel.pk}:challenge")
         assert "p1" in invite.text and "Python" in invite.text
         _play(duel, p1, right=5, secs=2)
@@ -669,5 +671,6 @@ def test_telegram_tells_of_a_challenge_a_duel_result_and_a_badge(bank, settings)
         link = TelegramLink.objects.get(user=p2)
         link.notify_duels = False
         link.save()
-        d2, _ = challenge(p1, "p2", "python", "medium")
+        with django_capture_on_commit_callbacks(execute=True):
+            d2, _ = challenge(p1, "p2", "python", "medium")
         assert not TelegramOutbox.objects.filter(event_key=f"duel:{d2.pk}:challenge").exists()  # turned off

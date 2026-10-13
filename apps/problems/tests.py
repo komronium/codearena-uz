@@ -991,7 +991,7 @@ def test_list_shows_rating_and_solver_count_and_sorts_by_solvers(client, problem
     r = client.get(reverse("problems:list"), {"sort": "solvers", "dir": "desc"})
     assert [p.id for p in r.context["problems"].object_list] == [hard.id, problem.id]
     html = r.content.decode()
-    assert f'title="Reyting {LEVEL_RATING['hard']}"' in html and f'title="Reyting {LEVEL_RATING['easy']}"' in html
+    assert f'reyting {LEVEL_RATING['hard']}"' in html and f'reyting {LEVEL_RATING['easy']}"' in html
     assert 'title="1 kishi yechgan' in html and 'title="0 kishi yechgan' in html
 
 

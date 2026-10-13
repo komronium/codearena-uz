@@ -27,6 +27,7 @@ from .models import VERDICT_LABELS, Submission, UserProblemSolved
 from .ratelimit import rate_limited
 
 MAX_SOURCE = 64 * 1024
+RATE_LIMIT_MAX = 10  # submissions per minute
 TRIAL_RATE_MAX = (
     20  # "Sinab ko'rish" runs per minute: cheaper than a submit, but still a container
 )
@@ -87,6 +88,8 @@ def submit(request, slug):
     problem, contest, error = _gate(request, slug)
     if error:
         return error
+    if rate_limited(request.user.id, "submit", RATE_LIMIT_MAX):
+        return HttpResponse("too many submissions, slow down", status=429)
     language = get_object_or_404(
         Language, code=request.POST.get("language"), is_active=True
     )
