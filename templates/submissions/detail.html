@@ -8,7 +8,7 @@ is among the accepted ones and the next step.{% endcomment %}
   <div class="ca-hud-in">
     <div class="min-w-0">
       <p class="ca7-crumb">{% if s.user_id == user.pk %}<a href="{% url 'submissions:mine' %}?mine=1">Urinishlarim</a>{% elif user.is_staff %}<a href="{% url 'moderation:submissions' %}">Barcha urinishlar</a>{% else %}<a href="{% url 'problems:leaders' s.problem.slug %}">Eng yaxshi yechimlar</a>{% endif %} / #{{ s.pk|stringformat:"06d" }}</p>
-      <h1 id="sub-title">Urinish <span class="font-mono tabular">#{{ s.pk|stringformat:"06d" }}</span></h1>
+      <h1 id="sub-title">Urinish <span class="tabular">#{{ s.pk|stringformat:"06d" }}</span></h1>
       <p class="ca7-bmeta">
         {% if s.user_id != user.pk %}<span>{{ s.user.username }}</span>{% endif %}
         <a class="text-white hover:underline" href="{% url 'problems:detail' s.problem.slug %}">{{ s.problem.title }}</a>

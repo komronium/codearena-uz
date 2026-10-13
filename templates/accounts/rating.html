@@ -33,8 +33,7 @@ own row marked.{% endcomment %}
     <li style="--tier: {{ t.color }}" class="{% if me and t.here %}is-me{% endif %}{% if not t.count %} is-empty{% endif %}{% if tier_sel == t.name %} is-sel{% endif %}"{% if me and t.here %} aria-current="true"{% endif %}>
       {% if me and t.here %}<span class="ca7-ladder-flag">Siz · {{ user.rating }}</span>{% endif %}
       <a class="ca7-ladder-go" href="{% if tier_sel == t.name %}{% querystring tier=None page=None %}{% else %}{% querystring tier=t.name page=None %}{% endif %}" aria-label="{{ t.name }}: {% if tier_sel == t.name %}filtrni olib tashlash{% else %}shu darajadagilarni ko‘rsatish{% endif %}"></a>
-      <b class="ca-tier-ink{% if not t.ceiling %} ca-lg{% endif %}">{{ t.name }}</b>
-      <small class="ca7-gloss">{{ t.name|tier_uz }}</small>
+      <b class="ca-tier-ink{% if not t.ceiling %} ca-lg{% endif %}"{% if not t.ceiling %} title="{{ t.name }}"{% endif %}>{% if not t.ceiling %}Legendary GM{% else %}{{ t.name }}{% endif %}</b>
       <small class="tabular">{% if t.floor %}{{ t.floor }}{% else %}0{% endif %}{% if t.ceiling %}–{{ t.ceiling|add:"-1" }}{% else %}+{% endif %}</small>
       <span class="ca7-ladder-n"><b class="tabular">{{ t.count }}</b> kishi</span>
     </li>

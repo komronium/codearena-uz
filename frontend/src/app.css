@@ -5,9 +5,9 @@
  * class names built in templates (ca-verdict-{{ v }}) are invisible to Tailwind's scan. */
 
 /* Lato for words, JetBrains Mono for data (clocks, ranks, scores, counts) and code. Both are
-   vendored by build.mjs; Lilex, Fira Code and Anthropic Mono stay as editor font options. */
-@font-face { font-family: "Anthropic Mono"; font-weight: 400; font-style: normal; font-display: swap; src: url("../fonts/AnthropicMono-Regular.otf") format("opentype"); }
-@font-face { font-family: "Anthropic Mono"; font-weight: 400; font-style: italic; font-display: swap; src: url("../fonts/AnthropicMono-Italic.otf") format("opentype"); }
+   vendored by build.mjs; JetBrains Mono is the mono; Anthropic Mono is the editor's default; Lilex and Fira Code stay as editor options. */
+@font-face { font-family: "Anthropic Mono"; font-weight: 400; font-style: normal; font-display: swap; src: url("../fonts/AnthropicMono-Regular.woff2") format("woff2"); }
+@font-face { font-family: "Anthropic Mono"; font-weight: 400; font-style: italic; font-display: swap; src: url("../fonts/AnthropicMono-Italic.woff2") format("woff2"); }
 
 /* Palette, after Codeforces: white paper, thin grey lines and frames, one blue for links and action, a red that only
  * means time running out (the round clock), green = accepted / live, red = wrong, amber = medals
@@ -2153,13 +2153,13 @@ td a[href^="/problems/"]:not([href="/problems/"]):not([href*="?"]), .ca-rows a[h
 .ca-table-flat { border-block: 1px solid rgb(var(--ca-line-rgb)); }
 .ca-table-flat :is(th, td):first-child { padding-left: .25rem; }
 .ca-table-flat :is(th, td):last-child { padding-right: .25rem; }
-.ca-table .ca-pid { font-family: var(--ca-code); font-size: 0.8125rem; color: rgb(var(--ca-mute-rgb)); }
+.ca-table .ca-pid { font-family: var(--ca-sans); font-size: 0.8125rem; color: rgb(var(--ca-mute-rgb)); }
 .ca-table .ca-link { font-weight: 500; }
 
 /* a verdict as #7 shows it: the judge's code, then the words; the failing test beside it */
 .ca-vd { display: inline-flex; align-items: center; gap: .5rem; height: 1.625rem; padding: 0 .65rem 0 .5rem; border-radius: 6px; font-size: 0.875rem; font-weight: 600;
   white-space: nowrap; color: var(--ca-vd-ce); background: var(--ca-vd-ce-bg); }
-.ca-vd code { font-family: var(--ca-code); font-size: 0.8125rem; font-weight: 600; opacity: .95; }
+.ca-vd code { font-family: var(--ca-sans); font-size: 0.8125rem; font-weight: 600; opacity: .95; }
 .ca-vd.is-ac { color: var(--ca-vd-ac); background: var(--ca-vd-ac-bg); }
 .ca-vd.is-bad { color: var(--ca-vd-wa); background: var(--ca-vd-wa-bg); }
 .ca-vd.is-warn { color: var(--ca-vd-tle); background: var(--ca-vd-tle-bg); }
@@ -2348,7 +2348,7 @@ td a[href^="/problems/"]:not([href="/problems/"]):not([href*="?"]), .ca-rows a[h
 .ca-wbar-l { display: flex; align-items: center; gap: .65rem; min-width: 0; flex: 1; }
 .ca-wbar-r { display: flex; align-items: center; gap: .5rem; flex: none; }
 .ca-wbar-t { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 1rem; font-weight: 700; }
-.ca-wbar .ca-pid { font-family: var(--ca-code); font-size: 0.8125rem; color: rgb(var(--ca-mute-rgb)); }
+.ca-wbar .ca-pid { font-family: var(--ca-sans); font-size: 0.8125rem; color: rgb(var(--ca-mute-rgb)); }
 .ca-wbar-nav { display: inline-flex; align-items: center; gap: .35rem; margin-left: .25rem; }
 .ca-btn-wb { height: 2.125rem; padding: 0 .8rem; font-size: 0.875rem; gap: .35rem; }
 .ca-btn-wb.ca-btn-sq { width: 2.125rem; padding: 0; justify-content: center; }
@@ -2597,11 +2597,11 @@ details[open] > summary.ca-edb, .ca-edb[aria-pressed="true"] { background: rgb(2
 .ca7-tip p { line-height: 1.6; }
 .ca7-tip-ico { display: grid; place-items: center; flex: none; width: 2.25rem; height: 2.25rem; border-radius: 50%; color: var(--ca-vd-tle); background: rgb(var(--ca-paper-rgb)); }
 .ca7-tip-ico svg.lucide { width: 1.1rem; height: 1.1rem; }
-.ca7-tip .ca-pid { font-family: var(--ca-code); font-size: 0.875rem; }
+.ca7-tip .ca-pid { font-family: var(--ca-sans); font-size: 0.875rem; }
 .ca7-tmap th .font-normal { color: rgb(var(--ca-mute-rgb)); }
 .ca7-marks { display: flex; flex-wrap: wrap; gap: .3rem; }
 .ca7-mark { display: inline-grid; place-items: center; min-width: 1.85rem; height: 1.6rem; padding: 0 .3rem; border-radius: 6px; border: 1.5px solid transparent;
-  font-family: var(--ca-code); font-size: 0.8125rem; font-weight: 600; text-decoration: none; color: rgb(var(--ca-mute-rgb)); background: var(--ca-soft); }
+  font-family: var(--ca-sans); font-size: 0.8125rem; font-weight: 600; text-decoration: none; color: rgb(var(--ca-mute-rgb)); background: var(--ca-soft); }
 .ca7-mark.is-solved { color: #fff; background: rgb(var(--ca-ok-fill-rgb)); }
 .ca7-mark.is-attempted { color: var(--ca-vd-tle); background: transparent; border-color: #D9A21B; }
 .ca7-mark:hover { box-shadow: 0 0 0 2px rgb(var(--ca-accent-rgb) / .35); }
@@ -2930,7 +2930,7 @@ sparks fly once, then the words; a click outside or the button closes it */
   background: rgb(10 20 60 / .28); border: 1px solid rgb(255 255 255 / .14); }
 .ca-band .ca-band-side:not(:has(*)) { display: none; }
 .ca7-clock p { display: flex; justify-content: space-between; gap: 1rem; font-size: 0.8125rem; color: var(--ca-hud-lbl); }
-.ca7-clock > b { display: block; margin-top: .15rem; font: 700 1.9rem/1.15 var(--ca-code); letter-spacing: .02em; color: #fff; }
+.ca7-clock > b { display: block; margin-top: .15rem; font: 700 1.9rem/1.15 var(--ca-sans); letter-spacing: .02em; color: #fff; }
 .ca7-clock-bar { display: block; height: 5px; margin-top: .55rem; border-radius: 3px; overflow: hidden; background: rgb(255 255 255 / .16); }
 .ca7-clock-bar i { display: block; height: 100%; background: rgb(var(--ca-spec-rgb)); }
 .ca-band .ca-band-side .ca-band-actions { display: grid; gap: .5rem; margin: 0; }
@@ -3061,7 +3061,7 @@ sparks fly once, then the words; a click outside or the button closes it */
 .ca7-split-note { margin-top: 0 !important; font-size: 0.875rem; }
 .ca7-lbl { display: block; margin-bottom: .35rem; font-size: 0.875rem; font-weight: 600; }
 .ca7-vs { display: flex; align-items: center; gap: .7rem; width: 100%; padding: .65rem .9rem; border-radius: 10px; background: rgb(var(--ca-panel-rgb)); }
-.ca7-vs > b { margin-left: auto; font: 700 1.05rem var(--ca-code); }
+.ca7-vs > b { margin-left: auto; font: 700 1.05rem var(--ca-sans); }
 .ca7-seg-pick label { cursor: pointer; }
 .ca7-seg-pick span { display: inline-flex; align-items: center; gap: .35rem; padding: .3rem .8rem; border-radius: 7px; }
 .ca7-seg-pick span em { font-style: normal; font-size: 0.8125rem; color: rgb(var(--ca-mute-rgb)); }
@@ -3099,7 +3099,7 @@ sparks fly once, then the words; a click outside or the button closes it */
 .ca-dashboard-live .ca-tag-live .ca-live-dot { color: #FF6B81; }
 .ca-dashboard-live h2 a { color: #fff; }
 .ca-dashboard-live p { color: var(--ca-hud-lbl); }
-.ca-dashboard-live .ca-live-clock b { font-family: var(--ca-code); color: #fff; }
+.ca-dashboard-live .ca-live-clock b { font-family: var(--ca-sans); color: #fff; }
 .ca-dashboard-live .ca-btn-primary { color: #1A1F33; background: rgb(var(--ca-gold-rgb)); box-shadow: none; }
 .ca-dashboard-live :is(a, button):focus-visible { outline-color: #fff; }
 
@@ -3282,7 +3282,6 @@ body:has(.ca-main-ws) .ca-footer { display: none; }
 /* RAT-1/3: tier cards keep one shape (a two-line name leaves room in all of them), with the Uzbek gloss; the table stops
    at a readable width and the badges sit beside the handle */
 .ca7-ladder li > b { min-height: 2.5em; }
-.ca7-ladder .ca7-gloss { font-weight: 500; }
 .ca7-board { max-width: none; }
 
 /* DUE-1: a duel waiting on you comes first, as its own strip */
@@ -3516,7 +3515,7 @@ body .EasyMDEContainer .cm-s-easymde .cm-link, body .EasyMDEContainer .cm-s-easy
 .cm-editor.cm-focused { outline: 2px solid #8FB0FF; outline-offset: -2px; }
 
 /* rating tiers: the names share one two-line slot so every tile's rows line up; your tile shows how far through it you are */
-.ca7-ladder li > b { min-height: 2.6em; line-height: 1.3; }
+.ca7-ladder li > b { line-height: 1.3; }
 .ca7-ladder-pg { display: block; height: 5px; margin: .45rem 0 .15rem; border-radius: 9999px; background: rgb(var(--ca-ink-rgb) / .1); overflow: hidden; }
 .ca7-ladder-pg i { display: block; height: 100%; border-radius: inherit; background: var(--tier); }
 .ca7-ladder li.is-empty > span:last-child b { color: rgb(var(--ca-mute-rgb)); font-weight: 600; }
