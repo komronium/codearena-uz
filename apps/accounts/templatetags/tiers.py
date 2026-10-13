@@ -1,6 +1,6 @@
 from django import template
 
-from apps.accounts.tiers import TIER_ICONS, TIER_UZ, is_legendary, rating_tier, tier_banner, tier_color as _tier_color
+from apps.accounts.tiers import TIER_UZ, is_legendary, rating_tier, tier_banner, tier_color as _tier_color
 
 register = template.Library()
 
@@ -25,12 +25,6 @@ def tier_slug(rating: int) -> str:
 def lg(rating: int) -> str:
     """' ca-lg' for a legendary rating, else '': append it to the class of a tier-coloured name."""
     return " ca-lg" if is_legendary(rating) else ""
-
-
-@register.filter
-def tier_icon(rating: int) -> str:
-    """The lucide icon of a rating's tier."""
-    return TIER_ICONS.get(rating_tier(rating), "star")
 
 
 @register.filter

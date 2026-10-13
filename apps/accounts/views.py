@@ -28,7 +28,6 @@ from .forms import ProfileEditForm, RegisterForm
 from .models import Follow, TelegramLink, User
 
 from .tiers import RATING_TIERS as _RATING_TIERS
-from .tiers import TIER_ICONS
 from .tiers import next_tier as _next_tier
 from .tiers import rating_tier
 from . import badges as badge_system
@@ -346,7 +345,7 @@ def rating(request):
     for u in page:  # the place on the whole board, equal ratings sharing it, a search included
         u.rank = sum(1 for r in ratings if r > u.rating) + 1
         u.badge_sum = sums.get(u.pk)
-    tiers = [{"name": n, "color": c, "floor": f, "ceiling": ce, "icon": TIER_ICONS.get(n, "star"),
+    tiers = [{"name": n, "color": c, "floor": f, "ceiling": ce,
               "count": sum(1 for r in ratings if (f is None or r >= f) and (ce is None or r < ce))}
              for f, ce, n, c in _RATING_TIERS]
     me = None

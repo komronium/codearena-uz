@@ -18,9 +18,6 @@ RATING_TIERS = [
 # Uzbek gloss for the Codeforces names (the names themselves stay: users.seen_tier stores them).
 TIER_UZ = {"Newbie": "Yangi", "Pupil": "Shogird", "Specialist": "Mutaxassis", "Expert": "Bilimdon",
            "Candidate Master": "Master nomzodi", "Master": "Master", "Grandmaster": "Grossmeyster", "Legendary Grandmaster": "Afsonaviy"}
-# A lucide icon per tier, one that reads a step up each time: tiles and names show it beside the colour.
-TIER_ICONS = {"Newbie": "sprout", "Pupil": "book-open", "Specialist": "target", "Expert": "gem", "Candidate Master": "award",
-              "Master": "medal", "Grandmaster": "trophy", "Legendary Grandmaster": "crown"}
 TIER_ORDER = {name: i for i, (_floor, _ceiling, name, _color) in enumerate(RATING_TIERS)}
 # Legendary names are written like Codeforces' LGM: the first letter in ink (black on light), the rest red.
 LEGENDARY = RATING_TIERS[-1][0]

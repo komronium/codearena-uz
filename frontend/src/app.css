@@ -3528,15 +3528,9 @@ body .EasyMDEContainer .cm-s-easymde .cm-link, body .EasyMDEContainer .cm-s-easy
 .ca7-you-t { margin-left: .35rem; color: rgb(var(--ca-ink-rgb)); }
 .ca7-you-t b { font-weight: 700; }
 
-/* rating tiers: a tile is a way in (it filters the table to that tier); the icon steps up with the tier */
-.ca7-ladder li > b .lu { width: 1em; height: 1em; margin-right: .35rem; vertical-align: -.14em; }
+/* rating tiers: a tile is a way in (it filters the table to that tier) */
 .ca7-ladder-go { position: absolute; inset: 0; z-index: 1; }
 .ca7-ladder-go:hover { background: color-mix(in srgb, var(--tier) 7%, transparent); }
 .ca7-ladder-go:focus-visible { outline: 2px solid rgb(var(--ca-accent-rgb)); outline-offset: -2px; }
 .ca7-ladder-flag { z-index: 2; pointer-events: none; }
 .ca7-ladder li.is-sel { background: color-mix(in srgb, var(--tier) 12%, transparent); box-shadow: inset 0 -3px 0 var(--tier); }
-.ca7-ladder-n { display: flex; align-items: center; gap: .3rem; }
-.ca7-ladder-n .lu { width: .95rem; height: .95rem; margin-left: auto; color: rgb(var(--ca-mute-rgb)); }
-.ca7-ladder li:hover .ca7-ladder-n .lu, .ca7-ladder li.is-sel .ca7-ladder-n .lu { color: var(--tier); }
-.ca7-tn { display: inline-flex; align-items: center; gap: .25rem; margin-left: .15rem; font-size: 0.8125rem; font-weight: 600; color: color-mix(in oklab, var(--tier) 62%, rgb(var(--ca-ink-rgb))); }
-.ca7-tn .lu { width: .9rem; height: .9rem; }
