@@ -124,7 +124,9 @@ the console (samples, your own input, the run's result) and the one gold "Yubori
       <div class="ca-statement">
         <div class="prose max-w-none">{{ statement_html|safe }}</div>
         {% if problem.statement_image %}
-        <img class="w-full rounded-[var(--ca-radius)] border border-line" src="{{ problem.statement_image.url }}" alt="«{{ problem.title }}» masalasining rasmi" loading="lazy">
+        <div class="mt-4">
+          <img class="max-w-full h-auto rounded-[var(--ca-radius)] border border-line" src="{{ problem.statement_image.url }}" alt="«{{ problem.title }}» masalasining rasmi" loading="lazy">
+        </div>
         {% endif %}
         {% if problem.kind == "sql" %}
         <div>

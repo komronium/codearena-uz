@@ -29,12 +29,13 @@ class ProblemForm(ModelForm):
 
     class Meta:
         model = Problem
-        fields = ["title", "kind", "statement_md", "input_md", "output_md", "difficulty", "rating_guess", "tags",
+        fields = ["title", "kind", "statement_md", "statement_image", "input_md", "output_md", "difficulty", "rating_guess", "tags",
                   "tl_ms", "ml_mb", "is_public", "editorial_md"]
         widgets = {
             "title": forms.TextInput(attrs=_CA_INPUT),
             "kind": forms.Select(attrs={"class": "ca-select"}),
             "statement_md": forms.Textarea(attrs=_MD),
+            "statement_image": forms.ClearableFileInput(attrs={"accept": "image/*", "class": "sr-only"}),
             "input_md": forms.Textarea(attrs={**_MD, "rows": 3}),
             "output_md": forms.Textarea(attrs={**_MD, "rows": 3}),
             "editorial_md": forms.Textarea(attrs={**_MD, "rows": 5}),
@@ -50,6 +51,14 @@ class ProblemForm(ModelForm):
         if not self.instance.pk:
             # a new problem starts hidden: publishing is a choice, a contest problem must never leak by default
             self.fields["is_public"].initial = False
+
+    def clean_statement_image(self):
+        img = self.cleaned_data.get("statement_image")
+        if not img or not hasattr(img, "size"):
+            return img
+        if img.size > 10 * 1024 * 1024:
+            raise ValidationError("Rasm hajmi 10 MB dan oshmasligi kerak.")
+        return img
 
     def clean_tests_zip(self):
         f = self.cleaned_data.get("tests_zip")

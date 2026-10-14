@@ -12,6 +12,7 @@ urlpatterns = [
     path("<int:pk>/reject/", views.reject, name="reject"),
 
     path("problems/", views.problems, name="problems"),
+    path("upload-image/", views.upload_image, name="upload_image"),
     path("ai/", views.ai_generate, name="ai_generate"),
     path("submit/", views.submit, name="submit"),
     path("problems/<int:pk>/edit/", views.submit, name="problem_edit"),

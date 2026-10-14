@@ -796,3 +796,109 @@ def test_rating_button_reminds_of_flags_nobody_reviewed(client):
 def test_honor_rules_name_the_ladder_and_the_appeal_window(client):
     page = client.get(reverse("honor")).content.decode()
     assert "o‘sha masala natijasi bekor qilinadi" in page and "diskvalifikatsiya" in page and "48 soat" in page
+
+
+@pytest.mark.django_db
+def test_staff_submits_problem_with_statement_image(client):
+    from django.core.files.uploadedfile import SimpleUploadedFile
+
+    staff = User.objects.create_user("teacher_img", password="x", is_staff=True)
+    client.force_login(staff)
+    dummy_png = b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15c4\x00\x00\x00\nIDATx\x9cc\x00\x01\x00\x00\x05\x00\x01\r\n-\xb4\x00\x00\x00\x00IEND\xaeB`\x82"
+    img_file = SimpleUploadedFile("diagram.png", dummy_png, content_type="image/png")
+
+    data = {
+        "title": "Image Problem",
+        "statement_md": "Shart matni",
+        "statement_image": img_file,
+        "difficulty": "easy",
+        "kind": "code",
+        "tl_ms": "1000",
+        "ml_mb": "256",
+        "points": "100",
+        "is_public": "on",
+    }
+    data.update(_formset_data())
+    data["testcases-0-input"] = "1\n"
+    data["testcases-0-expected"] = "1\n"
+
+    r = client.post(reverse("moderation:submit"), data)
+    assert r.status_code == 302
+    p = Problem.objects.get(title="Image Problem")
+    assert bool(p.statement_image) is True
+    assert p.statement_image.name.startswith("statements/")
+
+
+@pytest.mark.django_db
+def test_staff_clears_statement_image(client):
+    from django.core.files.uploadedfile import SimpleUploadedFile
+
+    staff = User.objects.create_user("teacher_clear", password="x", is_staff=True)
+    client.force_login(staff)
+    dummy_png = b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15c4\x00\x00\x00\nIDATx\x9cc\x00\x01\x00\x00\x05\x00\x01\r\n-\xb4\x00\x00\x00\x00IEND\xaeB`\x82"
+    img_file = SimpleUploadedFile("diagram.png", dummy_png, content_type="image/png")
+
+    p = Problem.objects.create(
+        slug="clear-test",
+        title="Clear Test",
+        statement_md="x",
+        author=staff,
+        statement_image=img_file,
+    )
+    assert bool(p.statement_image) is True
+
+    data = {
+        "title": "Clear Test",
+        "statement_md": "x",
+        "statement_image-clear": "on",
+        "difficulty": "easy",
+        "kind": "code",
+        "tl_ms": "1000",
+        "ml_mb": "256",
+        "points": "100",
+    }
+    data.update(_formset_data())
+    data["testcases-0-input"] = "1\n"
+    data["testcases-0-expected"] = "1\n"
+
+    r = client.post(reverse("moderation:problem_edit", args=[p.pk]), data)
+    assert r.status_code == 302
+    p.refresh_from_db()
+    assert bool(p.statement_image) is False
+
+
+@pytest.mark.django_db
+def test_upload_image_endpoint(client):
+    from django.core.files.uploadedfile import SimpleUploadedFile
+
+    staff = User.objects.create_user("teacher_upload", password="x", is_staff=True)
+    student = User.objects.create_user("student_upload", password="x")
+
+    dummy_png = b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15c4\x00\x00\x00\nIDATx\x9cc\x00\x01\x00\x00\x05\x00\x01\r\n-\xb4\x00\x00\x00\x00IEND\xaeB`\x82"
+
+    # Anonymous -> 302
+    r = client.post(reverse("moderation:upload_image"), {"image": SimpleUploadedFile("test.png", dummy_png, content_type="image/png")})
+    assert r.status_code == 302
+
+    # Student -> 403
+    client.force_login(student)
+    r = client.post(reverse("moderation:upload_image"), {"image": SimpleUploadedFile("test.png", dummy_png, content_type="image/png")})
+    assert r.status_code == 403
+
+    # Staff -> 200 with JSON {data: {filePath: ...}, url: ...}
+    client.force_login(staff)
+    r = client.post(reverse("moderation:upload_image"), {"image": SimpleUploadedFile("graph_test.png", dummy_png, content_type="image/png")})
+    assert r.status_code == 200
+    res = r.json()
+    assert "data" in res and "filePath" in res["data"]
+    assert res["data"]["filePath"].startswith("/")
+    assert "statements/" in res["data"]["filePath"]
+
+    # No file -> 400
+    r = client.post(reverse("moderation:upload_image"), {})
+    assert r.status_code == 400
+
+    # Non-image file -> 400
+    r = client.post(reverse("moderation:upload_image"), {"image": SimpleUploadedFile("test.txt", b"hello", content_type="text/plain")})
+    assert r.status_code == 400
+

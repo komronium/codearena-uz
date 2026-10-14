@@ -62,6 +62,25 @@ def test_detail_renders_markdown_and_samples_only(client, problem):
     assert b"99 1" not in r.content
 
 
+def test_detail_renders_statement_image(client, problem):
+    from django.core.files.uploadedfile import SimpleUploadedFile
+    dummy_png = b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15c4\x00\x00\x00\nIDATx\x9cc\x00\x01\x00\x00\x05\x00\x01\r\n-\xb4\x00\x00\x00\x00IEND\xaeB`\x82"
+    problem.statement_image = SimpleUploadedFile("graph.png", dummy_png, content_type="image/png")
+    problem.save()
+    r = client.get(reverse("problems:detail", kwargs={"slug": problem.slug}))
+    assert r.status_code == 200
+    assert problem.statement_image.url in r.content.decode()
+
+
+def test_detail_renders_markdown_image(client, problem):
+    problem.statement_md = "Mana rasm: ![grafik](/media/statements/sample.png)"
+    problem.save()
+    r = client.get(reverse("problems:detail", kwargs={"slug": problem.slug}))
+    assert r.status_code == 200
+    body = r.content.decode()
+    assert '<img src="/media/statements/sample.png" alt="grafik">' in body
+
+
 def test_private_detail_404(client, problem):
     problem.is_public = False
     problem.save()

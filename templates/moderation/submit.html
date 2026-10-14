@@ -25,7 +25,37 @@
       <div>
         <label class="ca-label" for="{{ form.statement_md.id_for_label }}">Masala matni</label>
         {{ form.statement_md }}{{ form.statement_md.errors }}
-        <p class="mt-1 text-xs text-mute">Markdown va LaTeX ($n \le 10^5$) qo‘llanadi.</p>
+        <p class="mt-1 text-xs text-mute">Markdown va LaTeX ($n \le 10^5$) qo‘llanadi. Matn ichiga rasm joylash uchun rasmni sudrab tashlang (drag & drop), vaqtincha xotiradan qo‘ying (Ctrl+V) yoki muharrirdagi rasm tugmasini bosing.</p>
+      </div>
+      <div>
+        <label class="ca-label" for="{{ form.statement_image.id_for_label }}">Masala rasmi <span class="font-normal text-mute">(ixtiyoriy — shart ostidagi asosiy illyustratsiya)</span></label>
+        {% if form.instance.statement_image %}
+        <div class="mb-3 flex items-start gap-4 rounded-[var(--ca-radius)] border border-line bg-paper/60 p-3 transition-opacity" id="current-statement-image">
+          <img src="{{ form.instance.statement_image.url }}" alt="Masala rasmi" class="max-h-36 max-w-xs rounded border border-line object-contain">
+          <div class="min-w-0 flex-1 space-y-1">
+            <p class="text-xs font-semibold text-mute">Joriy yuklangan rasm:</p>
+            <p class="break-all font-mono text-xs">{{ form.instance.statement_image.name }}</p>
+            <label class="mt-2 inline-flex items-center gap-1.5 text-sm text-bad cursor-pointer">
+              <input type="checkbox" name="statement_image-clear" id="statement_image-clear_id" class="rounded border-line">
+              Rasmni o‘chirish
+            </label>
+          </div>
+        </div>
+        {% endif %}
+        <div class="flex items-center gap-3">
+          <input class="sr-only" type="file" name="statement_image" id="{{ form.statement_image.id_for_label }}" accept="image/*">
+          <label class="ca-btn ca-btn-ghost cursor-pointer !py-1.5 text-sm" for="{{ form.statement_image.id_for_label }}">
+            <i data-lucide="image" class="lu mr-1" aria-hidden="true"></i>
+            {% if form.instance.statement_image %}Rasmni almashtirish{% else %}Rasm tanlash{% endif %}
+          </label>
+          <span id="statement-image-filename" class="truncate text-xs text-mute">Fayl tanlanmagan</span>
+        </div>
+        {% if form.statement_image.errors %}<div class="mt-1 text-sm text-bad">{{ form.statement_image.errors }}</div>{% endif %}
+        <div id="statement-image-preview-wrap" class="mt-3 hidden">
+          <p class="mb-1 text-xs font-semibold text-mute">Tanlangan yangi rasm:</p>
+          <img id="statement-image-preview" src="" alt="Ko‘rish" class="max-h-48 max-w-full rounded-[var(--ca-radius)] border border-line object-contain">
+        </div>
+        <p class="mt-1.5 text-xs text-mute">PNG, JPG, GIF yoki WebP (maksimal 10 MB). Masala sharti tagida alohida illyustratsiya sifatida ko‘rinadi.</p>
       </div>
       <div class="grid gap-4 sm:grid-cols-2" data-kind-only="code">
         <div>
@@ -186,14 +216,89 @@
 <script src="{% static 'vendor/easymde/easymde.min.js' %}"></script>
 <script>
 (function () {
+  const csrf = document.querySelector("[name=csrfmiddlewaretoken]") ? document.querySelector("[name=csrfmiddlewaretoken]").value : "";
+  const uploadImageFn = (file, onSuccess, onError) => {
+    const fd = new FormData();
+    fd.append("image", file);
+    fetch("{% url 'moderation:upload_image' %}", {
+      method: "POST",
+      headers: { "X-CSRFToken": csrf },
+      body: fd,
+    })
+    .then((r) => r.json())
+    .then((data) => {
+      if (data.url || (data.data && data.data.filePath)) {
+        onSuccess(data.url || data.data.filePath);
+      } else {
+        onError(data.error || "Rasm yuklashda xatolik yuz berdi.");
+      }
+    })
+    .catch((err) => {
+      onError("Xatolik: " + err.message);
+    });
+  };
+
   document.querySelectorAll("textarea.ca-md").forEach((el) => {
     // autoDownloadFontAwesome: false, or it fetches its own copy from a CDN
-    const mde = new EasyMDE({ element: el, spellChecker: false, status: false, autoDownloadFontAwesome: false, minHeight: el.rows > 4 ? "220px" : "90px",
-      toolbar: ["bold", "italic", "heading", "|", "code", "quote", "unordered-list", "ordered-list", "table", "|", "preview", "guide"] });
+    const mde = new EasyMDE({
+      element: el,
+      spellChecker: false,
+      status: false,
+      autoDownloadFontAwesome: false,
+      minHeight: el.rows > 4 ? "220px" : "90px",
+      toolbar: ["bold", "italic", "heading", "|", "code", "quote", "unordered-list", "ordered-list", "table", "|", "upload-image", "|", "preview", "guide"],
+      uploadImage: true,
+      imageUploadFunction: uploadImageFn,
+      imageAccept: "image/png, image/jpeg, image/gif, image/webp, image/svg+xml",
+      imageMaxSize: 10 * 1024 * 1024,
+      imageTexts: {
+        sbInit: "Rasmni tashlang yoki yuklang",
+        sbOnDragEnter: "Rasmni shu yerga tashlang",
+        sbOnDrop: "Rasm yuklanmoqda...",
+        sbProgress: "Yuklanmoqda: #cur#/#total# (#percent#%)",
+        sbOnUploaded: "Yuklandi: #filename#",
+        sizeUnits: " B, KB, MB",
+      },
+      errorMessages: {
+        noFileGiven: "Hech qanday fayl tanlanmadi",
+        typeNotAllowed: "Faqat rasm fayllari (PNG, JPG, GIF, WebP, SVG) ruxsat etilgan",
+        fileTooLarge: "Fayl hajmi juda katta (maksimal #imageMaxSize#)",
+        importError: "Rasmni yuklashda xatolik yuz berdi",
+      }
+    });
     // typing goes into CodeMirror's own hidden textarea: give it the field's label for screen readers
     const label = el.id && document.querySelector(`label[for="${el.id}"]`);
     if (label) mde.codemirror.getInputField().setAttribute("aria-label", label.textContent.trim());
   });
+
+  const imgInput = document.getElementById("{{ form.statement_image.id_for_label }}");
+  const imgFilename = document.getElementById("statement-image-filename");
+  const imgPreviewWrap = document.getElementById("statement-image-preview-wrap");
+  const imgPreview = document.getElementById("statement-image-preview");
+
+  if (imgInput) {
+    imgInput.addEventListener("change", (e) => {
+      const f = e.target.files && e.target.files[0];
+      if (f) {
+        if (imgFilename) imgFilename.textContent = f.name;
+        if (imgPreview && imgPreviewWrap) {
+          imgPreview.src = URL.createObjectURL(f);
+          imgPreviewWrap.classList.remove("hidden");
+        }
+      } else {
+        if (imgFilename) imgFilename.textContent = "Fayl tanlanmagan";
+        if (imgPreviewWrap) imgPreviewWrap.classList.add("hidden");
+      }
+    });
+  }
+
+  const clearCb = document.getElementById("statement_image-clear_id");
+  const curImgBox = document.getElementById("current-statement-image");
+  if (clearCb && curImgBox) {
+    clearCb.addEventListener("change", () => {
+      curImgBox.classList.toggle("opacity-40", clearCb.checked);
+    });
+  }
 
   const tagQ = document.getElementById("tag-q"), tagBox = document.getElementById("tag-list"), tagN = document.getElementById("tag-n");
   const countTags = () => { tagN.textContent = tagBox.querySelectorAll("input:checked").length; };

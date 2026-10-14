@@ -1,13 +1,16 @@
 import datetime
+import os
+import uuid
 
 import django_rq
 from django.contrib import messages
+from django.core.files.storage import default_storage
 from django.core.management import CommandError, call_command
 from django.core.paginator import Paginator
 from django.db import IntegrityError, transaction
 from django.db.models import Count, OuterRef, Q, Subquery
 from django.db.models.functions import Coalesce, TruncDate
-from django.http import HttpResponseBadRequest
+from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -227,6 +230,28 @@ def ai_generate(request):
             messages.success(request, f"{len(drafts)} ta masala tuzildi — Navbat bo'limida ko'rib chiqing va tasdiqlang.")
             return redirect("moderation:queue")
     return render(request, "moderation/ai_generate.html", {"form": form, "max_count": MAX_COUNT})
+
+
+@staff_required
+@require_POST
+def upload_image(request):
+    """AJAX image upload endpoint for markdown editors (EasyMDE) and problem statements."""
+    f = request.FILES.get("image")
+    if not f:
+        return JsonResponse({"error": "Fayl tanlanmadi."}, status=400)
+    if f.size > 10 * 1024 * 1024:
+        return JsonResponse({"error": "Rasm hajmi 10 MB dan oshmasligi kerak."}, status=400)
+    ext = os.path.splitext(f.name)[1].lower()
+    if ext not in {".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg"}:
+        return JsonResponse({"error": "Faqat rasm fayllari (PNG, JPG, GIF, WebP, SVG) ruxsat etilgan."}, status=400)
+
+    stem = slugify(os.path.splitext(f.name)[0])[:30] or "image"
+    unique_name = f"statements/{uuid.uuid4().hex[:12]}_{stem}{ext}"
+    saved_path = default_storage.save(unique_name, f)
+    url = default_storage.url(saved_path)
+    if not url.startswith("/") and not url.startswith("http"):
+        url = "/" + url
+    return JsonResponse({"data": {"filePath": url}, "url": url})
 
 
 @staff_required

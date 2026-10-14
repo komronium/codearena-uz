@@ -84,7 +84,7 @@ _ALLOWED_TAGS = [
 ]
 _ALLOWED_ATTRS = {
     "a": ["href", "title"],
-    "img": ["src", "alt", "title"],
+    "img": ["src", "alt", "title", "class", "width", "height"],
     "code": ["class"],
 }
 
