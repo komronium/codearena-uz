@@ -525,6 +525,17 @@ def test_every_bank_question_is_well_formed():
 
 
 @pytest.mark.django_db
+def test_seed_python_duels_command():
+    from django.core.management import call_command
+    from .models import DuelQuestion
+
+    call_command("seed_python_duels")
+    count = DuelQuestion.objects.filter(language="python", level__in=("beginner", "easy"), is_active=True).count()
+    assert count >= 50
+
+
+
+@pytest.mark.django_db
 def test_duel_finder_offers_classmates_and_rivals_then_searches_every_handle(client, klass):
     from .models import Duel
 
