@@ -207,12 +207,10 @@ def _q(key, level="easy", language="python", **kw):
 
 @pytest.fixture
 def bank(db):
-    """Six easy Python questions (two picked from options, the rest typed) and five medium ones."""
+    """Six Python questions: two answered from options, the rest typed."""
     qs = [_q(f"e{i}") for i in range(4)]
     qs.append(_q("pick", options=["a", "b", "c", "d"], answer="b"))
     qs.append(_q("list", answer="[1, 4]"))
-    for i in range(5):
-        _q(f"m{i}", level="medium")
     return qs
 
 
@@ -256,14 +254,14 @@ def test_a_challenge_starts_the_challengers_run_and_accepting_starts_the_opponen
     p1, p2 = _players()
     client.force_login(p1)
     url = reverse("classroom:duels")
-    form = {"opponent": "p2", "language": "python", "difficulty": "easy"}
+    form = {"opponent": "p2", "language": "python"}
     assert client.post(url, {**form, "opponent": "p1"}).status_code == 200  # not yourself
     assert client.post(url, {**form, "opponent": "nobody"}).status_code == 200
     assert "Tilni tanlang" in client.post(url, {**form, "language": "cobol"}).content.decode()
     r = client.post(url, form)
     duel = Duel.objects.get()
     assert r.status_code == 302 and r.url == reverse("classroom:duel_play", args=[duel.pk])
-    # nobody waits for anybody: the challenger's run starts at once, on five easy Python questions
+    # nobody waits for anybody: the challenger's run starts at once, on five Python questions
     assert duel.status == "pending" and duel.mode == "quiz" and duel.language == "python"
     assert len(duel.questions) == 5 and len(set(duel.questions)) == 5 and duel.opponent_started_at is None
     assert client.post(url, form).status_code == 200  # one run at a time
@@ -297,7 +295,7 @@ def test_a_friend_who_declines_gets_no_duel(bank):
     from .duels import challenge, decline
 
     p1, p2 = _players()
-    duel, _ = challenge(p1, "p2", "python", "easy")
+    duel, _ = challenge(p1, "p2", "python")
     decline(duel, p1)
     duel.refresh_from_db()
     assert duel.status == "pending"
@@ -307,32 +305,32 @@ def test_a_friend_who_declines_gets_no_duel(bank):
 
 
 @pytest.mark.django_db
-def test_quick_match_joins_the_closest_rated_open_duel_in_that_language_and_level(bank):
+def test_quick_match_joins_the_closest_rated_open_duel_in_that_language(bank):
     from .duels import BUSY, _open, find_opponent, joinable_counts
 
     low, high = User.objects.create_user("low", password="x"), User.objects.create_user("high", password="x", duel_rating=1500)
     ids = [q.pk for q in bank[:5]]
-    d_low = _open(low, "python", "easy", ids)
-    d_high = _open(high, "python", "easy", ids)
-    _open(User.objects.create_user("cpp", password="x", duel_rating=1450), "cpp", "easy", ids)
+    d_low = _open(low, "python", ids)
+    d_high = _open(high, "python", ids)
+    _open(User.objects.create_user("cpp", password="x", duel_rating=1450), "cpp", ids)
     near = User.objects.create_user("near", password="x", duel_rating=1450)
-    assert joinable_counts(near) == {"python:easy": 2, "cpp:easy": 1}
+    assert joinable_counts(near) == {"python": 2, "cpp": 1}
 
-    duel, error = find_opponent(near, "python", "easy")
+    duel, error = find_opponent(near, "python")
     assert error == "" and duel.pk == d_high.pk  # 50 points apart, where low is 250
     duel.refresh_from_db()
     assert duel.opponent == near and duel.status == "active" and duel.opponent_started_at is not None
-    duel, _ = find_opponent(User.objects.create_user("mid", password="x"), "python", "easy")
+    duel, _ = find_opponent(User.objects.create_user("mid", password="x"), "python")
     assert duel.pk == d_low.pk
 
     # nobody left to join: the next player opens a duel of their own, run started
     late = User.objects.create_user("late", password="x")
-    duel, _ = find_opponent(late, "python", "medium")
+    duel, _ = find_opponent(late, "python")
     assert duel.challenger == late and duel.opponent is None and duel.status == "pending"
-    assert duel.difficulty == "medium" and duel.started_at is not None
-    assert find_opponent(late, "python", "easy") == (None, BUSY)
-    assert find_opponent(late, "python", "hard")[1] == "Darajani tanlang."
-    assert "yetarli emas" in find_opponent(User.objects.create_user("x", password="x"), "java", "easy")[1]
+    assert duel.started_at is not None
+    assert find_opponent(late, "python") == (None, BUSY)
+    assert find_opponent(late, "cobol")[1] == "Tilni tanlang."
+    assert "yetarli emas" in find_opponent(User.objects.create_user("x", password="x"), "java")[1]
 
 
 @pytest.mark.django_db
@@ -340,10 +338,10 @@ def test_new_questions_come_first_and_seen_ones_only_fill_up(bank):
     from .duels import _pick, find_opponent
 
     p1, _ = _players()
-    duel, _ = find_opponent(p1, "python", "easy")
+    duel, _ = find_opponent(p1, "python")
     _play(duel, p1, right=5)
     seen = set(duel.questions)
-    picked = _pick([p1], "python", "easy")
+    picked = _pick([p1], "python")
     unseen = {q.pk for q in bank} - seen
     assert len(picked) == 5 and unseen <= set(picked)  # the one unseen question, then four seen ones
 
@@ -354,7 +352,7 @@ def test_each_question_has_its_own_20_seconds_and_a_reload_doesnt_reset_them(ban
     from .models import DuelAnswer
 
     p1, _ = _players()
-    duel, _ = find_opponent(p1, "python", "easy")
+    duel, _ = find_opponent(p1, "python")
     first = current(duel, p1)
     assert current(duel, p1).pk == first.pk  # shown again, same clock
     late = answer(duel, p1, 0, first.question.answer, now=first.shown_at + timezone.timedelta(seconds=23))
@@ -377,7 +375,7 @@ def test_more_right_answers_win_then_less_time_and_none_right_is_a_draw(bank):
     from .models import Duel
 
     p1, p2 = _players()
-    duel, _ = challenge(p1, "p2", "python", "easy")
+    duel, _ = challenge(p1, "p2", "python")
     _play(duel, p1, right=3, secs=8)
     assert Duel.objects.get(pk=duel.pk).status == "pending"  # waiting for p2
     accept(duel, p2)
@@ -393,7 +391,7 @@ def test_more_right_answers_win_then_less_time_and_none_right_is_a_draw(bank):
     assert p1.duel_rating == 1180
 
     p3, p4 = User.objects.create_user("p3", password="x"), User.objects.create_user("p4", password="x")
-    duel, _ = challenge(p3, "p4", "python", "medium")
+    duel, _ = challenge(p3, "p4", "python")
     _play(duel, p3, right=0)
     accept(duel, p4)
     _play(duel, p4, right=0, secs=1)
@@ -415,7 +413,7 @@ def test_a_run_left_half_way_ends_after_five_minutes_and_an_open_duel_nobody_joi
     from .models import Duel
 
     p1, p2 = _players()
-    duel, _ = challenge(p1, "p2", "python", "easy")
+    duel, _ = challenge(p1, "p2", "python")
     _play(duel, p1, right=2)
     accept(duel, p2)
     from .duels import answer, current
@@ -429,7 +427,7 @@ def test_a_run_left_half_way_ends_after_five_minutes_and_an_open_duel_nobody_joi
     duel.refresh_from_db()
     assert duel.status == "finished" and duel.winner == p1  # 2 right beats 1; the four unseen count wrong
 
-    lonely, _ = find_opponent(User.objects.create_user("lonely", password="x"), "python", "easy")
+    lonely, _ = find_opponent(User.objects.create_user("lonely", password="x"), "python")
     lonely = _age(lonely, challenger=timezone.timedelta(days=4), created=timezone.timedelta(days=4))
     settle(lonely)
     assert Duel.objects.get(pk=lonely.pk).status == "expired"
@@ -450,7 +448,7 @@ def test_the_play_page_shows_one_question_never_its_answer_and_then_how_it_went(
     from .duels import find_opponent
 
     p1, p2 = _players()
-    duel, _ = find_opponent(p1, "python", "easy")
+    duel, _ = find_opponent(p1, "python")
     client.force_login(p1)
     url = reverse("classroom:duel_play", args=[duel.pk])
     r = client.get(url)
@@ -481,15 +479,68 @@ def test_replay_works_the_ratings_out_again_keeping_every_result(db):
 
     a, b, c = (User.objects.create_user(n, password="x", duel_rating=999) for n in "abc")
     lonely = User.objects.create_user("lonely", password="x", duel_rating=1234)
-    Duel.objects.create(challenger=a, opponent=b, difficulty="easy", status="finished", winner=a, mode="code")
-    Duel.objects.create(challenger=b, opponent=c, difficulty="easy", status="finished", winner=None, mode="code")
-    Duel.objects.create(challenger=a, opponent=c, difficulty="easy", status="expired", mode="code")
+    Duel.objects.create(challenger=a, opponent=b, status="finished", winner=a, mode="code")
+    Duel.objects.create(challenger=b, opponent=c, status="finished", winner=None, mode="code")
+    Duel.objects.create(challenger=a, opponent=c, status="expired", mode="code")
     replay(Duel.objects.all(), User.objects.all())
     ratings = dict(User.objects.values_list("username", "duel_rating"))
     # a beat b at 1200 each: ±20; then b (1180) drew with c (1200): the lower one gains a point
     assert (ratings["a"], ratings["b"], ratings["c"], ratings["lonely"]) == (1220, 1181, 1199, 1200)
     deltas = list(Duel.objects.order_by("pk").values_list("challenger_delta", "opponent_delta"))
     assert deltas[:2] == [(20, -20), (1, -1)] and deltas[2] == (None, None)
+
+
+@pytest.mark.django_db
+def test_recalc_duel_rating_command_rebuilds_deltas_and_ratings(bank):
+    from io import StringIO
+
+    from django.core.management import call_command
+
+    from .duels import accept, challenge
+    from .models import Duel
+
+    p1, p2 = _players()
+    duel, _ = challenge(p1, "p2", "python")
+    _play(duel, p1, right=5, secs=2)  # p1 all five right
+    accept(duel, p2)
+    _play(duel, p2, right=1)
+    # a corrupted history: a wrong delta and a hand-edited rating
+    Duel.objects.filter(pk=duel.pk).update(challenger_delta=999, opponent_delta=-999)
+    User.objects.filter(pk=p1.pk).update(duel_rating=7)
+
+    out = StringIO()
+    call_command("recalc_duel_rating", stdout=out)
+
+    duel.refresh_from_db()
+    p1.refresh_from_db()
+    p2.refresh_from_db()
+    assert (duel.challenger_delta, duel.opponent_delta) == (20, -20)  # both newcomers: K 40
+    assert (p1.duel_rating, p2.duel_rating) == (1220, 1180)
+    assert "Replayed 1 finished duels" in out.getvalue()
+
+
+@pytest.mark.django_db
+def test_recalc_duel_rating_command_rebuilds_a_past_season_podium():
+    from io import StringIO
+
+    from django.core.management import call_command
+
+    from .duels import duel_season
+    from .models import Duel, DuelSeasonResult
+
+    p1, p2 = _players()
+    ids = [Duel.objects.create(challenger=p1, opponent=p2, mode="quiz", language="python",
+                               status="finished", winner=p1).pk for _ in range(3)]
+    past = timezone.now() - timezone.timedelta(days=40)  # a finished month
+    Duel.objects.filter(pk__in=ids).update(created=past, ends_at=past, opponent_ends_at=past)
+    DuelSeasonResult.objects.all().delete()
+
+    call_command("recalc_duel_rating", stdout=StringIO())
+
+    season = duel_season(Duel.objects.first())
+    rows = list(DuelSeasonResult.objects.filter(season=season).order_by("rank")
+                .values_list("rank", "user_id", "duels"))
+    assert rows == [(1, p1.pk, 3), (2, p2.pk, 3)]  # p1 won all three, so the higher rating
 
 
 @pytest.mark.django_db
@@ -548,7 +599,7 @@ def test_duel_finder_offers_classmates_and_rivals_then_searches_every_handle(cli
         return [(p["username"], p["mate"]) for p in client.get(url, {"q": q}).json()["results"]]
 
     assert found() == [("sami", True), ("vali", True)]  # the group, minus yourself; the teacher isn't a member
-    Duel.objects.create(challenger=User.objects.create_user("bob", password="x"), opponent=ali, difficulty="easy")
+    Duel.objects.create(challenger=User.objects.create_user("bob", password="x"), opponent=ali)
     assert found() == [("bob", False), ("sami", True), ("vali", True)]  # and whoever you have duelled
     User.objects.create_user("valijon", password="x")
     User.objects.create_user("avali", password="x")
@@ -566,13 +617,13 @@ def test_duel_stats_count_wins_runs_the_best_rating_and_perfect_quiz_runs(bank):
 
     p1, p2 = _players()
     assert duel_stats(p1) == {"wins": 0, "win_run": 0, "duel_peak": 1200, "perfect": 0, "lightning": 0, "languages": 0}
-    duel, _ = challenge(p1, "p2", "python", "easy")
+    duel, _ = challenge(p1, "p2", "python")
     _play(duel, p1, right=5, secs=2)  # all five in 10 s
     accept(duel, p2)
     _play(duel, p2, right=1)
     assert duel_stats(p1) == {"wins": 1, "win_run": 1, "duel_peak": 1220, "perfect": 1, "lightning": 1, "languages": 1}
     for winner, delta in ((p1, 45), (p1, 45), (p2, -40)):
-        Duel.objects.create(challenger=p1, opponent=p2, difficulty="easy", status="finished", winner=winner,
+        Duel.objects.create(challenger=p1, opponent=p2, status="finished", winner=winner,
                             mode="code", challenger_delta=delta, opponent_delta=-delta)
     stats = duel_stats(p1)
     assert (stats["wins"], stats["win_run"], stats["duel_peak"]) == (3, 3, 1310)
@@ -583,7 +634,7 @@ def test_an_answer_gets_only_its_verdict_then_the_next_question(client, bank):
     from .duels import find_opponent
 
     p1, _ = _players()
-    duel, _ = find_opponent(p1, "python", "easy")
+    duel, _ = find_opponent(p1, "python")
     client.force_login(p1)
     url = reverse("classroom:duel_play", args=[duel.pk])
     q = client.get(url).context["q"]
@@ -608,7 +659,7 @@ def test_staff_see_every_duels_result_and_both_players_answers(client, bank):
     from .duels import accept, challenge
 
     p1, p2 = _players()
-    duel, _ = challenge(p1, "p2", "python", "easy")
+    duel, _ = challenge(p1, "p2", "python")
     _play(duel, p1, right=4)
     accept(duel, p2)
     _play(duel, p2, right=2)
@@ -631,7 +682,7 @@ def test_the_second_player_races_the_firsts_ghost_question_by_question(client, b
     from .duels import accept, challenge
 
     p1, p2 = _players()
-    duel, _ = challenge(p1, "p2", "python", "easy")
+    duel, _ = challenge(p1, "p2", "python")
     _play(duel, p1, right=1, secs=6)  # the first right in 6 s, then four wrong
     accept(duel, p2)
     client.force_login(p2)
@@ -649,7 +700,7 @@ def test_the_second_player_races_the_firsts_ghost_question_by_question(client, b
 
     # the first player, while the second hasn't started: the ghost is absent
     p3 = User.objects.create_user("p3", password="x")
-    duel, _ = challenge(p3, "p1", "python", "medium")
+    duel, _ = challenge(p3, "p1", "python")
     client.force_login(p3)
     url = reverse("classroom:duel_play", args=[duel.pk])
     g = client.get(url).context["ghost"]
@@ -669,7 +720,7 @@ def test_telegram_tells_of_a_challenge_a_duel_result_and_a_badge(bank, settings,
         TelegramLink.objects.create(user=u, chat_id=f"c{u.pk}")
     with patch("apps.accounts.telegram.dispatch_outbox"):
         with django_capture_on_commit_callbacks(execute=True):  # the notice goes out once the duel is committed
-            duel, _ = challenge(p1, "p2", "python", "easy")
+            duel, _ = challenge(p1, "p2", "python")
         invite = TelegramOutbox.objects.get(link__user=p2, event_key=f"duel:{duel.pk}:challenge")
         assert "p1" in invite.text and "Python" in invite.text
         _play(duel, p1, right=5, secs=2)
@@ -683,5 +734,5 @@ def test_telegram_tells_of_a_challenge_a_duel_result_and_a_badge(bank, settings,
         link.notify_duels = False
         link.save()
         with django_capture_on_commit_callbacks(execute=True):
-            d2, _ = challenge(p1, "p2", "python", "medium")
+            d2, _ = challenge(p1, "p2", "python")
         assert not TelegramOutbox.objects.filter(event_key=f"duel:{d2.pk}:challenge").exists()  # turned off

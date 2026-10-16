@@ -106,7 +106,7 @@ class Duel(models.Model):
     """1v1 quiz: the same five questions for both, each player on their own clock: the challenger's
     starts when they open the duel, the opponent's when they join. More right answers wins, then the
     faster (apps.classroom.duels). No opponent yet = an open duel: the next player who asks for a match
-    in that language and level gets the same questions. Duels before the quiz were coding races on one
+    in that language gets the same questions. Duels before the quiz were coding races on one
     problem (mode "code"); they stay as history."""
     class Mode(models.TextChoices):
         QUIZ = "quiz", "Savollar"
@@ -124,7 +124,6 @@ class Duel(models.Model):
                                  related_name="+")
     mode = models.CharField(max_length=10, choices=Mode.choices, default=Mode.QUIZ)
     language = models.CharField(max_length=10, choices=DuelQuestion.Lang.choices, blank=True)
-    difficulty = models.CharField(max_length=10, choices=Problem.Difficulty.choices)
     questions = models.JSONField(default=list, blank=True)  # DuelQuestion ids, in order
     problem = models.ForeignKey(Problem, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDING)
@@ -198,7 +197,6 @@ class LiveQuiz(models.Model):
     title = models.CharField(max_length=120, blank=True)
     code = models.CharField(max_length=6, db_index=True)
     language = models.CharField(max_length=10, choices=DuelQuestion.Lang.choices)
-    level = models.CharField(max_length=10, choices=DuelQuestion.Level.choices)
     questions = models.JSONField(default=list)  # DuelQuestion ids, in order
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.LOBBY)
     index = models.IntegerField(default=-1)

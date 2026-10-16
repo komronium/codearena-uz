@@ -293,7 +293,7 @@ def _site() -> str:
 
 
 def notify_duel_challenge(duel_id: int):
-    """A friend's challenge, to the one challenged: who, which language and level, and the way in."""
+    """A friend's challenge, to the one challenged: who, which language, and the way in."""
     from apps.classroom.models import Duel
 
     try:
@@ -301,8 +301,8 @@ def notify_duel_challenge(duel_id: int):
         if duel is None or duel.opponent_id is None:
             return
         text = (f"<b>⚔️ Sizni duelga chaqirishdi</b>\n\n"
-                f"<b>{html.escape(duel.challenger.username)}</b> — {duel.get_language_display()}, "
-                f"{duel.get_difficulty_display()}: 5 ta savol, har biriga 20 soniya.\n"
+                f"<b>{html.escape(duel.challenger.username)}</b> — {duel.get_language_display()}: "
+                f"5 ta savol, har biriga 20 soniya.\n"
                 f"3 kun ichida qabul qiling.\n\n"
                 f'<a href="{_site()}/classroom/duels/{duel.pk}/">Duelni ochish →</a>')
         queue_notification(duel.opponent_id, "notify_duels", f"duel:{duel.pk}:challenge", text)

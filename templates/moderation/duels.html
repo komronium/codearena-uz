@@ -2,7 +2,7 @@
 {% block title %}Duellar — boshqaruv{% endblock %}
 {% block content %}
 {% comment %}Every duel for staff: the two players face to face with their scores (right answers out of five and the time
-spent, the rating change once it's over), the score between them, then language, level and state. A duel's page opens
+spent, the rating change once it's over), the score between them, then language and state. A duel's page opens
 for staff too, with every question and both players' answers.{% endcomment %}
 <div class="mb-5">{% include "moderation/_header.html" with title="Duellar" subtitle="Har bir duel natijasi: kim nechta to‘g‘ri javob berdi, qancha vaqtda, reyting qanchaga o‘zgardi" %}</div>
 
@@ -55,7 +55,7 @@ for staff too, with every question and both players' answers.{% endcomment %}
       {% else %}<span class="text-mute">raqib kutilmoqda</span>{% endif %}
     </td>
     {% endfor %}
-    <td class="whitespace-nowrap text-sm">{% if d.mode == "quiz" %}{{ d.get_language_display }}{% else %}Masala{% endif %} <span class="ca-diff ca-diff-{{ d.difficulty }} !text-xs">{{ d.get_difficulty_display }}</span></td>
+    <td class="whitespace-nowrap text-sm">{% if d.mode == "quiz" %}{{ d.get_language_display }}{% else %}Masala{% endif %}</td>
     <td>{% if d.status == "finished" %}<span class="ca7-pill is-ok">{% if d.winner %}Tugagan{% else %}Durang{% endif %}</span>{% elif d.status == "active" %}<span class="ca7-pill is-warn">Davom etmoqda</span>{% elif d.status == "pending" %}<span class="ca7-pill">Kutmoqda</span>{% else %}<span class="ca7-pill is-bad">{{ d.get_status_display }}</span>{% endif %}</td>
     <td class="whitespace-nowrap text-right tabular text-sm text-mute">{{ d.created|date:"d.m H:i" }}</td>
   </tr>

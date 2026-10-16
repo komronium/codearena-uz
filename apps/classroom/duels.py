@@ -1,14 +1,14 @@
 """1v1 quiz duels, played on two clocks. Opening a duel starts the challenger's run at once on QUESTIONS
-questions in one language and level, so nobody has to wait for anyone; the opponent gets the same
+questions in one language, so nobody has to wait for anyone; the opponent gets the same
 questions and their own run when they join. Each question has PER_QUESTION from the moment it is first
 shown; a run left half-way ends RUN_LIMIT after its start, unseen questions counting as wrong. More right
 answers wins; equal, the less time spent; both with none right is a draw. Duel Elo moves once both runs
 are over, by each player's own K (k_factor), as in chess: high for a newcomer, low at the top.
 
 A duel names its opponent (a friend, who has WAIT_FOR to accept) or leaves the seat open: find_opponent
-puts the next player who asks in that language and level into the open duel whose owner's duel rating is
-closest to theirs, or opens a new one for them. Duels before the quiz were coding races (mode "code");
-they are history only."""
+puts the next player who asks in that language into the open duel whose owner's duel rating is
+closest to theirs, or opens a new one for them. Questions come from the whole language's bank, whatever
+level each one carries. Duels before the quiz were coding races (mode "code"); they are history only."""
 import random
 from datetime import datetime, timedelta
 from typing import NamedTuple
@@ -31,7 +31,6 @@ WAIT_FOR = timedelta(days=3)  # for someone to join an open duel, or for a frien
 START_RATING = 1200
 OPEN = (Duel.Status.PENDING, Duel.Status.ACTIVE)
 LANGUAGES = DuelQuestion.Lang.choices
-LEVELS = DuelQuestion.Level.choices
 BUSY = "Avval boshlagan duelingizni tugating."
 
 
@@ -234,9 +233,9 @@ def _seen(users) -> set[int]:
     return set(DuelAnswer.objects.filter(user__in=users).values_list("question_id", flat=True))
 
 
-def _pick(users, language: str, level: str) -> list[int] | None:
+def _pick(users, language: str) -> list[int] | None:
     """QUESTIONS questions none of `users` has seen, topped up with seen ones when the bank runs short."""
-    pool = list(DuelQuestion.objects.filter(language=language, level=level, is_active=True).values_list("pk", flat=True))
+    pool = list(DuelQuestion.objects.filter(language=language, is_active=True).values_list("pk", flat=True))
     if len(pool) < QUESTIONS:
         return None
     seen = _seen(users)
@@ -250,17 +249,15 @@ def _pick(users, language: str, level: str) -> list[int] | None:
     return picked
 
 
-def _valid(language: str, level: str) -> str:
+def _valid(language: str) -> str:
     if language not in dict(LANGUAGES):
         return "Tilni tanlang."
-    if level not in dict(LEVELS):
-        return "Darajani tanlang."
     return ""
 
 
-def _open(challenger, language: str, level: str, questions: list[int], opponent=None) -> Duel:
+def _open(challenger, language: str, questions: list[int], opponent=None) -> Duel:
     now = timezone.now()
-    return Duel.objects.create(challenger=challenger, opponent=opponent, language=language, difficulty=level,
+    return Duel.objects.create(challenger=challenger, opponent=opponent, language=language,
                                questions=questions, started_at=now, ends_at=now + RUN_LIMIT)
 
 
@@ -280,24 +277,24 @@ def joinable(user):
 
 
 def joinable_counts(user) -> dict[str, int]:
-    """How many open duels wait in each "language:level", for the picker."""
-    return {f"{lang}:{lvl}": n for lang, lvl, n in
-            joinable(user).order_by().values("language", "difficulty").annotate(n=Count("id"))
-            .values_list("language", "difficulty", "n")}
+    """How many open duels wait in each language, for the picker."""
+    return {lang: n for lang, n in
+            joinable(user).order_by().values("language").annotate(n=Count("id"))
+            .values_list("language", "n")}
 
 
-def find_opponent(user, language: str, level: str) -> tuple[Duel | None, str]:
-    """Join the open duel in this language and level whose owner's duel rating is closest to yours (then
+def find_opponent(user, language: str) -> tuple[Duel | None, str]:
+    """Join the open duel in this language whose owner's duel rating is closest to yours (then
     the longest-waiting), preferring questions you haven't seen; or open one: your run starts now, and
     whoever asks next gets your questions."""
-    error = _valid(language, level)
+    error = _valid(language)
     if error:
         return None, error
     with transaction.atomic():
         _lock(user)
         if _busy(user, timezone.now()):
             return None, BUSY
-        candidates = list(joinable(user).filter(language=language, difficulty=level)
+        candidates = list(joinable(user).filter(language=language)
                           .annotate(gap=Abs(F("challenger__duel_rating") - user.duel_rating))
                           .order_by("gap", "created", "pk").values_list("pk", "questions")[:10])
         seen = _seen([user])
@@ -309,20 +306,20 @@ def find_opponent(user, language: str, level: str) -> tuple[Duel | None, str]:
             if duel is not None:
                 _join(duel, user)
                 return duel, ""
-        questions = _pick([user], language, level)
+        questions = _pick([user], language)
         if questions is None:
-            return None, "Bu til va darajada savollar hali yetarli emas — boshqasini tanlang."
-        return _open(user, language, level, questions), ""
+            return None, "Bu tilda savollar hali yetarli emas — boshqasini tanlang."
+        return _open(user, language, questions), ""
 
 
-def challenge(challenger, opponent_username: str, language: str, level: str) -> tuple[Duel | None, str]:
+def challenge(challenger, opponent_username: str, language: str) -> tuple[Duel | None, str]:
     """Open a duel reserved for one opponent; the challenger's run starts now."""
     opponent = User.objects.filter(username=opponent_username.strip(), is_active=True).first()
     if opponent is None:
         return None, "Bunday foydalanuvchi yo‘q."
     if opponent.pk == challenger.pk:
         return None, "O‘zingizni chaqira olmaysiz."
-    error = _valid(language, level)
+    error = _valid(language)
     if error:
         return None, error
     with transaction.atomic():
@@ -332,10 +329,10 @@ def challenge(challenger, opponent_username: str, language: str, level: str) -> 
         pair = [challenger.pk, opponent.pk]
         if Duel.objects.filter(status__in=OPEN, challenger_id__in=pair, opponent_id__in=pair).exists():
             return None, "Bu raqib bilan ochiq duel bor."
-        questions = _pick(pair, language, level)
+        questions = _pick(pair, language)
         if questions is None:
-            return None, "Bu til va darajada savollar hali yetarli emas — boshqasini tanlang."
-        duel = _open(challenger, language, level, questions, opponent=opponent)
+            return None, "Bu tilda savollar hali yetarli emas — boshqasini tanlang."
+        duel = _open(challenger, language, questions, opponent=opponent)
         from apps.accounts.telegram import notify_duel_challenge
         transaction.on_commit(lambda: notify_duel_challenge(duel.pk))
         return duel, ""

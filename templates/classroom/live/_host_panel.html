@@ -1,6 +1,6 @@
 {% if quiz.status == "lobby" %}
 <section class="ca-live-lobby">
-  <p class="ca-live-lbl">{{ quiz.title|default:"Jonli viktorina" }} · {{ quiz.get_language_display }}, {{ quiz.get_level_display }} · {{ total }} savol</p>
+  <p class="ca-live-lbl">{{ quiz.title|default:"Jonli viktorina" }} · {{ quiz.get_language_display }} · {{ total }} savol</p>
   <p class="ca-live-how">Telefonda oching: <b>{{ request.get_host }}{{ join_url }}</b> va kodni kiriting</p>
   <p class="ca-live-code tabular" translate="no">{{ quiz.code }}</p>
   <p class="ca-live-players"><b class="tabular">{{ n_players }}</b> o‘yinchi qo‘shildi</p>

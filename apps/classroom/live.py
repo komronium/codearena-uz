@@ -24,18 +24,18 @@ def _new_code() -> str:
     raise RuntimeError("no free quiz code")
 
 
-def create(teacher, language: str, level: str, count: int, title: str = "", seconds: int = 20):
+def create(teacher, language: str, count: int, title: str = "", seconds: int = 20):
     """A quiz of `count` random bank questions; (quiz, "") or (None, why not)."""
-    if language not in dict(DuelQuestion.Lang.choices) or level not in dict(DuelQuestion.Level.choices):
-        return None, "Til va darajani tanlang."
+    if language not in dict(DuelQuestion.Lang.choices):
+        return None, "Tilni tanlang."
     if count not in COUNTS:
         count = COUNTS[0]
-    pool = list(DuelQuestion.objects.filter(language=language, level=level, is_active=True).values_list("pk", flat=True))
+    pool = list(DuelQuestion.objects.filter(language=language, is_active=True).values_list("pk", flat=True))
     if len(pool) < count:
-        return None, f"Bu tilda va darajada savol yetarli emas ({len(pool)} ta bor, {count} ta kerak)."
+        return None, f"Bu tilda savol yetarli emas ({len(pool)} ta bor, {count} ta kerak)."
     picked = random.sample(pool, count)
     return LiveQuiz.objects.create(teacher=teacher, title=title.strip()[:120], code=_new_code(), language=language,
-                                   level=level, questions=picked, seconds=max(10, min(60, seconds))), ""
+                                   questions=picked, seconds=max(10, min(60, seconds))), ""
 
 
 def join(user, code: str):

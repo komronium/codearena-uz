@@ -235,7 +235,7 @@
         {% endfor %}
         {% for d in challenges %}
         <li class="flex-wrap">
-          <span><b>{{ d.challenger.username }}</b> <span class="text-mute">sizni chaqirdi, {{ d.get_language_display }} · {{ d.get_difficulty_display }}</span></span>
+          <span><b>{{ d.challenger.username }}</b> <span class="text-mute">sizni chaqirdi, {{ d.get_language_display }}</span></span>
           <span class="flex gap-1.5">
             <form method="post" action="{% url 'classroom:duel_answer' d.pk %}">{% csrf_token %}<input type="hidden" name="accept" value="1"><button class="ca-btn ca-btn-primary ca-btn-xs">Qabul qilish</button></form>
             <form method="post" action="{% url 'classroom:duel_answer' d.pk %}">{% csrf_token %}<button class="ca-btn ca-btn-ghost ca-btn-xs">Rad etish</button></form>

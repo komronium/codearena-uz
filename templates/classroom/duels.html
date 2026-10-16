@@ -30,7 +30,7 @@ The duel rating is its own Elo and never touches the contest rating.{% endcommen
       {% for d in incoming %}
       <li>
         <div class="min-w-0">{% include "accounts/_u7.html" with u=d.challenger you=False %} <span class="text-sm text-mute tabular">duel {{ d.challenger.duel_rating }}</span>
-          <p class="text-sm text-mute">{{ d.get_language_display }} · <span class="ca-diff ca-diff-{{ d.difficulty }}">{{ d.get_difficulty_display }}</span> · {{ n_questions }} ta savol · {{ d.created|date:"d.m H:i" }}. Qabul qilsangiz, birinchi savol ochiladi.</p></div>
+          <p class="text-sm text-mute">{{ d.get_language_display }} · {{ n_questions }} ta savol · {{ d.created|date:"d.m H:i" }}. Qabul qilsangiz, birinchi savol ochiladi.</p></div>
         <div class="flex shrink-0 gap-2">
           <form method="post" action="{% url 'classroom:duel_answer' d.pk %}">{% csrf_token %}<button class="ca-btn ca-btn-ghost ca-btn-wb">Rad etish</button></form>
           <form method="post" action="{% url 'classroom:duel_answer' d.pk %}">{% csrf_token %}<input type="hidden" name="accept" value="1"><button class="ca-btn ca-btn-gold ca-btn-wb"><i data-lucide="play" class="lu" aria-hidden="true"></i>Qabul qilish</button></form>
@@ -48,16 +48,10 @@ The duel rating is its own Elo and never touches the contest rating.{% endcommen
       <fieldset>
         <legend class="ca7-lbl">Til</legend>
         <div class="ca7-seg ca7-seg-pick" id="duel-langs">
-          {% for v, label in languages %}<label><input type="radio" name="language" value="{{ v }}" class="sr-only"{% if form.language == v or not form.language and v == "python" %} checked{% endif %}><span>{{ label }}</span></label>{% endfor %}
+          {% for v, label in languages %}<label><input type="radio" name="language" value="{{ v }}" class="sr-only"{% if form.language == v or not form.language and v == "python" %} checked{% endif %}><span>{{ label }} <em hidden></em></span></label>{% endfor %}
         </div>
       </fieldset>
-      <fieldset>
-        <legend class="ca7-lbl">Daraja</legend>
-        <div class="ca7-seg ca7-seg-pick" id="duel-levels">
-          {% for v, label in levels %}<label><input type="radio" name="difficulty" value="{{ v }}" class="sr-only"{% if form.difficulty == v or not form.difficulty and v == "easy" %} checked{% endif %}><span>{{ label }} <em hidden></em></span></label>{% endfor %}
-        </div>
-      </fieldset>
-      <p class="ca7-split-note">Raqam shu til va darajada kutayotgan ochiq duellar soni. Ochiq duel bo‘lmasa, o‘zingiz boshlaysiz, keyingi raqib o‘sha savollarni oladi.</p>
+      <p class="ca7-split-note">Raqam shu tilda kutayotgan ochiq duellar soni. Ochiq duel bo‘lmasa, o‘zingiz boshlaysiz, keyingi raqib o‘sha savollarni oladi.</p>
       <button name="find" value="1" class="ca-btn ca-btn-gold"><i data-lucide="swords" class="lu" aria-hidden="true"></i>Raqib topish</button>
     </form>
     <form method="post" aria-labelledby="friend-title">{% csrf_token %}
@@ -72,12 +66,6 @@ The duel rating is its own Elo and never touches the contest rating.{% endcommen
         <legend class="ca7-lbl">Til</legend>
         <div class="ca7-seg ca7-seg-pick">
           {% for v, label in languages %}<label><input type="radio" name="language" value="{{ v }}" class="sr-only"{% if form.language == v or not form.language and v == "python" %} checked{% endif %}><span>{{ label }}</span></label>{% endfor %}
-        </div>
-      </fieldset>
-      <fieldset>
-        <legend class="ca7-lbl">Daraja</legend>
-        <div class="ca7-seg ca7-seg-pick">
-          {% for v, label in levels %}<label><input type="radio" name="difficulty" value="{{ v }}" class="sr-only"{% if form.difficulty == v or not form.difficulty and v == "easy" %} checked{% endif %}><span>{{ label }}</span></label>{% endfor %}
         </div>
       </fieldset>
       <button class="ca-btn ca-btn-primary"><i data-lucide="send" class="lu" aria-hidden="true"></i>Chaqiruv yuborish</button>
@@ -101,7 +89,7 @@ The duel rating is its own Elo and never touches the contest rating.{% endcommen
       {% for d in history %}
       <tr>
         <td>{% if d.challenger_id == user.pk %}{% if d.opponent %}{% include "accounts/_u7.html" with u=d.opponent you=False %}{% else %}<span class="text-mute">—</span>{% endif %}{% else %}{% include "accounts/_u7.html" with u=d.challenger you=False %}{% endif %}</td>
-        <td><a class="ca-link" href="{% url 'classroom:duel' d.pk %}">{% if d.mode == "quiz" %}{{ d.get_language_display }}{% else %}Duel{% endif %}</a> <span class="ca-diff ca-diff-{{ d.difficulty }} !text-xs">{{ d.get_difficulty_display }}</span></td>
+        <td><a class="ca-link" href="{% url 'classroom:duel' d.pk %}">{% if d.mode == "quiz" %}{{ d.get_language_display }}{% else %}Duel{% endif %}</a></td>
         <td>{% if d.status == "finished" %}{% if d.winner_id == user.pk %}<span class="ca7-pill is-ok">G‘alaba</span>{% elif d.winner_id %}<span class="ca7-pill is-bad">Mag‘lubiyat</span>{% else %}<span class="ca7-pill">Durang</span>{% endif %}{% else %}<span class="text-mute">{{ d.get_status_display }}</span>{% endif %}</td>
         <td class="hidden text-right tabular text-mute sm:table-cell">{{ d.created|date:"d.m H:i" }}</td>
         <td class="text-right font-semibold tabular">{% if d.status == "finished" %}{% if d.challenger_id == user.pk %}{{ d.challenger_delta|stringformat:"+d" }}{% else %}{{ d.opponent_delta|stringformat:"+d" }}{% endif %}{% endif %}</td>
@@ -159,12 +147,11 @@ The duel rating is its own Elo and never touches the contest rating.{% endcommen
 {{ joinable|json_script:"duel-open" }}
 <script>
 (() => {
-  // the level picker counts the open duels waiting in the chosen language
+  // the language picker shows the open duels waiting in each: the number beside the label
   const open = JSON.parse(document.getElementById("duel-open").textContent);
   const counts = () => {
-    const lang = document.querySelector("#duel-langs input:checked")?.value;
-    document.querySelectorAll("#duel-levels label").forEach((l) => {
-      const n = open[`${lang}:${l.querySelector("input").value}`] || 0, em = l.querySelector("em");
+    document.querySelectorAll("#duel-langs label").forEach((l) => {
+      const n = open[l.querySelector("input").value] || 0, em = l.querySelector("em");
       em.textContent = n; em.hidden = !n;
     });
   };

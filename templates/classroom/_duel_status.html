@@ -44,7 +44,7 @@ per_question, n_questions, expires, user. A coding duel from before the quiz sho
     <span class="ca-avatar h-11 w-11 shrink-0 text-lg" aria-hidden="true">?</span>
     <div class="min-w-0">
       <p class="font-semibold">Raqib kutilmoqda</p>
-      <p class="text-xs text-mute">{{ duel.get_language_display }}, {{ duel.get_difficulty_display }} darajasida duel boshlagan keyingi o‘yinchi</p>
+      <p class="text-xs text-mute">{{ duel.get_language_display }} tilida duel boshlagan keyingi o‘yinchi</p>
     </div>
   </div>
   {% endif %}
@@ -54,7 +54,6 @@ per_question, n_questions, expires, user. A coding duel from before the quiz sho
 
 <div class="mt-5 flex flex-wrap items-center justify-center gap-2 text-center">
   {% if duel.mode == "quiz" %}<span class="ca7-pill">{{ duel.get_language_display }}</span>{% endif %}
-  <span class="ca-diff ca-diff-{{ duel.difficulty }}">{{ duel.get_difficulty_display }}</span>
   <b>{{ duel.get_status_display }}</b>
 </div>
 
@@ -67,7 +66,7 @@ per_question, n_questions, expires, user. A coding duel from before the quiz sho
 
 {% if duel.status == "pending" %}
   {% if not duel.opponent_id %}
-  <p class="mx-auto mt-3 max-w-md text-center text-sm text-mute">Ochiq duel: shu til va darajada duel boshlagan keyingi o‘yinchi aynan shu savollarni oladi. Ko‘proq to‘g‘ri javob bergan g‘olib, teng bo‘lsa — tezrog‘i. Raqib {{ expires|date:"d.m H:i" }} gacha kutiladi.</p>
+  <p class="mx-auto mt-3 max-w-md text-center text-sm text-mute">Ochiq duel: shu tilda duel boshlagan keyingi o‘yinchi aynan shu savollarni oladi. Ko‘proq to‘g‘ri javob bergan g‘olib, teng bo‘lsa — tezrog‘i. Raqib {{ expires|date:"d.m H:i" }} gacha kutiladi.</p>
   {% elif duel.opponent_id == user.pk %}
   <p class="mx-auto mt-3 max-w-md text-center text-sm text-mute"><b class="text-ink">{{ duel.challenger.username }}</b> sizni chaqirdi: {{ duel.get_language_display }}, {{ n_questions }} ta savol. Qabul qilsangiz, birinchi savol ochiladi.</p>
   {% if rival %}<dl class="ca-rivalrec" aria-label="{{ duel.challenger.username }} haqida">
@@ -93,7 +92,6 @@ per_question, n_questions, expires, user. A coding duel from before the quiz sho
 {% if duel.status == "finished" or duel.status == "expired" or duel.status == "declined" %}
 <form method="post" action="{% url 'classroom:duels' %}" class="mt-3 flex justify-center gap-2">{% csrf_token %}
   <input type="hidden" name="language" value="{{ duel.language|default:'python' }}">
-  <input type="hidden" name="difficulty" value="{% if duel.difficulty == 'hard' %}medium{% else %}{{ duel.difficulty }}{% endif %}">
   <button name="find" value="1" class="ca-btn {% if result %}ca-btn-ghost{% else %}ca-btn-primary{% endif %}"><i data-lucide="swords" class="lu" aria-hidden="true"></i>Yangi duel</button>
 </form>
 {% endif %}

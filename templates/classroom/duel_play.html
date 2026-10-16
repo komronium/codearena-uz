@@ -10,7 +10,7 @@ second. Copying out of the question is blocked, so it can't be pasted into an AI
 <div class="ca-quiz" data-nocopy>
   <div class="ca-quiz-top">
     <a class="ca-link text-sm text-mute" href="{% url 'classroom:duel' duel.pk %}"><i data-lucide="swords" class="lu mr-1" aria-hidden="true"></i>{{ duel.challenger.username }} vs {{ duel.opponent.username|default:"?" }}</a>
-    <span class="ca-quiz-meta"><b>{{ language }}</b> · {{ duel.get_difficulty_display }}</span>
+    <span class="ca-quiz-meta"><b>{{ language }}</b></span>
   </div>
   {# head to head: your answers and score, the opponent's as a ghost (revealed as your clock passes them) #}
   <div class="ca-quiz-vs" aria-label="Hisob">

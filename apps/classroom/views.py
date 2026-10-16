@@ -229,11 +229,11 @@ def duel_list(request):
     duels.settle_open(request.user)
     error = ""
     if request.method == "POST":
-        language, level = request.POST.get("language", ""), request.POST.get("difficulty", "")
+        language = request.POST.get("language", "")
         if "find" in request.POST:
-            duel, error = duels.find_opponent(request.user, language, level)
+            duel, error = duels.find_opponent(request.user, language)
         else:
-            duel, error = duels.challenge(request.user, request.POST.get("opponent", ""), language, level)
+            duel, error = duels.challenge(request.user, request.POST.get("opponent", ""), language)
         if duel is not None:
             return redirect("classroom:duel_play", duel.pk)
     mine = (Duel.objects.filter(Q(challenger=request.user) | Q(opponent=request.user))
@@ -267,7 +267,7 @@ def duel_list(request):
         "open": open_duels,
         # an open duel nobody joined was never a duel: it stays out of the record
         "history": [d for d in mine if d.status not in duels.OPEN and d.opponent_id][:30],
-        "error": error, "languages": duels.LANGUAGES, "levels": duels.LEVELS, "joinable": joinable,
+        "error": error, "languages": duels.LANGUAGES, "joinable": joinable,
         "form": request.POST if error else {"opponent": request.GET.get("opponent", "")[:150]}, "per_question": int(duels.PER_QUESTION.total_seconds()),
         "n_questions": duels.QUESTIONS, "badges": badge_board(request.user, {"duels"}),
     })
@@ -306,13 +306,12 @@ def _my_duel(request, pk):
 @login_required
 @require_POST
 def duel_rematch(request, pk):
-    """Revansh: the same opponent, language and level, new questions; your run starts now, as any challenge."""
+    """Revansh: the same opponent and language, new questions; your run starts now, as any challenge."""
     duel = _my_duel(request, pk)
     other = duel.opponent if request.user.pk == duel.challenger_id else duel.challenger
     if other is None or request.user.pk not in duel.players():
         raise Http404
-    new, error = duels.challenge(request.user, other.username, duel.language or "python",
-                                 duel.difficulty if duel.difficulty in dict(duels.LEVELS) else "easy")
+    new, error = duels.challenge(request.user, other.username, duel.language or "python")
     if new is None:
         messages.error(request, error)
         return redirect("classroom:duel", duel.pk)
@@ -554,12 +553,12 @@ def live_new(request):
             count = int(request.POST.get("count", live.COUNTS[0]))
         except ValueError:
             count = live.COUNTS[0]
-        quiz, error = live.create(request.user, request.POST.get("language", ""), request.POST.get("level", ""), count,
+        quiz, error = live.create(request.user, request.POST.get("language", ""), count,
                                   request.POST.get("title", ""))
         if quiz is not None:
             return redirect("classroom:live_host", quiz.code)
     return render(request, "classroom/live/new.html", {
-        "error": error, "languages": duels.LANGUAGES, "levels": duels.LEVELS, "counts": live.COUNTS,
+        "error": error, "languages": duels.LANGUAGES, "counts": live.COUNTS,
         "recent": LiveQuiz.objects.filter(teacher=request.user)[:5]})
 
 
