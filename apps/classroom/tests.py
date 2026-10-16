@@ -544,6 +544,22 @@ def test_recalc_duel_rating_command_rebuilds_a_past_season_podium():
 
 
 @pytest.mark.django_db
+def test_a_finished_duel_records_when_it_ended(bank):
+    from .duels import accept, challenge
+
+    p1, p2 = _players()
+    duel, _ = challenge(p1, "p2", "python")
+    assert duel.finished_at is None and duel.ended_at == duel.created  # pending: it keeps its creation date
+    _play(duel, p1, right=1)
+    accept(duel, p2)
+    _play(duel, p2, right=1)
+    duel.refresh_from_db()
+    assert duel.status == "finished" and duel.finished_at is not None
+    assert duel.finished_at >= duel.created
+    assert duel.ended_at == duel.finished_at  # a finished duel is shown under when it ended
+
+
+@pytest.mark.django_db
 def test_load_duel_questions_adds_updates_and_retires(db):
     from django.core.management import call_command
 

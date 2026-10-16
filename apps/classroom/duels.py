@@ -388,7 +388,8 @@ def settle(duel) -> None:
         da, db = elo(ra, rb, score, k_factor(ra, _played(a.pk)), k_factor(rb, _played(b.pk)))
         duel.status, duel.winner_id = Duel.Status.FINISHED, winner or None
         duel.challenger_delta, duel.opponent_delta = da, db
-        duel.save(update_fields=["status", "winner", "challenger_delta", "opponent_delta"])
+        duel.finished_at = now  # both runs are over: the duel's own date, not when it was created
+        duel.save(update_fields=["status", "winner", "challenger_delta", "opponent_delta", "finished_at"])
         User.objects.filter(pk=a.pk).update(duel_rating=ra + da, duel_season=season)
         User.objects.filter(pk=b.pk).update(duel_rating=rb + db, duel_season=season)
     from apps.accounts.badges import award  # a finished duel can lift both players' duel badges
@@ -405,7 +406,8 @@ def settle_open(user) -> None:
 
 def replay(duels, users) -> None:
     """Rebuild duel ratings from START_RATING over finished duels, oldest first, with k_factor and the monthly
-    softening: each keeps its result, the deltas are worked out again. `duels`/`users` are querysets."""
+    softening: each keeps its result, the deltas are worked out again. `duels`/`users` are querysets. The
+    `finished_at` of a duel is left alone: it records real history, not something to work out again."""
     rating, played, season_of_user = {}, {}, {}
     for d in duels.filter(status="finished").order_by("created", "pk"):
         a, b = d.challenger_id, d.opponent_id

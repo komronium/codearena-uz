@@ -133,9 +133,11 @@ class Duel(models.Model):
     opponent_started_at = models.DateTimeField(null=True, blank=True)
     opponent_ends_at = models.DateTimeField(null=True, blank=True)
     winner = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
-                               related_name="+")
+                              related_name="+")
     challenger_delta = models.IntegerField(null=True, blank=True)
     opponent_delta = models.IntegerField(null=True, blank=True)
+    # When the duel ended (both runs over), set by settle(); the date a finished duel is shown under
+    finished_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ["-created", "-id"]
@@ -150,6 +152,12 @@ class Duel(models.Model):
 
     def players(self):
         return (self.challenger_id, self.opponent_id)
+
+    @property
+    def ended_at(self):
+        """When the duel finished (both runs over); its creation time until then, so a pending, declined or
+        expired duel still carries a date."""
+        return self.finished_at or self.created
 
 
 class DuelAnswer(models.Model):

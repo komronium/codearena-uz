@@ -84,14 +84,14 @@ The duel rating is its own Elo and never touches the contest rating.{% endcommen
     {% if history %}
     <div class="overflow-x-auto">
     <table class="ca-table ca-table-flat">
-      <thead><tr><th>Raqib</th><th>Duel</th><th>Natija</th><th class="hidden text-right sm:table-cell">Sana</th><th class="w-24 text-right" title="Duel reytingi o‘zgarishi">Reyting</th></tr></thead>
+      <thead><tr><th>Raqib</th><th>Duel</th><th>Natija</th><th class="hidden text-right sm:table-cell">Tugagan</th><th class="w-24 text-right" title="Duel reytingi o‘zgarishi">Reyting</th></tr></thead>
       <tbody>
       {% for d in history %}
       <tr>
         <td>{% if d.challenger_id == user.pk %}{% if d.opponent %}{% include "accounts/_u7.html" with u=d.opponent you=False %}{% else %}<span class="text-mute">—</span>{% endif %}{% else %}{% include "accounts/_u7.html" with u=d.challenger you=False %}{% endif %}</td>
         <td><a class="ca-link" href="{% url 'classroom:duel' d.pk %}">{% if d.mode == "quiz" %}{{ d.get_language_display }}{% else %}Duel{% endif %}</a></td>
         <td>{% if d.status == "finished" %}{% if d.winner_id == user.pk %}<span class="ca7-pill is-ok">G‘alaba</span>{% elif d.winner_id %}<span class="ca7-pill is-bad">Mag‘lubiyat</span>{% else %}<span class="ca7-pill">Durang</span>{% endif %}{% else %}<span class="text-mute">{{ d.get_status_display }}</span>{% endif %}</td>
-        <td class="hidden text-right tabular text-mute sm:table-cell">{{ d.created|date:"d.m H:i" }}</td>
+        <td class="hidden text-right tabular text-mute sm:table-cell">{{ d.ended_at|date:"d.m H:i" }}</td>
         <td class="text-right font-semibold tabular">{% if d.status == "finished" %}{% if d.challenger_id == user.pk %}{{ d.challenger_delta|stringformat:"+d" }}{% else %}{{ d.opponent_delta|stringformat:"+d" }}{% endif %}{% endif %}</td>
       </tr>
       {% endfor %}

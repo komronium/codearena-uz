@@ -5,7 +5,7 @@
     <div class="ca-row-meta">
       {% if d.mode == "quiz" %}<span>{{ d.get_language_display }}</span>{% endif %}
       <span>{{ d.get_status_display }}{% if d.status == "active" and d.questions %} · <b class="tabular text-ink">{{ d.my_done|default:0 }} / {{ d.questions|length }}</b> savol{% endif %}</span>
-      <time datetime="{{ d.created|date:'c' }}" title="{{ d.created|date:'d.m.Y H:i' }}">{{ d.created|ago_uz }}</time>
+      <time datetime="{{ d.ended_at|date:'c' }}" title="{{ d.ended_at|date:'d.m.Y H:i' }}">{{ d.ended_at|ago_uz }}</time>
     </div>
   </div>
   <div class="ca-row-side text-sm">
