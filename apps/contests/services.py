@@ -1,6 +1,6 @@
 from django.utils import timezone
 
-from .models import ContestProblem
+from .models import ContestProblem, Participation
 
 
 def active_contest_for(user, problem):
@@ -10,7 +10,7 @@ def active_contest_for(user, problem):
     if not user.is_authenticated:
         return None
     now = timezone.now()
-    cp = (
+    cps = (
         ContestProblem.objects.filter(
             problem=problem,
             contest__start__lte=now,
@@ -19,9 +19,15 @@ def active_contest_for(user, problem):
         )
         .select_related("contest")
         .order_by("contest_id")
-        .first()
     )
-    return cp.contest if cp is not None else None
+    for cp in cps:
+        if not cp.contest.personal_minutes:
+            return cp.contest
+        # a personal-clock round counts only between "Boshlash" and the end of the person's own time
+        mine = Participation.objects.filter(user=user, contest=cp.contest).select_related("contest").first()
+        if mine is not None and mine.can_submit_now():
+            return cp.contest
+    return None
 
 
 def in_upcoming_contest(problem) -> bool:

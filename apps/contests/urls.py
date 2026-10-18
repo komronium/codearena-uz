@@ -8,6 +8,7 @@ urlpatterns = [
     path("", views.contest_list, name="list"),
     path("<int:pk>/", views.contest_detail, name="detail"),
     path("<int:pk>/register/", views.register, name="register"),
+    path("<int:pk>/begin/", views.begin, name="begin"),
     path("<int:pk>/calendar.ics", views.calendar_ics, name="calendar"),
     path("<int:pk>/virtual/", views.virtual_start, name="virtual"),
     path("<int:pk>/standings/", views.standings, name="standings"),

@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
@@ -39,6 +41,9 @@ class Contest(models.Model):
     allowed_ip_prefix = models.CharField(max_length=50, blank=True)
     require_group = models.ForeignKey(Group, null=True, blank=True, on_delete=models.SET_NULL)
     rating_applied = models.BooleanField(default=False)
+    # A round with a window longer than the time each person gets (a marathon): every participant starts their
+    # own clock with "Boshlash" and has this many minutes from then, never past `end`. 0 = one clock for all.
+    personal_minutes = models.PositiveSmallIntegerField(default=0)
     # Rated only for users in the division's range; the rest take part out of competition:
     # on the board, but not rated (apps.contests.rating).
     division = models.PositiveSmallIntegerField(choices=Division.choices, default=Division.OPEN)
@@ -150,6 +155,27 @@ class Participation(models.Model):
     disqualified_reason = models.CharField(max_length=200, blank=True)
     # Last heartbeat from the contest tracker; a submit long after it had no tracker running.
     last_seen_at = models.DateTimeField(null=True, blank=True)
+    # Personal-clock rounds (Contest.personal_minutes): when this participant pressed "Boshlash".
+    started_at = models.DateTimeField(null=True, blank=True)
+
+    @property
+    def clock_start(self):
+        """Where this participant's time counts from: their own start in a personal-clock round, else the contest's."""
+        return self.started_at if self.contest.personal_minutes and self.started_at else self.contest.start
+
+    @property
+    def personal_end(self):
+        """When this participant's own time runs out (a personal-clock round, once started); None otherwise."""
+        if not (self.contest.personal_minutes and self.started_at):
+            return None
+        return min(self.contest.end, self.started_at + timedelta(minutes=self.contest.personal_minutes))
+
+    def can_submit_now(self) -> bool:
+        """Whether this participant may send code to the round right now."""
+        now = timezone.now()
+        if not (self.contest.start <= now < self.contest.end):
+            return False
+        return not self.contest.personal_minutes or (self.started_at is not None and now < self.personal_end)
 
     class Meta:
         unique_together = ("user", "contest")

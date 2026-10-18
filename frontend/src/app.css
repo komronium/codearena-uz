@@ -3600,3 +3600,8 @@ body .EasyMDEContainer .cm-s-easymde .cm-link, body .EasyMDEContainer .cm-s-easy
 /* the editor's action bar: one short line of keys (the rest in its tooltip), buttons that never wrap */
 .ca-act-keys { overflow: hidden; white-space: nowrap; cursor: help; }
 .ca-act .ca-edb, .ca-act .ca-btn { flex: none; white-space: nowrap; }
+
+/* a personal-clock round (contests/detail.html): the person's own time, big, above the problems */
+.ca-personal-clock { display: flex; align-items: baseline; gap: .75rem; margin: 0 0 .4rem; }
+.ca-personal-clock span { font-size: 0.875rem; color: rgb(var(--ca-mute-rgb)); }
+.ca-personal-clock b { font-size: 2rem; font-weight: 700; letter-spacing: -.02em; }

@@ -7,6 +7,7 @@
 {% block band %}{% include "contests/_band.html" with active="scoreboard" n_participants=rows|length %}{% endblock %}
 {% block content %}
 {# problem titles are secret until the start, even for registered users #}
+{% if board_shut %}<p class="ca-alert mb-4">Natijalar jadvali musobaqa tugagach ochiladi: hamma o‘z vaqtida boshlaydi, shuning uchun boshqalarning natijasi hozir ko‘rinmaydi. Quyida faqat o‘zingizning natijangiz.</p>{% endif %}
 {% if rows %}
 <section aria-labelledby="st-title">
   <div class="ca7-sec-h ca7-st-h">

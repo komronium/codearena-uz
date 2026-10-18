@@ -227,7 +227,8 @@ def _suspicious_solves(contest, events):
             views.setdefault((fe.user_id, fe.problem_id), fe.at)
         elif fe.kind == FocusEvent.Kind.FOCUS and (fe.away_ms or 0) >= _MIN_AWAY_S * 1000:
             returns.setdefault(fe.user_id, []).append(fe)
-    starts = {p.user_id: max(p.registered_at, contest.start) for p in Participation.objects.filter(contest=contest)}
+    starts = {p.user_id: p.started_at or max(p.registered_at, contest.start)
+              for p in Participation.objects.filter(contest=contest)}
     subs = (Submission.objects.filter(contest=contest, verdict="AC")
             .select_related("user", "problem").order_by("created"))
     seen, out = set(), []

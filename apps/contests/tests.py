@@ -1564,3 +1564,78 @@ def test_add_to_calendar_opens_google_calendar_not_a_download(client, contest):
     q = parse_qs(urlparse(link.replace("&amp;", "&")).query)
     assert q["text"] == [f"{contest.title} — CodeArena"] and q["dates"][0].endswith("Z") and "/" in q["dates"][0]
 
+
+
+# ---- a personal-clock round (Contest.personal_minutes) ----
+
+def _marathon(minutes=120):
+    now = timezone.now()
+    c = Contest.objects.create(title="M", is_rated=True, personal_minutes=minutes, start=now - timedelta(hours=5),
+                               end=now + timedelta(days=2))
+    boss = User.objects.create_user("marathon_author", password="x")
+    p = Problem.objects.create(slug="mp", title="MP", statement_md="x", is_public=False, points=10, author=boss)
+    ContestProblem.objects.create(contest=c, problem=p, label="A", points=100)
+    return c, p
+
+
+@pytest.mark.django_db
+def test_personal_clock_keeps_problems_shut_until_boshlash(client):
+    from .services import active_contest_for
+    c, p = _marathon()
+    u = User.objects.create_user("ali", password="x")
+    client.force_login(u)
+    client.post(reverse("contests:register", args=[c.pk]))
+    page = client.get(reverse("contests:detail", args=[c.pk])).content.decode()
+    assert "Boshlash" in page and 'href="/problems/mp/"' not in page  # registered, not started: title and link hidden
+    assert active_contest_for(u, p) is None
+    assert client.get(reverse("problems:detail", args=["mp"])).status_code == 404
+    assert client.post(reverse("contests:begin", args=[c.pk])).status_code == 302
+    me = Participation.objects.get(user=u, contest=c)
+    assert me.started_at is not None and me.personal_end == me.started_at + timedelta(minutes=120)
+    assert active_contest_for(u, p) == c
+    assert 'href="/problems/mp/"' in client.get(reverse("contests:detail", args=[c.pk])).content.decode()
+    first = me.started_at
+    client.post(reverse("contests:begin", args=[c.pk]))  # the clock can't be restarted
+    me.refresh_from_db()
+    assert me.started_at == first
+
+
+@pytest.mark.django_db
+def test_personal_clock_closes_after_its_minutes(client):
+    from .services import active_contest_for
+    c, p = _marathon(minutes=60)
+    u = User.objects.create_user("ali", password="x")
+    Participation.objects.create(user=u, contest=c, started_at=timezone.now() - timedelta(minutes=61))
+    assert active_contest_for(u, p) is None  # the hour is up, the round is not
+    client.force_login(u)
+    assert "Vaqtingiz tugadi" in client.get(reverse("contests:detail", args=[c.pk])).content.decode()
+
+
+@pytest.mark.django_db
+def test_personal_clock_times_a_solve_from_the_persons_own_start_and_shuts_the_board(client):
+    c, p = _marathon()
+    a, b = (User.objects.create_user(n, password="x") for n in ("ali", "bob"))
+    lang = Language.objects.create(code="python", name="Python", docker_image="x", run_cmd="x")
+    start = timezone.now() - timedelta(minutes=50)
+    pa = Participation.objects.create(user=a, contest=c, started_at=start)
+    Participation.objects.create(user=b, contest=c, started_at=timezone.now() - timedelta(minutes=10))
+    Submission.objects.create(user=a, problem=p, language=lang, contest=c, source="x", verdict="AC")
+    Submission.objects.filter(user=a).update(created=start + timedelta(minutes=30))
+    row = next(r for r in compute_standings(c) if r["user"] == a)
+    assert row["cells"][0]["minutes"] == 30 and row["penalty"] == 30  # from Boshlash, not from the round's start
+    client.force_login(b)
+    page = client.get(reverse("contests:standings", args=[c.pk])).content.decode()
+    assert "ali" not in page and "tugagach ochiladi" in page  # someone else's result stays shut while the round runs
+    assert pa.can_submit_now() and not Participation(contest=c, user=b).can_submit_now()
+
+
+@pytest.mark.django_db
+def test_marathon_2_command_builds_a_rated_personal_clock_round():
+    out = StringIO()
+    admin = User.objects.create_user("boss", password="x", is_superuser=True, is_staff=True)
+    start = (timezone.localtime() + timedelta(days=1)).strftime("%Y-%m-%d %H:%M")
+    end = (timezone.localtime() + timedelta(days=3)).strftime("%Y-%m-%d %H:%M")
+    call_command("add_codearena_marathon_2", start=start, end=end, stdout=out)
+    c = Contest.objects.get(title="CodeArena Marathon #2")
+    assert c.is_rated and c.personal_minutes == 120 and c.contest_problems.count() == 6 and admin
+    assert all(not cp.problem.is_public and cp.problem.testcases.count() >= 20 for cp in c.contest_problems.all())

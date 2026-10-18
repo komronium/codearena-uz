@@ -103,11 +103,17 @@ def contest_detail(request, pk):
           if request.user.is_authenticated else None)
     registered = me is not None
     my_row, leaders, next_cp, registrants = None, [], None, []
+    # a personal-clock round (a marathon): the problems stay shut until "Boshlash", and while it runs nobody sees the board
+    personal = _personal_state(contest, me, request.user)
+    if personal and personal["hide"]:
+        problems_shown = []
+    else:
+        problems_shown = problems
     if contest.has_started:
         rows = _standings(contest, problems)
         counted = [r for r in rows if not r["disqualified"]]
         # the board's top: the leaders while it runs, the final results once it is over
-        leaders = counted[:6]
+        leaders = [] if personal and not contest.has_ended and not request.user.is_staff else counted[:6]
         for i, cp in enumerate(problems):
             cp.solved_count = sum(1 for r in counted if r["cells"][i]["solved"])
             cp.n_tried = sum(1 for r in counted if r["cells"][i]["solved"] or r["cells"][i]["wrong"])
@@ -117,10 +123,10 @@ def contest_detail(request, pk):
                 cp.my_cell = my_row["cells"][i] if my_row else None
         if contest.is_running:
             # Codeforces rules: what a problem is worth if solved now, without wrong tries
-            minutes = int((timezone.now() - contest.start).total_seconds()) // 60
+            minutes = int((timezone.now() - (me.clock_start if me else contest.start)).total_seconds()) // 60
             for cp in problems:
                 cp.now_points = problem_points(contest, cp.points, minutes, 0)
-            if registered:
+            if registered and not (personal and personal["hide"]):
                 next_cp = next((cp for cp in problems if not (cp.my_cell and cp.my_cell["solved"])), None)
     else:
         for cp in problems:
@@ -128,7 +134,8 @@ def contest_detail(request, pk):
         # a few faces of who is coming, newest first
         registrants = [p.user for p in contest.participations.select_related("user").order_by("-registered_at")[:8]]
     return render(request, "contests/detail.html", {
-        "contest": contest, "problems": problems, "registered": registered, "my_row": my_row,
+        "contest": contest, "problems": problems_shown, "n_problems": len(problems), "personal": personal,
+        "registered": registered, "my_row": my_row,
         "leaders": leaders, "leaders_any": any(r["score"] or r["solved"] for r in leaders), "next_cp": next_cp, "registrants": registrants,
         "description_html": _render_statement(contest.description_md) if contest.description_md else "",
         "my_participation": me,
@@ -138,6 +145,40 @@ def contest_detail(request, pk):
                        .order_by("-pk")[:3]) if registered or request.user.is_staff else []),
         **_virtual_ctx(request, contest),
     })
+
+
+def _personal_state(contest, me, user) -> dict | None:
+    """For a personal-clock round, what the viewer sees: "ready" (registered, not started), "running" (their time
+    goes), "over" (their time is up) or "join" (not registered); `hide` says the problems stay shut. None for an
+    ordinary round, and for staff, who see everything."""
+    if not contest.personal_minutes or user.is_staff or contest.has_ended:
+        return None
+    if not contest.has_started:
+        return {"state": "wait", "hide": True, "minutes": contest.personal_minutes}
+    if me is None:
+        return {"state": "join", "hide": True, "minutes": contest.personal_minutes}
+    if me.started_at is None:
+        return {"state": "ready", "hide": True, "minutes": contest.personal_minutes}
+    if timezone.now() >= me.personal_end:
+        return {"state": "over", "hide": True, "minutes": contest.personal_minutes, "end": me.personal_end}
+    return {"state": "running", "hide": False, "minutes": contest.personal_minutes, "end": me.personal_end}
+
+
+@login_required
+@require_POST
+def begin(request, pk):
+    """"Boshlash": start this participant's own clock (once; it cannot be restarted or paused)."""
+    contest = get_object_or_404(Contest, pk=pk)
+    if not contest.personal_minutes or not contest.is_running:
+        return HttpResponseBadRequest("no personal clock to start")
+    me = get_object_or_404(Participation, user=request.user, contest=contest)
+    if me.disqualified:
+        return HttpResponseBadRequest("disqualified from this contest")
+    if me.started_at is None:
+        me.started_at = timezone.now()
+        me.save(update_fields=["started_at"])
+        cache.delete(f"contest-standings-{contest.pk}")
+    return redirect("contests:detail", pk=pk)
 
 
 def calendar_ics(request, pk):
@@ -187,6 +228,10 @@ def standings(request, pk):
     contest = get_object_or_404(Contest, pk=pk)
     problems = list(contest.contest_problems.select_related("problem"))
     rows = _standings(contest, problems)
+    # a personal-clock round keeps everyone's results shut until it ends (a late starter must not learn the answers)
+    board_shut = bool(contest.personal_minutes) and not contest.has_ended and not request.user.is_staff
+    if board_shut:
+        rows = [r for r in rows if request.user.is_authenticated and r["user"].pk == request.user.pk]
     # per-problem solved / tried, over the rows that count (a DQ row is shown but not counted,
     # as on the contest page)
     counted = [r for r in rows if not r["disqualified"]]
@@ -197,7 +242,7 @@ def standings(request, pk):
     me = contest.participations.filter(user=request.user).first() if request.user.is_authenticated else None
     my_row = next((r for r in rows if r["user"].pk == request.user.pk), None) if me is not None else None
     ctx = {"contest": contest, "rows": rows, "problems": problems, "registered": me is not None,
-           "my_participation": me, "my_row": my_row}
+           "my_participation": me, "my_row": my_row, "board_shut": board_shut}
     if request.GET.get("format") == "csv":  # the table for a spreadsheet: one row per participant
         import csv
         from django.http import HttpResponse

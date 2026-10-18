@@ -23,7 +23,7 @@ def problem_points(contest, points: int, minutes: int, wrong: int) -> int:
     value falls to 52% by the end of a contest of d minutes, each wrong try costs 50 and nothing
     drops below 30%. ICPC counts solved problems; a points contest gives the full points."""
     if contest.type == Contest.Type.CF:
-        d = max(1, int((contest.end - contest.start).total_seconds()) // 60)
+        d = max(1, contest.personal_minutes or int((contest.end - contest.start).total_seconds()) // 60)
         return max(3 * points // 10, points - 120 * points * minutes // (250 * d) - 50 * wrong)
     return 1 if contest.type == Contest.Type.ICPC else points
 
@@ -83,7 +83,7 @@ def compute_standings(contest):
                 subs = [s for s in subs if s.verdict != "AC"]
             elif void:
                 subs = []
-            c = cell(contest, cp, subs, contest.start)
+            c = cell(contest, cp, subs, p.clock_start)
             if penalty:
                 c["wrong"] += 1  # the cancelled solution, returned as a wrong try
             cells.append(c | {"voided": void, "penalty": penalty})
