@@ -1637,5 +1637,5 @@ def test_marathon_2_command_builds_a_rated_personal_clock_round():
     end = (timezone.localtime() + timedelta(days=3)).strftime("%Y-%m-%d %H:%M")
     call_command("add_codearena_marathon_2", start=start, end=end, stdout=out)
     c = Contest.objects.get(title="CodeArena Marathon #2")
-    assert c.is_rated and c.personal_minutes == 120 and c.contest_problems.count() == 6 and admin
+    assert c.is_rated and c.personal_minutes == 120 and c.contest_problems.count() == 8 and admin
     assert all(not cp.problem.is_public and cp.problem.testcases.count() >= 20 for cp in c.contest_problems.all())

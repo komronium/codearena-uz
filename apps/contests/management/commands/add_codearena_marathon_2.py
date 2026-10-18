@@ -1,8 +1,8 @@
 """CodeArena Marathon #2: a rated round with a personal clock. The round stays open for days, but whoever enters
-presses "Boshlash" and has 120 minutes from then (Contest.personal_minutes). Six hidden problems on one theme, a
-warehouse, from a first-week Beginner (A, B) to one Hard one (F): a parcel tariff, values that occur once, range sums
-(64-bit), the shortest window with a given sum, the fewest removals to make a sequence increase, and the cheapest
-roads that connect every city. None repeats a problem already on the portal.
+presses "Boshlash" and has 120 minutes from then (Contest.personal_minutes). Eight hidden problems in the style of Round #6 (short
+everyday stories, small inputs, one small trap each): two very easy Beginner (A, B), two Beginner (C, D), three Easy
+(E beginner-easy, F, G easy-medium) and one deciding Medium (H) that looks like a story about lamps but is an invariant
+puzzle. None repeats a problem already on the portal.
 
 Every expected output comes from a reference solution here, never typed by hand. Safe to re-run: problems that
 already exist (by slug) are reused, not duplicated.
@@ -10,10 +10,8 @@ already exist (by slug) are reused, not duplicated.
     python manage.py add_codearena_marathon_2 --start "2026-10-19 08:00" --end "2026-10-21 20:00" [--minutes 120]
         [--author admin] [--dry-run]
 """
-import heapq
-from bisect import bisect_left
-from collections import Counter
 from datetime import datetime
+from math import gcd
 
 from django.contrib.auth import get_user_model
 from django.core.management.base import CommandError
@@ -26,7 +24,7 @@ from apps.contests.models import Contest
 
 TITLE = "CodeArena Marathon #2"
 BADGE = "Marathon #2"
-DESCRIPTION = """**Marafon #2: 6 ta masala, sizga 120 daqiqa.** Musobaqa bir necha kun ochiq, lekin vaqtingiz — **«Boshlash» tugmasini bosgan paytdan 120 daqiqa**. Qulay paytda boshlang, soat to‘xtamaydi va qayta boshlanmaydi.
+DESCRIPTION = """**Marafon #2: 8 ta masala, sizga 120 daqiqa.** Musobaqa bir necha kun ochiq, lekin vaqtingiz — **«Boshlash» tugmasini bosgan paytdan 120 daqiqa**. Qulay paytda boshlang, soat to‘xtamaydi va qayta boshlanmaydi.
 
 - **Reytingli**: natija reytingingizga ta’sir qiladi. Reyting musobaqa tugagach hisoblanadi.
 - Masalalar «Boshlash»dan keyin ochiladi. Natijalar jadvali musobaqa tugagach ochiladi: hamma o‘z vaqtida boshlaydi, shuning uchun boshqalarning natijasi oldindan ko‘rinmaydi.
@@ -35,300 +33,278 @@ DESCRIPTION = """**Marafon #2: 6 ta masala, sizga 120 daqiqa.** Musobaqa bir nec
 - Halollik qoidalari amal qiladi: kod o‘zingizniki bo‘lsin; masalalarni va yechimlarni boshqalarga yubormang, AI yoki boshqa birovning yechimi taqiqlanadi. Shubhali yechimlar diskvalifikatsiyaga olinadi."""
 
 
-# ---- A. Beginner: yetkazib berish narxi --------------------------------------------------
-def ship_solve(inp):
-    w, a, b = map(int, inp.split())
-    return _lines(a if w <= 1000 else a + ((w - 1000 + 499) // 500) * b)
+# ---- A. Juda oson: qadamlar --------------------------------------------------------------
+def steps_solve(inp):
+    a, b, d = map(int, inp.split())
+    return _lines((a + b) * d)
 
 
-def ship_tests(rng):
-    tests = ["1500 3000 800", "2300 3000 800", "1 1 1", "1000 5 7", "1001 5 7", "1500 5 7", "1501 5 7", "2000 5 7",
-             "10 1000000000 1000000000", "1000000000 1000000000 1000000000", "999999999 1000000000 1000000000",
-             "1000000000 1 1", "1000 1000000000 1", "1001 1 1000000000", "2500 100 30", "1999 100 30", "2001 100 30"]
-    for _ in range(10):
-        w = rng.choice([rng.randint(1, 1000), rng.randint(1000, 5000), rng.randint(1, 10**9)])
-        tests.append(f"{w} {rng.randint(1, 10**4)} {rng.randint(1, 10**4)}")
-    for _ in range(3):
-        tests.append(f"{rng.randint(10**8, 10**9)} {rng.randint(10**8, 10**9)} {rng.randint(10**8, 10**9)}")
-    return _uniq(tests)
-
-
-# ---- B. Beginner: bir marta uchraydiganlar -----------------------------------------------
-def once_solve(inp):
-    lines = inp.split("\n")
-    a = list(map(int, lines[1].split()))
-    count = Counter(a)
-    result = [x for x in dict.fromkeys(a) if count[x] == 1]
-    return _lines(0) if not result else _lines(len(result), _arr(result))
-
-
-def once_tests(rng):
-    def case(a):
-        return f"{len(a)}\n{_arr(a)}"
-    tests = [case([4, 7, 4, 9, 7, 1]), case([3, 3, 3]), case([5]), case([1, 2, 3, 4]), case([-1, 1, -1, 1]),
-             case([0, 0, 1]), case([10**9, -10**9, 10**9]), case([2, 1, 2, 1, 3]), case(list(range(1, 2001))),
-             case([7] * 1000 + [8])]
-    for _ in range(12):
-        n = _size(rng, 8, 300, 2 * 10**5)
-        hi = rng.choice([3, 10, n, 10**9])
-        tests.append(case([rng.randint(-hi, hi) for _ in range(n)]))
-    return _uniq(tests)
-
-
-# ---- C. Easy: savdo hisoboti (64-bit yig'indilar) ----------------------------------------
-def sales_solve(inp):
-    lines = inp.split("\n")
-    n, q = map(int, lines[0].split())
-    pre = [0]
-    for x in map(int, lines[1].split()):
-        pre.append(pre[-1] + x)
-    out = []
-    for line in lines[2:2 + q]:
-        l, r = map(int, line.split())
-        out.append(pre[r] - pre[l - 1])
-    return _lines(*out)
-
-
-def sales_tests(rng):
-    def case(a, queries):
-        return f"{len(a)} {len(queries)}\n{_arr(a)}\n" + "\n".join(f"{l} {r}" for l, r in queries)
-    tests = [case([5, 3, 8, 2, 7], [(1, 3), (2, 5), (4, 4)]), case([1], [(1, 1)]),
-             case([10**9] * 5, [(1, 5), (2, 4)]), case([1, 2, 3, 4, 5, 6], [(1, 6), (1, 1), (6, 6), (3, 5)]),
-             case([10**9] * 2 * 10**5, [(1, 2 * 10**5), (5, 2 * 10**5 - 3), (7, 7)])]
-    for _ in range(18):
-        n = _size(rng, 8, 2000, 2 * 10**5)
-        q = _size(rng, 8, 2000, 2 * 10**5)
-        hi = rng.choice([5, 1000, 10**9])
-        a = [rng.randint(1, hi) for _ in range(n)]
-        queries = []
-        for _ in range(q):
-            l = rng.randint(1, n)
-            queries.append((l, rng.randint(l, n)))
-        tests.append(case(a, queries))
-    return _uniq(tests)
-
-
-# ---- D. Medium: eng qisqa bo'lak ---------------------------------------------------------
-def window_solve(inp):
-    lines = inp.split("\n")
-    n, s = map(int, lines[0].split())
-    a = list(map(int, lines[1].split()))
-    best, best_start, total, left = n + 1, 0, 0, 0
-    for right in range(n):
-        total += a[right]
-        while total - a[left] >= s:
-            total -= a[left]
-            left += 1
-        if total >= s and right - left + 1 < best:
-            best, best_start = right - left + 1, left + 1
-    return _lines(-1) if best == n + 1 else _lines(f"{best} {best_start}")
-
-
-def window_tests(rng):
-    def case(s, a):
-        return f"{len(a)} {s}\n{_arr(a)}"
-    tests = [case(15, [5, 1, 3, 5, 10, 7, 4, 9, 2, 8]), case(7, [2, 3, 1, 2, 4, 3]), case(1, [1]), case(2, [1]),
-             case(5, [5, 5, 5]), case(10, [1, 1, 1, 1, 1]), case(10**14, [10**9] * 10**5),
-             case(2 * 10**14, [10**9] * 2 * 10**5), case(2 * 10**14 + 1, [10**9] * 2 * 10**5),
-             case(9, [4, 5, 9, 1, 8, 9]), case(6, [3, 3, 6, 6, 1, 5, 1]), case(3, [1, 1, 1, 3, 1, 1])]
-    for _ in range(12):
-        n = _size(rng, 8, 2000, 2 * 10**5)
-        hi = rng.choice([4, 30, 10**4, 10**9])
-        a = [rng.randint(1, hi) for _ in range(n)]
-        total = sum(a)
-        s = rng.choice([rng.randint(1, max(1, total // 50)), rng.randint(1, total), total, total + 1])
-        tests.append(case(s, a))
-    return _uniq(tests)
-
-
-# ---- E. Medium: eng kam olib tashlash ----------------------------------------------------
-def remove_solve(inp):
-    lines = inp.split("\n")
-    n = int(lines[0])
-    tails = []
-    for x in map(int, lines[1].split()):
-        i = bisect_left(tails, x)  # strictly increasing: an equal value replaces, never extends
-        if i == len(tails):
-            tails.append(x)
-        else:
-            tails[i] = x
-    return _lines(n - len(tails))
-
-
-def remove_tests(rng):
-    def case(a):
-        return f"{len(a)}\n{_arr(a)}"
-    tests = [case([3, 1, 2, 5, 4]), case([2, 2, 2, 2]), case([1]), case([5, 4, 3, 2, 1]), case([1, 2, 3, 4, 5]),
-             case([1, 2, 2, 3]), case([10, 1, 11, 2, 12, 3]), case(list(range(2 * 10**5, 0, -1))),
-             case(list(range(1, 2 * 10**5 + 1))), case([1, 3, 2, 3, 1, 4]), case([7, 7, 8, 8, 9, 9]),
-             case([4, 10, 4, 3, 8, 9])]
+def steps_tests(rng):
+    tests = ["3000 4000 7", "0 5000 30", "0 0 1", "20000 20000 365", "1 1 1", "20000 0 100", "0 20000 365",
+             "1234 5678 90", "10000 10000 31", "500 0 1"]
     for _ in range(14):
-        n = _size(rng, 8, 3000, 2 * 10**5)
-        hi = rng.choice([3, 20, n, 10**9])
-        tests.append(case([rng.randint(1, hi) for _ in range(n)]))
-    tests.append(case([rng.choice([1, 2, 3, 4, 5]) for _ in range(2 * 10**5)]))
+        tests.append(f"{rng.choice([0, rng.randint(0, 20000)])} {rng.randint(0, 20000)} {rng.randint(1, 365)}")
     return _uniq(tests)
 
 
-# ---- F. Hard: yo'llar qurilishi ----------------------------------------------------------
-def roads_solve(inp):
+# ---- B. Juda oson: baho ------------------------------------------------------------------
+def grade_solve(inp):
+    s = int(inp)
+    return _lines(5 if s >= 86 else 4 if s >= 71 else 3 if s >= 56 else 2)
+
+
+def grade_tests(rng):
+    tests = ["90", "55", "0", "100", "56", "70", "71", "85", "86", "87", "69", "72", "54", "1", "99", "60", "80"]
+    tests += [str(rng.randint(0, 100)) for _ in range(8)]
+    return _uniq(tests)
+
+
+# ---- C. Beginner: bir xil harorat --------------------------------------------------------
+def same_solve(inp):
     lines = inp.split("\n")
-    n, m, k = map(int, lines[0].split())
-    parent = list(range(n + 1))
-
-    def find(x):
-        while parent[x] != x:
-            parent[x] = parent[parent[x]]
-            x = parent[x]
-        return x
-
-    parts = n
-    for line in lines[1:1 + k]:
-        u, v = map(int, line.split())
-        ru, rv = find(u), find(v)
-        if ru != rv:
-            parent[ru] = rv
-            parts -= 1
-    edges = []
-    for line in lines[1 + k:1 + k + m]:
-        u, v, c = map(int, line.split())
-        edges.append((c, u, v))
-    edges.sort()
-    cost = 0
-    for c, u, v in edges:
-        if parts == 1:
-            break
-        ru, rv = find(u), find(v)
-        if ru != rv:
-            parent[ru] = rv
-            parts -= 1
-            cost += c
-    return _lines(cost if parts == 1 else -1)
+    t = list(map(int, lines[1].split()))
+    return _lines(sum(1 for i in range(1, len(t)) if t[i] == t[i - 1]))
 
 
-def roads_tests(rng):
-    def case(n, built, roads):
-        rows = [f"{n} {len(roads)} {len(built)}", *[f"{u} {v}" for u, v in built], *[f"{u} {v} {c}" for u, v, c in roads]]
-        return "\n".join(rows)
+def same_tests(rng):
+    def case(t):
+        return f"{len(t)}\n{_arr(t)}"
+    tests = [case([20, 20, 21, 21, 21, 19]), case([5]), case([7, 7]), case([7, 8]), case([3] * 100),
+             case([1, 2] * 50), case([-5, -5, -5, 0, 0, -5]), case([0, 0, 0]), case([-50, 50, -50, 50]),
+             case([10, 11, 11, 10, 10, 10, 9])]
+    for _ in range(14):
+        n = rng.choice([rng.randint(1, 10), rng.randint(1, 100), 100])
+        span = rng.choice([1, 2, 5, 50])
+        tests.append(case([rng.randint(-span, span) for _ in range(n)]))
+    return _uniq(tests)
 
-    def spanning(n, extra, hi):
-        """Random roads that do connect every city (a tree), plus `extra` more."""
-        order = list(range(1, n + 1))
-        rng.shuffle(order)
-        roads = [(order[i], order[rng.randint(0, i - 1)], rng.randint(1, hi)) for i in range(1, n)]
-        for _ in range(extra):
-            u, v = rng.randint(1, n), rng.randint(1, n)
-            if u != v:
-                roads.append((u, v, rng.randint(1, hi)))
-        rng.shuffle(roads)
-        return roads
 
-    tests = [case(4, [], [(1, 2, 5), (2, 3, 4), (3, 4, 6), (1, 4, 1), (1, 3, 2)]),
-             case(5, [(1, 2), (4, 5)], [(2, 3, 7), (3, 4, 3), (1, 5, 9), (2, 4, 8)]),
-             case(1, [], []), case(2, [], []), case(2, [(1, 2)], []),
-             case(3, [], [(1, 2, 4)]), case(3, [(1, 2), (2, 3), (1, 3)], [(1, 2, 9)]),
-             case(4, [(1, 2)], [(1, 2, 1), (1, 2, 1), (3, 4, 10**9)]),
-             case(5, [], [(1, 2, 3), (2, 3, 3), (3, 1, 3), (4, 5, 1)]),
-             case(2 * 10**5, [], [(i, i + 1, 10**9) for i in range(1, 2 * 10**5)]),
-             case(2 * 10**5, [(i, i + 1) for i in range(1, 10**5)], [(i, i + 1, 10**9) for i in range(10**5, 2 * 10**5)])]
+# ---- D. Beginner: eng uzun yomg'ir -------------------------------------------------------
+def rain_solve(inp):
+    lines = inp.split("\n")
+    best = run = 0
+    for x in map(int, lines[1].split()):
+        run = run + 1 if x > 0 else 0
+        best = max(best, run)
+    return _lines(best)
+
+
+def rain_tests(rng):
+    def case(r):
+        return f"{len(r)}\n{_arr(r)}"
+    tests = [case([0, 4, 9, 0, 2, 7, 1, 0]), case([0, 0, 0, 0]), case([5]), case([0]), case([1] * 100),
+             case([0] * 100), case([3, 0, 3, 0, 3]), case([0, 1, 1, 1]), case([1, 1, 1, 0]),
+             case([2, 2, 0, 5, 5, 5, 0, 1]), case([200, 0, 200, 200])]
+    for _ in range(14):
+        n = rng.choice([rng.randint(1, 10), rng.randint(1, 100), 100])
+        rain = rng.choice([0.2, 0.5, 0.8])
+        tests.append(case([rng.randint(1, 200) if rng.random() < rain else 0 for _ in range(n)]))
+    return _uniq(tests)
+
+
+# ---- E. Easy (beginner-easy): kitob ------------------------------------------------------
+def book_solve(inp):
+    n, a = map(int, inp.split())
+    days = (n + a - 1) // a  # reading days needed
+    return _lines(days + (days - 1) // 2)  # the 3rd, 6th, 9th... calendar day is a rest day
+
+
+def book_tests(rng):
+    tests = ["10 4", "5 5", "1 1", "1000000000 1", "1000000000 1000000000", "7 3", "6 3", "9 3", "12 4", "13 4",
+             "2 1", "3 1", "4 1", "5 1", "1000000000 2", "999999999 1", "1000000000 3", "100 7", "100 100", "99 100"]
+    for _ in range(8):
+        n = rng.choice([rng.randint(1, 100), rng.randint(1, 10**5), rng.randint(1, 10**9)])
+        a = rng.choice([rng.randint(1, 10), rng.randint(1, 1000), rng.randint(1, 10**9)])
+        tests.append(f"{n} {a}")
+    return _uniq(tests)
+
+
+# ---- F. Easy: bank navbati ---------------------------------------------------------------
+def queue_solve(inp):
+    lines = inp.split("\n")
+    n, limit = map(int, lines[0].split())
+    served = used = 0
+    for t in map(int, lines[1].split()):
+        if used + t > limit:
+            break  # nobody behind may skip ahead
+        used += t
+        served += 1
+    return _lines(f"{served} {used}")
+
+
+def queue_tests(rng):
+    def case(limit, t):
+        return f"{len(t)} {limit}\n{_arr(t)}"
+    tests = [case(20, [5, 7, 6, 3, 9]), case(5, [6, 1, 1]), case(10, [10]), case(9, [10]), case(10, [4, 6, 1]),
+             case(10, [4, 6]), case(1, [1]), case(10**9, [10**4] * 10**5), case(10**8, [10**4] * 10**5),
+             case(15, [5, 20, 1, 1]), case(7, [3, 3, 3, 1])]
+    for _ in range(14):
+        n = _size(rng, 8, 500, 10**5)
+        t = [rng.randint(1, rng.choice([5, 100, 10**4])) for _ in range(n)]
+        limit = rng.choice([rng.randint(1, max(1, sum(t))), sum(t), sum(t) // 2 + 1, rng.randint(1, 30)])
+        tests.append(case(limit, t))
+    return _uniq(tests)
+
+
+# ---- G. Easy-medium: ikki avtobus (64-bit) -----------------------------------------------
+def buses_solve(inp):
+    a, b, t = map(int, inp.split())
+    return _lines(t // (a // gcd(a, b) * b) + 1)  # together at minute 0, then every lcm(a, b) minutes
+
+
+def buses_tests(rng):
+    tests = ["4 6 25", "5 7 30", "1 1 1", "1 1 10", "6 6 60", "6 6 59", "999983 999979 10000000000",
+             "1000000 999999 1000000000000", "1000000 1000000 1000000000000", "12 18 36", "12 18 35", "2 4 8",
+             "3 5 14", "3 5 15", "3 5 16", "999999 1000000 999999999999", "999999 1000000 999998000001",
+             "999999 1000000 999998000000", "7 1 7", "1 7 6"]
+    for _ in range(8):
+        a, b = rng.randint(1, 10**6), rng.randint(1, 10**6)
+        tests.append(f"{a} {b} {rng.choice([rng.randint(1, 10**4), rng.randint(1, 10**9), rng.randint(1, 10**12)])}")
+    return _uniq(tests)
+
+
+# ---- H. Medium (hal qiluvchi): chiroqlar -------------------------------------------------
+def lamps_solve(inp):
+    lines = inp.split("\n")
+    n, s = int(lines[0]), lines[1].strip()
+    if n < 3:
+        return _lines("YES" if "0" not in s else "NO")  # no move exists
+    # a move switches one lamp of each class (position mod 3), so the three classes' "off" counts change parity together
+    parity = [0, 0, 0]
+    for i, ch in enumerate(s, start=1):
+        if ch == "0":
+            parity[i % 3] ^= 1
+    return _lines("YES" if parity[0] == parity[1] == parity[2] else "NO")
+
+
+def lamps_tests(rng):
+    def case(s):
+        return f"{len(s)}\n{s}"
+
+    def reachable(n):
+        s = [1] * n
+        for _ in range(rng.randint(0, 3 * n)):
+            i = rng.randint(0, max(0, n - 3))
+            for j in range(i, min(n, i + 3)):
+                s[j] ^= 1
+        return s
+
+    def text(bits):
+        return "".join(map(str, bits))
+
+    tests = [case("10001"), case("11011"), case("1"), case("0"), case("11"), case("10"), case("111"), case("000"),
+             case("100"), case("110"), case("1111"), case("0000"), case("1001"), case("0110"), case("00000"),
+             case("11111"), case("01110"), case("1" * 2 * 10**5), case("0" * 2 * 10**5),
+             case("1" * (2 * 10**5 - 1) + "0")]
     for _ in range(10):
-        n = _size(rng, 8, 2000, 2 * 10**5)
-        extra = rng.randint(0, min(2 * 10**5 - max(0, n - 1), n))
-        roads = spanning(n, extra, rng.choice([5, 1000, 10**9]))
-        built = []
-        if rng.random() < 0.6:
-            for _ in range(rng.randint(0, min(n, 10))):
-                u, v = rng.randint(1, n), rng.randint(1, n)
-                if u != v:
-                    built.append((u, v))
-        if rng.random() < 0.35 and len(roads) > 3:  # break the connection: drop some roads, maybe disconnecting
-            del roads[:rng.randint(1, max(1, len(roads) // 3))]
-        tests.append(case(n, built, roads[:2 * 10**5]))
+        n = _size(rng, 12, 3000, 2 * 10**5)
+        bits = reachable(n) if n >= 3 else [1] * n
+        tests.append(case(text(bits)))
+        wrong = list(bits)
+        wrong[rng.randrange(n)] ^= 1  # one lamp switched by hand: the parities no longer agree
+        tests.append(case(text(wrong)))
     return _uniq(tests)
 
 
 PROBLEMS = [
     {
-        "slug": "cam2-yetkazib-berish", "title": "Yetkazib berish", "difficulty": "beginner", "points": 250,
-        "tags": ["input-output", "arithmetic"], "solve": ship_solve, "tests": ship_tests, "samples": 2,
-        "statement": ("Ombor posilkalarni quyidagi tarif bo‘yicha yuboradi: **birinchi 1000 gramm** uchun $a$ so‘m, "
-                      "undan keyingi **har bir boshlangan 500 gramm** uchun yana $b$ so‘m.\n\n"
-                      "Masalan, posilka 1001 gramm bo‘lsa, ortiqcha 1 gramm ham to‘liq 500 grammlik qadam sanaladi.\n\n"
-                      "Og‘irligi $w$ gramm bo‘lgan posilkani yuborish necha so‘m turadi?"),
-        "input": "Bitta qatorda uchta butun son: $w$, $a$ va $b$ ($1 \\le w, a, b \\le 10^9$).",
-        "output": "Bitta son: yuborish narxi. U 32 bitli butun songa sig‘masligi mumkin.",
+        "slug": "cam2-qadamlar", "title": "Qadamlar", "difficulty": "beginner", "points": 100,
+        "tags": ["input-output", "arithmetic"], "solve": steps_solve, "tests": steps_tests, "samples": 2,
+        "statement": ("Sardor sog‘lom turmush tarziga o‘tdi: har kuni ertalab $a$ qadam, kechqurun $b$ qadam yuradi.\n\n"
+                      "U $d$ kun shunday yursa, jami necha qadam yuradi?"),
+        "input": "Bitta qatorda uchta butun son: $a$, $b$ va $d$ ($0 \\le a, b \\le 20000$, $1 \\le d \\le 365$).",
+        "output": "Bitta butun son: jami qadamlar soni.",
     },
     {
-        "slug": "cam2-bir-marta-uchraydiganlar", "title": "Bir marta uchraydiganlar", "difficulty": "beginner",
-        "points": 250, "tags": ["hash-table", "arrays"], "solve": once_solve, "tests": once_tests, "samples": 2,
-        "statement": ("Omborga $n$ ta buyum keldi, har birining kodi butun son. Faqat **bitta** buyumi bor kodlarni "
-                      "toping: ular ro‘yxatda aynan bir marta uchraydi.\n\n"
-                      "Kodlarni ro‘yxatda birinchi marta uchragan tartibda chiqaring."),
-        "input": ("Birinchi qatorda $n$ ($1 \\le n \\le 2 \\cdot 10^5$). Ikkinchi qatorda $n$ ta butun son — "
-                  "kodlar ($|x_i| \\le 10^9$)."),
-        "output": ("Birinchi qatorda bunday kodlar soni $k$. $k > 0$ bo‘lsa, ikkinchi qatorda ularning o‘zi. "
-                   "Bunday kod bo‘lmasa, faqat `0` chiqaring."),
+        "slug": "cam2-baho", "title": "Baho", "difficulty": "beginner", "points": 100,
+        "tags": ["conditionals"], "solve": grade_solve, "tests": grade_tests, "samples": 2,
+        "statement": ("Maktabda imtihon $100$ ballik tizimda baholanadi:\n\n"
+                      "- $86$ dan $100$ gacha — baho `5`\n"
+                      "- $71$ dan $85$ gacha — baho `4`\n"
+                      "- $56$ dan $70$ gacha — baho `3`\n"
+                      "- $0$ dan $55$ gacha — baho `2`\n\n"
+                      "O‘quvchi $s$ ball to‘pladi. Uning bahosi nechchi?"),
+        "input": "Bitta qatorda butun son $s$ ($0 \\le s \\le 100$).",
+        "output": "Bitta butun son: baho ($2$, $3$, $4$ yoki $5$).",
     },
     {
-        "slug": "cam2-savdo-hisoboti", "title": "Savdo hisoboti", "difficulty": "easy", "points": 500,
-        "tags": ["prefix-sums", "arrays"], "solve": sales_solve, "tests": sales_tests, "samples": 2,
-        "statement": ("Do‘kon $n$ kun davomida savdo qildi: $a_i$ — $i$-kundagi tushum (so‘mda). Hisobchi $q$ ta "
-                      "savol berdi: $l$-kundan $r$-kungacha (ikkalasi ham kiradi) jami tushum qancha?\n\n"
-                      "Har bir savolga javob bering."),
-        "input": ("Birinchi qatorda $n$ va $q$ ($1 \\le n, q \\le 2 \\cdot 10^5$). Ikkinchi qatorda $n$ ta butun son "
-                  "$a_i$ ($1 \\le a_i \\le 10^9$). Keyingi $q$ qatorda ikkitadan son: $l$ va $r$ "
-                  "($1 \\le l \\le r \\le n$)."),
-        "output": "$q$ ta qator: har bir savolning javobi. Yig‘indi 32 bitli butun songa sig‘masligi mumkin.",
+        "slug": "cam2-bir-xil-harorat", "title": "Bir xil harorat", "difficulty": "beginner", "points": 200,
+        "tags": ["arrays", "for-loop"], "solve": same_solve, "tests": same_tests, "samples": 2,
+        "statement": ("Meteorolog $n$ kun ketma-ket havo haroratini yozib bordi.\n\n"
+                      "Nechta kunning harorati **avvalgi kundagi harorat bilan aynan bir xil** bo‘lgan? "
+                      "Birinchi kunning avvalgi kuni yo‘q, shuning uchun u hisoblanmaydi."),
+        "input": ("* Birinchi qatorda kunlar soni $n$ ($1 \\le n \\le 100$) beriladi.\n"
+                  "* Ikkinchi qatorda $n$ ta butun son $t_1, \\ldots, t_n$ ($|t_i| \\le 50$) bo‘shliq bilan ajratilgan "
+                  "holda beriladi."),
+        "output": "Bitta butun son: avvalgi kun bilan harorati bir xil bo‘lgan kunlar soni.",
     },
     {
-        "slug": "cam2-eng-qisqa-bolak", "title": "Eng qisqa bo‘lak", "difficulty": "medium", "points": 750,
-        "tl_ms": 2000, "tags": ["two-pointers", "sliding-window"], "solve": window_solve, "tests": window_tests,
-        "samples": 2,
-        "statement": ("Omborda $n$ ta quti ketma-ket turibdi, $i$-qutining og‘irligi $a_i$. Yuk mashinasi ketma-ket "
-                      "joylashgan bir nechta qutini olib ketadi va ularning jami og‘irligi **kamida $S$** bo‘lishi "
-                      "kerak.\n\n"
-                      "Eng kam nechta quti olish mumkin? Shunday eng qisqa bo‘laklar bir nechta bo‘lsa, eng "
-                      "chapdagisini oling. Bo‘lak uzunligini va u nechanchi qutidan boshlanishini chiqaring. "
-                      "Hech qanday bo‘lakning og‘irligi $S$ ga yetmasa, `-1`."),
-        "input": ("Birinchi qatorda $n$ va $S$ ($1 \\le n \\le 2 \\cdot 10^5$, $1 \\le S \\le 2 \\cdot 10^{14}$). "
-                  "Ikkinchi qatorda $n$ ta butun son $a_i$ ($1 \\le a_i \\le 10^9$)."),
-        "output": ("Ikkita son: eng qisqa bo‘lakning uzunligi va uning boshlanish raqami ($1$ dan boshlab), "
-                   "yoki `-1`."),
+        "slug": "cam2-eng-uzun-yomgir", "title": "Eng uzun yomg‘ir", "difficulty": "beginner", "points": 200,
+        "tags": ["arrays", "for-loop"], "solve": rain_solve, "tests": rain_tests, "samples": 2,
+        "statement": ("Fermer $n$ kun davomida yog‘gan yomg‘ir miqdorini (millimetrda) yozib bordi. Yomg‘ir miqdori "
+                      "$0$ dan katta bo‘lgan kun **yomg‘irli** hisoblanadi.\n\n"
+                      "Ketma-ket yomg‘irli kunlarning eng uzun seriyasi necha kun davom etgan? Yomg‘irli kun "
+                      "bo‘lmasa, javob $0$."),
+        "input": ("* Birinchi qatorda kunlar soni $n$ ($1 \\le n \\le 100$) beriladi.\n"
+                  "* Ikkinchi qatorda $n$ ta butun son $r_1, \\ldots, r_n$ ($0 \\le r_i \\le 200$) bo‘shliq bilan "
+                  "ajratilgan holda beriladi."),
+        "output": "Bitta butun son: ketma-ket yomg‘irli kunlarning eng uzun seriyasi.",
     },
     {
-        "slug": "cam2-eng-kam-olib-tashlash", "title": "Eng kam olib tashlash", "difficulty": "medium",
-        "points": 750, "tl_ms": 2000, "tags": ["binary-search", "dynamic-programming"], "solve": remove_solve,
-        "tests": remove_tests, "samples": 2,
-        "statement": ("Konveyerdan $n$ ta posilka o‘tadi, $i$-posilkaning raqami $a_i$. Posilkalarni raqami "
-                      "**qat’iy o‘sib borishi** uchun tartiblash kerak: ularning ba’zilarini konveyerdan olib "
-                      "tashlash mumkin, qolganlarining tartibi o‘zgarmaydi.\n\n"
-                      "Qolgan posilkalarning raqamlari qat’iy o‘suvchi bo‘lishi uchun eng kamida nechtasini olib "
-                      "tashlash kerak? Qat’iy o‘suvchi: har bir keyingi raqam oldingisidan **katta**, teng emas."),
-        "input": ("Birinchi qatorda $n$ ($1 \\le n \\le 2 \\cdot 10^5$). Ikkinchi qatorda $n$ ta butun son "
-                  "$a_i$ ($1 \\le a_i \\le 10^9$)."),
-        "output": "Bitta son: olib tashlanadigan posilkalarning eng kam soni.",
+        "slug": "cam2-kitob", "title": "Kitob", "difficulty": "easy", "points": 300,
+        "tags": ["arithmetic", "math"], "solve": book_solve, "tests": book_tests, "samples": 2,
+        "statement": ("Aziza $n$ betlik kitob o‘qimoqchi. U har kuni aynan $a$ bet o‘qiydi, faqat **har uchinchi kuni** "
+                      "(3-, 6-, 9-, ... kunlar) dam oladi va o‘sha kuni umuman o‘qimaydi.\n\n"
+                      "Oxirgi o‘qiladigan kuni kitobda $a$ betdan kam qolgan bo‘lsa, qolganini o‘qib tugatadi. "
+                      "Aziza kitobni nechanchi kuni o‘qib tugatadi?"),
+        "input": "Bitta qatorda ikkita butun son: $n$ va $a$ ($1 \\le n, a \\le 10^9$).",
+        "output": "Bitta butun son: Aziza kitobni o‘qib tugatadigan kun raqami (kunlar $1$ dan boshlab sanaladi).",
     },
     {
-        "slug": "cam2-yollar-qurilishi", "title": "Yo‘llar qurilishi", "difficulty": "hard", "points": 1000,
-        "tl_ms": 2000, "tags": ["graphs", "dsu", "greedy"], "solve": roads_solve, "tests": roads_tests,
-        "samples": 2,
-        "statement": ("Mamlakatda $n$ ta shahar bor. Ba’zi shaharlar orasida yo‘l allaqachon qurilgan. Yana $m$ ta "
-                      "yo‘lni qurish mumkin: $i$-yo‘l $u_i$ va $v_i$ shaharlarni bog‘laydi va $c_i$ so‘m turadi.\n\n"
-                      "Har qanday ikki shahar orasida (boshqa shaharlar orqali bo‘lsa ham) yo‘l bo‘lishi uchun eng "
-                      "kamida necha so‘m sarflash kerak? Iloji bo‘lmasa, `-1` chiqaring."),
-        "input": ("Birinchi qatorda $n$, $m$ va $k$ ($1 \\le n \\le 2 \\cdot 10^5$, $0 \\le m, k \\le 2 \\cdot 10^5$): "
-                  "shaharlar, qurilishi mumkin bo‘lgan yo‘llar va allaqachon qurilgan yo‘llar soni. Keyingi $k$ "
-                  "qatorda ikkitadan son $u$, $v$ — qurilgan yo‘l. Undan keyingi $m$ qatorda uchtadan son "
-                  "$u_i$, $v_i$, $c_i$ ($1 \\le u_i, v_i \\le n$, $u_i \\ne v_i$, $1 \\le c_i \\le 10^9$). "
-                  "Bir juft shahar orasida bir nechta yo‘l bo‘lishi mumkin."),
-        "output": ("Bitta son: eng kam xarajat yoki `-1`. Hamma shahar allaqachon bog‘langan bo‘lsa, `0`. "
-                   "Javob 32 bitli butun songa sig‘masligi mumkin."),
+        "slug": "cam2-bank-navbati", "title": "Bank navbati", "difficulty": "easy", "points": 400,
+        "tags": ["arrays", "simulation"], "solve": queue_solve, "tests": queue_tests, "samples": 2,
+        "statement": ("Bankda navbat bor: $n$ ta mijoz, $i$-mijozga xizmat ko‘rsatish $t_i$ daqiqa oladi. Xodim "
+                      "mijozlarga navbat tartibida, birin-ketin xizmat ko‘rsatadi va bank ish vaqti tugaguncha "
+                      "faqat $T$ daqiqa qoldi.\n\n"
+                      "Mijozga xizmat boshlansa, u to‘liq tugatilishi kerak: ish vaqti tugab qolsa, xodim uni "
+                      "boshlamaydi. **Navbatdan chiqib ketib bo‘lmaydi**: biror mijozga ulgurilmasa, undan keyingilarga "
+                      "ham xizmat ko‘rsatilmaydi (ularga vaqt yetadigan bo‘lsa ham).\n\n"
+                      "Nechta mijozga xizmat ko‘rsatiladi va buning uchun jami necha daqiqa ketadi?"),
+        "input": ("* Birinchi qatorda $n$ va $T$ ($1 \\le n \\le 10^5$, $1 \\le T \\le 10^9$) beriladi.\n"
+                  "* Ikkinchi qatorda $n$ ta butun son $t_1, \\ldots, t_n$ ($1 \\le t_i \\le 10^4$) bo‘shliq bilan "
+                  "ajratilgan holda beriladi."),
+        "output": "Bitta qatorda ikkita son: xizmat ko‘rsatilgan mijozlar soni va sarflangan jami daqiqalar.",
+    },
+    {
+        "slug": "cam2-ikki-avtobus", "title": "Ikki avtobus", "difficulty": "easy", "points": 500,
+        "tags": ["math", "gcd"], "solve": buses_solve, "tests": buses_tests, "samples": 2,
+        "statement": ("Avtoparkdan ikki yo‘nalishdagi avtobuslar chiqadi. Ikkalasi ham $0$-daqiqada birga chiqadi. "
+                      "Keyin birinchi yo‘nalish har $a$ daqiqada, ikkinchisi har $b$ daqiqada yana chiqadi.\n\n"
+                      "$0$-daqiqadan $T$-daqiqagacha (ikkala chegara ham kiradi) ikkala avtobus **aynan bir daqiqada** "
+                      "necha marta chiqadi? $0$-daqiqa ham hisobga kiradi."),
+        "input": ("Bitta qatorda uchta butun son: $a$, $b$ va $T$ ($1 \\le a, b \\le 10^6$, $1 \\le T \\le 10^{12}$)."),
+        "output": "Bitta butun son: avtobuslar birga chiqadigan daqiqalar soni.",
+    },
+    {
+        "slug": "cam2-chiroqlar", "title": "Chiroqlar", "difficulty": "medium", "points": 900,
+        "tl_ms": 1000, "tags": ["math", "constructive"], "solve": lamps_solve, "tests": lamps_tests, "samples": 2,
+        "statement": ("Katta zalda $n$ ta chiroq bir qatorda turibdi. Ba’zilari yonib turibdi, ba’zilari o‘chiq. "
+                      "Navbatchi zalni to‘liq yoritmoqchi: **hamma chiroq yonib turishi** kerak.\n\n"
+                      "Pult bilan faqat bitta ish qilish mumkin: **ketma-ket turgan uchta chiroqni** tanlab, ularning "
+                      "uchalasining holatini almashtirish (yonig‘i o‘chadi, o‘chig‘i yonadi). Bu ishni istagancha "
+                      "marta, istalgan joyda takrorlash mumkin. Ikkita yoki bitta chiroqni alohida o‘zgartirib "
+                      "bo‘lmaydi.\n\n"
+                      "Navbatchi hamma chiroqni yondira oladimi?"),
+        "input": ("* Birinchi qatorda chiroqlar soni $n$ ($1 \\le n \\le 2 \\cdot 10^5$) beriladi.\n"
+                  "* Ikkinchi qatorda uzunligi $n$ bo‘lgan satr: $i$-belgi `1` bo‘lsa $i$-chiroq yonib turibdi, "
+                  "`0` bo‘lsa o‘chiq."),
+        "output": "Hamma chiroqni yondirish mumkin bo‘lsa `YES`, aks holda `NO` chiqaring.",
     },
 ]
 
 
 class Command(WeekendCommand):
-    help = "Creates CodeArena Marathon #2 (rated, 120-minute personal clock) if needed and attaches its 6 problems (hidden) as A..F."
+    help = "Creates CodeArena Marathon #2 (rated, 120-minute personal clock) if needed and attaches its 8 problems (hidden) as A..H."
     ml_mb = 256
 
     def add_arguments(self, parser):
@@ -370,6 +346,9 @@ class Command(WeekendCommand):
                                   f"har kimga {contest.personal_minutes} daqiqa.")
             elif contest.start <= timezone.now() and not opts["force"]:
                 raise CommandError("Musobaqa allaqachon boshlangan. Baribir ulash uchun --force qo'shing.")
+            else:  # a re-run before the start: the rules text and the personal clock follow this file
+                contest.description_md, contest.personal_minutes, contest.badge = DESCRIPTION, opts["minutes"], BADGE
+                contest.save(update_fields=["description_md", "personal_minutes", "badge"])
 
             self._drop_old(contest, PROBLEMS, "cam2-")
             taken = set(contest.contest_problems.values_list("label", flat=True))
