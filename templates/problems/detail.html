@@ -373,7 +373,7 @@ the console (samples, your own input, the run's result) and the one gold "Yubori
       </div>
       <div class="ca-act">
         {% if user.is_authenticated %}
-        <span class="ca-act-keys"><kbd class="ca-kbd">Ctrl</kbd>+<kbd class="ca-kbd">Enter</kbd> yuborish<span class="hidden 2xl:inline"> · <kbd class="ca-kbd">Esc</kbd>, <kbd class="ca-kbd">Tab</kbd> muharrirdan chiqish</span>{% if contest %} · <kbd class="ca-kbd">Ctrl</kbd>+<kbd class="ca-kbd">'</kbd> sinash{% else %}<span class="hidden xl:inline" title="Mashqda kod qanday yozilgani (uzun kod qo‘yish, boshqa oynaga o‘tish) o‘qituvchingizga ko‘rinadi. Ko‘chirilgan yechim uchun ball berilmaydi."> · {% if problem.difficulty == "beginner" or problem.difficulty == "easy" %}uzun kod qo‘yish yopiq{% else %}o‘qituvchi ko‘radi{% endif %} <i data-lucide="info" class="lu" aria-hidden="true"></i></span>{% endif %}</span>
+        <span class="ca-act-keys" title="Ctrl+Enter — yuborish. Ctrl+' — sinab ko‘rish. Esc, keyin Tab — muharrirdan chiqish.{% if not contest %} {% if problem.difficulty == "beginner" or problem.difficulty == "easy" %}Bu masalada uzun kodni qo‘yib bo‘lmaydi.{% endif %} Mashqda kod qanday yozilgani o‘qituvchingizga ko‘rinadi; ko‘chirilgan yechim uchun ball berilmaydi.{% endif %}"><kbd class="ca-kbd">Ctrl</kbd>+<kbd class="ca-kbd">Enter</kbd> yuborish <i data-lucide="info" class="lu" aria-hidden="true"></i></span>
         {% if contest_blocked %}
         <button type="button" id="trial-btn" class="ca-edb opacity-50 cursor-not-allowed" disabled title="Masala bloklangan — musobaqa tugaguncha sinab bo‘lmaydi"><i data-lucide="play" class="lu" aria-hidden="true"></i>Sinab ko‘rish</button>
         <button type="button" id="submit-btn" class="ca-btn ca-btn-gold ca-btn-go opacity-50 cursor-not-allowed" disabled title="Masala bloklangan — musobaqa tugaguncha yechim yuborish mumkin emas"><i data-lucide="send" class="lu" aria-hidden="true"></i>Yuborish</button>
@@ -467,6 +467,8 @@ resolves their bare imports so @codemirror/state loads once — two copies break
     sql: () => import("@codemirror/lang-sql").then((m) => m.sql()),
     python: () => import("@codemirror/lang-python").then((m) => m.python()),
     cpp: () => import("@codemirror/lang-cpp").then((m) => m.cpp()),
+    c: () => import("@codemirror/lang-cpp").then((m) => m.cpp()),  // the C++ grammar reads C too
+    rust: () => import("@codemirror/lang-rust").then((m) => m.rust()),
     java: () => import("@codemirror/lang-java").then((m) => m.java()),
     node: () => import("@codemirror/lang-javascript").then((m) => m.javascript()),
   };
@@ -518,6 +520,8 @@ resolves their bare imports so @codemirror/state loads once — two copies break
     cpp: "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    ios::sync_with_stdio(false);\n    cin.tie(nullptr);\n\n    \n    return 0;\n}\n",
     java: "import java.util.*;\nimport java.io.*;\n\npublic class Main {\n    public static void main(String[] args) throws IOException {\n        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));\n        \n    }\n}\n",
     node: "const lines = require(\"fs\").readFileSync(0, \"utf8\").split(\"\\n\");\n\n",
+    c: "#include <stdio.h>\n\nint main(void) {\n    \n    return 0;\n}\n",
+    rust: "use std::io::{self, Read};\n\nfn main() {\n    let mut input = String::new();\n    io::stdin().read_to_string(&mut input).unwrap();\n    let mut it = input.split_ascii_whitespace();\n    \n}\n",
   };
   // Tab-completed snippets (type the label, e.g. "fori", then Tab; Tab again jumps between fields).
   const S = (label, detail, template) => snip(template, { label, detail, type: "keyword" });
@@ -559,8 +563,100 @@ resolves their bare imports so @codemirror/state loads once — two copies break
       S("gcd", "EKUB", "const gcd = (a, b) => (b ? gcd(b, a % b) : a);"),
       S("binsearch", "binar qidiruv", "let lo = ${0}, hi = ${n};\nwhile (lo < hi) {\n\tconst mid = (lo + hi) >> 1;\n\tif (${check(mid)}) hi = mid;\n\telse lo = mid + 1;\n}"),
     ],
+    c: [
+      S("fori", "for sikli", "for (int ${i} = 0; ${i} < ${n}; ${i}++) {\n\t${}\n}"),
+      S("forr", "teskari for", "for (int ${i} = ${n} - 1; ${i} >= 0; ${i}--) {\n\t${}\n}"),
+      S("scan", "son o‘qish", "scanf(\"%d\", &${x});"),
+      S("scanll", "long long o‘qish", "scanf(\"%lld\", &${x});"),
+      S("pr", "chiqarish", "printf(\"%d\\n\", ${x});"),
+      S("gcd", "EKUB", "long long gcd(long long a, long long b) { return b ? gcd(b, a % b) : a; }"),
+      S("cmp", "qsort uchun", "int cmp(const void *a, const void *b) { return (*(int *)a > *(int *)b) - (*(int *)a < *(int *)b); }"),
+    ],
+    rust: [
+      S("next", "keyingi son", "let ${x}: ${i64} = it.next().unwrap().parse().unwrap();"),
+      S("vec", "n ta son", "let ${a}: Vec<${i64}> = (0..${n}).map(|_| it.next().unwrap().parse().unwrap()).collect();"),
+      S("fori", "for sikli", "for ${i} in 0..${n} {\n\t${}\n}"),
+      S("out", "tez chiqarish", "use std::io::Write;\nlet mut out = io::BufWriter::new(io::stdout().lock());\nwriteln!(out, \"{}\", ${x}).unwrap();"),
+      S("gcd", "EKUB", "fn gcd(a: u64, b: u64) -> u64 { if b == 0 { a } else { gcd(b, a % b) } }"),
+    ],
   };
-  // "CodeArena": the #7 navy, the khatam palette for the syntax (keywords rose, calls sky, strings gold)
+  // Names worth suggesting while typing: the language's built-in functions and types, and after "." (or "::")
+  // the methods of the usual containers and strings. A function goes in with its brackets, the cursor inside.
+  const F = (name, detail) => snip(name + "(${})", { label: name, detail, type: "function" });
+  const T = (name, detail) => ({ label: name, detail, type: "type" });
+  const API = {
+    // Python's own built-ins (print, len, range…) and the names in the code come from @codemirror/lang-python
+    python: [T("defaultdict", "collections"), T("Counter", "collections"), T("deque", "collections"),
+      F("heappush", "heapq"), F("heappop", "heapq"), F("bisect_left", "bisect"), F("bisect_right", "bisect"),
+      F("gcd", "math"), F("sqrt", "math"), F("isqrt", "math"), F("ceil", "math"), F("floor", "math"),
+      F("permutations", "itertools"), F("combinations", "itertools"), F("accumulate", "itertools"), F("lru_cache", "functools")],
+    cpp: [F("sort", "algorithm"), F("reverse"), F("lower_bound"), F("upper_bound"), F("binary_search"), F("unique"),
+      F("max"), F("min"), F("swap"), F("abs"), F("max_element"), F("min_element"), F("accumulate", "numeric"),
+      F("fill"), F("count"), F("find"), F("next_permutation"), F("gcd"), F("lcm"), F("sqrt"), F("pow"), F("to_string"),
+      F("stoi"), F("stoll"), F("getline"), F("make_pair"), F("printf"), F("scanf"),
+      T("vector"), T("string"), T("pair"), T("map"), T("set"), T("unordered_map"), T("unordered_set"), T("multiset"),
+      T("queue"), T("stack"), T("deque"), T("priority_queue"), T("bitset"), T("long long"), T("greater<int>")],
+    c: [F("printf", "chiqarish"), F("scanf", "o‘qish"), F("puts"), F("getchar"), F("putchar"), F("strlen", "string.h"),
+      F("strcmp"), F("strcpy"), F("strcat"), F("memset"), F("memcpy"), F("qsort", "stdlib.h"), F("malloc"), F("calloc"),
+      F("free"), F("abs"), F("llabs"), F("sqrt", "math.h"), F("pow", "math.h"), F("fabs"), F("floor"), F("ceil"),
+      T("long long"), T("unsigned"), T("size_t")],
+    java: [F("System.out.println", "chiqarish"), F("System.out.print"), F("Integer.parseInt"), F("Long.parseLong"),
+      F("Math.max"), F("Math.min"), F("Math.abs"), F("Math.sqrt"), F("Math.pow"), F("Arrays.sort"), F("Arrays.fill"),
+      F("Collections.sort"), F("String.valueOf"),
+      T("ArrayList"), T("HashMap"), T("HashSet"), T("TreeMap"), T("TreeSet"), T("ArrayDeque"), T("PriorityQueue"),
+      T("StringBuilder"), T("StringTokenizer"), T("BufferedReader"), T("Scanner")],
+    node: [F("console.log", "chiqarish"), F("parseInt"), F("parseFloat"), F("Math.max"),
+      F("Math.min"), F("Math.abs"), F("Math.floor"), F("Math.sqrt"), F("Array.from"),
+      F("BigInt")],
+    rust: [F("println!", "chiqarish"), F("print!"), F("writeln!"), F("format!"), F("vec!"), F("assert!"),
+      T("Vec"), T("String"), T("HashMap"), T("HashSet"), T("BTreeMap"), T("BTreeSet"), T("VecDeque"), T("BinaryHeap"),
+      T("i32"), T("i64"), T("u64"), T("usize"), T("f64"), T("bool"), T("char"), T("Option"), T("Result")],
+  };
+  const M = (name, detail) => snip(name + "(${})", { label: name, detail, type: "method" });
+  const MEMBERS = {
+    python: { ".": [M("append"), M("extend"), M("pop"), M("insert"), M("remove"), M("index"), M("count"), M("sort"),
+      M("reverse"), M("split"), M("strip"), M("join"), M("replace"), M("find"), M("startswith"), M("endswith"),
+      M("lower"), M("upper"), M("isdigit"), M("get"), M("keys"), M("values"), M("items"), M("add"), M("discard"),
+      M("update"), M("appendleft"), M("popleft"), M("most_common")] },
+    cpp: { ".": [M("push_back"), M("pop_back"), M("emplace_back"), M("size"), M("empty"), M("clear"), M("begin"),
+      M("end"), M("rbegin"), M("rend"), M("back"), M("front"), M("insert"), M("erase"), M("find"), M("count"),
+      M("resize"), M("assign"), M("push"), M("pop"), M("top"), M("substr"), M("length"), M("first", "pair"),
+      M("second", "pair")], "::": [T("vector"), T("string"), T("sort"), T("max"), T("min"), T("cin"), T("cout"),
+      T("endl"), T("pair"), T("map"), T("set"), T("sync_with_stdio")] },
+    c: { ".": [] },
+    java: { ".": [M("add"), M("get"), M("set"), M("size"), M("isEmpty"), M("remove"), M("contains"), M("put"),
+      M("getOrDefault"), M("containsKey"), M("keySet"), M("values"), M("append"), M("toString"), M("length"),
+      M("charAt"), M("substring"), M("equals"), M("split"), M("trim"), M("poll"), M("offer"), M("peek"),
+      M("readLine"), M("nextToken"), M("nextInt"), M("nextLine")] },
+    node: { ".": [M("push"), M("pop"), M("shift"), M("unshift"), M("slice"), M("splice"), M("map"), M("filter"),
+      M("reduce"), M("forEach"), M("sort"), M("reverse"), M("join"), M("split"), M("trim"), M("includes"),
+      M("indexOf"), M("length"), M("has"), M("get"), M("set"), M("add"), M("toString"), M("padStart")] },
+    rust: { ".": [M("push"), M("pop"), M("len"), M("is_empty"), M("iter"), M("iter_mut"), M("into_iter"), M("map"),
+      M("filter"), M("collect"), M("sum"), M("max"), M("min"), M("sort"), M("sort_unstable"), M("reverse"),
+      M("contains"), M("insert"), M("remove"), M("get"), M("entry"), M("or_insert"), M("unwrap"), M("parse"),
+      M("trim"), M("split_whitespace"), M("chars"), M("to_string"), M("clone"), M("enumerate"), M("zip"),
+      M("push_back"), M("pop_front")], "::": [T("new"), T("with_capacity"), T("from"), T("io"), T("collections"),
+      T("cmp"), T("stdin"), T("stdout"), T("max"), T("min")] },
+  };
+  // after "." or "::" the members; elsewhere the built-ins, plus every name already written in the code
+  const apiSource = (lang) => (ctx) => {
+    const member = ctx.matchBefore(/(\.|::)\w*$/);
+    if (member) {
+      const op = member.text.startsWith("::") ? "::" : ".";
+      const list = (MEMBERS[lang] || {})[op];
+      return list && list.length ? { from: member.from + op.length, options: list, validFor: /^\w*$/ } : null;
+    }
+    const word = ctx.matchBefore(/\w+/);
+    if (!word || (word.from === word.to && !ctx.explicit)) return null;
+    const seen = new Set(), own = [];
+    // Python's and JavaScript's packages list the code's own names already
+    if (!["python", "node"].includes(lang)) for (const m of ctx.state.doc.toString().matchAll(/[A-Za-z_]\w{2,}/g)) {
+      if (m.index === word.from || seen.has(m[0])) continue;
+      seen.add(m[0]); own.push({ label: m[0], type: "variable", boost: -1 });
+    }
+    return { from: word.from, options: [...(API[lang] || []), ...own], validFor: /^\w*$/ };
+  };
+  // "CodeArena": the #7 navy, a warm palette for the syntax (keywords rose, calls sky, strings gold)
   const caTheme = [EditorView.theme({
     "&": { color: "#D7DEEF", backgroundColor: "transparent" },
     ".cm-content": { caretColor: "#8FB0FF" },
@@ -629,7 +725,12 @@ resolves their bare imports so @codemirror/state loads once — two copies break
       { key: "Tab", run: (v) => (tabFree ? false : indentMore(v)) },
       { key: "Shift-Tab", run: (v) => (tabFree ? false : indentLess(v)) }]),
       EditorView.domEventHandlers({ keydown: (e) => { if (!["Escape", "Tab", "Shift"].includes(e.key)) tabFree = false; return false; }, blur: () => { tabFree = false; return false; } }),
-      langC.of([]), themeC.of([]),
+      langC.of([]), themeC.of([]), EditorView.theme({
+        ".cm-gutters": { paddingLeft: "6px" },
+        ".cm-lineNumbers .cm-gutterElement": { minWidth: "3ch", padding: "0 10px 0 6px" },
+        ".cm-foldGutter .cm-gutterElement": { width: "14px", padding: "0 4px 0 0" },
+        ".cm-content": { paddingLeft: "6px" },
+      }),
       EditorView.updateListener.of((u) => {
         if (!u.docChanged) return;
         try { localStorage.setItem(draftKey, u.state.doc.toString()); draftState.textContent = "Qoralama saqlandi"; } catch {}
@@ -648,7 +749,8 @@ resolves their bare imports so @codemirror/state loads once — two copies break
   const setLang = async () => {
     const load = LANG_LOADERS[langSel.value];
     const ext = load ? await load() : [];
-    const snippets = EditorState.languageData.of(() => [{ autocomplete: completeFromList(SNIPPETS[langSel.value] || []) }]);
+    const snippets = EditorState.languageData.of(() => [{ autocomplete: completeFromList(SNIPPETS[langSel.value] || []) },
+                                                        ...(langSel.value === "sql" ? [] : [{ autocomplete: apiSource(langSel.value) }])]);
     view.dispatch({ effects: langC.reconfigure([ext, snippets]) });
     try { localStorage.setItem(langKey, langSel.value); } catch {}
     const doc = view.state.doc.toString();

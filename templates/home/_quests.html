@@ -1,7 +1,7 @@
 {% comment %}Today's three quests in the side column. Any one keeps the Olov going (like the day's problem); the rest are
 a bonus. ctx: quests (apps.problems.quests.today_quests), freezes, streak.{% endcomment %}
 <section class="ca-box" aria-labelledby="quests-title">
-  <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" style="--c: var(--ca-lvl-easy)" aria-hidden="true"></span><h2 id="quests-title">Bugungi vazifalar</h2><span class="ca-box-tools tabular">{{ quests.done }}/{{ quests.total }}</span></div>
+  <div class="ca-box-cap ca-hd"><h2 id="quests-title">Kunlik maqsadlar</h2><span class="ca-box-tools tabular">{{ quests.done }}/{{ quests.total }}</span></div>
   <ul class="ca-quests">
     {% for q in quests.rows %}
     <li class="{% if q.done %}is-done{% endif %}">

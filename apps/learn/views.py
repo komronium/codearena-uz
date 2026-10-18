@@ -105,15 +105,9 @@ def hub(request):
         if not stages or stages[-1]["stage"] != p.stage:
             stages.append({"stage": p.stage, "label": labels.get(p.stage, p.stage), "courses": []})
         stages[-1]["courses"].append(p)
-    # a course badge per finished course; the ones with problems still to earn show locked
-    badges = [p for p in plans if p.progress["total"] and p.is_public]
-    from apps.accounts.badges import board as badge_board
-
     return render(request, "learn/hub.html", {
-        "course_badge": badge_board(request.user, {"learn"})[0] if request.user.is_authenticated else None,
         "stages": stages, "soon": soon, "current": current, "next_problem": next_problem, "up_next": up_next,
-        "here": current if request.user.is_authenticated else None,
-        "badges": badges, "badges_earned": sum(1 for p in badges if p.progress["completed"])})
+        "here": current if request.user.is_authenticated else None})
 
 
 def course_detail(request, slug):
@@ -142,7 +136,7 @@ def course_detail(request, slug):
     })
 
 
-CODE_LANGS = {"python", "c++", "cpp", "java", "javascript", "js", "sql", "c#"}
+CODE_LANGS = {"python", "c", "c++", "cpp", "java", "javascript", "js", "sql", "c#", "rust"}
 
 
 def _with_toc(html: str) -> tuple[str, list[dict]]:

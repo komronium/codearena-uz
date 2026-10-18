@@ -20,7 +20,7 @@ site's figures; the side column has every staff section.{% endcomment %}
 {% block content %}
 <div class="ca7-col">
   <section aria-labelledby="queue-title">
-    <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-hard)" aria-hidden="true"></span><h2 id="queue-title">Tasdiq kutayotgan masalalar</h2>{% if counts.pending %}<span class="ca7-pill is-warn tabular">{{ counts.pending }}</span>{% endif %}<a class="ca-link" href="{% url 'moderation:queue' %}">Navbatni ochish</a></div>
+    <div class="ca7-sec-h"><h2 id="queue-title">Tasdiq kutayotgan masalalar</h2>{% if counts.pending %}<span class="ca7-pill is-warn tabular">{{ counts.pending }}</span>{% endif %}<a class="ca-link" href="{% url 'moderation:queue' %}">Navbatni ochish</a></div>
     {% if pending %}
     <div class="overflow-x-auto">
     <table class="ca-table ca-table-flat">
@@ -64,7 +64,7 @@ site's figures; the side column has every staff section.{% endcomment %}
   </section>
 
   <section aria-labelledby="activity-title">
-    <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span><h2 id="activity-title">So‘nggi 14 kun</h2>
+    <div class="ca7-sec-h"><h2 id="activity-title">So‘nggi 14 kun</h2>
       <span class="ca7-r text-mute"><b class="tabular text-ink">{{ activity.subs }}</b> urinish · <b class="tabular text-ink">{{ activity.users }}</b> yangi foydalanuvchi</span></div>
     <div class="ca-actbars" role="img" aria-label="Kunlik urinishlar soni">
       {% for r in activity.rows %}<span title="{{ r.day|date:'d.m' }}: {{ r.subs }} urinish, {{ r.users }} yangi foydalanuvchi"><i style="height: {{ r.pct }}%"></i><small>{{ r.day|date:"d" }}</small><small class="ca-actn tabular">{% if r.subs %}{{ r.subs }}{% else %}·{% endif %}</small></span>{% endfor %}
@@ -77,7 +77,7 @@ site's figures; the side column has every staff section.{% endcomment %}
   </section>
 
   <section aria-labelledby="site-title">
-    <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-easy)" aria-hidden="true"></span><h2 id="site-title">Sayt holati</h2></div>
+    <div class="ca7-sec-h"><h2 id="site-title">Sayt holati</h2></div>
     <dl class="ca7-nums">
       <a href="{% url 'moderation:problems' %}"><dd class="tabular">{{ counts.problems }}</dd><dt>Masalalar</dt></a>
       <a href="{% url 'moderation:contests' %}"><dd class="tabular">{{ counts.contests }}</dd><dt>Musobaqalar</dt></a>

@@ -14,6 +14,11 @@ ROMAN = ["", "I", "II", "III", "IV", "V"]
 METALS = ["", "bronza", "kumush", "oltin", "platina", "olmos"]
 
 
+def titled(name: str, tier: int) -> str:
+    """A badge at a level, as people read it: "Duelchi · Kumush" (the level by its metal, not a numeral)."""
+    return f"{name} · {METALS[tier].capitalize()}" if tier else name
+
+
 @dataclass(frozen=True)
 class Family:
     key: str
@@ -118,15 +123,33 @@ def board(user, groups: set[str] | None = None, store: bool = True) -> list[dict
             at = f.levels[tier]
             start = f.levels[tier - 1] if tier else f.base
             nxt = {"roman": ROMAN[tier + 1], "at": at, "done": max(0, value - start), "total": at - start,
-                   "shown": f"{value} / {at}"}
+                   "shown": f"{value} / {at}",
+                   # "Kumush: 4 / 5 ta Hard masala": the next level's metal and the count towards it
+                   "text": f"{METALS[tier + 1].capitalize()}: {f.unit.format(n=f'{min(value, at)} / {at}')}"}
         out.append({
             "key": f.key, "name": f.name, "icon": f.icon, "group": f.group, "group_label": GROUPS[f.group],
             "tier": tier, "roman": ROMAN[tier], "metal": METALS[tier], "max": len(f.levels),
-            "title": f"{f.name} {ROMAN[tier]}" if tier else f.name,
+            "title": titled(f.name, tier),
             "sub": f.unit.format(n=f.levels[max(tier, 1) - 1]),
             "pips": [i < tier for i in range(len(f.levels))],
+            "segs": segments(f, tier, value), "level_name": METALS[tier].capitalize() if tier else "",
             "earned_at": stored.get(f.key, (0, None))[1], "next": nxt, "value": value,
         })
+    return out
+
+
+def segments(family: Family, tier: int, value: int) -> list[int]:
+    """The badge's bar, one segment per level: 100 for each level held, the share of the way through the
+    next one, 0 after it. One bar says both the level and how far the next is."""
+    out = []
+    for i, at in enumerate(family.levels):
+        if i < tier:
+            out.append(100)
+        elif i == tier:
+            start = family.levels[i - 1] if i else family.base
+            out.append(max(0, min(99, round(100 * (value - start) / (at - start)))))
+        else:
+            out.append(0)
     return out
 
 
@@ -137,7 +160,7 @@ def next_streak(current: int, best: int) -> dict | None:
     if tier >= len(f.levels):
         return None
     at = f.levels[tier]
-    return {"name": f"{f.name} {ROMAN[tier + 1]}", "icon": f.icon, "days": at, "left": at - current}
+    return {"name": titled(f.name, tier + 1), "icon": f.icon, "days": at, "left": at - current}
 
 
 def unseen(user) -> list[dict]:
@@ -155,9 +178,9 @@ def unseen(user) -> list[dict]:
     for r in rows:
         if r.family in BY_KEY and r.family not in best:
             f = BY_KEY[r.family]
-            best[r.family] = {"key": r.family, "title": f"{f.name} {ROMAN[r.tier]}", "icon": f.icon, "tier": r.tier,
+            best[r.family] = {"key": r.family, "title": titled(f.name, r.tier), "icon": f.icon, "tier": r.tier,
                               "roman": ROMAN[r.tier], "metal": METALS[r.tier], "sub": f.unit.format(n=f.levels[r.tier - 1]),
-                              "next": (f"{f.name} {ROMAN[r.tier + 1]}: {f.unit.format(n=f.levels[r.tier])}"
+                              "next": (f"{METALS[r.tier + 1].capitalize()}: {f.unit.format(n=f.levels[r.tier])}"
                                        if r.tier < len(f.levels) else "")}
     out = sorted(best.values(), key=lambda b: -b["tier"])
     rare = rarity([(b["key"], b["tier"]) for b in out])
@@ -171,10 +194,16 @@ def award(user, groups: set[str]) -> None:
     round), so the award shows on the very next page. Never lets a badge error break the caller."""
     try:
         added = sync(user, metrics(user, groups))
-        if added:  # and say so on Telegram too, for whoever turned that on
+        if added:  # and say so in the bell and on Telegram too, for whoever turned that on
             from django.db import transaction
 
+            from .notifications import notify
             from .telegram import notify_badges
+            best = {}
+            for fam, tier in added:
+                best[fam] = max(tier, best.get(fam, 0))
+            for fam, tier in best.items():
+                notify(user.pk, "badge", f"badge:{fam}:{tier}", f"Yangi nishon: {titled(BY_KEY[fam].name, tier)}", "/accounts/badges/")
             transaction.on_commit(lambda: notify_badges(user.pk, added))
     except Exception:  # noqa: BLE001 - a badge is a nicety; judging, duels and ratings must go on
         import logging
@@ -207,7 +236,7 @@ def summaries(user_ids) -> dict[int, dict]:
     out = {}
     for uid, fams in best.items():
         held = sorted(({"key": f, "icon": BY_KEY[f].icon, "tier": t, "roman": ROMAN[t],
-                        "title": f"{BY_KEY[f].name} {ROMAN[t]}"} for f, t in fams.items()),
+                        "title": titled(BY_KEY[f].name, t)} for f, t in fams.items()),
                       key=lambda b: (-b["tier"], [x.key for x in FAMILIES].index(b["key"])))
         out[uid] = {"badges": held, "count": len(held), "levels": sum(fams.values())}
     return out
@@ -220,11 +249,12 @@ def ladders(user=None) -> list[dict]:
     rare = rarity()
     out = []
     for f in FAMILIES:
-        b = mine.get(f.key)
-        tier = b["tier"] if b else 0
-        out.append({"key": f.key, "name": f.name, "icon": f.icon, "group_label": GROUPS[f.group], "tier": tier,
-                    "title": f"{f.name} {ROMAN[tier]}" if tier else f.name, "roman": ROMAN[tier], "mine": b,
-                    "levels": [{"tier": i, "roman": ROMAN[i], "metal": METALS[i], "at": at, "sub": f.unit.format(n=at),
-                                "pct": rare.get((f.key, i), 0), "done": i <= tier}
+        # the same entry board() makes (for a guest, the family at level 0), plus each level's threshold and rarity
+        b = mine.get(f.key) or {
+            "key": f.key, "name": f.name, "icon": f.icon, "tier": 0, "max": len(f.levels), "level_name": "",
+            "segs": [0] * len(f.levels), "sub": f.unit.format(n=f.levels[0]), "earned_at": None,
+            "next": {"text": f"{METALS[1].capitalize()}: {f.unit.format(n=f.levels[0])}"}}
+        out.append({**b, "group_label": GROUPS[f.group], "mine": mine.get(f.key),
+                    "levels": [{"tier": i, "metal": METALS[i], "at": at, "pct": rare.get((f.key, i), 0)}
                                for i, at in enumerate(f.levels, start=1)]})
     return out

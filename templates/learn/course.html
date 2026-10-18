@@ -5,7 +5,7 @@
 {% block band %}
 {% comment %}#7 course: the band with the way back, the stage, the title, its level and size, and the one gold way in;
 then the theory (open until the first solve) and one flat table per difficulty; on the right your progress, the
-course note and its khatam badge.{% endcomment %}
+course note and its badge.{% endcomment %}
 <section class="ca-hud" aria-labelledby="course-title">
   <div class="ca-hud-in">
     <div class="min-w-0">
@@ -25,7 +25,7 @@ course note and its khatam badge.{% endcomment %}
     {% if theory_html %}
     {# Open until the first solve: then the problems come first and the theory is one click away. #}
     <details class="ca7-theory"{% if not progress.done %} open{% endif %}>
-      <summary class="ca7-sec-h"><span class="ca-star" style="--c: rgb(var(--ca-spec-rgb))" aria-hidden="true"></span><h2>Nazariya</h2><i data-lucide="chevron-down" class="lu ca7-r ca-theory-chevron" aria-hidden="true"></i></summary>
+      <summary class="ca7-sec-h"><h2>Nazariya</h2><i data-lucide="chevron-down" class="lu ca7-r ca-theory-chevron" aria-hidden="true"></i></summary>
       <div class="prose max-w-none" id="theory-body">{{ theory_html|safe }}</div>
       <div class="ca-theory-end" id="nazariya-tugadi">
         {% if user.is_authenticated %}
@@ -41,7 +41,7 @@ course note and its khatam badge.{% endcomment %}
 
     {% for g in groups %}
     <section aria-labelledby="lvl-{{ g.level }}">
-      <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-{{ g.level }})" aria-hidden="true"></span><h2 id="lvl-{{ g.level }}"><span>{{ g.label }}</span> masalalar</h2>
+      <div class="ca7-sec-h"><h2 id="lvl-{{ g.level }}"><span>{{ g.label }}</span> masalalar</h2>
         <span class="ca7-r tabular{% if g.done == g.problems|length %} font-semibold text-ok{% else %} text-mute{% endif %}">{% if user.is_authenticated %}{{ g.done }}/{% endif %}{{ g.problems|length }}</span></div>
       {% include "learn/_problem_rows.html" with rows=g.problems %}
     </section>
@@ -53,18 +53,18 @@ course note and its khatam badge.{% endcomment %}
   <aside class="ca7-aside" aria-label="Kurs haqida">
     {% if toc|length > 1 %}
     <section class="ca-box" aria-labelledby="toc-title">
-      <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" style="--c: rgb(var(--ca-spec-rgb))" aria-hidden="true"></span><h2 id="toc-title">Mazmun</h2></div>
+      <div class="ca-box-cap ca-hd"><h2 id="toc-title">Mazmun</h2></div>
       <ol class="ca-toc">{% for h in toc %}<li class="is-l{{ h.level }}"><a href="#{{ h.id }}">{{ h.text }}</a></li>{% endfor %}</ol>
     </section>
     {% endif %}
     {% if user.is_authenticated and progress.theory_only %}
     <section class="ca-box" aria-labelledby="progress-title">
-      <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" style="--c: var(--ca-lvl-easy)" aria-hidden="true"></span><h2 id="progress-title">Bajarilishi</h2></div>
+      <div class="ca-box-cap ca-hd"><h2 id="progress-title">Bajarilishi</h2></div>
       <div class="ca7-pad"><p>{% if progress.read %}<i data-lucide="circle-check-big" class="lu text-ok" aria-hidden="true"></i> Nazariya o‘qilgan, kurs tugatildi.{% else %}Bu kurs faqat nazariya: o‘qib bo‘lgach «Tushundim» ni bosing.{% endif %}</p></div>
     </section>
     {% elif user.is_authenticated and progress.total %}
     <section class="ca-box" aria-labelledby="progress-title">
-      <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" style="--c: var(--ca-lvl-easy)" aria-hidden="true"></span><h2 id="progress-title">Bajarilishi</h2><span class="ca-box-tools tabular">{{ progress.pct }}%</span></div>
+      <div class="ca-box-cap ca-hd"><h2 id="progress-title">Bajarilishi</h2><span class="ca-box-tools tabular">{{ progress.pct }}%</span></div>
       <div class="ca7-pad">
         <p class="!mb-2"><b class="text-2xl font-bold text-ink tabular">{{ progress.done }}</b> / {{ progress.total }} masala {% if progress.completed %}— tugatildi{% else %}yechildi{% endif %}</p>
         <span class="ca7-pg" role="progressbar" aria-valuenow="{{ progress.pct }}" aria-valuemin="0" aria-valuemax="100" aria-label="Kurs bajarilishi"><i style="width: {{ progress.pct }}%"></i></span>
@@ -73,13 +73,13 @@ course note and its khatam badge.{% endcomment %}
     {% endif %}
     {% if description_html %}
     <section class="ca-box" aria-labelledby="about-title">
-      <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" aria-hidden="true"></span><h2 id="about-title">Kurs haqida</h2></div>
+      <div class="ca-box-cap ca-hd"><h2 id="about-title">Kurs haqida</h2></div>
       <div class="ca7-pad prose max-w-none text-sm">{{ description_html|safe }}</div>
     </section>
     {% endif %}
     {% if progress.total %}
     <section class="ca-box" aria-labelledby="award-title">
-      <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span><h2 id="award-title">Nishon</h2></div>
+      <div class="ca-box-cap ca-hd"><h2 id="award-title">Nishon</h2></div>
       <ul class="ca7-pad">{% if progress.completed %}{% include "accounts/_badge7.html" with tone="lapis" icon=plan.icon title=plan.title sub="Olingan — profilingizda ko‘rinadi" href=None total=None %}{% else %}{% include "accounts/_badge7.html" with tone="locked" icon=plan.icon title=plan.title sub="Kursni tugatsangiz profilingizga qo‘shiladi" href=None done=progress.done total=progress.total %}{% endif %}</ul>
     </section>
     {% endif %}
@@ -90,7 +90,7 @@ course note and its khatam badge.{% endcomment %}
   // Theory code: a copy button on every block, and neighbouring "Python / C++ / Java" blocks become language tabs
   const body = document.getElementById("theory-body");
   if (!body) return;
-  const LANGS = ["python", "c++", "cpp", "java", "javascript", "js", "sql", "c#"];
+  const LANGS = ["python", "c", "c++", "cpp", "java", "javascript", "js", "sql", "c#", "rust"];
   const labelOf = (el) => ["P", "H2", "H3", "H4"].includes(el.tagName) && el.children.length <= 1 && LANGS.includes(el.textContent.trim().toLowerCase()) ? el.textContent.trim() : null;
   const kids = [...body.children];
   for (let i = 0; i < kids.length - 1; i++) {

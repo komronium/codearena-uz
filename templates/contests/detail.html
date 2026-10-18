@@ -14,12 +14,12 @@ it is scored, virtual participation.{% endcomment %}
 <div class="ca7-col">
   {% if contest.has_ended and leaders and not leaders_any %}
   <section aria-labelledby="final-title">
-    <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span><h2 id="final-title">Yakuniy natijalar</h2><a class="ca-link" href="{% url 'contests:standings' contest.pk %}">To‘liq jadval</a></div>
+    <div class="ca7-sec-h"><h2 id="final-title">Yakuniy natijalar</h2><a class="ca-link" href="{% url 'contests:standings' contest.pk %}">To‘liq jadval</a></div>
     <p class="ca7-empty"><b>Bu raundda hech kim masala yechmadi</b>Ball hech kimda yo‘q. Masalalar ro‘yxatidan ularni o‘zingiz sinab ko‘rishingiz mumkin.</p>
   </section>
   {% elif contest.has_ended and leaders %}
   <section aria-labelledby="final-title">
-    <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span><h2 id="final-title">Yakuniy natijalar</h2><a class="ca-link" href="{% url 'contests:standings' contest.pk %}">To‘liq jadval</a></div>
+    <div class="ca7-sec-h"><h2 id="final-title">Yakuniy natijalar</h2><a class="ca-link" href="{% url 'contests:standings' contest.pk %}">To‘liq jadval</a></div>
     <table class="ca-table ca-table-flat">
       <thead><tr>
         <th class="w-16 text-center">O‘rin</th><th>Ishtirokchi</th>
@@ -44,7 +44,7 @@ it is scored, virtual participation.{% endcomment %}
 
   {% if description_html %}
   <section aria-labelledby="about-title">
-    <div class="ca7-sec-h"><span class="ca-star" style="--c: rgb(var(--ca-spec-rgb))" aria-hidden="true"></span><h2 id="about-title">Musobaqa haqida</h2></div>
+    <div class="ca7-sec-h"><h2 id="about-title">Musobaqa haqida</h2></div>
     <div class="prose max-w-[70ch]">{{ description_html|safe }}</div>
   </section>
   {% endif %}
@@ -52,7 +52,7 @@ it is scored, virtual participation.{% endcomment %}
   {% if not contest.has_started %}
   {# the rules that matter before a round, each with what it is about; not a sequence, so no numbers #}
   <section aria-labelledby="honor-title">
-    <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-hard)" aria-hidden="true"></span><h2 id="honor-title">Muhim qoidalar</h2><a class="ca-link" href="{% url 'honor' %}">Halollik qoidalari</a></div>
+    <div class="ca7-sec-h"><h2 id="honor-title">Muhim qoidalar</h2><a class="ca-link" href="{% url 'honor' %}">Halollik qoidalari</a></div>
     <ul class="ca7-feats ca7-feats-3">
       <li><span class="ca7-fi" aria-hidden="true"><i data-lucide="code-xml" class="lu"></i></span><div><h3>Kod o‘zingizniki bo‘lsin</h3><p>Musobaqada har qanday tashqi yordam taqiqlanadi: AI, boshqa oyna, telefon, maslahatchi.</p></div></li>
       <li><span class="ca7-fi" aria-hidden="true"><i data-lucide="message-circle" class="lu"></i></span><div><h3>Savollar «Savol-javoblar» orqali</h3><p>Shart tushunarsiz bo‘lsa, hakamlardan so‘rang.</p></div></li>
@@ -62,7 +62,7 @@ it is scored, virtual participation.{% endcomment %}
   {% endif %}
 
   <section aria-labelledby="contest-problems">
-    <div class="ca7-sec-h"><span class="ca-star" aria-hidden="true"></span><h2 id="contest-problems">Masalalar</h2>
+    <div class="ca7-sec-h"><h2 id="contest-problems">Masalalar</h2>
       <span class="ca7-r flex items-center gap-3 text-sm">
         {% if contest.type == "cf" and contest.is_running %}<span class="text-mute">Baho vaqt o‘tishi bilan kamayadi, xato urinish −50</span>{% endif %}
         {% if user.is_staff %}<a class="ca-link" href="{% url 'moderation:contest_edit' contest.pk %}">Boshqaruvda tahrirlash</a>{% endif %}
@@ -112,7 +112,7 @@ it is scored, virtual participation.{% endcomment %}
 
   {% if registered or user.is_staff %}{% if contest.has_started %}
   <section aria-labelledby="qa-title">
-    <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span><h2 id="qa-title">Savol-javoblar</h2><a class="ca-btn ca-btn-soft ca-btn-wb ca7-r" href="{% url 'contests:clarifications' contest.pk %}">{% if contest.has_ended or user.is_staff %}Hammasi{% else %}Savol berish{% endif %}</a></div>
+    <div class="ca7-sec-h"><h2 id="qa-title">Savol-javoblar</h2><a class="ca-btn ca-btn-soft ca-btn-wb ca7-r" href="{% url 'contests:clarifications' contest.pk %}">{% if contest.has_ended or user.is_staff %}Hammasi{% else %}Savol berish{% endif %}</a></div>
     {% if clars %}
     <ol class="ca7-qa">
       {% for c in clars %}
@@ -131,7 +131,7 @@ it is scored, virtual participation.{% endcomment %}
 <aside class="ca7-aside" aria-label="Musobaqa haqida">
   {% if my_row %}
   <section class="ca-box" aria-labelledby="me-title">
-    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" style="--c: rgb(var(--ca-spec-rgb))" aria-hidden="true"></span><h2 id="me-title">Sizning holatingiz</h2><a class="ca-box-tools ca-link" href="{% url 'contests:standings' contest.pk %}#me">Jadvalda</a></div>
+    <div class="ca-box-cap ca-hd"><h2 id="me-title">Sizning holatingiz</h2><a class="ca-box-tools ca-link" href="{% url 'contests:standings' contest.pk %}#me">Jadvalda</a></div>
     <div class="ca-box-body ca-box-pad">
       <dl class="ca-stat-tiles">
         <div><dt>O‘rin</dt><dd>{% if my_row.disqualified or not my_row.solved and contest.is_running %}—{% else %}{{ my_row.rank }}{% endif %}<small>/ {{ n_participants }}</small></dd></div>
@@ -150,7 +150,7 @@ it is scored, virtual participation.{% endcomment %}
 
   {% if contest.is_running and leaders %}
   <section class="ca-box" aria-labelledby="lead-title">
-    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" style="--c: var(--ca-lvl-easy)" aria-hidden="true"></span><h2 id="lead-title">Natijalar</h2><a class="ca-box-tools ca-link" href="{% url 'contests:standings' contest.pk %}">To‘liq jadval</a></div>
+    <div class="ca-box-cap ca-hd"><h2 id="lead-title">Natijalar</h2><a class="ca-box-tools ca-link" href="{% url 'contests:standings' contest.pk %}">To‘liq jadval</a></div>
     <table class="ca-table ca7-top">
       <thead><tr><th class="w-10 text-center">#</th><th>Ishtirokchi</th><th class="text-right">{% if contest.type == "icpc" %}Yechildi{% else %}Ball{% endif %}</th></tr></thead>
       <tbody>

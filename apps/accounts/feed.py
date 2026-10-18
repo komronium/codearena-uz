@@ -39,12 +39,12 @@ def events(user) -> list[dict]:
                                   created__gte=since).select_related("challenger", "opponent").order_by("-created")[:LIMIT]):
         loser = d.opponent if d.winner_id == d.challenger_id else d.challenger
         out.append({"at": d.created, "user": names[d.winner_id], "kind": "duel", "versus": loser})
-    from .badges import BY_KEY, METALS, ROMAN
+    from .badges import BY_KEY, METALS
     for b in UserBadge.objects.filter(user_id__in=names, earned_at__gte=since).order_by("-earned_at")[:LIMIT]:
         fam = BY_KEY.get(b.family)
         if fam:
             out.append({"at": b.earned_at, "user": names[b.user_id], "kind": "badge", "badge": fam.name,
-                        "level": ROMAN[b.tier], "icon": fam.icon})
+                        "level": METALS[b.tier].capitalize(), "icon": fam.icon})
     out.sort(key=lambda e: e["at"], reverse=True)
     return group(out)[:LIMIT]
 

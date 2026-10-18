@@ -1,0 +1,26 @@
+{% comment %}The bell in the top bar (apps.accounts.notifications): how many lines are unread, and in its menu the latest
+few, the unread ones marked; a line opens its page and is read from then on.{% endcomment %}
+{% with n=bell.unread %}
+<details class="ca-dropdown ca-bell" data-dropdown>
+  <summary class="ca-icon-btn" aria-label="Bildirishnomalar{% if n %}: {{ n }} ta yangi{% endif %}" title="Bildirishnomalar">
+    <i data-lucide="bell" class="lu" aria-hidden="true"></i>{% if n %}<b class="ca-bell-n tabular" aria-hidden="true">{% if n > 9 %}9+{% else %}{{ n }}{% endif %}</b>{% endif %}
+  </summary>
+  <div class="ca-dropdown-panel ca-bell-panel">
+    <div class="ca-bell-head"><b>Bildirishnomalar</b>{% if n %}<form method="post" action="{% url 'notifications_read' %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="ca-link text-sm">Hammasi o‘qildi</button></form>{% endif %}</div>
+    {% with rows=bell.latest %}
+    {% if rows %}
+    <ul class="ca-bell-list">
+      {% for x in rows %}
+      <li{% if not x.read_at %} class="is-new"{% endif %}><a href="{% url 'notification_open' x.pk %}">
+        <span class="ca-bell-ico" aria-hidden="true"><i data-lucide="{{ x.icon }}" class="lu"></i></span>
+        <span class="min-w-0"><span class="ca-bell-text">{{ x.text }}</span><small><time datetime="{{ x.created|date:'c' }}">{{ x.created|date:"d.m H:i" }}</time></small></span>
+      </a></li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="ca-bell-empty">Hozircha xabar yo‘q. Duel chaqiruvi, yangi vazifa, kod sharhi va nishonlar shu yerda chiqadi.</p>
+    {% endif %}
+    {% endwith %}
+  </div>
+</details>
+{% endwith %}

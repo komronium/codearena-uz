@@ -6,7 +6,7 @@
 participant asks from the side card; staff answer, they never ask.{% endcomment %}
 <div class="ca7">
 <section class="min-w-0" aria-labelledby="clars-title">
-  <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span><h2 id="clars-title">Savol-javoblar</h2>{% if clars %}<span class="ca7-r text-mute tabular">{{ clars|length }} ta</span>{% endif %}</div>
+  <div class="ca7-sec-h"><h2 id="clars-title">Savol-javoblar</h2>{% if clars %}<span class="ca7-r text-mute tabular">{{ clars|length }} ta</span>{% endif %}</div>
   {% if clars %}
   <ol class="ca7-qa">
   {% for c in clars %}
@@ -35,7 +35,7 @@ participant asks from the side card; staff answer, they never ask.{% endcomment 
 <aside class="ca7-aside" aria-label="Savol berish">
   {% if registered and not contest.has_ended %}
   <section class="ca-box" aria-labelledby="ask-title">
-    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" aria-hidden="true"></span><h2 id="ask-title">Savol berish</h2></div>
+    <div class="ca-box-cap ca-hd"><h2 id="ask-title">Savol berish</h2></div>
     <form method="post" action="{% url 'contests:ask_clarification' contest.pk %}" class="ca7-pad ca7-join" id="ask-clar-form">
       {% csrf_token %}
       <p>Shart tushunarsiz bo‘lsa, hakamlardan so‘rang. Javob berilgach savol va javob hammaga ko‘rinadi.</p>
@@ -51,7 +51,7 @@ participant asks from the side card; staff answer, they never ask.{% endcomment 
   </section>
   {% endif %}
   <section class="ca-box" aria-labelledby="qa-rules-title">
-    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" style="--c: var(--ca-lvl-hard)" aria-hidden="true"></span><h2 id="qa-rules-title">Nimani so‘rash mumkin</h2></div>
+    <div class="ca-box-cap ca-hd"><h2 id="qa-rules-title">Nimani so‘rash mumkin</h2></div>
     <div class="ca7-pad"><p>Shartdagi noaniqlik, chegaralar, kirish formati. Yechim yoki tekshiruvchi haqidagi savollarga javob berilmaydi.</p></div>
   </section>
 </aside>

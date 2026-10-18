@@ -2,7 +2,7 @@
 lapis), the problem with its level and the way in, your streak and the next streak badge, who solved it today.
 ctx: daily, ds (apps.problems.templatetags.daily.daily_stats), daily_done.{% endcomment %}
 <section class="ca-box" aria-labelledby="daily-title">
-  <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span><h2 id="daily-title">Kun masalasi</h2>
+  <div class="ca-box-cap ca-hd"><h2 id="daily-title">Kun masalasi</h2>
     {% if user.is_authenticated %}<span class="ca-box-tools ca7-streak" title="Olov{% if ds.best %}, eng uzuni {{ ds.best }} kun{% endif %}"><i data-lucide="flame" class="lu" aria-hidden="true"></i><b>{{ ds.streak }}</b> kun</span>
     {% else %}<small class="ca-box-tools">{{ daily.date|date:"d.m.Y" }}</small>{% endif %}</div>
   <div class="ca7-pad">

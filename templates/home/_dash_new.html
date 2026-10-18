@@ -5,7 +5,7 @@ ctx: the dashboard's, with first_problem, n_courses, joined_any, learning, upcom
 <div class="ca7-col">
   {% with s1=solved_count s2=learning.progress.done s3=joined_any %}
   <section aria-labelledby="start-title">
-    <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span><h2 id="start-title">Nimadan boshlash</h2>
+    <div class="ca7-sec-h"><h2 id="start-title">Nimadan boshlash</h2>
       <span class="ca7-r text-mute tabular">{% if s1 and s2 and s3 %}3{% elif s1 and s2 or s1 and s3 or s2 and s3 %}2{% elif s1 or s2 or s3 %}1{% else %}0{% endif %} / 3 bajarildi</span></div>
     <ol class="ca7-steps7">
       <li class="{% if s1 %}is-done{% else %}is-cur{% endif %}"><span aria-hidden="true">{% if s1 %}<i data-lucide="check" class="lu"></i>{% else %}1{% endif %}</span>
@@ -22,7 +22,7 @@ ctx: the dashboard's, with first_problem, n_courses, joined_any, learning, upcom
   {% endwith %}
 
   <section aria-labelledby="map-title">
-    <div class="ca7-sec-h"><span class="ca-star" aria-hidden="true"></span><h2 id="map-title">CodeArena’da nimalar bor</h2></div>
+    <div class="ca7-sec-h"><h2 id="map-title">CodeArena’da nimalar bor</h2></div>
     <table class="ca-table ca-table-flat ca7-tour">
       <tbody>
         <tr><td><a class="ca-link" href="{% url 'problems:list' %}">Masalalar</a></td><td class="text-mute">{% if ring %}{{ ring.total }} ta masala, {% endif %}Beginner’dan Hard’gacha. Har biriga kod yuborasiz, tizim testlar bilan tekshiradi.</td></tr>
@@ -40,7 +40,7 @@ ctx: the dashboard's, with first_problem, n_courses, joined_any, learning, upcom
   {% if daily %}{% load daily %}{% daily_stats daily user as ds %}{% include "problems/_daily_card.html" %}{% endif %}
   {% if ring %}{% url 'problems:list' as problems_url %}{% include "problems/_solved_card.html" with title="Yechilgan masalalar" more_url=problems_url %}{% endif %}
   <section class="ca-box" aria-labelledby="help-title">
-    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" style="--c: rgb(var(--ca-spec-rgb))" aria-hidden="true"></span><h2 id="help-title">Natijalar nimani anglatadi</h2></div>
+    <div class="ca-box-cap ca-hd"><h2 id="help-title">Natijalar nimani anglatadi</h2></div>
     <dl class="ca7-pad ca7-legend7">
       <div><dt><span class="ca-vd is-ac"><code translate="no">AC</code>Qabul qilindi</span></dt><dd>Barcha testlardan o‘tdi: masala yechildi.</dd></div>
       <div><dt><span class="ca-vd is-bad"><code translate="no">WA</code>Noto‘g‘ri javob</span></dt><dd>Dastur ishladi, lekin biror testda javob boshqacha chiqdi.</dd></div>

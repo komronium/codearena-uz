@@ -337,7 +337,7 @@ def notify_duel_result(duel_id: int):
 
 def notify_badges(user_id: int, levels: list[tuple[str, int]]):
     """New badge levels (family, level), the highest per badge: one message."""
-    from .badges import BY_KEY, ROMAN
+    from .badges import BY_KEY, titled
 
     try:
         best = {}
@@ -346,7 +346,7 @@ def notify_badges(user_id: int, levels: list[tuple[str, int]]):
                 best[fam] = tier
         if not best:
             return
-        lines = "\n".join(f"• <b>{BY_KEY[f].name} {ROMAN[t]}</b> — {BY_KEY[f].unit.format(n=BY_KEY[f].levels[t - 1])}"
+        lines = "\n".join(f"• <b>{titled(BY_KEY[f].name, t)}</b> — {BY_KEY[f].unit.format(n=BY_KEY[f].levels[t - 1])}"
                           for f, t in sorted(best.items(), key=lambda x: -x[1]))
         key = ",".join(f"{f}{t}" for f, t in sorted(best.items()))
         text = (f"<b>🏅 Yangi nishon!</b>\n\n{lines}\n\n"

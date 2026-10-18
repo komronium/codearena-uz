@@ -2,7 +2,7 @@
 head; colour is never the only key, every row says its level and numbers.
 ctx: ring (apps.problems.views._solved_ring), title, more_url (optional), more_label.{% endcomment %}
 <section class="ca-box" aria-labelledby="solved-title">
-  <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" style="--c: var(--ca-lvl-easy)" aria-hidden="true"></span><h2 id="solved-title">{{ title|default:"Taraqqiyot" }}</h2>
+  <div class="ca-box-cap ca-hd"><h2 id="solved-title">{{ title|default:"Taraqqiyot" }}</h2>
     <span class="ca-box-tools tabular">{% if more_url %}<a class="ca-link" href="{{ more_url }}">{{ ring.done }} / {{ ring.total }}</a>{% else %}{{ ring.done }} / {{ ring.total }}{% endif %}</span></div>
   <div class="ca7-pad">{% include "problems/_solved_ring.html" %}</div>
 </section>

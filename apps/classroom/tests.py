@@ -752,3 +752,18 @@ def test_telegram_tells_of_a_challenge_a_duel_result_and_a_badge(bank, settings,
         with django_capture_on_commit_callbacks(execute=True):
             d2, _ = challenge(p1, "p2", "python")
         assert not TelegramOutbox.objects.filter(event_key=f"duel:{d2.pk}:challenge").exists()  # turned off
+
+
+@pytest.mark.django_db
+def test_duel_history_lists_the_latest_finish_first(client):
+    from .models import Duel
+
+    me, b = (User.objects.create_user(n, password="x") for n in ("me", "bob"))
+    now = timezone.now()
+    first = Duel.objects.create(challenger=me, opponent=b, status="finished", winner=me, mode="quiz",
+                                finished_at=now - timezone.timedelta(hours=1))
+    late_start = Duel.objects.create(challenger=me, opponent=b, status="finished", winner=b, mode="quiz",
+                                     finished_at=now - timezone.timedelta(days=2))  # made last, ended first
+    client.force_login(me)
+    history = client.get(reverse("classroom:duels")).context["history"]
+    assert [d.pk for d in history] == [first.pk, late_start.pk]

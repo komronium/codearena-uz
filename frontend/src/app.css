@@ -56,7 +56,7 @@
     --ca-navy-rgb: 19 42 107;          /* the top bar, both themes keep it navy */
     --ca-hud-rgb: 29 58 143;           /* the lapis page band */
     --ca-spec-rgb: 47 196 185;         /* teal: the logo star, the rating line */
-    /* difficulty, atlas colours: fills for dots, bars and the band's strip, darker inks for the words (4.5:1 on white) */
+    /* difficulty colours: fills for dots, bars and the band's strip, darker inks for the words (4.5:1 on white) */
     --ca-lvl-beginner: #1F78C8; --ca-lvl-easy: #0B7F5F; --ca-lvl-medium: #D9A21B; --ca-lvl-hard: #B8174F;
     --ca-lvl-beginner-ink: #1A6DB8; --ca-lvl-easy-ink: #0A6B4F; --ca-lvl-medium-ink: #946300; --ca-lvl-hard-ink: #B8174F;
     --ca-sql-rgb: 123 47 190;          /* SQL problems and their topics */
@@ -339,7 +339,7 @@ a.ca-st-label:hover { text-decoration: underline; text-underline-offset: 3px; }
 .ca-picked > li { display: flex; align-items: center; gap: .5rem; padding: .55rem .75rem; }
 .ca-picked-n { flex: none; display: grid; place-items: center; width: 1.6rem; height: 1.6rem; margin-right: .25rem; border-radius: 9999px; font-size: 0.8125rem; font-weight: 600; background: rgb(var(--ca-sunk-rgb)); }
 /* profile banner: one picture per rating tier, climbing from an exercise book to a crown
-   (Yulduzli tun, Islimiy naqsh, Daryo, Rishton, Registon girihi, Quyosh, Olov, Toj). The tag names it. */
+   (a line, chevrons, stars, laurels, a crown: apps.accounts.tiers.TIER_BANNERS). The tag names it. */
 .ca-banner { position: relative; height: 6.5rem; overflow: hidden; background: #E8EDF5; }
 @media (min-width: 640px) { .ca-banner { height: 8rem; } }
 .ca-banner-tag { position: absolute; right: .75rem; bottom: .6rem; display: inline-flex; align-items: center; gap: .35rem;
@@ -728,12 +728,8 @@ section.ca-ed-full #editor .cm-editor { height: calc(100vh - 9.5rem); }
   color: rgb(var(--ca-mute-rgb)); padding: 0 .75rem; margin: 1.1rem 0 .3rem;
 }
 .ca-brand-mark { width: 1.9rem; height: 1.9rem; flex-shrink: 0; overflow: visible; }
-.ca-brand-star { fill: rgb(var(--ca-accent-fill-rgb)); stroke: rgb(var(--ca-accent-fill-rgb)); stroke-width: 1.5; stroke-linejoin: round;
-  transform-box: fill-box; transform-origin: center; }
+.ca-brand-tile { fill: rgb(var(--ca-accent-fill-rgb)); }
 .ca-brand-code { fill: none; stroke: rgb(var(--ca-on-fill-rgb)); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
-/* the star turns one step of its own symmetry (45°) and lands as it began; the <> never tilts */
-:is(.ca-nav-brand, .ca-auth-brand):is(:hover, :focus-visible) .ca-brand-star { transform: rotate(45deg); }
-@media (prefers-reduced-motion: no-preference) { .ca-brand-star { transition: transform .45s cubic-bezier(.22, 1, .36, 1); } }
 /* ---- shell: one flat top bar (after Kick Start), an optional full-width band, the page ---- */
 .ca-nav { position: sticky; top: 0; z-index: 45; background: rgb(var(--ca-surface-rgb)); border-bottom: 1px solid rgb(var(--ca-line-rgb)); }
 .ca-nav-in { display: flex; align-items: center; gap: 1rem; height: var(--ca-nav-h); max-width: 88rem; margin-inline: auto; padding: 0 1rem; }
@@ -1216,7 +1212,7 @@ pill that says how they did once your clock gets there */
   .ca-quiz-card { padding: 1.4rem 1rem 1.2rem; }
 }
 
-/* ---- Xon-atlas pages: calm lists, colour only where it means something ---- */
+/* ---- list pages: calm lists, colour only where it means something ---- */
 .ca-level-tabs { display: flex; gap: 1.4rem; overflow-x: auto; scrollbar-width: none; }
 .ca-picker {
   position: relative; display: inline-flex; align-items: center; gap: .4rem; height: 2rem; padding: 0 .6rem;
@@ -2017,13 +2013,10 @@ section.ca-ed-full { background: rgb(13 16 22); }
 /* problem names a notch heavier than the text around them: medium */
 td a[href^="/problems/"]:not([href="/problems/"]):not([href*="?"]), .ca-rows a[href^="/problems/"]:not([href="/problems/"]) { font-weight: 500; }
 
-/* the whole interface one notch smaller on a desktop screen, like the mock-ups: every size is in rem, so one line scales all of it;
-   the page keeps the same pixel width it had */
-@media (min-width: 1024px) {
-  html { font-size: 15px; }
-  .ca-main, .ca-nav-in, .ca-footer-in { max-width: 94rem; }
-}
-@media (min-width: 1920px) { html { font-size: 16px; } .ca-main, .ca-nav-in, .ca-footer-in { max-width: 88rem; } }
+/* the whole interface one notch smaller on a desktop screen, like the mock-ups: every size is in rem, so one line scales all of it.
+   The top bar, the band, the page and the footer share one width (88rem), so their edges line up */
+@media (min-width: 1024px) { html { font-size: 15px; } }
+@media (min-width: 1920px) { html { font-size: 16px; } }
 
 /* the tier banner: a flat tier-colour gradient and the tier's rank insignia (bar, chevrons, stars, wreath, crown), one more mark each step up */
 .ca-banner-boshlovchi { background: url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20220%20180%22%20fill=%22none%22%20stroke=%22%23E2E8F0%22%20color=%22%23E2E8F0%22%20stroke-width=%2213%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%20opacity=%22.92%22%3E%3Cline%20x1=%2265.0%22%20y1=%2290%22%20x2=%22155.0%22%20y2=%2290%22/%3E%3C/svg%3E") no-repeat right 3.5rem center / auto 72%, radial-gradient(70% 140% at 85% 20%, rgb(255 255 255 / .16), transparent 62%), linear-gradient(120deg, #0B1020, #1E293B 55%, #334155); }
@@ -2036,11 +2029,10 @@ td a[href^="/problems/"]:not([href="/problems/"]):not([href*="?"]), .ca-rows a[h
 .ca-banner-afsonaviy { background: url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20220%20180%22%20fill=%22none%22%20stroke=%22%23FDE68A%22%20color=%22%23FDE68A%22%20stroke-width=%2213%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%20opacity=%22.92%22%3E%3Cpath%20d=%22M52%20128%20L62%2070%20L88%20100%20L110%2052%20L132%20100%20L158%2070%20L168%20128%20Z%22/%3E%3Cline%20x1=%2252%22%20y1=%22148%22%20x2=%22168%22%20y2=%22148%22/%3E%3Cpolygon%20points=%22110.0%2C23.0%20112.9%2C30.0%20120.5%2C30.6%20114.7%2C35.5%20116.5%2C42.9%20110.0%2C39.0%20103.5%2C42.9%20105.3%2C35.5%2099.5%2C30.6%20107.1%2C30.0%22%20fill=%22currentColor%22%20stroke=%22none%22/%3E%3C/svg%3E") no-repeat right 3.5rem center / auto 72%, radial-gradient(70% 140% at 85% 20%, rgb(255 255 255 / .16), transparent 62%), linear-gradient(120deg, #1C0306, #7F1D1D 55%, #DC2626); }
 
 /* ===================================================================================
-   #7 shell: a navy top bar in both themes, the teal khatam logo whose <> takes the bar's
-   colour, a theme menu for everyone, and the lapis page band with its khatam tiles and
-   atlas strip. Pages opt into the band with .ca-band or .ca-hud.
+   #7 shell: a navy top bar in both themes, the teal logo whose <> takes the bar's
+   colour, a theme menu for everyone, and the plain lapis page band. Pages opt into the band with .ca-band or .ca-hud.
    =================================================================================== */
-.ca-brand-star { fill: rgb(var(--ca-spec-rgb)); stroke: rgb(var(--ca-spec-rgb)); }
+.ca-brand-tile { fill: rgb(var(--ca-spec-rgb)); }
 .ca-brand-code { stroke: rgb(var(--ca-navy-rgb)); stroke-width: 2.6; }
 .ca-nav { background: rgb(var(--ca-navy-rgb)); border-bottom: 1px solid rgb(255 255 255 / .06); color: #fff; }
 .ca-nav-brand { color: #fff; }
@@ -2087,14 +2079,9 @@ td a[href^="/problems/"]:not([href="/problems/"]):not([href*="?"]), .ca-rows a[h
 /* the gold button: one main action per screen */
 .ca-btn-gold { background: rgb(var(--ca-gold-rgb)); color: #1A1F33; }
 .ca-btn-gold:hover:not(:disabled) { background: #F5C25C; }
-/* the lapis band: khatam tiles, then a 4px atlas strip in the difficulty colours */
+/* the lapis band: one flat colour */
 .ca-band, .ca-hud, .ca-band.is-score, .ca-band.is-icpc {
   position: relative; color: #fff; background-color: rgb(var(--ca-hud-rgb));
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Cpath d='M64 32l-8.78 8.78v12.44H42.78L32 64l-8.78-8.78H10.78V42.78L0 32l8.78-8.78V10.78h12.44L32 0l8.78 8.78h12.44v12.44z' transform='translate(16 16) scale(.5)' fill='none' stroke='white' stroke-opacity='.08' stroke-width='2'/%3E%3C/svg%3E");
-}
-.ca-band::after, .ca-hud::after {
-  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 4px;
-  background: linear-gradient(90deg, var(--ca-lvl-beginner) 0 20%, var(--ca-lvl-easy) 20% 40%, var(--ca-lvl-medium) 40% 60%, var(--ca-lvl-hard) 60% 80%, rgb(var(--ca-spec-rgb)) 80% 100%);
 }
 .ca-band-mark { display: none; }
 .ca-band-in { padding-bottom: 1.6rem; }
@@ -2112,10 +2099,10 @@ td a[href^="/problems/"]:not([href="/problems/"]):not([href*="?"]), .ca-rows a[h
 
 /* ===================================================================================
    #7 pages: a white page with grey panels on it, flat tables with hairline rows, a small
-   khatam star before every section head, and the parts the panel and the lists share.
+   dot before every section head, and the parts the panel and the lists share.
    =================================================================================== */
 :root {
-  --ca-star: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M31 16l-4.39 4.39v6.22h-6.22L16 31l-4.39-4.39H5.39v-6.22L1 16l4.39-4.39V5.39h6.22L16 1l4.39 4.39h6.22v6.22z'/%3E%3C/svg%3E");
+  --ca-star: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15'/%3E%3C/svg%3E");
   --ca-vd-ac-bg: #E3F4EC; --ca-vd-ac: #0A6B4F; --ca-vd-wa-bg: #FBE7EE; --ca-vd-wa: #B8174F;
   --ca-vd-tle-bg: #FBF1D9; --ca-vd-tle: #7A5000; --ca-vd-ce-bg: #EEF1F7; --ca-vd-ce: #34405A;
   --ca-hud-lbl: #C8D3F2;
@@ -2131,17 +2118,15 @@ td a[href^="/problems/"]:not([href="/problems/"]):not([href*="?"]), .ca-rows a[h
   --ca-vd-tle-bg: rgb(242 181 58 / .15); --ca-vd-tle: #F7CB6B; --ca-vd-ce-bg: rgb(154 167 196 / .15); --ca-vd-ce: #C9D3EA;
 }
 
-/* the star: a section's colour mark, coloured by --c */
+/* the dot: a section's colour mark, coloured by --c */
 .ca-star { display: inline-block; flex: none; width: 13px; height: 13px; background: var(--c, rgb(var(--ca-accent-rgb)));
   -webkit-mask: var(--ca-star) center / contain no-repeat; mask: var(--ca-star) center / contain no-repeat; }
 
-/* panels: grey on the white page, a hairline, no shadow; their heads take the star */
+/* panels: grey on the white page, a hairline, no shadow */
 .ca-box { background: rgb(var(--ca-panel-rgb)); border: 1px solid var(--ca-panel-line); border-radius: 12px; box-shadow: none; }
 .ca-box-cap, .ca-box-cap.ca-hd { min-height: 0; padding: .9rem 1.15rem .5rem; gap: .6rem; }
 .ca-box-cap.ca-hd :is(h1, h2) { font-size: 1rem; font-weight: 600; letter-spacing: -.005em; }
-.ca-box-cap .ca-hd-icon, .ca-box-cap.ca-hd-lg .ca-hd-icon { width: 13px; height: 13px; border-radius: 0; background: var(--c, rgb(var(--ca-accent-rgb)));
-  -webkit-mask: var(--ca-star) center / contain no-repeat; mask: var(--ca-star) center / contain no-repeat; }
-.ca-box-cap .ca-hd-icon svg { display: none; }
+.ca-box-cap .ca-hd-icon { display: none; }  /* a card's title stands alone: no mark before it */
 .ca-box-tools { color: rgb(var(--ca-mute-rgb)); }
 
 /* tables: flat, a hairline under the head, softer lines between rows, no stripes */
@@ -2183,7 +2168,7 @@ td a[href^="/problems/"]:not([href="/problems/"]):not([href*="?"]), .ca-rows a[h
 .ca7-sec-h { display: flex; align-items: center; gap: .65rem; margin: 0 0 .75rem; }
 .ca7-sec-h h2 { margin: 0; font-size: 1.0625rem; font-weight: 700; letter-spacing: -.01em; }
 .ca7-sec-h > a, .ca7-sec-h > .ca7-r { margin-left: auto; font-size: 0.875rem; }
-.ca7-sec-sub { margin: -.4rem 0 .75rem 1.45rem; font-size: 0.875rem; color: rgb(var(--ca-mute-rgb)); }
+.ca7-sec-sub { margin: -.4rem 0 .75rem; font-size: 0.875rem; color: rgb(var(--ca-mute-rgb)); }
 .ca7-empty { padding: 1.25rem .25rem; color: rgb(var(--ca-mute-rgb)); border-block: 1px solid rgb(var(--ca-line-rgb)); }
 .ca7-empty b { display: block; margin-bottom: .2rem; font-size: 1rem; color: rgb(var(--ca-ink-rgb)); }
 .ca-btn-soft { background: rgb(var(--ca-field-rgb)); color: rgb(var(--ca-ink-rgb)); border: 1px solid rgb(var(--ca-line-rgb)); }
@@ -2263,7 +2248,7 @@ td a[href^="/problems/"]:not([href="/problems/"]):not([href*="?"]), .ca-rows a[h
 :root[data-theme="dark"] .ca7-cal > .is-today { box-shadow: inset 0 0 0 1px rgb(143 176 255 / .55); }
 
 /* the problem set: the band's bar per level, the tools over the table, your mark on each row */
-:root { --ca-star-o: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M31 16l-4.39 4.39v6.22h-6.22L16 31l-4.39-4.39H5.39v-6.22L1 16l4.39-4.39V5.39h6.22L16 1l4.39 4.39h6.22v6.22z' fill='none' stroke='black' stroke-width='3' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+:root { --ca-star-o: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13.5' fill='none' stroke='black' stroke-width='3'/%3E%3C/svg%3E"); }
 .ca-hud-lvbar { display: flex; gap: 3px; width: 16rem; height: 7px; margin-top: .45rem; }
 .ca-hud-lvbar i { flex: 1 1 0; border-radius: 2px; background: rgb(255 255 255 / .16); }
 .ca-hud-lvbar i.is-beginner { background: #5AB4F5; } .ca-hud-lvbar i.is-easy { background: #3CC79A; }
@@ -2494,12 +2479,10 @@ details[open] > summary.ca-edb, .ca-edb[aria-pressed="true"] { background: rgb(2
 @media (prefers-reduced-motion: reduce) { .ca-edb { transition: none; } }
 
 /* contests: lapis round cards, the past list with a date tile, the top of the rating with medals */
-.ca-khatam { background-color: rgb(var(--ca-hud-rgb));
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Cpath d='M64 32l-8.78 8.78v12.44H42.78L32 64l-8.78-8.78H10.78V42.78L0 32l8.78-8.78V10.78h12.44L32 0l8.78 8.78h12.44v12.44z' transform='translate(16 16) scale(.5)' fill='none' stroke='white' stroke-opacity='.08' stroke-width='2'/%3E%3C/svg%3E"); }
+.ca-navy { background-color: rgb(var(--ca-hud-rgb)); }
 .ca7-ccards { display: grid; gap: 1rem; }
 @media (min-width: 768px) { .ca7-ccards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-.ca7-ccard { display: flex; flex-direction: column; padding: 1.1rem 1.25rem 1.1rem; border-radius: 14px; color: #fff; background-color: rgb(var(--ca-hud-rgb));
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Cpath d='M64 32l-8.78 8.78v12.44H42.78L32 64l-8.78-8.78H10.78V42.78L0 32l8.78-8.78V10.78h12.44L32 0l8.78 8.78h12.44v12.44z' transform='translate(16 16) scale(.5)' fill='none' stroke='white' stroke-opacity='.08' stroke-width='2'/%3E%3C/svg%3E"); }
+.ca7-ccard { display: flex; flex-direction: column; padding: 1.1rem 1.25rem 1.1rem; border-radius: 14px; color: #fff; background-color: rgb(var(--ca-hud-rgb)); }
 .ca7-ccard-tags { display: flex; flex-wrap: wrap; gap: .35rem; }
 .ca7-htag { display: inline-flex; align-items: center; gap: .3rem; height: 1.4rem; padding: 0 .5rem; border-radius: 6px; font-size: 0.8125rem; font-weight: 600; color: #fff; background: rgb(255 255 255 / .12); }
 .ca7-htag .ca-live-dot { margin: 0; color: #FF6B81; box-shadow: 0 0 0 3px rgb(255 107 129 / .28); }
@@ -2566,7 +2549,7 @@ details[open] > summary.ca-edb, .ca-edb[aria-pressed="true"] { background: rgb(2
 .ca7-ladder-flag::after { content: ""; position: absolute; left: 50%; bottom: -4px; width: 8px; height: 8px; transform: translateX(-50%) rotate(45deg); background: inherit; }
 .ca7-u + .text-xs { margin-left: .2rem; }
 
-/* profile: the band with the person and six figures, two columns, the year map, topics as marks, khatam badges */
+/* profile: the band with the person and six figures, two columns, the year map, topics as marks, the badges */
 .ca-hud-in.ca7-phud { display: block; padding-top: 1.25rem; padding-bottom: 0; }
 .ca7-pwho { display: flex; align-items: center; gap: 1.1rem; padding-bottom: 1.1rem; }
 .ca7-pav { display: grid; place-items: center; flex: none; width: 4rem; height: 4rem; border-radius: 50%; overflow: hidden; font-size: 1.5rem; font-weight: 700;
@@ -3104,8 +3087,7 @@ sparks fly once, then the words; a click outside or the button closes it */
 .ca7-legend7 { display: grid; gap: .8rem; }
 .ca7-legend7 dd { margin: .3rem 0 0; font-size: 0.875rem; color: rgb(var(--ca-mute-rgb)); }
 /* the live round on the panel: a lapis strip like the band */
-.ca-dashboard-live.ca-live-strip { color: #fff; background-color: rgb(var(--ca-hud-rgb)); border-radius: 14px; box-shadow: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Cpath d='M64 32l-8.78 8.78v12.44H42.78L32 64l-8.78-8.78H10.78V42.78L0 32l8.78-8.78V10.78h12.44L32 0l8.78 8.78h12.44v12.44z' transform='translate(16 16) scale(.5)' fill='none' stroke='white' stroke-opacity='.08' stroke-width='2'/%3E%3C/svg%3E"); }
+.ca-dashboard-live.ca-live-strip { color: #fff; background-color: rgb(var(--ca-hud-rgb)); border-radius: 14px; box-shadow: none; }
 .ca-dashboard-live .ca-tag-live { color: #fff; background: rgb(255 255 255 / .12); border: 0; }
 .ca-dashboard-live .ca-tag-live .ca-live-dot { color: #FF6B81; }
 .ca-dashboard-live h2 a { color: #fff; }
@@ -3156,7 +3138,7 @@ words beside a photo sat lower. Centred instead, the chip and what follows it li
 .ca7-topics-key i { display: inline-block; width: .7rem; height: .7rem; margin-left: .5rem; border-radius: 2px; background: var(--ca-soft); }
 .ca7-topics-key i:first-child { margin-left: 0; }
 @media (max-width: 639px) { .ca7-topic { grid-template-columns: minmax(0, 1fr) 4rem; } .ca7-topic-bar { grid-column: 1 / -1; order: 3; } .ca7-topic-next { display: none; } }
-/* a round's badge is a khatam star like the rest: no pill behind it */
+/* a round's badge is a disc like the rest: no pill behind it */
 .ca7-badge.ca-badge-contest, .ca7-badge[class*="ca-badge-medal-"] { display: block; padding: 0; border-radius: 0; color: inherit; background: none; }
 /* a statement's note for AI assistants: not shown, not read aloud, but kept when the text is copied */
 .ca-ai-mark { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
@@ -3552,3 +3534,69 @@ body .EasyMDEContainer .cm-s-easymde .cm-link, body .EasyMDEContainer .cm-s-easy
 /* the toolbar speaks in one weight: chips, dropdown buttons and buttons are medium, the chosen chip is bold */
 .ca7-seg a, .ca7-ddb, .ca7-tools-r .ca-btn { font-weight: 500; }
 .ca7-seg a[aria-current], .ca7-dd.is-on > .ca7-ddb { font-weight: 600; }
+
+/* the account gate's two steps (accounts/welcome.html): the current one in ink, a done one ticked */
+.ca-steps-mini { display: flex; gap: .4rem; margin: 0; padding: 0; list-style: none; font-size: 0.8125rem; font-weight: 600; }
+.ca-steps-mini li { flex: 1; padding-top: .45rem; border-top: 3px solid rgb(var(--ca-line-rgb)); color: rgb(var(--ca-mute-rgb)); }
+.ca-steps-mini li[aria-current] { border-color: rgb(var(--ca-accent-rgb)); color: rgb(var(--ca-ink-rgb)); }
+.ca-steps-mini li.is-done { border-color: rgb(var(--ca-ok-rgb)); }
+
+/* badges as tiles (accounts/_tbadge.html, _badge7.html): the icon on a square in the level's metal, the name and the
+   level in words, one bar of five parts (the full ones the levels held, the part-filled one the way to the next),
+   then what the next level asks. Grey before level I. */
+.ca-bts { display: grid; grid-template-columns: repeat(auto-fill, minmax(17.5rem, 1fr)); gap: .75rem; margin: 0; padding: 0; list-style: none; }
+.ca-bts-one { grid-template-columns: minmax(0, 1fr); }
+.ca-bt-wrap { display: grid; gap: 1.25rem; }
+.ca-bt { display: flex; gap: .8rem; align-items: flex-start; padding: .8rem .9rem; list-style: none;
+  border: 1px solid rgb(var(--ca-line-rgb)); border-radius: var(--ca-radius); background: rgb(var(--ca-surface-rgb)); }
+.ca-bt.is-lapis { --bg1: rgb(var(--ca-accent-rgb)); --bg2: rgb(var(--ca-accent-rgb)); }
+.ca-bt-link { display: contents; color: inherit; text-decoration: none; }
+.ca-bt-link:hover b { color: rgb(var(--ca-accent-rgb)); }
+.ca-bt-ico { flex: none; display: grid; place-items: center; width: 2.6rem; height: 2.6rem; border-radius: 10px; color: #fff;
+  background: var(--bg1, rgb(var(--ca-accent-rgb))); box-shadow: inset 0 -2px 0 rgb(0 0 0 / .14); }
+.ca-bt-ico svg.lucide { width: 1.3rem; height: 1.3rem; }
+.ca-bt.is-locked .ca-bt-ico { color: rgb(var(--ca-mute-rgb)); background: rgb(var(--ca-sunk-rgb)); box-shadow: inset 0 0 0 1px rgb(var(--ca-line-rgb)); }
+.ca-bt-main { display: grid; flex: 1; gap: .4rem; min-width: 0; }
+.ca-bt-head { display: flex; align-items: baseline; justify-content: space-between; gap: .5rem; margin: 0; }
+.ca-bt-head b { overflow: hidden; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.ca-bt-lv { flex: none; font-size: 0.8125rem; font-weight: 600; color: var(--bg2, rgb(var(--ca-mute-rgb))); }
+.ca-bt.is-locked .ca-bt-lv { color: rgb(var(--ca-mute-rgb)); }
+.ca-bt-bar { display: grid; grid-auto-columns: minmax(0, 1fr); grid-auto-flow: column; gap: 3px; height: 6px; }
+.ca-bt-bar i { border-radius: 2px; background: linear-gradient(90deg, var(--bg1) var(--p), rgb(var(--ca-ink-rgb) / .1) var(--p)); }
+.ca-bt.is-locked .ca-bt-bar i { background: linear-gradient(90deg, rgb(var(--ca-accent-rgb) / .6) var(--p), rgb(var(--ca-ink-rgb) / .1) var(--p)); }
+.ca-bt-ticks { display: grid; grid-auto-columns: minmax(0, 1fr); grid-auto-flow: column; gap: 3px; margin-top: -.2rem;
+  font-size: 0.75rem; font-variant-numeric: tabular-nums; text-align: right; color: rgb(var(--ca-mute-rgb)); }
+.ca-bt small { font-size: 0.8125rem; color: rgb(var(--ca-mute-rgb)); }
+/* small, for lists, and big, for the award */
+.ca-bmini { display: inline-grid; place-items: center; width: 1.6rem; height: 1.6rem; border-radius: 6px; color: #fff; background: var(--bg1); }
+.ca-bmini svg.lucide { width: .85rem; height: .85rem; }
+.ca7-pbadges .ca-bmini { width: 1.75rem; height: 1.75rem; }
+.ca-bt-ico.ca-win-star { width: 6rem; height: 6rem; border-radius: 22px; }
+/* inside a side box the box is the frame: tiles become rows split by hairlines */
+.ca-box .ca-bts { gap: 0; }
+.ca-box .ca-bt { border: 0; border-top: 1px solid rgb(var(--ca-line-rgb)); border-radius: 0; background: transparent; padding: .7rem 1rem; }
+
+/* the bell (_bell.html): a count on the icon, the latest lines in its menu, unread ones tinted */
+.ca-bell > summary { position: relative; list-style: none; }
+.ca-bell > summary::-webkit-details-marker { display: none; }
+.ca-bell-n { position: absolute; top: -.2rem; right: -.25rem; min-width: 1.05rem; padding: 0 .25rem; border-radius: 9999px;
+  font-size: 0.6875rem; font-weight: 700; line-height: 1.05rem; text-align: center; color: #fff; background: rgb(var(--ca-bad-rgb));
+  box-shadow: 0 0 0 2px rgb(var(--ca-hud-rgb)); }
+.ca-bell-panel { width: 22rem; padding: 0; }
+.ca-bell-head { display: flex; align-items: center; justify-content: space-between; gap: .5rem; padding: .7rem .9rem; border-bottom: 1px solid rgb(var(--ca-line-rgb)); }
+.ca-bell-list { max-height: 24rem; margin: 0; padding: .25rem; overflow-y: auto; list-style: none; }
+.ca-bell-list a { display: flex; gap: .65rem; align-items: flex-start; padding: .55rem .6rem; border-radius: 8px; color: rgb(var(--ca-ink-rgb)); text-decoration: none; }
+.ca-bell-list a:hover { background: rgb(var(--ca-sunk-rgb)); }
+.ca-bell-list li.is-new a { background: rgb(var(--ca-accent-rgb) / .07); }
+.ca-bell-list li.is-new .ca-bell-text { font-weight: 600; }
+.ca-bell-ico { flex: none; display: grid; place-items: center; width: 1.9rem; height: 1.9rem; border-radius: 8px; color: rgb(var(--ca-accent-rgb)); background: rgb(var(--ca-accent-rgb) / .1); }
+.ca-bell-ico svg.lucide { width: 1rem; height: 1rem; }
+.ca-bell-text { display: block; font-size: 0.875rem; line-height: 1.35; }
+.ca-bell-list small { font-size: 0.75rem; color: rgb(var(--ca-mute-rgb)); }
+.ca-bell-empty { margin: 0; padding: 1rem .9rem; font-size: 0.875rem; color: rgb(var(--ca-mute-rgb)); }
+.ca-nav .ca-bell-panel, .ca-nav .ca-bell-head b, .ca-nav .ca-bell-text { color: rgb(var(--ca-ink-rgb)); }
+.ca-nav .ca-bell-list li.is-new .ca-bell-text { font-weight: 600; }
+
+/* the editor's action bar: one short line of keys (the rest in its tooltip), buttons that never wrap */
+.ca-act-keys { overflow: hidden; white-space: nowrap; cursor: help; }
+.ca-act .ca-edb, .ca-act .ca-btn { flex: none; white-space: nowrap; }

@@ -1,19 +1,16 @@
-{% comment %}The award: a badge level just reached, said the moment it happens. A dialog over the page: the star in its
+{% comment %}The award: a badge level just reached, said the moment it happens. A dialog over the page: the tile in its
 level's metal pops in over a slow burst of light, "Nishonni qo‘lga kiritdingiz!", the badge, how rare it is and what
 the next level asks; others reached at the same time listed small. ctx: new_badges (badges.unseen), user.{% endcomment %}
 {% with b=new_badges.0 %}
 <dialog class="ca-win ca-t{{ b.tier }}" id="ca-award" aria-labelledby="ca-award-title">
   <div class="ca-win-stage" aria-hidden="true">
     <span class="ca-win-burst"></span>
-    <span class="ca7-badge-art ca-win-star">
-      <svg viewBox="0 0 64 64"><path d="M62 32l-8.78 8.78v12.44H40.78L32 62l-8.78-8.78H10.78V40.78L2 32l8.78-8.78V10.78h12.44L32 2l8.78 8.78h12.44v12.44z"/><path class="in" d="M53 32l-6.15 6.15v8.7h-8.7L32 53l-6.15-6.15h-8.7v-8.7L11 32l6.15-6.15v-8.7h8.7L32 11l6.15 6.15h8.7v8.7z"/></svg>
-      <i data-lucide="{{ b.icon }}" class="lu"></i><span class="ca-tb-num">{{ b.roman }}</span>
-    </span>
+    <span class="ca-bt-ico ca-win-star"><i data-lucide="{{ b.icon }}" class="lu"></i></span>
     <i class="ca-win-spark s1"></i><i class="ca-win-spark s2"></i><i class="ca-win-spark s3"></i><i class="ca-win-spark s4"></i>
   </div>
   <p class="ca-win-kicker">{% if b.tier > 1 %}Bosqich oshdi!{% else %}Nishonni qo‘lga kiritdingiz!{% endif %}</p>
   <h2 id="ca-award-title">{{ b.title }}</h2>
-  <p class="ca-win-sub">{{ b.sub }} · <span class="ca-win-metal">{{ b.metal|capfirst }}</span></p>
+  <p class="ca-win-sub"><span class="ca-win-metal">{{ b.metal|capfirst }}</span> · {{ b.sub }}</p>
   <p class="ca-win-rare">{% if b.pct <= 10 %}Kamyob: {% endif %}o‘yinchilarning {{ b.pct }}% ida bor</p>
   {% if b.next %}<p class="ca-win-next">Keyingisi — {{ b.next }}</p>{% endif %}
   {% if new_badges|length > 1 %}

@@ -20,7 +20,8 @@ class User(AbstractUser):
     official_rating = models.IntegerField(null=True, blank=True, db_index=True)
     role = models.CharField(max_length=10, choices=Role.choices, default=Role.STUDENT)
     avatar = models.ImageField(upload_to="avatars/", blank=True, null=True)
-    location = models.CharField(max_length=100, blank=True)
+    country = models.CharField(max_length=2, blank=True)  # ISO 3166-1 alpha-2, see apps.accounts.countries
+    location = models.CharField(max_length=100, blank=True)  # the city
     school = models.CharField(max_length=150, blank=True)
     invited_by = models.ForeignKey(
         "self", null=True, blank=True, on_delete=models.SET_NULL, related_name="invited_users",
@@ -37,6 +38,16 @@ class User(AbstractUser):
         "self", null=True, blank=True, on_delete=models.SET_NULL, related_name="verified_users",
     )
     verified_note = models.CharField(max_length=200, blank=True)
+    # the address in `email` was confirmed by its link (apps.accounts.onboarding); None = not yet, so the
+    # account waits on the welcome page
+    email_verified_at = models.DateTimeField(null=True, blank=True)
+    # the last time the user renamed themselves; once per USERNAME_CHANGE_DAYS
+    username_changed_at = models.DateTimeField(null=True, blank=True)
+
+    @property
+    def country_name(self) -> str:
+        from .countries import country_name
+        return country_name(self.country)
 
 
 class TelegramLink(models.Model):
@@ -161,3 +172,26 @@ class Follow(models.Model):
     class Meta:
         constraints = [models.UniqueConstraint(fields=["user", "target"], name="one_follow_per_pair"),
                        models.CheckConstraint(condition=~models.Q(user=models.F("target")), name="no_self_follow")]
+
+
+class Notification(models.Model):
+    """One line in the top bar's bell (apps.accounts.notifications): something happened that is yours to see —
+    a duel call or result, new homework, a code review, a badge. Made once per (user, key); read when opened."""
+
+    class Kind(models.TextChoices):
+        DUEL = "duel", "Duel"
+        ASSIGNMENT = "assignment", "Vazifa"
+        REVIEW = "review", "Kod sharhi"
+        BADGE = "badge", "Nishon"
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="notifications")
+    kind = models.CharField(max_length=12, choices=Kind.choices)
+    text = models.CharField(max_length=200)
+    url = models.CharField(max_length=300)
+    key = models.CharField(max_length=160)  # the event, so it is never told twice
+    created = models.DateTimeField(auto_now_add=True, db_index=True)
+    read_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created", "-id"]
+        constraints = [models.UniqueConstraint(fields=["user", "key"], name="one_notification_per_event")]

@@ -70,7 +70,7 @@ def test_signed_in_home_gathers_what_to_do_next(client, world):
         AssignmentProblem.objects.create(assignment=a, problem=world[1])
     lang = Language.objects.create(code="python", name="Python 3", docker_image="x", run_cmd="x")
     Submission.objects.create(user=ali, problem=world[0], language=lang, source="x", verdict="AC")
-    Duel.objects.create(challenger=bob, opponent=ali, difficulty="easy")
+    Duel.objects.create(challenger=bob, opponent=ali)
 
     client.force_login(ali)
     r = client.get("/")
@@ -176,7 +176,7 @@ def test_nav_shows_a_running_contest_and_homework_due_soon(client):
 
     page = client.get("/problems/").content.decode()
     assert "ca-live-pill" in page and "Musobaqangiz davom etmoqda" in page  # the clock, from any page
-    assert "ca-badge-live" in page and "1 ta vazifa muddati 2 kun ichida tugaydi" in page
+    assert "ca-badge-live" in page and "Muddati yaqin vazifa yoki duel chaqiruvi: 1" in page
     assert "ca-live-pill" not in client.get("/").content.decode()  # home has its own live strip
 
 
@@ -239,7 +239,7 @@ def test_server_error_page_renders_without_any_context():
     from django.template.loader import render_to_string
 
     html = render_to_string("500.html")
-    assert "Serverda xatolik" in html and 'class="ca-brand-star"' in html
+    assert "Serverda xatolik" in html and 'class="ca-brand-tile"' in html
 
 
 @pytest.mark.django_db

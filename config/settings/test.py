@@ -6,3 +6,6 @@ EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
 
 # Most tests post submissions directly; the editor rule has its own tests (override_settings).
 PRACTICE_REQUIRE_EDITOR = False
+
+# The account gate has its own tests (override_settings); everyone else's test users go straight in.
+ACCOUNT_GATE = False

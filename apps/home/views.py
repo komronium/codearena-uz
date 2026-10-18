@@ -73,23 +73,6 @@ def _live(user, running) -> dict | None:
             "solved": row and row["solved"], "n_problems": contest.contest_problems.count()}
 
 
-
-def _badge_card(user) -> dict:
-    """The dashboard's badge box: the latest level earned, and the badge closest to its next level (the
-    biggest share of the way there) with what it still needs."""
-    from apps.accounts import badges
-    from apps.accounts.models import UserBadge
-
-    board = badges.board(user)
-    last = UserBadge.objects.filter(user=user).order_by("-earned_at", "-tier").first()
-    latest = next((b for b in board if last and b["key"] == last.family), None)
-    started = [b for b in board if b["next"] and b["next"]["done"]]
-    near = max(started, key=lambda b: b["next"]["done"] / b["next"]["total"], default=None)
-    if near is None:
-        near = next((b for b in board if b["next"]), None)
-    return {"latest": latest, "latest_at": last.earned_at if last else None, "near": near,
-            "earned": sum(1 for b in board if b["tier"]), "total": len(board)}
-
 def _classes(user, now):
     """The teacher's classes for the dashboard's top: size, the work now open and how many of the class have handed
     in its most pressing assignment. [] for everyone who teaches nothing."""
@@ -175,21 +158,18 @@ def home(request):
         "solved_count": Problem.objects.filter(userproblemsolved__user=user, is_public=True).count(),
         "homework": homework,
         "challenges": list(mine.filter(status=Duel.Status.PENDING, opponent=user)[:3]),
-        "badge_card": _badge_card(user),
         "active_duels": live,
         "running": running, "upcoming": upcoming, "live": _live(user, running),
         "today_label": f"{_WEEKDAYS[today.weekday()]}, {today.day}-{_MONTHS[today.month - 1]}",
         "rating_card": _rating_card(user),
         "spark": _spark(user),
-        # LeetCode's ring of solved problems per level, out of the open problems
-        "ring": solved_ring(level_progress(user, open_problems())),
+        # a newcomer's first steps show LeetCode's ring of solved problems per level (the problem list has it otherwise)
+        "ring": solved_ring(level_progress(user, open_problems())) if is_new else None,
         "next_picks": next_picks, "picks_reason": shared_reason(next_picks),
         "registered": set(Participation.objects.filter(user=user, contest__in=upcoming)
                           .values_list("contest_id", flat=True)),
         "learning": continue_course(user),
         "recent": list(Submission.objects.filter(user=user).select_related("problem", "language")[:5]),
-        "best_rating": max(Participation.objects.filter(user=user, rating_after__isnull=False)
-                           .values_list("rating_after", flat=True), default=None),
         "taught": taught, "classes": _classes(user, now),
     })
 

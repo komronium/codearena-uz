@@ -45,7 +45,7 @@
 <div class="ca7-col">
   {% if classes %}
   <section aria-labelledby="classes-title">
-    <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-easy)" aria-hidden="true"></span><h2 id="classes-title">Sinflarim</h2><a class="ca-link" href="{% url 'classroom:list' %}">Hammasi</a></div>
+    <div class="ca7-sec-h"><h2 id="classes-title">Sinflarim</h2><a class="ca-link" href="{% url 'classroom:list' %}">Hammasi</a></div>
     <table class="ca-table ca-table-flat">
       <thead><tr><th>Sinf</th><th class="w-28 text-right">O‘quvchilar</th><th>Ochiq vazifa</th><th class="w-44 text-right"><span class="sr-only">Amallar</span></th></tr></thead>
       <tbody>
@@ -109,7 +109,7 @@
 
   {% if homework %}
   <section aria-labelledby="hw-title">
-    <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span><h2 id="hw-title">Vazifalar</h2><a class="ca-link" href="{% url 'classroom:list' %}">Hammasi</a></div>
+    <div class="ca7-sec-h"><h2 id="hw-title">Vazifalar</h2><a class="ca-link" href="{% url 'classroom:list' %}">Hammasi</a></div>
     <table class="ca-table ca-table-flat">
       <thead><tr><th>Vazifa</th><th class="hidden sm:table-cell">Guruh</th><th class="w-28 text-right">Yechildi</th><th class="w-36 text-right">Muddat</th></tr></thead>
       <tbody>
@@ -128,7 +128,7 @@
 
   {% if taught %}
   <section aria-labelledby="taught-title">
-    <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span><h2 id="taught-title">Men bergan vazifalar</h2><a class="ca-link" href="{% url 'classroom:new' %}">+ Yangi vazifa</a></div>
+    <div class="ca7-sec-h"><h2 id="taught-title">Men bergan vazifalar</h2><a class="ca-link" href="{% url 'classroom:new' %}">+ Yangi vazifa</a></div>
     <table class="ca-table ca-table-flat">
       <thead><tr><th>Vazifa</th><th class="hidden sm:table-cell">Sinf</th><th class="w-28 text-right">Topshirdi</th><th class="w-40 text-right">Muddat</th><th class="w-28 text-right"><span class="sr-only">Natijalar</span></th></tr></thead>
       <tbody>
@@ -147,7 +147,7 @@
   {% endif %}
 
   <section aria-labelledby="recent-title">
-    <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-hard)" aria-hidden="true"></span><h2 id="recent-title">So‘nggi urinishlar</h2>{% if recent %}<a class="ca-link" href="{% url 'submissions:mine' %}?mine=1">Barcha urinishlar</a>{% endif %}</div>
+    <div class="ca7-sec-h"><h2 id="recent-title">So‘nggi urinishlar</h2>{% if recent %}<a class="ca-link" href="{% url 'submissions:mine' %}?mine=1">Barcha urinishlar</a>{% endif %}</div>
     {% if recent %}
     <div class="overflow-x-auto">
     <table class="ca-table ca-table-flat">
@@ -172,7 +172,7 @@
 
   {% if next_picks %}
   <section aria-labelledby="next-title">
-    <div class="ca7-sec-h"><span class="ca-star" aria-hidden="true"></span><h2 id="next-title">Siz uchun</h2><a class="ca-link" href="{% url 'problems:list' %}{% if picks_reason %}?tag={{ picks_reason|urlencode }}{% endif %}">Masalalar</a></div>
+    <div class="ca7-sec-h"><h2 id="next-title">Siz uchun</h2><a class="ca-link" href="{% url 'problems:list' %}{% if picks_reason %}?tag={{ picks_reason|urlencode }}{% endif %}">Masalalar</a></div>
     <p class="ca7-sec-sub">{% if picks_reason %}Eng kam yechgan mavzuingiz <b class="text-ink">{{ picks_reason|tag_uz }}</b>. Shu masalalar aynan shu mavzuni mashq qildiradi.{% else %}Siz ko‘p yechadigan qiyinlikdagi, hali yechilmagan masalalar.{% endif %}</p>
     <table class="ca-table ca-table-flat">
       <thead><tr><th class="w-16">#</th><th>Masala</th><th class="hidden sm:table-cell">Mavzu</th><th class="text-right">Qiyinlik</th></tr></thead>
@@ -189,45 +189,13 @@
     </table>
   </section>
   {% endif %}
-  {# the progress and the points sit under the problems, so the two columns end together #}
-  <div class="ca7-pair">
-    {% if ring %}{% url 'problems:list' as problems_url %}{% include "problems/_solved_card.html" with title="Yechilgan masalalar" more_url=problems_url %}{% endif %}
-
-  <section class="ca-box" aria-labelledby="pts-title">
-    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" style="--c: rgb(var(--ca-spec-rgb))" aria-hidden="true"></span><h2 id="pts-title">Ballaringiz</h2><a class="ca-box-tools ca-link" href="{% url 'profile' user.username %}">Profil</a></div>
-    <div class="ca7-kv"><span>Reyting</span><b class="tabular">{{ user.rating }}</b>
-      <small>Musobaqalardan keladi.{% if rating_card.delta is not None %} Oxirgisida {{ rating_card.delta|stringformat:"+d" }}{% if best_rating %}, eng yuqorisi {{ best_rating }}{% endif %}{% if rating_card.rank %}, umumiy ro‘yxatda {{ rating_card.rank }}-o‘rin{% endif %}.{% else %} Birinchi reytingli musobaqadan keyin o‘rningiz chiqadi.{% endif %}</small></div>
-    <div class="ca7-kv"><span>Amaliyot balli</span><b class="tabular">{{ user.practice_points }}</b>
-      <small>Har bir yechilgan masala uchun beriladi, reytingga ta’sir qilmaydi.</small></div>
-  </section>
-  </div>
 </div>
 
 <aside class="ca7-aside" aria-label="Qo‘shimcha">
-  {% if daily %}{% include "problems/_daily_card.html" with compact=True %}{% endif %}
   {% include "home/_quests.html" %}
-  <section class="ca-box" aria-labelledby="bcard-title">
-    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span><h2 id="bcard-title">Nishonlar</h2><a class="ca-box-tools ca-link tabular" href="{% url 'badges' %}">{{ badge_card.earned }} / {{ badge_card.total }}</a></div>
-    <div class="ca7-pad ca-bcard">
-      {% with b=badge_card.latest %}{% if b %}
-      <a class="ca-bcard-row" href="{% url 'profile' user.username %}#badges-title">
-        <span class="ca7-badge-art ca-t{{ b.tier }}" aria-hidden="true"><svg viewBox="0 0 64 64"><path d="M62 32l-8.78 8.78v12.44H40.78L32 62l-8.78-8.78H10.78V40.78L2 32l8.78-8.78V10.78h12.44L32 2l8.78 8.78h12.44v12.44z"/><path class="in" d="M53 32l-6.15 6.15v8.7h-8.7L32 53l-6.15-6.15h-8.7v-8.7L11 32l6.15-6.15v-8.7h8.7L32 11l6.15 6.15h8.7v8.7z"/></svg><i data-lucide="{{ b.icon }}" class="lu"></i><span class="ca-tb-num">{{ b.roman }}</span></span>
-        <span class="min-w-0"><small>Oxirgi nishon · {{ badge_card.latest_at|date:"d.m" }}</small><b>{{ b.title }}</b><small>{{ b.sub }}</small></span>
-      </a>
-      {% endif %}{% endwith %}
-      {% with b=badge_card.near %}{% if b %}
-      <a class="ca-bcard-row is-next" href="{% url 'badges' %}">
-        <span class="ca7-badge-art{% if b.tier %} ca-t{{ b.tier }}{% else %} is-locked{% endif %}" aria-hidden="true"><svg viewBox="0 0 64 64"><path d="M62 32l-8.78 8.78v12.44H40.78L32 62l-8.78-8.78H10.78V40.78L2 32l8.78-8.78V10.78h12.44L32 2l8.78 8.78h12.44v12.44z"/><path class="in" d="M53 32l-6.15 6.15v8.7h-8.7L32 53l-6.15-6.15h-8.7v-8.7L11 32l6.15-6.15v-8.7h8.7L32 11l6.15 6.15h8.7v8.7z"/></svg><i data-lucide="{{ b.icon }}" class="lu"></i></span>
-        <span class="min-w-0 flex-1"><small>Eng yaqini</small><b>{{ b.name }} {{ b.next.roman }}</b>
-          <span class="ca7-badge-pg" role="progressbar" aria-valuenow="{{ b.next.done }}" aria-valuemin="0" aria-valuemax="{{ b.next.total }}" aria-label="{{ b.name }} {{ b.next.roman }}: {{ b.next.shown }}"><i style="width: {% widthratio b.next.done b.next.total 100 %}%"></i></span>
-          <small class="tabular">{{ b.next.shown }}</small></span>
-      </a>
-      {% endif %}{% endwith %}
-    </div>
-  </section>
+  {% if active_duels or challenges %}
   <section class="ca-box" aria-labelledby="duel-title">
-    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span><h2 id="duel-title">Duel</h2><a class="ca-box-tools ca-link" href="{% url 'classroom:duels' %}">Duellar</a></div>
-    {% if active_duels or challenges %}
+    <div class="ca-box-cap ca-hd"><h2 id="duel-title">Duel</h2><a class="ca-box-tools ca-link" href="{% url 'classroom:duels' %}">Duellar</a></div>
       <ul class="ca-facts">
         {% for d in active_duels %}
         <li><a class="ca-link min-w-0 truncate" href="{% url 'classroom:duel' d.pk %}">{% if d.opponent %}{{ d.challenger.username }} vs {{ d.opponent.username }}{% else %}Ochiq duel, raqib kutilmoqda{% endif %}</a>
@@ -243,13 +211,8 @@
         </li>
         {% endfor %}
       </ul>
-    {% else %}
-      <div class="ca7-pad">
-        <p>Kod beriladi: nima chiqaradi yoki bo‘sh joyga nima yoziladi? 5 ta savol, har biriga 20 soniya.</p>
-        <a class="ca-btn ca-btn-soft" href="{% url 'classroom:duels' %}">Raqib topish</a>
-      </div>
-    {% endif %}
   </section>
+  {% endif %}
 </aside>
 </div>
 {% endif %}

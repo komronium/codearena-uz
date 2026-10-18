@@ -18,7 +18,7 @@ own row marked.{% endcomment %}
 {% endblock %}
 {% block content %}
 <section aria-labelledby="tiers-title">
-  <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span><h2 id="tiers-title">Darajalar</h2>
+  <div class="ca7-sec-h"><h2 id="tiers-title">Darajalar</h2>
     {% if me %}{% for t in tiers %}{% if t.here %}
     <div class="ca7-you ca7-r" style="--tier: {{ t.color }}" title="Reytingingiz {{ user.rating }}">
       <span class="ca7-you-n"><b class="tabular">{{ t.floor|default:0 }}</b></span>

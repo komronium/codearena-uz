@@ -24,7 +24,7 @@
         {% if e.kind == "solve" %}{% if e.items|length == 1 %}{% with it=e.items.0 %}<a class="ca-link" href="{% url 'problems:detail' it.problem.slug %}">{{ it.problem.title }}</a> masalasini yechdi <span class="ca-diff ca-diff-{{ it.problem.difficulty }}">{{ it.problem.get_difficulty_display }}</span>{% endwith %}
         {% else %}<b>{{ e.items|length }} ta</b> masala yechdi: {% for it in e.items|slice:":3" %}<a class="ca-link" href="{% url 'problems:detail' it.problem.slug %}">{{ it.problem.title }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}{% if e.items|length > 3 %} va yana {{ e.items|length|add:"-3" }} ta{% endif %}{% endif %}
         {% elif e.kind == "duel" %}duelda <a class="ca-user-name" href="{% url 'profile' e.versus.username %}" translate="no">{{ e.versus.username }}</a> ni yutdi
-        {% else %}{% if e.items|length == 1 %}«{{ e.items.0.badge }} {{ e.items.0.level }}» nishonini oldi{% else %}<b>{{ e.items|length }} ta</b> nishon oldi: {% for it in e.items %}«{{ it.badge }} {{ it.level }}»{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}{% endif %}
+        {% else %}{% if e.items|length == 1 %}«{{ e.items.0.badge }} · {{ e.items.0.level }}» nishonini oldi{% else %}<b>{{ e.items|length }} ta</b> nishon oldi: {% for it in e.items %}«{{ it.badge }} · {{ it.level }}»{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}{% endif %}
       </div>
       <time class="tabular text-xs text-mute" datetime="{{ e.at|date:'c' }}">{{ e.at|ago_uz }}</time>
     </li>
@@ -37,7 +37,7 @@
 <aside class="ca7-aside" aria-label="Tavsiya">
   {% if suggestions %}
   <section class="ca-box" aria-labelledby="sug-title">
-    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" aria-hidden="true"></span><h2 id="sug-title">Kimni kuzatish mumkin</h2></div>
+    <div class="ca-box-cap ca-hd"><h2 id="sug-title">Kimni kuzatish mumkin</h2></div>
     <ul class="ca7-pad space-y-2">
       {% for u in suggestions %}<li class="flex items-center justify-between gap-2">{% include "accounts/_u7.html" with u=u you=False %}
         <form method="post" action="{% url 'follow' u.username %}">{% csrf_token %}<button class="ca-btn ca-btn-ghost !py-1 text-xs">Kuzatish</button></form></li>{% endfor %}

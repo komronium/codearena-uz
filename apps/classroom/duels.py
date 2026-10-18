@@ -333,7 +333,10 @@ def challenge(challenger, opponent_username: str, language: str) -> tuple[Duel |
         if questions is None:
             return None, "Bu tilda savollar hali yetarli emas — boshqasini tanlang."
         duel = _open(challenger, language, questions, opponent=opponent)
+        from apps.accounts.notifications import notify
         from apps.accounts.telegram import notify_duel_challenge
+        notify(opponent.pk, "duel", f"duel:{duel.pk}:challenge",
+               f"{challenger.username} sizni duelga chaqirdi ({duel.get_language_display()})", f"/classroom/duels/{duel.pk}/")
         transaction.on_commit(lambda: notify_duel_challenge(duel.pk))
         return duel, ""
 
@@ -393,9 +396,13 @@ def settle(duel) -> None:
         User.objects.filter(pk=a.pk).update(duel_rating=ra + da, duel_season=season)
         User.objects.filter(pk=b.pk).update(duel_rating=rb + db, duel_season=season)
     from apps.accounts.badges import award  # a finished duel can lift both players' duel badges
+    from apps.accounts.notifications import notify
     from apps.accounts.telegram import notify_duel_result
-    for player in (a, b):
+    for player, other in ((a, b), (b, a)):
         award(player, {"duels"})
+        head = "G‘alaba" if duel.winner_id == player.pk else "Durang" if duel.winner_id is None else "Mag‘lubiyat"
+        notify(player.pk, "duel", f"duel:{duel.pk}:result", f"{head}: {other.username} bilan duel tugadi",
+               f"/classroom/duels/{duel.pk}/")
     notify_duel_result(duel.pk)
 
 

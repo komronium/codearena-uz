@@ -24,8 +24,9 @@ from apps.problems.progress import solved_ring
 from apps.problems.skills import skill_map
 from apps.submissions.models import Submission
 
-from .forms import ProfileEditForm, RegisterForm
-from .models import Follow, TelegramLink, User
+from . import onboarding
+from .forms import ProfileEditForm, RegisterForm, WelcomeForm
+from .models import Follow, Notification, TelegramLink, User
 
 from .tiers import RATING_TIERS as _RATING_TIERS
 from .tiers import next_tier as _next_tier
@@ -163,6 +164,7 @@ def register(request):
                 form.add_error(None, "Ro‘yxatdan o‘tishda xatolik yuz berdi. Qayta urinib ko‘ring.")
         else:
             login(request, user)
+            onboarding.send_verification(request, user, force=True)
             if user.teacher_requested:
                 messages.success(request, "Xush kelibsiz! O‘qituvchi so‘rovingiz adminga yuborildi — tasdiqlangach, «Vazifalar» bo‘limida guruh ochasiz.")
             return redirect(nxt or "home")
@@ -196,15 +198,86 @@ def teacher_request(request):
 
 @login_required
 def profile_edit(request):
-    form = ProfileEditForm(request.POST or None, request.FILES or None, instance=request.user)
+    # a fresh copy: a form that fails must not leave its values on request.user (the top bar shows it)
+    user = User.objects.get(pk=request.user.pk)
+    old_name, old_email = user.username, user.email.lower()
+    form = ProfileEditForm(request.POST or None, request.FILES or None, instance=user)
     if request.method == "POST" and form.is_valid():
-        form.save()
-        return redirect("profile", request.user.username)
+        user = form.save(commit=False)
+        if user.username != old_name:
+            user.username_changed_at = timezone.now()
+        email_changed = user.email.lower() != old_email
+        if email_changed:
+            user.email_verified_at = None
+        user.save()
+        if email_changed:
+            onboarding.send_verification(request, user, force=True)
+            messages.info(request, f"{user.email} manziliga tasdiqlash havolasi yuborildi.")
+        return redirect("profile", user.username)
     return render(request, "accounts/profile_edit.html", {
         "form": form,
         "telegram_link": TelegramLink.objects.filter(user=request.user).first(),
         "telegram_configured": bot_configured(),
     })
+
+
+@login_required
+def welcome(request):
+    """The account gate's page (apps.accounts.onboarding): the profile fields still empty, then the email
+    confirmation. A user with nothing owed goes home."""
+    user = request.user
+    if not onboarding.needs_gate(user):
+        return redirect("home")
+    old_email = user.email.lower()
+    form = WelcomeForm(request.POST or None, instance=User.objects.get(pk=user.pk))
+    if request.method == "POST" and "resend" in request.POST:
+        if onboarding.send_verification(request, user):
+            messages.success(request, f"Havola {user.email} manziliga qayta yuborildi.")
+        else:
+            messages.warning(request, "Havola hozirgina yuborildi. Bir daqiqadan keyin qayta urinib ko‘ring.")
+        return redirect("welcome")
+    if request.method == "POST" and form.is_valid():
+        user = form.save(commit=False)
+        email_changed = user.email.lower() != old_email
+        if email_changed:
+            user.email_verified_at = None
+        user.save()
+        if user.email_verified_at is None:
+            onboarding.send_verification(request, user, force=email_changed)
+        return redirect("welcome")
+    return render(request, "accounts/welcome.html", {
+        "form": form, "missing": onboarding.missing(user), "email_pending": not onboarding.missing(user)})
+
+
+@login_required
+def notification_open(request, pk):
+    """A line in the bell: mark it read and go where it points."""
+    n = get_object_or_404(Notification, pk=pk, user=request.user)
+    if n.read_at is None:
+        n.read_at = timezone.now()
+        n.save(update_fields=["read_at"])
+    return redirect(n.url if n.url.startswith("/") else "home")
+
+
+@login_required
+@require_POST
+def notifications_read(request):
+    """The bell's "Hammasini o‘qildi": every unread line read at once."""
+    Notification.objects.filter(user=request.user, read_at__isnull=True).update(read_at=timezone.now())
+    return redirect(_safe_next(request) or "home")
+
+
+def verify_email(request, token):
+    """The link from the confirmation mail. Works signed in or not (the mail may be opened on a phone)."""
+    data = onboarding.read_token(token)
+    user = data and User.objects.filter(pk=data[0], is_active=True).first()
+    if not user or not onboarding.confirm(user, data[1]):
+        messages.error(request, "Havola eskirgan yoki noto‘g‘ri. Yangi havola so‘rang.")
+        return redirect("welcome" if request.user.is_authenticated else "login")
+    messages.success(request, "Email tasdiqlandi. Xush kelibsiz!")
+    if request.user.is_authenticated and request.user.pk == user.pk:
+        return redirect("home")
+    return redirect("login")
 
 
 def _ranked(page):
@@ -441,7 +514,7 @@ def _badges(user, owner: bool) -> dict:
             groups.append({"label": b["group_label"], "badges": []})
         groups[-1]["badges"].append(b)
     earned = sorted((b for b in board if b["tier"]), key=lambda b: -b["tier"])
-    return {"badge_groups": groups, "badge_owner": owner, "badges_total": len(board), "top_badges": earned[:6],
+    return {"badge_groups": groups, "held_badges": earned, "badge_owner": owner, "badges_total": len(board), "top_badges": earned[:6],
             "badges_earned": sum(1 for b in board if b["tier"]), "levels_earned": sum(b["tier"] for b in board)}
 
 

@@ -31,7 +31,7 @@ is among the accepted ones and the next step.{% endcomment %}
   </div>
 
   <section class="mt-9" aria-labelledby="code-title">
-    <div class="ca7-sec-h"><span class="ca-star" aria-hidden="true"></span><h2 id="code-title">Kod</h2>
+    <div class="ca7-sec-h"><h2 id="code-title">Kod</h2>
       <span class="ca7-r flex items-center gap-3 text-sm text-mute">
         {% if prev_sub or next_sub %}<span class="ca7-hop" aria-label="Shu masaladagi boshqa urinishlar">
           {% if prev_sub %}<a href="{% url 'submissions:detail' prev_sub.pk %}" title="Oldingi urinish #{{ prev_sub.pk|stringformat:'06d' }}"><i data-lucide="chevron-left" class="lu" aria-hidden="true"></i>Oldingi</a>{% endif %}
@@ -49,7 +49,7 @@ is among the accepted ones and the next step.{% endcomment %}
 {# a student with no comments yet has nothing to answer: the section appears with the first one #}
 {% if can_review and reviews or can_review and s.user_id != user.pk %}
 <section class="mt-9 space-y-4" id="review" aria-labelledby="review-title">
-  <div class="ca7-sec-h !mb-0"><span class="ca-star" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span><h2 id="review-title">Kod sharhi</h2></div>
+  <div class="ca7-sec-h !mb-0"><h2 id="review-title">Kod sharhi</h2></div>
   {% for r in reviews %}
   <article class="rounded-[var(--ca-radius)] border border-line px-4 py-3{% if r.author_id == s.user_id %} bg-ink/[.025]{% endif %}">
     <p class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-mute">
@@ -75,7 +75,7 @@ is among the accepted ones and the next step.{% endcomment %}
 <aside class="ca7-aside" aria-label="Qo‘shimcha">
   {% if beats %}
   <section class="ca-box" aria-labelledby="speed-title">
-    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" style="--c: rgb(var(--ca-spec-rgb))" aria-hidden="true"></span><h2 id="speed-title">Tezlik</h2></div>
+    <div class="ca-box-cap ca-hd"><h2 id="speed-title">Tezlik</h2></div>
     <div class="ca7-pad">
       <svg class="ca-hist" viewBox="-6 -30 {{ beats.vb_w }} {{ beats.vb_h }}" role="img" aria-label="Qabul qilingan {{ beats.n }} ta yechimning ishlash vaqti taqsimoti; sizniki {{ s.exec_ms }} ms">
         {% for b in beats.bars %}<rect x="{{ b.x }}" y="{{ b.y }}" width="{{ beats.bw }}" height="{{ b.h }}" rx="3"{% if b.me %} class="is-me"{% endif %}/>{% endfor %}
@@ -85,7 +85,7 @@ is among the accepted ones and the next step.{% endcomment %}
   </section>
   {% endif %}
   <section class="ca-box" aria-labelledby="next-title">
-    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span><h2 id="next-title">Keyingi qadam</h2></div>
+    <div class="ca-box-cap ca-hd"><h2 id="next-title">Keyingi qadam</h2></div>
     <div class="ca7-pad">
       {% if next_pick %}{% with p=next_pick.0 %}
       <p>{% if next_pick.1 %}Shu mavzudagi keyingi masala ({{ next_pick.1 }}):{% else %}Darajangizga mos keyingi masala:{% endif %}</p>

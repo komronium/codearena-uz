@@ -8,7 +8,7 @@
 {% block band %}
 {% comment %}#7 profile: the band with the person (picture, handle in the tier colour, where from, since when) and six
 figures; then the rating history beside the problems per level, the year of activity across the page, the topics with
-each problem as a mark (green solved, amber tried, grey new) and the next to solve, and the badges as khatam stars.
+each problem as a mark (green solved, amber tried, grey new) and the next to solve, and the badges as discs.
 Colour carries meaning only: the tier colour is the person, green/red the results, lapis the way forward.{% endcomment %}
 <section class="ca-hud ca7-ptier-band" aria-labelledby="hero-name" style="--tier: {{ tier_color }}">
   <div class="ca-hud-in ca7-phud">
@@ -18,7 +18,8 @@ Colour carries meaning only: the tier colour is the person, green/red the result
         <h1 id="hero-name"><span translate="no">{{ profile_user.username }}</span><span class="ca7-ptier">{% if rating_history %}{{ tier }}{% else %}Reytingsiz{% endif %}</span></h1>
         {% if profile_user.get_full_name %}<p class="ca-hud-sub">{{ profile_user.get_full_name }}</p>{% endif %}
         <p class="ca7-pmeta">
-          {% if profile_user.school or profile_user.location %}<span><i data-lucide="map-pin" class="lu" aria-hidden="true"></i>{{ profile_user.school }}{% if profile_user.school and profile_user.location %}, {% endif %}{{ profile_user.location }}</span>{% endif %}
+          {% if profile_user.location or profile_user.country %}<span><i data-lucide="map-pin" class="lu" aria-hidden="true"></i>{{ profile_user.location }}{% if profile_user.location and profile_user.country %}, {% endif %}{{ profile_user.country_name }}</span>{% endif %}
+          {% if profile_user.school %}<span><i data-lucide="school" class="lu" aria-hidden="true"></i>{{ profile_user.school }}</span>{% endif %}
           <span><i data-lucide="calendar" class="lu" aria-hidden="true"></i>{{ profile_user.date_joined|date:"d.m.Y" }} dan beri</span>
           {% if profile_user.is_staff %}<span><i data-lucide="shield-check" class="lu" aria-hidden="true"></i>Moderator</span>{% endif %}
         </p>
@@ -34,10 +35,8 @@ Colour carries meaning only: the tier colour is the person, green/red the result
     <dl class="ca7-pstats">
       <div><dt>Musobaqa reytingi</dt><dd>{% if rating_history %}<b class="ca7-prt tabular">{{ profile_user.rating }}</b>{% if last_delta %} <span class="ca7-pdelta{% if last_delta < 0 %} is-down{% endif %}">{{ last_delta|stringformat:"+d" }}</span>{% endif %}{% else %}<b>—</b>{% endif %}</dd>
         <dd><small>{% if max_rating %}eng yuqori {{ max_rating }}{% else %}hali reytingli raund yo‘q{% endif %}</small></dd></div>
-      <div><dt>Reytingdagi o‘rni</dt><dd>{% if rating_rank %}<b class="tabular">{{ rating_rank }}</b> <span class="ca7-of">/ {{ total_rated }}</span>{% else %}<b>—</b>{% endif %}</dd><dd><small>musobaqa bo‘yicha</small></dd></div>
-      <div><dt>Musobaqalar</dt><dd><b class="tabular">{{ rating_history|length }}</b></dd><dd><small>reytingli raundlar</small></dd></div>
-      <div><dt>Amaliyot balli</dt><dd><b class="tabular">{{ profile_user.practice_points }}</b></dd><dd><small>yechilgan {{ solved|length }} ta masala uchun</small></dd></div>
-      <div><dt>Ball bo‘yicha o‘rni</dt><dd>{% if points_rank %}<b class="tabular">{{ points_rank }}</b> <span class="ca7-of">/ {{ total_users }}</span>{% else %}<b>—</b>{% endif %}</dd><dd><small>amaliyot reytingi</small></dd></div>
+      <div><dt>Reytingdagi o‘rni</dt><dd>{% if rating_rank %}<b class="tabular">{{ rating_rank }}</b> <span class="ca7-of">/ {{ total_rated }}</span>{% else %}<b>—</b>{% endif %}</dd><dd><small>{{ rating_history|length }} ta reytingli musobaqa</small></dd></div>
+      <div><dt>Amaliyot balli</dt><dd><b class="tabular">{{ profile_user.practice_points }}</b></dd><dd><small>{{ solved|length }} ta masala{% if points_rank %} · {{ points_rank }}-o‘rin{% endif %}</small></dd></div>
       <div><dt>Olov</dt><dd><b class="tabular">{{ streak.0 }}</b> <span class="ca7-of">kun</span></dd><dd><small>{% if streak.1 %}eng uzuni {{ streak.1 }} kun{% else %}kun masalasini yechib boshlang{% endif %}</small></dd></div>
     </dl>
   </div>
@@ -47,7 +46,7 @@ Colour carries meaning only: the tier colour is the person, green/red the result
 <div class="ca7-col">
 <div class="ca7-g2">
   <section aria-labelledby="hist-title">
-    <div class="ca7-sec-h"><span class="ca-star" style="--c: rgb(var(--ca-spec-rgb))" aria-hidden="true"></span><h2 id="hist-title">Reyting tarixi</h2>{% if rating_history %}<span class="ca7-r text-mute">{{ rating_history|length }} musobaqa</span>{% endif %}</div>
+    <div class="ca7-sec-h"><h2 id="hist-title">Reyting tarixi</h2>{% if rating_history %}<span class="ca7-r text-mute">{{ rating_history|length }} musobaqa</span>{% endif %}</div>
     {% if rating_history %}
     {% if rating_history|length > 1 %}
     <div class="ca7-chart" id="rchart">
@@ -117,7 +116,7 @@ Colour carries meaning only: the tier colour is the person, green/red the result
   </section>
 
   <section aria-labelledby="solved-title">
-    <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-easy)" aria-hidden="true"></span><h2 id="solved-title">Masalalar</h2><a class="ca-link" href="{% url 'problems:list' %}">Barchasi</a></div>
+    <div class="ca7-sec-h"><h2 id="solved-title">Masalalar</h2><a class="ca-link" href="{% url 'problems:list' %}">Barchasi</a></div>
     <div class="ca7-psolved mb-4">
       {% if next_tier and rating_history %}<p class="text-sm text-mute"><span class="ca-tier-ink font-semibold" style="--tier: {{ next_tier.color }}">{{ next_tier.name }}</span> darajasigacha <b class="text-ink tabular">{{ next_tier.need }}</b> reyting</p>{% endif %}
     </div>
@@ -128,23 +127,19 @@ Colour carries meaning only: the tier colour is the person, green/red the result
   </section>
 </div>
 
-{% if badge_groups or contest_badges %}
+{% if held_badges or contest_badges or badge_owner %}
 <section aria-labelledby="badges-title">
-  <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span><h2 id="badges-title">Nishonlar</h2><span class="ca7-r text-mute tabular">{{ badges_earned }} / {{ badges_total }} nishon · {{ levels_earned }} bosqich</span></div>
-  {% comment %}Each group's families: the owner sees every one (the ones not reached yet grey, with the way to level I),
-  a visitor only the reached ones. Round badges (Contest.badge) follow, coloured by place.{% endcomment %}
-  <div class="ca-tb-groups">
-  {% for g in badge_groups %}
-  <div class="ca-tb-group" style="--n: {% if g.badges|length > 6 %}6{% else %}{{ g.badges|length|default:1 }}{% endif %}">
-    <h3>{{ g.label }}</h3>
-    <ul>{% for b in g.badges %}{% include "accounts/_tbadge.html" with owner=badge_owner %}{% endfor %}</ul>
-  </div>
-  {% endfor %}
+  <div class="ca7-sec-h"><h2 id="badges-title">Nishonlar</h2><span class="ca7-r text-mute"><span class="tabular">{{ badges_earned }} / {{ badges_total }}</span>{% if badge_owner %} · <a class="ca-link" href="{% url 'badges' %}">Barcha nishonlar</a>{% endif %}</span></div>
+  {% comment %}Only the badges held, the highest level first; the rest and the way to them are on the badges page.
+  Round badges (Contest.badge) follow.{% endcomment %}
+  <div class="ca-bt-wrap">
+  {% if held_badges %}<ul class="ca-bts">{% for b in held_badges %}{% include "accounts/_tbadge.html" with owner=badge_owner %}{% endfor %}</ul>
+  {% elif badge_owner %}<p class="ca7-empty"><b>Hali nishon yo‘q</b><a class="ca-link" href="{% url 'badges' %}">Qanday olinadi?</a></p>{% endif %}
   {% if contest_badges %}
-  <div class="ca-tb-group" style="--n: 6">
+  <div class="ca-tb-group">
     <h3>Musobaqa nishonlari</h3>
-    <ul>
-      {% for b in contest_badges %}{% url 'contests:standings' b.contest.pk as round_url %}{% if b.medal %}{% include "accounts/_badge7.html" with tone="medal" icon="medal" title=b.name sub=b.contest.title medal=b.medal href=round_url done=None total=None kind="ca-badge-contest" %}{% else %}{% include "accounts/_badge7.html" with tone="lapis" icon="flag" title=b.name sub=b.contest.title of_solved=b.solved of_total=b.total medal=None href=round_url done=None total=None kind="ca-badge-contest" %}{% endif %}{% endfor %}
+    <ul class="ca-bts">
+      {% for b in contest_badges %}{% url 'contests:standings' b.contest.pk as round_url %}{% if b.medal %}{% include "accounts/_badge7.html" with tone="medal" icon="medal" title=b.name sub=b.contest.title medal=b.medal href=round_url done=None total=None %}{% else %}{% include "accounts/_badge7.html" with tone="lapis" icon="flag" title=b.name sub=b.contest.title of_solved=b.solved of_total=b.total medal=None href=round_url done=None total=None %}{% endif %}{% endfor %}
     </ul>
   </div>
   {% endif %}
@@ -153,7 +148,7 @@ Colour carries meaning only: the tier colour is the person, green/red the result
 {% endif %}
 
 <section aria-labelledby="act-title">
-  <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-easy)" aria-hidden="true"></span><h2 id="act-title">Faollik</h2>
+  <div class="ca7-sec-h"><h2 id="act-title">Faollik</h2>
     <span class="ca7-r text-mute">so‘nggi yilda <b class="tabular text-ink">{{ activity.total }}</b> ta urinish · faol kunlar <b class="tabular text-ink">{{ activity.active_days }}</b> · eng uzun ketma-ket faol kunlar <b class="tabular text-ink">{{ activity.max_streak }}</b></span></div>
   {# rtl scroller: a phone shows the latest weeks first; the map itself stays left-to-right #}
   <div class="ca-scroll-end overflow-x-auto" tabindex="0" role="region" aria-label="Faollik xaritasi (yon tomonga suriladi)">
@@ -171,7 +166,7 @@ Colour carries meaning only: the tier colour is the person, green/red the result
 
 {% if topic_map %}
 <section aria-labelledby="skills-title">
-  <div class="ca7-sec-h"><span class="ca-star" aria-hidden="true"></span><h2 id="skills-title">Mavzular bo‘yicha</h2><a class="ca-link" href="{% url 'problems:list' %}">Barcha masalalar</a></div>
+  <div class="ca7-sec-h"><h2 id="skills-title">Mavzular bo‘yicha</h2><a class="ca-link" href="{% url 'problems:list' %}">Barcha masalalar</a></div>
   {% if weakest and user == profile_user %}
   <div class="ca7-tip">
     <span class="ca7-tip-ico" aria-hidden="true"><i data-lucide="target" class="lu"></i></span>

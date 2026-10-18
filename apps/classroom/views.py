@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.db.models import Case, Count, IntegerField, Q, Value, When
+from django.db.models.functions import Coalesce
 from django.http import Http404, HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -18,12 +19,11 @@ from apps.accounts.tiers import tier_color
 from apps.problems.views import _render_statement
 from apps.submissions.models import Submission
 
-from . import duels, live
+from . import duels
 from apps.accounts.badges import board as badge_board
 from .access import can_review
 from .forms import AssignmentForm
-from .models import (Assignment, AssignmentProblem, Duel, DuelAnswer, DuelQuestion, LiveQuiz, LiveQuizAnswer,
-                     LiveQuizPlayer, ReviewComment)
+from .models import Assignment, AssignmentProblem, Duel, DuelAnswer, DuelQuestion, ReviewComment
 from .progress import cell, completion, grid
 
 
@@ -125,8 +125,12 @@ def assignment_edit(request, pk=None):
             AssignmentProblem.objects.bulk_create(
                 AssignmentProblem(assignment=a, problem=p, order=i) for i, p in enumerate(form.cleaned_data["problems"]))
             if created:
+                from apps.accounts.notifications import notify
                 from apps.accounts.telegram import notify_assignment
 
+                notify(a.group.members.filter(is_active=True).exclude(pk=request.user.pk).values_list("pk", flat=True),
+                       "assignment", f"assignment:{a.pk}:created", f"Yangi vazifa: {a.title} ({a.group.name})",
+                       reverse("classroom:detail", args=[a.pk]))
                 transaction.on_commit(lambda assignment_id=a.pk: notify_assignment(assignment_id))
         return redirect("classroom:detail", a.pk)
     return render(request, "classroom/form.html", {"form": form, "assignment": assignment})
@@ -218,9 +222,14 @@ def review(request, pk):
         return HttpResponseBadRequest("izoh bo‘sh yoki juda uzun")
     if line and not (line.isdigit() and 1 <= int(line) <= n_lines):
         return HttpResponseBadRequest(f"qator 1..{n_lines} oralig‘ida bo‘lishi kerak")
-    ReviewComment.objects.create(submission=submission, author=request.user, body=body,
-                                 line=int(line) if line else None,
-                                 read=request.user.pk == submission.user_id)
+    comment = ReviewComment.objects.create(submission=submission, author=request.user, body=body,
+                                           line=int(line) if line else None,
+                                           read=request.user.pk == submission.user_id)
+    if request.user.pk != submission.user_id:
+        from apps.accounts.notifications import notify
+        notify(submission.user_id, "review", f"review:{comment.pk}",
+               f"{request.user.username} kodingizga izoh qoldirdi: {submission.problem.title}",
+               reverse("submissions:detail", args=[pk]) + "#review")
     return redirect(reverse("submissions:detail", args=[pk]) + "#review")
 
 
@@ -236,8 +245,10 @@ def duel_list(request):
             duel, error = duels.challenge(request.user, request.POST.get("opponent", ""), language)
         if duel is not None:
             return redirect("classroom:duel_play", duel.pk)
+    # newest end first: a finished duel by when it ended, an open one by when it was made (Duel.ended_at)
     mine = (Duel.objects.filter(Q(challenger=request.user) | Q(opponent=request.user))
-            .select_related("challenger", "opponent", "winner"))
+            .select_related("challenger", "opponent", "winner")
+            .order_by(Coalesce("finished_at", "created").desc(), "-pk"))
     joinable = duels.joinable_counts(request.user)
     finished = [d for d in mine if d.status == Duel.Status.FINISHED]
     record = {"wins": sum(1 for d in finished if d.winner_id == request.user.pk),
@@ -533,138 +544,3 @@ def _my_cells(r) -> list[str]:
     now = timezone.now()
     cells = ["ok" if a.correct else ("bad" if r.closed(a, now) else "now") for a in r.answers]
     return cells + [""] * (duels.QUESTIONS - len(cells))
-
-
-# ---- live quiz ------------------------------------------------------------------------------------------
-def _host_quiz(request, code) -> LiveQuiz:
-    quiz = get_object_or_404(LiveQuiz, code=code)
-    if not (request.user.is_staff or quiz.teacher_id == request.user.pk):
-        raise PermissionDenied
-    return quiz
-
-
-@login_required
-def live_new(request):
-    if not can_teach(request.user):
-        raise PermissionDenied
-    error = ""
-    if request.method == "POST":
-        try:
-            count = int(request.POST.get("count", live.COUNTS[0]))
-        except ValueError:
-            count = live.COUNTS[0]
-        quiz, error = live.create(request.user, request.POST.get("language", ""), count,
-                                  request.POST.get("title", ""))
-        if quiz is not None:
-            return redirect("classroom:live_host", quiz.code)
-    return render(request, "classroom/live/new.html", {
-        "error": error, "languages": duels.LANGUAGES, "counts": live.COUNTS,
-        "recent": LiveQuiz.objects.filter(teacher=request.user)[:5]})
-
-
-@login_required
-def live_join(request):
-    error = ""
-    code = (request.POST.get("code") or request.GET.get("code") or "").strip().replace(" ", "")
-    if request.method == "POST" or code:
-        quiz = live.join(request.user, code) if code else None
-        if quiz is not None:
-            return redirect("classroom:live_play", quiz.code)
-        error = "Bunday faol viktorina topilmadi. Kodni tekshiring."
-    return render(request, "classroom/live/join.html", {"error": error, "code": code})
-
-
-@login_required
-def live_host(request, code):
-    quiz = live.tick(_host_quiz(request, code))
-    return render(request, "classroom/live/host.html", {"quiz": quiz, "state_url": reverse("classroom:live_host_state", args=[code]),
-                                                       "act_url": reverse("classroom:live_act", args=[code])})
-
-
-def _host_ctx(quiz):
-    q = live.question(quiz)
-    now = timezone.now()
-    answered = LiveQuizAnswer.objects.filter(quiz=quiz, index=quiz.index).count() if q else 0
-    ctx = {"quiz": quiz, "q": q, "n": quiz.index + 1, "total": len(quiz.questions), "players": list(quiz.players.select_related("user")),
-           "answered": answered, "join_url": reverse("classroom:live_join"), "now": now}
-    ctx["n_players"] = len(ctx["players"])
-    if quiz.status == LiveQuiz.Status.QUESTION and q:
-        ctx["remaining_ms"] = max(0, int((live.deadline(quiz) - now).total_seconds() * 1000))
-        ctx["pct"] = round(100 * ctx["remaining_ms"] / (quiz.seconds * 1000))
-        ctx["options"] = _shuffled(q.options, f"live-{quiz.pk}-{quiz.index}")
-    if quiz.status == LiveQuiz.Status.REVEAL and q:
-        ctx["counts"] = live.counts(quiz, q)
-        ctx["top"] = live.board(quiz, 5)
-        ctx["last"] = quiz.index + 1 >= len(quiz.questions)
-    if quiz.status == LiveQuiz.Status.DONE:
-        ctx["top"] = live.board(quiz)
-    ctx["v"] = f"{quiz.status}-{quiz.index}-{answered}-{ctx['n_players']}"
-    return ctx
-
-
-@login_required
-def live_host_state(request, code):
-    quiz = live.tick(_host_quiz(request, code))
-    ctx = _host_ctx(quiz)
-    from django.template.loader import render_to_string
-    return JsonResponse({"v": ctx["v"], "html": render_to_string("classroom/live/_host_panel.html", ctx, request),
-                         "ms": ctx.get("remaining_ms")})
-
-
-@login_required
-@require_POST
-def live_act(request, code):
-    quiz = _host_quiz(request, code)
-    live.step(quiz, request.POST.get("action", ""))
-    return JsonResponse({"ok": True})
-
-
-def _player_quiz(request, code) -> LiveQuiz:
-    quiz = get_object_or_404(LiveQuiz, code=code)
-    if not LiveQuizPlayer.objects.filter(quiz=quiz, user=request.user).exists():
-        raise Http404
-    return quiz
-
-
-@login_required
-def live_play(request, code):
-    quiz = get_object_or_404(LiveQuiz, code=code)
-    if quiz.status == LiveQuiz.Status.LOBBY:  # opening the link in the lobby is joining
-        live.join(request.user, code)
-    quiz = _player_quiz(request, code)
-    return render(request, "classroom/live/play.html", {
-        "quiz": quiz, "state_url": reverse("classroom:live_play_state", args=[code]),
-        "answer_url": reverse("classroom:live_answer", args=[code])})
-
-
-@login_required
-def live_play_state(request, code):
-    quiz = live.tick(_player_quiz(request, code))
-    q = live.question(quiz)
-    mine = (LiveQuizAnswer.objects.filter(quiz=quiz, user=request.user, index=quiz.index).first() if q else None)
-    ctx = {"quiz": quiz, "q": q, "n": quiz.index + 1, "total": len(quiz.questions), "mine": mine,
-           "n_players": quiz.players.count()}
-    if quiz.status == LiveQuiz.Status.QUESTION and q:
-        ctx["remaining_ms"] = max(0, int((live.deadline(quiz) - timezone.now()).total_seconds() * 1000))
-        ctx["options"] = _shuffled(q.options, f"live-{quiz.pk}-{request.user.pk}-{quiz.index}")
-    if quiz.status in (LiveQuiz.Status.REVEAL, LiveQuiz.Status.DONE):
-        rows = live.board(quiz)
-        ctx["me"] = next((r for r in rows if r["user"].pk == request.user.pk), None)
-        ctx["top"] = rows[:3]
-        ctx["answer"] = q.answer if quiz.status == LiveQuiz.Status.REVEAL and q else None
-    from django.template.loader import render_to_string
-    v = f"{quiz.status}-{quiz.index}-{'a' if mine else 'n'}"
-    return JsonResponse({"v": v, "html": render_to_string("classroom/live/_play_panel.html", ctx, request),
-                         "ms": ctx.get("remaining_ms")})
-
-
-@login_required
-@require_POST
-def live_answer(request, code):
-    quiz = _player_quiz(request, code)
-    try:
-        index = int(request.POST.get("index", ""))
-    except ValueError:
-        return HttpResponseBadRequest()
-    a = live.answer(quiz, request.user, index, request.POST.get("answer", ""))
-    return JsonResponse({"ok": a is not None})

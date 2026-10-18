@@ -13,6 +13,12 @@ class Command(BaseCommand):
         Language.objects.update_or_create(code="cpp", defaults=dict(
             name="C++ (g++)", docker_image="codearena-judge-cpp",
             compile_cmd="g++ -O2 -o main main.cpp", run_cmd="./main", tl_multiplier=1.0))
+        Language.objects.update_or_create(code="c", defaults=dict(
+            name="C (gcc)", docker_image="codearena-judge-c",
+            compile_cmd="gcc -O2 -std=c17 -o main main.c -lm", run_cmd="./main", tl_multiplier=1.0))
+        Language.objects.update_or_create(code="rust", defaults=dict(
+            name="Rust", docker_image="codearena-judge-rust",
+            compile_cmd="rustc -O --edition 2021 -o main main.rs", run_cmd="./main", tl_multiplier=1.0))
         Language.objects.update_or_create(code="java", defaults=dict(
             name="Java", docker_image="codearena-judge-java",
             compile_cmd="javac Main.java", run_cmd="java Main", tl_multiplier=3.0))

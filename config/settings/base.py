@@ -33,6 +33,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+    "apps.accounts.onboarding.OnboardingMiddleware",  # name, country, city and a confirmed email first
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
@@ -51,6 +52,7 @@ TEMPLATES = [{
         "apps.problems.context_processors.streak",
         "apps.accounts.context_processors.tier_up",
         "apps.accounts.context_processors.new_badges",
+        "apps.accounts.notifications.bell",
         "apps.home.context_processors.nav",
     ]},
 }]
@@ -94,6 +96,10 @@ EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "1") == "1"
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@codearena.local")
+# Signed-in users fill in their profile and confirm their email before any page opens (apps.accounts.onboarding).
+# Needs working mail in production: set the EMAIL_* above first, or ACCOUNT_GATE=0 holds it off.
+ACCOUNT_GATE = os.environ.get("ACCOUNT_GATE", "1") == "1"
+USERNAME_CHANGE_DAYS = 90  # a user may rename themselves once in this many days
 
 # Telegram Bot API: create the bot with @BotFather, then configure its webhook after deploy.
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")

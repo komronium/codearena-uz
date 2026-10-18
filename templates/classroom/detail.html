@@ -36,14 +36,14 @@ teacher the whole group's grid (problems as numbered columns) with a CSV export.
 
 {% if assignment.description_md %}
 <section class="mb-8" aria-labelledby="task-title">
-  <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span><h2 id="task-title">Topshiriq</h2></div>
+  <div class="ca7-sec-h"><h2 id="task-title">Topshiriq</h2></div>
   <div class="prose max-w-none text-sm">{{ description_html|safe }}</div>
 </section>
 {% endif %}
 
 {% if mine %}
 <section class="mb-8" aria-labelledby="mine-title">
-  <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-easy)" aria-hidden="true"></span><h2 id="mine-title">Masalalar</h2></div>
+  <div class="ca7-sec-h"><h2 id="mine-title">Masalalar</h2></div>
   <table class="ca-table ca-table-flat">
     <thead><tr><th class="w-12 text-center">#</th><th>Masala</th><th class="hidden w-40 text-center sm:table-cell" title="Qiyinlik va reyting: shu reytingdagi o‘quvchining yarmi yechadi">Qiyinlik</th><th class="w-36 text-center">Holat</th></tr></thead>
     <tbody>
@@ -62,7 +62,7 @@ teacher the whole group's grid (problems as numbered columns) with a CSV export.
 
 {% if grid is not None %}
 <section class="mb-8" aria-labelledby="grid-title">
-  <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-beginner)" aria-hidden="true"></span><h2 id="grid-title">Guruh natijalari</h2><span class="ca7-r text-mute">topshirdi <b class="tabular text-ink">{{ n_done }}</b> / <b class="tabular text-ink">{{ n_students }}</b></span></div>
+  <div class="ca7-sec-h"><h2 id="grid-title">Guruh natijalari</h2><span class="ca7-r text-mute">topshirdi <b class="tabular text-ink">{{ n_done }}</b> / <b class="tabular text-ink">{{ n_students }}</b></span></div>
   <div class="mb-2 flex flex-wrap items-center gap-2">
     <div class="ca-seg inline-flex whitespace-nowrap !p-0.5 text-sm" role="group" aria-label="Ko‘rinish">
       <a href="{% querystring behind=None %}"{% if not behind_only %} aria-current="true"{% endif %}>Hammasi</a>

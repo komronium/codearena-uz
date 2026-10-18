@@ -120,7 +120,7 @@ table; on the right your progress per level, picks for you and, while browsing, 
   {% if ring %}{% url 'profile' user.username as profile_url %}{% include "problems/_solved_card.html" with title="Taraqqiyot" more_url=profile_url %}{% endif %}
   {% if next_picks %}
   <section class="ca-box" aria-labelledby="picks-title">
-    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" aria-hidden="true"></span><h2 id="picks-title">Siz uchun</h2>{% if picks_reason %}<a class="ca-box-tools ca-link" href="{% querystring tag=picks_reason page=None %}" title="Eng kam yechgan mavzuingiz">{{ picks_reason|tag_uz }}</a>{% endif %}</div>
+    <div class="ca-box-cap ca-hd"><h2 id="picks-title">Siz uchun</h2>{% if picks_reason %}<a class="ca-box-tools ca-link" href="{% querystring tag=picks_reason page=None %}" title="Eng kam yechgan mavzuingiz">{{ picks_reason|tag_uz }}</a>{% endif %}</div>
     <ul class="ca7-links">
       {% for p, reason in next_picks %}<li><a class="ca-link" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a><span class="ca-diff ca-diff-{{ p.difficulty }}">{{ p.get_difficulty_display }}</span></li>{% endfor %}
     </ul>
@@ -128,7 +128,7 @@ table; on the right your progress per level, picks for you and, while browsing, 
   {% endif %}
   {% if plans %}
   <section class="ca-box" aria-labelledby="plans-title">
-    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" style="--c: rgb(var(--ca-spec-rgb))" aria-hidden="true"></span><h2 id="plans-title">Boshlovchilar uchun</h2><a class="ca-box-tools ca-link" href="{% url 'learn:hub' %}">O‘rganish</a></div>
+    <div class="ca-box-cap ca-hd"><h2 id="plans-title">Boshlovchilar uchun</h2><a class="ca-box-tools ca-link" href="{% url 'learn:hub' %}">O‘rganish</a></div>
     <div class="ca7-pad !pb-2"><p>Masala qiyin tuyulsa, avval O‘rganish bo‘limidagi mavzulardan o‘ting.</p></div>
     <ul class="ca7-links">
       {% for plan in plans %}<li><a class="ca-link" href="{% url 'learn:course' plan.slug %}">{{ plan.title }}</a>{% if plan.progress and plan.progress.total %}<span class="tabular text-mute">{{ plan.progress.done }} / {{ plan.progress.total }}<span class="sr-only"> masala yechilgan</span></span>{% endif %}</li>{% endfor %}

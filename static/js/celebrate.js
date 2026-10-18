@@ -1,4 +1,4 @@
-// A submission turning AC: confetti in the Xon-atlas colours, a short two-note chime and a toast.
+// A submission turning AC: confetti in the site colours, a short two-note chime and a toast.
 // Fires only on the live change (a polled "Tekshirilmoqda" status swapped for an AC one), never
 // when an old accepted submission is merely opened. Motion is skipped for prefers-reduced-motion;
 // the chime is skipped when localStorage "ca-sound" is "off".

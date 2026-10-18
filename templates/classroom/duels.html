@@ -74,13 +74,13 @@ The duel rating is its own Elo and never touches the contest rating.{% endcommen
 
   {% if open %}
   <section aria-labelledby="open-title">
-    <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span><h2 id="open-title">Ochiq duellar</h2><span class="ca7-r text-mute">{{ open|length }} ta</span></div>
+    <div class="ca7-sec-h"><h2 id="open-title">Ochiq duellar</h2><span class="ca7-r text-mute">{{ open|length }} ta</span></div>
     <ul class="ca-rows ca7-rows">{% for d in open %}{% include "classroom/_duel_row.html" %}{% endfor %}</ul>
   </section>
   {% endif %}
 
   <section aria-labelledby="history-title">
-    <div class="ca7-sec-h"><span class="ca-star" aria-hidden="true"></span><h2 id="history-title">Tarix</h2><span class="ca7-r text-mute">{{ history|length }} ta duel</span></div>
+    <div class="ca7-sec-h"><h2 id="history-title">Tarix</h2><span class="ca7-r text-mute">{{ history|length }} ta duel</span></div>
     {% if history %}
     <div class="overflow-x-auto">
     <table class="ca-table ca-table-flat">
@@ -106,7 +106,7 @@ The duel rating is its own Elo and never touches the contest rating.{% endcommen
 
 <aside class="ca7-aside" aria-label="Duel reytingi">
   <section class="ca-box" aria-labelledby="me-title">
-    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span><h2 id="me-title">Duel reytingingiz</h2></div>
+    <div class="ca-box-cap ca-hd"><h2 id="me-title">Duel reytingingiz</h2></div>
     <div class="ca7-pad">
       <p class="!mb-2"><b class="text-2xl font-bold text-ink tabular">{{ user.duel_rating }}</b> {% if not record.wins and not record.losses and not record.draws %}boshlang‘ich{% endif %}</p>
       <dl class="ca7-duelrec">
@@ -119,11 +119,11 @@ The duel rating is its own Elo and never touches the contest rating.{% endcommen
     </div>
   </section>
   <section class="ca-box" aria-labelledby="dbadges-title">
-    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" style="--c: var(--ca-lvl-hard)" aria-hidden="true"></span><h2 id="dbadges-title">Duel nishonlari</h2><a class="ca-box-tools ca-link" href="{% url 'profile' user.username %}#badges-title">Hammasi</a></div>
-    <ul class="ca7-badges ca7-badges-tight">{% for b in badges %}{% include "accounts/_tbadge.html" with owner=True %}{% endfor %}</ul>
+    <div class="ca-box-cap ca-hd"><h2 id="dbadges-title">Duel nishonlari</h2><a class="ca-box-tools ca-link" href="{% url 'profile' user.username %}#badges-title">Hammasi</a></div>
+    <ul class="ca-bts ca-bts-one">{% for b in badges %}{% include "accounts/_tbadge.html" with owner=True %}{% endfor %}</ul>
   </section>
   <section class="ca-box" aria-labelledby="board-title">
-    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" aria-hidden="true"></span><h2 id="board-title">Duel reytingi</h2><a class="ca-box-tools ca-link" href="{% url 'duel_board' %}">Hammasi</a></div>
+    <div class="ca-box-cap ca-hd"><h2 id="board-title">Duel reytingi</h2><a class="ca-box-tools ca-link" href="{% url 'duel_board' %}">Hammasi</a></div>
     {% if board %}
     <table class="ca-table ca7-top">
       <thead><tr><th class="w-10 text-center">#</th><th>Foydalanuvchi</th><th class="text-right" title="Tugagan duellar">Duel</th><th class="text-right">Reyting</th></tr></thead>

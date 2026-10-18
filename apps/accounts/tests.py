@@ -491,3 +491,148 @@ def test_an_accept_awards_its_badge_on_the_submission_page_at_once(client):
     assert 'hx-swap-oob="beforeend:body"' in part and "Cho‘qqi I" in part  # the first Hard solve
     assert UserBadge.objects.filter(user=u, family="choqqi", tier=1, seen=True).exists()
     assert "ca-award" not in client.get(reverse("submissions:status", args=[s.pk])).content.decode()
+
+
+# ---- the account gate (apps.accounts.onboarding) ----
+
+def _gated(**kw):
+    defaults = dict(email="ali@example.com", first_name="Ali", last_name="Valiyev", country="UZ", location="Toshkent")
+    return User.objects.create_user("ali", password="x", **{**defaults, **kw})
+
+
+@pytest.mark.django_db
+def test_gate_sends_an_unconfirmed_user_to_the_welcome_page(client, settings):
+    settings.ACCOUNT_GATE = True
+    client.force_login(_gated(country=""))
+    r = client.get(reverse("problems:list"))
+    assert r.status_code == 302 and r.url == reverse("welcome")
+    page = client.get(reverse("welcome")).content.decode()
+    assert "Hisobingizni yakunlang" in page and "davlat" in page
+
+
+@pytest.mark.django_db
+def test_gate_leaves_staff_and_confirmed_users_alone(client, settings):
+    from django.utils import timezone
+    settings.ACCOUNT_GATE = True
+    client.force_login(_gated(email_verified_at=timezone.now()))
+    assert client.get(reverse("problems:list")).status_code == 200
+    assert client.get(reverse("welcome")).status_code == 302  # nothing owed: home
+    client.force_login(User.objects.create_user("boss", password="x", is_staff=True))
+    assert client.get(reverse("problems:list")).status_code == 200
+
+
+@pytest.mark.django_db
+def test_welcome_form_saves_fields_and_mails_the_link_that_confirms(client, settings, mailoutbox):
+    settings.ACCOUNT_GATE = True
+    u = User.objects.create_user("ali", password="x", email="")
+    client.force_login(u)
+    r = client.post(reverse("welcome"), {"first_name": "Ali", "last_name": "Valiyev", "country": "UZ",
+                                         "location": "Samarqand", "email": "ali@example.com"})
+    assert r.status_code == 302
+    u.refresh_from_db()
+    assert (u.country, u.location, u.email) == ("UZ", "Samarqand", "ali@example.com") and u.email_verified_at is None
+    assert len(mailoutbox) == 1 and mailoutbox[0].to == ["ali@example.com"]
+    assert "Emailingizni tasdiqlang" in client.get(reverse("welcome")).content.decode()
+    link = next(w for w in mailoutbox[0].body.split() if "/verify-email/" in w)
+    assert client.get(link).status_code == 302
+    u.refresh_from_db()
+    assert u.email_verified_at is not None
+    assert client.get(reverse("problems:list")).status_code == 200
+
+
+@pytest.mark.django_db
+def test_verify_link_is_void_once_the_email_changes(client):
+    from . import onboarding
+    u = _gated()
+    token = onboarding.make_token(u)
+    u.email = "other@example.com"
+    u.save()
+    client.get(reverse("verify_email", args=[token]))
+    u.refresh_from_db()
+    assert u.email_verified_at is None
+    client.get(reverse("verify_email", args=["junk"]))  # a bad token is a message, not a 500
+
+
+@pytest.mark.django_db
+def test_resend_is_held_back_for_a_minute(client, settings, mailoutbox):
+    settings.ACCOUNT_GATE = True
+    client.force_login(_gated())
+    client.post(reverse("welcome"), {"resend": "1"})
+    client.post(reverse("welcome"), {"resend": "1"})
+    assert len(mailoutbox) == 1
+
+
+def _settings_post(u, **kw):
+    data = {"username": u.username, "first_name": u.first_name, "last_name": u.last_name, "country": u.country,
+            "location": u.location, "school": "", "email": u.email}
+    return {**data, **kw}
+
+
+@pytest.mark.django_db
+def test_username_changes_once_in_90_days(client):
+    from django.utils import timezone
+    u = _gated(email_verified_at=timezone.now())
+    client.force_login(u)
+    assert client.post(reverse("profile_edit"), _settings_post(u, username="ali2")).status_code == 302
+    u.refresh_from_db()
+    assert u.username == "ali2" and u.username_changed_at is not None
+    client.post(reverse("profile_edit"), _settings_post(u, username="ali3"))
+    u.refresh_from_db()
+    assert u.username == "ali2"  # the field is locked until the 90 days are up
+    u.username_changed_at = timezone.now() - timezone.timedelta(days=91)
+    u.save()
+    client.post(reverse("profile_edit"), _settings_post(u, username="ali3"))
+    u.refresh_from_db()
+    assert u.username == "ali3"
+
+
+@pytest.mark.django_db
+def test_new_email_in_settings_must_be_confirmed_again(client, mailoutbox):
+    from django.utils import timezone
+    u = _gated(email_verified_at=timezone.now())
+    User.objects.create_user("taken", password="x", email="taken@example.com")
+    client.force_login(u)
+    r = client.post(reverse("profile_edit"), _settings_post(u, email="TAKEN@example.com"))
+    assert r.status_code == 200 and "boshqa hisobda" in r.content.decode()
+    client.post(reverse("profile_edit"), _settings_post(u, email="new@example.com"))
+    u.refresh_from_db()
+    assert u.email == "new@example.com" and u.email_verified_at is None and mailoutbox[-1].to == ["new@example.com"]
+
+
+@pytest.mark.django_db
+def test_register_mails_the_confirmation_link(client, mailoutbox):
+    client.post(reverse("register"), {"username": "vali", "email": "vali@example.com", "first_name": "Vali",
+                                      "password1": "StrongPass123!"})
+    assert [m.to for m in mailoutbox] == [["vali@example.com"]]
+
+
+# ---- the bell (apps.accounts.notifications) ----
+
+@pytest.mark.django_db
+def test_bell_counts_unread_and_opening_one_reads_it(client):
+    from .models import Notification
+    from .notifications import notify
+    u = User.objects.create_user("ali", password="x")
+    notify(u.pk, "duel", "k1", "bob sizni duelga chaqirdi", "/classroom/duels/")
+    notify(u.pk, "duel", "k1", "twice", "/x/")  # the same event is told once
+    notify(u.pk, "badge", "k2", "Yangi nishon", "/accounts/badges/")
+    client.force_login(u)
+    page = client.get(reverse("problems:list")).content.decode()
+    assert "Bildirishnomalar: 2 ta yangi" in page and "bob sizni duelga chaqirdi" in page and "twice" not in page
+    n = Notification.objects.get(key="k1")
+    r = client.get(reverse("notification_open", args=[n.pk]))
+    assert r.status_code == 302 and r.url == "/classroom/duels/"
+    n.refresh_from_db()
+    assert n.read_at is not None
+    client.post(reverse("notifications_read"))
+    assert not Notification.objects.filter(user=u, read_at__isnull=True).exists()
+
+
+@pytest.mark.django_db
+def test_someone_elses_notification_is_a_404(client):
+    from .models import Notification
+    from .notifications import notify
+    a, b = (User.objects.create_user(n, password="x") for n in ("a", "b"))
+    notify(a.pk, "duel", "k", "t", "/")
+    client.force_login(b)
+    assert client.get(reverse("notification_open", args=[Notification.objects.get().pk])).status_code == 404

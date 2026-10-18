@@ -2,8 +2,8 @@
 {% block title %}Kurslar — O‘rganish{% endblock %}
 {% block description %}Dasturlashni mavzulab o‘rganing: har kursda qisqa nazariya va osonidan qiyiniga masalalar, o‘zbek tilida.{% endblock %}
 {% block band %}
-{% comment %}#7 learn: the band with a filter over the courses; on the left the path's stages to jump to and the course
-badges; on the right the course to go on with, then each stage as a flat list (name and one line, level, your
+{% comment %}#7 learn: the band with a filter over the courses; on the left the path's stages to jump to;
+on the right the course to go on with, then each stage as a flat list (name and one line, level, your
 progress or where it stands).{% endcomment %}
 <section class="ca-hud" aria-labelledby="learn-title">
   <div class="ca-hud-in">
@@ -21,23 +21,12 @@ progress or where it stands).{% endcomment %}
   {% if stages %}
   <nav class="ca-box ca7-side" aria-label="Yo‘l bosqichlari">
     {% for s in stages %}<a href="#stage-{{ s.stage }}"{% if forloop.first %} aria-current="true"{% endif %}>{{ s.label }} <span class="tabular">{{ s.courses|length }}</span></a>{% endfor %}
-    {% if soon %}<a href="#soon">Tez orada <span class="tabular">{{ soon|length }}</span></a>{% endif %}
+    {% if soon %}<a href="#soon" onclick="document.getElementById('soon').open = true">Tez orada <span class="tabular">{{ soon|length }}</span></a>{% endif %}
   </nav>
   {% endif %}
-  {% if badges and user.is_authenticated %}
-  <section class="ca-box" aria-labelledby="badges-title">
-    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span><h2 id="badges-title">Nishonlar</h2><span class="ca-box-tools tabular">{{ badges_earned }} / {{ badges|length }}</span></div>
-    {% if course_badge %}<ul class="ca7-badges ca7-badges-tight ca7-badges-one">{% include "accounts/_tbadge.html" with b=course_badge owner=True %}</ul>{% endif %}
-    <div class="ca7-pad">
-      <p>Har bir tugatilgan kurs «Bilimdon» nishonini keyingi bosqichga ko‘taradi.</p>
-      <ul class="ca7-earned">
-        {% for p in badges %}{% if p.progress.completed %}<li><i data-lucide="check" class="lu" aria-hidden="true"></i><a href="{% url 'learn:course' p.slug %}">{{ p.title }}</a></li>{% endif %}{% endfor %}
-      </ul>
-    </div>
-  </section>
-  {% elif stages and not user.is_authenticated %}
+  {% if stages and not user.is_authenticated %}
   <section class="ca-box" aria-labelledby="join-title">
-    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" aria-hidden="true"></span><h2 id="join-title">Yutuqlaringiz saqlansin</h2></div>
+    <div class="ca-box-cap ca-hd"><h2 id="join-title">Yutuqlaringiz saqlansin</h2></div>
     <div class="ca7-pad"><p><a class="ca-link" href="{% url 'register' %}">Ro‘yxatdan o‘ting</a>: yutuqlaringiz saqlanadi va har kurs uchun nishon olasiz.</p></div>
   </section>
   {% endif %}
@@ -61,7 +50,7 @@ progress or where it stands).{% endcomment %}
 
   {% for s in stages %}
   <section class="ca7-stage" aria-labelledby="stage-{{ s.stage }}" data-stage>
-    <div class="ca7-sec-h"><span class="ca-star" aria-hidden="true"></span><h2 id="stage-{{ s.stage }}">{{ s.label }}</h2><span class="ca7-r text-mute">{{ s.courses|length }} kurs</span></div>
+    <div class="ca7-sec-h"><h2 id="stage-{{ s.stage }}">{{ s.label }}</h2><span class="ca7-r text-mute">{{ s.courses|length }} kurs</span></div>
     <ul class="ca7-courses">
       {% for p in s.courses %}
       <li data-course="{{ p.title|lower }} {{ p.summary|lower }}" class="{% if p == here %}is-here{% elif not p.progress.total and not p.progress.completed %}is-soon{% endif %}">
@@ -85,9 +74,9 @@ progress or where it stands).{% endcomment %}
   <p class="ca7-empty"><b>Hali kurs yo‘q</b>{% if user.is_staff %}<a class="ca-link" href="{% url 'moderation:plan_new' %}">Birinchisini tuzing</a>.{% endif %}</p>
   {% endfor %}
   {% if soon %}
-  {# the courses still being filled, folded into one line so the open ones lead; each opens at 10 problems #}
-  <details class="ca7-soon" id="soon" data-stage open>
-    <summary><span class="ca-star" style="--c: rgb(var(--ca-mute-rgb))" aria-hidden="true"></span><b>Tez orada</b><span class="text-mute">{{ soon|length }} ta kurs tayyorlanmoqda — kursda 10 ta masala bo‘lganda ochiladi</span><i data-lucide="chevron-down" class="lu ml-auto" aria-hidden="true"></i></summary>
+  {# the courses still being filled, folded shut into one line so the open ones lead; each opens at 10 problems #}
+  <details class="ca7-soon" id="soon" data-stage>
+    <summary><b>Tez orada</b><span class="text-mute">{{ soon|length }} ta kurs tayyorlanmoqda — kursda 10 ta masala bo‘lganda ochiladi</span><i data-lucide="chevron-down" class="lu ml-auto" aria-hidden="true"></i></summary>
     <ul>{% for p in soon %}<li data-course="{{ p.title|lower }} {{ p.summary|lower }}"><a class="ca7-soon-link" href="{% url 'learn:course' p.slug %}">{{ p.title }}</a><span class="ca-diff ca-diff-{{ p.level }}">{{ p.get_level_display }}</span><span class="ca7-soon-n tabular" title="Kurs 10 ta masala bo‘lganda ochiladi"><span class="ca7-pg" role="progressbar" aria-valuenow="{{ p.ready_pct }}" aria-valuemin="0" aria-valuemax="100" aria-label="Tayyorlik"><i style="width: {{ p.ready_pct }}%"></i></span>{{ p.ready }}/10 masala</span></li>{% endfor %}</ul>
   </details>
   {% endif %}

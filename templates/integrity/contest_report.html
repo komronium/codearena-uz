@@ -33,7 +33,7 @@ participants by risk, the similar code pairs, the fast solves and the journal.{%
 {% block content %}
 <section class="mb-10 scroll-mt-20" id="people">
   <div class="mb-3 flex flex-wrap items-end justify-between gap-2">
-    <h2 class="ca7-h"><span class="ca-star" style="--c: var(--ca-lvl-hard)" aria-hidden="true"></span>Xavf bo‘yicha saralangan</h2>
+    <h2 class="ca7-h">Xavf bo‘yicha saralangan</h2>
     <p class="text-xs text-mute">Chiqish — musobaqa sahifalaridan tashqariga (boshqa oyna, varaq yoki saytning boshqa sahifasi) · Tashqarida — jami vaqt · Paste — muharrirga qo‘yish urinishi · Tez — g‘ayrioddiy tez matn kiritish · Nusxa — shart matnidan nusxa. Dalillar — serverda tekshirilgani, brauzerda o‘chirib bo‘lmaydi: tracker o‘chiq (×6), muharrirda yozilmagan kod (×8), kod sakrashi (×3), umumiy qurilma (×10), ikki qurilma (×5), o‘xshash kod (×8). Xavf = paste×5 + tez×3 + nusxa×2 + chiqish + tashqarida daqiqa + shubhali yechim×4 + dalillar.</p>
   </div>
   <div class="overflow-x-auto">
@@ -127,7 +127,7 @@ participants by risk, the similar code pairs, the fast solves and the journal.{%
 
 <section class="mb-10 scroll-mt-20" id="suspicious">
   <div class="mb-3 flex flex-wrap items-end justify-between gap-2">
-    <h2 class="ca7-h"><span class="ca-star" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span>Shubhali yechimlar {% if suspicious %}<span class="ca-chip ca-chip-score ml-1">{{ suspicious|length }}</span>{% endif %}</h2>
+    <h2 class="ca7-h">Shubhali yechimlar {% if suspicious %}<span class="ca-chip ca-chip-score ml-1">{{ suspicious|length }}</span>{% endif %}</h2>
     <p class="text-xs text-mute">Juda tez — masala ochilgandan AC gacha: Easy &lt; {{ speed_limits.easy }} s, Medium &lt; {{ speed_limits.medium }} s, Hard &lt; {{ speed_limits.hard }} s. Chiqib-qaytib — {{ min_away_s }}+ s tashqarida bo‘lib, qaytgach {{ quick_after_return_s }} s ichida AC.</p>
   </div>
   {% if suspicious %}
@@ -159,7 +159,7 @@ participants by risk, the similar code pairs, the fast solves and the journal.{%
 
 <section id="flags" class="scroll-mt-20">
   <div class="mb-3 flex flex-wrap items-end justify-between gap-2">
-    <h2 class="ca7-h"><span class="ca-star" aria-hidden="true"></span>O‘xshash kodlar {% if open_flags %}<span class="ca-chip ca-chip-score ml-1">{{ open_flags }} ko‘rilmagan</span>{% endif %}</h2>
+    <h2 class="ca7-h">O‘xshash kodlar {% if open_flags %}<span class="ca-chip ca-chip-score ml-1">{{ open_flags }} ko‘rilmagan</span>{% endif %}</h2>
     <p class="max-w-2xl text-xs text-mute">Bir masala, bir til, kamida {{ min_lines }} qator kod, o‘xshashlik ≥ {{ threshold }}%. AC yechimlar, AC olmaganlarning oxirgi urinishi, va musobaqadan oldingi yechimlar (amaliyot, oldingi musobaqalar, muallif) solishtiriladi; ishtirokchi qatoridagi <i data-lucide="scan-search" class="lu" aria-hidden="true"></i> chuqur tekshiruv esa uning barcha urinishlarini solishtiradi. O‘zgaruvchi nomlari va izohlar hisobga olinmaydi. <span class="ca-cmp-key"></span> — ikkala kodda ham bor qatorlar.
       {% if contest.similarity_checked_at and contest.similarity_checked_at > contest.end %}<b class="text-ink">Barcha masalalar avtomatik tekshirildi: {{ contest.similarity_checked_at|date:"d.m H:i" }}.</b>{% elif not contest.similarity_checked_at %}<b class="text-ink">Musobaqa tugaganidan 10 daqiqa o‘tib barcha masalalar avtomatik tekshiriladi.</b>{% endif %}</p>
   </div>
@@ -255,7 +255,7 @@ participants by risk, the similar code pairs, the fast solves and the journal.{%
 
 <section class="mt-10 scroll-mt-20" id="journal">
   <div class="mb-3 flex flex-wrap items-end justify-between gap-2">
-    <h2 class="ca7-h"><span class="ca-star" style="--c: var(--ca-lvl-easy)" aria-hidden="true"></span>Amallar jurnali</h2>
+    <h2 class="ca7-h">Amallar jurnali</h2>
     <a class="ca-link text-sm" href="{% url 'integrity:audit' %}?contest={{ contest.pk }}">Hammasi »</a>
   </div>
   {% include "integrity/_audit_rows.html" with entries=audit %}

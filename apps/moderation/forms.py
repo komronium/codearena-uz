@@ -7,6 +7,7 @@ from django.forms import inlineformset_factory
 from django.forms.models import BaseInlineFormSet, ModelForm
 from django.utils import timezone
 
+from apps.accounts.countries import COUNTRY_CHOICES
 from apps.accounts.forms import validate_public_username
 from apps.accounts.models import Group, User
 from apps.contests.models import MIN_POINTS, Contest, ContestProblem
@@ -252,8 +253,9 @@ class UserForm(ModelForm):
     class Meta:
         model = User
         fields = ["username", "email", "first_name", "last_name", "role", "is_staff", "is_active",
-                  "rating", "school", "location"]
+                  "rating", "school", "country", "location"]
         widgets = {
+            "country": forms.Select(attrs={"class": "ca-select"}, choices=[("", "—")] + COUNTRY_CHOICES),
             **{k: forms.TextInput(attrs=_CA_INPUT) for k in ["username", "first_name", "last_name", "school", "location"]},
             "email": forms.EmailInput(attrs=_CA_INPUT),
             "role": forms.Select(attrs={"class": "ca-select"}),

@@ -668,7 +668,7 @@ def duels(request):
         qs = qs.filter(status=f["status"])
     if f["language"] in DuelQuestion.Lang.values:
         qs = qs.filter(language=f["language"])
-    page = Paginator(qs.order_by("-pk"), 50).get_page(request.GET.get("page"))
+    page = Paginator(qs.order_by(Coalesce("finished_at", "created").desc(), "-pk"), 50).get_page(request.GET.get("page"))
     now = timezone.now()
     for d in page:
         d.sides = []

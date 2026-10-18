@@ -33,28 +33,49 @@
       </div>
     </div>
     <div class="space-y-4 px-6 py-5">
+      <div>
+        <label class="ca-label" for="id_username">Foydalanuvchi nomi</label>
+        <input class="ca-input" type="text" name="username" id="id_username" value="{{ form.username.value|default:'' }}" autocomplete="username" spellcheck="false" autocapitalize="none" maxlength="150"{% if form.next_rename %} disabled{% endif %}>
+        {% if form.username.errors %}<p class="mt-1 text-sm text-bad">{{ form.username.errors.0 }}</p>{% endif %}
+        <p class="mt-1.5 text-[0.8125rem] text-mute">{% if form.next_rename %}Keyingi o‘zgartirish {{ form.next_rename|date:"d.m.Y" }} dan keyin mumkin.{% else %}90 kunda bir marta o‘zgartirish mumkin. Profil havolangiz ham o‘zgaradi.{% endif %}</p>
+      </div>
       <div class="grid grid-cols-2 gap-3">
         <div>
           <label class="ca-label" for="id_first_name">Ism</label>
-          <input class="ca-input" type="text" name="first_name" id="id_first_name" value="{{ form.first_name.value|default:'' }}" autocomplete="given-name" maxlength="150">
+          <input class="ca-input" type="text" name="first_name" id="id_first_name" value="{{ form.first_name.value|default:'' }}" autocomplete="given-name" maxlength="150" required>
           {% if form.first_name.errors %}<p class="mt-1 text-sm text-bad">{{ form.first_name.errors.0 }}</p>{% endif %}
         </div>
         <div>
-          <label class="ca-label" for="id_last_name">Familiya <span class="font-normal text-mute">(ixtiyoriy)</span></label>
-          <input class="ca-input" type="text" name="last_name" id="id_last_name" value="{{ form.last_name.value|default:'' }}" autocomplete="family-name" maxlength="150">
+          <label class="ca-label" for="id_last_name">Familiya</label>
+          <input class="ca-input" type="text" name="last_name" id="id_last_name" value="{{ form.last_name.value|default:'' }}" autocomplete="family-name" maxlength="150" required>
           {% if form.last_name.errors %}<p class="mt-1 text-sm text-bad">{{ form.last_name.errors.0 }}</p>{% endif %}
         </div>
       </div>
       <p class="mt-1.5 text-[0.8125rem] text-mute">Ism va familiya faqat profilingizda ko‘rinadi; reyting jadvalida foydalanuvchi nomingiz chiqadi.</p>
-      <div>
-        <label class="ca-label" for="id_location">Shahar</label>
-        <input class="ca-input" type="text" name="location" id="id_location" value="{{ form.location.value|default:'' }}" placeholder="Toshkent" autocomplete="address-level2">
-        {% if form.location.errors %}<p class="mt-1 text-sm text-bad">{{ form.location.errors.0 }}</p>{% endif %}
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="ca-label" for="id_country">Davlat</label>
+          <select class="ca-input" name="country" id="id_country" autocomplete="country" required>
+            {% for code, name in form.fields.country.choices %}<option value="{{ code }}"{% if code == form.country.value %} selected{% endif %}>{{ name }}</option>{% endfor %}
+          </select>
+          {% if form.country.errors %}<p class="mt-1 text-sm text-bad">{{ form.country.errors.0 }}</p>{% endif %}
+        </div>
+        <div>
+          <label class="ca-label" for="id_location">Shahar</label>
+          <input class="ca-input" type="text" name="location" id="id_location" value="{{ form.location.value|default:'' }}" placeholder="Toshkent" autocomplete="address-level2" required>
+          {% if form.location.errors %}<p class="mt-1 text-sm text-bad">{{ form.location.errors.0 }}</p>{% endif %}
+        </div>
       </div>
       <div>
-        <label class="ca-label" for="id_school">O‘quv joyi</label>
+        <label class="ca-label" for="id_school">O‘quv joyi <span class="font-normal text-mute">(ixtiyoriy)</span></label>
         <input class="ca-input" type="text" name="school" id="id_school" value="{{ form.school.value|default:'' }}" placeholder="TATU, 1-kurs" autocomplete="organization">
         {% if form.school.errors %}<p class="mt-1 text-sm text-bad">{{ form.school.errors.0 }}</p>{% endif %}
+      </div>
+      <div>
+        <label class="ca-label" for="id_email">Email {% if user.email_verified_at %}<span class="ml-1 font-normal text-ok"><i data-lucide="circle-check" class="lu" aria-hidden="true"></i> tasdiqlangan</span>{% endif %}</label>
+        <input class="ca-input" type="email" name="email" id="id_email" value="{{ form.email.value|default:'' }}" autocomplete="email" spellcheck="false" autocapitalize="none" required>
+        {% if form.email.errors %}<p class="mt-1 text-sm text-bad">{{ form.email.errors.0 }}</p>{% endif %}
+        <p class="mt-1.5 text-[0.8125rem] text-mute">Hech kimga ko‘rinmaydi. Yangi emailni havola orqali qayta tasdiqlaysiz.</p>
       </div>
     </div>
     <div class="flex items-center justify-between gap-3 border-t border-line bg-paper/60 px-6 py-4">

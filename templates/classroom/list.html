@@ -7,13 +7,11 @@ a new-group form and the assignments they set.{% endcomment %}
 <section class="ca-hud" aria-labelledby="class-title">
   <div class="ca-hud-in">
     <div>
-      <h1 id="class-title">Vazifalar</h1>
+      <h1 id="class-title">Sinf</h1>
       <p class="ca-hud-sub">{% if can_teach %}Guruh oching, kodini o‘quvchilarga bering va muddatli vazifa bering.{% else %}O‘qituvchi bergan vazifalar va sinfdoshlar bilan duellar.{% endif %}</p>
     </div>
-    {% if not can_teach %}<div class="ml-auto"><a href="{% url 'classroom:live_join' %}" class="ca7-hbtn is-wide"><i data-lucide="presentation" class="lu" aria-hidden="true"></i>Viktorinaga qo‘shilish</a></div>{% endif %}
     {% if can_teach or can_create %}
     <div class="ml-auto flex flex-wrap gap-2">
-      {% if can_teach %}<a href="{% url 'classroom:live_new' %}" class="ca7-hbtn is-wide"><i data-lucide="presentation" class="lu" aria-hidden="true"></i>Jonli viktorina</a>{% endif %}
       {% if can_teach %}<a href="{% url 'integrity:practice_report' %}" class="ca7-hbtn is-wide"><i data-lucide="shield-alert" class="lu" aria-hidden="true"></i>Mashq nazorati</a>{% endif %}
       {% if can_create %}<a href="{% url 'classroom:new' %}" class="ca-btn ca-btn-gold"><i data-lucide="plus" class="lu" aria-hidden="true"></i>Vazifa berish</a>{% endif %}
     </div>
@@ -27,7 +25,7 @@ a new-group form and the assignments they set.{% endcomment %}
 <div class="ca7-col">
   {% if can_teach %}
   <section aria-labelledby="my-groups-title">
-    <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-easy)" aria-hidden="true"></span><h2 id="my-groups-title">Guruhlarim</h2><span class="ca7-r text-mute">{{ my_groups|length }} ta</span></div>
+    <div class="ca7-sec-h"><h2 id="my-groups-title">Guruhlarim</h2><span class="ca7-r text-mute">{{ my_groups|length }} ta</span></div>
     <div class="ca7-groups">
       {% for g in my_groups %}
       <div class="ca-box">
@@ -65,7 +63,7 @@ a new-group form and the assignments they set.{% endcomment %}
 
   {% if assignments or not can_teach %}
   <section aria-labelledby="mine-title">
-    <div class="ca7-sec-h"><span class="ca-star" aria-hidden="true"></span><h2 id="mine-title">Vazifalarim</h2><span class="ca7-r text-mute">{{ assignments|length }} ta</span></div>
+    <div class="ca7-sec-h"><h2 id="mine-title">Vazifalarim</h2><span class="ca7-r text-mute">{{ assignments|length }} ta</span></div>
     {% if assignments %}
     <div class="overflow-x-auto">
     <table class="ca-table ca-table-flat">
@@ -89,7 +87,7 @@ a new-group form and the assignments they set.{% endcomment %}
   </section>
   {% if not assignments and not joined_groups %}
   <section aria-labelledby="how-title">
-    <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span><h2 id="how-title">Qanday qo‘shiladi</h2></div>
+    <div class="ca7-sec-h"><h2 id="how-title">Qanday qo‘shiladi</h2></div>
     <ol class="ca7-howto">
       <li><b>Kod oling</b><span>O‘qituvchingizdan 6 belgili guruh kodini so‘rang.</span></li>
       <li><b>Guruhga qo‘shiling</b><span>Kodni o‘ngdagi maydonga kiriting.</span></li>
@@ -101,7 +99,7 @@ a new-group form and the assignments they set.{% endcomment %}
 
   {% if taught %}
   <section aria-labelledby="taught-title">
-    <div class="ca7-sec-h"><span class="ca-star" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span><h2 id="taught-title">Men bergan vazifalar</h2><span class="ca7-r text-mute">{{ taught|length }} ta</span></div>
+    <div class="ca7-sec-h"><h2 id="taught-title">Men bergan vazifalar</h2><span class="ca7-r text-mute">{{ taught|length }} ta</span></div>
     <div class="overflow-x-auto">
     <table class="ca-table ca-table-flat">
       <thead><tr><th>Vazifa</th><th>Guruh</th><th class="w-44">Topshirdi</th><th class="w-44 text-right">Muddat</th><th class="w-24 text-right"><span class="sr-only">Amal</span></th></tr></thead>
@@ -125,7 +123,7 @@ a new-group form and the assignments they set.{% endcomment %}
 {% if not can_teach %}
 <aside class="ca7-aside" aria-label="Guruhlar">
   <section class="ca-box" aria-labelledby="join-title">
-    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" style="--c: var(--ca-lvl-easy)" aria-hidden="true"></span><h2 id="join-title">Guruhga qo‘shilish</h2></div>
+    <div class="ca-box-cap ca-hd"><h2 id="join-title">Guruhga qo‘shilish</h2></div>
     <form method="post" action="{% url 'classroom:group_join' %}" class="ca7-pad ca7-join">{% csrf_token %}
       {% if joined_groups %}<p>Guruhlaringiz: {% for g in joined_groups %}<b class="font-semibold text-ink">{{ g.name }}</b>{% if not forloop.last %}, {% endif %}{% endfor %}.</p>{% endif %}
       <label for="join-code">Guruh kodi</label>
@@ -136,7 +134,7 @@ a new-group form and the assignments they set.{% endcomment %}
   </section>
   {% if user.role == "student" and not user.is_staff %}
   <section class="ca-box" aria-labelledby="teach-title">
-    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" aria-hidden="true"></span><h2 id="teach-title">O‘qituvchimisiz?</h2></div>
+    <div class="ca-box-cap ca-hd"><h2 id="teach-title">O‘qituvchimisiz?</h2></div>
     <div class="ca7-pad">
       {% if user.teacher_requested %}<p>So‘rovingiz yuborilgan. Admin tasdiqlagach, shu yerda guruh ochasiz.</p>
       {% else %}<p>So‘rov yuboring. Admin tasdiqlagach, o‘z guruhingizni ochib muddatli vazifa berasiz va yechimlarga izoh yozasiz.</p>

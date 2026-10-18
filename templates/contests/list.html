@@ -35,17 +35,14 @@ the right.{% endcomment %}
   {% endif %}
 
   <section aria-labelledby="end-title">
-    <div class="ca7-sec-h"><span class="ca-star" aria-hidden="true"></span><h2 id="end-title">O‘tgan musobaqalar</h2>
-      <nav class="ca7-seg ca7-r" aria-label="Turi">
-        <a href="{% querystring show=None page=None %}"{% if not show %} aria-current="true"{% endif %}>Hammasi</a>
-        <a href="{% querystring show='rated' page=None %}"{% if show == 'rated' %} aria-current="true"{% endif %}>Reytingli</a>
-        <a href="{% querystring show='official' page=None %}"{% if show == 'official' %} aria-current="true"{% endif %}>Rasmiy</a>
-        <a href="{% querystring show='unrated' page=None %}"{% if show == 'unrated' %} aria-current="true"{% endif %}>Mashq</a>
-      </nav>
-      {% if user.is_authenticated %}<nav class="ca7-seg" aria-label="Qaysi musobaqalar">
-        <a href="{% querystring mine=None page=None %}"{% if not only_mine %} aria-current="true"{% endif %}>Hamma raund</a>
-        <a href="{% querystring mine=1 page=None %}"{% if only_mine %} aria-current="true"{% endif %}>Men qatnashgan</a>
-      </nav>{% endif %}</div>
+    <div class="ca7-sec-h"><h2 id="end-title">O‘tgan musobaqalar</h2>
+      <nav class="ca7-seg ca7-r" aria-label="Qaysi musobaqalar">
+        <a href="{% querystring show=None mine=None page=None %}"{% if not show and not only_mine %} aria-current="true"{% endif %}>Hammasi</a>
+        <a href="{% querystring show='rated' mine=None page=None %}"{% if show == 'rated' %} aria-current="true"{% endif %}>Reytingli</a>
+        <a href="{% querystring show='official' mine=None page=None %}"{% if show == 'official' %} aria-current="true"{% endif %}>Rasmiy</a>
+        <a href="{% querystring show='unrated' mine=None page=None %}"{% if show == 'unrated' %} aria-current="true"{% endif %}>Mashq</a>
+        {% if user.is_authenticated %}<a href="{% querystring mine=1 show=None page=None %}"{% if only_mine %} aria-current="true"{% endif %}>Men qatnashgan</a>{% endif %}
+      </nav></div>
     {% if ended.paginator.count %}
     <div class="overflow-x-auto">
     <table class="ca-table ca-table-flat ca7-past">
@@ -54,30 +51,27 @@ the right.{% endcomment %}
         <th>Musobaqa</th>
         <th class="hidden w-28 text-right md:table-cell">Ishtirokchi</th>
         {% if user.is_authenticated %}<th class="w-24 text-right">O‘rningiz</th><th class="w-24 text-right">Reyting</th>{% endif %}
-        <th class="w-28"><span class="sr-only">Natijalar</span></th>
       </tr></thead>
       {% regroup ended by start_month as months %}
       {% for m in months %}
       <tbody>
-      <tr class="ca-month"><th colspan="{% if user.is_authenticated %}6{% else %}4{% endif %}" scope="rowgroup">{{ m.grouper }}</th></tr>
+      <tr class="ca-month"><th colspan="{% if user.is_authenticated %}5{% else %}3{% endif %}" scope="rowgroup">{{ m.grouper }}</th></tr>
       {% for c in m.list %}
       <tr>
         <td><span class="ca7-date{% if not c.is_rated %} is-plain{% endif %}" aria-hidden="true"><b>{{ c.start|date:"d" }}</b>{{ c.start|weekday_uz }}</span><span class="sr-only">{{ c.start|date:"d.m.Y" }}</span></td>
-        <td><a class="ca-link" href="{% url 'contests:detail' c.pk %}">{{ c.title }}</a>{% include "contests/_tags.html" %}
+        <td><a class="ca-link" href="{% url 'contests:standings' c.pk %}" title="Natijalar jadvali">{{ c.title }}</a>{% include "contests/_tags.html" %}
           <span class="block text-xs text-mute"><span class="tabular">{{ c.start|date:"H:i" }}</span> · {{ c.duration_label }}</span></td>
         <td class="hidden text-right tabular md:table-cell">{{ c.n_participants }}</td>
         {% if user.is_authenticated %}
         <td class="text-right">{% if c.me and c.me.rank %}<b class="font-semibold tabular">{{ c.me.rank }}</b>{% elif c.me %}<span class="text-mute">qatnashgan</span>{% else %}<span class="text-mute" title="Siz bu raundda qatnashmagansiz">qatnashmagan</span>{% endif %}</td>
         <td class="text-right">{% if c.my_delta is not None %}<b class="font-semibold tabular {% if c.my_delta > 0 %}text-ok{% elif c.my_delta < 0 %}text-bad{% else %}text-mute{% endif %}">{{ c.my_delta|stringformat:"+d" }}</b>{% elif c.me and not c.is_rated %}<span class="text-mute">reytingsiz</span>{% else %}<span class="text-mute">—</span>{% endif %}</td>
         {% endif %}
-        <td class="text-right"><a class="ca-link whitespace-nowrap font-medium" href="{% url 'contests:standings' c.pk %}">Natijalar<i data-lucide="chevron-right" class="lu ml-0.5" aria-hidden="true"></i></a></td>
       </tr>
       {% endfor %}
       </tbody>
       {% endfor %}
     </table>
     </div>
-    <p class="ca7-foot-note">Musobaqa nomini bosing: natijalar jadvali ochiladi. O‘tgan raundni virtual ishlab ko‘rish mumkin.</p>
     {% else %}
     <p class="ca7-empty">{% if show %}<b>Bu turdagi o‘tgan musobaqa yo‘q</b><a class="ca-link" href="{% querystring show=None page=None %}">Hammasini ko‘rsatish</a>{% elif only_mine %}<b>Siz hali musobaqada qatnashmagansiz</b>Kelgusi raundga ro‘yxatdan o‘ting.{% else %}<b>Hali tugagan musobaqa yo‘q</b>Birinchi raund tugagach shu yerda chiqadi.{% endif %}</p>
     {% endif %}
@@ -88,7 +82,7 @@ the right.{% endcomment %}
 <aside class="ca7-aside" aria-label="Reyting">
   {% if top_rated %}
   <section class="ca-box" aria-labelledby="top-title">
-    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" style="--c: var(--ca-lvl-medium)" aria-hidden="true"></span><h2 id="top-title">Eng yuqori reyting</h2><a class="ca-box-tools ca-link" href="{% url 'rating' %}">Hammasi</a></div>
+    <div class="ca-box-cap ca-hd"><h2 id="top-title">Eng yuqori reyting</h2><a class="ca-box-tools ca-link" href="{% url 'rating' %}">Hammasi</a></div>
     <table class="ca-table ca7-top">
       <thead><tr><th class="w-10 text-center">#</th><th>Ishtirokchi</th><th class="text-right">Reyting</th></tr></thead>
       <tbody>
@@ -101,7 +95,7 @@ the right.{% endcomment %}
   </section>
   {% endif %}
   <section class="ca-box" aria-labelledby="how-title">
-    <div class="ca-box-cap ca-hd"><span class="ca-hd-icon" aria-hidden="true"></span><h2 id="how-title">Qanday ishlaydi</h2></div>
+    <div class="ca-box-cap ca-hd"><h2 id="how-title">Qanday ishlaydi</h2></div>
     <ol class="ca7-steps">
       <li><b>Oldindan ro‘yxatdan o‘ting,</b> keyin boshlanishini kuting.</li>
       <li><b>Reytingli raundlar</b> natijasi reytingingizni o‘zgartiradi.</li>
