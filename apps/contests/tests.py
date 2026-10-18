@@ -1639,3 +1639,21 @@ def test_marathon_2_command_builds_a_rated_personal_clock_round():
     c = Contest.objects.get(title="CodeArena Marathon #2")
     assert c.is_rated and c.personal_minutes == 120 and c.contest_problems.count() == 8 and admin
     assert all(not cp.problem.is_public and cp.problem.testcases.count() >= 20 for cp in c.contest_problems.all())
+
+
+@pytest.mark.django_db
+def test_personal_clock_under_codeforces_rules_decays_over_the_persons_own_minutes():
+    c, p = _marathon(minutes=120)
+    c.type = Contest.Type.CF
+    c.save()
+    ContestProblem.objects.filter(contest=c).update(points=1000)
+    u = User.objects.create_user("ali", password="x")
+    lang = Language.objects.create(code="python", name="Python", docker_image="x", run_cmd="x")
+    start = timezone.now() - timedelta(minutes=70)
+    Participation.objects.create(user=u, contest=c, started_at=start)
+    for verdict, at in (("WA", 20), ("AC", 60)):
+        s = Submission.objects.create(user=u, problem=p, language=lang, contest=c, source="x", verdict=verdict, passed=1)
+        Submission.objects.filter(pk=s.pk).update(created=start + timedelta(minutes=at))
+    cell = compute_standings(c)[0]["cells"][0]
+    # 60 own minutes of 120: 1000 - 120*1000*60/(250*120) = 760, one wrong try -50; over the 2-day window it would barely decay
+    assert cell["minutes"] == 60 and cell["points"] == 710 and cell["wrong"] == 1

@@ -1,4 +1,5 @@
-"""CodeArena Marathon #2: a rated round with a personal clock. The round stays open for days, but whoever enters
+"""CodeArena Marathon #2: a rated round with a personal clock, scored by Codeforces rules (the worth falls with the person's own
+minutes, every wrong try costs 50, never below 30%). The round stays open for days, but whoever enters
 presses "Boshlash" and has 120 minutes from then (Contest.personal_minutes). Eight hidden problems in the style of Round #6 (short
 everyday stories, small inputs, one small trap each): two very easy Beginner (A, B), two Beginner (C, D), three Easy
 (E beginner-easy, F, G easy-medium) and one deciding Medium (H) that looks like a story about lamps but is an invariant
@@ -28,7 +29,7 @@ DESCRIPTION = """**Marafon #2: 8 ta masala, sizga 120 daqiqa.** Musobaqa bir nec
 
 - **Reytingli**: natija reytingingizga ta’sir qiladi. Reyting musobaqa tugagach hisoblanadi.
 - Masalalar «Boshlash»dan keyin ochiladi. Natijalar jadvali musobaqa tugagach ochiladi: hamma o‘z vaqtida boshlaydi, shuning uchun boshqalarning natijasi oldindan ko‘rinmaydi.
-- Har bir to‘liq yechilgan masala uchun uning bali; ball teng bo‘lsa, jarimasi kam bo‘lgan yuqorida. Jarima sizning boshlagan paytingizdan hisoblanadi.
+- **Codeforces qoidasi**: masala bahosi sizning soatingiz o‘tishi bilan kamayadi (120 daqiqa oxirida taxminan yarmigacha), har bir noto‘g‘ri urinish **−50 ball**, lekin baho boshlang‘ich bahoning 30% idan pastga tushmaydi. Vaqt «Boshlash»dan hisoblanadi. Birinchi testda xato qilish jarima bermaydi.
 - **Nishon**: kamida bitta masala yechgan har bir ishtirokchi profiliga «Marathon #2» nishoni qo‘shiladi, birinchi uchtalikka — medal.
 - Halollik qoidalari amal qiladi: kod o‘zingizniki bo‘lsin; masalalarni va yechimlarni boshqalarga yubormang, AI yoki boshqa birovning yechimi taqiqlanadi. Shubhali yechimlar diskvalifikatsiyaga olinadi."""
 
@@ -208,7 +209,7 @@ def lamps_tests(rng):
 
 PROBLEMS = [
     {
-        "slug": "cam2-qadamlar", "title": "Qadamlar", "difficulty": "beginner", "points": 100,
+        "slug": "cam2-qadamlar", "title": "Qadamlar", "difficulty": "beginner", "points": 200,
         "tags": ["input-output", "arithmetic"], "solve": steps_solve, "tests": steps_tests, "samples": 2,
         "statement": ("Sardor sog‘lom turmush tarziga o‘tdi: har kuni ertalab $a$ qadam, kechqurun $b$ qadam yuradi.\n\n"
                       "U $d$ kun shunday yursa, jami necha qadam yuradi?"),
@@ -216,7 +217,7 @@ PROBLEMS = [
         "output": "Bitta butun son: jami qadamlar soni.",
     },
     {
-        "slug": "cam2-baho", "title": "Baho", "difficulty": "beginner", "points": 100,
+        "slug": "cam2-baho", "title": "Baho", "difficulty": "beginner", "points": 200,
         "tags": ["conditionals"], "solve": grade_solve, "tests": grade_tests, "samples": 2,
         "statement": ("Maktabda imtihon $100$ ballik tizimda baholanadi:\n\n"
                       "- $86$ dan $100$ gacha — baho `5`\n"
@@ -228,7 +229,7 @@ PROBLEMS = [
         "output": "Bitta butun son: baho ($2$, $3$, $4$ yoki $5$).",
     },
     {
-        "slug": "cam2-bir-xil-harorat", "title": "Bir xil harorat", "difficulty": "beginner", "points": 200,
+        "slug": "cam2-bir-xil-harorat", "title": "Bir xil harorat", "difficulty": "beginner", "points": 250,
         "tags": ["arrays", "for-loop"], "solve": same_solve, "tests": same_tests, "samples": 2,
         "statement": ("Meteorolog $n$ kun ketma-ket havo haroratini yozib bordi.\n\n"
                       "Nechta kunning harorati **avvalgi kundagi harorat bilan aynan bir xil** bo‘lgan? "
@@ -239,7 +240,7 @@ PROBLEMS = [
         "output": "Bitta butun son: avvalgi kun bilan harorati bir xil bo‘lgan kunlar soni.",
     },
     {
-        "slug": "cam2-eng-uzun-yomgir", "title": "Eng uzun yomg‘ir", "difficulty": "beginner", "points": 200,
+        "slug": "cam2-eng-uzun-yomgir", "title": "Eng uzun yomg‘ir", "difficulty": "beginner", "points": 250,
         "tags": ["arrays", "for-loop"], "solve": rain_solve, "tests": rain_tests, "samples": 2,
         "statement": ("Fermer $n$ kun davomida yog‘gan yomg‘ir miqdorini (millimetrda) yozib bordi. Yomg‘ir miqdori "
                       "$0$ dan katta bo‘lgan kun **yomg‘irli** hisoblanadi.\n\n"
@@ -251,7 +252,7 @@ PROBLEMS = [
         "output": "Bitta butun son: ketma-ket yomg‘irli kunlarning eng uzun seriyasi.",
     },
     {
-        "slug": "cam2-kitob", "title": "Kitob", "difficulty": "easy", "points": 300,
+        "slug": "cam2-kitob", "title": "Kitob", "difficulty": "easy", "points": 400,
         "tags": ["arithmetic", "math"], "solve": book_solve, "tests": book_tests, "samples": 2,
         "statement": ("Aziza $n$ betlik kitob o‘qimoqchi. U har kuni aynan $a$ bet o‘qiydi, faqat **har uchinchi kuni** "
                       "(3-, 6-, 9-, ... kunlar) dam oladi va o‘sha kuni umuman o‘qimaydi.\n\n"
@@ -261,7 +262,7 @@ PROBLEMS = [
         "output": "Bitta butun son: Aziza kitobni o‘qib tugatadigan kun raqami (kunlar $1$ dan boshlab sanaladi).",
     },
     {
-        "slug": "cam2-bank-navbati", "title": "Bank navbati", "difficulty": "easy", "points": 400,
+        "slug": "cam2-bank-navbati", "title": "Bank navbati", "difficulty": "easy", "points": 500,
         "tags": ["arrays", "simulation"], "solve": queue_solve, "tests": queue_tests, "samples": 2,
         "statement": ("Bankda navbat bor: $n$ ta mijoz, $i$-mijozga xizmat ko‘rsatish $t_i$ daqiqa oladi. Xodim "
                       "mijozlarga navbat tartibida, birin-ketin xizmat ko‘rsatadi va bank ish vaqti tugaguncha "
@@ -276,7 +277,7 @@ PROBLEMS = [
         "output": "Bitta qatorda ikkita son: xizmat ko‘rsatilgan mijozlar soni va sarflangan jami daqiqalar.",
     },
     {
-        "slug": "cam2-ikki-avtobus", "title": "Ikki avtobus", "difficulty": "easy", "points": 500,
+        "slug": "cam2-ikki-avtobus", "title": "Ikki avtobus", "difficulty": "easy", "points": 650,
         "tags": ["math", "gcd"], "solve": buses_solve, "tests": buses_tests, "samples": 2,
         "statement": ("Avtoparkdan ikki yo‘nalishdagi avtobuslar chiqadi. Ikkalasi ham $0$-daqiqada birga chiqadi. "
                       "Keyin birinchi yo‘nalish har $a$ daqiqada, ikkinchisi har $b$ daqiqada yana chiqadi.\n\n"
@@ -286,7 +287,7 @@ PROBLEMS = [
         "output": "Bitta butun son: avtobuslar birga chiqadigan daqiqalar soni.",
     },
     {
-        "slug": "cam2-chiroqlar", "title": "Chiroqlar", "difficulty": "medium", "points": 900,
+        "slug": "cam2-chiroqlar", "title": "Chiroqlar", "difficulty": "medium", "points": 1000,
         "tl_ms": 1000, "tags": ["math", "constructive"], "solve": lamps_solve, "tests": lamps_tests, "samples": 2,
         "statement": ("Katta zalda $n$ ta chiroq bir qatorda turibdi. Ba’zilari yonib turibdi, ba’zilari o‘chiq. "
                       "Navbatchi zalni to‘liq yoritmoqchi: **hamma chiroq yonib turishi** kerak.\n\n"
@@ -339,7 +340,7 @@ class Command(WeekendCommand):
                     raise CommandError("Boshlanish vaqti o'tib ketgan.")
                 contest = Contest.objects.create(
                     title=opts["contest"], description_md=DESCRIPTION, start=start, end=end,
-                    type=Contest.Type.SCORE, is_rated=True, personal_minutes=opts["minutes"],
+                    type=Contest.Type.CF, is_rated=True, personal_minutes=opts["minutes"],
                     division=Contest.Division.OPEN, badge=BADGE)
                 self.stdout.write(f"«{contest.title}» yaratildi: {timezone.localtime(contest.start):%d.%m.%Y %H:%M} — "
                                   f"{timezone.localtime(contest.end):%d.%m.%Y %H:%M}, reytingli, "
@@ -348,12 +349,15 @@ class Command(WeekendCommand):
                 raise CommandError("Musobaqa allaqachon boshlangan. Baribir ulash uchun --force qo'shing.")
             else:  # a re-run before the start: the rules text and the personal clock follow this file
                 contest.description_md, contest.personal_minutes, contest.badge = DESCRIPTION, opts["minutes"], BADGE
-                contest.save(update_fields=["description_md", "personal_minutes", "badge"])
+                contest.type = Contest.Type.CF
+                contest.save(update_fields=["description_md", "personal_minutes", "badge", "type"])
 
             self._drop_old(contest, PROBLEMS, "cam2-")
             taken = set(contest.contest_problems.values_list("label", flat=True))
             for i, spec in enumerate(PROBLEMS):
                 self._add(contest, spec, "ABCDEFGHIJ"[i], i, author, taken)
+            for spec in PROBLEMS:  # a re-run keeps the worth of problems already attached in step with this file
+                contest.contest_problems.filter(problem__slug=spec["slug"]).update(points=spec["points"])
             if opts["dry_run"]:
                 transaction.set_rollback(True)
                 self.stdout.write(self.style.WARNING("Dry run — hech narsa saqlanmadi."))
