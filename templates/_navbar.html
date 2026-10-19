@@ -1,8 +1,7 @@
 {% comment %}The top bar, after Kick Start: the brand, the places as text links (the current one underlined on
-the bar's edge), and the tools on the right. Your class (homework and duels, one link) and the staff link
+the bar's edge), and the tools on the right. Duels and the staff link
 show from 1360px up (app.css); narrower screens reach them from the account menu, phones from the bottom bar and the
-menu sheet (base.html). Badges: a pulsing dot while a contest runs, homework due within two days, unread
-code reviews, the staff queue; the bell (_bell.html) lists what happened.{% endcomment %}
+menu sheet (base.html). Badges: a pulsing dot while a contest runs, waiting duel calls, the staff queue; the bell (_bell.html) lists what happened.{% endcomment %}
 {% with ns=request.resolver_match.namespace un=request.resolver_match.url_name %}
 <div class="ca-nav-in">
   <a href="{% url 'home' %}" class="ca-nav-brand" aria-label="CodeArena bosh sahifa">{% include "_brand_mark.html" %}<span>CodeArena</span></a>
@@ -13,8 +12,8 @@ code reviews, the staff queue; the bell (_bell.html) lists what happened.{% endc
     <a href="{% url 'rating' %}" class="ca-nav-link{% if un == 'rating' or un == 'top' %} is-active{% endif %}"{% if un == 'rating' or un == 'top' %} aria-current="page"{% endif %}>Reyting</a>
     {% if user.is_authenticated %}
     <span class="ca-nav-sep" aria-hidden="true"></span>
-    {% with n=nav.due|add:nav.duels %}
-    <a href="{% url 'classroom:list' %}" class="ca-nav-link is-more{% if ns == 'classroom' %} is-active{% endif %}"{% if ns == 'classroom' %} aria-current="page"{% endif %}{% if n %} title="Muddati yaqin vazifa yoki duel chaqiruvi: {{ n }}"{% endif %}>Sinf{% if n %}<b class="ca-badge-n is-warn">{{ n }}<span class="sr-only"> ta vazifa yoki duel kutmoqda</span></b>{% endif %}</a>
+    {% with n=nav.duels %}
+    <a href="{% url 'classroom:duels' %}" class="ca-nav-link is-more{% if ns == 'classroom' %} is-active{% endif %}"{% if ns == 'classroom' %} aria-current="page"{% endif %}{% if n %} title="Duel chaqiruvi: {{ n }}"{% endif %}>Duel{% if n %}<b class="ca-badge-n is-warn">{{ n }}<span class="sr-only"> ta duel kutmoqda</span></b>{% endif %}</a>
     {% endwith %}
     {% endif %}
     {% if user.is_staff %}

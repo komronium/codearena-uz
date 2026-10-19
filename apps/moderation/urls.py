@@ -44,10 +44,5 @@ urlpatterns = [
     path("users/", views.users, name="users"),
     path("users/<int:pk>/edit/", views.user_edit, name="user_edit"),
     path("users/<int:pk>/delete/", views.user_delete, name="user_delete"),
-    path("users/<int:pk>/teacher/", views.teacher_decide, name="teacher_decide"),
 
-    path("groups/", views.groups, name="groups"),
-    path("groups/new/", views.group_edit, name="group_new"),
-    path("groups/<int:pk>/edit/", views.group_edit, name="group_edit"),
-    path("groups/<int:pk>/delete/", views.group_delete, name="group_delete"),
 ]

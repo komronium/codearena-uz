@@ -239,55 +239,6 @@ def recover_outbox(limit: int = 500):
         dispatch_outbox(outbox_id)
 
 
-def notify_assignment_reminder(assignment, user_ids) -> tuple[int, int]:
-    """The teacher's "Eslatma yuborish": one nudge per student per day, to those with Telegram on. Returns
-    (queued for, asked), so the teacher sees how many could not be reached."""
-    when = timezone.localtime(assignment.deadline).strftime("%d.%m.%Y, %H:%M")
-    url = f"{settings.SITE_URL.rstrip('/')}/classroom/{assignment.pk}/"
-    text = (
-        f"<b>⏰ Vazifa eslatmasi</b>\n\n"
-        f"<b>{html.escape(assignment.title)}</b>\n"
-        f"Guruh: {html.escape(assignment.group.name)}\n"
-        f"Muddat: {when}\n\n"
-        f'<a href="{url}">Vazifani ochish →</a>'
-    )
-    day = timezone.localdate().isoformat()
-    ids = list(user_ids)
-    reachable = list(TelegramLink.objects.filter(user_id__in=ids, is_active=True, notify_assignments=True)
-                     .values_list("user_id", flat=True))
-    for user_id in reachable:
-        queue_notification(user_id, "notify_assignments", f"assignment:{assignment.pk}:remind:{day}", text)
-    return len(reachable), len(ids)
-
-
-def notify_assignment(assignment_id: int):
-    """Send a newly created group assignment to its students after the DB commit."""
-    from apps.classroom.models import Assignment
-
-    try:
-        assignment = (Assignment.objects.select_related("group")
-                      .filter(pk=assignment_id).first())
-        if assignment is None:
-            return
-        when = timezone.localtime(assignment.deadline).strftime("%d.%m.%Y, %H:%M")
-        url = f"{settings.SITE_URL.rstrip('/')}/classroom/{assignment.pk}/"
-        text = (
-            f"<b>📝 Yangi vazifa</b>\n\n"
-            f"<b>{html.escape(assignment.title)}</b>\n"
-            f"Guruh: {html.escape(assignment.group.name)}\n"
-            f"Topshirish muddati: {when}\n\n"
-            f'<a href="{url}">Vazifani ochish →</a>'
-        )
-        user_ids = (assignment.group.members.filter(is_active=True)
-                    .exclude(pk=assignment.created_by_id)
-                    .filter(telegram_link__is_active=True, telegram_link__notify_assignments=True)
-                    .values_list("pk", flat=True))
-        for user_id in user_ids.iterator():
-            queue_notification(user_id, "notify_assignments", f"assignment:{assignment.pk}:created", text)
-    except Exception:
-        log.exception("Could not queue Telegram assignment notification for assignment %s", assignment_id)
-
-
 def _site() -> str:
     return settings.SITE_URL.rstrip("/")
 

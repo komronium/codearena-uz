@@ -5,7 +5,6 @@ from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils import timezone
 
-from apps.accounts.models import Group
 from apps.problems.models import Problem
 
 
@@ -39,7 +38,6 @@ class Contest(models.Model):
     type = models.CharField(max_length=10, choices=Type.choices, default=Type.SCORE)
     is_rated = models.BooleanField(default=False)
     allowed_ip_prefix = models.CharField(max_length=50, blank=True)
-    require_group = models.ForeignKey(Group, null=True, blank=True, on_delete=models.SET_NULL)
     rating_applied = models.BooleanField(default=False)
     # A round with a window longer than the time each person gets (a marathon): every participant starts their
     # own clock with "Boshlash" and has this many minutes from then, never past `end`. 0 = one clock for all.

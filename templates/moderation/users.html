@@ -11,11 +11,9 @@
 
 <div class="mb-4 flex flex-wrap items-center gap-3">
   <nav class="ca7-seg" aria-label="Rol">
-    <a href="{% querystring role=None requests=None page=None %}"{% if not role and not requests_only %} aria-current="true"{% endif %}>Hammasi</a>
-    <a href="{% querystring role='student' requests=None page=None %}"{% if role == 'student' %} aria-current="true"{% endif %}>O‘quvchilar</a>
-    <a href="{% querystring role='teacher' requests=None page=None %}"{% if role == 'teacher' %} aria-current="true"{% endif %}>O‘qituvchilar</a>
-    <a href="{% querystring role='staff' requests=None page=None %}"{% if role == 'staff' %} aria-current="true"{% endif %}>Adminlar</a>
-    <a href="{% querystring requests=1 role=None page=None %}"{% if requests_only %} aria-current="true"{% endif %}>So‘rovlar{% if n_requests %} <em>{{ n_requests }}</em>{% endif %}</a>
+    <a href="{% querystring role=None page=None %}"{% if not role %} aria-current="true"{% endif %}>Hammasi</a>
+    <a href="{% querystring role='student' page=None %}"{% if role == 'student' %} aria-current="true"{% endif %}>Foydalanuvchilar</a>
+    <a href="{% querystring role='staff' page=None %}"{% if role == 'staff' %} aria-current="true"{% endif %}>Adminlar</a>
   </nav>
   <nav class="ca7-seg ml-auto" aria-label="Saralash">
     <a href="{% querystring sort=None page=None %}"{% if not sort %} aria-current="true"{% endif %}>Yangi</a>
@@ -32,9 +30,8 @@
     <div class="ca-row-main">
       <div class="ca-row-title">
         {% include "accounts/_user.html" with tier=False %}
-        {% if u.is_staff %}<span class="ca-chip shrink-0"><i data-lucide="shield" class="lu mr-1" aria-hidden="true"></i>Admin</span>{% else %}<span class="ca-chip shrink-0 !bg-ink/5 text-mute">{% if u.role == "teacher" %}O‘qituvchi{% else %}O‘quvchi{% endif %}</span>{% endif %}
+        {% if u.is_staff %}<span class="ca-chip shrink-0"><i data-lucide="shield" class="lu mr-1" aria-hidden="true"></i>Admin</span>{% else %}<span class="ca-chip shrink-0 !bg-ink/5 text-mute">O‘quvchi</span>{% endif %}
         {% if not u.is_active %}<span class="ca-chip shrink-0 text-bad">Bloklangan</span>{% endif %}
-        {% if u.teacher_requested %}<span class="ca-chip ca-chip-score shrink-0"><i data-lucide="graduation-cap" class="lu mr-1" aria-hidden="true"></i>O‘qituvchi so‘rovi</span>{% endif %}
       </div>
       <div class="ca-row-meta pl-9">
         <span class="truncate" translate="no">{{ u.email|default:"email yo‘q" }}</span>
@@ -44,12 +41,6 @@
       </div>
     </div>
     <div class="ca-row-side">
-      {% if u.teacher_requested %}
-      <form method="post" action="{% url 'moderation:teacher_decide' u.pk %}" class="flex gap-1.5">{% csrf_token %}
-        <button name="decision" value="approve" class="ca-btn ca-btn-primary !py-1.5 text-sm"><i data-lucide="check" class="lu" aria-hidden="true"></i>O‘qituvchi qilish</button>
-        <button name="decision" value="decline" class="ca-btn ca-btn-ghost !py-1.5 text-sm">Rad etish</button>
-      </form>
-      {% endif %}
       <div class="ca-row-stat"><b style="--tier: {{ u.rating|tier_color }}" class="ca-tier-ink">{{ u.rating }}</b>reyting</div>
       <div class="ca-row-stat"><b>{{ u.n_subs }}</b>urinish</div>
       <a href="{% url 'moderation:submissions' %}?user={{ u.username|urlencode }}" class="ca-btn ca-btn-ghost !p-1.5" title="Urinishlari" aria-label="Urinishlari: {{ u.username }}"><i data-lucide="history" class="lu" aria-hidden="true"></i></a>

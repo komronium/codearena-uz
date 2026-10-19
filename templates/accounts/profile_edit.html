@@ -11,7 +11,6 @@
     <a href="#xavfsizlik"><i data-lucide="shield-check" class="lu" aria-hidden="true"></i>Xavfsizlik</a>
     <a href="#bildirishnoma"><i data-lucide="bell" class="lu" aria-hidden="true"></i>Bildirishnomalar</a>
     <a href="#korinish"><i data-lucide="sun-moon" class="lu" aria-hidden="true"></i>Ko‘rinish</a>
-    {% if user.role == "student" and not user.is_staff %}<a href="#oqituvchi"><i data-lucide="graduation-cap" class="lu" aria-hidden="true"></i>O‘qituvchi</a>{% endif %}
   </nav>
   <div class="min-w-0 max-w-lg">
   <form method="post" enctype="multipart/form-data" class="ca-panel !p-0 overflow-hidden scroll-mt-20" id="profil">{% csrf_token %}
@@ -83,7 +82,7 @@
         <p class="mt-1 text-sm text-warn">Bot bilan aloqa to‘xtatilgan. Qayta ulang yoki hisobni uzing.</p>
         {% if telegram_link.last_error %}<p class="mt-1 text-xs text-mute">Botga xabar yetkazilmadi. Telegram’da botni ochib, Start tugmasini bosing, keyin qayta ulang.</p>{% endif %}
         {% else %}
-        <p class="mt-1 max-w-xl text-sm text-mute">Telegram botni ulang: kunlik masala va tavsiya, trenddagi masala, musobaqa eslatmalari va yangi vazifalar haqida xabar oling.</p>
+        <p class="mt-1 max-w-xl text-sm text-mute">Telegram botni ulang: kunlik masala va tavsiya, trenddagi masala, musobaqa eslatmalari va duellar haqida xabar oling.</p>
         {% endif %}
       </div>
       {% if telegram_configured %}
@@ -107,7 +106,6 @@
           <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-line p-3 text-sm"><input class="mt-0.5" type="checkbox" name="notify_daily_tip"{% if telegram_link.notify_daily_tip %} checked{% endif %}><span><b>💡 Kunlik tavsiya</b><small class="mt-0.5 block text-xs text-mute">Algoritm va yechish bo‘yicha qisqa maslahat</small></span></label>
           <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-line p-3 text-sm"><input class="mt-0.5" type="checkbox" name="notify_trending_problem"{% if telegram_link.notify_trending_problem %} checked{% endif %}><span><b>🔥 Trenddagi masala</b><small class="mt-0.5 block text-xs text-mute">So‘nggi 7 kunda ommalashgan masala</small></span></label>
           <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-line p-3 text-sm"><input class="mt-0.5" type="checkbox" name="notify_contests"{% if telegram_link.notify_contests %} checked{% endif %}><span><b>🏆 Musobaqalar</b><small class="mt-0.5 block text-xs text-mute">Ro‘yxatdan o‘tgan musobaqa boshlanishidan 1 soat oldin</small></span></label>
-          <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-line p-3 text-sm"><input class="mt-0.5" type="checkbox" name="notify_assignments"{% if telegram_link.notify_assignments %} checked{% endif %}><span><b>📝 Vazifalar</b><small class="mt-0.5 block text-xs text-mute">Guruhingizga yangi vazifa berilganda</small></span></label>
           <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-line p-3 text-sm"><input class="mt-0.5" type="checkbox" name="notify_duels"{% if telegram_link.notify_duels %} checked{% endif %}><span><b>⚔️ Duellar</b><small class="mt-0.5 block text-xs text-mute">Sizni duelga chaqirishganda va duel natijasi chiqqanda</small></span></label>
           <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-line p-3 text-sm"><input class="mt-0.5" type="checkbox" name="notify_badges"{% if telegram_link.notify_badges %} checked{% endif %}><span><b>🏅 Nishonlar</b><small class="mt-0.5 block text-xs text-mute">Yangi nishon yoki bosqich olganingizda</small></span></label>
           <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-line p-3 text-sm"><input class="mt-0.5" type="checkbox" name="notify_streak"{% if telegram_link.notify_streak %} checked{% endif %}><span><b>Olov</b><small class="mt-0.5 block text-xs text-mute">Kechqurun, bugungi masala yechilmagan bo‘lsa, Olov o‘chmasin</small></span></label>
@@ -126,21 +124,6 @@
       <button type="button" data-theme-set="dark" aria-pressed="false"><i data-lucide="moon" class="lu mr-1.5" aria-hidden="true"></i>Tungi</button>
     </div>
   </section>
-  {% if user.role == "student" and not user.is_staff %}
-  <section class="ca-panel mt-6 flex scroll-mt-20 flex-wrap items-center justify-between gap-3" id="oqituvchi" aria-labelledby="teacher-title">
-    <div class="min-w-0">
-      <h2 id="teacher-title" class="text-[1.0625rem] font-bold"><i data-lucide="graduation-cap" class="lu mr-1.5 text-accent" aria-hidden="true"></i>O‘qituvchimisiz?</h2>
-      {% if user.teacher_requested %}
-      <p class="mt-1 text-sm text-mute">So‘rovingiz yuborilgan — admin ko‘rib chiqmoqda. Tasdiqlangach, «Vazifalar» bo‘limida guruh ochasiz.</p>
-      {% else %}
-      <p class="mt-1 text-sm text-mute">So‘rov yuboring: admin tasdiqlagach, o‘z guruhingizni ochib, o‘quvchilarga vazifa berasiz.</p>
-      {% endif %}
-    </div>
-    {% if not user.teacher_requested %}
-    <form method="post" action="{% url 'teacher_request' %}">{% csrf_token %}<button class="ca-btn ca-btn-ghost"><i data-lucide="send" class="lu" aria-hidden="true"></i>So‘rov yuborish</button></form>
-    {% endif %}
-  </section>
-  {% endif %}
   </div>
   </div>
 </div>

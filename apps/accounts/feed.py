@@ -1,8 +1,7 @@
-"""The friends feed: what the people you follow, and your classmates, did lately. Derived from what is recorded (first
+"""The friends feed: what the people you follow did lately. Derived from what is recorded (first
 solves, duel wins, badge levels), so there is nothing to keep in step; only public problems are named."""
 import datetime
 
-from django.db.models import Q
 from django.utils import timezone
 
 from .models import Follow, User, UserBadge
@@ -12,12 +11,8 @@ DAYS = 14
 
 
 def circle(user) -> set[int]:
-    """Whose doings the user sees: who they follow plus the members of their classes and their students."""
+    """Whose doings the user sees: the people they follow."""
     ids = set(Follow.objects.filter(user=user).values_list("target_id", flat=True))
-    for group in user.student_groups.all():
-        ids |= set(group.members.values_list("pk", flat=True)) | {group.teacher_id}
-    for group in user.taught_groups.all():
-        ids |= set(group.members.values_list("pk", flat=True))
     ids.discard(user.pk)
     return ids
 

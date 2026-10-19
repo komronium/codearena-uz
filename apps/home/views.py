@@ -11,13 +11,12 @@ from django.views.decorators.cache import cache_control
 from apps.accounts.models import User
 from apps.accounts.tiers import next_tier as _next_tier
 from apps.classroom import duels
-from apps.classroom.models import Assignment, Duel
-from apps.classroom.progress import completion
+from apps.classroom.models import Duel
 from apps.contests.models import Contest, Participation
 from apps.contests.views import _standings  # cached, the standings page's own numbers
 from apps.learn.models import StudyPlan
 from apps.learn.views import continue_course
-from apps.problems.daily import daily_for, streaks, week_strip
+from apps.problems.daily import daily_for, week_strip
 from apps.problems.models import DailySolve, Language, Problem
 from apps.problems.quests import streak_state, today_quests
 from apps.problems.progress import level_progress, solved_ring
@@ -73,28 +72,6 @@ def _live(user, running) -> dict | None:
             "solved": row and row["solved"], "n_problems": contest.contest_problems.count()}
 
 
-def _classes(user, now):
-    """The teacher's classes for the dashboard's top: size, the work now open and how many of the class have handed
-    in its most pressing assignment. [] for everyone who teaches nothing."""
-    groups = list(user.taught_groups.annotate(n_students=Count("members", distinct=True)).order_by("name"))
-    if not groups:
-        return []
-    open_work = {}
-    for a in (Assignment.objects.filter(group__in=groups, start__lte=now, deadline__gt=now)
-              .prefetch_related("assignment_problems", "group").order_by("deadline")):
-        open_work.setdefault(a.group_id, []).append(a)
-    pending = [w[0] for w in open_work.values()]
-    done = completion(pending)
-    out = []
-    for g in groups:
-        work = open_work.get(g.pk, [])
-        row = {"group": g, "n_open": len(work), "next": work[0] if work else None}
-        if work:
-            row["done"], row["of"] = done[work[0].pk]
-        out.append(row)
-    return out
-
-
 def home(request):
     now = timezone.now()
     daily = daily_for()
@@ -108,7 +85,7 @@ def home(request):
         board = [r for r in _standings(last_rated) if not r["disqualified"]] if last_rated else []
         podium = board[:5]
         # the hero's first line: the round running now, else the next one, that anyone may enter
-        next_round = next((c for c in running + upcoming if not c.require_group_id), None)
+        next_round = (running + upcoming or [None])[0]
         return render(request, "home/landing.html", {
             "daily": daily, "running": running, "upcoming": upcoming, "next_round": next_round,
             "last_rated": last_rated, "podium": podium, "n_last": len(board),
@@ -118,12 +95,6 @@ def home(request):
         })
 
     user = request.user
-    homework = list(Assignment.objects.filter(group__members=user, deadline__gt=now).select_related("group")
-                    .prefetch_related("assignment_problems").order_by("deadline")[:3])
-    solved = set(Submission.objects.filter(user=user, verdict=Submission.Verdict.AC).values_list("problem_id", flat=True))
-    for a in homework:
-        ids = [ap.problem_id for ap in a.assignment_problems.all()]
-        a.my_total, a.my_solved = len(ids), sum(1 for i in ids if i in solved)
     duels.settle_open(user)
     mine = Duel.objects.filter(Q(challenger=user) | Q(opponent=user)).select_related("challenger", "opponent")
     live = list(mine.filter(status__in=duels.OPEN).exclude(status=Duel.Status.PENDING, opponent=user)[:3])
@@ -141,11 +112,6 @@ def home(request):
     if is_new:
         first_problem = (open_problems().filter(difficulty=Problem.Difficulty.BEGINNER).order_by("pk").first()
                          or open_problems().order_by("pk").first())
-    taught = list(Assignment.objects.filter(group__teacher=user).select_related("group")
-                  .prefetch_related("assignment_problems").order_by("-deadline")[:3])
-    handed = completion(taught)
-    for a in taught:
-        a.done_n, a.total_n = handed[a.pk]
     return render(request, "home/dashboard.html", {
         "is_new": is_new, "first_problem": first_problem,
         "n_courses": StudyPlan.objects.filter(is_public=True).count() if is_new else 0,
@@ -156,7 +122,6 @@ def home(request):
         "week": week_strip(user),
         # the profile's count: public problems solved (what the practice points are made of)
         "solved_count": Problem.objects.filter(userproblemsolved__user=user, is_public=True).count(),
-        "homework": homework,
         "challenges": list(mine.filter(status=Duel.Status.PENDING, opponent=user)[:3]),
         "active_duels": live,
         "running": running, "upcoming": upcoming, "live": _live(user, running),
@@ -170,7 +135,6 @@ def home(request):
                           .values_list("contest_id", flat=True)),
         "learning": continue_course(user),
         "recent": list(Submission.objects.filter(user=user).select_related("problem", "language")[:5]),
-        "taught": taught, "classes": _classes(user, now),
     })
 
 

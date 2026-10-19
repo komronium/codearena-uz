@@ -47,8 +47,7 @@ class Courses(sitemaps.Sitemap):
 
 
 def _public_contests():
-    # a round for one group is no page for the public to land on
-    return Contest.objects.filter(require_group__isnull=True).order_by("-start").only("pk", "start", "end", "updated")
+    return Contest.objects.order_by("-start").only("pk", "start", "end", "updated")
 
 
 class Contests(sitemaps.Sitemap):

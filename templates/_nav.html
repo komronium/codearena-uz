@@ -14,7 +14,6 @@ grouped by what the student is doing. Profile, settings and sign-out live in the
 {% if user.is_authenticated %}
 <a href="{% url 'submissions:mine' %}?mine=1" class="ca-sidebar-link {% if ns == 'submissions' %}is-active{% endif %}"{% if ns == 'submissions' %} aria-current="page"{% endif %}>
   <i data-lucide="history" class="lu" aria-hidden="true"></i>Urinishlarim
-  {% if unread_reviews %}<span class="ca-chip ca-chip-score ml-auto tabular" title="O‘qilmagan kod sharhlari">{{ unread_reviews }}</span>{% endif %}
 </a>
 {% endif %}
 <p class="ca-sidebar-heading">Musobaqa</p>
@@ -29,11 +28,7 @@ grouped by what the student is doing. Profile, settings and sign-out live in the
   <i data-lucide="users" class="lu" aria-hidden="true"></i>Amaliyot ballari
 </a>
 {% if user.is_authenticated %}
-<p class="ca-sidebar-heading">Sinf</p>
-<a href="{% url 'classroom:list' %}" class="ca-sidebar-link {% if ns == 'classroom' and 'duel' not in un %}is-active{% endif %}"{% if ns == 'classroom' and 'duel' not in un %} aria-current="page"{% endif %}>
-  <i data-lucide="notebook-pen" class="lu" aria-hidden="true"></i>Vazifalar
-  {% if nav.due %}<span class="ca-chip ca-chip-score ml-auto tabular" title="Muddati 2 kun ichida tugaydi">{{ nav.due }}</span>{% endif %}
-</a>
+<p class="ca-sidebar-heading">Duel</p>
 <a href="{% url 'classroom:duels' %}" class="ca-sidebar-link {% if ns == 'classroom' and 'duel' in un %}is-active{% endif %}"{% if ns == 'classroom' and 'duel' in un %} aria-current="page"{% endif %}>
   <i data-lucide="swords" class="lu" aria-hidden="true"></i>Duellar
 </a>
@@ -64,10 +59,6 @@ grouped by what the student is doing. Profile, settings and sign-out live in the
 </a>
 <a href="{% url 'moderation:users' %}" class="ca-sidebar-link {% if ns == 'moderation' and un in 'users,user_edit' %}is-active{% endif %}"{% if ns == 'moderation' and un in 'users,user_edit' %} aria-current="page"{% endif %}>
   <i data-lucide="users-round" class="lu" aria-hidden="true"></i>Foydalanuvchilar
-  {% if nav.staff.requests %}<span class="ca-chip ca-chip-score ml-auto tabular" title="O‘qituvchi so‘rovlari">{{ nav.staff.requests }}</span>{% endif %}
-</a>
-<a href="{% url 'moderation:groups' %}" class="ca-sidebar-link {% if ns == 'moderation' and un in 'groups,group_new,group_edit' %}is-active{% endif %}"{% if ns == 'moderation' and un in 'groups,group_new,group_edit' %} aria-current="page"{% endif %}>
-  <i data-lucide="school" class="lu" aria-hidden="true"></i>Guruhlar
 </a>
 <a href="{% url 'moderation:plans' %}" class="ca-sidebar-link {% if ns == 'moderation' and un in 'plans,plan_new,plan_edit' %}is-active{% endif %}"{% if ns == 'moderation' and un in 'plans,plan_new,plan_edit' %} aria-current="page"{% endif %}>
   <i data-lucide="graduation-cap" class="lu" aria-hidden="true"></i>Kurslar

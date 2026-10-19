@@ -225,21 +225,6 @@ def test_register_allowed_when_ip_prefix_matches(client):
 
 
 @pytest.mark.django_db
-def test_register_rejected_when_not_in_require_group(client):
-    from apps.accounts.models import Group
-
-    teacher = User.objects.create_user("t", password="x")
-    group = Group.objects.create(name="2-kurs", teacher=teacher)
-    c = Contest.objects.create(title="Sprint", start=timezone.now() - timezone.timedelta(hours=1),
-                               end=timezone.now() + timezone.timedelta(hours=1), require_group=group)
-    user = User.objects.create_user("ali", password="x")
-    client.force_login(user)
-    r = client.post(reverse("contests:register", args=[c.pk]))
-    assert r.status_code == 400
-    assert not Participation.objects.filter(user=user, contest=c).exists()
-
-
-@pytest.mark.django_db
 def test_register_after_end_rejected(client):
     c = Contest.objects.create(title="Sprint", start=timezone.now() - timezone.timedelta(hours=2),
                                end=timezone.now() - timezone.timedelta(hours=1))
@@ -1243,28 +1228,26 @@ def test_dq_after_official_apply_rebuilds_official_rating(staff_client, problem_
 
 
 @pytest.mark.django_db
-def test_teacher_verifies_own_student_and_past_official_contest_counts(client, problem_a, python):
-    from apps.accounts.models import Group
+def test_staff_verify_a_student_and_past_official_contest_counts(client, problem_a, python):
     from apps.integrity.models import AuditEntry
 
     from .rating import RAMP
 
-    teacher = User.objects.create_user("ustoz", password="x", role="teacher")
-    stranger = User.objects.create_user("begona", password="x", role="teacher")
+    staff = User.objects.create_user("boss", password="x", is_staff=True)
+    other = User.objects.create_user("begona", password="x")
     (ali,) = _verified("ali")
     student = User.objects.create_user("talaba", password="x")
-    Group.objects.create(name="CS-1", teacher=teacher).members.add(student)
     _official("Lab", 1, problem_a, python, [student], [ali])
     url = reverse("verify_user", args=[student.pk])
 
-    client.force_login(stranger)
+    client.force_login(other)
     assert client.post(url, {"verified": "1"}).status_code == 403
-    client.force_login(teacher)
+    client.force_login(staff)
     client.post(url, {"verified": "1", "note": "Pasport ko‘rildi"})
     student.refresh_from_db()
-    assert student.verified_by == teacher and student.verified_note == "Pasport ko‘rildi"
+    assert student.verified_by == staff and student.verified_note == "Pasport ko‘rildi"
     assert student.official_rating > RAMP[0]  # the lab contest before verification now counts
-    assert AuditEntry.objects.filter(action="verify", subject=student, actor=teacher).exists()
+    assert AuditEntry.objects.filter(action="verify", subject=student, actor=staff).exists()
 
     client.post(url, {"verified": "0"})
     student.refresh_from_db()

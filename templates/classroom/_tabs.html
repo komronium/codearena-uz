@@ -1,5 +1,0 @@
-{% comment %}The class pages' two tabs: homework and duels. ctx: active ("tasks" | "duels"), n (optional, the homework count).{% endcomment %}
-<nav class="ca7-tabs" aria-label="Sinf bo‘limlari">
-  <a href="{% url 'classroom:list' %}"{% if active == "tasks" %} aria-current="page"{% endif %}>Vazifalar{% if n is not None %} <em>{{ n }}</em>{% endif %}</a>
-  <a href="{% url 'classroom:duels' %}"{% if active == "duels" %} aria-current="page"{% endif %}>Duellar</a>
-</nav>

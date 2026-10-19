@@ -26,7 +26,6 @@ urlpatterns = [
     path("telegram/disconnect/", telegram_views.disconnect, name="telegram_disconnect"),
     path("telegram/preferences/", telegram_views.preferences, name="telegram_preferences"),
     path("telegram/webhook/", telegram_views.webhook, name="telegram_webhook"),
-    path("teacher-request/", views.teacher_request, name="teacher_request"),
     path("honor/", views.honor, name="honor"),
     path("verify/<int:user_id>/", views.verify_user, name="verify_user"),
     path("password-change/", views.PasswordChange.as_view(), name="password_change"),

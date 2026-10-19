@@ -1,5 +1,3 @@
-import secrets
-
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
@@ -9,7 +7,6 @@ from django.utils import timezone
 class User(AbstractUser):
     class Role(models.TextChoices):
         STUDENT = "student"
-        TEACHER = "teacher"
         ADMIN = "admin"
 
     rating = models.IntegerField(default=0, db_index=True)  # shown rating; see apps.contests.rating
@@ -26,13 +23,11 @@ class User(AbstractUser):
     invited_by = models.ForeignKey(
         "self", null=True, blank=True, on_delete=models.SET_NULL, related_name="invited_users",
     )
-    # "I'm a teacher" at sign-up or from the profile; staff approve it by giving the teacher role
-    teacher_requested = models.BooleanField(default=False, db_index=True)
     # the tier the user was last shown; a higher one on the next page view gets a congratulation
     seen_tier = models.CharField(max_length=30, blank=True)
     # when the user promised to submit only their own work (accounts:honor); asked once
     honor_pledged_at = models.DateTimeField(null=True, blank=True)
-    # A teacher or admin confirmed this is the real student; only verified users get an official rating
+    # An admin confirmed this is the real student; only verified users get an official rating
     verified_at = models.DateTimeField(null=True, blank=True)
     verified_by = models.ForeignKey(
         "self", null=True, blank=True, on_delete=models.SET_NULL, related_name="verified_users",
@@ -64,7 +59,6 @@ class TelegramLink(models.Model):
     notify_daily_tip = models.BooleanField(default=True)
     notify_trending_problem = models.BooleanField(default=True)
     notify_contests = models.BooleanField(default=True)
-    notify_assignments = models.BooleanField(default=True)
     notify_duels = models.BooleanField(default=True)  # an invite, and how a duel ended
     notify_badges = models.BooleanField(default=True)  # a badge level reached
     notify_streak = models.BooleanField(default=True)  # the evening before a daily streak would break
@@ -124,32 +118,6 @@ class TelegramOutbox(models.Model):
         indexes = [models.Index(fields=["status", "available_at"], name="accounts_tg_status_avail_idx")]
 
 
-_CODE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"
-
-
-def new_join_code() -> str:
-    while True:
-        code = "".join(secrets.choice(_CODE_ALPHABET) for _ in range(6))
-        if not Group.objects.filter(join_code=code).exists():
-            return code
-
-
-class Group(models.Model):
-    name = models.CharField(max_length=100)
-    teacher = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="taught_groups")
-    members = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name="student_groups")
-    # students join with this code; no ambiguous letters (0/O, 1/I/L) so it reads out loud in class
-    join_code = models.CharField(max_length=8, unique=True, null=True, blank=True)
-
-    def save(self, *args, **kwargs):
-        if not self.join_code:
-            self.join_code = new_join_code()
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return self.name
-
-
 class UserBadge(models.Model):
     """One level (tier) of a badge family a user reached (apps.accounts.badges), kept for good: a level once
     earned stays even if what earned it changes later. `seen` is for the "new badge" toast."""
@@ -164,7 +132,7 @@ class UserBadge(models.Model):
 
 
 class Follow(models.Model):
-    """"Kuzatish": the feed (apps.accounts.feed) shows what the people you follow, and your classmates, did."""
+    """"Kuzatish": the feed (apps.accounts.feed) shows what the people you follow did."""
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="following")
     target = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="followers")
     created = models.DateTimeField(auto_now_add=True)
@@ -176,12 +144,10 @@ class Follow(models.Model):
 
 class Notification(models.Model):
     """One line in the top bar's bell (apps.accounts.notifications): something happened that is yours to see —
-    a duel call or result, new homework, a code review, a badge. Made once per (user, key); read when opened."""
+    a duel call or result, a badge. Made once per (user, key); read when opened."""
 
     class Kind(models.TextChoices):
         DUEL = "duel", "Duel"
-        ASSIGNMENT = "assignment", "Vazifa"
-        REVIEW = "review", "Kod sharhi"
         BADGE = "badge", "Nishon"
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="notifications")

@@ -15,7 +15,6 @@ the page. A contest's integrity report and replay count as Musobaqalar.{% endcom
   <a href="{% url 'moderation:duels' %}"{% if ns == 'moderation' and un == 'duels' %} aria-current="page"{% endif %}><i data-lucide="swords" class="lu" aria-hidden="true"></i>Duellar</a>
   <p>Odamlar</p>
   <a href="{% url 'moderation:users' %}"{% if ns == 'moderation' and un in 'users,user_edit' %} aria-current="page"{% endif %}><i data-lucide="users" class="lu" aria-hidden="true"></i>Foydalanuvchilar</a>
-  <a href="{% url 'moderation:groups' %}"{% if ns == 'moderation' and un in 'groups,group_new,group_edit' %} aria-current="page"{% endif %}><i data-lucide="layout-grid" class="lu" aria-hidden="true"></i>Guruhlar</a>
   <p>Halollik</p>
   <a href="{% url 'integrity:practice_report' %}"{% if ns == 'integrity' and un == 'practice_report' %} aria-current="page"{% endif %}><i data-lucide="shield" class="lu" aria-hidden="true"></i>Mashq nazorati</a>
   <a href="{% url 'integrity:audit' %}"{% if ns == 'integrity' and un == 'audit' %} aria-current="page"{% endif %}><i data-lucide="scroll-text" class="lu" aria-hidden="true"></i>Jurnal</a>

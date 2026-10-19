@@ -16,7 +16,6 @@
 </section>
 {% endblock %}
 {% block content %}
-{% include "classroom/_tabs.html" with active="duels" %}
 {% comment %}Boxed like the rest: starting a duel and calling a friend, then calls, open duels and the history
 as a table; on the right your duel record and the duel rating board (everyone with a finished duel).
 The duel rating is its own Elo and never touches the contest rating.{% endcomment %}
@@ -57,7 +56,7 @@ The duel rating is its own Elo and never touches the contest rating.{% endcommen
     <form method="post" aria-labelledby="friend-title">{% csrf_token %}
       <h2 id="friend-title">Do‘stni chaqirish</h2>
       <p class="ca7-split-sub">Savollarni hoziroq yechasiz. Do‘stingiz 3 kun ichida qabul qilsa, o‘sha savollarni oladi.</p>
-      {# a finder: on focus your classmates and past rivals, typing searches every handle; a pick fills the field #}
+      {# a finder: on focus the people you follow and past rivals, typing searches every handle; a pick fills the field #}
       <div class="relative" id="duel-finder"><label class="ca7-lbl" for="duel-opponent">Raqib</label>
         <input id="duel-opponent" name="opponent" value="{{ form.opponent|default:'' }}" class="ca7-fld !pl-3" required autocomplete="off" placeholder="Login bo‘yicha qidiring…" aria-describedby="duel-finder-help">
         <span class="sr-only" id="duel-finder-help">Yozing yoki ro‘yxatdan tanlang; pastga strelka ro‘yxatga o‘tadi.</span>
@@ -169,7 +168,7 @@ The duel rating is its own Elo and never touches the contest rating.{% endcommen
       const b = document.createElement("button"), name = document.createElement("span"), meta = document.createElement("span");
       b.type = "button"; b.className = "ca-picker-hit";
       name.className = "ca-user-name min-w-0 flex-1"; name.style.setProperty("--tier", p.color); name.translate = false; name.textContent = p.username;
-      meta.className = "tabular text-xs text-mute"; meta.textContent = (p.mate ? "guruhdosh · " : "") + `duel ${p.duel}`;
+      meta.className = "tabular text-xs text-mute"; meta.textContent = (p.followed ? "kuzatyapsiz · " : "") + `duel ${p.duel}`;
       b.append(name, meta);
       b.addEventListener("click", () => pick(p.username));
       const li = document.createElement("li"); li.append(b);

@@ -8,13 +8,6 @@
     <p class="mt-1 max-w-2xl text-sm text-mute">AI yoki boshqa joydan ko‘chirilganga o‘xshagan mashq yechimlari. Bu dalil emas — kodni ochib ko‘ring va o‘zingiz qaror qiling. Tasdiqlangan yechim uchun amaliyot bali berilmaydi; qarorni istalgan payt bekor qilish mumkin. Belgilari juda kuchli yechimlarning bali siz ko‘rib chiqquningizcha avtomatik ushlab turiladi.</p>
   </div>
   <form method="get" class="flex flex-wrap items-center gap-2">
-    {% if groups %}
-    <label class="sr-only" for="pr-group">Guruh</label>
-    <select id="pr-group" name="group" class="ca-select !py-1.5" onchange="this.form.submit()">
-      <option value="">Barcha {% if user.is_staff %}talabalar{% else %}guruhlarim{% endif %}</option>
-      {% for g in groups %}<option value="{{ g.pk }}"{% if group == g.pk|stringformat:"d" %} selected{% endif %}>{{ g.name }}</option>{% endfor %}
-    </select>
-    {% endif %}
     <label class="sr-only" for="pr-days">Davr</label>
     <select id="pr-days" name="days" class="ca-select !py-1.5" onchange="this.form.submit()">
       <option value="7"{% if days == 7 %} selected{% endif %}>Oxirgi 7 kun</option>

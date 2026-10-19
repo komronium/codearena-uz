@@ -18,7 +18,7 @@ from django.utils.text import slugify
 from django.views.decorators.http import require_POST
 
 from apps.accounts.decorators import staff_required
-from apps.accounts.models import Group, User
+from apps.accounts.models import User
 from apps.contests.models import Contest, Participation
 from apps.contests.rating import recalc_official, review_queue
 from apps.contests.services import reuse_reason
@@ -37,7 +37,6 @@ from .forms import (
     AIGenerateForm,
     ContestForm,
     ContestProblemFormSet,
-    GroupForm,
     HintFormSet,
     ProblemForm,
     SQLDatasetForm,
@@ -67,8 +66,6 @@ def dashboard(request):
             "users": User.objects.count(),
             "submissions": Submission.objects.count(),
             "tags": Tag.objects.count(),
-            "groups": Group.objects.count(),
-            "teacher_requests": User.objects.filter(teacher_requested=True).count(),
         },
         # the decisions waiting first: the newest problems in the queue, and today's problem
         "pending": list(Problem.objects.filter(status=Problem.Status.PENDING).select_related("author").order_by("-pk")[:5]),
@@ -698,14 +695,11 @@ def duels(request):
 @staff_required
 def users(request):
     q = request.GET.get("q", "").strip()
-    requests_only = request.GET.get("requests") == "1"
-    qs = User.objects.annotate(n_subs=Count("submissions")).order_by("-teacher_requested", "-date_joined")
-    if requests_only:
-        qs = qs.filter(teacher_requested=True)
+    qs = User.objects.annotate(n_subs=Count("submissions")).order_by("-date_joined")
     role = request.GET.get("role", "")
     if role == "staff":
         qs = qs.filter(is_staff=True)
-    elif role in (User.Role.STUDENT, User.Role.TEACHER):
+    elif role == User.Role.STUDENT:
         qs = qs.filter(role=role, is_staff=False)
     else:
         role = ""
@@ -720,25 +714,8 @@ def users(request):
         sort = ""
     page = Paginator(qs, 30).get_page(request.GET.get("page"))
     return render(request, "moderation/users.html", {
-        "page": page, "q": q, "requests_only": requests_only, "role": role, "sort": sort,
-        "n_requests": User.objects.filter(teacher_requested=True).count(),
+        "page": page, "q": q, "role": role, "sort": sort,
     })
-
-
-@staff_required
-@require_POST
-def teacher_decide(request, pk):
-    """Approve gives the teacher role (they then open their own groups); decline just clears the request."""
-    user = get_object_or_404(User, pk=pk, teacher_requested=True)
-    user.teacher_requested = False
-    if request.POST.get("decision") == "approve":
-        user.role = User.Role.TEACHER
-        messages.success(request, f"{user.username} endi o‘qituvchi.")
-    else:
-        messages.info(request, f"{user.username} so‘rovi rad etildi.")
-    user.save(update_fields=["teacher_requested", "role"])
-    left = User.objects.filter(teacher_requested=True).exists()
-    return redirect(reverse("moderation:users") + ("?requests=1" if left else ""))
 
 
 @staff_required
@@ -764,9 +741,9 @@ def user_delete(request, pk):
         user = get_object_or_404(User.objects.select_for_update(), pk=pk)
         if user == request.user or user.is_staff or user.is_superuser:
             reason = "admin hisobini o‘chirib bo‘lmaydi — avval admin huquqini oling"
-        # Problem.author is PROTECT and Group.teacher would cascade other people's group.
-        elif user.authored_problems.exists() or user.taught_groups.exists():
-            reason = "uning masalalari yoki guruhlari bor — avval boshqasiga o‘tkazing yoki bloklang"
+        # Problem.author is PROTECT
+        elif user.authored_problems.exists():
+            reason = "uning masalalari bor — avval boshqasiga o‘tkazing yoki bloklang"
         else:
             reason = None
         if reason:
@@ -776,29 +753,3 @@ def user_delete(request, pk):
         user.delete()
     messages.success(request, f"{user.username} o‘chirildi.")
     return redirect("moderation:users")
-
-
-# ---- groups ------------------------------------------------------------------
-
-@staff_required
-def groups(request):
-    qs = Group.objects.select_related("teacher").annotate(n=Count("members")).order_by("name")
-    return render(request, "moderation/groups.html", {"groups": qs})
-
-
-@staff_required
-def group_edit(request, pk=None):
-    group = get_object_or_404(Group, pk=pk) if pk else None
-    form = GroupForm(request.POST or None, instance=group)
-    if request.method == "POST" and form.is_valid():
-        form.save()
-        messages.success(request, "Guruh saqlandi.")
-        return redirect("moderation:groups")
-    return render(request, "moderation/group_form.html", {"form": form, "group": group})
-
-
-@staff_required
-@require_POST
-def group_delete(request, pk):
-    get_object_or_404(Group, pk=pk).delete()
-    return redirect("moderation:groups")

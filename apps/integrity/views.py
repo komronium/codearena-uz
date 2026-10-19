@@ -10,7 +10,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
 from apps.accounts.decorators import staff_required
-from apps.accounts.models import Group, User
+from apps.accounts.models import User
 from apps.contests.models import Contest, Participation, VoidedProblem
 from apps.problems.models import Language, Problem
 from apps.submissions.models import Submission
@@ -380,11 +380,9 @@ def practice_snapshot(request):
 
 
 def _practice_students(user):
-    """Whose practice this user may review: staff everyone, a teacher the students of their groups."""
+    """Whose practice this user may review: staff everyone, nobody else."""
     if user.is_staff:
         return User.objects.filter(is_staff=False, is_active=True)
-    if user.role == User.Role.TEACHER:
-        return User.objects.filter(student_groups__teacher=user, is_active=True).distinct()
     return None
 
 
@@ -392,15 +390,11 @@ def _practice_students(user):
 def practice_report(request):
     students = _practice_students(request.user)
     if students is None:
-        return HttpResponseBadRequest("teachers and staff only")
-    groups = (Group.objects.all() if request.user.is_staff else request.user.taught_groups.all()).order_by("name")
-    group = request.GET.get("group", "")
-    if group.isdigit():
-        students = students.filter(student_groups__pk=int(group))
+        return HttpResponseBadRequest("staff only")
     days = int(request.GET.get("days", "30")) if request.GET.get("days", "30") in {"7", "30", "90"} else 30
     rows = suspicious_solves(students, days)
     return render(request, "integrity/practice_report.html", {
-        "rows": rows, "groups": groups, "group": group, "days": days,
+        "rows": rows, "days": days,
         "open": sum(r["waiting"] for r in rows),
     })
 
@@ -410,7 +404,7 @@ def practice_report(request):
 def practice_decide(request, user_id, problem_id):
     students = _practice_students(request.user)
     if students is None or not students.filter(pk=user_id).exists():
-        return HttpResponseBadRequest("not your student")
+        return HttpResponseBadRequest("staff only")
     problem = get_object_or_404(Problem, pk=problem_id)
     decision = request.POST.get("decision")
     if decision == "undo":

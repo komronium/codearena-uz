@@ -96,7 +96,7 @@
   {# signed in, the fifth tab is the duels (played mostly on phones; the rating sits in the menu); a guest's is the rating #}
   {% if user.is_authenticated %}<a href="{% url 'classroom:duels' %}"{% if ns == 'classroom' and 'duel' in un %} class="is-active" aria-current="page"{% endif %}><span class="ca-bn-icon"><i data-lucide="swords" class="lu" aria-hidden="true"></i>{% if nav.duels %}<b class="ca-badge-n ca-bn-badge">{{ nav.duels }}<span class="sr-only"> ta duel chaqiruvi</span></b>{% endif %}</span><span>Duel</span></a>
   {% else %}<a href="{% url 'rating' %}"{% if un == 'rating' or un == 'top' %} class="is-active" aria-current="page"{% endif %}><span class="ca-bn-icon"><i data-lucide="chart-column" class="lu" aria-hidden="true"></i></span><span>Reyting</span></a>{% endif %}
-  <button type="button" data-menu-open aria-haspopup="dialog" aria-controls="ca-menu"><span class="ca-bn-icon">{% if user.is_authenticated %}<i data-lucide="user" class="lu" aria-hidden="true"></i>{% else %}<i data-lucide="menu" class="lu" aria-hidden="true"></i>{% endif %}</span><span>{% if user.is_authenticated %}Men{% else %}Menyu{% endif %}</span>{% with n=unread_reviews|add:nav.due %}{% if n %}<b class="ca-badge-n ca-bn-badge">{{ n }}<span class="sr-only"> ta yangi: sharh yoki muddati yaqin vazifa</span></b>{% endif %}{% endwith %}</button>
+  <button type="button" data-menu-open aria-haspopup="dialog" aria-controls="ca-menu"><span class="ca-bn-icon">{% if user.is_authenticated %}<i data-lucide="user" class="lu" aria-hidden="true"></i>{% else %}<i data-lucide="menu" class="lu" aria-hidden="true"></i>{% endif %}</span><span>{% if user.is_authenticated %}Men{% else %}Menyu{% endif %}</span></button>
   {% endwith %}
 </nav>
 {% comment %}The phone menu: the account, every destination (staff pages included) and the theme.
@@ -276,7 +276,6 @@ from /problems/suggest/. "go" is the second key of a "g <key>" shortcut.{% endco
   {"group": "Sahifalar", "icon": "users", "label": "Amaliyot ballari", "words": "top points ball", "url": "{% url 'top' %}"},
   {"group": "Sahifalar", "icon": "handshake", "label": "Halollik qoidalari", "words": "honor rules ai qoida adolat", "url": "{% url 'honor' %}"},
   {% if user.is_authenticated %}
-  {"group": "Sahifalar", "icon": "notebook-pen", "label": "Vazifalar", "words": "homework uy vazifasi guruh", "keys": "g v", "go": "v", "url": "{% url 'classroom:list' %}"},
   {"group": "Sahifalar", "icon": "swords", "label": "Duellar", "words": "duel 1v1 bellashuv", "keys": "g d", "go": "d", "url": "{% url 'classroom:duels' %}"},
   {"group": "Sahifalar", "icon": "history", "label": "Urinishlarim", "words": "submissions yechimlar natijalar", "keys": "g u", "go": "u", "url": "{% url 'submissions:mine' %}?mine=1"},
   {"group": "Sahifalar", "icon": "user", "label": "Profilim", "words": "profile men", "keys": "g m", "go": "m", "url": "{% url 'profile' user.username %}"},
@@ -292,8 +291,7 @@ from /problems/suggest/. "go" is the second key of a "g <key>" shortcut.{% endco
   {"group": "Admin", "icon": "circle-plus", "label": "Masala qo‘shish", "words": "new problem", "url": "{% url 'moderation:submit' %}"},
   {"group": "Admin", "icon": "sparkles", "label": "AI bilan masala tuzish", "words": "ai generate", "url": "{% url 'moderation:ai_generate' %}"},
   {"group": "Admin", "icon": "trophy", "label": "Musobaqa yaratish", "words": "new contest", "url": "{% url 'moderation:contest_new' %}"},
-  {"group": "Admin", "icon": "users-round", "label": "Foydalanuvchilar", "words": "users teacher o‘qituvchi so‘rov", "hint": "{% if nav.staff.requests %}{{ nav.staff.requests }} ta so‘rov{% endif %}", "url": "{% url 'moderation:users' %}"},
-  {"group": "Admin", "icon": "school", "label": "Guruhlar", "words": "groups", "url": "{% url 'moderation:groups' %}"},
+  {"group": "Admin", "icon": "users-round", "label": "Foydalanuvchilar", "words": "users foydalanuvchilar", "url": "{% url 'moderation:users' %}"},
   {"group": "Admin", "icon": "scroll-text", "label": "Amallar jurnali", "words": "audit log", "url": "{% url 'integrity:audit' %}"},
   {% endif %}
   {"group": "Amallar", "icon": "sun", "label": "Ko‘rinish: kunduzgi", "words": "theme light mavzu", "action": "theme:light"},
@@ -313,7 +311,6 @@ from /problems/suggest/. "go" is the second key of a "g <key>" shortcut.{% endco
     <dt><kbd class="ca-kbd">g</kbd> <kbd class="ca-kbd">c</kbd></dt><dd>Musobaqalar</dd>
     <dt><kbd class="ca-kbd">g</kbd> <kbd class="ca-kbd">r</kbd></dt><dd>Reyting</dd>
     {% if user.is_authenticated %}
-    <dt><kbd class="ca-kbd">g</kbd> <kbd class="ca-kbd">v</kbd></dt><dd>Vazifalar</dd>
     <dt><kbd class="ca-kbd">g</kbd> <kbd class="ca-kbd">d</kbd></dt><dd>Duellar</dd>
     <dt><kbd class="ca-kbd">g</kbd> <kbd class="ca-kbd">u</kbd></dt><dd>Urinishlarim</dd>
     <dt><kbd class="ca-kbd">g</kbd> <kbd class="ca-kbd">m</kbd></dt><dd>Profilim</dd>

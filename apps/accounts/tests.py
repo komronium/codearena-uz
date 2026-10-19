@@ -226,7 +226,7 @@ def test_password_reset_unknown_email_does_not_leak(client, mailoutbox):
 def test_recalc_practice_points_sums_current_points_of_solved_problems():
     from django.core.management import call_command
 
-    author = User.objects.create_user("teacher", password="x", role="teacher")
+    author = User.objects.create_user("teacher", password="x")
     python = Language.objects.create(code="python", name="Python 3", docker_image="x", run_cmd="x")
     cheap = Problem.objects.create(slug="cheap", title="Cheap", statement_md="x", author=author, points=30)
     pricey = Problem.objects.create(slug="pricey", title="Pricey", statement_md="x", author=author, points=250)

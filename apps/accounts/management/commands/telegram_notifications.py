@@ -27,7 +27,7 @@ DAILY_TIPS = (
 
 
 class Command(BaseCommand):
-    help = "Queue Telegram daily learning, trending problem, contest and assignment notifications."
+    help = "Queue Telegram daily learning, trending problem, and contest notifications."
 
     def handle(self, *args, **options):
         now = timezone.now()

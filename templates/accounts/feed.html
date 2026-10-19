@@ -13,7 +13,7 @@
 {% block content %}
 <div class="ca7">
 <div class="ca7-col">
-  <p class="mb-3 text-sm text-mute">Sinfdoshlaringiz va kuzatgan odamlaringiz nima qilgani shu yerda. Kimnidir kuzatish uchun uning profilidagi «Kuzatish»ni bosing.</p>
+  <p class="mb-3 text-sm text-mute">Kuzatgan odamlaringiz nima qilgani shu yerda. Kimnidir kuzatish uchun uning profilidagi «Kuzatish»ni bosing.</p>
   {% if events %}
   <ul class="ca-feed">
     {% for e in events %}
@@ -31,7 +31,7 @@
     {% endfor %}
   </ul>
   {% else %}
-  <p class="ca7-empty"><b>Hozircha jim</b>{% if n_circle %}So‘nggi {{ days }} kunda hech narsa bo‘lmadi.{% else %}Hali hech kimni kuzatmayapsiz va sinfda emassiz.{% endif %}</p>
+  <p class="ca7-empty"><b>Hozircha jim</b>{% if n_circle %}So‘nggi {{ days }} kunda hech narsa bo‘lmadi.{% else %}Hali hech kimni kuzatmayapsiz.{% endif %}</p>
   {% endif %}
 </div>
 <aside class="ca7-aside" aria-label="Tavsiya">

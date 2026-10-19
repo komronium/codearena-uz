@@ -67,7 +67,7 @@ class Command(BaseCommand):
             for i, uname in enumerate(USERNAMES):
                 user, _ = User.objects.get_or_create(username=uname, defaults=dict(
                     email=f"{uname}@example.uz",
-                    role=User.Role.TEACHER if i == 0 else User.Role.STUDENT,
+                    role=User.Role.STUDENT,
                     rating=random.randint(900, 1600),
                     practice_points=random.randint(0, 3000),
                     country="UZ", location=random.choice(CITIES),

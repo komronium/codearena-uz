@@ -2,8 +2,8 @@ import pytest
 from django.urls import reverse
 from django.utils import timezone
 
-from apps.accounts.models import Group, User
-from apps.classroom.models import Assignment, AssignmentProblem, Duel
+from apps.accounts.models import User
+from apps.classroom.models import Duel
 from apps.contests.models import Contest
 from apps.problems.models import Language, Problem
 from apps.submissions.models import Submission
@@ -36,10 +36,6 @@ def test_landing_hero_announces_the_running_or_next_round(client, world):
     now = timezone.now()
     r = client.get("/")
     assert r.context["next_round"].title == "Keyingi raund" and "Kelgusi musobaqa" in r.content.decode()
-    group = Group.objects.create(name="201", teacher=User.objects.get(username="author"))
-    Contest.objects.create(title="Guruh raundi", start=now - timezone.timedelta(minutes=5),
-                           end=now + timezone.timedelta(hours=1), require_group=group)
-    assert client.get("/").context["next_round"].title == "Keyingi raund"  # a group's own round isn't advertised
     Contest.objects.create(title="Jonli raund", start=now - timezone.timedelta(minutes=5), end=now + timezone.timedelta(hours=1))
     r = client.get("/")
     assert r.context["next_round"].title == "Jonli raund" and "Jonli musobaqa" in r.content.decode()
@@ -55,19 +51,6 @@ def test_daily_box_shows_no_zero_streak_records(client, world):
 def test_signed_in_home_gathers_what_to_do_next(client, world):
     ali = User.objects.create_user("ali", password="x", first_name="Ali")
     bob = User.objects.create_user("bob", password="x")
-    teacher = User.objects.create_user("ustoz", password="x")
-    g = Group.objects.create(name="201", teacher=teacher)
-    g.members.add(ali)
-    now = timezone.now()
-    soon = Assignment.objects.create(group=g, title="Tez orada", created_by=teacher,
-                                     start=now - timezone.timedelta(days=1), deadline=now + timezone.timedelta(hours=5))
-    later = Assignment.objects.create(group=g, title="Keyinroq", created_by=teacher,
-                                      start=now, deadline=now + timezone.timedelta(days=5))
-    past = Assignment.objects.create(group=g, title="O‘tgan", created_by=teacher,
-                                     start=now - timezone.timedelta(days=9), deadline=now - timezone.timedelta(days=2))
-    for a in (soon, later, past):
-        AssignmentProblem.objects.create(assignment=a, problem=world[0])
-        AssignmentProblem.objects.create(assignment=a, problem=world[1])
     lang = Language.objects.create(code="python", name="Python 3", docker_image="x", run_cmd="x")
     Submission.objects.create(user=ali, problem=world[0], language=lang, source="x", verdict="AC")
     Duel.objects.create(challenger=bob, opponent=ali)
@@ -76,10 +59,8 @@ def test_signed_in_home_gathers_what_to_do_next(client, world):
     r = client.get("/")
     page = r.content.decode()
     assert "home/dashboard.html" in [t.name for t in r.templates]
-    assert [a.title for a in r.context["homework"]] == ["Tez orada", "Keyinroq"]  # open ones, due soonest first
-    assert r.context["homework"][0].my_solved == 1 and r.context["homework"][0].my_total == 2
     assert [d.challenger.username for d in r.context["challenges"]] == ["bob"]
-    assert "Salom, Ali" in page and "Keyingi raund" in page and "Tez orada" in page
+    assert "Salom, Ali" in page and "Keyingi raund" in page
     assert r.context["recent"][0].problem == world[0]
 
 
@@ -150,57 +131,29 @@ def test_top_bar_offers_admin_to_staff_only(client, world):
 
 
 @pytest.mark.django_db
-def test_nav_shows_a_running_contest_and_homework_due_soon(client):
+def test_nav_shows_a_running_contest_and_waiting_duel_calls(client):
     from datetime import timedelta
 
     from django.core.cache import cache
     from django.utils import timezone
 
-    from apps.accounts.models import Group, User
-    from apps.classroom.models import Assignment, AssignmentProblem
+    from apps.accounts.models import User
+    from apps.classroom.models import Duel
     from apps.contests.models import Contest, Participation
-    from apps.problems.models import Problem
 
     cache.clear()
-    teacher = User.objects.create_user("navt", password="x")
+    rival = User.objects.create_user("navt", password="x")
     me = User.objects.create_user("navs", password="x")
     now = timezone.now()
     live = Contest.objects.create(title="Jonli sinov", start=now - timedelta(hours=1), end=now + timedelta(hours=1))
     Participation.objects.create(user=me, contest=live)
-    g = Group.objects.create(name="G", teacher=teacher)
-    g.members.add(me)
-    p = Problem.objects.create(slug="navp", title="P", statement_md="x", author=teacher)
-    a = Assignment.objects.create(group=g, title="Uy ishi", start=now - timedelta(days=1), deadline=now + timedelta(hours=20))
-    AssignmentProblem.objects.create(assignment=a, problem=p, order=0)
+    Duel.objects.create(challenger=rival, opponent=me)  # pending: a call waiting on me
     client.force_login(me)
 
     page = client.get("/problems/").content.decode()
     assert "ca-live-pill" in page and "Musobaqangiz davom etmoqda" in page  # the clock, from any page
-    assert "ca-badge-live" in page and "Muddati yaqin vazifa yoki duel chaqiruvi: 1" in page
+    assert "ca-badge-live" in page and "Duel chaqiruvi: 1" in page
     assert "ca-live-pill" not in client.get("/").content.decode()  # home has its own live strip
-
-
-@pytest.mark.django_db
-def test_nav_does_not_advertise_a_contest_for_another_group(client):
-    from datetime import timedelta
-
-    from django.utils import timezone
-
-    from apps.accounts.models import Group, User
-    from apps.contests.models import Contest
-
-    teacher = User.objects.create_user("gt", password="x")
-    inside, outside = User.objects.create_user("gin", password="x"), User.objects.create_user("gout", password="x")
-    g = Group.objects.create(name="2-kurs", teacher=teacher)
-    g.members.add(inside)
-    now = timezone.now()
-    Contest.objects.create(title="Faqat 2-kurs", start=now - timedelta(hours=1), end=now + timedelta(hours=1), require_group=g)
-
-    client.force_login(outside)
-    assert "ca-live-pill" not in client.get("/problems/").content.decode()
-    client.force_login(inside)
-    page = client.get("/problems/").content.decode()
-    assert "ca-live-pill" in page and "Jonli musobaqa" in page
 
 
 @pytest.mark.django_db
@@ -273,10 +226,7 @@ def test_sitemap_lists_only_what_a_guest_can_open(client, world):
     ContestProblem.objects.create(contest=upcoming, problem=sealed, label="A")  # not before the start
     StudyPlan.objects.create(slug="sikllar", title="Sikllar", is_public=True)
     StudyPlan.objects.create(slug="qoralama", title="Qoralama")
-    teacher = User.objects.create_user("ustoz-sm", password="x")
     now = timezone.now()
-    own = Contest.objects.create(title="Guruh raundi", start=now, end=now,
-                                 require_group=Group.objects.create(name="G", teacher=teacher))
     ended = Contest.objects.create(title="O‘tgan raund", start=now - timezone.timedelta(days=2),
                                    end=now - timezone.timedelta(days=2, hours=-2))
 
@@ -289,7 +239,7 @@ def test_sitemap_lists_only_what_a_guest_can_open(client, world):
     courses = _sitemap(client, "courses")
     assert "/learn/sikllar/" in courses and "/learn/qoralama/" not in courses
     contests = _sitemap(client, "contests")
-    assert f"/contests/{upcoming.pk}/" in contests and f"/contests/{own.pk}/" not in contests
+    assert f"/contests/{upcoming.pk}/" in contests
     # results once a round has begun, dated by its end
     standings = _sitemap(client, "standings")
     assert f"/contests/{ended.pk}/standings/" in standings and f"/contests/{upcoming.pk}/standings/" not in standings
@@ -393,16 +343,11 @@ def test_head_names_the_page_for_search_and_link_previews(client, world):
 
 
 @pytest.mark.django_db
-def test_private_pages_and_group_rounds_stay_out_of_the_index(client, world, settings):
+def test_private_pages_stay_out_of_the_index(client, world, settings):
     assert _robots(client.get(reverse("problems:list")).content.decode()) == "max-image-preview:large"
     client.force_login(User.objects.create_user("boss", password="x", is_staff=True))
     assert _robots(client.get(reverse("moderation:dashboard")).content.decode()) == "noindex"
     client.logout()
-    teacher = User.objects.create_user("ustoz-r", password="x")
-    own = Contest.objects.create(title="Guruh", start=timezone.now(), end=timezone.now() + timezone.timedelta(hours=1),
-                                 require_group=Group.objects.create(name="G", teacher=teacher))
-    assert _robots(client.get(reverse("contests:detail", args=[own.pk])).content.decode()) == "noindex"
-    assert _robots(client.get(reverse("contests:standings", args=[own.pk])).content.decode()) == "noindex"
     open_round = Contest.objects.get(title="Keyingi raund")
     page = client.get(reverse("contests:detail", args=[open_round.pk])).content.decode()
     assert _robots(page) == "max-image-preview:large" and '"@type": "BreadcrumbList"' in page

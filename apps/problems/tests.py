@@ -11,7 +11,7 @@ from .scoring import BANDS, MIN_ATTEMPTS, compute_points
 
 @pytest.fixture
 def problem(db):
-    author = User.objects.create_user("teacher", password="x", role="teacher")
+    author = User.objects.create_user("teacher", password="x")
     p = Problem.objects.create(slug="a-plus-b", title="A + B", statement_md="Ikki son **yig'indisi**.",
                                author=author)
     TestCase.objects.create(problem=p, input="1 2\n", expected="3\n", is_sample=True, order=0)
@@ -338,7 +338,7 @@ def test_recalc_points_command_updates_from_real_submissions():
 
     from apps.submissions.models import Submission, UserProblemSolved
 
-    author = User.objects.create_user("teacher", password="x", role="teacher")
+    author = User.objects.create_user("teacher", password="x")
     p = Problem.objects.create(slug="easy-one", title="Easy One", statement_md="x", author=author,
                                difficulty=Problem.Difficulty.EASY, status=Problem.Status.APPROVED)
     python = Language.objects.create(code="python", name="Python 3", docker_image="x", run_cmd="x")
@@ -370,7 +370,7 @@ def test_recalc_points_makes_practice_points_live():
     from apps.submissions.models import Submission
     from apps.submissions.solves import refresh_solves
 
-    author = User.objects.create_user("teacher", password="x", role="teacher")
+    author = User.objects.create_user("teacher", password="x")
     ali = User.objects.create_user("ali", password="x")
     p = Problem.objects.create(slug="p", title="P", statement_md="x", author=author, points=999,
                                difficulty=Problem.Difficulty.EASY, status=Problem.Status.APPROVED)

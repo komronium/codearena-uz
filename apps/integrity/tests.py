@@ -588,17 +588,15 @@ def test_evidence_skips_contests_from_before_telemetry(flag_contest, flag_proble
     assert contest_evidence(flag_contest) == {}
 
 
-# ---------- practice: paste lock, signals, the teacher's report ----------
+# ---------- practice: paste lock, signals, the staff report ----------
 
 def _practice_world():
-    from apps.accounts.models import Group
     from apps.submissions.models import UserProblemSolved
     from apps.submissions.solves import sync_practice_points
 
-    teacher = User.objects.create_user("ustoz1", password="x", role=User.Role.TEACHER)
+    teacher = User.objects.create_user("ustoz1", password="x", is_staff=True)  # the reviewer
     mine = User.objects.create_user("talaba1", password="x")
     other = User.objects.create_user("begona1", password="x")
-    Group.objects.create(name="2-kurs", teacher=teacher).members.add(mine)
     admin = User.objects.create_user("adm", password="x", is_staff=True)
     p = Problem.objects.create(slug="pr-easy", title="Oson masala", statement_md="x", author=admin, difficulty="easy")
     py = Language.objects.create(code="python", name="Python 3", docker_image="x", run_cmd="x")
@@ -625,7 +623,7 @@ def _clean_trail(client, user, p, ac_at):
 
 
 @pytest.mark.django_db
-def test_practice_signals_flag_the_ai_shaped_solve_and_a_teacher_can_void_its_points(client):
+def test_practice_signals_flag_the_ai_shaped_solve_and_staff_can_void_its_points(client):
     from .models import PracticeEvent
 
     teacher, mine, other, p, ac_at = _practice_world()
@@ -643,11 +641,11 @@ def test_practice_signals_flag_the_ai_shaped_solve_and_a_teacher_can_void_its_po
     client.force_login(teacher)
     page = client.get(reverse("integrity:practice_report"))
     body = page.content.decode()
-    assert [r["solve"].user for r in page.context["rows"]] == [mine]  # not the clean solve, not another group
+    assert [r["solve"].user for r in page.context["rows"]] == [mine]  # not the clean solve
     assert "boshqa oynada" in body and "uzun kod" in body
 
     url = reverse("integrity:practice_decide", args=[mine.pk, p.pk])
-    assert client.post(reverse("integrity:practice_decide", args=[other.pk, p.pk]), {"decision": "confirm"}).status_code == 400
+    assert client.post(reverse("integrity:practice_decide", args=[mine.pk, p.pk]), {"decision": "bad"}).status_code == 400
     client.post(url, {"decision": "confirm", "back": "https://evil.example/"})
     mine.refresh_from_db()
     assert mine.practice_points == 0
@@ -668,9 +666,9 @@ def test_practice_editor_locks_long_paste_on_easy_only_and_says_so(client):
     easy_page = client.get(reverse("problems:detail", args=[p.slug])).content.decode()
     assert "const locked = true" in easy_page and "uzun kod qo‘yish yopiq" in easy_page
     hard_page = client.get(reverse("problems:detail", args=[hard.slug])).content.decode()
-    assert "const locked = false" in hard_page and "o‘qituvchi ko‘radi" in hard_page
+    assert "const locked = false" in hard_page
     # the page's name and the site's, nothing else (its copy-code script once landed inside <title>)
-    assert "<title>Vazifalar — CodeArena</title>" in client.get(reverse("classroom:list")).content.decode()
+    assert "<title>Duellar — CodeArena</title>" in client.get(reverse("classroom:duels")).content.decode()
 
 
 @pytest.mark.django_db
@@ -761,15 +759,13 @@ def test_practice_submission_no_longer_has_to_come_from_the_editor(client, setti
 
 
 @pytest.mark.django_db
-def test_a_strongly_flagged_new_solve_is_held_until_a_teacher_clears_it(client):
-    from apps.accounts.models import Group
+def test_a_strongly_flagged_new_solve_is_held_until_staff_clear_it(client):
     from apps.submissions.solves import refresh_solves
 
     from .models import PracticeEvent, PracticeReview, PracticeSnapshot
 
-    teacher = User.objects.create_user("ustoz9", password="x", role=User.Role.TEACHER)
+    teacher = User.objects.create_user("ustoz9", password="x", is_staff=True)
     kid = User.objects.create_user("bola9", password="x")
-    Group.objects.create(name="G9", teacher=teacher).members.add(kid)
     p = Problem.objects.create(slug="pr-held", title="Ushlangan", statement_md="x", author=teacher, difficulty="easy")
     py = Language.objects.create(code="python", name="Python 3", docker_image="x", run_cmd="x")
     # page open, a long paste tried, and the accepted code never in the editor

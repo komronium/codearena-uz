@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Boshqaruv{% endblock %}
 {% block band %}
-{% comment %}#7 staff home: the decisions waiting first (the problem queue, teacher requests, today's problem), then the
+{% comment %}#7 staff home: the decisions waiting first (the problem queue, today's problem), then the
 site's figures; the side column has every staff section.{% endcomment %}
 <section class="ca-hud" aria-labelledby="mod-title">
   <div class="ca-hud-in">
@@ -52,11 +52,6 @@ site's figures; the side column has every staff section.{% endcomment %}
         <div class="ca7-mis-f"><a class="ca-btn ca-btn-soft ca-btn-wb" href="{% url 'integrity:practice_report' %}">Hisobotni ochish</a></div></div>
     </div>
     <div>
-      <span class="ca7-mis-ico is-learn" aria-hidden="true"><i data-lucide="users" class="lu"></i></span>
-      <div class="min-w-0 flex-1"><b class="ca7-mis-t">O‘qituvchi so‘rovlari</b><small>{% if counts.teacher_requests %}{{ counts.teacher_requests }} ta so‘rov kutmoqda{% else %}Yangi so‘rov yo‘q{% endif %}</small>
-        <div class="ca7-mis-f"><a class="ca-btn ca-btn-soft ca-btn-wb" href="{% url 'moderation:users' %}?requests=1">Foydalanuvchilar</a></div></div>
-    </div>
-    <div>
       <span class="ca7-mis-ico is-learn" aria-hidden="true"><i data-lucide="calendar" class="lu"></i></span>
       <div class="min-w-0 flex-1"><b class="ca7-mis-t">Kun masalasi</b><small>{% if daily %}Bugun: {{ daily.problem.title }} · {{ daily.problem.get_difficulty_display }}{% else %}Bugun tanlanmagan{% endif %}</small>
         <div class="ca7-mis-f"><a class="ca-btn ca-btn-soft ca-btn-wb" href="{% url 'moderation:daily_problem' %}">{% if daily %}Boshqasini tanlash{% else %}Tanlash{% endif %}</a></div></div>
@@ -82,7 +77,6 @@ site's figures; the side column has every staff section.{% endcomment %}
       <a href="{% url 'moderation:problems' %}"><dd class="tabular">{{ counts.problems }}</dd><dt>Masalalar</dt></a>
       <a href="{% url 'moderation:contests' %}"><dd class="tabular">{{ counts.contests }}</dd><dt>Musobaqalar</dt></a>
       <a href="{% url 'moderation:users' %}"><dd class="tabular">{{ counts.users }}</dd><dt>Foydalanuvchilar</dt></a>
-      <a href="{% url 'moderation:groups' %}"><dd class="tabular">{{ counts.groups }}</dd><dt>Guruhlar</dt></a>
       <a href="{% url 'moderation:submissions' %}"><dd class="tabular">{{ counts.submissions }}</dd><dt>Urinishlar</dt></a>
       <a href="{% url 'moderation:tags' %}"><dd class="tabular">{{ counts.tags }}</dd><dt>Mavzular</dt></a>
     </dl>

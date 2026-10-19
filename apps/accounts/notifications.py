@@ -5,7 +5,7 @@ from django.db import IntegrityError
 
 from .models import Notification
 
-ICONS = {"duel": "swords", "assignment": "notebook-pen", "review": "message-square-text", "badge": "award"}
+ICONS = {"duel": "swords", "badge": "award"}
 SHOWN = 8  # in the bell's menu
 
 

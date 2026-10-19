@@ -82,7 +82,6 @@ def preferences(request):
         "notify_daily_tip": link.notify_daily_tip,
         "notify_trending_problem": link.notify_trending_problem,
         "notify_contests": link.notify_contests,
-        "notify_assignments": link.notify_assignments,
         "notify_duels": link.notify_duels,
         "notify_badges": link.notify_badges,
         "notify_streak": link.notify_streak,

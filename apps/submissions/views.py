@@ -1,5 +1,4 @@
 import django_rq
-from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import redirect_to_login
 from django.core.paginator import Paginator
@@ -10,7 +9,6 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from apps.accounts.models import User
-from apps.classroom.access import can_review, teaches
 from apps.contests.models import Participation, VoidedProblem
 from apps.contests.services import (
     access_allowed,
@@ -48,7 +46,7 @@ def _gate(request, slug):
     ):
         raise Http404
     # re-check supervised-mode eligibility on every submit, not just at
-    # registration — group membership or client IP can change mid-contest.
+    # registration — the client IP can change mid-contest.
     if contest is not None and not access_allowed(
         request.user, contest, request.META.get("REMOTE_ADDR")
     ):
@@ -229,7 +227,6 @@ def _own(request, pk):
     if (
         s.user_id == request.user.pk
         or request.user.is_staff
-        or teaches(request.user, s.user_id)
     ):
         return s
     if (
@@ -354,14 +351,6 @@ def detail(request, pk):
 
         picks = next_problems(request.user, n=1, exclude=(s.problem_id,))
         ctx["next_pick"] = picks[0] if picks else None
-    if can_review(request.user, s):
-        reviews = list(s.reviews.select_related("author"))
-        lines = s.source.splitlines()
-        for r in reviews:
-            r.code = lines[r.line - 1] if r.line and r.line <= len(lines) else ""
-        if s.user_id == request.user.pk:
-            s.reviews.filter(read=False).exclude(author=request.user).update(read=True)
-        ctx |= {"reviews": reviews, "can_review": True, "n_lines": len(lines)}
     return render(request, "submissions/detail.html", ctx)
 
 

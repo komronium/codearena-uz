@@ -166,8 +166,6 @@ def register(request):
         else:
             login(request, user)
             onboarding.send_verification(request, user, force=True)
-            if user.teacher_requested:
-                messages.success(request, "Xush kelibsiz! O‘qituvchi so‘rovingiz adminga yuborildi — tasdiqlangach, «Vazifalar» bo‘limida guruh ochasiz.")
             return redirect(nxt or "home")
     return render(request, "registration/register.html", {"form": form, "next": nxt})
 
@@ -184,17 +182,6 @@ class PasswordChange(SuccessMessageMixin, auth_views.PasswordChangeView):
     """Knowing the old password is enough — no email round trip."""
     success_url = reverse_lazy("profile_edit")
     success_message = "Parol almashtirildi."
-
-
-@login_required
-@require_POST
-def teacher_request(request):
-    user = request.user
-    if user.role == User.Role.STUDENT and not user.is_staff and not user.teacher_requested:
-        user.teacher_requested = True
-        user.save(update_fields=["teacher_requested"])
-        messages.success(request, "So‘rov yuborildi. Admin tasdiqlagach, «Vazifalar» bo‘limida guruh ochasiz.")
-    return redirect("profile_edit")
 
 
 @login_required
@@ -692,18 +679,17 @@ def honor(request):
 @login_required
 @require_POST
 def verify_user(request, user_id):
-    """A teacher (of one of the student's groups) or staff confirms this is the real student.
+    """Staff confirm this is the real student.
     Only verified users get an official rating, so it is rebuilt either way."""
     from django.core.exceptions import PermissionDenied
     from django.db import transaction
     from django.http import HttpResponseBadRequest
 
-    from apps.classroom.access import teaches
     from apps.contests.rating import recalc_official
     from apps.integrity import audit
 
     student = get_object_or_404(User, pk=user_id)
-    if not (request.user.is_staff or teaches(request.user, student.pk)):
+    if not request.user.is_staff:
         raise PermissionDenied
     want = {"1": True, "0": False}.get(request.POST.get("verified"))
     if want is None:

@@ -9,7 +9,7 @@ from django.utils import timezone
 
 from apps.accounts.countries import COUNTRY_CHOICES
 from apps.accounts.forms import validate_public_username
-from apps.accounts.models import Group, User
+from apps.accounts.models import User
 from apps.contests.models import MIN_POINTS, Contest, ContestProblem
 from apps.contests.services import reuse_reason
 from apps.learn.models import RESERVED_SLUGS, StudyPlan
@@ -158,7 +158,7 @@ class ContestForm(ModelForm):
     class Meta:
         model = Contest
         fields = ["title", "description_md", "start", "end", "type", "is_rated", "division", "is_official", "review_top_n",
-                  "allowed_ip_prefix", "require_group", "badge", "personal_minutes"]
+                  "allowed_ip_prefix", "badge", "personal_minutes"]
         widgets = {
             "personal_minutes": forms.NumberInput(attrs={**_CA_INPUT, "min": 0, "max": 1440, "placeholder": "0 — hamma uchun bir soat"}),
             "title": forms.TextInput(attrs=_CA_INPUT),
@@ -168,7 +168,6 @@ class ContestForm(ModelForm):
             "allowed_ip_prefix": forms.TextInput(attrs={**_CA_INPUT, "placeholder": "masalan 10.0."}),
             "badge": forms.TextInput(attrs={**_CA_INPUT, "placeholder": "masalan Marathon #1"}),
             "review_top_n": forms.NumberInput(attrs={**_CA_INPUT, "min": 0, "max": 100}),
-            "require_group": forms.Select(attrs={"class": "ca-select"}),
             "division": forms.Select(attrs={"class": "ca-select"}),
             "type": forms.Select(attrs={"class": "ca-select"}),
         }
@@ -265,22 +264,6 @@ class UserForm(ModelForm):
 
     def clean_username(self):
         return validate_public_username(self.cleaned_data["username"])
-
-
-class GroupForm(ModelForm):
-    class Meta:
-        model = Group
-        fields = ["name", "teacher", "members"]
-        widgets = {
-            "name": forms.TextInput(attrs=_CA_INPUT),
-            "teacher": forms.Select(attrs={"class": "ca-select"}),
-            "members": forms.SelectMultiple(attrs={"class": "ca-select", "size": 12}),
-        }
-
-    def __init__(self, *a, **kw):
-        super().__init__(*a, **kw)
-        self.fields["teacher"].queryset = User.objects.filter(is_staff=True).order_by("username")
-        self.fields["members"].queryset = User.objects.order_by("username")
 
 
 class TagForm(ModelForm):

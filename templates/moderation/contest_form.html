@@ -70,7 +70,6 @@
       <div><label class="ca-label" for="{{ form.division.id_for_label }}">Divizion</label>{{ form.division }}
         <p class="mt-1 text-xs text-mute">Diapazondan tashqaridagilar ham qatnashadi, lekin reytingi o‘zgarmaydi.</p>
         {% if form.division.errors %}<p class="mt-1 text-sm text-bad">{{ form.division.errors.0 }}</p>{% endif %}</div>
-      <div><label class="ca-label" for="{{ form.require_group.id_for_label }}">Faqat guruh uchun</label>{{ form.require_group }}</div>
       <div><label class="ca-label" for="{{ form.allowed_ip_prefix.id_for_label }}">IP prefiks (ixtiyoriy)</label>{{ form.allowed_ip_prefix }}
         <p class="mt-1 text-xs text-mute">Faqat shu prefiksli IP dan yuborish mumkin, masalan sinf tarmog‘i.</p></div>
       <div><label class="ca-label" for="{{ form.personal_minutes.id_for_label }}">Shaxsiy vaqt (daqiqa)</label>{{ form.personal_minutes }}

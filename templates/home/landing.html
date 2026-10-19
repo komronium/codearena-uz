@@ -18,7 +18,7 @@ the next round) and one closing call.{% endcomment %}
       </a>
       {% endwith %}{% endif %}
       <h1 id="hero-title">Dasturlashni musobaqada o‘rganing</h1>
-      <p class="ca7-lead">Masala yeching, sinfdoshingiz bilan bellashing, reytingda ko‘tariling. Kodingiz shu zahoti serverda testlanadi, natija halol.</p>
+      <p class="ca7-lead">Masala yeching, do‘stingiz bilan bellashing, reytingda ko‘tariling. Kodingiz shu zahoti serverda testlanadi, natija halol.</p>
       <div class="flex flex-wrap gap-3">
         <a class="ca-btn ca-btn-gold ca-btn-lg" href="{% url 'register' %}">Bepul boshlash</a>
         <a class="ca7-hbtn is-wide ca-btn-lg" href="{% url 'problems:list' %}">Masalalarni ko‘rish</a>
@@ -53,33 +53,14 @@ the next round) and one closing call.{% endcomment %}
 
 <section aria-labelledby="features-title">
   <div class="ca7-sec-h"><h2 id="features-title">Nimasi bilan boshqacha</h2></div>
-  <p class="ca7-sec-sub">Katta platformalarda yo‘q narsalar: sinf, o‘qituvchi va halollik uchun qurilgan.</p>
+  <p class="ca7-sec-sub">Katta platformalarda yo‘q narsalar: duellar, musobaqalar va halollik uchun qurilgan.</p>
   <ul class="ca7-feats">
     <li><span class="ca7-fi" aria-hidden="true"><i data-lucide="trophy" class="lu"></i></span><div><h3>Reytingli musobaqalar</h3><p>Jonli natijalar jadvali va Elo reyting. Reytingli raundda faqat hech kim ko‘rmagan masalalar beriladi.</p></div></li>
-    <li><span class="ca7-fi" aria-hidden="true"><i data-lucide="swords" class="lu"></i></span><div><h3>1 ga 1 duellar</h3><p>Sinfdoshingizni chaqiring: Python, C++, Java yoki JavaScript kodi — nima chiqaradi? 5 ta savol, har biriga 20 soniya.</p></div></li>
+    <li><span class="ca7-fi" aria-hidden="true"><i data-lucide="swords" class="lu"></i></span><div><h3>1 ga 1 duellar</h3><p>Do‘stingizni chaqiring: Python, C++, Java yoki JavaScript kodi — nima chiqaradi? 5 ta savol, har biriga 20 soniya.</p></div></li>
     <li><span class="ca7-fi" aria-hidden="true"><i data-lucide="calendar-check" class="lu"></i></span><div><h3>Kun masalasi</h3><p>Har kuni bitta masala. Kunida yechsangiz Olov o‘sadi va +5 bonus ball olasiz.</p></div></li>
-    <li><span class="ca7-fi" aria-hidden="true"><i data-lucide="notebook-pen" class="lu"></i></span><div><h3>Uy vazifalari</h3><p>O‘qituvchi guruhga muddatli vazifa beradi, kim qachon yechganini ko‘radi va kodga satrma-satr izoh yozadi.</p></div></li>
     <li><span class="ca7-fi" aria-hidden="true"><i data-lucide="code" class="lu"></i></span><div><h3>{{ languages|length }} ta til</h3><p>{{ languages|join:", " }}. Har bir yechim cheklangan muhitda barcha testlarda tekshiriladi.</p></div></li>
     <li><span class="ca7-fi" aria-hidden="true"><i data-lucide="shield-check" class="lu"></i></span><div><h3>Halol natijalar</h3><p>Musobaqadagi har bir yechim dalillar bilan tekshiriladi. Shubha bo‘lsa, qarorni odam qabul qiladi va u jurnalga yoziladi.</p></div></li>
   </ul>
-</section>
-
-<section aria-labelledby="paths-title">
-  <div class="ca7-sec-h"><h2 id="paths-title">Kim uchun</h2></div>
-  <div class="ca7-paths">
-    <article>
-      <span class="ca7-fi" aria-hidden="true"><i data-lucide="graduation-cap" class="lu"></i></span>
-      <h3>O‘quvchi uchun</h3>
-      <ul><li>Oson masaladan boshlang, darajangizga mos keyingisi tavsiya qilinadi</li><li>Kun masalasi va Olov bilan har kuni mashq qiling</li><li>Sinfdoshingiz bilan duelda bellashing</li></ul>
-      <a class="ca-btn ca-btn-gold" href="{% url 'register' %}">Bepul boshlash</a>
-    </article>
-    <article>
-      <span class="ca7-fi" aria-hidden="true"><i data-lucide="users" class="lu"></i></span>
-      <h3>O‘qituvchi uchun</h3>
-      <ul><li>Sinf oching, o‘quvchilar kod bilan qo‘shiladi</li><li>Muddatli vazifa bering, kim topshirgani bir qarashda ko‘rinadi</li><li>Kodga satrma-satr izoh yozing, orqada qolganlarga Telegramda eslatma yuboring</li></ul>
-      <a class="ca-btn ca-btn-soft" href="{% url 'register' %}">O‘qituvchi sifatida boshlash</a>
-    </article>
-  </div>
 </section>
 
 <section aria-labelledby="now-title">
@@ -123,7 +104,7 @@ the next round) and one closing call.{% endcomment %}
   <div class="ca-hud-in">
     <div>
       <h2 id="cta-title">Bugun boshlang</h2>
-      <p class="ca-hud-sub">Ro‘yxatdan o‘tish bir daqiqa oladi. O‘qituvchimisiz? Ro‘yxatda belgilang: admin tasdiqlagach, o‘z guruhingizni ochib vazifa berasiz.</p>
+      <p class="ca-hud-sub">Ro‘yxatdan o‘tish bir daqiqa oladi.</p>
     </div>
     <a class="ca-btn ca-btn-gold ca-btn-lg ml-auto" href="{% url 'register' %}">Ro‘yxatdan o‘tish</a>
   </div>

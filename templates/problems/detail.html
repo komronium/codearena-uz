@@ -81,7 +81,7 @@ the console (samples, your own input, the run's result) and the one gold "Yubori
       {% if contest_blocked %}
       <div class="ca-alert ca-alert-bad mb-4" role="alert">
         <p class="font-semibold"><i data-lucide="shield-alert" class="lu mr-1.5" aria-hidden="true"></i>Bu masala siz uchun bloklangan.</p>
-        <p class="mt-1 text-sm">Musobaqadagi yechimingiz bekor qilingan va xato urinish hisoblandi. Musobaqa tugaguncha bu masalaga yechim yuborish mumkin emas. Xato deb hisoblasangiz, o‘qituvchingizga murojaat qiling.</p>
+        <p class="mt-1 text-sm">Musobaqadagi yechimingiz bekor qilingan va xato urinish hisoblandi. Musobaqa tugaguncha bu masalaga yechim yuborish mumkin emas. Xato deb hisoblasangiz, adminga murojaat qiling.</p>
       </div>
       {% endif %}
       <div class="ca-problem-heading">
@@ -99,9 +99,9 @@ the console (samples, your own input, the run's result) and the one gold "Yubori
           {% else %}
           <span class="ca-diff ca-diff-{{ problem.difficulty }}" title="Masala reytingi {{ problem.rating }}: reytingi shu songa teng o‘quvchi uni taxminan yarim holda yechadi">{{ problem.get_difficulty_display }}</span>
           {% if voided == "held" %}
-          <span class="font-medium text-warn" title="Yechim qanday yozilgani shubhali ko‘rindi, shuning uchun ball o‘qituvchi ko‘rib chiqquncha ushlab turilibdi. O‘zingiz yozgan bo‘lsangiz, ball qaytariladi."><i data-lucide="hourglass" class="lu" aria-hidden="true"></i>Ball tekshiruvda</span>
+          <span class="font-medium text-warn" title="Yechim qanday yozilgani shubhali ko‘rindi, shuning uchun ball admin ko‘rib chiqquncha ushlab turilibdi. O‘zingiz yozgan bo‘lsangiz, ball qaytariladi."><i data-lucide="hourglass" class="lu" aria-hidden="true"></i>Ball tekshiruvda</span>
           {% elif voided %}
-          <span class="font-medium text-bad" title="O‘qituvchi bu yechimni ko‘chirilgan deb belgiladi, shuning uchun amaliyot baliga qo‘shilmadi. Savol bo‘lsa, o‘qituvchingizga murojaat qiling."><i data-lucide="shield-alert" class="lu" aria-hidden="true"></i>Ball berilmadi</span>
+          <span class="font-medium text-bad" title="Admin bu yechimni ko‘chirilgan deb belgiladi, shuning uchun amaliyot baliga qo‘shilmadi. Savol bo‘lsa, adminga murojaat qiling."><i data-lucide="shield-alert" class="lu" aria-hidden="true"></i>Ball berilmadi</span>
           {% else %}
           <span title="Yechsangiz amaliyot balingizga qo‘shiladi. Ko‘p odam yechgan masala biroz arzonlashadi."><i data-lucide="coins" class="lu" aria-hidden="true"></i><b class="tabular">+{{ problem.points }}</b> ball</span>
           {% endif %}
@@ -373,7 +373,7 @@ the console (samples, your own input, the run's result) and the one gold "Yubori
       </div>
       <div class="ca-act">
         {% if user.is_authenticated %}
-        <span class="ca-act-keys" title="Ctrl+Enter — yuborish. Ctrl+' — sinab ko‘rish. Esc, keyin Tab — muharrirdan chiqish.{% if not contest %} {% if problem.difficulty == "beginner" or problem.difficulty == "easy" %}Bu masalada uzun kodni qo‘yib bo‘lmaydi.{% endif %} Mashqda kod qanday yozilgani o‘qituvchingizga ko‘rinadi; ko‘chirilgan yechim uchun ball berilmaydi.{% endif %}"><kbd class="ca-kbd">Ctrl</kbd>+<kbd class="ca-kbd">Enter</kbd> yuborish <i data-lucide="info" class="lu" aria-hidden="true"></i></span>
+        <span class="ca-act-keys" title="Ctrl+Enter — yuborish. Ctrl+' — sinab ko‘rish. Esc, keyin Tab — muharrirdan chiqish.{% if not contest %} {% if problem.difficulty == "beginner" or problem.difficulty == "easy" %}Bu masalada uzun kodni qo‘yib bo‘lmaydi.{% endif %} Mashqda kod qanday yozilgani adminlarga ko‘rinadi; ko‘chirilgan yechim uchun ball berilmaydi.{% endif %}"><kbd class="ca-kbd">Ctrl</kbd>+<kbd class="ca-kbd">Enter</kbd> yuborish <i data-lucide="info" class="lu" aria-hidden="true"></i></span>
         {% if contest_blocked %}
         <button type="button" id="trial-btn" class="ca-edb opacity-50 cursor-not-allowed" disabled title="Masala bloklangan — musobaqa tugaguncha sinab bo‘lmaydi"><i data-lucide="play" class="lu" aria-hidden="true"></i>Sinab ko‘rish</button>
         <button type="button" id="submit-btn" class="ca-btn ca-btn-gold ca-btn-go opacity-50 cursor-not-allowed" disabled title="Masala bloklangan — musobaqa tugaguncha yechim yuborish mumkin emas"><i data-lucide="send" class="lu" aria-hidden="true"></i>Yuborish</button>
@@ -1052,7 +1052,7 @@ resolves their bare imports so @codemirror/state loads once — two copies break
     <ul class="mt-4 list-disc space-y-1.5 pl-5 text-sm text-mute">
       <li>Kodni <b class="text-ink">o‘zingiz yozasiz</b>. AI'ga masalani berib kod yozdirish yoki birovning yechimini ko‘chirish mumkin emas.</li>
       <li>Hujjatlar, maslahatlar (hint) va AI'dan mavzuni tushuntirishni so‘rash mumkin.</li>
-      <li>Kod qanday yozilgani qayd etiladi va o‘qituvchingizga ko‘rinadi. Ko‘chirilgan yechim uchun ball berilmaydi, musobaqada esa diskvalifikatsiya qilinadi.</li>
+      <li>Kod qanday yozilgani qayd etiladi va adminlarga ko‘rinadi. Ko‘chirilgan yechim uchun ball berilmaydi, musobaqada esa diskvalifikatsiya qilinadi.</li>
     </ul>
     <a class="ca-link mt-2 inline-block text-sm" href="{% url 'honor' %}" target="_blank" rel="noopener">Batafsil: halollik qoidalari</a>
     <label class="mt-4 flex items-start gap-2 text-sm"><input type="checkbox" id="ca-honor-ok" class="mt-1"> <span>Men yechimlarimni o‘zim yozaman va qoidalarga amal qilaman.</span></label>
