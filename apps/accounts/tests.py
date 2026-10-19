@@ -648,6 +648,9 @@ def test_places_tidy_spellings_and_keep_unknown_text():
     assert canon_school("UZ", "OXU 2-ATT-25") == "Osiyo xalqaro universiteti"
     assert canon_school("UZ", "osiyo xalqaro unversituti 2-kurs") == "Osiyo xalqaro universiteti"
     assert canon_school("UZ", "buxoro davlat universiteti") == "Buxoro davlat universiteti"
+    for typed in ("2-ATT", "2-ATT-25", "OXU_2-ATT-25", "att 2- kurs", "ATT", "K4 ATT25 99 KURS"):
+        assert canon_school("UZ", typed) == "Osiyo xalqaro universiteti"
+    assert canon_school("UZ", "Battery maktabi") == "Battery maktabi"  # ATT only as a word of its own
     assert canon_school("UZ", "2-sonli maktab") == "2-sonli maktab"
 
 

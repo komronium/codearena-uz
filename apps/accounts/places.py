@@ -112,7 +112,9 @@ SCHOOLS = {
 
 # old free-text spellings of an institution, by a distinctive word, to its list name (first match wins)
 _SCHOOL_HINTS = {
-    "UZ": [(r"\boxu\b|osiyo", "Osiyo xalqaro universiteti")],
+    # "OXU", "osiyo ...", or the group code "ATT" (also "OXU_2-ATT-25", "att 2- kurs", "ATT25"): letters, not
+    # digits or underscores, bound the word
+    "UZ": [(r"(?<![a-z])(oxu|att)(?![a-z])|osiyo", "Osiyo xalqaro universiteti")],
 }
 
 
