@@ -3603,15 +3603,17 @@ body .EasyMDEContainer .cm-s-easymde .cm-link, body .EasyMDEContainer .cm-s-easy
 /* Taraqqiyot: the total over a four-segment meter and a row per level. Hovering or focusing a row or a segment turns the big
    number (and the row's count) into that level's percentage, and the other segments step back */
 .ca-sr { display: grid; gap: .8rem; }
-.ca-sr-hero { display: grid; }
+.ca-sr-hero { display: grid; cursor: default; }
 .ca-sr-c { grid-area: 1 / 1; display: flex; align-items: baseline; gap: .6rem; pointer-events: none; transition: opacity .15s ease; }
 .ca-sr-c b { font-size: 2.1rem; font-weight: 700; line-height: 1.1; letter-spacing: -.02em; }
 .ca-sr-c b small { margin-left: .1rem; font-size: 1.05rem; font-weight: 500; color: rgb(var(--ca-mute-rgb)); }
 .ca-sr-c span { font-size: 0.9375rem; color: rgb(var(--ca-mute-rgb)); }
-.ca-sr-c.is-lv { opacity: 0; }
+.ca-sr-c.is-lv, .ca-sr-c.is-top { opacity: 0; }
 .ca-sr-c.is-lv b, .ca-sr-c.is-lv span { color: var(--lvl); }
-.ca-sr-c.is-lv span { font-weight: 600; }
-.ca-sr-meter { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
+.ca-sr-c.is-lv span, .ca-sr-c.is-top span { font-weight: 600; }
+.ca-sr:has(.ca-sr-hero:hover) .ca-sr-c.is-all { opacity: 0; }
+.ca-sr:has(.ca-sr-hero:hover) .ca-sr-c.is-top { opacity: 1; }
+.ca-sr-meter { display: grid; gap: 4px; }  /* the columns come from the markup: one per level, as wide as its share of the problems */
 .ca-sr-seg { position: relative; display: block; height: 10px; border-radius: 9999px; overflow: hidden; background: color-mix(in srgb, var(--lvl) 20%, transparent); transition: opacity .15s ease; }
 .ca-sr-seg::after { content: ""; position: absolute; inset: 0 auto 0 0; width: var(--p, 0%); border-radius: inherit; background: var(--lvl); }
 .ca-sr-rows { display: grid; margin: 0 -.4rem; padding: 0; list-style: none; }

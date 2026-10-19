@@ -597,7 +597,7 @@ def profile(request, username):
         "by_diff": by_diff,
         # LeetCode's ring of what was solved per level, from the same counts
         "ring": solved_ring([{"value": d["key"], "label": d["label"], "done": d["solved"], "total": d["total"]}
-                             for d in by_diff if d["total"]]),
+                             for d in by_diff if d["total"]], user=profile_user),
         "problem_map": problem_map,
         "tier": rating_tier(profile_user.rating),
         "banner": tier_banner(profile_user.rating),

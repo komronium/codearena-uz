@@ -1,15 +1,18 @@
 {% comment %}Solved problems per level as one compact figure: the total as a big number over a meter of four segments (one per
 level, each filled as far as that level is solved) and a row per level underneath. Hover or focus a row or a segment
-and the big number (and the row's count) turns into that level's percentage; at rest the exact counts show. A row is
-a way in: it opens the problems of that level you have not solved. Colour is never the only key: every row names its
+and the big number (and the row's count) turns into how far ahead of the other solvers you are in that level; at rest the exact counts show. A row is
+a way in: it opens the problems of that level you have not solved. A segment is as wide as its level's share of the
+problems. Hovering shows where you stand: the percent of the other solvers you are ahead of, in that level or (over the
+number) overall. Colour is never the only key: every row names its
 level and shows its numbers.
 ctx: ring (apps.problems.progress.solved_ring), attempting (optional: tried, not solved yet), user.{% endcomment %}
 <div class="ca-sr" role="group" aria-label="Yechilgan masalalar: {{ ring.done }} / {{ ring.total }}">
-  <div class="ca-sr-hero">
+  <div class="ca-sr-hero"{% if ring.top is not None %} title="Umumiy: yechuvchilarning necha foizidan oldindasiz"{% endif %}>
     <p class="ca-sr-c is-all"><b class="tabular">{{ ring.done }}<small>/{{ ring.total }}</small></b><span>yechilgan{% if attempting %} · <span class="tabular" title="Urinilgan, hali yechilmagan">{{ attempting }} urinilgan</span>{% endif %}</span></p>
-    {% for s in ring.segments %}<p class="ca-sr-c is-lv" data-i="{{ s.i }}" style="--lvl: var(--ca-lvl-{{ s.value }}-ink)" aria-hidden="true"><b class="tabular">{{ s.pct }}<small>%</small></b><span>{{ s.label }} yechilgan</span></p>{% endfor %}
+    {% if ring.top is not None %}<p class="ca-sr-c is-top" aria-hidden="true"><b class="tabular">{{ ring.top }}<small>%</small></b><span>yechuvchilardan oldindasiz</span></p>{% endif %}
+    {% for s in ring.segments %}{% if s.top is not None %}<p class="ca-sr-c is-lv" data-i="{{ s.i }}" style="--lvl: var(--ca-lvl-{{ s.value }}-ink)" aria-hidden="true"><b class="tabular">{{ s.top }}<small>%</small></b><span>yechuvchilardan oldindasiz</span></p>{% endif %}{% endfor %}
   </div>
-  <div class="ca-sr-meter" aria-hidden="true">
+  <div class="ca-sr-meter" aria-hidden="true" style="grid-template-columns: {% for s in ring.segments %}minmax(12px, {{ s.total }}fr) {% endfor %}">
     {% for s in ring.segments %}<i class="ca-sr-hit ca-sr-seg" data-i="{{ s.i }}" style="--lvl: var(--ca-lvl-{{ s.value }}); --p: {{ s.pct }}%"></i>{% endfor %}
   </div>
   <ul class="ca-sr-rows">
@@ -18,7 +21,7 @@ ctx: ring (apps.problems.progress.solved_ring), attempting (optional: tried, not
       <a class="ca-sr-hit" data-i="{{ s.i }}" href="{% url 'problems:list' %}?difficulty={{ s.value }}{% if user.is_authenticated and s.done < s.total %}&amp;status=new{% endif %}" title="{{ s.label }}: {% if s.done < s.total %}yechilmaganlarni ochish{% else %}hammasi yechilgan{% endif %}">
         <i class="ca-sr-dot" aria-hidden="true"></i>
         <span class="ca-sr-lv">{{ s.label }}</span>
-        <b class="tabular"><span class="ca-sr-n">{{ s.done }}<small>/{{ s.total }}</small></span><span class="ca-sr-p" aria-hidden="true">{{ s.pct }}<small>%</small></span></b>
+        <b class="tabular"><span class="ca-sr-n">{{ s.done }}<small>/{{ s.total }}</small></span>{% if s.top is not None %}<span class="ca-sr-p" aria-hidden="true">{{ s.top }}<small>%</small></span>{% endif %}</b>
         {% if s.done >= s.total %}<i data-lucide="check" class="lu" aria-label="hammasi yechilgan"></i>{% else %}<i data-lucide="chevron-right" class="lu" aria-hidden="true"></i>{% endif %}
       </a>
     </li>

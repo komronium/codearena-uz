@@ -340,7 +340,7 @@ def problem_list(request):
             "problems": page,
             "progress": progress,
             "level_progress": level_progress,
-            "ring": solved_ring(level_progress) if level_progress else None,
+            "ring": solved_ring(level_progress, user=request.user) if level_progress else None,
             "top_topics": topics[:8],
             "more_topics": topics[8:],
             "plans": plans,

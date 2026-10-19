@@ -164,7 +164,7 @@ def home(request):
         "rating_card": _rating_card(user),
         "spark": _spark(user),
         # a newcomer's first steps show LeetCode's ring of solved problems per level (the problem list has it otherwise)
-        "ring": solved_ring(level_progress(user, open_problems())) if is_new else None,
+        "ring": solved_ring(level_progress(user, open_problems()), user=user) if is_new else None,
         "next_picks": next_picks, "picks_reason": shared_reason(next_picks),
         "registered": set(Participation.objects.filter(user=user, contest__in=upcoming)
                           .values_list("contest_id", flat=True)),
