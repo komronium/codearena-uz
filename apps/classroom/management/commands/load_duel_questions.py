@@ -14,6 +14,7 @@ from django.db import transaction
 from apps.classroom.models import DuelQuestion
 from apps.classroom.quiz_bank import entries
 from apps.classroom.quiz_check import check, sandbox_run
+from apps.classroom.quiz_variants import acceptable
 
 FIELDS = ("language", "level", "kind", "code", "full", "expect", "options", "answer", "accept", "explain")
 
@@ -60,6 +61,9 @@ class Command(BaseCommand):
             retired += variants.exclude(origin__in=keys).update(is_active=False)
             picks = set(DuelQuestion.objects.filter(origin="", key__in=keys).exclude(options=[]).values_list("key", flat=True))
             retired += variants.filter(options=[], origin__in=picks).update(is_active=False)
+            origin_code = {e["key"]: e["code"] for e in bank}
+            poor = [q.pk for q in variants.filter(origin__in=keys) if not acceptable(q.code, q.answer, origin_code[q.origin])]
+            retired += DuelQuestion.objects.filter(pk__in=poor).update(is_active=False)
             self.stdout.write(f"Yangi: {added}, o‘zgargan: {changed}, olib tashlangan: {retired}, "
                               f"jami faol: {DuelQuestion.objects.filter(is_active=True).count()}.")
             if opts["dry_run"]:

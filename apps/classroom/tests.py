@@ -695,3 +695,13 @@ def test_duels_ask_only_about_io_if_loops_lists_and_strings():
     assert not friendly("java", "static int f() { return 1; }", "1", [])
     for e in entries():  # nothing in the bank breaks the rule
         assert friendly(e["language"], e["code"], e["answer"], e["options"]), e["key"]
+
+
+def test_a_variant_with_a_long_decimal_or_a_new_zero_is_not_worth_asking():
+    from .quiz_variants import acceptable
+
+    assert acceptable("print(9 // 2)", "4", "print(7 // 2)")
+    assert not acceptable("print(12 / 7)", "1.7142857142857142", "print(7 / 2)")
+    assert acceptable("print(7 / 4)", "1.75", "print(7 / 2)")
+    assert not acceptable("print(10 - 0 * 3)", "10", "print(10 - 2 * 3)")  # a 0 that was not there
+    assert acceptable("print(0 + 5)", "5", "print(0 + 3)")  # one the original had

@@ -17,6 +17,15 @@ from .quiz_check import _out, program
 _STRING = re.compile(r"""("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')""")
 _INT = re.compile(r"(?<![\w.])\d+(?![\w.])")
 _MAX_ANSWER = 60
+_ZERO = re.compile(r"(?<![\w.])0(?![\w.])")
+
+
+def acceptable(code: str, answer: str, origin_code: str) -> bool:
+    """A variant worth asking: not a long decimal tail (1.7142857142857142), and no 0 the original didn't have
+    (`x * 0`, `+ 0` make a question trivial)."""
+    if re.search(r"\d\.\d{5,}", answer):
+        return False
+    return len(_ZERO.findall(code)) <= len(_ZERO.findall(origin_code))
 
 
 def mutate(code: str, rng: random.Random) -> str:
@@ -71,7 +80,7 @@ def variants_of(entry: dict, run, count: int, rng: random.Random):
         options = options_for(answer, entry["options"], rng)
         if entry["options"] and not options:  # a pick question never turns into a typed one
             continue
-        if not friendly(entry["language"], code, answer, options):
+        if not friendly(entry["language"], code, answer, options) or not acceptable(code, answer, entry["code"]):
             continue
         digest = hashlib.sha1(f"variant\n{entry['language']}\n{code}".encode()).hexdigest()[:10]
         yield {**entry, "code": code, "answer": answer, "accept": [], "explain": "",
