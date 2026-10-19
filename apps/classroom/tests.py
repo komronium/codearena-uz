@@ -469,7 +469,7 @@ def test_an_answer_gets_only_its_verdict_then_the_next_question(client, bank):
     url = reverse("classroom:duel_play", args=[duel.pk])
     q = client.get(url).context["q"]
     r = client.post(url, {"index": "0", "answer": q.answer}, HTTP_X_DUEL_ANSWER="1")
-    assert r.json() == {"verdict": "ok", "next": url, "ghost": None}  # never the right answer; no opponent yet
+    assert r.json() == {"verdict": "ok", "next": url}  # never the right answer
     q = client.get(url).context["q"]
     assert client.post(url, {"index": "1", "answer": "nope"}, HTTP_X_DUEL_ANSWER="1").json()["verdict"] == "bad"
     client.get(url)
@@ -505,36 +505,6 @@ def test_staff_see_every_duels_result_and_both_players_answers(client, bank):
     assert client.get(reverse("moderation:duels"), {"user": "nobody"}).context["page"].object_list == []
     review = client.get(reverse("classroom:duel", args=[duel.pk])).context["review"]
     assert len(review) == 5 and [s["label"] for s in review[0]["answers"]] == ["p1", "p2"]
-
-
-@pytest.mark.django_db
-def test_the_second_player_races_the_firsts_ghost_question_by_question(client, bank):
-    from .duels import accept, challenge
-
-    p1, p2 = _players()
-    duel, _ = challenge(p1, "p2", "python")
-    _play(duel, p1, right=1, secs=6)  # the first right in 6 s, then four wrong
-    accept(duel, p2)
-    client.force_login(p2)
-    url = reverse("classroom:duel_play", args=[duel.pk])
-    g = client.get(url).context["ghost"]
-    assert (g["name"], g["absent"], g["past"], g["right"]) == ("p1", False, [], 0)
-    assert (g["now"]["state"], g["now"]["took_ms"], g["now"]["secs"]) == ("ok", 6000, "6,0")  # never their answer
-    assert "answer" not in g["now"]
-    j = client.post(url, {"index": "0", "answer": "nope"}, HTTP_X_DUEL_ANSWER="1").json()
-    assert j["verdict"] == "bad" and j["ghost"]["state"] == "ok"
-    g = client.get(url).context["ghost"]
-    assert [c["state"] for c in g["past"]] == ["ok"] and g["right"] == 1 and g["now"]["state"] == "bad"
-    assert client.get(url, {"ghost": "1"}).json()["state"] == "bad"
-    assert client.get(url, {"ghost": "4"}).json() == {"state": "none"}  # a question not shown to you yet
-
-    # the first player, while the second hasn't started: the ghost is absent
-    p3 = User.objects.create_user("p3", password="x")
-    duel, _ = challenge(p3, "p1", "python")
-    client.force_login(p3)
-    url = reverse("classroom:duel_play", args=[duel.pk])
-    g = client.get(url).context["ghost"]
-    assert g["absent"] is True and "p1 hali o‘ynamagan" in client.get(url).content.decode()
 
 
 @pytest.mark.django_db(transaction=True)

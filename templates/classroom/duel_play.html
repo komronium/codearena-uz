@@ -12,7 +12,7 @@ second. Copying out of the question is blocked, so it can't be pasted into an AI
     <a class="ca-link text-sm text-mute" href="{% url 'classroom:duel' duel.pk %}"><i data-lucide="swords" class="lu mr-1" aria-hidden="true"></i>{{ duel.challenger.username }} vs {{ duel.opponent.username|default:"?" }}</a>
     <span class="ca-quiz-meta"><b>{{ language }}</b></span>
   </div>
-  {# head to head: your answers and score, the opponent's as a ghost (revealed as your clock passes them) #}
+  {# your answers and score #}
   <div class="ca-quiz-vs" aria-label="Hisob">
     <div class="is-me">
       <span class="ca-quiz-vs-name">Siz</span>
@@ -20,14 +20,6 @@ second. Copying out of the question is blocked, so it can't be pasted into an AI
         {% for c in cells %}<li class="{% if c %}is-{{ c }}{% endif %}{% if forloop.counter == n %} is-here{% endif %}"><span class="sr-only">{{ forloop.counter }}-savol: {% if c == "ok" %}to‘g‘ri{% elif c == "bad" %}noto‘g‘ri{% elif c == "now" %}hozirgi{% else %}hali yo‘q{% endif %}</span></li>{% endfor %}
       </ol>
       <b class="ca-quiz-vs-score tabular" id="my-score">{{ my_right|default:0 }}</b>
-    </div>
-    <span class="ca-quiz-vs-sep" aria-hidden="true">:</span>
-    <div class="is-ghost{% if not ghost or ghost.absent %} is-absent{% endif %}">
-      <b class="ca-quiz-vs-score tabular" id="ghost-score">{% if ghost and not ghost.absent %}{{ ghost.right }}{% else %}–{% endif %}</b>
-      <ol class="ca-quiz-steps" id="ghost-steps" aria-label="Raqibning javoblari">
-        {% for c in cells %}{% with i=forloop.counter0 %}<li class="{% for g in ghost.past %}{% if forloop.counter0 == i %}is-{{ g.state }}{% endif %}{% endfor %}"></li>{% endwith %}{% endfor %}
-      </ol>
-      <span class="ca-quiz-vs-name">{% if ghost %}{{ ghost.name }}{% else %}raqib kutilmoqda{% endif %}</span>
     </div>
   </div>
 
@@ -42,10 +34,9 @@ second. Copying out of the question is blocked, so it can't be pasted into an AI
   </section>
   {% else %}
   <section class="ca-quiz-card" id="quiz-card" aria-labelledby="quiz-ask">
-    <div class="ca-quiz-clock" aria-hidden="true"><i id="quiz-bar"></i>{% if ghost and not ghost.absent %}<span class="ca-quiz-gmark" id="ghost-mark" hidden>{{ ghost.name|first|upper }}</span>{% endif %}</div>
+    <div class="ca-quiz-clock" aria-hidden="true"><i id="quiz-bar"></i></div>
     <div class="ca-quiz-head">
       <p class="ca-quiz-n">{{ n }}-savol, {{ n_questions }} tadan</p>
-      {% if ghost %}<span class="ca-quiz-gpill" id="ghost-pill" aria-live="polite"><i aria-hidden="true">{{ ghost.name|first|upper }}</i><span id="ghost-text">{% if ghost.absent %}{{ ghost.name }} hali o‘ynamagan{% else %}{{ ghost.name }} o‘ylamoqda…{% endif %}</span></span>{% endif %}
       <b class="ca-quiz-secs tabular" id="quiz-secs" aria-hidden="true">{% widthratio remaining_ms 1000 1 %}</b>
     </div>
     <p class="ca-quiz-ask" id="quiz-ask">{% include "classroom/_quiz_ask.html" %}</p>
@@ -71,14 +62,12 @@ second. Copying out of the question is blocked, so it can't be pasted into an AI
     <div class="ca-quiz-flash" id="quiz-flash" role="status" aria-live="assertive">
       <span class="ca-quiz-flash-ico" aria-hidden="true"><i data-lucide="check" class="lu" data-v="ok"></i><i data-lucide="x" class="lu" data-v="bad"></i><i data-lucide="timer-off" class="lu" data-v="late"></i></span>
       <b id="quiz-flash-text"></b>
-      <span class="ca-quiz-flash-ghost" id="quiz-flash-ghost" hidden></span>
       <span class="ca-quiz-flash-go" aria-hidden="true"><i></i></span>
     </div>
   </section>
   {% endif %}
 </div>
 {% if not verdict %}
-{{ ghost|json_script:"ghost-data" }}
 <script>
 (() => {
   const root = document.querySelector("[data-nocopy]");
@@ -92,44 +81,6 @@ second. Copying out of the question is blocked, so it can't be pasted into an AI
         end = performance.now() + {{ remaining_ms }}, here = document.querySelector(".ca-quiz-steps .is-here");
   const WORDS = { ok: "To‘g‘ri!", bad: "Noto‘g‘ri", late: "Vaqt tugadi" };
 
-  // the opponent as a ghost: their result on this question shows when your clock reaches the moment they
-  // answered it (their marker on the time bar), or at once when you answer first; while they haven't got to
-  // this question yet (playing at the same time), the page asks again every two seconds
-  const G = JSON.parse(document.getElementById("ghost-data").textContent);
-  const pill = document.getElementById("ghost-pill"), ghostText = document.getElementById("ghost-text"),
-        mark = document.getElementById("ghost-mark"), gsteps = document.querySelectorAll("#ghost-steps li"),
-        gscore = document.getElementById("ghost-score"), index = {{ a.index }};
-  let ghostDone = !G || G.absent;
-  const SAY = { ok: (s) => `${G.name} ${s} s da topdi`, bad: () => `${G.name} xato qildi`, late: () => `${G.name} ulgurmadi`,
-                wait: () => `${G.name} hali bu savolga yetmadi` };
-  const placeMark = () => {
-    if (!mark || G.now.took_ms == null) return;
-    mark.style.left = `${100 - Math.min(100, G.now.took_ms / all * 100)}%`;
-    mark.hidden = false;
-  };
-  const revealGhost = () => {
-    if (ghostDone || !G.now || !["ok", "bad", "late"].includes(G.now.state)) return;
-    ghostDone = true;
-    const st = G.now.state;
-    pill.classList.add(`is-${st}`);
-    ghostText.textContent = SAY[st](G.now.secs);
-    if (mark) mark.classList.add(`is-${st}`);
-    if (gsteps[index]) gsteps[index].className = st === "ok" ? "is-ok" : "is-bad";
-    if (st === "ok") gscore.textContent = Number(gscore.textContent) + 1;
-  };
-  if (G && !G.absent) {
-    if (G.now.state === "wait") {
-      ghostText.textContent = SAY.wait();
-      const poll = setInterval(() => {
-        if (ghostDone || sent) return clearInterval(poll);
-        fetch(`${location.pathname}?ghost=${index}`, { credentials: "same-origin" }).then((r) => r.json()).then((now) => {
-          if (now.state !== "wait" && now.state !== "none") { G.now = now; ghostText.textContent = `${G.name} o‘ylamoqda…`; placeMark(); clearInterval(poll); }
-        }).catch(() => {});
-      }, 2000);
-    } else {
-      placeMark();
-    }
-  }
   const PAUSE = { ok: 800, bad: 1100, late: 1100 };
   let sent = false;
 
@@ -143,15 +94,6 @@ second. Copying out of the question is blocked, so it can't be pasted into an AI
     // the icons are SVG by now, which has no .hidden: set the attribute
     flash.querySelectorAll("[data-v]").forEach((i) => i.toggleAttribute("hidden", i.dataset.v !== state));
     document.getElementById("quiz-flash-text").textContent = WORDS[state];
-    try {
-      if (G && !G.absent && G.now && ["ok", "bad", "late"].includes(G.now.state)) {
-        revealGhost();
-        const line = document.getElementById("quiz-flash-ghost");
-        line.textContent = SAY[G.now.state](G.now.secs);
-        line.className = `ca-quiz-flash-ghost is-${G.now.state}`;
-        line.hidden = false;
-      }
-    } catch (e) { /* the ghost is a nicety: the verdict and the next question come regardless */ }
     flash.style.setProperty("--pause", `${PAUSE[state]}ms`);
     flash.classList.add("is-on");
   };
@@ -166,7 +108,6 @@ second. Copying out of the question is blocked, so it can't be pasted into an AI
     fetch(location.pathname, { method: "POST", body: data, headers: { "X-Duel-Answer": "1" }, credentials: "same-origin" })
       .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
       .then((j) => {
-        if (j.ghost && G && !G.absent && !ghostDone) G.now = j.ghost;  // they may have answered since the page loaded
         return j.verdict ? show(j.verdict, picked, j.next) : location.replace(j.next);
       })
       .catch(() => location.reload());  // the server has the answer or the clock: the page picks up from there
@@ -180,7 +121,6 @@ second. Copying out of the question is blocked, so it can't be pasted into an AI
     bar.style.width = (left / all * 100) + "%";
     bar.classList.toggle("is-low", left < 5000);
     secs.textContent = Math.ceil(left / 1000);
-    if (!ghostDone && G && G.now && G.now.took_ms != null && all - left >= G.now.took_ms) revealGhost();
     if (left <= 0) { send(null); return; }
     requestAnimationFrame(tick);
   };
