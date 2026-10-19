@@ -7,6 +7,7 @@
 <div id="duel-status" class="ca-panel"{% if duel.status == "pending" or duel.status == "active" %} hx-get="{% url 'classroom:duel' duel.pk %}?seen={{ state }}" hx-trigger="every 5s" hx-swap="innerHTML"{% endif %}>
   {% include "classroom/_duel_status.html" %}
 </div>
+{% if review_waits %}<p class="mt-6 text-sm text-mute"><i data-lucide="lock" class="lu mr-1" aria-hidden="true"></i>Savollar va to‘g‘ri javoblar raqibingiz ham tugatgach ochiladi.</p>{% endif %}
 {% if review %}
 <section class="mt-6" aria-labelledby="review-title">
   <div class="ca7-sec-h"><h2 id="review-title">Savollar</h2><span class="ca7-r text-mute">{{ duel.get_language_display }}</span></div>

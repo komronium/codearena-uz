@@ -36,6 +36,9 @@ class DuelQuestion(models.Model):
     accept = models.JSONField(default=list, blank=True)  # typed: other right spellings
     explain = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
+    # for a generated variant: the key of the bank question it was made from (apps.classroom.quiz_variants);
+    # "" for a bank question. load_duel_questions leaves variants alone.
+    origin = models.CharField(max_length=40, blank=True, db_index=True)
 
     class Meta:
         ordering = ["language", "level", "id"]
@@ -61,7 +64,7 @@ class DuelQuestion(models.Model):
 class Duel(models.Model):
     """1v1 quiz: the same five questions for both, each player on their own clock: the challenger's
     starts when they open the duel, the opponent's when they join. More right answers wins, then the
-    faster (apps.classroom.duels). No opponent yet = an open duel: the next player who asks for a match
+    equal is a draw (apps.classroom.duels). No opponent yet = an open duel: the next player who asks for a match
     in that language gets the same questions. Duels before the quiz were coding races on one
     problem (mode "code"); they stay as history."""
     class Mode(models.TextChoices):

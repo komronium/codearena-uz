@@ -13,17 +13,9 @@ from django.db import transaction
 
 from apps.classroom.models import DuelQuestion
 from apps.classroom.quiz_bank import entries
-from apps.classroom.quiz_check import SANDBOX_LANG, check
+from apps.classroom.quiz_check import check, sandbox_run
 
 FIELDS = ("language", "level", "kind", "code", "full", "expect", "options", "answer", "accept", "explain")
-
-
-def _sandbox_run(language, source):
-    from judge.runner import run_trial
-    r = run_trial(SANDBOX_LANG[language], source, [""], None, 2000, 256)
-    if r["verdict"] != "OK":
-        return False, r["log"] or r["verdict"]
-    return True, r["cases"][0]["output"]
 
 
 class Command(BaseCommand):
@@ -38,7 +30,7 @@ class Command(BaseCommand):
         bank = list(entries())
         if opts["verify"]:
             with ThreadPoolExecutor(opts["workers"]) as pool:
-                results = list(pool.map(lambda e: check(e, _sandbox_run), bank))
+                results = list(pool.map(lambda e: check(e, sandbox_run), bank))
             bad = [(e, errs) for e, errs in zip(bank, results) if errs]
             for e, errs in bad:
                 self.stdout.write(self.style.ERROR(f"{e['key']}: {e['code'][:60]!r}"))
@@ -60,7 +52,7 @@ class Command(BaseCommand):
                 elif not q.is_active or any(getattr(q, f) != v for f, v in values.items()):
                     DuelQuestion.objects.filter(pk=q.pk).update(is_active=True, **values)
                     changed += 1
-            retired = (DuelQuestion.objects.filter(is_active=True).exclude(key__in=[e["key"] for e in bank])
+            retired = (DuelQuestion.objects.filter(is_active=True, origin="").exclude(key__in=[e["key"] for e in bank])
                        .update(is_active=False))
             self.stdout.write(f"Yangi: {added}, o‘zgargan: {changed}, olib tashlangan: {retired}, "
                               f"jami faol: {DuelQuestion.objects.filter(is_active=True).count()}.")

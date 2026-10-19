@@ -167,7 +167,8 @@ def _secs(t) -> str:
 def _duel_board(duel, viewer) -> dict:
     """Both players' runs side by side, open to both like a live standings row: how many right, the time
     spent, and a cell per question (right, wrong, on it, not yet). The questions themselves, with the
-    answers, only once your own run is over, so nobody sees them before playing."""
+    answers, only once both runs are over (the duel is settled, or nobody will play it any more), so a
+    player who has finished can't pass the answers on to one who hasn't."""
     now = timezone.now()
     rows, runs = [], {}
     for u, delta in ((duel.challenger, duel.challenger_delta), (duel.opponent, duel.opponent_delta)):
@@ -189,7 +190,8 @@ def _duel_board(duel, viewer) -> dict:
     my_over = mine is not None and mine.over(now)
     review = []
     watcher = viewer.is_staff and viewer.pk not in duel.players()  # staff sees both players' answers any time
-    if duel.mode == Duel.Mode.QUIZ and (my_over or watcher):
+    closed = duel.status in (Duel.Status.FINISHED, Duel.Status.EXPIRED, Duel.Status.DECLINED)
+    if duel.mode == Duel.Mode.QUIZ and ((my_over and closed) or watcher):
         if watcher:
             sides = [(u.username, runs.get(u.pk)) for u in (duel.challenger, duel.opponent) if u]
         else:
@@ -224,6 +226,7 @@ def _duel_board(duel, viewer) -> dict:
     return {
         "result": result, "rival": rival,
         "players": rows, "review": review, "my_over": my_over,
+        "review_waits": duel.mode == Duel.Mode.QUIZ and my_over and not closed and not watcher,
         "my_playing": mine is not None and not my_over,
         "my_started": bool(mine and mine.answers),
         "per_question": int(duels.PER_QUESTION.total_seconds()), "n_questions": duels.QUESTIONS,

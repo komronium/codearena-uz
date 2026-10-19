@@ -182,7 +182,7 @@ def test_each_question_has_its_own_20_seconds_and_a_reload_doesnt_reset_them(ban
 
 
 @pytest.mark.django_db
-def test_more_right_answers_win_then_less_time_and_none_right_is_a_draw(bank):
+def test_more_right_answers_win_and_equal_is_a_draw_whatever_the_time(bank):
     from .duels import accept, challenge, settle
     from .models import Duel
 
@@ -191,7 +191,7 @@ def test_more_right_answers_win_then_less_time_and_none_right_is_a_draw(bank):
     _play(duel, p1, right=3, secs=8)
     assert Duel.objects.get(pk=duel.pk).status == "pending"  # waiting for p2
     accept(duel, p2)
-    _play(duel, p2, right=3, secs=4)  # as many right, and faster
+    _play(duel, p2, right=4, secs=4)  # one more right
     duel.refresh_from_db()
     p1.refresh_from_db()
     p2.refresh_from_db()
@@ -204,11 +204,11 @@ def test_more_right_answers_win_then_less_time_and_none_right_is_a_draw(bank):
 
     p3, p4 = User.objects.create_user("p3", password="x"), User.objects.create_user("p4", password="x")
     duel, _ = challenge(p3, "p4", "python")
-    _play(duel, p3, right=0)
+    _play(duel, p3, right=3, secs=8)
     accept(duel, p4)
-    _play(duel, p4, right=0, secs=1)
+    _play(duel, p4, right=3, secs=1)  # as many right, and far faster: still a draw
     duel.refresh_from_db()
-    assert duel.status == "finished" and duel.winner is None  # nobody right: speed doesn't matter
+    assert duel.status == "finished" and duel.winner is None and duel.challenger_delta == duel.opponent_delta == 0
 
     from django.test import Client
     page = Client()
@@ -581,3 +581,98 @@ def test_duel_history_lists_the_latest_finish_first(client):
     client.force_login(me)
     history = client.get(reverse("classroom:duels")).context["history"]
     assert [d.pk for d in history] == [first.pk, late_start.pk]
+
+
+# ---- duel rules: levels, pairs, hidden answers, variants ---------------------------------------------
+
+@pytest.mark.django_db
+def test_a_duel_mixes_levels_by_rating_and_takes_the_least_asked_first():
+    from collections import Counter
+
+    from .duels import _pick
+    from .models import DuelAnswer, DuelQuestion
+
+    for level in ("beginner", "easy", "medium"):
+        for i in range(6):
+            _q(f"{level}{i}", level=level)
+    p1, p2 = _players()  # both 1200: one beginner, two easy, two medium
+
+    def levels(ids):
+        return Counter(DuelQuestion.objects.get(pk=i).level for i in ids)
+
+    assert levels(_pick([p1, p2], "python")) == {"beginner": 1, "easy": 2, "medium": 2}
+    User.objects.filter(pk=p1.pk).update(duel_rating=900)
+    User.objects.filter(pk=p2.pk).update(duel_rating=1000)
+    assert levels(_pick([p1, p2], "python")) == {"beginner": 2, "easy": 2, "medium": 1}
+    # a question asked many times to others waits behind the ones nobody was asked
+    busy = DuelQuestion.objects.get(key="easy0")
+    third = User.objects.create_user("p3", password="x")
+    from .models import Duel
+    d = Duel.objects.create(challenger=third, language="python", questions=[busy.pk], started_at=timezone.now())
+    for i in range(3):
+        DuelAnswer.objects.create(duel=d, user=third, index=i, question=busy, shown_at=timezone.now())
+    for _ in range(20):
+        assert busy.pk not in _pick([p1, p2], "python")
+
+
+@pytest.mark.django_db
+def test_the_same_pair_counts_less_and_less_in_the_elo_within_a_day(bank):
+    from .duels import pair_weight
+    from .models import Duel
+
+    p1, p2 = _players()
+    made = [Duel.objects.create(challenger=p1, opponent=p2, mode="quiz", language="python", status="finished", winner=p1)
+            for _ in range(7)]
+    assert [pair_weight(d) for d in made] == [1, 1, 1, 0.5, 0.5, 0.5, 0.0]
+    other = User.objects.create_user("p3", password="x")
+    fresh = Duel.objects.create(challenger=p1, opponent=other, mode="quiz", language="python", status="finished", winner=p1)
+    assert pair_weight(fresh) == 1  # another opponent: full
+    Duel.objects.filter(pk__in=[d.pk for d in made]).update(created=timezone.now() - timezone.timedelta(days=2))
+    again = Duel.objects.create(challenger=p2, opponent=p1, mode="quiz", language="python", status="finished", winner=p2)
+    assert pair_weight(again) == 1  # the day has passed
+
+
+@pytest.mark.django_db
+def test_questions_and_right_answers_open_only_when_both_runs_are_over(client, bank):
+    from .duels import accept, challenge
+
+    p1, p2 = _players()
+    duel, _ = challenge(p1, "p2", "python")
+    _play(duel, p1, right=4)
+    client.force_login(p1)
+    page = client.get(reverse("classroom:duel", args=[duel.pk]))
+    assert page.context["review"] == [] and page.context["review_waits"]  # p2 hasn't played: nothing to pass on
+    assert "raqibingiz ham tugatgach" in page.content.decode()
+    accept(duel, p2)
+    _play(duel, p2, right=2)
+    page = client.get(reverse("classroom:duel", args=[duel.pk]))
+    assert len(page.context["review"]) == 5 and not page.context["review_waits"]
+
+
+def test_variants_nudge_numbers_outside_strings_and_work_the_answer_out():
+    import random
+
+    from .quiz_variants import mutate, options_for, variants_of
+
+    rng = random.Random(3)
+    code = 'print("7 // 2")\nprint(7 // 2)'
+    new = mutate(code, rng)
+    assert new.splitlines()[0] == 'print("7 // 2")' and new != code  # the string stays as it was
+    assert mutate("print('x')", rng) == "print('x')"  # nothing to nudge
+
+    def run(language, source):  # a stand-in for the sandbox: evaluate the one expression
+        try:
+            return True, str(eval(source.strip().removeprefix("print(").removesuffix(")"))) + "\n"
+        except Exception:
+            return False, ""
+
+    entry = {"kind": "output", "language": "python", "level": "easy", "code": "print(7 // 2)", "answer": "3",
+             "options": ["3", "4", "2", "5"], "full": False, "key": "python-abc", "accept": [], "explain": "", "expect": ""}
+    made = list(variants_of(entry, run, 5, rng))
+    assert made and all(v["origin"] == "python-abc" and v["code"] != entry["code"] and v["answer"] != "3" for v in made)
+    assert all(v["answer"] == str(eval(v["code"][6:-1])) for v in made)
+    for v in made:
+        assert len(set(v["options"])) == 4 and v["answer"] in v["options"]
+    assert options_for("hello", ["a", "b"], rng) == []  # a word answer is typed
+    assert options_for("True", ["True", "False", "None"], rng) == ["True", "False", "None"]
+    assert list(variants_of({**entry, "answer": "Xato"}, run, 5, rng)) == []  # an error answer is not varied

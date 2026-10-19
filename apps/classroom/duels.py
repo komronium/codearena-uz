@@ -2,13 +2,13 @@
 questions in one language, so nobody has to wait for anyone; the opponent gets the same
 questions and their own run when they join. Each question has PER_QUESTION from the moment it is first
 shown; a run left half-way ends RUN_LIMIT after its start, unseen questions counting as wrong. More right
-answers wins; equal, the less time spent; both with none right is a draw. Duel Elo moves once both runs
+answers wins; equal is a draw (time is only the 20 seconds a question gets, never a tie-break). Duel Elo moves once both runs
 are over, by each player's own K (k_factor), as in chess: high for a newcomer, low at the top.
 
 A duel names its opponent (a friend, who has WAIT_FOR to accept) or leaves the seat open: find_opponent
 puts the next player who asks in that language into the open duel whose owner's duel rating is
-closest to theirs, or opens a new one for them. Questions come from the whole language's bank, whatever
-level each one carries. Duels before the quiz were coding races (mode "code"); they are history only."""
+closest to theirs, or opens a new one for them. Each duel mixes levels by the pair's duel rating (MIX) and takes the questions
+the two have seen least; the right answers are shown only once both runs are over. Duels before the quiz were coding races (mode "code"); they are history only."""
 import random
 from datetime import datetime, timedelta
 from typing import NamedTuple
@@ -46,6 +46,20 @@ def elo(a: int, b: int, score: float, ka: int, kb: int) -> tuple[int, int]:
     """Rating changes of a and b for a's score (1 win, 0.5 draw, 0 loss)."""
     expected = 1 / (1 + 10 ** ((b - a) / 400))
     return round(ka * (score - expected)), round(kb * ((1 - score) - (1 - expected)))
+
+
+PAIR_WINDOW = timedelta(hours=24)
+
+
+def pair_weight(duel) -> float:
+    """How much of its K a duel's Elo counts: the same two trading duels all day would only pass points
+    back and forth, so after 3 finished duels between them in the 24 hours before this one it counts half,
+    after 6 not at all. Counted from the data (not a counter), so replay() gives the same answer."""
+    pair = [duel.challenger_id, duel.opponent_id]
+    n = Duel.objects.filter(status=Duel.Status.FINISHED, mode=Duel.Mode.QUIZ, challenger_id__in=pair,
+                            opponent_id__in=pair, created__lt=duel.created,
+                            created__gte=duel.created - PAIR_WINDOW).count()
+    return 1.0 if n < 3 else 0.5 if n < 6 else 0.0
 
 
 # ---- seasons ------------------------------------------------------------------------------------------
@@ -167,14 +181,9 @@ def _winner(duel, now) -> int | None:
     a, b = run(duel, duel.challenger_id), run(duel, duel.opponent_id)
     if a is None or b is None or not a.over(now) or not b.over(now):
         return None
-    if a.right != b.right:
-        return duel.challenger_id if a.right > b.right else duel.opponent_id
-    if a.right == 0:
+    if a.right == b.right:
         return 0
-    ta, tb = a.spent(now), b.spent(now)
-    if ta == tb:
-        return 0
-    return duel.challenger_id if ta < tb else duel.opponent_id
+    return duel.challenger_id if a.right > b.right else duel.opponent_id
 
 
 def is_right(question, given: str) -> bool:
@@ -233,18 +242,35 @@ def _seen(users) -> set[int]:
     return set(DuelAnswer.objects.filter(user__in=users).values_list("question_id", flat=True))
 
 
+# (beginner, easy, medium) questions of the five, by the pair's average duel rating: newcomers get more
+# of the easy ones, the strong more of the hard
+MIX = ((1100, (2, 2, 1)), (1500, (1, 2, 2)), (10 ** 9, (0, 2, 3)))
+
+
+def _mix(users) -> tuple[int, int, int]:
+    ids = [getattr(u, "pk", u) for u in users]
+    ratings = list(User.objects.filter(pk__in=ids).values_list("duel_rating", flat=True)) or [START_RATING]
+    avg = sum(ratings) / len(ratings)
+    return next(mix for limit, mix in MIX if avg < limit)
+
+
 def _pick(users, language: str) -> list[int] | None:
-    """QUESTIONS questions none of `users` has seen, topped up with seen ones when the bank runs short."""
-    pool = list(DuelQuestion.objects.filter(language=language, is_active=True).values_list("pk", flat=True))
-    if len(pool) < QUESTIONS:
+    """QUESTIONS questions in the level mix, the ones none of `users` has seen first, then the ones asked
+    least often overall (so the bank wears evenly); shorter levels are topped up from the others."""
+    rows = list(DuelQuestion.objects.filter(language=language, is_active=True).values_list("pk", "level"))
+    if len(rows) < QUESTIONS:
         return None
     seen = _seen(users)
-    fresh = [q for q in pool if q not in seen]
-    random.shuffle(fresh)
-    picked = fresh[:QUESTIONS]
-    if len(picked) < QUESTIONS:
-        old = [q for q in pool if q in seen]
-        picked += random.sample(old, QUESTIONS - len(picked))
+    asked = dict(DuelAnswer.objects.filter(question_id__in=[pk for pk, _ in rows]).values("question_id")
+                 .annotate(n=Count("id")).values_list("question_id", "n"))
+    order = {pk: (pk in seen, asked.get(pk, 0), random.random()) for pk, _ in rows}
+    by_level = {lvl: sorted((pk for pk, l in rows if l == lvl), key=order.get) for lvl in ("beginner", "easy", "medium")}
+    picked: list[int] = []
+    for lvl, n in zip(("beginner", "easy", "medium"), _mix(users)):
+        picked += by_level[lvl][:n]
+    if len(picked) < QUESTIONS:  # a level with too few: the best of the rest
+        rest = sorted((pk for pk, _ in rows if pk not in picked), key=order.get)
+        picked += rest[:QUESTIONS - len(picked)]
     random.shuffle(picked)
     return picked
 
@@ -388,7 +414,8 @@ def settle(duel) -> None:
         score = 0.5 if winner == 0 else (1.0 if winner == a.pk else 0.0)
         season = duel_season(duel)  # a new month starts everyone's rating part of the way back to the middle
         ra, rb = carried(a.duel_rating, a.duel_season, season), carried(b.duel_rating, b.duel_season, season)
-        da, db = elo(ra, rb, score, k_factor(ra, _played(a.pk)), k_factor(rb, _played(b.pk)))
+        weight = pair_weight(duel)
+        da, db = elo(ra, rb, score, k_factor(ra, _played(a.pk)) * weight, k_factor(rb, _played(b.pk)) * weight)
         duel.status, duel.winner_id = Duel.Status.FINISHED, winner or None
         duel.challenger_delta, duel.opponent_delta = da, db
         duel.finished_at = now  # both runs are over: the duel's own date, not when it was created
@@ -422,7 +449,8 @@ def replay(duels, users) -> None:
         ra = carried(rating.get(a, START_RATING), season_of_user.get(a, ""), season)
         rb = carried(rating.get(b, START_RATING), season_of_user.get(b, ""), season)
         score = 0.5 if d.winner_id is None else (1.0 if d.winner_id == a else 0.0)
-        da, db = elo(ra, rb, score, k_factor(ra, played.get(a, 0)), k_factor(rb, played.get(b, 0)))
+        weight = pair_weight(d)
+        da, db = elo(ra, rb, score, k_factor(ra, played.get(a, 0)) * weight, k_factor(rb, played.get(b, 0)) * weight)
         duels.filter(pk=d.pk).update(challenger_delta=da, opponent_delta=db)
         rating[a], rating[b] = ra + da, rb + db
         season_of_user[a] = season_of_user[b] = season

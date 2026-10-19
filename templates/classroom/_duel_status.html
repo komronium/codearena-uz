@@ -66,7 +66,7 @@ per_question, n_questions, expires, user. A coding duel from before the quiz sho
 
 {% if duel.status == "pending" %}
   {% if not duel.opponent_id %}
-  <p class="mx-auto mt-3 max-w-md text-center text-sm text-mute">Ochiq duel: shu tilda duel boshlagan keyingi o‘yinchi aynan shu savollarni oladi. Ko‘proq to‘g‘ri javob bergan g‘olib, teng bo‘lsa — tezrog‘i. Raqib {{ expires|date:"d.m H:i" }} gacha kutiladi.</p>
+  <p class="mx-auto mt-3 max-w-md text-center text-sm text-mute">Ochiq duel: shu tilda duel boshlagan keyingi o‘yinchi aynan shu savollarni oladi. Ko‘proq to‘g‘ri javob bergan g‘olib, teng bo‘lsa — durang. Raqib {{ expires|date:"d.m H:i" }} gacha kutiladi.</p>
   {% elif duel.opponent_id == user.pk %}
   <p class="mx-auto mt-3 max-w-md text-center text-sm text-mute"><b class="text-ink">{{ duel.challenger.username }}</b> sizni chaqirdi: {{ duel.get_language_display }}, {{ n_questions }} ta savol. Qabul qilsangiz, birinchi savol ochiladi.</p>
   {% if rival %}<dl class="ca-rivalrec" aria-label="{{ duel.challenger.username }} haqida">

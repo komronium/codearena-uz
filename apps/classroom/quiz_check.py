@@ -8,6 +8,15 @@ _JAVA = "import java.util.*;\n\npublic class Main {\n    public static void main
 SANDBOX_LANG = {"python": "python", "cpp": "cpp", "java": "java", "js": "node"}
 
 
+def sandbox_run(language, source):
+    """`run` for check() in production: the judge sandbox (the worker container has it)."""
+    from judge.runner import run_trial
+    r = run_trial(SANDBOX_LANG[language], source, [""], None, 2000, 256)
+    if r["verdict"] != "OK":
+        return False, r["log"] or r["verdict"]
+    return True, r["cases"][0]["output"]
+
+
 def program(language: str, code: str, full: bool) -> str:
     """The runnable program around what the player sees."""
     if language == "cpp" and not full:
