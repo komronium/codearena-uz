@@ -690,7 +690,7 @@ def test_settings_school_from_the_picker_or_typed(client):
 
 # ---- place filters and flags on the boards (apps.accounts.geo) ----
 
-def _rated(name, rating, **kw):
+def _rated_in(name, rating, **kw):
     """A user with one rated contest, so the rating board lists them."""
     from datetime import timedelta
     from django.utils import timezone
@@ -703,9 +703,9 @@ def _rated(name, rating, **kw):
 
 @pytest.mark.django_db
 def test_rating_filters_by_country_city_and_school(client):
-    _rated("ali", 1500, country="UZ", location="Buxoro", school="Osiyo xalqaro universiteti")
-    _rated("vali", 1400, country="UZ", location="Toshkent")
-    _rated("kair", 1300, country="KZ", location="Ostona")
+    _rated_in("ali", 1500, country="UZ", location="Buxoro", school="Osiyo xalqaro universiteti")
+    _rated_in("vali", 1400, country="UZ", location="Toshkent")
+    _rated_in("kair", 1300, country="KZ", location="Ostona")
     page = client.get(reverse("rating")).content.decode()
     assert "O‘zbekiston" in page and "Qozog‘iston" in page and "/static/flags/uz.svg" in page
     uz = client.get(reverse("rating"), {"country": "UZ"}).content.decode()
@@ -719,8 +719,8 @@ def test_rating_filters_by_country_city_and_school(client):
 @pytest.mark.django_db
 def test_place_filter_ranks_within_the_group_and_ignores_unknown_values(client):
     from .geo import board_geo
-    _rated("top", 1900, country="KZ", location="Ostona")
-    _rated("ali", 1500, country="UZ", location="Buxoro")
+    _rated_in("top", 1900, country="KZ", location="Ostona")
+    _rated_in("ali", 1500, country="UZ", location="Buxoro")
     r = client.get(reverse("rating"), {"country": "UZ"})
     assert [u.rank for u in r.context["users"]] == [1]  # first among Uzbeks, not second overall
     r = client.get(reverse("rating"), {"country": "XX", "city": "Nowhere", "school": "?"})
@@ -751,8 +751,8 @@ def test_backfill_gives_uzbek_cities_their_country():
 
 @pytest.mark.django_db
 def test_school_filter_is_independent_of_the_home_city(client):
-    _rated("ali", 1500, country="UZ", location="Qarshi", school="Osiyo xalqaro universiteti")
-    _rated("vali", 1400, country="UZ", location="Buxoro", school="Osiyo xalqaro universiteti")
+    _rated_in("ali", 1500, country="UZ", location="Qarshi", school="Osiyo xalqaro universiteti")
+    _rated_in("vali", 1400, country="UZ", location="Buxoro", school="Osiyo xalqaro universiteti")
     page = client.get(reverse("rating"), {"country": "UZ", "school": "Osiyo xalqaro universiteti"}).content.decode()
     assert "Qarshi" in page and "Buxoro" in page  # both home cities are still offered
     r = client.get(reverse("rating"), {"country": "UZ", "city": "Qarshi", "school": "Osiyo xalqaro universiteti"})
