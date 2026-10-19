@@ -636,3 +636,50 @@ def test_someone_elses_notification_is_a_404(client):
     notify(a.pk, "duel", "k", "t", "/")
     client.force_login(b)
     assert client.get(reverse("notification_open", args=[Notification.objects.get().pk])).status_code == 404
+
+
+# ---- country -> city -> school pickers (apps.accounts.places) ----
+
+def test_places_tidy_spellings_and_keep_unknown_text():
+    from .places import canon_city, canon_school
+    assert canon_city("UZ", "BUKHARA") == "Buxoro" and canon_city("UZ", "buxoro") == "Buxoro"
+    assert canon_city("UZ", "Qo'qon") == "Qo‘qon" and canon_city("UZ", " Tashkent ") == "Toshkent"
+    assert canon_city("UZ", "Qishloqcha") == "Qishloqcha" and canon_city("FR", "Parij") == "Parij"
+    assert canon_school("UZ", "OXU 2-ATT-25") == "Osiyo xalqaro universiteti"
+    assert canon_school("UZ", "osiyo xalqaro unversituti 2-kurs") == "Osiyo xalqaro universiteti"
+    assert canon_school("UZ", "buxoro davlat universiteti") == "Buxoro davlat universiteti"
+    assert canon_school("UZ", "2-sonli maktab") == "2-sonli maktab"
+
+
+@pytest.mark.django_db
+def test_welcome_takes_a_listed_city_or_a_typed_one(client, settings):
+    settings.ACCOUNT_GATE = True
+    u = User.objects.create_user("ali", password="x", email="")
+    client.force_login(u)
+    base = {"first_name": "Ali", "last_name": "Valiyev", "country": "UZ", "email": "ali@example.com"}
+    client.post(reverse("welcome"), {**base, "location": "__other__", "location_other": "Bukhara"})
+    u.refresh_from_db()
+    assert u.location == "Buxoro"  # typed in "Boshqa…", tidied to the list's spelling
+    client.post(reverse("welcome"), {**base, "email": "ali2@example.com", "location": "__other__", "location_other": "Qishloqcha"})
+    u.refresh_from_db()
+    assert u.location == "Qishloqcha"
+    r = client.post(reverse("welcome"), {**base, "email": "ali3@example.com", "location": "__other__", "location_other": " "})
+    assert r.status_code == 200 and "Shaharni yozing." in r.content.decode()
+
+
+@pytest.mark.django_db
+def test_settings_school_from_the_picker_or_typed(client):
+    from django.utils import timezone
+    u = _gated(email_verified_at=timezone.now(), location="Buxoro")
+    client.force_login(u)
+    client.post(reverse("profile_edit"), _settings_post(u, school="Buxoro davlat universiteti"))
+    u.refresh_from_db()
+    assert u.school == "Buxoro davlat universiteti"
+    client.post(reverse("profile_edit"), _settings_post(u, school="__other__", school_other="OXU, 2-kurs"))
+    u.refresh_from_db()
+    assert u.school == "Osiyo xalqaro universiteti"
+    client.post(reverse("profile_edit"), _settings_post(u, school="__other__", school_other="12-maktab"))
+    u.refresh_from_db()
+    assert u.school == "12-maktab"
+    page = client.get(reverse("profile_edit")).content.decode()
+    assert 'id="places-data"' in page and 'data-value="12-maktab"' in page

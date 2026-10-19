@@ -20,14 +20,7 @@ still empty, step 2 the link in the mail. ctx: form (WelcomeForm), missing (labe
         {% include "registration/_auth_field.html" with name="first_name" label="Ism" type="text" icon="user" autocomplete="given-name" value=form.first_name.value errors=form.first_name.errors %}
         {% include "registration/_auth_field.html" with name="last_name" label="Familiya" type="text" icon="user" autocomplete="family-name" value=form.last_name.value errors=form.last_name.errors %}
       </div>
-      <div>
-        <label class="ca-label" for="id_country">Davlat</label>
-        <select class="ca-input" name="country" id="id_country" autocomplete="country" required{% if form.country.errors %} aria-invalid="true"{% endif %}>
-          {% for code, name in form.fields.country.choices %}<option value="{{ code }}"{% if code == form.country.value %} selected{% endif %}>{{ name }}</option>{% endfor %}
-        </select>
-        {% if form.country.errors %}<p class="mt-1.5 text-sm text-bad">{{ form.country.errors.0 }}</p>{% endif %}
-      </div>
-      {% include "registration/_auth_field.html" with name="location" label="Shahar" type="text" icon="map-pin" autocomplete="address-level2" value=form.location.value errors=form.location.errors %}
+      {% include "accounts/_place_fields.html" %}
       {% include "registration/_auth_field.html" with name="email" label="Email" type="email" icon="mail" autocomplete="email" value=form.email.value errors=form.email.errors hint="Unga tasdiqlash havolasi yuboramiz." %}
       <button type="submit" class="ca-btn ca-btn-primary w-full !py-2.5">Davom etish<i data-lucide="arrow-right" class="lu" aria-hidden="true"></i></button>
     </form>

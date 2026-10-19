@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 
 from .countries import COUNTRY_CHOICES
 from .models import TelegramLink, User
+from .places import OTHER, canon_city, canon_school
 
 _CA_INPUT = {"class": "ca-input"}
 
@@ -69,13 +70,15 @@ class _ProfileFields(forms.ModelForm):
     """The fields the account gate asks for (apps.accounts.onboarding.REQUIRED), all required here."""
     country = forms.ChoiceField(label="Davlat", choices=[("", "Davlatni tanlang")] + COUNTRY_CHOICES)
     email = forms.EmailField(label="Email")
+    # the city picker's "Boshqa…" (places.OTHER) sends the typed city here
+    location_other = forms.CharField(required=False, max_length=100)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for name in ("first_name", "last_name", "location"):
             self.fields[name].required = True
         self.fields["location"].label = "Shahar"
-        self.fields["location"].error_messages["required"] = "Shaharni yozing."
+        self.fields["location"].error_messages["required"] = "Shaharni tanlang."
         self.fields["first_name"].error_messages["required"] = "Ismingizni yozing."
         self.fields["last_name"].error_messages["required"] = "Familiyangizni yozing."
         self.fields["country"].error_messages["required"] = "Davlatni tanlang."
@@ -84,6 +87,18 @@ class _ProfileFields(forms.ModelForm):
 
     def clean_email(self):
         return _unique_email(self.cleaned_data["email"], self.instance)
+
+    def clean(self):
+        data = super().clean()
+        if "location" in data:
+            city = data["location"]
+            if city == OTHER:
+                city = data.get("location_other", "")
+            city = canon_city(data.get("country", ""), city)
+            if not city:
+                self.add_error("location", "Shaharni yozing.")
+            data["location"] = city
+        return data
 
 
 class WelcomeForm(_ProfileFields):
@@ -95,6 +110,7 @@ class WelcomeForm(_ProfileFields):
 class ProfileEditForm(_ProfileFields):
     """Settings' profile card. The username may change once in USERNAME_CHANGE_DAYS days; a new email has to be
     confirmed again (the account waits on the welcome page until it is)."""
+    school_other = forms.CharField(required=False, max_length=150)  # the school picker's "Boshqa…"
 
     class Meta:
         model = User
@@ -103,9 +119,19 @@ class ProfileEditForm(_ProfileFields):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["username"].help_text = ""
+        self.fields["school"].required = False
         self.next_rename = rename_allowed_from(self.instance)
         if self.next_rename:
             self.fields["username"].disabled = True
+
+    def clean(self):
+        data = super().clean()
+        if "school" in data:
+            school = data["school"]
+            if school == OTHER:
+                school = data.get("school_other", "")
+            data["school"] = canon_school(data.get("country", ""), school)
+        return data
 
     def clean_username(self):
         name = self.cleaned_data["username"]

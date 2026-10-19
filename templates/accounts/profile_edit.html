@@ -52,25 +52,7 @@
         </div>
       </div>
       <p class="mt-1.5 text-[0.8125rem] text-mute">Ism va familiya faqat profilingizda ko‘rinadi; reyting jadvalida foydalanuvchi nomingiz chiqadi.</p>
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="ca-label" for="id_country">Davlat</label>
-          <select class="ca-input" name="country" id="id_country" autocomplete="country" required>
-            {% for code, name in form.fields.country.choices %}<option value="{{ code }}"{% if code == form.country.value %} selected{% endif %}>{{ name }}</option>{% endfor %}
-          </select>
-          {% if form.country.errors %}<p class="mt-1 text-sm text-bad">{{ form.country.errors.0 }}</p>{% endif %}
-        </div>
-        <div>
-          <label class="ca-label" for="id_location">Shahar</label>
-          <input class="ca-input" type="text" name="location" id="id_location" value="{{ form.location.value|default:'' }}" placeholder="Toshkent" autocomplete="address-level2" required>
-          {% if form.location.errors %}<p class="mt-1 text-sm text-bad">{{ form.location.errors.0 }}</p>{% endif %}
-        </div>
-      </div>
-      <div>
-        <label class="ca-label" for="id_school">O‘quv joyi <span class="font-normal text-mute">(ixtiyoriy)</span></label>
-        <input class="ca-input" type="text" name="school" id="id_school" value="{{ form.school.value|default:'' }}" placeholder="TATU, 1-kurs" autocomplete="organization">
-        {% if form.school.errors %}<p class="mt-1 text-sm text-bad">{{ form.school.errors.0 }}</p>{% endif %}
-      </div>
+      {% include "accounts/_place_fields.html" with side=True with_school=True %}
       <div>
         <label class="ca-label" for="id_email">Email {% if user.email_verified_at %}<span class="ml-1 font-normal text-ok"><i data-lucide="circle-check" class="lu" aria-hidden="true"></i> tasdiqlangan</span>{% endif %}</label>
         <input class="ca-input" type="email" name="email" id="id_email" value="{{ form.email.value|default:'' }}" autocomplete="email" spellcheck="false" autocapitalize="none" required>
