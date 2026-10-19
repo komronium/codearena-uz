@@ -88,7 +88,6 @@ table; on the right your progress per level, picks for you and, while browsing, 
         <th class="w-36" title="Masala reytingi, Codeforces’dagidek: reytingi shu songa teng o‘quvchi uni taxminan yarim holda yechadi.">{% include "problems/_sort_th.html" with key="difficulty" label="Qiyinlik" %}</th>
         <th class="hidden w-24 text-right md:table-cell" title="Yuborilgan yechimlarning necha foizi qabul qilingan">Qabul %</th>
         <th class="w-28 text-right">{% include "problems/_sort_th.html" with key="solvers" label="Yechdi" %}</th>
-        {% if any_rated %}<th class="hidden w-20 text-right xl:table-cell">{% include "problems/_sort_th.html" with key="rating" label="Baho" %}</th>{% endif %}
       </tr>
     </thead>
     <tbody>
@@ -101,7 +100,6 @@ table; on the right your progress per level, picks for you and, while browsing, 
       <td>{% include "problems/_difficulty.html" %}</td>
       <td class="hidden text-right md:table-cell">{% if p.attempts %}{% widthratio p.ac_count p.attempts 100 %}%{% else %}<span class="text-mute">—</span>{% endif %}</td>
       <td class="text-right" title="{{ p.solvers }} kishi yechgan, {{ p.ac_count }} / {{ p.attempts }} urinish qabul qilingan">{{ p.solvers|kplus }}</td>
-      {% if any_rated %}<td class="hidden text-right xl:table-cell">{% if p.avg_stars %}<span class="ca-stars-sum" title="O‘rtacha baho"><i data-lucide="star" class="lu" aria-hidden="true"></i><span class="tabular">{{ p.avg_stars|floatformat:1 }}</span></span>{% else %}<span class="text-mute" aria-hidden="true">—</span><span class="sr-only">baho yo‘q</span>{% endif %}</td>{% endif %}
     </tr>
     {% endfor %}
     </tbody>

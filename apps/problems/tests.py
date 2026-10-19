@@ -757,10 +757,9 @@ def test_difficulty_chips_count_what_a_click_would_show(client, catalog):
     # the hidden and the contest-locked dp problems are not counted; other levels still are
     assert chips == {"beginner": 0, "easy": 2, "medium": 1, "hard": 1} and r.context["level_total"] == 4
     assert len(r.context["problems"].object_list) == 2
-    # nobody rated anything yet: no column of dashes
-    assert r.context["any_rated"] is False and ">Baho<" not in r.content.decode()
+    # the list carries no star column, rated or not (stars live on the problem page)
     ProblemRating.objects.create(user=User.objects.get(username="author"), problem=catalog["dp1"], stars=4)
-    assert ">Baho<" in client.get(reverse("problems:list")).content.decode()
+    assert ">Baho<" not in client.get(reverse("problems:list")).content.decode()
 
 
 @pytest.mark.django_db

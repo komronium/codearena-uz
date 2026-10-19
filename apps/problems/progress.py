@@ -1,7 +1,5 @@
-"""Solved problems per level, and LeetCode's horseshoe ring drawn from them (the problem list's side card, the home
+"""Solved problems per level, and the figure drawn from them (the problem list's side card, the home
 page)."""
-import math
-
 from django.db.models import Count
 
 from apps.submissions.models import UserProblemSolved
@@ -20,22 +18,19 @@ def level_progress(user, visible) -> list[dict]:
             for v, label in Problem.Difficulty.choices if totals.get(v)]
 
 
-def solved_ring(levels, size=112, stroke=7) -> dict | None:
-    """A horseshoe with a track per level (as long as the level has problems), each filled as far as solved.
-    Only SVG dash numbers here; problems/_solved_card.html draws them."""
+def _pct(done, total) -> int:
+    """Whole percent solved; a started level never reads 0%, an unfinished one never reads 100%."""
+    if not total or not done:
+        return 0
+    return min(99 if done < total else 100, max(1, round(done * 100 / total)))
+
+
+def solved_ring(levels) -> dict | None:
+    """What problems/_solved_ring.html draws: a segment per level (its own percent solved, so a level of ten problems
+    reads as plainly as one of a hundred) and the total."""
     total = sum(lv["total"] for lv in levels)
     if not total:
         return None
-    c = size / 2
-    r = c - stroke / 2 - 1
-    circ = 2 * math.pi * r
-    gap = stroke + 3  # the round caps eat into the gaps
-    avail = circ * 0.75 - gap * (len(levels) - 1)
-    off, segments = 0.0, []
-    for lv in levels:
-        length = avail * lv["total"] / total
-        segments.append({**lv, "offset": f"{-off:.2f}", "track": f"{length:.2f} {circ:.2f}",
-                         "fill": f"{length * lv['done'] / lv['total']:.2f} {circ:.2f}"})
-        off += length + gap
-    return {"size": size, "c": c, "r": f"{r:.2f}", "stroke": stroke, "segments": segments,
-            "done": sum(lv["done"] for lv in levels), "total": total}
+    done = sum(lv["done"] for lv in levels)
+    return {"segments": [{**lv, "i": i, "pct": _pct(lv["done"], lv["total"])} for i, lv in enumerate(levels)],
+            "done": done, "total": total, "pct": _pct(done, total)}

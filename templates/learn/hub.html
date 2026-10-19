@@ -55,13 +55,12 @@ progress or where it stands).{% endcomment %}
       {% for p in s.courses %}
       <li data-course="{{ p.title|lower }} {{ p.summary|lower }}" class="{% if p == here %}is-here{% elif not p.progress.total and not p.progress.completed %}is-soon{% endif %}">
         <div class="min-w-0">
-          <a class="{% if p.progress.total or p.progress.completed %}ca-link{% else %}ca7-soon-link{% endif %}" href="{% url 'learn:course' p.slug %}">{{ p.title }}</a>{% if not p.is_public %} <span class="ca-tag">Yashirin</span>{% endif %}
+          <a class="{% if p.progress.total or p.progress.completed %}ca-link{% else %}ca7-soon-link{% endif %}" href="{% url 'learn:course' p.slug %}">{{ p.title }}</a>{% if not p.is_public %} <span class="ca-tag">Yashirin</span>{% endif %}{% if p == here and user.is_authenticated and not p.progress.completed %} <span class="ca-you">Siz shu yerdasiz</span>{% endif %}
           {% if p.summary %}<small>{{ p.summary }}</small>{% endif %}
         </div>
         <span class="ca-diff ca-diff-{{ p.level }}">{{ p.get_level_display }}</span>
         <span class="ca7-cstate">
           {% if p.progress.completed %}<span class="font-semibold text-ok"><i data-lucide="check" class="lu" aria-hidden="true"></i> tugatildi</span>
-          {% elif p == here and user.is_authenticated %}<span class="ca-you">Siz shu yerdasiz · {{ p.progress.done }}/{{ p.progress.total }}</span>
           {% elif not p.progress.total %}{% if p.n_tags %}<span class="text-mute">Tayyorlanmoqda</span>{% else %}<span class="ca7-pill">Nazariya</span>{% endif %}
           {% elif user.is_authenticated and p.progress.done %}<span class="ca7-cprog" title="{{ p.progress.done }} / {{ p.progress.total }} yechilgan"><span class="ca7-pg"><i style="width: {{ p.progress.pct }}%"></i></span><b class="tabular">{{ p.progress.done }}/{{ p.progress.total }}</b></span>
           {% else %}<span class="tabular text-mute">{{ p.progress.total }} masala</span>{% endif %}

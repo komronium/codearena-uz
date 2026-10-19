@@ -1611,17 +1611,6 @@ section.ca-ed-full { background: rgb(13 16 22); }
 .ca-month-day.is-today { font-weight: 700; color: rgb(var(--ca-on-fill-rgb)); background: rgb(var(--ca-accent-fill-rgb)); box-shadow: 0 4px 10px -3px rgb(var(--ca-accent-rgb) / .6); }
 /* solved per level: LeetCode's horseshoe ring and a row per level */
 .ca-solved { display: flex; align-items: center; gap: 1rem; }
-.ca-solved-ring { position: relative; flex: none; }
-.ca-solved-ring svg { display: block; width: 100%; height: 100%; }
-.ca-solved-ring .trk.lv-beginner { stroke: color-mix(in srgb, var(--ca-lvl-beginner) 22%, transparent); } .ca-solved-ring .val.lv-beginner { stroke: var(--ca-lvl-beginner); }
-.ca-solved-ring .trk.lv-easy { stroke: color-mix(in srgb, var(--ca-lvl-easy) 22%, transparent); } .ca-solved-ring .val.lv-easy { stroke: var(--ca-lvl-easy); }
-.ca-solved-ring .trk.lv-medium { stroke: color-mix(in srgb, var(--ca-lvl-medium) 26%, transparent); } .ca-solved-ring .val.lv-medium { stroke: var(--ca-lvl-medium); }
-.ca-solved-ring .trk.lv-hard { stroke: color-mix(in srgb, var(--ca-lvl-hard) 22%, transparent); } .ca-solved-ring .val.lv-hard { stroke: var(--ca-lvl-hard); }
-.ca-solved-ring > p { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.ca-solved-ring b { font-size: 1.45rem; font-weight: 700; line-height: 1.1; letter-spacing: -.02em; }
-.ca-solved-ring small { font-size: 0.875rem; font-weight: 500; color: rgb(var(--ca-mute-rgb)); }
-.ca-solved-ring span { display: inline-flex; align-items: center; gap: .15rem; font-size: 0.8125rem; color: rgb(var(--ca-mute-rgb)); }
-.ca-solved-ring span svg.lucide { width: .8rem; height: .8rem; color: rgb(var(--ca-ok-rgb)); stroke-width: 3; }
 .ca-solved-levels { display: grid; flex: 1; gap: .35rem; min-width: 0; }
 .ca-solved-levels li { display: flex; align-items: center; justify-content: space-between; height: 1.65rem; padding: 0 .6rem; border-radius: 7px; background: rgb(var(--ca-sunk-rgb)); }
 .ca-solved-levels .ca-diff { font-size: 0.8125rem; }
@@ -3326,26 +3315,6 @@ body:has(.ca-main-ws) .ca-footer { display: none; }
 .ca-table td a.ca-link { vertical-align: middle; }
 
 /* The solved ring with level tiles (problems/_solved_ring.html): profile, home, problem list */
-.ca-sr { display: flex; align-items: center; gap: 1.25rem; }
-.ca-sr-ring { width: 8.5rem; aspect-ratio: 1; }
-.ca-sr-ring > p b { font-size: 1.9rem; }
-.ca-sr-ring > p b small { font-size: 1rem; }
-.ca-sr-try { position: absolute; left: 0; right: 0; bottom: -.15rem; text-align: center; font-style: normal; font-size: 0.8125rem; color: rgb(var(--ca-mute-rgb)); }
-.ca-sr-try b { color: rgb(var(--ca-ink-rgb)); font-size: 0.875rem; }
-.ca-sr-tiles { flex: 1; min-width: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; margin: 0; padding: 0; list-style: none; }
-.ca-sr-tiles a { position: relative; display: grid; gap: .1rem; padding: .6rem .8rem; border-radius: 10px; background: rgb(var(--ca-sunk-rgb)); box-shadow: inset 0 0 0 1px rgb(var(--ca-line-rgb)); text-decoration: none; color: rgb(var(--ca-ink-rgb)); transition: background-color .15s ease, box-shadow .15s ease; }
-.ca-sr-tiles a:hover { background: rgb(var(--ca-surface-rgb)); box-shadow: inset 0 0 0 1px var(--lvl), var(--ca-shadow); }
-.ca-sr-lv { font-size: 1rem; font-weight: 700; color: var(--lvl); }
-.ca-sr-tiles b { font-size: 1.25rem; font-weight: 700; line-height: 1.2; }
-.ca-sr-tiles b small { font-size: 0.9375rem; font-weight: 500; color: rgb(var(--ca-mute-rgb)); }
-.ca-sr-bar { display: block; height: 4px; margin-top: .35rem; border-radius: 9999px; background: rgb(var(--ca-ink-rgb) / .09); overflow: hidden; }
-.ca-sr-bar::after { content: ""; display: block; height: 100%; width: var(--p, 0%); border-radius: inherit; background: var(--lvl); }
-.ca-sr-tiles a > svg.lucide { position: absolute; right: .6rem; top: 50%; width: 1rem; height: 1rem; transform: translateY(-50%); color: rgb(var(--ca-mute-rgb)); }
-.ca-sr-tiles a:hover > svg.lucide { color: var(--lvl); }
-.ca-box .ca-sr { flex-direction: column; align-items: stretch; gap: .9rem; }
-.ca-box .ca-sr-ring { align-self: center; }
-@media (max-width: 30rem) { .ca-sr { flex-direction: column; align-items: stretch; } .ca-sr-ring { align-self: center; } }
-.ca7-g2 .ca-sr-ring { width: 9.5rem; }
 
 /* GLB-3: dates and file pickers drawn by static/js/forms.js (the native controls stay in the form, hidden) */
 .ca-dt { position: relative; display: grid; gap: .35rem; }
@@ -3453,8 +3422,6 @@ pre:hover > .ca-copy-pre, .ca-codetabs:hover .ca-copy-pre, .ca-copy-pre:focus-vi
 .ca-live-names li { padding: .25rem .8rem; border-radius: 9999px; background: rgb(var(--ca-frame-rgb)); font-weight: 600; }
 .ca-live-top { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
 .ca-live-secs { display: grid; place-items: center; width: 3.2rem; height: 3.2rem; border-radius: 50%; font-size: 1.5rem; color: rgb(var(--ca-on-fill-rgb)); background: rgb(var(--ca-accent-fill-rgb)); }
-.ca-live-clock { height: .5rem; margin: .6rem 0 1.2rem; border-radius: 9999px; background: rgb(var(--ca-frame-rgb)); overflow: hidden; }
-.ca-live-clock i { display: block; height: 100%; background: rgb(var(--ca-accent-fill-rgb)); transition: width .2s linear; }
 .ca-live-ask { font-size: 1.5rem; font-weight: 700; margin-bottom: .75rem; }
 .ca-live .ca-quiz-code { font-size: 1.25rem; }
 .ca-live-opts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; margin-top: 1rem; }
@@ -3605,3 +3572,71 @@ body .EasyMDEContainer .cm-s-easymde .cm-link, body .EasyMDEContainer .cm-s-easy
 .ca-personal-clock { display: flex; align-items: baseline; gap: .75rem; margin: 0 0 .4rem; }
 .ca-personal-clock span { font-size: 0.875rem; color: rgb(var(--ca-mute-rgb)); }
 .ca-personal-clock b { font-size: 2rem; font-weight: 700; letter-spacing: -.02em; }
+
+
+.ca-you { white-space: nowrap; }
+
+/* Darajalar in the rating page's side column: the ladder top-down, one row per tier (dot in its colour, name, range, head count);
+   a row filters the table, yours says "Siz" and the box opens with how far the next tier is */
+.ca7-tier-me { padding: .15rem 1.15rem .9rem; }
+.ca7-tier-me p { display: flex; align-items: baseline; justify-content: space-between; gap: .75rem; font-size: 0.875rem; color: rgb(var(--ca-mute-rgb)); }
+.ca7-tier-me p > b { font-size: 1.5rem; font-weight: 700; letter-spacing: -.02em; color: rgb(var(--ca-ink-rgb)); }
+.ca7-tier-me p b:not(:first-child) { font-weight: 700; color: rgb(var(--ca-ink-rgb)); }
+.ca7-tier-me .ca7-ladder-pg { margin: .5rem 0 0; }
+.ca7-tiers { margin: 0; padding: 0 .5rem .4rem; list-style: none; }
+.ca7-tiers li { position: relative; display: flex; align-items: center; gap: .7rem; padding: .55rem .65rem; border-radius: 9px; transition: background-color .15s ease; }
+.ca7-tiers li:hover { background: color-mix(in srgb, var(--tier) 9%, transparent); }
+.ca7-tiers li.is-me { background: color-mix(in srgb, var(--tier) 13%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tier) 55%, transparent); }
+.ca7-tiers li.is-sel { background: color-mix(in srgb, var(--tier) 16%, transparent); }
+.ca7-tiers li.is-empty:not(.is-me):not(.is-sel) { opacity: .6; }
+.ca7-tiers .ca7-ladder-dot { flex: none; width: .7rem; height: .7rem; border-radius: 50%; background: var(--tier); }
+.ca7-ladder-dot { flex: none; border-radius: 50%; background: var(--tier); }
+.ca7-tier-n { display: grid; min-width: 0; line-height: 1.25; }
+.ca7-tier-n b { font-size: 0.9375rem; font-weight: 700; }
+.ca7-tier-n em { display: inline-block; margin-left: .45rem; padding: 0 .4rem; border-radius: 9999px; font-style: normal; font-size: 0.75rem; font-weight: 600; color: rgb(var(--ca-ink-rgb)); background: color-mix(in srgb, var(--tier) 30%, transparent); }
+.ca7-tier-n small { font-size: 0.8125rem; color: rgb(var(--ca-mute-rgb)); }
+.ca7-tier-c { margin-left: auto; font-size: 0.875rem; color: rgb(var(--ca-mute-rgb)); white-space: nowrap; }
+.ca7-tier-c b { font-weight: 700; color: rgb(var(--ca-ink-rgb)); }
+.ca7-tier-note { padding: .35rem 1.15rem 1rem; font-size: 0.8125rem; color: rgb(var(--ca-mute-rgb)); }
+.ca7-tiers .ca7-ladder-go { border-radius: 9px; }
+
+/* Taraqqiyot: the total over a four-segment meter and a row per level. Hovering or focusing a row or a segment turns the big
+   number (and the row's count) into that level's percentage, and the other segments step back */
+.ca-sr { display: grid; gap: .8rem; }
+.ca-sr-hero { display: grid; }
+.ca-sr-c { grid-area: 1 / 1; display: flex; align-items: baseline; gap: .6rem; pointer-events: none; transition: opacity .15s ease; }
+.ca-sr-c b { font-size: 2.1rem; font-weight: 700; line-height: 1.1; letter-spacing: -.02em; }
+.ca-sr-c b small { margin-left: .1rem; font-size: 1.05rem; font-weight: 500; color: rgb(var(--ca-mute-rgb)); }
+.ca-sr-c span { font-size: 0.9375rem; color: rgb(var(--ca-mute-rgb)); }
+.ca-sr-c.is-lv { opacity: 0; }
+.ca-sr-c.is-lv b, .ca-sr-c.is-lv span { color: var(--lvl); }
+.ca-sr-c.is-lv span { font-weight: 600; }
+.ca-sr-meter { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
+.ca-sr-seg { position: relative; display: block; height: 10px; border-radius: 9999px; overflow: hidden; background: color-mix(in srgb, var(--lvl) 20%, transparent); transition: opacity .15s ease; }
+.ca-sr-seg::after { content: ""; position: absolute; inset: 0 auto 0 0; width: var(--p, 0%); border-radius: inherit; background: var(--lvl); }
+.ca-sr-rows { display: grid; margin: 0 -.4rem; padding: 0; list-style: none; }
+.ca-sr-rows a { display: flex; align-items: center; gap: .6rem; padding: .5rem .4rem; border-radius: 8px; color: rgb(var(--ca-ink-rgb)); text-decoration: none; transition: background-color .15s ease; }
+.ca-sr-rows a:is(:hover, :focus-visible) { background: color-mix(in srgb, var(--dot) 12%, transparent); }
+.ca-sr-rows a:focus-visible { outline: 2px solid var(--dot); outline-offset: -2px; }
+.ca-sr-dot { flex: none; width: .65rem; height: .65rem; border-radius: 50%; background: var(--dot); }
+.ca-sr-lv { font-size: 0.9375rem; font-weight: 600; color: var(--lvl); }
+.ca-sr-rows b { margin-left: auto; font-size: 0.9375rem; font-weight: 700; }
+.ca-sr-rows b small { font-weight: 500; color: rgb(var(--ca-mute-rgb)); }
+.ca-sr-p { display: none; }
+.ca-sr-rows a:is(:hover, :focus-visible) .ca-sr-n { display: none; }
+.ca-sr-rows a:is(:hover, :focus-visible) .ca-sr-p { display: inline; }
+.ca-sr-rows a > svg.lucide { flex: none; width: 1rem; height: 1rem; color: rgb(var(--ca-mute-rgb)); }
+.ca-sr-rows a:is(:hover, :focus-visible) > svg.lucide { color: var(--lvl); }
+.ca-sr:has(.ca-sr-hit[data-i="0"]:is(:hover, :focus-visible)) .ca-sr-c.is-all { opacity: 0; }
+.ca-sr:has(.ca-sr-hit[data-i="0"]:is(:hover, :focus-visible)) .ca-sr-c.is-lv[data-i="0"] { opacity: 1; }
+.ca-sr:has(.ca-sr-hit[data-i="0"]:is(:hover, :focus-visible)) .ca-sr-seg:not([data-i="0"]) { opacity: .3; }
+.ca-sr:has(.ca-sr-hit[data-i="1"]:is(:hover, :focus-visible)) .ca-sr-c.is-all { opacity: 0; }
+.ca-sr:has(.ca-sr-hit[data-i="1"]:is(:hover, :focus-visible)) .ca-sr-c.is-lv[data-i="1"] { opacity: 1; }
+.ca-sr:has(.ca-sr-hit[data-i="1"]:is(:hover, :focus-visible)) .ca-sr-seg:not([data-i="1"]) { opacity: .3; }
+.ca-sr:has(.ca-sr-hit[data-i="2"]:is(:hover, :focus-visible)) .ca-sr-c.is-all { opacity: 0; }
+.ca-sr:has(.ca-sr-hit[data-i="2"]:is(:hover, :focus-visible)) .ca-sr-c.is-lv[data-i="2"] { opacity: 1; }
+.ca-sr:has(.ca-sr-hit[data-i="2"]:is(:hover, :focus-visible)) .ca-sr-seg:not([data-i="2"]) { opacity: .3; }
+.ca-sr:has(.ca-sr-hit[data-i="3"]:is(:hover, :focus-visible)) .ca-sr-c.is-all { opacity: 0; }
+.ca-sr:has(.ca-sr-hit[data-i="3"]:is(:hover, :focus-visible)) .ca-sr-c.is-lv[data-i="3"] { opacity: 1; }
+.ca-sr:has(.ca-sr-hit[data-i="3"]:is(:hover, :focus-visible)) .ca-sr-seg:not([data-i="3"]) { opacity: .3; }
+@media (prefers-reduced-motion: reduce) { .ca-sr-c, .ca-sr-seg, .ca-sr-rows a { transition: none; } }

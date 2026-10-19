@@ -349,7 +349,6 @@ def problem_list(request):
             "level_chips": level_chips,
             "status_chips": status_chips,
             "level_total": sum(by_level.values()),
-            "any_rated": any(p.avg_stars for p in page),
             "next_picks": next_picks,
             "picks_reason": shared_reason(next_picks),
             "daily": daily,

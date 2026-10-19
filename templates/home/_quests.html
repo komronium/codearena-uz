@@ -10,6 +10,6 @@ a bonus. ctx: quests (apps.problems.quests.today_quests), freezes, streak.{% end
     </li>
     {% endfor %}
   </ul>
-  <p class="ca7-note"><i data-lucide="flame" class="lu" style="color: #E8590C" aria-hidden="true"></i><span>{% if quests.safe %}Bugungi Olov saqlandi.{% else %}Bittasini bajarsangiz ham Olov o‘chmaydi.{% endif %}</span></p>
-  <p class="ca7-note"><i data-lucide="snowflake" class="lu text-accent" aria-hidden="true"></i><span>{% if freezes %}<b>{{ freezes }}</b> ta muzlatish bor: bir kunlik tanaffus Olovni o‘chirmaydi.{% else %}Har 7 kunlik Olov uchun bitta muzlatish olasiz (ko‘pi bilan 2 ta).{% endif %}</span></p>
+  <p class="ca7-note" title="Har 7 kunlik Olov uchun bitta muzlatish olasiz (ko‘pi bilan 2 ta)."><i data-lucide="flame" class="lu" style="color: #E8590C" aria-hidden="true"></i><span>{% if quests.safe %}Bugungi Olov saqlandi.{% else %}Bittasini bajarsangiz ham Olov o‘chmaydi.{% endif %}</span></p>
+  {% if freezes %}<p class="ca7-note"><i data-lucide="snowflake" class="lu text-accent" aria-hidden="true"></i><span><b>{{ freezes }}</b> ta muzlatish bor: bir kunlik tanaffus Olovni o‘chirmaydi.</span></p>{% endif %}
 </section>
