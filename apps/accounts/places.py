@@ -2,7 +2,8 @@
 box (the form accepts any text, these lists only drive the pickers and tidy up spellings).
 
 CITIES[code] is a list of (group, [city, ...]); the group is a region shown as the picker's heading.
-SCHOOLS[code][city] is the list of institutions in that city. Add to these when a student cannot find theirs;
+SCHOOLS[code][city] is the institutions located in that city; the pickers offer a country's institutions
+grouped by that city (where one studies is not where one lives, so the school list never depends on the home city). Add to these when a student cannot find theirs;
 "Boshqa…" in the picker lets them write it meanwhile."""
 
 import re
@@ -71,6 +72,11 @@ ALIASES = {
 
 SCHOOLS = {
     "UZ": {
+        "Buxoro": [
+            "Osiyo xalqaro universiteti", "Buxoro davlat universiteti", "Buxoro muhandislik-texnologiya instituti",
+            "Abu Ali ibn Sino nomidagi Buxoro davlat tibbiyot instituti", "Buxoro davlat pedagogika instituti",
+            "Buxoro xalqaro universiteti", "Prezident maktabi",
+        ],
         "Toshkent": [
             "O‘zbekiston Milliy universiteti", "Toshkent axborot texnologiyalari universiteti (TATU)",
             "Toshkent davlat texnika universiteti", "Inha universiteti (Toshkent)",
@@ -81,11 +87,6 @@ SCHOOLS = {
             "Toshkent davlat sharqshunoslik universiteti", "Toshkent kimyo-texnologiya instituti",
             "Toshkent to‘qimachilik va yengil sanoat instituti", "Amity University Tashkent",
             "Webster University Tashkent", "Prezident maktabi",
-        ],
-        "Buxoro": [
-            "Osiyo xalqaro universiteti", "Buxoro davlat universiteti", "Buxoro muhandislik-texnologiya instituti",
-            "Abu Ali ibn Sino nomidagi Buxoro davlat tibbiyot instituti", "Buxoro davlat pedagogika instituti",
-            "Buxoro xalqaro universiteti", "Prezident maktabi",
         ],
         "Samarqand": [
             "Samarqand davlat universiteti", "Samarqand davlat tibbiyot universiteti",
@@ -149,5 +150,5 @@ def canon_school(country: str, text: str) -> str:
 
 
 def payload() -> dict:
-    """What the pickers' script needs: {"cities": {code: [[group, [city, ...]], ...]}, "schools": {code: {city: [...]}}}."""
-    return {"cities": CITIES, "schools": SCHOOLS, "other": OTHER}
+    """What the pickers' script needs: {"cities": {code: [[group, [city, ...]], ...]}, "schools": {code: [[city, [school, ...]], ...]}}."""
+    return {"cities": CITIES, "schools": {code: list(by_city.items()) for code, by_city in SCHOOLS.items()}, "other": OTHER}

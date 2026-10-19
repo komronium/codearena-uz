@@ -1,4 +1,5 @@
-// Country -> city -> school pickers of the profile (templates/accounts/_place_fields.html). The lists are in
+// Country -> city and country -> school pickers of the profile (the school list follows the country only: where
+// one studies is not where one lives) (templates/accounts/_place_fields.html). The lists are in
 // #places-data (apps/accounts/places.py). A country or city without a list shows a text box instead, and
 // "Boshqa…" opens the same box, so nobody is stuck on a missing entry; the server accepts either.
 (() => {
@@ -53,25 +54,14 @@
   }
 
   const cityGroups = () => data.cities[country.value] || [];
-  const cityName = () => (city.select.value === OTHER ? "" : city.select.value);
-
   function fillCity(value, text) {
     fill(city, cityGroups(), value, text, "Shaharni tanlang", "Boshqa shahar…");
   }
 
   function fillSchool(value, text) {
     if (!school.select) return;
-    const list = (data.schools[country.value] || {})[cityName()] || [];
-    if (!list.length && cityGroups().length && !cityName() && city.select.value !== OTHER) {
-      // a list country, no city yet: the school list waits for it
-      school.select.replaceChildren(option("", "Avval shaharni tanlang"));
-      school.select.disabled = true;
-      school.select.hidden = false;
-      school.other.hidden = true;
-      return;
-    }
-    school.select.disabled = false;
-    fill(school, list.length ? [[null, list]] : [], value, text, "O‘quv joyini tanlang", "Boshqa…");
+    const groups = data.schools[country.value] || [];
+    fill(school, groups, value, text, "O‘quv joyini tanlang", "Boshqa…");
   }
 
   const initial = (box) => [box.select.dataset.value || "", box.other.dataset.value || ""];
@@ -85,7 +75,6 @@
   city.select.addEventListener("change", () => {
     city.other.hidden = city.select.value !== OTHER;
     if (!city.other.hidden) city.other.focus();
-    fillSchool("", "");
   });
   if (school.select) {
     school.select.addEventListener("change", () => {

@@ -1,5 +1,5 @@
-"""The boards' place filters: country, then city, then school, each offering only what people on the board
-have (with how many), so no choice leads to an empty table."""
+"""The boards' place filters: country, then city and school, each offering only what people on the board
+have (with how many)."""
 
 from collections import Counter
 
@@ -15,13 +15,18 @@ def board_geo(request, rows):
     country = request.GET.get("country", "")
     country = country if country in countries else ""
     in_country = [r for r in rows if r[0] == country] if country else []
-    cities = Counter(city for _, city, _ in in_country if city)
     city = request.GET.get("city", "")
-    city = city if city in cities else ""
-    in_city = [r for r in in_country if r[1] == city] if city else in_country
-    schools = Counter(s for _, _, s in in_city if s)
+    city = city if any(r[1] == city for r in in_country) else ""
     school = request.GET.get("school", "")
-    school = school if school in schools else ""
+    school = school if any(r[2] == school for r in in_country) else ""
+    # city and school are separate questions (where one lives, where one studies); each list counts the people the
+    # other one's choice leaves, so no pick leads to an empty table
+    cities = Counter(c for _, c, s in in_country if c and (not school or s == school))
+    schools = Counter(s for _, c, s in in_country if s and (not city or c == city))
+    if city:
+        cities.setdefault(city, 0)
+    if school:
+        schools.setdefault(school, 0)
 
     def ranked(counter):
         return sorted(counter.items(), key=lambda kv: (-kv[1], kv[0]))

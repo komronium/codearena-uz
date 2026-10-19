@@ -16,8 +16,8 @@
   <summary class="ca7-ddb">{% if geo.city %}{{ geo.city }}{% else %}Shahar{% endif %}<i data-lucide="chevron-down" class="lu" aria-hidden="true"></i></summary>
   <div class="ca-dropdown-panel ca7-ddp">
     <div class="ca7-ddl">
-      <a class="ca-dropdown-item" href="{% querystring city=None school=None page=None %}"{% if not geo.city %} aria-current="true"{% endif %}>Barcha shaharlar</a>
-      {% for name, n in geo.cities %}<a class="ca-dropdown-item" href="{% querystring city=name school=None page=None %}"{% if name == geo.city %} aria-current="true"{% endif %}>{{ name }}<em>{{ n }}</em></a>{% endfor %}
+      <a class="ca-dropdown-item" href="{% querystring city=None page=None %}"{% if not geo.city %} aria-current="true"{% endif %}>Barcha shaharlar</a>
+      {% for name, n in geo.cities %}<a class="ca-dropdown-item" href="{% querystring city=name page=None %}"{% if name == geo.city %} aria-current="true"{% endif %}>{{ name }}<em>{{ n }}</em></a>{% endfor %}
     </div>
   </div>
 </details>

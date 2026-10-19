@@ -747,3 +747,13 @@ def test_backfill_gives_uzbek_cities_their_country():
     importlib.import_module("apps.accounts.migrations.0025_backfill_country").backfill(django_apps, None)
     a.refresh_from_db(); b.refresh_from_db()
     assert (a.country, b.country) == ("UZ", "")
+
+
+@pytest.mark.django_db
+def test_school_filter_is_independent_of_the_home_city(client):
+    _rated("ali", 1500, country="UZ", location="Qarshi", school="Osiyo xalqaro universiteti")
+    _rated("vali", 1400, country="UZ", location="Buxoro", school="Osiyo xalqaro universiteti")
+    page = client.get(reverse("rating"), {"country": "UZ", "school": "Osiyo xalqaro universiteti"}).content.decode()
+    assert "Qarshi" in page and "Buxoro" in page  # both home cities are still offered
+    r = client.get(reverse("rating"), {"country": "UZ", "city": "Qarshi", "school": "Osiyo xalqaro universiteti"})
+    assert [u.username for u in r.context["users"]] == ["ali"]
