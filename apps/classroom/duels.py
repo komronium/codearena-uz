@@ -7,9 +7,10 @@ are over, by each player's own K (k_factor), as in chess: high for a newcomer, l
 
 A duel names its opponent (a friend, who has WAIT_FOR to accept) or leaves the seat open: find_opponent
 puts the next player who asks in that language into the open duel whose owner's duel rating is
-closest to theirs, or opens a new one for them. Each duel mixes levels by the pair's duel rating (MIX) and takes the questions
+closest to theirs, or opens a new one for them. A pair may play PAIR_LIMIT duels in 24 hours (Elo at half after the first PAIR_FULL_K). Each duel mixes levels by the pair's duel rating (MIX) and takes the questions
 the two have seen least; the right answers are shown only once both runs are over. Duels before the quiz were coding races (mode "code"); they are history only."""
 import random
+from collections import Counter
 from datetime import datetime, timedelta
 from typing import NamedTuple
 
@@ -49,17 +50,38 @@ def elo(a: int, b: int, score: float, ka: int, kb: int) -> tuple[int, int]:
 
 
 PAIR_WINDOW = timedelta(hours=24)
+PAIR_FULL_K = 10  # the first duels of a pair in 24 hours move the rating in full,
+PAIR_LIMIT = 20  # the rest, up to this many, at half; the next one can't be sent, accepted or matched
+COUNTED = (Duel.Status.PENDING, Duel.Status.ACTIVE, Duel.Status.FINISHED)  # a declined or expired one doesn't use a slot
+PAIR_FULL = "Bu raqib bilan so‘nggi 24 soatda 20 ta duel o‘ynadingiz — keyinroq davom eting."
 
 
 def pair_weight(duel) -> float:
     """How much of its K a duel's Elo counts: the same two trading duels all day would only pass points
-    back and forth, so after 3 finished duels between them in the 24 hours before this one it counts half,
-    after 6 not at all. Counted from the data (not a counter), so replay() gives the same answer."""
+    back and forth, so after PAIR_FULL_K finished duels between them in the 24 hours before this one it
+    counts half. Counted from the data (not a counter), so replay() gives the same answer."""
     pair = [duel.challenger_id, duel.opponent_id]
     n = Duel.objects.filter(status=Duel.Status.FINISHED, mode=Duel.Mode.QUIZ, challenger_id__in=pair,
                             opponent_id__in=pair, created__lt=duel.created,
                             created__gte=duel.created - PAIR_WINDOW).count()
-    return 1.0 if n < 3 else 0.5 if n < 6 else 0.0
+    return 1.0 if n < PAIR_FULL_K else 0.5
+
+
+def pair_count(a_id: int, b_id: int, exclude=None) -> int:
+    """Duels of this pair that used a slot in the last 24 hours."""
+    qs = Duel.objects.filter(mode=Duel.Mode.QUIZ, status__in=COUNTED, challenger_id__in=[a_id, b_id],
+                             opponent_id__in=[a_id, b_id], created__gte=timezone.now() - PAIR_WINDOW)
+    return qs.exclude(pk=exclude).count() if exclude else qs.count()
+
+
+def full_pairs(user_id: int) -> set[int]:
+    """The people `user_id` has used all PAIR_LIMIT duels with in the last 24 hours."""
+    seen = Counter()
+    for c, o in (Duel.objects.filter(Q(challenger_id=user_id) | Q(opponent_id=user_id), mode=Duel.Mode.QUIZ,
+                                     status__in=COUNTED, opponent__isnull=False,
+                                     created__gte=timezone.now() - PAIR_WINDOW).values_list("challenger_id", "opponent_id")):
+        seen[o if c == user_id else c] += 1
+    return {uid for uid, n in seen.items() if n >= PAIR_LIMIT}
 
 
 # ---- seasons ------------------------------------------------------------------------------------------
@@ -299,7 +321,7 @@ def joinable(user):
     """Open duels `user` could be put into: someone else's, still waiting."""
     return (Duel.objects.filter(mode=Duel.Mode.QUIZ, status=Duel.Status.PENDING, opponent__isnull=True,
                                 created__gt=timezone.now() - WAIT_FOR)
-            .exclude(challenger=user))
+            .exclude(challenger=user).exclude(challenger_id__in=full_pairs(user.pk)))
 
 
 def joinable_counts(user) -> dict[str, int]:
@@ -355,6 +377,8 @@ def challenge(challenger, opponent_username: str, language: str) -> tuple[Duel |
         pair = [challenger.pk, opponent.pk]
         if Duel.objects.filter(status__in=OPEN, challenger_id__in=pair, opponent_id__in=pair).exists():
             return None, "Bu raqib bilan ochiq duel bor."
+        if pair_count(*pair) >= PAIR_LIMIT:
+            return None, PAIR_FULL
         questions = _pick(pair, language)
         if questions is None:
             return None, "Bu tilda savollar hali yetarli emas — boshqasini tanlang."
@@ -380,6 +404,8 @@ def accept(duel, user) -> str:
             return "Chaqiriq muddati o‘tgan."
         if _busy(user, timezone.now()):
             return BUSY
+        if pair_count(duel.challenger_id, user.pk, exclude=duel.pk) >= PAIR_LIMIT:
+            return PAIR_FULL
         _join(duel, user)
     return ""
 

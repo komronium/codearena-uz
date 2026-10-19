@@ -586,14 +586,14 @@ def test_a_duel_mixes_levels_by_rating_and_takes_the_least_asked_first():
 
 
 @pytest.mark.django_db
-def test_the_same_pair_counts_less_and_less_in_the_elo_within_a_day(bank):
+def test_a_pair_moves_full_elo_for_ten_duels_a_day_then_half_and_stops_at_twenty(bank):
     from .duels import pair_weight
     from .models import Duel
 
     p1, p2 = _players()
     made = [Duel.objects.create(challenger=p1, opponent=p2, mode="quiz", language="python", status="finished", winner=p1)
-            for _ in range(7)]
-    assert [pair_weight(d) for d in made] == [1, 1, 1, 0.5, 0.5, 0.5, 0.0]
+            for _ in range(12)]
+    assert [pair_weight(d) for d in made] == [1] * 10 + [0.5] * 2
     other = User.objects.create_user("p3", password="x")
     fresh = Duel.objects.create(challenger=p1, opponent=other, mode="quiz", language="python", status="finished", winner=p1)
     assert pair_weight(fresh) == 1  # another opponent: full
@@ -646,3 +646,30 @@ def test_variants_nudge_numbers_outside_strings_and_work_the_answer_out():
     assert options_for("hello", ["a", "b"], rng) == []  # a word answer is typed
     assert options_for("True", ["True", "False", "None"], rng) == ["True", "False", "None"]
     assert list(variants_of({**entry, "answer": "Xato"}, run, 5, rng)) == []  # an error answer is not varied
+
+
+@pytest.mark.django_db
+def test_a_full_day_of_duels_with_one_person_blocks_sending_accepting_and_matching(bank):
+    from .duels import PAIR_FULL, PAIR_LIMIT, _open, accept, challenge, find_opponent, full_pairs, joinable_counts
+    from .models import Duel
+
+    p1, p2 = _players()
+    for _ in range(PAIR_LIMIT):
+        Duel.objects.create(challenger=p1, opponent=p2, mode="quiz", language="python", status="finished", winner=p1)
+    assert full_pairs(p1.pk) == {p2.pk} and full_pairs(p2.pk) == {p1.pk}
+    assert challenge(p1, "p2", "python") == (None, PAIR_FULL)  # can't be sent
+    # an invitation made before the day filled up can't be accepted either
+    p3 = User.objects.create_user("p3", password="x")
+    old = Duel.objects.create(challenger=p3, opponent=p1, mode="quiz", language="python", questions=[1, 2, 3, 4, 5],
+                              started_at=timezone.now(), ends_at=timezone.now() + timezone.timedelta(minutes=5))
+    for _ in range(PAIR_LIMIT):
+        Duel.objects.create(challenger=p1, opponent=p3, mode="quiz", language="python", status="finished", winner=p1)
+    Duel.objects.filter(pk=old.pk).update(created=timezone.now() - timezone.timedelta(minutes=1))
+    assert accept(old, p1) == PAIR_FULL
+    # automatic matching leaves out an owner whose pair with you is full
+    fresh = User.objects.create_user("p4", password="x")
+    _open(p2, "python", [e.pk for e in bank[:5]])
+    assert joinable_counts(p1) == {}  # p2's open duel isn't offered to p1 ...
+    duel, _ = find_opponent(p1, "python")
+    assert duel is not None and duel.opponent_id is None and duel.challenger_id == p1.pk  # ... p1 opens their own
+    assert joinable_counts(fresh) == {"python": 2}  # while anyone else still sees both
