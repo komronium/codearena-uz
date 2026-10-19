@@ -565,15 +565,17 @@ def test_a_duel_mixes_levels_by_rating_and_takes_the_least_asked_first():
     for level in ("beginner", "easy", "medium"):
         for i in range(6):
             _q(f"{level}{i}", level=level)
-    p1, p2 = _players()  # both 1200: one beginner, two easy, two medium
+    p1, p2 = _players()  # both 1200: mostly easy ones, no medium
 
     def levels(ids):
         return Counter(DuelQuestion.objects.get(pk=i).level for i in ids)
 
-    assert levels(_pick([p1, p2], "python")) == {"beginner": 1, "easy": 2, "medium": 2}
+    assert levels(_pick([p1, p2], "python")) == {"beginner": 2, "easy": 3}
     User.objects.filter(pk=p1.pk).update(duel_rating=900)
     User.objects.filter(pk=p2.pk).update(duel_rating=1000)
-    assert levels(_pick([p1, p2], "python")) == {"beginner": 2, "easy": 2, "medium": 1}
+    assert levels(_pick([p1, p2], "python")) == {"beginner": 3, "easy": 2}
+    User.objects.filter(pk__in=[p1.pk, p2.pk]).update(duel_rating=1700)  # only the strong get a medium
+    assert levels(_pick([p1, p2], "python")) == {"beginner": 1, "easy": 3, "medium": 1}
     # a question asked many times to others waits behind the ones nobody was asked
     busy = DuelQuestion.objects.get(key="easy0")
     third = User.objects.create_user("p3", password="x")
@@ -646,6 +648,8 @@ def test_variants_nudge_numbers_outside_strings_and_work_the_answer_out():
     assert options_for("hello", ["a", "b"], rng) == []  # a word answer is typed
     assert options_for("True", ["True", "False", "None"], rng) == ["True", "False", "None"]
     assert list(variants_of({**entry, "answer": "Xato"}, run, 5, rng)) == []  # an error answer is not varied
+    word = {**entry, "code": 'print("ab" + "c" * 2)', "answer": "abcc", "options": ["abcc", "abc", "ab", "cc"]}
+    assert list(variants_of(word, lambda lang, src: (True, "abcd\n"), 5, rng)) == []  # a pick never becomes a typed question
 
 
 @pytest.mark.django_db
@@ -673,3 +677,21 @@ def test_a_full_day_of_duels_with_one_person_blocks_sending_accepting_and_matchi
     duel, _ = find_opponent(p1, "python")
     assert duel is not None and duel.opponent_id is None and duel.challenger_id == p1.pk  # ... p1 opens their own
     assert joinable_counts(fresh) == {"python": 2}  # while anyone else still sees both
+
+
+def test_duels_ask_only_about_io_if_loops_lists_and_strings():
+    from .quiz_bank import entries, friendly
+
+    assert friendly("python", "print(7 // 2)", "3", [])
+    assert friendly("python", "a = [3, 1, 2]\na.sort()\nprint(a[0])", "1", [])
+    assert friendly("python", 'for c in "abc":\n    print(c)', "a b c", [])
+    assert not friendly("python", "def f(x):\n    return x\nprint(f(1))", "1", [])  # functions
+    assert not friendly("python", "print(type(5))", "<class 'int'>", ["<class 'int'>", "x"])  # type checks
+    assert not friendly("python", 'd = {"a": 1}\nprint(d["a"])', "1", [])  # dicts
+    assert not friendly("python", "print([n * 2 for n in range(3)])", "[0, 2, 4]", ["[0, 2, 4]", "x"])  # comprehensions
+    assert not friendly("python", "a = [1, 2]\nprint(a)", "[1, 2]", [])  # a typed list: everyone writes it differently
+    assert friendly("python", "a = [1, 2]\nprint(a)", "[1, 2]", ["[1, 2]", "[2, 1]"])  # but a pick is fine
+    assert not friendly("js", "console.log([1, 2].map(x => x * 2))", "[2, 4]", ["[2, 4]"])
+    assert not friendly("java", "static int f() { return 1; }", "1", [])
+    for e in entries():  # nothing in the bank breaks the rule
+        assert friendly(e["language"], e["code"], e["answer"], e["options"]), e["key"]

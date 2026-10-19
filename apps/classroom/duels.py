@@ -264,9 +264,9 @@ def _seen(users) -> set[int]:
     return set(DuelAnswer.objects.filter(user__in=users).values_list("question_id", flat=True))
 
 
-# (beginner, easy, medium) questions of the five, by the pair's average duel rating: newcomers get more
-# of the easy ones, the strong more of the hard
-MIX = ((1100, (2, 2, 1)), (1500, (1, 2, 2)), (10 ** 9, (0, 2, 3)))
+# (beginner, easy, medium) questions of the five, by the pair's average duel rating: mostly easy ones for
+# everybody, a medium only for the strong
+MIX = ((1100, (3, 2, 0)), (1500, (2, 3, 0)), (10 ** 9, (1, 3, 1)))
 
 
 def _mix(users) -> tuple[int, int, int]:

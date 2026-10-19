@@ -52,8 +52,14 @@ class Command(BaseCommand):
                 elif not q.is_active or any(getattr(q, f) != v for f, v in values.items()):
                     DuelQuestion.objects.filter(pk=q.pk).update(is_active=True, **values)
                     changed += 1
-            retired = (DuelQuestion.objects.filter(is_active=True, origin="").exclude(key__in=[e["key"] for e in bank])
+            keys = [e["key"] for e in bank]
+            retired = (DuelQuestion.objects.filter(is_active=True, origin="").exclude(key__in=keys)
                        .update(is_active=False))
+            # variants follow their original out of the bank, and a pick question's variant is never typed
+            variants = DuelQuestion.objects.filter(is_active=True).exclude(origin="")
+            retired += variants.exclude(origin__in=keys).update(is_active=False)
+            picks = set(DuelQuestion.objects.filter(origin="", key__in=keys).exclude(options=[]).values_list("key", flat=True))
+            retired += variants.filter(options=[], origin__in=picks).update(is_active=False)
             self.stdout.write(f"Yangi: {added}, o‘zgargan: {changed}, olib tashlangan: {retired}, "
                               f"jami faol: {DuelQuestion.objects.filter(is_active=True).count()}.")
             if opts["dry_run"]:

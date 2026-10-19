@@ -11,6 +11,7 @@ C++ and Java code is the inside of main() unless full=True. "Xato" as an option 
 with an error or doesn't compile.
 """
 import hashlib
+import re
 
 XATO = "Xato"
 
@@ -571,9 +572,34 @@ for _key, _more in MORE.items():
     BANK[_key] = BANK[_key] + _more
 
 
+# What duels ask about: input/output and arithmetic, if, for, while, lists/arrays and strings. Code that uses
+# anything beyond that (functions, classes, dicts and sets, comprehensions, lambdas, type checks) is left out,
+# and so is a typed answer that is a list or other container: everyone writes those differently.
+_BEYOND = {
+    "python": r"\b(class|lambda|def|import|try|except|finally|with|yield|global|nonlocal|zip|map|filter|enumerate|set|dict|"
+              r"tuple|frozenset|isinstance|type|reversed|any|all|reduce|self|None|bool|raise|assert|del|is|round)\b|__\w+__|"
+              r"[{}]|\[[^\]\n]*\bfor\b|\([^)\n]*\bfor\b",
+    "cpp": r"\b(class|struct|template|typename|auto|map|set|pair|unordered_\w+|priority_queue|queue|stack|deque|bitset|"
+           r"function|new|delete|sizeof|union|enum|operator|virtual|string_view|tuple|iterator)\b|\[\s*\]\s*\(|->|\[&\]|\[=\]",
+    "java": r"\b(class|interface|enum|extends|implements|Map|HashMap|Set|HashSet|Optional|Stream|stream|record|var|try|catch|"
+            r"throw|instanceof|static)\b|->",
+    "js": r"=>|\b(class|new|Map|Set|Promise|async|await|reduce|filter|map|forEach|this|typeof|JSON|Symbol|function|try|"
+          r"catch|prototype|null|undefined|Object)\b|\{\s*\w+\s*:",
+}
+
+
+def friendly(language: str, code: str, answer: str, options) -> bool:
+    """Whether a question stays within what duels ask about (see _BEYOND)."""
+    if re.search(_BEYOND[language], code):
+        return False
+    return bool(options) or not re.search(r"[\[\]{}()]", answer)
+
+
 def entries():
     """Every bank question as a dict ready for DuelQuestion, keyed by language and code."""
     for (language, level), questions in BANK.items():
         for q in questions:
+            if not friendly(language, q["code"], q["answer"], q["options"]):
+                continue
             digest = hashlib.sha1(f"{q['kind']}\n{q['code']}".encode()).hexdigest()[:10]
             yield {**q, "language": language, "level": level, "key": f"{language}-{digest}"}

@@ -11,7 +11,7 @@ import hashlib
 import random
 import re
 
-from .quiz_bank import XATO, entries
+from .quiz_bank import XATO, entries, friendly
 from .quiz_check import _out, program
 
 _STRING = re.compile(r"""("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')""")
@@ -68,9 +68,14 @@ def variants_of(entry: dict, run, count: int, rng: random.Random):
         answer = _out(got) if ok else ""
         if not answer or len(answer) > _MAX_ANSWER or answer == entry["answer"]:
             continue
+        options = options_for(answer, entry["options"], rng)
+        if entry["options"] and not options:  # a pick question never turns into a typed one
+            continue
+        if not friendly(entry["language"], code, answer, options):
+            continue
         digest = hashlib.sha1(f"variant\n{entry['language']}\n{code}".encode()).hexdigest()[:10]
         yield {**entry, "code": code, "answer": answer, "accept": [], "explain": "",
-               "options": options_for(answer, entry["options"], rng), "origin": entry["key"],
+               "options": options, "origin": entry["key"],
                "key": f"{entry['language']}-v{digest}"}
 
 
