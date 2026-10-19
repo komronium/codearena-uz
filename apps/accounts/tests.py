@@ -683,3 +683,64 @@ def test_settings_school_from_the_picker_or_typed(client):
     assert u.school == "12-maktab"
     page = client.get(reverse("profile_edit")).content.decode()
     assert 'id="places-data"' in page and 'data-value="12-maktab"' in page
+
+
+# ---- place filters and flags on the boards (apps.accounts.geo) ----
+
+def _rated(name, rating, **kw):
+    """A user with one rated contest, so the rating board lists them."""
+    from datetime import timedelta
+    from django.utils import timezone
+    from apps.contests.models import Contest, Participation
+    u = User.objects.create_user(name, password="x", rating=rating, **kw)
+    c = Contest.objects.create(title=f"c-{name}", start=timezone.now() - timedelta(days=2), end=timezone.now() - timedelta(days=1))
+    Participation.objects.create(contest=c, user=u, rating_before=1200, rating_after=rating)
+    return u
+
+
+@pytest.mark.django_db
+def test_rating_filters_by_country_city_and_school(client):
+    _rated("ali", 1500, country="UZ", location="Buxoro", school="Osiyo xalqaro universiteti")
+    _rated("vali", 1400, country="UZ", location="Toshkent")
+    _rated("kair", 1300, country="KZ", location="Ostona")
+    page = client.get(reverse("rating")).content.decode()
+    assert "O‘zbekiston" in page and "Qozog‘iston" in page and "/static/flags/uz.svg" in page
+    uz = client.get(reverse("rating"), {"country": "UZ"}).content.decode()
+    assert "vali" in uz and "ali" in uz and "kair" not in uz and "Barcha shaharlar" in uz
+    city = client.get(reverse("rating"), {"country": "UZ", "city": "Buxoro"}).content.decode()
+    assert "ali" in city and "vali" not in city and "Barcha o‘quv joylari" in city
+    school = client.get(reverse("rating"), {"country": "UZ", "city": "Buxoro", "school": "Osiyo xalqaro universiteti"})
+    assert school.status_code == 200 and "vali" not in school.content.decode()
+
+
+@pytest.mark.django_db
+def test_place_filter_ranks_within_the_group_and_ignores_unknown_values(client):
+    from .geo import board_geo
+    _rated("top", 1900, country="KZ", location="Ostona")
+    _rated("ali", 1500, country="UZ", location="Buxoro")
+    r = client.get(reverse("rating"), {"country": "UZ"})
+    assert [u.rank for u in r.context["users"]] == [1]  # first among Uzbeks, not second overall
+    r = client.get(reverse("rating"), {"country": "XX", "city": "Nowhere", "school": "?"})
+    assert r.status_code == 200 and len(r.context["users"]) == 2 and not r.context["geo"]["active"]
+    from django.test import RequestFactory
+    cond, ctx = board_geo(RequestFactory().get("/", {"country": "UZ", "city": "Qarshi"}), [("UZ", "Buxoro", "")])
+    assert cond == {"country": "UZ"} and ctx["geo"]["city"] == ""  # a city nobody on the board has is dropped
+
+
+@pytest.mark.django_db
+def test_practice_board_filters_by_country(client):
+    User.objects.create_user("ali", password="x", practice_points=50, country="UZ", location="Buxoro")
+    User.objects.create_user("kair", password="x", practice_points=40, country="KZ", location="Ostona")
+    page = client.get(reverse("top"), {"country": "KZ"}).content.decode()
+    assert "kair" in page and "ali" not in page.split("<tbody>")[1]
+
+
+@pytest.mark.django_db
+def test_backfill_gives_uzbek_cities_their_country():
+    import importlib
+    from django.apps import apps as django_apps
+    a = User.objects.create_user("a", password="x", location="Buxoro")
+    b = User.objects.create_user("b", password="x", location="Parij")
+    importlib.import_module("apps.accounts.migrations.0025_backfill_country").backfill(django_apps, None)
+    a.refresh_from_db(); b.refresh_from_db()
+    assert (a.country, b.country) == ("UZ", "")

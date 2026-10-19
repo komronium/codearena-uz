@@ -24,7 +24,7 @@ there first; each player's badges beside them, best first.{% endcomment %}
   {% for r in rows %}
   <tr{% if r.u == user %} class="ca-row-me" id="me"{% endif %}>
     <td class="text-center">{% if r.rank <= 3 %}<span class="ca7-medal m{{ r.rank }}">{{ r.rank }}</span>{% else %}<span class="tabular text-mute">{{ r.rank }}</span>{% endif %}</td>
-    <td>{% if r.u == user %}{% include "accounts/_u7.html" with u=r.u you=True %}{% else %}{% include "accounts/_u7.html" with u=r.u you=False %}{% endif %}</td>
+    <td>{% if r.u == user %}{% include "accounts/_u7.html" with u=r.u you=True flag=True %}{% else %}{% include "accounts/_u7.html" with u=r.u you=False flag=True %}{% endif %}</td>
     <td><span class="ca-bminis">{% for b in r.badges|slice:":8" %}{% include "accounts/_bmini.html" %}{% endfor %}{% if r.badges|length > 8 %}<small>+{{ r.badges|length|add:"-8" }}</small>{% endif %}</span></td>
     <td class="text-right tabular">{{ r.families }}</td>
     <td class="text-right tabular font-bold">{{ r.levels }}</td>

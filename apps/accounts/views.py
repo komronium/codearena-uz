@@ -26,6 +26,7 @@ from apps.submissions.models import Submission
 
 from . import onboarding
 from .forms import ProfileEditForm, RegisterForm, WelcomeForm
+from .geo import board_geo
 from .models import Follow, Notification, TelegramLink, User
 
 from .tiers import RATING_TIERS as _RATING_TIERS
@@ -297,7 +298,9 @@ def top(request):
     """The practice-points board. Equal points share a place (two people on 1650 are both 4th), and a search shows
     each match with the place they hold on the whole board."""
     q = request.GET.get("q", "").strip()[:40]
-    board = practice_board()
+    everyone = practice_board()
+    cond, geo = board_geo(request, list(everyone.values_list("country", "location", "school")))
+    board = everyone.filter(**cond)  # a place filter makes the places those within the group
     qs = (board.annotate(solved_count=Count("userproblemsolved", distinct=True),
                          rank=Window(expression=Rank(), order_by=F("practice_points").desc()))
           .order_by("-practice_points", "username"))
@@ -305,9 +308,9 @@ def top(request):
         found = list(qs.filter(username__icontains=q)[:50])
         for u in found:  # the window ran over the filtered rows: count the places above on the whole board
             u.rank = board.filter(practice_points__gt=u.practice_points).count() + 1
-        return render(request, "accounts/top.html", {"users": found, "total": board.count(), "q": q, "found": len(found)})
+        return render(request, "accounts/top.html", {"users": found, "total": board.count(), "q": q, "found": len(found), **geo})
     page = Paginator(qs, 50).get_page(request.GET.get("page"))
-    return render(request, "accounts/top.html", {"users": page, "total": qs.count(), "q": ""})
+    return render(request, "accounts/top.html", {"users": page, "total": qs.count(), "q": "", **geo})
 
 
 @login_required
@@ -399,13 +402,17 @@ def rating(request):
           .annotate(contest_count=Count("participations", filter=Q(participations__rating_after__isnull=False)),
                     last_delta=Subquery(last.values("d")[:1]))
           .filter(contest_count__gt=0).order_by("-rating", "username"))
-    ratings = list(qs.values_list("rating", flat=True))  # highest first
+    rows = list(qs.values_list("rating", "country", "location", "school"))  # highest first
+    everyone = [r[0] for r in rows]
+    cond, geo = board_geo(request, [r[1:] for r in rows])
+    scope = qs.filter(**cond) if cond else qs  # a place filter makes the places those within the group
+    ratings = list(scope.values_list("rating", flat=True)) if cond else everyone
     q = request.GET.get("q", "").strip()[:50]
     # the order of the rows only; a place is always the place by rating
     sort = request.GET.get("sort", "")
     order = {"delta": ("-last_delta", "-rating", "username"),
              "contests": ("-contest_count", "-rating", "username")}.get(sort)
-    shown = qs.filter(username__icontains=q) if q else qs
+    shown = scope.filter(username__icontains=q) if q else scope
     tier_sel = request.GET.get("tier", "")
     band = next(((f, ce) for f, ce, n, _c in _RATING_TIERS if n == tier_sel), None)
     if band:  # one tier's players; the places stay the places on the whole board
@@ -431,13 +438,13 @@ def rating(request):
                     t["here"] = True
                     t["pct"] = round(100 * (request.user.rating - lo) / (hi - lo)) if hi else 100
             row = list(qs.values_list("pk", flat=True)).index(request.user.pk)
-            me = {"rank": sum(1 for r in ratings if r > request.user.rating) + 1, "page": row // 50 + 1,
+            me = {"rank": sum(1 for r in everyone if r > request.user.rating) + 1, "page": row // 50 + 1,
                   "delta": mine.rating_after - mine.rating_before, "next": _next_tier(request.user.rating),
                   "contests": rated.filter(user=request.user).count()}
     spread = _rating_spread(ratings, request.user.rating if me else None)
     return render(request, "accounts/rating.html",
                   {"users": page, "total": len(ratings), "tiers": tiers, "spread": spread, "me": me, "q": q,
-                   "sort": sort if order else "", "tier_sel": tier_sel})
+                   "sort": sort if order else "", "tier_sel": tier_sel, **geo})
 
 
 def badges_page(request):

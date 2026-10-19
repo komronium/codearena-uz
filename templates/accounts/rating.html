@@ -1,4 +1,4 @@
-{% extends "base.html" %}{% load tiers %}
+{% extends "base.html" %}{% load tiers places %}
 {% block title %}Reyting{% endblock %}
 {% block description %}CodeArena musobaqa reytingi: {{ total }} ishtirokchi, Elo bo‘yicha o‘rinlar va darajalar.{% endblock %}
 {% block band %}
@@ -23,7 +23,7 @@ own row marked.{% endcomment %}
   <div class="ca7-tools is-board">
     <div class="ca7-trow">
       <form method="get" class="ca7-search" role="search" aria-label="Foydalanuvchini qidirish">
-        {% if sort %}<input type="hidden" name="sort" value="{{ sort }}">{% endif %}
+        {% for k, v in geo_keep %}{% if k != "q" %}<input type="hidden" name="{{ k }}" value="{{ v }}">{% endif %}{% endfor %}{% if geo.country %}<input type="hidden" name="country" value="{{ geo.country }}">{% endif %}{% if geo.city %}<input type="hidden" name="city" value="{{ geo.city }}">{% endif %}{% if geo.school %}<input type="hidden" name="school" value="{{ geo.school }}">{% endif %}
         <i data-lucide="search" class="lu" aria-hidden="true"></i><input class="ca7-fld" type="search" name="q" value="{{ q }}" placeholder="Foydalanuvchi…" aria-label="Foydalanuvchi nomi" autocomplete="off" spellcheck="false">
       </form>
       <nav class="ca7-seg ca7-tools-r" aria-label="Saralash">
@@ -32,9 +32,10 @@ own row marked.{% endcomment %}
         <a href="{% querystring sort='contests' page=None %}"{% if sort == 'contests' %} aria-current="true"{% endif %}>Musobaqalar soni</a>
       </nav>
     </div>
+    {% if geo.countries %}<div class="ca7-trow">{% include "accounts/_geo_filters.html" %}{% if geo.active %}<a class="ca-link text-sm" href="{% querystring country=None city=None school=None page=None %}">Tozalash</a>{% endif %}</div>{% endif %}
   </div>
   {% if user.is_authenticated and not q %}<p class="mb-2 text-sm"><a class="ca-link" href="#me">Mening o‘rnimga o‘tish</a></p>{% endif %}
-  {% if q or tier_sel %}<p class="ca7-found">{% if tier_sel %}<b class="ca-tier-ink" style="--tier: {% for t in tiers %}{% if t.name == tier_sel %}{{ t.color }}{% endif %}{% endfor %}">{{ tier_sel }}</b>{% endif %}{% if q %} «{{ q }}»{% endif %}: {{ users.paginator.count }} ta · <a class="ca-link" href="{% url 'rating' %}">hammasi</a></p>{% endif %}
+  {% if q or tier_sel or geo.active %}<p class="ca7-found">{% if geo.country %}{% flag geo.country %} <b>{{ geo.country_name }}{% if geo.city %}, {{ geo.city }}{% endif %}{% if geo.school %}, {{ geo.school }}{% endif %}</b>{% endif %}{% if tier_sel %}<b class="ca-tier-ink" style="--tier: {% for t in tiers %}{% if t.name == tier_sel %}{{ t.color }}{% endif %}{% endfor %}">{{ tier_sel }}</b>{% endif %}{% if q %} «{{ q }}»{% endif %}: {{ users.paginator.count }} ta · <a class="ca-link" href="{% url 'rating' %}">hammasi</a></p>{% endif %}
   {% if users %}
   <div class="overflow-x-auto ca7-board">
   <table class="ca-table ca-table-flat">
@@ -43,7 +44,7 @@ own row marked.{% endcomment %}
     {% for u in users %}
     <tr{% if u == user %} class="ca-row-me" id="me"{% endif %}>
       <td class="text-center">{% if u.rank <= 3 and not q %}<span class="ca7-medal m{{ u.rank }}">{{ u.rank }}</span>{% else %}<span class="tabular text-mute">{{ u.rank }}</span>{% endif %}</td>
-      <td>{% if u == user %}{% include "accounts/_u7.html" with u=u you=True %}{% else %}{% include "accounts/_u7.html" with u=u you=False %} <span class="text-xs text-mute">{{ u.rating|tier_name }}</span>{% endif %}</td>
+      <td>{% if u == user %}{% include "accounts/_u7.html" with u=u you=True flag=True %}{% else %}{% include "accounts/_u7.html" with u=u you=False flag=True %} <span class="text-xs text-mute">{{ u.rating|tier_name }}</span>{% endif %}</td>
       <td class="hidden text-right tabular sm:table-cell">{{ u.contest_count }}</td>
       <td class="text-right tabular font-semibold {% if u.last_delta > 0 %}text-ok{% elif u.last_delta < 0 %}text-bad{% else %}text-mute{% endif %}">{{ u.last_delta|stringformat:"+d" }}</td>
       <td class="text-right tabular font-bold"><span class="ca-tier-ink" style="--tier: {{ u.rating|tier_color }}">{{ u.rating }}</span></td>

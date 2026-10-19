@@ -17,7 +17,7 @@
 {% if podium %}
 <section class="ca-podium" aria-label="O‘tgan mavsum g‘oliblari">
   <b>{{ podium_season }} mavsumi g‘oliblari</b>
-  {% for m in podium %}<span><span class="ca7-medal m{{ m.rank }}">{{ m.rank }}</span>{% include "accounts/_u7.html" with u=m.user you=False %}<small class="tabular text-mute">{{ m.rating }}</small></span>{% endfor %}
+  {% for m in podium %}<span><span class="ca7-medal m{{ m.rank }}">{{ m.rank }}</span>{% include "accounts/_u7.html" with u=m.user you=False flag=True %}<small class="tabular text-mute">{{ m.rating }}</small></span>{% endfor %}
 </section>
 {% endif %}
 {% if user.is_authenticated %}<p class="mb-3 text-sm"><a class="ca-link" href="#me">Mening o‘rnimga o‘tish</a> · <a class="ca-link" href="{% url 'classroom:duels' %}">Duel boshlash</a></p>{% endif %}
@@ -28,7 +28,7 @@
   {% for u in users %}
   <tr{% if u == user %} class="ca-row-me" id="me"{% endif %}>
     <td class="text-center">{% if u.rank <= 3 %}<span class="ca7-medal m{{ u.rank }}">{{ u.rank }}</span>{% else %}<span class="tabular text-mute">{{ u.rank }}</span>{% endif %}</td>
-    <td>{% if u == user %}{% include "accounts/_u7.html" with u=u you=True %}{% else %}{% include "accounts/_u7.html" with u=u you=False %}{% endif %}</td>
+    <td>{% if u == user %}{% include "accounts/_u7.html" with u=u you=True flag=True %}{% else %}{% include "accounts/_u7.html" with u=u you=False flag=True %}{% endif %}</td>
     <td class="text-right tabular text-mute">{{ u.duels }}</td>
     <td class="text-right tabular text-ok">{{ u.wins }}</td>
     <td class="text-right tabular font-bold">{{ u.eff }}</td>

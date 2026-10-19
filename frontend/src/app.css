@@ -3642,3 +3642,10 @@ body .EasyMDEContainer .cm-s-easymde .cm-link, body .EasyMDEContainer .cm-s-easy
 .ca-sr:has(.ca-sr-hit[data-i="3"]:is(:hover, :focus-visible)) .ca-sr-c.is-lv[data-i="3"] { opacity: 1; }
 .ca-sr:has(.ca-sr-hit[data-i="3"]:is(:hover, :focus-visible)) .ca-sr-seg:not([data-i="3"]) { opacity: .3; }
 @media (prefers-reduced-motion: reduce) { .ca-sr-c, .ca-sr-seg, .ca-sr-rows a { transition: none; } }
+
+/* Country flags (static/flags, MIT flag-icons 4x3): the board names carry one, the place filters list them */
+.ca-flag { display: inline-block; flex: none; width: 1.125rem; height: .875rem; border-radius: 2px; object-fit: cover; box-shadow: 0 0 0 1px rgb(var(--ca-ink-rgb) / .18); }
+.ca7-u img.ca-flag { width: 1.125rem; height: .875rem; border-radius: 2px; margin-right: -.125rem; }
+.ca-dd-flag { display: inline-flex; width: 1.125rem; margin-right: .5rem; }
+.ca7-ddb .ca-flag { margin-right: .25rem; vertical-align: -2px; }
+.ca7-found .ca-flag { vertical-align: -2px; }

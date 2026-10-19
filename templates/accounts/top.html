@@ -1,4 +1,4 @@
-{% extends "base.html" %}{% load tiers %}
+{% extends "base.html" %}{% load tiers places %}
 {% block title %}Amaliyot ballari{% endblock %}
 {% block description %}Amaliyot ballari: musobaqadan tashqari yechilgan masalalar uchun {{ total }} ishtirokchining ballari.{% endblock %}
 {% block band %}
@@ -13,15 +13,18 @@
 </section>
 {% endblock %}
 {% block content %}
-{% if users or q %}
+{% if users or q or geo.active %}
 <div class="ca7-tools is-board">
   <div class="ca7-trow">
     <form method="get" class="ca7-search" role="search" aria-label="Foydalanuvchini qidirish">
+      {% if geo.country %}<input type="hidden" name="country" value="{{ geo.country }}">{% endif %}{% if geo.city %}<input type="hidden" name="city" value="{{ geo.city }}">{% endif %}{% if geo.school %}<input type="hidden" name="school" value="{{ geo.school }}">{% endif %}
       <i data-lucide="search" class="lu" aria-hidden="true"></i><input class="ca7-fld" type="search" name="q" value="{{ q }}" placeholder="Foydalanuvchi…" aria-label="Foydalanuvchi nomi" autocomplete="off" spellcheck="false">
     </form>
     {% if user.is_authenticated and not q %}<a class="ca-link ml-auto" href="#me">Mening o‘rnimga o‘tish</a>{% endif %}
   </div>
+  {% if geo.countries %}<div class="ca7-trow">{% include "accounts/_geo_filters.html" %}{% if geo.active %}<a class="ca-link text-sm" href="{% querystring country=None city=None school=None page=None %}">Tozalash</a>{% endif %}</div>{% endif %}
 </div>
+{% if geo.country %}<p class="ca7-found">{% flag geo.country %} <b>{{ geo.country_name }}{% if geo.city %}, {{ geo.city }}{% endif %}{% if geo.school %}, {{ geo.school }}{% endif %}</b>: {{ total }} ta · <a class="ca-link" href="{% querystring country=None city=None school=None page=None %}">hammasi</a></p>{% endif %}
 {% if q %}<p class="ca7-found">«{{ q }}»: {{ found }} ta topildi · <a class="ca-link" href="{% url 'top' %}">hammasi</a></p>{% endif %}
 {% if users %}<div class="overflow-x-auto ca7-board">
 <table class="ca-table ca-table-flat">
@@ -30,7 +33,7 @@
   {% for u in users %}
   <tr{% if u == user %} class="ca-row-me" id="me"{% endif %}>
     <td class="text-center">{% if u.rank <= 3 %}<span class="ca7-medal m{{ u.rank }}">{{ u.rank }}</span>{% else %}<span class="tabular text-mute">{{ u.rank }}</span>{% endif %}</td>
-    <td>{% if u == user %}{% include "accounts/_u7.html" with u=u you=True %}{% else %}{% include "accounts/_u7.html" with u=u you=False %}{% endif %}</td>
+    <td>{% if u == user %}{% include "accounts/_u7.html" with u=u you=True flag=True %}{% else %}{% include "accounts/_u7.html" with u=u you=False flag=True %}{% endif %}</td>
     <td class="text-right tabular">{{ u.solved_count }}</td>
     <td class="text-right tabular font-bold">{{ u.practice_points }}</td>
   </tr>
