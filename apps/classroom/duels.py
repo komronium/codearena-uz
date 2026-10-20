@@ -33,6 +33,12 @@ START_RATING = 1200
 OPEN = (Duel.Status.PENDING, Duel.Status.ACTIVE)
 LANGUAGES = DuelQuestion.Lang.choices
 BUSY = "Avval boshlagan duelingizni tugating."
+NO_ADMIN = "Admin akkaunti duelda qatnasha olmaydi."
+
+
+def can_duel(user) -> bool:
+    """The admin account stays out of duels: it can't open, join or accept one, and nobody can invite it."""
+    return not user.is_superuser
 
 
 def k_factor(rating: int, played: int) -> int:
@@ -338,6 +344,8 @@ def find_opponent(user, language: str) -> tuple[Duel | None, str]:
     error = _valid(language)
     if error:
         return None, error
+    if not can_duel(user):
+        return None, NO_ADMIN
     with transaction.atomic():
         _lock(user)
         if _busy(user, timezone.now()):
@@ -362,7 +370,9 @@ def find_opponent(user, language: str) -> tuple[Duel | None, str]:
 
 def challenge(challenger, opponent_username: str, language: str) -> tuple[Duel | None, str]:
     """Open a duel reserved for one opponent; the challenger's run starts now."""
-    opponent = User.objects.filter(username=opponent_username.strip(), is_active=True).first()
+    if not can_duel(challenger):
+        return None, NO_ADMIN
+    opponent = User.objects.filter(username=opponent_username.strip(), is_active=True, is_superuser=False).first()
     if opponent is None:
         return None, "Bunday foydalanuvchi yo‘q."
     if opponent.pk == challenger.pk:
@@ -393,6 +403,8 @@ def challenge(challenger, opponent_username: str, language: str) -> tuple[Duel |
 
 def accept(duel, user) -> str:
     """Start the invited opponent's run; "" on success, else why not."""
+    if not can_duel(user):
+        return NO_ADMIN
     with transaction.atomic():
         _lock(user)
         duel = Duel.objects.select_for_update().get(pk=duel.pk)

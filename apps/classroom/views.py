@@ -76,7 +76,7 @@ def duel_people(request):
     you follow and the people you have duelled, else up to 8 active users whose handle holds the text, the
     exact handle first, then those starting with it."""
     q = request.GET.get("q", "").strip()[:30]
-    people = User.objects.filter(is_active=True).exclude(pk=request.user.pk)
+    people = User.objects.filter(is_active=True, is_superuser=False).exclude(pk=request.user.pk)
     followed = set(Follow.objects.filter(user=request.user).values_list("target_id", flat=True))
     if q:
         found = (people.filter(username__icontains=q)

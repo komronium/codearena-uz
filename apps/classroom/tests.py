@@ -60,6 +60,18 @@ def _play(duel, user, right: int, secs: float = 3):
 
 
 @pytest.mark.django_db
+def test_the_admin_account_is_out_of_duels(client, bank):
+    from . import duels
+
+    admin = User.objects.create_superuser("admin", password="x")
+    p1, _ = _players()
+    assert duels.challenge(admin, "p1", "python")[0] is None
+    assert duels.find_opponent(admin, "python")[0] is None
+    assert duels.challenge(p1, "admin", "python") == (None, "Bunday foydalanuvchi yo‘q.")
+    client.force_login(p1)
+    assert client.get(reverse("classroom:duel_people"), {"q": "adm"}).json()["results"] == []
+
+
 def test_a_challenge_starts_the_challengers_run_and_accepting_starts_the_opponents(client, bank):
     from .models import Duel
 
