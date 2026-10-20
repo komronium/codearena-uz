@@ -894,3 +894,42 @@ def test_statement_images_must_come_from_this_site():
     from apps.problems.views import _render_statement
     page = _render_statement("![x](https://tracker.example/p.png) ![y](/media/problem/a.png)")
     assert "tracker.example" not in page and "/media/problem/a.png" in page
+
+
+# ---- clubs (schools without classrooms) ----
+
+@pytest.mark.django_db
+def test_a_club_is_opened_joined_by_its_link_and_left(client):
+    from .models import Club
+    ali, bob, eve = (User.objects.create_user(n, password="x", rating=r) for n, r in (("ali", 1500), ("bob", 1200), ("eve", 0)))
+    client.force_login(ali)
+    assert client.post(reverse("club_create"), {"name": "12-maktab to‘garagi"}).status_code == 302
+    club = Club.objects.get()
+    ali.refresh_from_db()
+    assert ali.club == club and club.owner == ali
+    client.force_login(bob)
+    assert "Klubga qo‘shilish" not in client.get(reverse("club", args=[club.slug])).content.decode()  # no code, no button
+    page = client.get(reverse("club", args=[club.slug]) + f"?code={club.join_code}").content.decode()
+    assert "Klubga qo‘shilish" in page
+    client.post(reverse("club_join", args=[club.slug]), {"code": "wrong"})
+    bob.refresh_from_db()
+    assert bob.club is None
+    client.post(reverse("club_join", args=[club.slug]), {"code": club.join_code})
+    bob.refresh_from_db()
+    assert bob.club == club
+    assert "12-maktab" in client.get(reverse("clubs")).content.decode()
+    client.force_login(ali)
+    client.post(reverse("club_leave", args=[club.slug]))  # the owner leaves: the club goes to the longest-standing member
+    club.refresh_from_db()
+    assert club.owner == bob
+    client.force_login(bob)
+    client.post(reverse("club_leave", args=[club.slug]))
+    assert not Club.objects.exists()  # empty: closed
+
+
+@pytest.mark.django_db
+def test_the_duel_and_badge_boards_have_search_and_place_filters(client):
+    u = User.objects.create_user("ali", password="x", country="UZ", location="Toshkent")
+    for name in ("duel_board", "badge_board", "top"):
+        page = client.get(reverse(name) + "?q=zz").content.decode()
+        assert 'name="q"' in page

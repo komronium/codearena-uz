@@ -16,6 +16,7 @@
 {% comment %}The rating by badges: levels earned across all badges (of {{ max_levels }}), then badges held, then who got
 there first; each player's badges beside them, best first.{% endcomment %}
 <p class="ca7-foot-note !mt-0 mb-4">Har bir nishon 5 bosqichdan iborat: bronza, kumush, oltin, platina, olmos. Bosqich qancha ko‘p bo‘lsa, o‘rin shuncha yuqori.{% if me %} Siz <b class="text-ink">{{ me.rank }}</b>-o‘rindasiz{% if me_page %} — <a class="ca-link" href="{% querystring page=me_page %}#me">jadvalda</a>{% endif %}.{% endif %} <a class="ca-link" href="{% url 'badges' %}">Barcha nishonlar</a></p>
+{% include "accounts/_board_tools.html" %}
 {% if rows %}
 <div class="overflow-x-auto">
 <table class="ca-table ca-table-flat">

@@ -20,6 +20,8 @@ class User(AbstractUser):
     country = models.CharField(max_length=2, blank=True)  # ISO 3166-1 alpha-2, see apps.accounts.countries
     location = models.CharField(max_length=100, blank=True)  # the city
     school = models.CharField(max_length=150, blank=True)
+    # a school or club the person belongs to (accounts.clubs): one at a time, read-only pages, no teacher role
+    club = models.ForeignKey("accounts.Club", null=True, blank=True, on_delete=models.SET_NULL, related_name="members")
     invited_by = models.ForeignKey(
         "self", null=True, blank=True, on_delete=models.SET_NULL, related_name="invited_users",
     )
@@ -162,3 +164,16 @@ class Notification(models.Model):
     class Meta:
         ordering = ["-created", "-id"]
         constraints = [models.UniqueConstraint(fields=["user", "key"], name="one_notification_per_event")]
+
+
+class Club(models.Model):
+    """A school or club: a name, a page with its members and their results, a join link. Not a classroom: there are no
+    assignments and no teacher role; the creator can only rename it and share the link."""
+    name = models.CharField(max_length=80, unique=True)
+    slug = models.SlugField(max_length=90, unique=True)
+    join_code = models.CharField(max_length=16)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name

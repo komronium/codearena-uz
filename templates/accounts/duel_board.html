@@ -13,14 +13,14 @@
 </section>
 {% endblock %}
 {% block content %}
-{% if users %}
+{% if users or q or geo.active %}
 {% if podium %}
 <section class="ca-podium" aria-label="O‘tgan mavsum g‘oliblari">
   <b>{{ podium_season }} mavsumi g‘oliblari</b>
   {% for m in podium %}<span><span class="ca7-medal m{{ m.rank }}">{{ m.rank }}</span>{% include "accounts/_u7.html" with u=m.user you=False flag=True %}<small class="tabular text-mute">{{ m.rating }}</small></span>{% endfor %}
 </section>
 {% endif %}
-{% if user.is_authenticated %}<p class="mb-3 text-sm"><a class="ca-link" href="#me">Mening o‘rnimga o‘tish</a> · <a class="ca-link" href="{% url 'classroom:duels' %}">Duel boshlash</a></p>{% endif %}
+{% include "accounts/_board_tools.html" %}
 <div class="overflow-x-auto ca7-board">
 <table class="ca-table ca-table-flat">
   <thead><tr><th scope="col" class="w-16 text-center">#</th><th scope="col">Foydalanuvchi</th><th scope="col" class="w-28 text-right" title="Tugagan duellar">Duel</th><th scope="col" class="w-28 text-right">G‘alaba</th><th scope="col" class="w-28 text-right">Reyting</th></tr></thead>

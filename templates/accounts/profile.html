@@ -20,6 +20,7 @@ Colour carries meaning only: the tier colour is the person, green/red the result
         <p class="ca7-pmeta">
           {% if profile_user.location or profile_user.country %}<span>{% if profile_user.country %}{% flag profile_user.country %}{% else %}<i data-lucide="map-pin" class="lu" aria-hidden="true"></i>{% endif %} {{ profile_user.location }}{% if profile_user.location and profile_user.country %}, {% endif %}{{ profile_user.country_name }}</span>{% endif %}
           {% if profile_user.school %}<span><i data-lucide="school" class="lu" aria-hidden="true"></i>{{ profile_user.school }}</span>{% endif %}
+          {% if profile_user.club %}<span><i data-lucide="users" class="lu" aria-hidden="true"></i><a class="text-white underline" href="{% url 'club' profile_user.club.slug %}">{{ profile_user.club.name }}</a></span>{% endif %}
           <span><i data-lucide="calendar" class="lu" aria-hidden="true"></i>{{ profile_user.date_joined|date:"d.m.Y" }} dan beri</span>
           {% if profile_user.is_staff %}<span><i data-lucide="shield-check" class="lu" aria-hidden="true"></i>Moderator</span>{% endif %}
         </p>

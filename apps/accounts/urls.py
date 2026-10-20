@@ -1,7 +1,7 @@
 from django.contrib.auth import views as auth_views
 from django.urls import path, reverse_lazy
 
-from . import views
+from . import clubs, views
 from . import telegram_views
 
 urlpatterns = [
@@ -29,6 +29,11 @@ urlpatterns = [
     path("telegram/preferences/", telegram_views.preferences, name="telegram_preferences"),
     path("telegram/webhook/", telegram_views.webhook, name="telegram_webhook"),
     path("honor/", views.honor, name="honor"),
+    path("clubs/", clubs.club_list, name="clubs"),
+    path("clubs/new/", clubs.club_create, name="club_create"),
+    path("clubs/<slug:slug>/", clubs.club_detail, name="club"),
+    path("clubs/<slug:slug>/join/", clubs.club_join, name="club_join"),
+    path("clubs/<slug:slug>/leave/", clubs.club_leave, name="club_leave"),
     path("how-ratings-work/", views.how_ratings, name="how_ratings"),
     path("verify/<int:user_id>/", views.verify_user, name="verify_user"),
     path("password-change/", views.PasswordChange.as_view(), name="password_change"),

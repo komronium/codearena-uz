@@ -373,17 +373,22 @@ def duel_board(request):
     for u in people:
         u.eff = duel_rules.carried(u.duel_rating, u.duel_season, season)
     people.sort(key=lambda u: (-u.eff, u.username))
-    page = Paginator(people, 50).get_page(request.GET.get("page"))
+    q = request.GET.get("q", "").strip()[:40]
+    cond, geo = board_geo(request, [(u.country, u.location, u.school) for u in people])
+    scope = [u for u in people if all(getattr(u, k) == v for k, v in cond.items())]  # a place filter: places within it
+    shown = [u for u in scope if q.lower() in u.username.lower()] if q else scope
+    page = Paginator(shown, 50).get_page(request.GET.get("page"))
     users = page
-    effs = [p.eff for p in people]
+    effs = [p.eff for p in scope]
     for u in users:  # equal duel ratings share a place, as on every other board ("1, 2, 2, 2, 5")
         u.rank = sum(1 for e in effs if e > u.eff) + 1
         u.duels, u.wins = played[u.pk], wins[u.pk]
     podium_season = (DuelSeasonResult.objects.filter(rank__gt=0).order_by("-season").values_list("season", flat=True).first())
     podium = list(DuelSeasonResult.objects.filter(season=podium_season, rank__gt=0).select_related("user")) if podium_season else []
     return render(request, "accounts/duel_board.html", {
-        "users": users, "total": len(people), "season": season, "season_ends": duel_rules.season_ends(),
-        "podium": podium, "podium_season": podium_season, "min_duels": duel_rules.SEASON_MIN_DUELS})
+        "users": users, "total": len(scope), "found": len(shown), "q": q, "season": season,
+        "season_ends": duel_rules.season_ends(),
+        "podium": podium, "podium_season": podium_season, "min_duels": duel_rules.SEASON_MIN_DUELS, **geo})
 
 
 def _rating_spread(ratings: list[int], mine: int | None) -> dict:
@@ -509,15 +514,25 @@ def _badge_ranking() -> list[dict]:
 
 def badge_board(request):
     """The rating by badges: levels earned across all badges, each player's best badges beside them."""
-    rows = _badge_ranking()
-    page = Paginator(rows, 50).get_page(request.GET.get("page"))
-    users = User.objects.in_bulk([r["user"] for r in page])
+    everyone = _badge_ranking()
+    people = User.objects.in_bulk([r["user"] for r in everyone])
+    q = request.GET.get("q", "").strip()[:40]
+    cond, geo = board_geo(request, [(u.country, u.location, u.school) for u in people.values()])
+    rows = [r for r in everyone if all(getattr(people[r["user"]], k) == v for k, v in cond.items())]  # places within it
+    if cond:  # the places of the group, not of the whole board
+        for i, r in enumerate(rows):
+            same = i and (rows[i - 1]["levels"], rows[i - 1]["families"]) == (r["levels"], r["families"])
+            r["rank"] = rows[i - 1]["rank"] if same else i + 1
+    shown = [r for r in rows if q.lower() in people[r["user"]].username.lower()] if q else rows
+    page = Paginator(shown, 50).get_page(request.GET.get("page"))
+    users = {pk: people[pk] for pk in (r["user"] for r in page)}
     sums = badge_system.summaries(users)
     for r in page:
         r["u"], r["badges"] = users[r["user"]], sums.get(r["user"], {}).get("badges", [])
     me = next((r for r in rows if request.user.is_authenticated and r["user"] == request.user.pk), None)
     return render(request, "accounts/badge_board.html", {
-        "rows": page, "total": len(rows), "me": me, "me_page": (rows.index(me) // 50 + 1) if me else None,
+        "rows": page, "total": len(rows), "found": len(shown), "q": q, **geo,
+        "me": me, "me_page": (rows.index(me) // 50 + 1) if me else None,
         "max_levels": sum(len(f.levels) for f in badge_system.FAMILIES)})
 
 
