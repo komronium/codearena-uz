@@ -252,7 +252,7 @@ def test_sql_problem_page_draws_the_tables_and_the_expected_result(client, probl
     client.force_login(User.objects.create_user("student", password="x"))
     page = client.get(reverse("problems:detail", args=[sql.slug])).content.decode()
     assert '<span translate="no">users</span>' in page
-    assert '<th translate="no">age <span class="ca-sql-type">integer</span></th>' in page
+    assert '<th scope="col" translate="no">age <span class="ca-sql-type">integer</span></th>' in page
     assert '<td class="font-mono">vali</td>' in page  # sample row and expected result
     assert "guli" not in page  # the hidden check data stays hidden
     assert "aynan shu tartibda" in page and "yashirin, kattaroq" in page

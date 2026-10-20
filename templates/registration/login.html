@@ -10,7 +10,9 @@
       <h1 class="text-xl font-bold">Xush kelibsiz</h1>
       <p class="mt-1 text-sm text-mute">Hisobingizga kiring va davom eting.</p>
     </div>
-    {% if form.non_field_errors %}
+    {% if throttled %}
+    <div class="ca-alert ca-alert-bad" role="alert">Juda ko‘p urinish. Biroz kutib, qayta urinib ko‘ring.</div>
+    {% elif form.non_field_errors %}
     <div class="ca-alert ca-alert-bad" role="alert">Login yoki parol noto‘g‘ri. Qaytadan urinib ko‘ring.</div>
     {% endif %}
     {% include "registration/_auth_field.html" with name="username" label="Foydalanuvchi nomi yoki email" type="text" icon="at-sign" autocomplete="username" value=form.username.value errors=form.username.errors autofocus=True %}

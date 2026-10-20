@@ -99,7 +99,7 @@ def test_status_partial_polls_until_terminal(client, problem, python, user):
     s = Submission.objects.create(user=user, problem=problem, language=python, source="x")
     client.force_login(user)
     r = client.get(reverse("submissions:status", args=[s.pk]))
-    assert b'hx-trigger="every 1s"' in r.content
+    assert b'hx-trigger="every 1500ms [!document.hidden]"' in r.content
     s.verdict, s.mem_kb = "AC", 9216
     s.save()
     r = client.get(reverse("submissions:status", args=[s.pk]))

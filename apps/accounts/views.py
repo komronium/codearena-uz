@@ -193,8 +193,7 @@ class Login(auth_views.LoginView):
         who = (request.POST.get("username") or "").strip().lower()[:150]
         if throttle.ip_blocked(request, "login", 60, 600) or (who and throttle.blocked(f"thr:login-who:{who}", 10, 600)):
             form = self.get_form()
-            form.add_error(None, throttle.TOO_MANY)
-            return self.render_to_response(self.get_context_data(form=form), status=429)
+            return self.render_to_response(self.get_context_data(form=form, throttled=True), status=429)
         return super().post(request, *args, **kwargs)
 
 

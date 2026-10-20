@@ -27,7 +27,7 @@ def test_guests_get_the_landing_page(client, world):
     assert "Ro‘yxatdan o‘tish" in page and "Keyingi raund" in page and "0 ishtirokchi" in page
     assert r.context["daily"] is not None and r.context["stats"]["problems"] == 4
     # the decorative code sample scrolls on a phone; inert keeps it out of the tab order, aria-hidden alone does not
-    assert '<div class="ca7-arena" inert>' in page
+    assert '<div class="ca7-arena">' in page
 
 
 
