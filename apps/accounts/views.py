@@ -158,7 +158,7 @@ def register(request):
         # a bot fills the hidden "website" field; a person never sees it. Per address, a class of students fits.
         if request.POST.get("website") or throttle.ip_blocked(request, "register", 40, 3600):
             form.add_error(None, throttle.TOO_MANY)
-            return render(request, "registration/register.html", {"form": form, "next": nxt}, status=429)
+            return render(request, "registration/register.html", {"form": form, "next": nxt}, status=429)  # (no Google button here)
     if request.method == "POST" and form.is_valid():
         try:
             with transaction.atomic():
@@ -179,15 +179,17 @@ def register(request):
             login(request, user)
             onboarding.send_verification(request, user, force=True)
             return redirect(nxt or "home")
-    return render(request, "registration/register.html", {"form": form, "next": nxt})
+    from . import google
+    return render(request, "registration/register.html", {"form": form, "next": nxt, "google_login": google.configured()})
 
 
 class Login(auth_views.LoginView):
     """The sign-in page, with "Telegram orqali kirish" offered once the bot is set up."""
 
     def get_context_data(self, **kwargs):
+        from . import google
         from .telegram import bot_configured
-        return super().get_context_data(**kwargs, telegram_login=bot_configured())
+        return super().get_context_data(**kwargs, telegram_login=bot_configured(), google_login=google.configured())
 
     def post(self, request, *args, **kwargs):
         who = (request.POST.get("username") or "").strip().lower()[:150]

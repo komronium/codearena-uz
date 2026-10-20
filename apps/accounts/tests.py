@@ -933,3 +933,62 @@ def test_the_duel_and_badge_boards_have_search_and_place_filters(client):
     for name in ("duel_board", "badge_board", "top"):
         page = client.get(reverse(name) + "?q=zz").content.decode()
         assert 'name="q"' in page
+
+
+# ---- Google sign-in ----
+
+@pytest.fixture
+def google_on(settings):
+    settings.GOOGLE_CLIENT_ID, settings.GOOGLE_CLIENT_SECRET = "cid", "secret"
+
+
+def _google_callback(client, monkeypatch, info, state="s1"):
+    from . import google
+    session = client.session
+    session["g_state"] = state
+    session.save()
+    monkeypatch.setattr(google, "_post_form", lambda url, data: {"access_token": "tok"})
+    monkeypatch.setattr(google, "_get_json", lambda url, token: info)
+    return client.get(reverse("google_callback"), {"state": state, "code": "c"})
+
+
+@pytest.mark.django_db
+def test_google_buttons_show_only_when_configured(client, settings):
+    assert "Google bilan davom etish" not in client.get(reverse("login")).content.decode()
+    settings.GOOGLE_CLIENT_ID, settings.GOOGLE_CLIENT_SECRET = "cid", "secret"
+    assert "Google bilan davom etish" in client.get(reverse("login")).content.decode()
+    assert "Google bilan davom etish" in client.get(reverse("register")).content.decode()
+    r = client.get(reverse("google_login"))
+    assert r.status_code == 302 and r.url.startswith("https://accounts.google.com/") and "state=" in r.url
+
+
+@pytest.mark.django_db
+def test_google_creates_an_account_signs_in_and_later_finds_it_again(client, google_on, monkeypatch):
+    info = {"sub": "g-1", "email": "Vali.Aliyev@gmail.com", "email_verified": True, "given_name": "Vali", "family_name": "Aliyev"}
+    r = _google_callback(client, monkeypatch, info)
+    assert r.status_code == 302 and "_auth_user_id" in client.session
+    u = User.objects.get(google_sub="g-1")
+    assert u.username == "ValiAliyev" and u.email == "vali.aliyev@gmail.com" and u.email_verified_at is not None
+    assert not u.has_usable_password() and u.first_name == "Vali"
+    client.logout()
+    _google_callback(client, monkeypatch, info)  # the same Google id: the same account
+    assert User.objects.count() == 1 and "_auth_user_id" in client.session
+
+
+@pytest.mark.django_db
+def test_google_links_the_account_that_has_that_verified_email_and_refuses_staff(client, google_on, monkeypatch):
+    mine = User.objects.create_user("ali", password="x", email="ali@example.com")
+    _google_callback(client, monkeypatch, {"sub": "g-2", "email": "ali@example.com", "email_verified": True})
+    mine.refresh_from_db()
+    assert mine.google_sub == "g-2" and mine.email_verified_at is not None and User.objects.count() == 1
+    client.logout()
+    boss = User.objects.create_user("boss", password="x", email="boss@example.com", is_staff=True)
+    r = _google_callback(client, monkeypatch, {"sub": "g-3", "email": "boss@example.com", "email_verified": True}, state="s2")
+    assert "_auth_user_id" not in client.session
+    # an address Google did not verify, or a wrong state, signs nobody in
+    _google_callback(client, monkeypatch, {"sub": "g-4", "email": "x@example.com", "email_verified": False}, state="s3")
+    assert "_auth_user_id" not in client.session and not User.objects.filter(google_sub="g-4").exists()
+    from . import google
+    monkeypatch.setattr(google, "_post_form", lambda url, data: pytest.fail("must not call Google"))
+    client.get(reverse("google_callback"), {"state": "forged", "code": "c"})
+    assert "_auth_user_id" not in client.session

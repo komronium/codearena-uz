@@ -22,6 +22,8 @@ class User(AbstractUser):
     school = models.CharField(max_length=150, blank=True)
     # a school or club the person belongs to (accounts.clubs): one at a time, read-only pages, no teacher role
     club = models.ForeignKey("accounts.Club", null=True, blank=True, on_delete=models.SET_NULL, related_name="members")
+    # Google's stable account id ("sub") once the person has signed in with Google (accounts.google); empty otherwise
+    google_sub = models.CharField(max_length=64, null=True, blank=True, unique=True)
     invited_by = models.ForeignKey(
         "self", null=True, blank=True, on_delete=models.SET_NULL, related_name="invited_users",
     )

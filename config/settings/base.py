@@ -110,6 +110,10 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 2 * 1024 * 1024
 USERNAME_CHANGE_DAYS = 90  # a user may rename themselves once in this many days
 
 # Telegram Bot API: create the bot with @BotFather, then configure its webhook after deploy.
+# "Google bilan kirish": an OAuth client from the Google Cloud console (redirect URI: <site>/accounts/google/callback/).
+# Unset, the buttons do not appear.
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
+GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "")
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_BOT_USERNAME = os.environ.get("TELEGRAM_BOT_USERNAME", "").lstrip("@")
 TELEGRAM_WEBHOOK_SECRET = os.environ.get("TELEGRAM_WEBHOOK_SECRET", "")

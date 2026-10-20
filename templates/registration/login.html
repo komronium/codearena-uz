@@ -23,6 +23,7 @@
     <button type="submit" class="ca-btn ca-btn-primary w-full !py-2.5"><i data-lucide="log-in" class="lu" aria-hidden="true"></i>Kirish</button>
     {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
   </form>
+  {% include "registration/_google_btn.html" %}
   {% if telegram_login %}
   <form method="post" action="{% url 'telegram_login' %}" class="mt-3">{% csrf_token %}
     {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
