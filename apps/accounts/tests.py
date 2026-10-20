@@ -954,6 +954,7 @@ def _google_callback(client, monkeypatch, info, state="s1"):
 
 @pytest.mark.django_db
 def test_google_buttons_show_only_when_configured(client, settings):
+    settings.GOOGLE_CLIENT_ID = settings.GOOGLE_CLIENT_SECRET = ""  # the test container reads the real .env
     assert "Google bilan davom etish" not in client.get(reverse("login")).content.decode()
     settings.GOOGLE_CLIENT_ID, settings.GOOGLE_CLIENT_SECRET = "cid", "secret"
     assert "Google bilan davom etish" in client.get(reverse("login")).content.decode()
