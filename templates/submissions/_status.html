@@ -1,9 +1,10 @@
 {% comment %}A submission's result, #7: a verdict card (the words, how many tests passed, time, memory, the limits, the
 level) tinted by the verdict, a hint after a failure, the compiler's log, then every test as a row; while it is judged
-the card polls itself every second; below it only the test it stopped on, not a row per test.
+the card polls itself every 1.5 s while the tab is visible; below it only the test it stopped on, not a row per test.
 compact=True: the verdict chip only.{% endcomment %}
-<div data-verdict="{{ s.verdict }}" {% if not s.is_terminal %}hx-get="{% url 'submissions:status' s.pk %}{% if compact %}?compact=1{% endif %}" hx-trigger="every 1s" hx-swap="outerHTML"{% endif %}
-     role="status" aria-live="polite" aria-busy="{% if not s.is_terminal %}true{% else %}false{% endif %}">
+<div data-verdict="{{ s.verdict }}" {% if not s.is_terminal %}hx-get="{% url 'submissions:status' s.pk %}{% if compact %}?compact=1{% endif %}" hx-trigger="every 1500ms [!document.hidden]" hx-swap="outerHTML"{% endif %}
+     aria-busy="{% if not s.is_terminal %}true{% else %}false{% endif %}">
+{% if s.is_terminal %}{% load verdicts %}<span class="sr-only" role="status">{{ s.verdict|verdict_words }}</span>{% endif %}
 {% if compact %}{% include "submissions/_verdict.html" with v=s.verdict sub=s %}
 {% else %}{% load verdicts %}
 <section class="ca7-vhero is-{% if s.verdict == 'AC' %}ac{% elif s.verdict == 'WA' %}bad{% elif s.verdict == 'RE' %}re{% elif s.verdict == 'TLE' or s.verdict == 'MLE' or s.verdict == 'OLE' %}warn{% elif s.is_terminal %}ce{% else %}run{% endif %}" aria-label="Natija">
@@ -14,7 +15,7 @@ compact=True: the verdict chip only.{% endcomment %}
       <p>{% if s.verdict == "AC" %}Barcha {{ s.total }} testdan o‘tdi · <span translate="no">AC</span>
         {% elif s.verdict == "CE" %}Kod kompilyatsiya bo‘lmadi · <span translate="no">CE</span>
         {% elif s.is_terminal %}{% if s.total %}{{ s.passed|add:1 }}-testda · {{ s.passed }}/{{ s.total }} test o‘tdi · {% endif %}<span translate="no">{{ s.verdict }}</span>
-        {% elif progress %}{{ progress.done }}/{{ progress.total }} test tekshirildi{% else %}Tez orada boshlanadi{% endif %}</p>
+        {% elif progress %}{{ progress.done }}/{{ progress.total }} test tekshirildi{% elif s.is_stale %}Tekshiruv odatdagidan uzoq cho‘zildi. Bir necha daqiqadan keyin ham o‘zgarmasa, qayta yuboring yoki adminga yozing.{% else %}Tez orada boshlanadi{% endif %}</p>
     </div>
   </div>
   {% if s.is_terminal and s.verdict != 'CE' and strip|length > 1 %}<ol class="ca7-vstrip" aria-label="Testlar: {{ s.passed }} / {{ s.total }} o‘tdi">{% for c in strip %}<li class="is-{{ c }}" title="{{ forloop.counter }}-test: {% if c == 'ok' %}o‘tdi{% elif c == 'bad' %}xato{% else %}tekshirilmadi{% endif %}"><i data-lucide="{% if c == 'ok' %}check{% elif c == 'bad' %}x{% else %}minus{% endif %}" class="lu" aria-hidden="true"></i><span class="sr-only">{{ forloop.counter }}-test {% if c == 'ok' %}o‘tdi{% elif c == 'bad' %}xato{% else %}tekshirilmadi{% endif %}</span></li>{% endfor %}</ol>{% endif %}
@@ -23,7 +24,7 @@ compact=True: the verdict chip only.{% endcomment %}
     <div><dt>Vaqt</dt><dd class="tabular">{% if s.is_terminal and s.verdict != 'CE' %}{{ s.exec_ms }} ms{% else %}—{% endif %}</dd></div>
     <div><dt>Xotira</dt><dd class="tabular">{% if s.is_terminal and s.verdict != 'CE' and s.mem_kb %}{% widthratio s.mem_kb 1024 1 %} MB{% else %}—{% endif %}</dd></div>
     <div><dt>Cheklov</dt><dd class="tabular">{{ s.problem.tl_ms }} ms{% if s.problem.kind != "sql" %} · {{ s.problem.ml_mb }} MB{% endif %}</dd></div>
-    <div><dt>Masala</dt><dd><span class="ca-diff ca-diff-{{ s.problem.difficulty }} !text-[1.05rem]">{{ s.problem.get_difficulty_display }}</span></dd></div>
+    <div><dt>Qiyinlik</dt><dd><span class="ca-diff ca-diff-{{ s.problem.difficulty }} !text-[1.05rem]">{{ s.problem.get_difficulty_display }}</span></dd></div>
   </dl>
   {% if s.is_terminal and s.verdict != 'AC' %}
   <p class="ca7-vhero-hint"><i data-lucide="lightbulb" class="lu" aria-hidden="true"></i>{% if s.verdict == 'WA' %}Dastur ishladi, lekin javob kutilganidan farq qildi. Chegaraviy holatlarni (0, 1, eng katta qiymat) va chiqish formatini tekshiring.{% elif s.verdict == 'TLE' %}Dastur vaqt chegarasiga sig‘madi. Tezroq algoritm kerak — masalan, ichma-ich sikllarni kamaytiring.{% elif s.verdict == 'MLE' %}Dastur ruxsat etilganidan ko‘p xotira ishlatdi. Katta massivlar va rekursiya chuqurligini tekshiring.{% elif s.verdict == 'OLE' %}Dastur juda ko‘p narsa chiqardi. Ortiqcha yoki sikl ichidagi chiqarishlarni olib tashlang.{% elif s.verdict == 'RE' %}Dastur xato bilan to‘xtadi: nolga bo‘lish, massiv chegarasidan chiqish yoki noto‘g‘ri kiritishni o‘qish bo‘lishi mumkin.{% elif s.verdict == 'CE' %}Kod kompilyatsiya bo‘lmadi. Til to‘g‘ri tanlanganini va sintaksisni tekshiring.{% else %}Tekshiruvda xato yuz berdi. Qayta yuborib ko‘ring.{% endif %}</p>

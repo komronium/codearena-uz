@@ -24,7 +24,7 @@
 <p class="mb-3 text-sm"><b class="tabular">{{ rows|length }}</b> ta shubhali yechim{% if open %}, <b class="tabular text-warn">{{ open }}</b> tasi ko‘rib chiqilmagan{% endif %}.</p>
 <div class="ca-panel !p-0 overflow-x-auto">
 <table class="ca-table">
-  <thead><tr><th>Talaba</th><th>Masala</th><th>Nima ko‘rindi</th><th class="text-right">Xavf</th><th class="hidden md:table-cell">Yechilgan</th><th class="text-right">Qaror</th></tr></thead>
+  <thead><tr><th scope="col">Talaba</th><th scope="col">Masala</th><th scope="col">Nima ko‘rindi</th><th scope="col" class="text-right">Xavf</th><th scope="col" class="hidden md:table-cell">Yechilgan</th><th scope="col" class="text-right">Qaror</th></tr></thead>
   <tbody>
   {% for r in rows %}{% with s=r.solve %}
   <tr{% if not r.waiting %} class="opacity-70"{% endif %}>

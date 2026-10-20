@@ -28,7 +28,7 @@
   {% endif %}
   {% if rows %}
   <table class="ca-table ca-table-flat">
-    <thead><tr><th class="w-12 text-center">#</th><th>Foydalanuvchi</th><th class="text-center">Til</th><th class="text-right">Vaqt</th><th class="text-right">Hajm</th>{% if can_view_code %}<th class="w-12 text-center"><span class="sr-only">Kod</span></th>{% endif %}</tr></thead>
+    <thead><tr><th scope="col" class="w-12 text-center">#</th><th scope="col">Foydalanuvchi</th><th scope="col" class="text-center">Til</th><th scope="col" class="text-right">Vaqt</th><th scope="col" class="text-right">Hajm</th>{% if can_view_code %}<th scope="col" class="w-12 text-center"><span class="sr-only">Kod</span></th>{% endif %}</tr></thead>
     <tbody>
     {% for s in rows %}
     <tr{% if s.user == user %} class="ca-row-me"{% endif %}>

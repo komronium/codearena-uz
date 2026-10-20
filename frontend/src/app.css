@@ -40,6 +40,7 @@
     --ca-ink-rgb: 20 30 58;
     --ca-mute-rgb: 62 74 99;
     --ca-line-rgb: 221 227 238;
+    --ca-edge-rgb: 138 148 171;        /* borders of fields and other controls: 3:1 on the surface (WCAG 1.4.11) */
     --ca-frame-rgb: 234 238 245;       /* soft fills: secondary buttons, chips, tracks */
     --ca-accent-rgb: 29 58 143;        /* lapis: links, active, focus */
     --ca-accent-hover-rgb: 19 42 107;
@@ -73,7 +74,8 @@
     --ca-sunk-rgb: 14 22 46;
     --ca-ink-rgb: 227 233 247;
     --ca-mute-rgb: 184 195 220;
-    --ca-line-rgb: 38 48 76;
+    --ca-line-rgb: 46 58 92;
+    --ca-edge-rgb: 108 124 168;
     --ca-frame-rgb: 28 39 70;
     --ca-accent-rgb: 143 176 255;
     --ca-accent-hover-rgb: 179 202 255;
@@ -106,7 +108,8 @@
     --ca-sunk-rgb: 14 22 46;
     --ca-ink-rgb: 227 233 247;
     --ca-mute-rgb: 184 195 220;
-    --ca-line-rgb: 38 48 76;
+    --ca-line-rgb: 46 58 92;
+    --ca-edge-rgb: 108 124 168;
     --ca-frame-rgb: 28 39 70;
     --ca-accent-rgb: 143 176 255;
     --ca-accent-hover-rgb: 179 202 255;
@@ -181,7 +184,7 @@ svg.lucide { width: 1.2em; height: 1.2em; display: inline-block; vertical-align:
 .ca-btn-success { background: rgb(var(--ca-ok-fill-rgb)); color: rgb(var(--ca-on-fill-rgb)); }
 .ca-btn-success:hover:not(:disabled) { filter: brightness(1.08); }
 .ca-input, .ca-select {
-  width: 100%; border: 1px solid rgb(var(--ca-line-rgb)); border-radius: var(--ca-radius-sm);
+  width: 100%; border: 1px solid rgb(var(--ca-edge-rgb)); border-radius: var(--ca-radius-sm);
   background: rgb(var(--ca-field-rgb)); padding: .4rem .65rem; font-size: 0.9375rem; color: rgb(var(--ca-ink-rgb));
   transition: border-color .15s ease, box-shadow .15s ease;
 }
@@ -280,6 +283,12 @@ a.ca-st-label:hover { text-decoration: underline; text-underline-offset: 3px; }
   border: 1px solid rgb(var(--ca-line-rgb)); border-radius: var(--ca-radius); box-shadow: var(--ca-shadow-lift);
 }
 .ca-dialog::backdrop { background: rgb(8 10 16 / .55); backdrop-filter: blur(2px); }
+.ca-confirm { width: min(26rem, calc(100vw - 2rem)); }
+.ca-confirm-in { display: grid; gap: .9rem; padding: 1.25rem 1.5rem; }
+.ca-confirm-msg { margin: 0; font-size: 1rem; line-height: 1.5; }
+.ca-confirm-why { display: grid; gap: .3rem; font-size: .875rem; color: rgb(var(--ca-mute-rgb)); }
+.ca-confirm-why textarea { font: inherit; color: rgb(var(--ca-ink-rgb)); background: rgb(var(--ca-surface-rgb)); border: 1px solid rgb(var(--ca-line-rgb)); border-radius: .5rem; padding: .5rem .65rem; resize: vertical; }
+.ca-confirm-btns { display: flex; justify-content: flex-end; gap: .5rem; }
 @media (prefers-reduced-motion: no-preference) { .ca-dialog[open] { animation: ca-pop .16s ease-out; } }
 @keyframes ca-pop { from { opacity: 0; transform: translateY(6px) scale(.98); } }
 .ca-dialog-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .9rem 1rem .9rem 1.5rem; border-bottom: 1px solid rgb(var(--ca-line-rgb)); }
@@ -798,20 +807,6 @@ section.ca-ed-full #editor .cm-editor { height: calc(100vh - 9.5rem); }
 .ca-live-pill .ca-live-dot { margin-right: 0; }
 .ca-live-pill.is-ended { color: rgb(var(--ca-mute-rgb)); background: rgb(var(--ca-sunk-rgb)); border-color: rgb(var(--ca-line-rgb)); }
 .ca-live-pill.is-ended .ca-live-dot, .ca-live-pill.is-ended .ca-live-label { display: none; }
-/* the landing's first line: the round running now or the next one, with its clock */
-.ca-announce { display: inline-flex; flex-wrap: wrap; align-items: center; gap: .35rem .6rem; max-width: 100%; padding: .3rem .85rem .3rem .3rem;
-  border: 1px solid rgb(var(--ca-line-rgb)); border-radius: 9999px; background: rgb(var(--ca-surface-rgb)); box-shadow: var(--ca-shadow);
-  font-size: 0.875rem; color: rgb(var(--ca-ink-rgb)); transition: border-color .15s ease; }
-.ca-announce:hover { border-color: rgb(var(--ca-accent-rgb) / .5); }
-.ca-announce-tag { display: inline-flex; align-items: center; gap: .35rem; padding: .15rem .6rem; border-radius: 9999px; font-size: 0.8125rem; font-weight: 600;
-  color: rgb(var(--ca-warn-rgb)); background: rgb(var(--ca-warn-rgb) / .12); }
-.ca-announce.is-live .ca-announce-tag { color: rgb(var(--ca-ok-rgb)); background: rgb(var(--ca-ok-rgb) / .12); }
-.ca-announce-tag .ca-live-dot { margin-right: 0; }
-.ca-announce-title { min-width: 0; max-width: 18rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
-.ca-announce-when { color: rgb(var(--ca-mute-rgb)); }
-.ca-announce-when b { color: rgb(var(--ca-ink-rgb)); font-weight: 600; }
-.ca-announce > svg.lucide { width: .95rem; height: .95rem; color: rgb(var(--ca-mute-rgb)); }
-.ca-announce .ca-announce-tag svg.lucide { width: .85rem; height: .85rem; }
 .ca-streak { position: relative; }
 .ca-streak-todo { position: absolute; top: -.2rem; right: -.2rem; width: .55rem; height: .55rem; border-radius: 9999px; background: rgb(var(--ca-warn-rgb)); box-shadow: 0 0 0 2px rgb(var(--ca-surface-rgb)); }
 /* account dropdown (templates/_user_menu.html) */
@@ -1092,6 +1087,7 @@ change; a rematch beside it */
 .ca-quiz-steps li.is-ok { background: rgb(var(--ca-ok-fill-rgb)); }
 .ca-quiz-steps li.is-bad { background: rgb(var(--ca-bad-rgb)); }
 .ca-quiz-steps li.is-now { background: rgb(var(--ca-gold-rgb)); }
+.ca-quiz-steps li.is-skip { background: repeating-linear-gradient(135deg, rgb(var(--ca-ink-rgb) / .22) 0 3px, rgb(var(--ca-ink-rgb) / .08) 3px 6px); }
 .ca-quiz-steps li.is-here { box-shadow: 0 0 0 2px rgb(var(--ca-surface-rgb)), 0 0 0 3.5px rgb(var(--ca-accent-rgb)); }
 .ca-quiz-card {
   position: relative; overflow: hidden; padding: 1.6rem 1.6rem 1.5rem; border: 1px solid rgb(var(--ca-line-rgb));
@@ -2246,6 +2242,8 @@ td a[href^="/problems/"]:not([href="/problems/"]):not([href*="?"]), .ca-rows a[h
   -webkit-mask: var(--ca-star-o) center / contain no-repeat; mask: var(--ca-star-o) center / contain no-repeat; background: #8492AA; }
 .ca-st.is-solved { -webkit-mask-image: var(--ca-star); mask-image: var(--ca-star); background: rgb(var(--ca-ok-fill-rgb)); }
 .ca-st.is-tried { background: #B07D0E; }
+/* attempted = a half-filled star, so it differs from the empty and the full one by shape, not by colour alone */
+.ca-st.is-tried { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cdefs%3E%3CclipPath id='h'%3E%3Crect width='12' height='24'/%3E%3C/clipPath%3E%3C/defs%3E%3Cpath d='M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z' fill='black' clip-path='url%28%23h%29'/%3E%3Cpath d='M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z' fill='none' stroke='black' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cdefs%3E%3CclipPath id='h'%3E%3Crect width='12' height='24'/%3E%3C/clipPath%3E%3C/defs%3E%3Cpath d='M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z' fill='black' clip-path='url%28%23h%29'/%3E%3Cpath d='M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z' fill='none' stroke='black' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E"); }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .ca-st { background: #6E7FA3; } :root:not([data-theme="light"]) .ca-st.is-solved { background: #34C88A; } :root:not([data-theme="light"]) .ca-st.is-tried { background: #F2B53A; } }
 :root[data-theme="dark"] .ca-st { background: #6E7FA3; } :root[data-theme="dark"] .ca-st.is-solved { background: #34C88A; } :root[data-theme="dark"] .ca-st.is-tried { background: #F2B53A; }
 .ca7-seg .ca-st { width: 13px; height: 13px; }
@@ -3176,14 +3174,6 @@ tab switches wrap instead of running off the edge */
   .ca7-pwho { flex-wrap: wrap; row-gap: .75rem; }
   .ca7-pwho > .ca7-hbtn { margin-left: 0; }
 }
-
-/* ======================= UX audit v2 (2026-10-12) =======================
-   Small additions from the audit, one block per finding id. Keep at the end: they win by order. */
-
-/* CLS-1: the student's homework strip: progress, deadline state, next problem */
-.ca-hwbar { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem 1.5rem; margin-bottom: 1.5rem; padding: .85rem 0; border-block: 1px solid rgb(var(--ca-line-rgb)); }
-.ca-hwbar-prog { min-width: 14rem; font-size: 0.9375rem; }
-.ca-hwbar-prog .ca-progress { margin-top: .35rem; }
 .ca-hwbar-state { display: inline-flex; align-items: center; gap: .4rem; font-size: 0.9375rem; color: rgb(var(--ca-mute-rgb)); }
 .ca-hwbar-state.is-late { color: rgb(var(--ca-bad-rgb)); font-weight: 600; }
 .ca-hwbar-state.is-ok { color: rgb(var(--ca-ok-rgb)); font-weight: 600; }
@@ -3290,8 +3280,6 @@ body:has(.ca-main-ws) .ca-footer { display: none; }
 .ca7-joincode { display: inline-flex; align-items: center; gap: .5rem; padding: .15rem .6rem; border-radius: 8px; font-family: var(--ca-code); font-size: 1.35rem; font-weight: 700; letter-spacing: .14em; color: rgb(var(--ca-accent-rgb)); background: rgb(var(--ca-accent-rgb) / .09); }
 .ca7-joincode svg.lucide { width: 1rem; height: 1rem; color: rgb(var(--ca-mute-rgb)); }
 .ca7-joincode.is-copied { color: rgb(var(--ca-ok-rgb)); background: rgb(var(--ca-ok-rgb) / .12); }
-.ca-hwprog { display: flex; align-items: center; gap: .6rem; }
-.ca-hwprog .ca-progress { flex: 1; min-width: 4rem; }
 .ca-codedlg { width: min(46rem, 94vw); padding: 2.5rem 2rem; border: 0; border-radius: 18px; text-align: center; background: rgb(var(--ca-surface-rgb)); color: rgb(var(--ca-ink-rgb)); box-shadow: var(--ca-shadow-lift); }
 .ca-codedlg::backdrop { background: rgb(8 12 24 / .72); }
 .ca-codedlg #code-dlg-name { font-size: 1.25rem; font-weight: 700; }
@@ -3413,30 +3401,7 @@ pre:hover > .ca-copy-pre, .ca-codetabs:hover .ca-copy-pre, .ca-copy-pre:focus-vi
 
 /* FEAT-3: the live quiz: the projector screen and the phone */
 .ca-live { max-width: 64rem; margin: 0 auto; padding-block: 1rem; }
-.ca-live-lbl { font-size: 1rem; color: rgb(var(--ca-mute-rgb)); }
-.ca-live-lobby { display: grid; gap: .75rem; justify-items: center; text-align: center; padding-block: 2rem; }
-.ca-live-how { font-size: 1.25rem; }
-.ca-live-code { font-size: clamp(3.5rem, 10vw, 7rem); font-weight: 700; letter-spacing: .12em; line-height: 1; color: rgb(var(--ca-accent-rgb)); }
-.ca-live-players { font-size: 1.25rem; }
-.ca-live-names { display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem; margin: 0 0 1rem; padding: 0; list-style: none; max-width: 48rem; }
-.ca-live-names li { padding: .25rem .8rem; border-radius: 9999px; background: rgb(var(--ca-frame-rgb)); font-weight: 600; }
-.ca-live-top { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
-.ca-live-secs { display: grid; place-items: center; width: 3.2rem; height: 3.2rem; border-radius: 50%; font-size: 1.5rem; color: rgb(var(--ca-on-fill-rgb)); background: rgb(var(--ca-accent-fill-rgb)); }
-.ca-live-ask { font-size: 1.5rem; font-weight: 700; margin-bottom: .75rem; }
 .ca-live .ca-quiz-code { font-size: 1.25rem; }
-.ca-live-opts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; margin-top: 1rem; }
-.ca-live-opt { display: flex; align-items: center; gap: .8rem; padding: 1rem 1.2rem; border-radius: var(--ca-radius); font-size: 1.35rem; color: #fff; background: rgb(var(--ca-accent-fill-rgb)); }
-.ca-live-opt.is-2 { background: #0f766e; } .ca-live-opt.is-3 { background: #b45309; } .ca-live-opt.is-4 { background: #be123c; }
-.ca-live-opt code { background: none; color: inherit; font-size: inherit; }
-.ca-live-opt b { opacity: .95; }
-.ca-live-right { margin: 1rem 0; font-size: 1.35rem; font-weight: 700; color: rgb(var(--ca-ok-rgb)); }
-.ca-live-counts { display: grid; gap: .35rem; margin: .75rem 0; padding: 0; list-style: none; }
-.ca-live-counts li { display: flex; justify-content: space-between; padding: .5rem .9rem; border-radius: 8px; background: rgb(var(--ca-frame-rgb)); font-size: 1.1rem; }
-.ca-live-counts .is-right { box-shadow: inset 0 0 0 2px rgb(var(--ca-ok-rgb)); }
-.ca-live-h { margin: 1.25rem 0 .5rem; font-size: 1.3rem; font-weight: 700; }
-.ca-live-board { display: grid; gap: .3rem; margin: 0; padding: 0; list-style: none; }
-.ca-live-board li { display: grid; grid-template-columns: 2.5rem 1fr auto; align-items: center; gap: .6rem; padding: .5rem .9rem; border-radius: 8px; background: rgb(var(--ca-frame-rgb)); font-size: 1.1rem; }
-.ca-live-phone { max-width: 32rem; margin: 0 auto; }
 @media (max-width: 767.98px) { .ca-live-opts { grid-template-columns: 1fr; } }
 
 /* home: the progress card and the points side by side under the problems */
@@ -3532,7 +3497,7 @@ body .EasyMDEContainer .cm-s-easymde .cm-link, body .EasyMDEContainer .cm-s-easy
 .ca-bt-bar i { border-radius: 2px; background: linear-gradient(90deg, var(--bg1) var(--p), rgb(var(--ca-ink-rgb) / .1) var(--p)); }
 .ca-bt.is-locked .ca-bt-bar i { background: linear-gradient(90deg, rgb(var(--ca-accent-rgb) / .6) var(--p), rgb(var(--ca-ink-rgb) / .1) var(--p)); }
 .ca-bt-ticks { display: grid; grid-auto-columns: minmax(0, 1fr); grid-auto-flow: column; gap: 3px; margin-top: -.2rem;
-  font-size: 0.75rem; font-variant-numeric: tabular-nums; text-align: right; color: rgb(var(--ca-mute-rgb)); }
+  font-size: 0.8125rem; font-variant-numeric: tabular-nums; text-align: right; color: rgb(var(--ca-mute-rgb)); }
 .ca-bt small { font-size: 0.8125rem; color: rgb(var(--ca-mute-rgb)); }
 /* small, for lists, and big, for the award */
 .ca-bmini { display: inline-grid; place-items: center; width: 1.6rem; height: 1.6rem; border-radius: 6px; color: #fff; background: var(--bg1); }
@@ -3559,7 +3524,7 @@ body .EasyMDEContainer .cm-s-easymde .cm-link, body .EasyMDEContainer .cm-s-easy
 .ca-bell-ico { flex: none; display: grid; place-items: center; width: 1.9rem; height: 1.9rem; border-radius: 8px; color: rgb(var(--ca-accent-rgb)); background: rgb(var(--ca-accent-rgb) / .1); }
 .ca-bell-ico svg.lucide { width: 1rem; height: 1rem; }
 .ca-bell-text { display: block; font-size: 0.875rem; line-height: 1.35; }
-.ca-bell-list small { font-size: 0.75rem; color: rgb(var(--ca-mute-rgb)); }
+.ca-bell-list small { font-size: 0.8125rem; color: rgb(var(--ca-mute-rgb)); }
 .ca-bell-empty { margin: 0; padding: 1rem .9rem; font-size: 0.875rem; color: rgb(var(--ca-mute-rgb)); }
 .ca-nav .ca-bell-panel, .ca-nav .ca-bell-head b, .ca-nav .ca-bell-text { color: rgb(var(--ca-ink-rgb)); }
 .ca-nav .ca-bell-list li.is-new .ca-bell-text { font-weight: 600; }
@@ -3588,12 +3553,12 @@ body .EasyMDEContainer .cm-s-easymde .cm-link, body .EasyMDEContainer .cm-s-easy
 .ca7-tiers li:hover { background: color-mix(in srgb, var(--tier) 9%, transparent); }
 .ca7-tiers li.is-me { background: color-mix(in srgb, var(--tier) 13%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tier) 55%, transparent); }
 .ca7-tiers li.is-sel { background: color-mix(in srgb, var(--tier) 16%, transparent); }
-.ca7-tiers li.is-empty:not(.is-me):not(.is-sel) { opacity: .6; }
+.ca7-tiers li.is-empty:not(.is-me):not(.is-sel) .ca7-tier-c { opacity: .65; }  /* the tier's name and range stay readable; only its head count fades */
 .ca7-tiers .ca7-ladder-dot { flex: none; width: .7rem; height: .7rem; border-radius: 50%; background: var(--tier); }
 .ca7-ladder-dot { flex: none; border-radius: 50%; background: var(--tier); }
 .ca7-tier-n { display: grid; min-width: 0; line-height: 1.25; }
 .ca7-tier-n b { font-size: 0.9375rem; font-weight: 700; }
-.ca7-tier-n em { display: inline-block; margin-left: .45rem; padding: 0 .4rem; border-radius: 9999px; font-style: normal; font-size: 0.75rem; font-weight: 600; color: rgb(var(--ca-ink-rgb)); background: color-mix(in srgb, var(--tier) 30%, transparent); }
+.ca7-tier-n em { display: inline-block; margin-left: .45rem; padding: 0 .4rem; border-radius: 9999px; font-style: normal; font-size: 0.8125rem; font-weight: 600; color: rgb(var(--ca-ink-rgb)); background: color-mix(in srgb, var(--tier) 30%, transparent); }
 .ca7-tier-n small { font-size: 0.8125rem; color: rgb(var(--ca-mute-rgb)); }
 .ca7-tier-c { margin-left: auto; font-size: 0.875rem; color: rgb(var(--ca-mute-rgb)); white-space: nowrap; }
 .ca7-tier-c b { font-weight: 700; color: rgb(var(--ca-ink-rgb)); }
@@ -3649,3 +3614,74 @@ body .EasyMDEContainer .cm-s-easymde .cm-link, body .EasyMDEContainer .cm-s-easy
 .ca-dd-flag { display: inline-flex; width: 1.125rem; margin-right: .5rem; }
 .ca7-ddb .ca-flag { margin-right: .25rem; vertical-align: -2px; }
 .ca7-found .ca-flag { vertical-align: -2px; }
+
+/* the account gate's slim reminder: shown to a signed-in user who has not finished their profile or email */
+.ca-nudge { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.25rem; padding: .55rem .9rem; font-size: .9375rem;
+  color: rgb(var(--ca-ink-rgb)); background: rgb(var(--ca-gold-rgb) / .14); border: 1px solid rgb(var(--ca-gold-rgb) / .45); border-radius: var(--ca-radius); }
+.ca-zt-note { color: rgb(var(--ca-mute-rgb)); white-space: nowrap; }
+.ca7-try { display: flex; align-items: center; gap: .5rem; margin-top: .9rem; font-size: .9375rem; font-weight: 600; color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+/* problem page: the topic tags as chips, with a count for the rest */
+.ca-tagrow { display: inline-flex; flex-wrap: wrap; align-items: center; gap: .3rem; }
+.ca-tagrow .ca-facts7-tag { padding: .05rem .55rem; border: 1px solid rgb(var(--ca-accent-rgb) / .35); border-radius: 9999px; color: rgb(var(--ca-accent-rgb)); font-weight: 500; }
+.ca-tagrow .ca-facts7-tag:hover { background: rgb(var(--ca-accent-rgb) / .1); text-decoration: none; }
+.ca-tagrow .ca-facts7-tag.is-sql { color: rgb(var(--ca-sql-rgb)); border-color: rgb(var(--ca-sql-rgb) / .4); }
+.ca7-quiet { margin: 0 0 1.25rem; font-size: .9375rem; color: rgb(var(--ca-mute-rgb)); }
+.ca-setnav a[aria-current] { color: rgb(var(--ca-accent-rgb)); background: rgb(var(--ca-accent-rgb) / .09); font-weight: 600; }
+.ca-streak-lbl { display: none; margin-left: .3rem; font-size: .8125rem; font-weight: 600; }
+@media (min-width: 1280px) { .ca-streak-lbl { display: inline; } }
+.ca7-topic-next a { display: inline-block; max-width: 15rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
+
+/* ---- audit pass 2026-10-20 ----------------------------------------------------------------------------------
+   Button colour rule: gold = the one action that commits or moves you forward on a content page (Boshlash,
+   Raqib topish, Saqlash); navy ("primary") = the commit button inside a sign-in or account form card; ghost/soft =
+   everything else. Gold is not used for decoration except the medals and the streak flame. */
+:root { --ca-row-h: 40px; }
+
+/* native selects match the text fields: same height, a drawn caret */
+select.ca-input, .ca-select { appearance: none; -webkit-appearance: none; min-height: 2.125rem; padding-right: 2rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238A94AB' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right .7rem center; }
+
+/* every motion off for people who ask for it (spinners, quiz bar, htmx swaps, hover lifts) */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
+
+/* small links keep a 24px hit area without changing how they look */
+.ca-table th a, .ca-table th button { display: inline-block; padding-block: .3rem; margin-block: -.3rem; }
+.ca7-crumb a, .ca-hud-lbl a { display: inline-block; padding-block: .25rem; margin-block: -.25rem; }
+
+/* a first solve also carries a star, so it is not told from a plain solve by tint alone */
+.ca-standings td.ca-cell-first { position: relative; }
+.ca-standings td.ca-cell-first::after { content: "★"; position: absolute; top: 2px; right: 5px; font-size: .7rem; line-height: 1; color: rgb(var(--ca-ok-rgb)); }
+
+/* tier dots on the dark panels: lighter, so the dark red/green tiers keep 4.5:1 */
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .ca7-ladder-dot { background: color-mix(in srgb, var(--tier) 62%, #fff); } }
+:root[data-theme="dark"] .ca7-ladder-dot { background: color-mix(in srgb, var(--tier) 62%, #fff); }
+/* five features in a 3-column grid: the last two share the second row */
+@media (min-width: 768px) {
+  .ca7-feats { grid-template-columns: repeat(6, 1fr); }
+  .ca7-feats li { grid-column: span 2; }
+  .ca7-feats li:nth-child(n+4) { grid-column: span 3; }
+}
+/* the round bands are one flat lapis (the rules show in the tag, not the colour): drop the leftover cover gradients */
+.ca-band.is-score, .ca-band.is-icpc { background-image: none; }
+/* list pages: a slimmer band, so the table starts higher */
+@media (min-width: 768px) { .ca-hud-in { padding: .95rem 2rem 1.15rem; min-height: 4.75rem; } }
+/* the profile chart's points on the dark surface: a lighter ring, so a saturated tier colour (blue) still shows */
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .ca7-chart circle.dot { filter: brightness(1.6) saturate(.85); } }
+:root[data-theme="dark"] .ca7-chart circle.dot { filter: brightness(1.6) saturate(.85); }
+/* the city field: when the picker hides the select, the text field takes its place without the stacking gap */
+:is(select[hidden], select[style*="display: none"]) + input.mt-2 { margin-top: 0; }
+/* row density: one-line rows are --ca-row-h (40px) tall, as agreed; rows with a second line grow by that line only */
+.ca-table td { padding-block: .55rem; }
+/* nothing below 12px: <small> and <em> labels (badge ladders, "/3" counters, the "Siz" chip) */
+small { font-size: max(12.25px, .8em); }
+.ca7-tier-n em { font-size: max(12.25px, .8em); }
+/* rating boards: the handle carries the tier colour; the initial's tint is neutral, so six tiers on one page are not a rainbow */
+.ca7-board .ca7-u i, .ca7-top .ca7-u i { background: rgb(var(--ca-frame-rgb)); color: rgb(var(--ca-mute-rgb)); }
+/* the problems table: a title with its pill (SQL, Kun masalasi) stays on one line, so the row keeps its height */
+.ca-ps td:nth-child(3) { min-width: 20rem; }
+.ca-ps td:nth-child(3) :is(.ca-kind-sql, .ca-chip) { white-space: nowrap; margin-left: .35rem; vertical-align: middle; }
+.ca7-report { margin-top: 2rem; font-size: .9375rem; }
+.ca7-report summary { cursor: pointer; width: fit-content; }

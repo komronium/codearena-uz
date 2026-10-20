@@ -40,6 +40,9 @@ The duel rating is its own Elo and never touches the contest rating.{% endcommen
   </section>
   {% endif %}
 
+  {% if user.is_superuser %}
+  <p class="ca7-quiet">Admin akkaunti duelda qatnashmaydi: duel ochish va chaqiriq yuborish o‘chirilgan.</p>
+  {% else %}
   <div class="ca7-split">
     <form method="post" aria-labelledby="quick-title">{% csrf_token %}
       <h2 id="quick-title">Tezkor duel</h2>
@@ -67,9 +70,10 @@ The duel rating is its own Elo and never touches the contest rating.{% endcommen
           {% for v, label in languages %}<label><input type="radio" name="language" value="{{ v }}" class="sr-only"{% if form.language == v or not form.language and v == "python" %} checked{% endif %}><span>{{ label }}</span></label>{% endfor %}
         </div>
       </fieldset>
-      <button class="ca-btn ca-btn-primary"><i data-lucide="send" class="lu" aria-hidden="true"></i>Chaqiruv yuborish</button>
+      <button class="ca-btn ca-btn-ghost"><i data-lucide="send" class="lu" aria-hidden="true"></i>Chaqiruv yuborish</button>
     </form>
   </div>
+  {% endif %}
 
   {% if open %}
   <section aria-labelledby="open-title">
@@ -83,7 +87,7 @@ The duel rating is its own Elo and never touches the contest rating.{% endcommen
     {% if history %}
     <div class="overflow-x-auto">
     <table class="ca-table ca-table-flat">
-      <thead><tr><th>Raqib</th><th>Duel</th><th>Natija</th><th class="hidden text-right sm:table-cell">Tugagan</th><th class="w-24 text-right" title="Duel reytingi o‘zgarishi">Reyting</th></tr></thead>
+      <thead><tr><th scope="col">Raqib</th><th scope="col">Duel</th><th scope="col">Natija</th><th scope="col" class="hidden text-right sm:table-cell">Tugagan</th><th scope="col" class="w-24 text-right" title="Duel reytingi o‘zgarishi">Reyting</th></tr></thead>
       <tbody>
       {% for d in history %}
       <tr>
@@ -91,7 +95,7 @@ The duel rating is its own Elo and never touches the contest rating.{% endcommen
         <td><a class="ca-link" href="{% url 'classroom:duel' d.pk %}">{% if d.mode == "quiz" %}{{ d.get_language_display }}{% else %}Duel{% endif %}</a></td>
         <td>{% if d.status == "finished" %}{% if d.winner_id == user.pk %}<span class="ca7-pill is-ok">G‘alaba</span>{% elif d.winner_id %}<span class="ca7-pill is-bad">Mag‘lubiyat</span>{% else %}<span class="ca7-pill">Durang</span>{% endif %}{% else %}<span class="text-mute">{{ d.get_status_display }}</span>{% endif %}</td>
         <td class="hidden text-right tabular text-mute sm:table-cell">{{ d.ended_at|date:"d.m H:i" }}</td>
-        <td class="text-right font-semibold tabular">{% if d.status == "finished" %}{% if d.challenger_id == user.pk %}{{ d.challenger_delta|stringformat:"+d" }}{% else %}{{ d.opponent_delta|stringformat:"+d" }}{% endif %}{% endif %}</td>
+        <td class="text-right font-semibold tabular">{% if d.status == "finished" %}{% if d.challenger_id == user.pk %}{{ d.challenger_delta|signed }}{% else %}{{ d.opponent_delta|signed }}{% endif %}{% endif %}</td>
       </tr>
       {% endfor %}
       </tbody>
@@ -125,7 +129,7 @@ The duel rating is its own Elo and never touches the contest rating.{% endcommen
     <div class="ca-box-cap ca-hd"><h2 id="board-title">Duel reytingi</h2><a class="ca-box-tools ca-link" href="{% url 'duel_board' %}">Hammasi</a></div>
     {% if board %}
     <table class="ca-table ca7-top">
-      <thead><tr><th class="w-10 text-center">#</th><th>Foydalanuvchi</th><th class="text-right" title="Tugagan duellar">Duel</th><th class="text-right">Reyting</th></tr></thead>
+      <thead><tr><th scope="col" class="w-10 text-center">#</th><th scope="col">Foydalanuvchi</th><th scope="col" class="text-right" title="Tugagan duellar">Duel</th><th scope="col" class="text-right">Reyting</th></tr></thead>
       <tbody>
       {% for u in board %}
       <tr{% if u == user %} class="ca-row-me"{% endif %}>

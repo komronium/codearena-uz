@@ -15,7 +15,7 @@ ctx: the dashboard's, with first_problem, n_courses, joined_any, learning, upcom
         <div><h3>Asoslarni o‘rganing</h3><p>O‘rganish bo‘limida {{ n_courses }} ta kurs: qisqa nazariya va har biridan keyin mashq masalalari{% if learning %}, birinchisi «{{ learning.plan.title }}»{% endif %}.</p></div>
         <a class="ca-btn ca-btn-soft" href="{% url 'learn:hub' %}">Darslarni ko‘rish</a></li>
       <li class="{% if s3 %}is-done{% elif s1 and s2 %}is-cur{% endif %}"><span aria-hidden="true">{% if s3 %}<i data-lucide="check" class="lu"></i>{% else %}3{% endif %}</span>
-        <div><h3>Birinchi musobaqaga yoziling</h3><p>{% with c=upcoming.0 %}{% if c %}{{ c.title }}, {{ c.start|date:"d.m H:i" }}. Reytingingiz musobaqada boshlanadi{% if not c.is_rated %}; bu raund reytingga ta’sir qilmaydi, mashq uchun{% endif %}.{% else %}Reytingingiz birinchi reytingli musobaqada boshlanadi. Yangi raund e’lon qilinganda shu yerda chiqadi.{% endif %}{% endwith %}</p></div>
+        <div><h3>Birinchi musobaqaga yoziling</h3><p>{% with c=upcoming.0 %}{% if c %}{{ c.title }}, {{ c.start|ztime:"d.m H:i" }}. Reytingingiz musobaqada boshlanadi{% if not c.is_rated %}; bu raund reytingga ta’sir qilmaydi, mashq uchun{% endif %}.{% else %}Reytingingiz birinchi reytingli musobaqada boshlanadi. Yangi raund e’lon qilinganda shu yerda chiqadi.{% endif %}{% endwith %}</p></div>
         <a class="ca-btn ca-btn-soft" href="{% if upcoming %}{% url 'contests:detail' upcoming.0.pk %}{% else %}{% url 'contests:list' %}{% endif %}">{% if upcoming %}Ro‘yxatdan o‘tish{% else %}Musobaqalar{% endif %}</a></li>
     </ol>
   </section>

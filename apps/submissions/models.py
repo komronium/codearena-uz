@@ -1,5 +1,8 @@
+from datetime import timedelta
+
 from django.conf import settings
 from django.db import models
+from django.utils import timezone
 
 from apps.contests.models import Contest
 from apps.problems.models import Language, Problem, TestCase
@@ -75,6 +78,11 @@ class Submission(models.Model):
     @property
     def is_terminal(self) -> bool:
         return self.verdict in self.TERMINAL
+
+    @property
+    def is_stale(self) -> bool:
+        """Still waiting for a verdict long after it was sent: the judge is behind or down."""
+        return not self.is_terminal and timezone.now() - self.created > timedelta(minutes=2)
 
 
 class TestResult(models.Model):

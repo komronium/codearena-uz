@@ -1,6 +1,6 @@
 {% load tagnames %}{# A course's problems of one difficulty (the section head names it) as a flat table, your mark first. Needs `rows` (problems with .solved); `plan` adds ?plan= to links. #}
 <table class="ca-table ca-table-flat">
-  <thead><tr><th class="w-8"><span class="sr-only">Holat</span></th><th class="w-16">#</th><th>Masala</th><th class="hidden sm:table-cell">Mavzu</th></tr></thead>
+  <thead><tr><th scope="col" class="w-8"><span class="sr-only">Holat</span></th><th scope="col" class="w-16">#</th><th scope="col">Masala</th><th scope="col" class="hidden sm:table-cell">Mavzu</th></tr></thead>
   <tbody>
   {% for p in rows %}
   <tr>

@@ -31,7 +31,7 @@ course note and its badge.{% endcomment %}
         {% if user.is_authenticated %}
         <form method="post" action="{% url 'learn:course_read' plan.slug %}">{% csrf_token %}
           {% if progress.read %}<span class="ca-hwbar-state is-ok"><i data-lucide="circle-check-big" class="lu" aria-hidden="true"></i>Nazariya o‘qildi</span> <button class="ca-link text-sm text-mute" name="undo" value="1">Bekor qilish</button>
-          {% else %}<button class="ca-btn ca-btn-gold"><i data-lucide="check" class="lu" aria-hidden="true"></i>Tushundim</button>{% endif %}
+          {% else %}<button class="ca-btn ca-btn-soft"><i data-lucide="check" class="lu" aria-hidden="true"></i>Tushundim</button>{% endif %}
         </form>
         {% else %}<a class="ca-btn ca-btn-ghost" href="{% url 'login' %}?next={{ request.path|urlencode }}">Kirib, o‘qilgan deb belgilash</a>{% endif %}
         {% if next_plan %}<a class="ca-link ml-auto" href="{% url 'learn:course' next_plan.slug %}">Keyingi kurs: {{ next_plan.title }}<i data-lucide="chevron-right" class="lu" aria-hidden="true"></i></a>{% endif %}
@@ -46,7 +46,7 @@ course note and its badge.{% endcomment %}
       {% include "learn/_problem_rows.html" with rows=g.problems %}
     </section>
     {% empty %}
-    <p class="ca7-empty"><b>{% if plan.tags.exists %}Masalalar tayyorlanmoqda{% else %}Bu kurs faqat nazariya{% endif %}</b>{% if plan.tags.exists %}Hozircha nazariyani o‘qing. Shu mavzudagi masalalar umumiy ro‘yxatda ham bor: {% for tg in plan.tags.all|slice:":3" %}<a class="ca-link" href="{% url 'problems:list' %}?tag={{ tg.name|urlencode }}">{{ tg.name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}.{% endif %}</p>
+    <p class="ca7-empty"><b>{% if plan.tags.exists %}Masalalar tayyorlanmoqda{% else %}Bu kurs faqat nazariya{% endif %}</b>{% if plan.tags.exists %}Hozircha nazariyani o‘qing. Shu mavzudagi masalalar umumiy ro‘yxatda ham bor (teg bo‘yicha): {% for tg in plan.tags.all|slice:":3" %}<a class="ca-link" href="{% url 'problems:list' %}?tag={{ tg.name|urlencode }}">{{ tg.name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}.{% endif %}</p>
     {% endfor %}
   </div>
 

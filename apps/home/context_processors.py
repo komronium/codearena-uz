@@ -76,3 +76,9 @@ def nav(request):
         }
 
     return {"nav": SimpleLazyObject(build)}
+
+
+def analytics(request):
+    """{"analytics_domain", "analytics_src"}: the visitor-statistics script, only when the site is set up for it."""
+    from django.conf import settings
+    return {"analytics_domain": settings.ANALYTICS_DOMAIN, "analytics_src": settings.ANALYTICS_SRC}

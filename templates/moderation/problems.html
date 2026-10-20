@@ -54,14 +54,14 @@
         <summary class="ca-btn ca-btn-ghost !px-2 !py-1.5" aria-label="Boshqa amallar: {{ p.title }}" title="Boshqa amallar"><i data-lucide="ellipsis" class="lu" aria-hidden="true"></i></summary>
         <div class="ca-dropdown-panel !w-60">
           <a class="ca-dropdown-item" href="{% url 'moderation:submissions' %}?problem={{ p.slug|urlencode }}"><i data-lucide="history" class="lu" aria-hidden="true"></i>Urinishlarni ko‘rish</a>
-          <form method="post" action="{% url 'moderation:problem_rejudge' p.pk %}" onsubmit="return confirm('«{{ p.title|escapejs }}»: {{ p.n_subs }} ta urinish qayta tekshiriladi. Davom etasizmi?');">{% csrf_token %}
+          <form method="post" action="{% url 'moderation:problem_rejudge' p.pk %}" data-confirm="«{{ p.title }}»: {{ p.n_subs }} ta urinish qayta tekshiriladi. Davom etasizmi?">{% csrf_token %}
             <button class="ca-dropdown-item w-full text-left"{% if not p.n_subs %} disabled{% endif %}><i data-lucide="refresh-cw" class="lu" aria-hidden="true"></i>Qayta tekshirish{% if p.n_subs %} <span class="ml-auto text-xs text-mute">{{ p.n_subs }}</span>{% endif %}</button>
           </form>
           <form method="post" action="{% url 'moderation:problem_toggle' p.pk %}">{% csrf_token %}
             <button class="ca-dropdown-item w-full text-left"><i data-lucide="{% if p.is_public %}eye-off{% else %}eye{% endif %}" class="lu" aria-hidden="true"></i>{% if p.is_public %}Yashirish{% else %}Ochiq qilish{% endif %}</button>
           </form>
           <hr class="my-1 border-line">
-          <form method="post" action="{% url 'moderation:problem_delete' p.pk %}" onsubmit="return confirm('«{{ p.title|escapejs }}» va barcha urinishlari o‘chiriladi. Davom etasizmi?');">{% csrf_token %}
+          <form method="post" action="{% url 'moderation:problem_delete' p.pk %}" data-confirm="«{{ p.title }}» va barcha urinishlari o‘chiriladi. Davom etasizmi?">{% csrf_token %}
             <button class="ca-dropdown-item w-full text-left text-bad"><i data-lucide="trash-2" class="lu" aria-hidden="true"></i>O‘chirish</button>
           </form>
         </div>

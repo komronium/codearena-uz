@@ -9,7 +9,7 @@
 {% if not contest.is_official %}
 <div class="ca-alert mb-4 items-center">
   <p class="flex-1">Bu musobaqa rasmiy emas. Rasmiy reyting faqat tasdiqlangan ishtirokchilar uchun alohida hisoblanadi va kod tekshiruvini talab qiladi.</p>
-  <form method="post" action="{% url 'moderation:contest_make_official' contest.pk %}" onsubmit="return confirm('Musobaqa rasmiy deb belgilanadi. Davom etasizmi?');">{% csrf_token %}<button class="ca-btn ca-btn-primary !py-1.5"><i data-lucide="award" class="lu" aria-hidden="true"></i>Rasmiy qilish</button></form>
+  <form method="post" action="{% url 'moderation:contest_make_official' contest.pk %}" data-confirm="Musobaqa rasmiy deb belgilanadi. Davom etasizmi?">{% csrf_token %}<button class="ca-btn ca-btn-primary !py-1.5"><i data-lucide="award" class="lu" aria-hidden="true"></i>Rasmiy qilish</button></form>
 </div>
 {% elif contest.allowed_ip_prefix %}
 <p class="mb-4 text-sm text-mute">Auditoriya musobaqasi (IP {{ contest.allowed_ip_prefix }}…): kod tekshiruvi shart emas. Cheaterlarni diskvalifikatsiya qilib, reytingni qo‘llang.</p>
@@ -32,7 +32,7 @@
         <input type="hidden" name="reviewed" value="{% if r.participation.reviewed_at %}0{% else %}1{% endif %}">
         <button class="ca-btn {% if r.participation.reviewed_at %}ca-btn-ghost{% else %}ca-btn-primary{% endif %} !py-1.5 text-xs">{% if r.participation.reviewed_at %}Bekor qilish{% else %}<i data-lucide="check" class="lu" aria-hidden="true"></i>Tushuntirdi{% endif %}</button>
       </form>
-      <form method="post" action="{% url 'contests:disqualify' contest.pk r.user.pk %}" onsubmit="return confirm('{{ r.user.username|escapejs }} diskvalifikatsiya qilinadi. Davom etasizmi?');">{% csrf_token %}
+      <form method="post" action="{% url 'contests:disqualify' contest.pk r.user.pk %}" data-confirm="{{ r.user.username }} diskvalifikatsiya qilinadi. Davom etasizmi?">{% csrf_token %}
         <input type="hidden" name="disqualified" value="1"><input type="hidden" name="back" value="official">
         <input type="hidden" name="reason" value="Kodini tushuntira olmadi">
         <button class="ca-btn ca-btn-ghost !py-1.5 text-xs text-bad"><i data-lucide="ban" class="lu" aria-hidden="true"></i>Diskvalifikatsiya</button>

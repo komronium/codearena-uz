@@ -50,7 +50,7 @@ def _gate(request, slug):
     if contest is not None and not access_allowed(
         request.user, contest, request.META.get("REMOTE_ADDR")
     ):
-        return problem, contest, HttpResponseBadRequest("not eligible for this contest")
+        return problem, contest, HttpResponseBadRequest("Bu musobaqaga shu tarmoqdan yuborib bo‘lmaydi.")
     if (
         contest is not None
         and Participation.objects.filter(
@@ -60,7 +60,7 @@ def _gate(request, slug):
         return (
             problem,
             contest,
-            HttpResponseBadRequest("disqualified from this contest"),
+            HttpResponseBadRequest("Siz bu musobaqadan chetlatilgansiz."),
         )
     if (
         contest is not None
@@ -75,9 +75,15 @@ def _gate(request, slug):
         return (
             problem,
             contest,
-            HttpResponseBadRequest("this problem is blocked in this contest"),
+            HttpResponseBadRequest("Bu masala shu raundda bloklangan."),
         )
     return problem, contest, None
+
+
+def _refused(request, problem, message, status):
+    """A refused submit as a page, not bare text: the draft is still in the editor (localStorage), so the way
+    back is one click. The status code stays what it was."""
+    return render(request, "submissions/refused.html", {"message": message, "problem": problem}, status=status)
 
 
 @login_required
@@ -85,15 +91,15 @@ def _gate(request, slug):
 def submit(request, slug):
     problem, contest, error = _gate(request, slug)
     if error:
-        return error
+        return _refused(request, problem, error.content.decode(), error.status_code)
     if rate_limited(request.user.id, "submit", RATE_LIMIT_MAX):
-        return HttpResponse("too many submissions, slow down", status=429)
+        return _refused(request, problem, "Juda tez yuboryapsiz. Bir daqiqa kuting va qayta yuboring.", 429)
     language = get_object_or_404(
         Language, code=request.POST.get("language"), is_active=True
     )
     source = request.POST.get("source", "")
     if not source.strip() or len(source) > MAX_SOURCE:
-        return HttpResponseBadRequest("source empty or too large")
+        return _refused(request, problem, "Kod bo‘sh yoki juda katta (64 KB gacha).", 400)
     if (
         request.POST.get("pledge") == "1" and not request.user.honor_pledged_at
     ):  # accepted in the dialog

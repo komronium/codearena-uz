@@ -23,7 +23,7 @@
 {% if user.is_authenticated %}<p class="mb-3 text-sm"><a class="ca-link" href="#me">Mening o‘rnimga o‘tish</a> · <a class="ca-link" href="{% url 'classroom:duels' %}">Duel boshlash</a></p>{% endif %}
 <div class="overflow-x-auto ca7-board">
 <table class="ca-table ca-table-flat">
-  <thead><tr><th class="w-16 text-center">#</th><th>Foydalanuvchi</th><th class="w-28 text-right" title="Tugagan duellar">Duel</th><th class="w-28 text-right">G‘alaba</th><th class="w-28 text-right">Reyting</th></tr></thead>
+  <thead><tr><th scope="col" class="w-16 text-center">#</th><th scope="col">Foydalanuvchi</th><th scope="col" class="w-28 text-right" title="Tugagan duellar">Duel</th><th scope="col" class="w-28 text-right">G‘alaba</th><th scope="col" class="w-28 text-right">Reyting</th></tr></thead>
   <tbody>
   {% for u in users %}
   <tr{% if u == user %} class="ca-row-me" id="me"{% endif %}>

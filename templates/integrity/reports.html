@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Shikoyatlar{% endblock %}
+{% comment %}What users sent staff (integrity.Report): reports about people and appeals against a contest result; open first.{% endcomment %}
+{% block content %}
+<div class="mb-6">
+  <h1 class="ca-page-title">Shikoyat va apellyatsiyalar</h1>
+  <p class="mt-1 text-sm text-mute">{{ open_count }} ta ochiq. Ochiqlari tepada.</p>
+</div>
+{% if reports %}
+<div class="overflow-x-auto">
+<table class="ca-table ca-table-flat">
+  <thead><tr><th scope="col" class="w-28">Tur</th><th scope="col">Xabar</th><th scope="col" class="w-40">Kimdan</th><th scope="col" class="w-40">Kimga / musobaqa</th><th scope="col" class="w-32">Sana</th><th scope="col" class="w-28"><span class="sr-only">Holat</span></th></tr></thead>
+  <tbody>
+  {% for r in reports %}
+  <tr{% if r.done_at %} class="opacity-60"{% endif %}>
+    <td>{{ r.get_kind_display }}</td>
+    <td><p>{{ r.text }}</p>{% if r.link %}<a class="ca-link text-sm" href="{{ r.link }}">Yuborilgan sahifa</a>{% endif %}</td>
+    <td><a class="ca-link" href="{% url 'profile' r.reporter.username %}">{{ r.reporter.username }}</a></td>
+    <td>{% if r.target %}<a class="ca-link" href="{% url 'profile' r.target.username %}">{{ r.target.username }}</a>{% elif r.contest %}<a class="ca-link" href="{% url 'integrity:contest_report' r.contest.pk %}">{{ r.contest.title }}</a>{% else %}—{% endif %}</td>
+    <td class="tabular text-mute">{{ r.created|date:"d.m.Y H:i" }}</td>
+    <td><form method="post" action="{% url 'integrity:report_done' r.pk %}">{% csrf_token %}<button class="ca-btn {% if r.done_at %}ca-btn-ghost{% else %}ca-btn-soft{% endif %} !py-1.5 text-sm">{% if r.done_at %}Qayta ochish{% else %}Yopish{% endif %}</button></form></td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% include "_pagination.html" with page=reports %}
+{% else %}
+<p class="ca7-empty"><b>Hozircha xabar yo‘q</b>Foydalanuvchilar profil yoki natija haqida yozganda shu yerda chiqadi.</p>
+{% endif %}
+{% endblock %}

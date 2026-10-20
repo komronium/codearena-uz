@@ -40,14 +40,16 @@ menu sheet (base.html). Badges: a pulsing dot while a contest runs, waiting duel
     {% with s=streak_pill %}{% if s.daily %}
     <a href="{% url 'problems:detail' s.daily.problem.slug %}" class="ca-streak{% if s.done %} is-done{% elif s.current %} is-risk{% endif %}"
        title="{% if s.done %}Olov {{ s.current }} kun: bugungi masala yechildi{% elif s.current %}Olov {{ s.current }} kun: bugun kun masalasini yeching, aks holda uziladi{% else %}Olovni boshlang: bugungi kun masalasini yeching{% endif %}">
-      <i data-lucide="flame" class="lu" aria-hidden="true"></i>{% if s.current %}<span class="tabular">{{ s.current }}</span>{% endif %}
+      <i data-lucide="flame" class="lu" aria-hidden="true"></i>{% if s.current %}<span class="tabular">{{ s.current }}</span>{% else %}<span class="ca-streak-lbl" aria-hidden="true">Kun masalasi</span>{% endif %}
       <span class="sr-only">Olov{% if s.current %} {{ s.current }} kun{% endif %}{% if s.done %}, bugungi masala yechilgan{% else %}, bugungi masala hali yechilmagan{% endif %}</span>
     </a>
     {% endif %}{% endwith %}
     <span class="hidden md:block">{% include "_user_menu.html" %}</span>
     {% else %}
-    <a href="{% url 'login' %}" class="ca-btn ca-btn-ghost !py-1.5">Kirish</a>
-    <a href="{% url 'register' %}" class="ca-btn ca-btn-primary hidden !py-1.5 sm:inline-flex">Ro‘yxatdan o‘tish</a>
+    {% with un=request.resolver_match.url_name %}
+    {% if un != "login" %}<a href="{% url 'login' %}" class="ca-btn ca-btn-ghost !py-1.5">Kirish</a>{% endif %}
+    {% if un != "register" and un != "home" %}<a href="{% url 'register' %}" class="ca-btn ca-btn-primary hidden !py-1.5 sm:inline-flex">Ro‘yxatdan o‘tish</a>{% endif %}
+    {% endwith %}
     {% endif %}
   </div>
 </div>

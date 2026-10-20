@@ -658,3 +658,12 @@ def test_an_accept_shows_where_its_time_stands_among_the_others(client, problem,
     assert sum(b["me"] for b in beats["bars"]) == 1
     wrong = ac(user, 10, verdict="WA")
     assert client.get(reverse("submissions:detail", args=[wrong.pk])).context["beats"] is None
+
+
+@pytest.mark.django_db
+def test_a_refused_submit_is_a_page_with_the_way_back_not_bare_text(client, python, problem):
+    client.force_login(User.objects.create_user("ali", password="x"))
+    r = client.post(reverse("submissions:submit", args=[problem.slug]), {"language": python.code, "source": ""})
+    assert r.status_code == 400  # the code is what it was; the body is now a page
+    page = r.content.decode()
+    assert "Yechim yuborilmadi" in page and "Kod bo‘sh yoki juda katta" in page and problem.slug in page

@@ -10,7 +10,7 @@ ctx: c (from contests.views.contest_list), state ("running" | "upcoming").{% end
   </p>
   <h3 id="cc-{{ c.pk }}"><a href="{% url 'contests:detail' c.pk %}">{{ c.title }}</a></h3>
   <ul class="ca7-ccard-meta">
-    <li><i data-lucide="calendar" class="lu" aria-hidden="true"></i><span class="tabular">{{ c.start|date:"d.m.Y · H:i" }}{% if state == "running" %}–{{ c.end|date:"H:i" }}{% endif %}</span></li>
+    <li><i data-lucide="calendar" class="lu" aria-hidden="true"></i><span class="tabular">{{ c.start|ztime:"d.m.Y · H:i" }}{% if state == "running" %}–{{ c.end|ztime:"H:i" }}{% endif %}</span></li>
     <li><i data-lucide="list" class="lu" aria-hidden="true"></i>{{ c.duration_label }} · {{ c.n_problems }} masala · {% if c.type == "cf" %}Codeforces qoidasi{% elif c.type == "icpc" %}ICPC qoidasi{% else %}ball qoidasi{% endif %}</li>
     <li><i data-lucide="users" class="lu" aria-hidden="true"></i>{% if state == "running" %}{{ c.n_participants }} ishtirokchi{% if c.me and c.my_rank %} · siz {{ c.my_rank }}-o‘rinda{% endif %}{% else %}hozircha {{ c.n_participants }} kishi{% endif %}</li>
   </ul>

@@ -176,7 +176,7 @@ def _duel_board(duel, viewer) -> dict:
                 state = "ok" if a.correct else ("bad" if r.closed(a, now) else "now")
                 cells.append({"state": state})
             if r.over(now):
-                cells += [{"state": "bad"}] * (duels.QUESTIONS - len(cells))
+                cells += [{"state": "skip"}] * (duels.QUESTIONS - len(cells))  # time ran out unanswered: not "wrong"
             cells += [{"state": ""}] * (duels.QUESTIONS - len(cells))
         rows.append({"user": u, "run": r, "delta": delta, "winner": u is not None and duel.winner_id == u.pk,
                      "over": r is not None and r.over(now), "right": r.right if r else 0, "cells": cells})

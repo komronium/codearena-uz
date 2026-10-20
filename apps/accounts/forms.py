@@ -67,12 +67,12 @@ class _ProfileFields(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        for name in ("first_name", "last_name", "location"):
+        for name in ("first_name", "location"):
             self.fields[name].required = True
+        self.fields["last_name"].required = False  # the sign-up form says it is optional
         self.fields["location"].label = "Shahar"
         self.fields["location"].error_messages["required"] = "Shaharni tanlang."
         self.fields["first_name"].error_messages["required"] = "Ismingizni yozing."
-        self.fields["last_name"].error_messages["required"] = "Familiyangizni yozing."
         self.fields["country"].error_messages["required"] = "Davlatni tanlang."
         if not self.initial.get("country"):
             self.initial["country"] = "UZ"  # most users are from here
@@ -124,6 +124,12 @@ class ProfileEditForm(_ProfileFields):
                 school = data.get("school_other", "")
             data["school"] = canon_school(data.get("country", ""), school)
         return data
+
+    def clean_avatar(self):
+        avatar = self.cleaned_data.get("avatar")
+        if avatar and hasattr(avatar, "size") and avatar.size > 2 * 1024 * 1024:
+            raise forms.ValidationError("Rasm 2 MB dan oshmasligi kerak.")
+        return avatar
 
     def clean_username(self):
         name = self.cleaned_data["username"]

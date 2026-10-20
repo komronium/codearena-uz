@@ -8,6 +8,7 @@ card says right or wrong on the spot (never the right answer, which waits for th
 the next question opens by itself. Without script the post lands on the verdict page, which moves on after a
 second. Copying out of the question is blocked, so it can't be pasted into an AI or a compiler.{% endcomment %}
 <div class="ca-quiz" data-nocopy>
+  <h1 class="sr-only">Duel, {{ n }}-savol, {{ n_questions }} tadan</h1>
   <div class="ca-quiz-top">
     <a class="ca-link text-sm text-mute" href="{% url 'classroom:duel' duel.pk %}"><i data-lucide="swords" class="lu mr-1" aria-hidden="true"></i>{{ duel.challenger.username }} vs {{ duel.opponent.username|default:"?" }}</a>
     <span class="ca-quiz-meta"><b>{{ language }}</b></span>
@@ -38,6 +39,7 @@ second. Copying out of the question is blocked, so it can't be pasted into an AI
     <div class="ca-quiz-head">
       <p class="ca-quiz-n">{{ n }}-savol, {{ n_questions }} tadan</p>
       <b class="ca-quiz-secs tabular" id="quiz-secs" aria-hidden="true">{% widthratio remaining_ms 1000 1 %}</b>
+      <span class="sr-only" id="quiz-say" role="status" aria-live="polite"></span>
     </div>
     <p class="ca-quiz-ask" id="quiz-ask">{% include "classroom/_quiz_ask.html" %}</p>
     {% if q.in_main %}<p class="ca-quiz-note"><code>main()</code> ichidagi kod{% if q.language == "cpp" %}, <code>bits/stdc++.h</code> va <code>using namespace std</code> bilan{% else %}, <code>java.util.*</code> bilan{% endif %}.</p>{% endif %}
@@ -115,12 +117,17 @@ second. Copying out of the question is blocked, so it can't be pasted into an AI
 
   form.addEventListener("submit", (e) => { e.preventDefault(); send(e.submitter && e.submitter.name === "answer" ? e.submitter : null); });
 
+  const say = document.getElementById("quiz-say");
+  let said10 = false, said5 = false;
   const tick = () => {
     if (sent) return;
     const left = Math.max(0, end - performance.now());
     bar.style.width = (left / all * 100) + "%";
     bar.classList.toggle("is-low", left < 5000);
     secs.textContent = Math.ceil(left / 1000);
+    // spoken warnings for screen readers: the visible counter is aria-hidden
+    if (left <= 10000 && !said10) { said10 = true; say.textContent = "10 soniya qoldi"; }
+    if (left <= 5000 && !said5) { said5 = true; say.textContent = "5 soniya qoldi"; }
     if (left <= 0) { send(null); return; }
     requestAnimationFrame(tick);
   };

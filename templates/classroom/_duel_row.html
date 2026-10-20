@@ -13,7 +13,7 @@
       {% if d.winner_id == user.pk %}<span class="ca-verdict ca-verdict-ac">G‘alaba</span>
       {% elif d.winner_id %}<span class="ca-verdict ca-verdict-bad">Mag‘lubiyat</span>
       {% else %}<span class="ca-verdict ca-verdict-mute">Durang</span>{% endif %}
-      {% if d.challenger_id == user.pk %}<span class="tabular text-mute">{{ d.challenger_delta|stringformat:"+d" }}</span>{% else %}<span class="tabular text-mute">{{ d.opponent_delta|stringformat:"+d" }}</span>{% endif %}
+      {% if d.challenger_id == user.pk %}<span class="tabular text-mute">{{ d.challenger_delta|signed }}</span>{% else %}<span class="tabular text-mute">{{ d.opponent_delta|signed }}</span>{% endif %}
     {% else %}
       <a class="ca-btn ca-btn-primary ca-btn-xs" href="{% url 'classroom:duel' d.pk %}">{% if d.status == "active" %}Davom etish{% else %}Ochish{% endif %}<span class="sr-only">: {% if d.opponent %}{{ d.challenger.username }} va {{ d.opponent.username }} dueli{% else %}ochiq duel{% endif %}</span></a>
     {% endif %}

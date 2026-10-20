@@ -17,6 +17,9 @@ urlpatterns = [
         name="practice_decide",
     ),
     path("audit/", views.audit_log, name="audit"),
+    path("report/", views.report_create, name="report"),
+    path("reports/", views.reports, name="reports"),
+    path("reports/<int:pk>/done/", views.report_done, name="report_done"),
     path("contest/<int:pk>/", views.contest_report, name="contest_report"),
     path(
         "contest/<int:pk>/replay/<int:user_id>/<int:problem_id>/",

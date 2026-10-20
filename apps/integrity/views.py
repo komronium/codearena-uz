@@ -423,3 +423,56 @@ def practice_decide(request, user_id, problem_id):
     if not url_has_allowed_host_and_scheme(back, allowed_hosts={request.get_host()}):
         back = reverse("integrity:practice_report")
     return redirect(back)
+
+
+@login_required
+@require_POST
+def report_create(request):
+    """A report about a user, or an appeal against the signed-in user's own contest result."""
+    from .models import Report
+
+    kind = request.POST.get("kind", "")
+    text = request.POST.get("text", "").strip()[:600]
+    back = request.POST.get("next", "")
+    if not url_has_allowed_host_and_scheme(back, allowed_hosts={request.get_host()}):
+        back = "/"
+    if kind not in Report.Kind.values or len(text) < 5:
+        messages.error(request, "Xabarni kamida bir necha so‘z bilan yozing.")
+        return redirect(back)
+    if rate_limited(request.user.id, "report", 5):  # a minute; the page is for real problems, not floods
+        messages.error(request, "Juda tez-tez. Bir daqiqadan keyin qayta urinib ko‘ring.")
+        return redirect(back)
+    report = Report(reporter=request.user, kind=kind, text=text, link=back[:300])
+    if kind == Report.Kind.USER:
+        report.target = User.objects.filter(username=request.POST.get("target", "")).first()
+    else:  # an appeal is about your own result, and only if you have one
+        contest = Contest.objects.filter(pk=request.POST.get("contest") or 0).first()
+        if contest is None or not Participation.objects.filter(user=request.user, contest=contest).exists():
+            messages.error(request, "Bu musobaqada qatnashmagansiz.")
+            return redirect(back)
+        report.contest = contest
+    report.save()
+    messages.success(request, "Xabaringiz adminlarga yuborildi. Rahmat." if kind == Report.Kind.USER
+                     else "Apellyatsiyangiz adminlarga yuborildi. Javob kutilmoqda.")
+    return redirect(back)
+
+
+@staff_required
+def reports(request):
+    from .models import Report
+
+    page = Paginator(Report.objects.select_related("reporter", "target", "contest", "done_by"), 50).get_page(
+        request.GET.get("page"))
+    return render(request, "integrity/reports.html", {"reports": page, "open_count": Report.objects.filter(done_at__isnull=True).count()})
+
+
+@staff_required
+@require_POST
+def report_done(request, pk):
+    from .models import Report
+
+    report = get_object_or_404(Report, pk=pk)
+    report.done_at = None if report.done_at else timezone.now()
+    report.done_by = request.user if report.done_at else None
+    report.save(update_fields=["done_at", "done_by"])
+    return redirect("integrity:reports")

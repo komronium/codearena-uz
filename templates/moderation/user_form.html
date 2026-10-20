@@ -47,6 +47,6 @@
   </aside>
 </form>
 {% if obj != request.user and not obj.is_staff %}
-<form id="user-delete" method="post" action="{% url 'moderation:user_delete' obj.pk %}" onsubmit="return confirm('«{{ obj.username|escapejs }}» va uning barcha urinishlari, natijalari butunlay o‘chiriladi. Qaytarib bo‘lmaydi. Davom etasizmi?');">{% csrf_token %}</form>
+<form id="user-delete" method="post" action="{% url 'moderation:user_delete' obj.pk %}" data-confirm="«{{ obj.username }}» va uning barcha urinishlari, natijalari butunlay o‘chiriladi. Qaytarib bo‘lmaydi. Davom etasizmi?">{% csrf_token %}</form>
 {% endif %}
 {% endblock %}

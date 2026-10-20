@@ -24,7 +24,7 @@ site's figures; the side column has every staff section.{% endcomment %}
     {% if pending %}
     <div class="overflow-x-auto">
     <table class="ca-table ca-table-flat">
-      <thead><tr><th>Masala</th><th>Muallif</th><th>Qiyinlik</th><th>Yuborilgan</th><th class="text-right">Qaror</th></tr></thead>
+      <thead><tr><th scope="col">Masala</th><th scope="col">Muallif</th><th scope="col">Qiyinlik</th><th scope="col">Yuborilgan</th><th scope="col" class="text-right">Qaror</th></tr></thead>
       <tbody>
       {% for p in pending %}
       <tr>
@@ -33,7 +33,7 @@ site's figures; the side column has every staff section.{% endcomment %}
         <td><span class="ca-diff ca-diff-{{ p.difficulty }}">{{ p.get_difficulty_display }}</span></td>
         <td class="tabular text-mute">{{ p.created|date:"d.m H:i" }}</td>
         <td class="text-right"><div class="flex justify-end gap-2 whitespace-nowrap">
-          <form method="post" action="{% url 'moderation:reject' p.pk %}" onsubmit="return confirm('«{{ p.title|escapejs }}» masalasini rad etishni tasdiqlaysizmi?');">{% csrf_token %}<button class="ca-btn ca-btn-soft ca-btn-wb">Rad etish</button></form>
+          <form method="post" action="{% url 'moderation:reject' p.pk %}" data-confirm="«{{ p.title }}» masalasini rad etishni tasdiqlaysizmi?">{% csrf_token %}<button class="ca-btn ca-btn-soft ca-btn-wb">Rad etish</button></form>
           <form method="post" action="{% url 'moderation:approve' p.pk %}">{% csrf_token %}<button class="ca-btn ca-btn-gold ca-btn-wb">Tasdiqlash</button></form>
         </div></td>
       </tr>

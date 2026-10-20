@@ -9,11 +9,11 @@
 <table class="ca-table">
   <thead>
     <tr>
-      <th>Sarlavha</th>
-      <th>Muallif</th>
-      <th>Qiyinlik</th>
-      <th>Yuborilgan</th>
-      <th class="text-right">Amal</th>
+      <th scope="col">Sarlavha</th>
+      <th scope="col">Muallif</th>
+      <th scope="col">Qiyinlik</th>
+      <th scope="col">Yuborilgan</th>
+      <th scope="col" class="text-right">Amal</th>
     </tr>
   </thead>
   <tbody>
@@ -29,7 +29,7 @@
         <form method="post" action="{% url 'moderation:approve' p.pk %}">{% csrf_token %}
           <button type="submit" class="ca-btn ca-btn-success !py-1.5"><i data-lucide="check" class="lu" aria-hidden="true"></i>Tasdiqlash</button>
         </form>
-        <form method="post" action="{% url 'moderation:reject' p.pk %}" onsubmit="return confirm('«{{ p.title|escapejs }}» masalasini rad etishni tasdiqlaysizmi?');">{% csrf_token %}
+        <form method="post" action="{% url 'moderation:reject' p.pk %}" data-confirm="«{{ p.title }}» masalasini rad etishni tasdiqlaysizmi?">{% csrf_token %}
           <button type="submit" class="ca-btn ca-btn-ghost !py-1.5 text-bad"><i data-lucide="x" class="lu" aria-hidden="true"></i>Rad etish</button>
         </form>
       </div>

@@ -51,3 +51,12 @@ def new_badges(request):
 
 
 SYNC_EVERY = 300
+
+
+def gate_nudge(request):
+    """{"gate_nudge": ...}: what a signed-in user still owes the account gate, for the slim banner."""
+    user = getattr(request, "user", None)
+    if not (user and user.is_authenticated) or request.headers.get("HX-Request"):
+        return {}
+    from . import onboarding
+    return {"gate_nudge": onboarding.nudge(user)}

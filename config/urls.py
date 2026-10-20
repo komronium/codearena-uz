@@ -4,7 +4,7 @@ from django.urls import include, path, re_path
 from django.views.static import serve
 
 from apps.home.sitemaps import SITEMAPS
-from apps.home.views import favicon, home, manifest, robots_txt
+from apps.home.views import favicon, healthz, home, manifest, robots_txt
 
 urlpatterns = [
     path("django-rq/", include("django_rq.urls")),
@@ -22,6 +22,7 @@ urlpatterns = [
          name="sitemap"),
     path("sitemap-<section>.xml", sitemaps.sitemap, {"sitemaps": SITEMAPS}, name="sitemap_section"),
     path("favicon.ico", favicon, name="favicon"),
+    path("healthz", healthz, name="healthz"),
     path("manifest.webmanifest", manifest, name="manifest"),
     path("", home, name="home"),
 ]

@@ -26,6 +26,7 @@ own row marked.{% endcomment %}
         {% for k, v in geo_keep %}{% if k != "q" %}<input type="hidden" name="{{ k }}" value="{{ v }}">{% endif %}{% endfor %}{% if geo.country %}<input type="hidden" name="country" value="{{ geo.country }}">{% endif %}{% if geo.city %}<input type="hidden" name="city" value="{{ geo.city }}">{% endif %}{% if geo.school %}<input type="hidden" name="school" value="{{ geo.school }}">{% endif %}
         <i data-lucide="search" class="lu" aria-hidden="true"></i><input class="ca7-fld" type="search" name="q" value="{{ q }}" placeholder="Foydalanuvchi…" aria-label="Foydalanuvchi nomi" autocomplete="off" spellcheck="false">
       </form>
+      {% if user.is_authenticated and not q %}<a class="ca-btn ca-btn-soft" href="#me"><i data-lucide="crosshair" class="lu" aria-hidden="true"></i>Mening o‘rnim</a>{% endif %}
       <nav class="ca7-seg ca7-tools-r" aria-label="Saralash">
         <a href="{% querystring sort=None page=None %}"{% if not sort %} aria-current="true"{% endif %}>Reyting</a>
         <a href="{% querystring sort='delta' page=None %}"{% if sort == 'delta' %} aria-current="true"{% endif %}>Oxirgi o‘zgarish</a>
@@ -34,19 +35,18 @@ own row marked.{% endcomment %}
     </div>
     {% if geo.countries %}<div class="ca7-trow">{% include "accounts/_geo_filters.html" %}{% if geo.active %}<a class="ca-link text-sm" href="{% querystring country=None city=None school=None page=None %}">Tozalash</a>{% endif %}</div>{% endif %}
   </div>
-  {% if user.is_authenticated and not q %}<p class="mb-2 text-sm"><a class="ca-link" href="#me">Mening o‘rnimga o‘tish</a></p>{% endif %}
   {% if q or tier_sel or geo.active %}<p class="ca7-found">{% if geo.country %}{% flag geo.country %} <b>{{ geo.country_name }}{% if geo.city %}, {{ geo.city }}{% endif %}{% if geo.school %}, {{ geo.school }}{% endif %}</b>{% endif %}{% if tier_sel %}<b class="ca-tier-ink" style="--tier: {% for t in tiers %}{% if t.name == tier_sel %}{{ t.color }}{% endif %}{% endfor %}">{{ tier_sel }}</b>{% endif %}{% if q %} «{{ q }}»{% endif %}: {{ users.paginator.count }} ta · <a class="ca-link" href="{% url 'rating' %}">hammasi</a></p>{% endif %}
   {% if users %}
   <div class="overflow-x-auto ca7-board">
   <table class="ca-table ca-table-flat">
-    <thead><tr><th class="w-16 text-center">#</th><th>Foydalanuvchi</th><th class="hidden w-32 text-right sm:table-cell">Musobaqalar</th><th class="w-28 text-right" title="Oxirgi reytingli musobaqadagi o‘zgarish">Oxirgi ±</th><th class="w-28 text-right">Reyting</th></tr></thead>
+    <thead><tr><th scope="col" class="w-16 text-center">#</th><th scope="col">Foydalanuvchi</th><th scope="col" class="hidden w-32 text-right sm:table-cell">Musobaqalar</th><th scope="col" class="w-28 text-right" title="Oxirgi reytingli musobaqadagi o‘zgarish">Oxirgi ±</th><th scope="col" class="w-28 text-right">Reyting</th></tr></thead>
     <tbody>
     {% for u in users %}
     <tr{% if u == user %} class="ca-row-me" id="me"{% endif %}>
       <td class="text-center">{% if u.rank <= 3 and not q %}<span class="ca7-medal m{{ u.rank }}">{{ u.rank }}</span>{% else %}<span class="tabular text-mute">{{ u.rank }}</span>{% endif %}</td>
       <td>{% if u == user %}{% include "accounts/_u7.html" with u=u you=True flag=True %}{% else %}{% include "accounts/_u7.html" with u=u you=False flag=True %} <span class="text-xs text-mute">{{ u.rating|tier_name }}</span>{% endif %}</td>
       <td class="hidden text-right tabular sm:table-cell">{{ u.contest_count }}</td>
-      <td class="text-right tabular font-semibold {% if u.last_delta > 0 %}text-ok{% elif u.last_delta < 0 %}text-bad{% else %}text-mute{% endif %}">{{ u.last_delta|stringformat:"+d" }}</td>
+      <td class="text-right tabular font-semibold {% if u.last_delta > 0 %}text-ok{% elif u.last_delta < 0 %}text-bad{% else %}text-mute{% endif %}">{{ u.last_delta|signed }}</td>
       <td class="text-right tabular font-bold"><span class="ca-tier-ink" style="--tier: {{ u.rating|tier_color }}">{{ u.rating }}</span></td>
     </tr>
     {% endfor %}

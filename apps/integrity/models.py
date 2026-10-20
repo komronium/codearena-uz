@@ -153,3 +153,26 @@ class PracticeSnapshot(models.Model):
 
     class Meta:
         indexes: ClassVar[list[models.Index]] = [models.Index(fields=["user", "problem", "at"])]
+
+
+class Report(models.Model):
+    """What a signed-in user tells staff: a report about another user (a profile, a duel) or an appeal against
+    their own result in a contest. Staff read them at /integrity/reports/ and mark them done."""
+    class Kind(models.TextChoices):
+        USER = "user", "Shikoyat"
+        APPEAL = "appeal", "Apellyatsiya"
+
+    reporter = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="+")
+    kind = models.CharField(max_length=10, choices=Kind.choices)
+    target = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
+                               related_name="+")
+    contest = models.ForeignKey(Contest, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    link = models.CharField(max_length=300, blank=True)  # the page it was sent from
+    text = models.CharField(max_length=600)
+    created = models.DateTimeField(auto_now_add=True)
+    done_at = models.DateTimeField(null=True, blank=True)
+    done_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
+                                related_name="+")
+
+    class Meta:
+        ordering = ["done_at", "-created", "-id"]

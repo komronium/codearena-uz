@@ -113,7 +113,7 @@ the console (samples, your own input, the run's result) and the one gold "Yubori
           <button type="button" class="ca-stars-sum" data-dialog="rate-dialog" title="{{ problem.n_ratings }} ta baho"><i data-lucide="star" class="lu" aria-hidden="true"></i><b class="tabular text-ink">{{ problem.avg_stars|floatformat:1 }}</b><span class="sr-only">/5,</span> <span class="tabular text-mute">({{ problem.n_ratings }})</span></button>
           {% endif %}
           {% if not contest and problem.tags.all %}
-          <span class="text-mute">mavzu: {% for t in problem.tags.all|slice:":3" %}<a class="ca-facts7-tag{% if t.kind == 'sql' %} is-sql{% endif %}" href="{% url 'problems:list' %}?tag={{ t.name|urlencode }}">{{ t.name|tag_uz }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</span>
+          <span class="ca-tagrow"><span class="text-mute">mavzu:</span> {% for t in problem.tags.all|slice:":6" %}<a class="ca-facts7-tag{% if t.kind == 'sql' %} is-sql{% endif %}" href="{% url 'problems:list' %}?tag={{ t.name|urlencode }}">{{ t.name|tag_uz }}</a>{% endfor %}{% if problem.tags.all|length > 6 %}<span class="text-mute tabular" title="Yana {{ problem.tags.all|length|add:'-6' }} ta mavzu">+{{ problem.tags.all|length|add:"-6" }}</span>{% endif %}</span>
           {% endif %}
           {% if not contest %}
           <span class="text-mute">muallif: <a class="ca-tier-ink font-semibold{{ problem.author.rating|lg }}" href="{% url 'profile' problem.author.username %}" translate="no" style="--tier: {{ problem.author.rating|tier_color }}">{{ problem.author.username }}</a></span>
@@ -136,7 +136,7 @@ the console (samples, your own input, the run's result) and the one gold "Yubori
             <figcaption><i data-lucide="table-2" class="lu" aria-hidden="true"></i><span translate="no">{{ t.name }}</span><span class="text-mute">· {{ t.rows|length }} qator</span></figcaption>
             <div class="overflow-x-auto">
               <table class="ca-table">
-                <thead><tr>{% for name, type in t.columns %}<th translate="no">{{ name }}{% if type %} <span class="ca-sql-type">{{ type|lower }}</span>{% endif %}</th>{% endfor %}</tr></thead>
+                <thead><tr>{% for name, type in t.columns %}<th scope="col" translate="no">{{ name }}{% if type %} <span class="ca-sql-type">{{ type|lower }}</span>{% endif %}</th>{% endfor %}</tr></thead>
                 <tbody>{% for row in t.rows %}<tr>{% for v in row %}<td class="font-mono">{% if v is None %}<span class="text-mute">NULL</span>{% else %}{{ v }}{% endif %}</td>{% endfor %}</tr>{% endfor %}</tbody>
               </table>
             </div>
@@ -232,7 +232,7 @@ the console (samples, your own input, the run's result) and the one gold "Yubori
         <div class="flex flex-wrap items-center justify-between gap-2">
           <span class="text-sm"><i data-lucide="lock" class="lu mr-1.5 text-mute" aria-hidden="true"></i>{{ forloop.counter }}-maslahat{% if not solved %} · <span class="font-semibold text-warn">−{{ h.cost_pct }}%</span> ball{% else %} · bepul (yechilgan){% endif %}</span>
           {% if h.can_open and user.is_authenticated %}
-          <form method="post" action="{% url 'problems:hint' problem.slug h.pk %}"{% if not solved %} onsubmit="return confirm('Maslahatni ochasizmi? Masalani yechganingizda ballning {{ h.cost_pct }}% i ayriladi.');"{% endif %}>{% csrf_token %}
+          <form method="post" action="{% url 'problems:hint' problem.slug h.pk %}"{% if not solved %} data-confirm="Maslahatni ochasizmi? Masalani yechganingizda ballning {{ h.cost_pct }}% i ayriladi."{% endif %}>{% csrf_token %}
             <button class="ca-btn ca-btn-ghost !py-1 text-xs">Ochish</button>
           </form>
           {% endif %}
@@ -260,7 +260,7 @@ the console (samples, your own input, the run's result) and the one gold "Yubori
     <div class="ca-doc" id="doc-mine" role="tabpanel" aria-labelledby="tab-doc-mine" hidden>
       <div class="ca7-sec-h"><h2>Urinishlarim</h2><a class="ca-link" href="{% url 'submissions:mine' %}?mine=1">Barchasi</a></div>
       <table class="ca-table ca-table-flat">
-        <thead><tr><th>Natija</th><th class="hidden sm:table-cell">Til</th><th class="text-right">Vaqt</th><th class="text-right">Yuborilgan</th></tr></thead>
+        <thead><tr><th scope="col">Natija</th><th scope="col" class="hidden sm:table-cell">Til</th><th scope="col" class="text-right">Vaqt</th><th scope="col" class="text-right">Yuborilgan</th></tr></thead>
         <tbody>
         {% for s in my_subs %}
         <tr>
@@ -390,10 +390,12 @@ the console (samples, your own input, the run's result) and the one gold "Yubori
     </form>
   </section>
 </div>
+{% if has_math %}
 <link rel="stylesheet" href="{% static 'vendor/katex/katex.min.css' %}">
 <script defer src="{% static 'vendor/katex/katex.min.js' %}"></script>
 <script defer src="{% static 'vendor/katex/auto-render.min.js' %}"
         onload="renderMathInElement(document.querySelector('.ca-statement'), {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}], throwOnError: false})"></script>
+{% endif %}
 <script>
   (() => {
     const panes = document.getElementById("panes"), tabs = document.querySelectorAll("[data-pane-tab]");
@@ -797,8 +799,8 @@ resolves their bare imports so @codemirror/state loads once — two copies break
   fullBtn.addEventListener("click", () => setFull(!pane.classList.contains("ca-ed-full")));
   // Esc belongs to Vim when it is on; otherwise it leaves full screen.
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !prefs.vim && pane.classList.contains("ca-ed-full")) setFull(false); });
-  document.getElementById("editor-reset").addEventListener("click", () => {
-    if (view.state.doc.length && !confirm("Kod o‘chiriladi. Davom etasizmi? (Ctrl+Z bilan qaytarish mumkin)")) return;
+  document.getElementById("editor-reset").addEventListener("click", async () => {
+    if (view.state.doc.length && !(await window.caConfirm("Kod o‘chiriladi. Davom etasizmi? (Ctrl+Z bilan qaytarish mumkin)"))) return;
     view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: "" } });
     view.focus();
   });
@@ -834,7 +836,7 @@ resolves their bare imports so @codemirror/state loads once — two copies break
     const show = (html) => { out.hidden = false; if (empty) empty.hidden = true; out.innerHTML = html; window.caIcons?.(); window.caConsole?.("result"); };
     const HINT = { TLE: "Vaqt chegarasi oshdi.", MLE: "Xotira chegarasi oshdi.", OLE: "Chiqish hajmi chegarasi oshdi.",
                    RE: "Dastur xato bilan tugadi." };
-    const grid = (cols, rows) => `<div class="ca-sql-table overflow-x-auto"><table class="ca-table">${cols.length ? `<thead><tr>${cols.map((c) => `<th>${esc(c)}</th>`).join("")}</tr></thead>` : ""}<tbody>${
+    const grid = (cols, rows) => `<div class="ca-sql-table overflow-x-auto"><table class="ca-table">${cols.length ? `<thead><tr>${cols.map((c) => `<th scope="col">${esc(c)}</th>`).join("")}</tr></thead>` : ""}<tbody>${
       rows.length ? rows.map((row) => `<tr>${row.map((v) => `<td class="font-mono">${esc(v)}</td>`).join("")}</tr>`).join("") : '<tr><td class="text-mute">(bo‘sh natija)</td></tr>'}</tbody></table></div>`;
     function renderSql(r) {
       if (r.verdict === "RE" || r.verdict === "TLE") {
@@ -967,8 +969,8 @@ resolves their bare imports so @codemirror/state loads once — two copies break
 <script>
   // Practice: not policed like a contest, but copying an AI's answer teaches nothing. On Beginner
   // and Easy a long paste or drop into the editor is refused (a short one, like a sample line, is
-  // fine); on every level what the editor sees is sent to integrity:practice_event, which only
-  // feeds the teacher's "Mashq nazorati" report.
+  // fine; code you cut or copied in this editor may be pasted back); on every level what the editor
+  // sees is sent to integrity:practice_event, which feeds the staff's "Mashq nazorati" report.
   (function () {
     const editor = document.getElementById("editor");
     const guard = document.getElementById("ca-guard");
@@ -991,10 +993,15 @@ resolves their bare imports so @codemirror/state loads once — two copies break
     }
     report("view");
 
-    const LOCK_MSG = "Mashqda uzun kodni qo‘yib bo‘lmaydi — o‘zingiz yozing, shunda o‘rganasiz. Qisqa qator (40 belgigacha) qo‘yish mumkin.";
+    const LOCK_MSG = "Mashqda tashqaridan uzun kod qo‘yib bo‘lmaydi: o‘zingiz yozing, shunda o‘rganasiz. Qisqa qator (40 belgigacha) va shu muharrirdan olingan kodni qo‘yish mumkin.";
+    // Your own code, cut or copied in this editor, may come back by paste (moving a block, undoing a cut).
+    let own = "";
+    const keepOwn = () => { const t = String(window.getSelection() || ""); if (t) own = t; };
+    editor.addEventListener("copy", keepOwn, true);
+    editor.addEventListener("cut", keepOwn, true);
     editor.addEventListener("paste", (e) => {
       const text = e.clipboardData?.getData("text") || "";
-      if (text.length <= SHORT) return;
+      if (text.length <= SHORT || (own && text.replace(/\r\n/g, "\n") === own.replace(/\r\n/g, "\n"))) return;
       report("paste");
       if (locked) { e.preventDefault(); e.stopPropagation(); notify(LOCK_MSG); }
     }, true);
@@ -1052,7 +1059,7 @@ resolves their bare imports so @codemirror/state loads once — two copies break
     <ul class="mt-4 list-disc space-y-1.5 pl-5 text-sm text-mute">
       <li>Kodni <b class="text-ink">o‘zingiz yozasiz</b>. AI'ga masalani berib kod yozdirish yoki birovning yechimini ko‘chirish mumkin emas.</li>
       <li>Hujjatlar, maslahatlar (hint) va AI'dan mavzuni tushuntirishni so‘rash mumkin.</li>
-      <li>Kod qanday yozilgani qayd etiladi va adminlarga ko‘rinadi. Ko‘chirilgan yechim uchun ball berilmaydi, musobaqada esa diskvalifikatsiya qilinadi.</li>
+      <li>Kod qanday yozilgani qayd etiladi: muharrirdagi kod o‘zgarganda vaqti-vaqti bilan saqlab boriladi, qo‘yilgan matn va boshqa oynada o‘tkazilgan vaqt belgilanadi. Bu adminlarga ko‘rinadi. Ko‘chirilgan yechim uchun ball berilmaydi, musobaqada esa diskvalifikatsiya qilinadi.</li>
     </ul>
     <a class="ca-link mt-2 inline-block text-sm" href="{% url 'honor' %}" target="_blank" rel="noopener">Batafsil: halollik qoidalari</a>
     <label class="mt-4 flex items-start gap-2 text-sm"><input type="checkbox" id="ca-honor-ok" class="mt-1"> <span>Men yechimlarimni o‘zim yozaman va qoidalarga amal qilaman.</span></label>

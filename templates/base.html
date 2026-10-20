@@ -43,6 +43,10 @@
   <script src="{% static 'vendor/htmx.min.js' %}" defer></script>
   <script src="{% static 'js/celebrate.js' %}" defer></script>
   <script src="{% static 'js/forms.js' %}" defer></script>
+  <script src="{% static 'js/confirm.js' %}" defer></script>
+  <script src="{% static 'js/localtime.js' %}" defer></script>
+  <script src="{% static 'js/a11y.js' %}" defer></script>
+  {% if analytics_domain %}<script defer data-domain="{{ analytics_domain }}" src="{{ analytics_src }}"></script>{% endif %}
   <script>
     // <i data-lucide="name"> -> inline SVG, 1.5px stroke. Re-run after htmx swaps and any JS that
     // inserts icons; before the (deferred) icon script has loaded, DOMContentLoaded catches up.
@@ -60,6 +64,12 @@
 {% block band %}{% endblock %}
 <main id="main" class="{% block main_class %}ca-main{% endblock %}">
   {% if user.is_staff and request.resolver_match.namespace == "moderation" or user.is_staff and request.resolver_match.namespace == "integrity" %}<div class="ca7-admin">{% include "_mod_tabs.html" %}<div class="min-w-0">{% endif %}
+  {% if gate_nudge and request.resolver_match.url_name != "welcome" %}
+  <div class="ca-nudge" role="note">
+    <span>{% if gate_nudge.email_pending %}Emailingizni tasdiqlang: musobaqa va duellar shundan keyin ochiladi.{% else %}Musobaqa va duellar uchun to‘ldiring: {{ gate_nudge.missing|join:", "|lower }}.{% endif %}</span>
+    <a class="ca-btn ca-btn-soft" href="{% url 'welcome' %}">{% if gate_nudge.email_pending %}Tasdiqlash{% else %}To‘ldirish{% endif %}</a>
+  </div>
+  {% endif %}
   {% if messages %}
   <div class="mb-6 space-y-2" role="status" aria-live="polite">
     {% for m in messages %}

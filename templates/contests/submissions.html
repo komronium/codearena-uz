@@ -36,7 +36,7 @@ one problem here, and a row's handle or letter narrows the list to it.{% endcomm
   </div>
   <div class="ca-box-body">
   <table class="ca-table">
-    <thead><tr><th class="w-14 text-center">Masala</th><th>Natija</th><th class="w-48"><span class="sr-only">Amallar</span></th></tr></thead>
+    <thead><tr><th scope="col" class="w-14 text-center">Masala</th><th scope="col">Natija</th><th scope="col" class="w-48"><span class="sr-only">Amallar</span></th></tr></thead>
     <tbody>
     {% for x in participant.results %}
     <tr>
@@ -51,14 +51,14 @@ one problem here, and a row's handle or letter narrows the list to it.{% endcomm
       <td class="whitespace-nowrap text-right">
         <a class="ca-btn ca-btn-ghost !px-2 !py-1" href="{% url 'integrity:replay' contest.pk p.user_id x.cp.problem_id %}" title="Yozilishini ko‘rish" aria-label="Yozilishini ko‘rish: {{ x.cp.label }}"><i data-lucide="history" class="lu" aria-hidden="true"></i></a>
         {% if x.void or x.cell.solved or x.cell.wrong %}
-        <form method="post" action="{% url 'contests:void' contest.pk p.user_id %}" class="inline"{% if not x.void %} onsubmit="const s=prompt('{{ x.cp.label }} masalasi natijasini bekor qilish. Sabab (ixtiyoriy, faqat adminlar ko‘radi):',''); if(s===null) return false; this.reason.value=s;"{% endif %}>{% csrf_token %}
+        <form method="post" action="{% url 'contests:void' contest.pk p.user_id %}" class="inline"{% if not x.void %} data-confirm="{{ x.cp.label }} masalasi natijasini bekor qilish. Sabab (ixtiyoriy, faqat adminlar ko‘radi):" data-reason data-reason-default=""{% endif %}>{% csrf_token %}
           <input type="hidden" name="label" value="{{ x.cp.label }}"><input type="hidden" name="voided" value="{% if x.void %}0{% else %}1{% endif %}">
           <input type="hidden" name="reason" value=""><input type="hidden" name="next" value="{{ request.get_full_path }}">
           {% if x.void %}<button class="ca-btn ca-btn-ghost !py-1 text-xs"><i data-lucide="undo-2" class="lu" aria-hidden="true"></i>Tiklash</button>
           {% else %}<button class="ca-btn ca-btn-ghost !py-1 text-xs text-bad"><i data-lucide="ban" class="lu" aria-hidden="true"></i>Bekor qilish</button>{% endif %}
         </form>
         {% if not x.void %}
-        <form method="post" action="{% url 'contests:void' contest.pk p.user_id %}" class="inline" onsubmit="const s=prompt('{{ x.cp.label }} masalasi natijasini AI tufayli bekor qilish: xato urinish hisoblanadi va masala bloklanadi. Sabab (ixtiyoriy, faqat adminlar ko‘radi):','AI ishlatgan'); if(s===null) return false; this.reason.value=s;">{% csrf_token %}
+        <form method="post" action="{% url 'contests:void' contest.pk p.user_id %}" class="inline" data-confirm="{{ x.cp.label }} masalasi natijasini AI tufayli bekor qilish: xato urinish hisoblanadi va masala bloklanadi. Sabab (ixtiyoriy, faqat adminlar ko‘radi):" data-reason data-reason-default="AI ishlatgan">{% csrf_token %}
           <input type="hidden" name="label" value="{{ x.cp.label }}"><input type="hidden" name="voided" value="1"><input type="hidden" name="penalty" value="1">
           <input type="hidden" name="reason" value=""><input type="hidden" name="next" value="{{ request.get_full_path }}">
           <button class="ca-btn ca-btn-ghost !py-1 text-xs text-bad" title="AI tufayli: natija xato urinish sifatida qaytariladi va masala bloklanadi"><i data-lucide="bot" class="lu" aria-hidden="true"></i>AI</button>

@@ -585,6 +585,8 @@ def problem_detail(request, slug):
             "prev_problem": public.filter(id__lt=problem.id).order_by("-id").first(),
             "next_problem": public.filter(id__gt=problem.id).order_by("id").first(),
             "statement_html": _render_statement(problem.statement_md),
+            # KaTeX (300 KB) only for a statement that has a formula in it
+            "has_math": any("$" in (text or "") for text in (problem.statement_md, problem.input_md, problem.output_md)),
             "input_html": _render_statement(problem.input_md)
             if problem.input_md
             else "",

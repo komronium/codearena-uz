@@ -504,10 +504,22 @@ def _gated(**kw):
 def test_gate_sends_an_unconfirmed_user_to_the_welcome_page(client, settings):
     settings.ACCOUNT_GATE = True
     client.force_login(_gated(country=""))
-    r = client.get(reverse("problems:list"))
+    r = client.get(reverse("classroom:duels"))  # duels are behind the gate; practice and ratings are not
     assert r.status_code == 302 and r.url == reverse("welcome")
     page = client.get(reverse("welcome")).content.decode()
     assert "Hisobingizni yakunlang" in page and "davlat" in page
+
+
+@pytest.mark.django_db
+def test_gate_leaves_practice_open_with_a_reminder_and_walls_contest_writes(client, settings):
+    settings.ACCOUNT_GATE = True
+    client.force_login(_gated(country=""))
+    r = client.get(reverse("problems:list"))
+    assert r.status_code == 200 and "ca-nudge" in r.content.decode()
+    assert client.post(reverse("contests:register", args=[1])).status_code == 302  # joining a round asks first
+    # coming back from the gate leads to the page that was asked for
+    client.get(reverse("classroom:duels"))
+    assert client.session["gate_next"] == reverse("classroom:duels")
 
 
 @pytest.mark.django_db
@@ -757,3 +769,62 @@ def test_school_filter_is_independent_of_the_home_city(client):
     assert "Qarshi" in page and "Buxoro" in page  # both home cities are still offered
     r = client.get(reverse("rating"), {"country": "UZ", "city": "Qarshi", "school": "Osiyo xalqaro universiteti"})
     assert [u.username for u in r.context["users"]] == ["ali"]
+
+
+# ---- throttles, invite link, data export, inactive board (audit 2026-10) ----
+
+@pytest.mark.django_db
+def test_login_is_throttled_per_account_name(client):
+    User.objects.create_user("ali", password="right")
+    for _ in range(10):
+        client.post(reverse("login"), {"username": "ali", "password": "wrong"})
+    r = client.post(reverse("login"), {"username": "ali", "password": "right"})
+    assert r.status_code == 429 and "Juda ko‘p urinish" in r.content.decode()
+
+
+@pytest.mark.django_db
+def test_register_refuses_a_filled_honeypot_and_remembers_the_inviter(client):
+    boss = User.objects.create_user("boss", password="x")
+    r = client.post(reverse("register"), {"username": "bot", "email": "b@example.com", "first_name": "B",
+                                          "password1": "StrongPass123!", "website": "http://spam"})
+    assert r.status_code == 429 and not User.objects.filter(username="bot").exists()
+    client.get(reverse("home") + "?ref=boss")
+    client.post(reverse("register"), {"username": "vali", "email": "v@example.com", "first_name": "V",
+                                      "password1": "StrongPass123!"})
+    assert User.objects.get(username="vali").invited_by == boss
+
+
+@pytest.mark.django_db
+def test_export_gives_the_users_own_data_as_json(client):
+    u = User.objects.create_user("ali", password="x", first_name="Ali")
+    client.force_login(u)
+    r = client.get(reverse("export_data"))
+    assert r.status_code == 200 and "attachment" in r["Content-Disposition"]
+    assert r.json()["profile"]["username"] == "ali" and r.json()["submissions"] == []
+    client.logout()
+    assert client.get(reverse("export_data")).status_code == 302
+
+
+@pytest.mark.django_db
+def test_rating_board_drops_those_inactive_for_90_days(client):
+    from django.utils import timezone
+    from apps.contests.models import Contest, Participation
+    now = timezone.now()
+    old = Contest.objects.create(title="old", start=now - timezone.timedelta(days=130), end=now - timezone.timedelta(days=129), is_rated=True)
+    new = Contest.objects.create(title="new", start=now - timezone.timedelta(days=3), end=now - timezone.timedelta(days=2), is_rated=True)
+    stale, fresh = (User.objects.create_user(n, password="x", rating=1300) for n in ("stale", "fresh"))
+    Participation.objects.create(user=stale, contest=old, rating_before=0, rating_after=1300)
+    Participation.objects.create(user=fresh, contest=new, rating_before=0, rating_after=1300)
+    page = client.get(reverse("rating")).content.decode()
+    assert "fresh" in page and "stale" not in page
+
+
+def test_signed_filter_uses_a_real_minus():
+    from apps.problems.templatetags.numbers import signed
+    assert (signed(12), signed(-49), signed(0)) == ("+12", "\u221249", "0")
+
+
+@pytest.mark.django_db
+def test_healthz_answers_for_a_monitor(client):
+    r = client.get("/healthz")
+    assert r.status_code == 200 and r.json() == {"ok": True, "failed": []}

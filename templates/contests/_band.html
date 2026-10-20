@@ -19,7 +19,7 @@ and optionally problems, n_participants, next_cp (the first problem you have not
         </p>
         <h1 id="round-title">{{ contest.title }}</h1>
         <p class="ca7-bmeta tabular">
-          <span><i data-lucide="calendar" class="lu" aria-hidden="true"></i>{{ contest.start|date:"d.m.Y · H:i" }}–{% if contest.start|date:"Ymd" != contest.end|date:"Ymd" %}{{ contest.end|date:"d.m.Y H:i" }}{% else %}{{ contest.end|date:"H:i" }}{% endif %}</span>
+          <span><i data-lucide="calendar" class="lu" aria-hidden="true"></i>{{ contest.start|ztime:"d.m.Y · H:i" }}–{% if contest.start|date:"Ymd" != contest.end|date:"Ymd" %}{{ contest.end|ztime:"d.m.Y H:i" }}{% else %}{{ contest.end|ztime:"H:i" }}{% endif %}</span>
           <span><i data-lucide="hourglass" class="lu" aria-hidden="true"></i>{{ contest.duration_label }}</span>
           {% if problems %}<span><i data-lucide="list" class="lu" aria-hidden="true"></i>{{ problems|length }} masala</span>{% endif %}
           {% if n_participants is not None %}<span><i data-lucide="users" class="lu" aria-hidden="true"></i>{{ n_participants }} ishtirokchi</span>{% endif %}
@@ -29,7 +29,7 @@ and optionally problems, n_participants, next_cp (the first problem you have not
         {% if contest.has_ended and my_row and not my_row.disqualified %}
         <dl class="ca7-band-me">
           <div><dt>O‘rningiz</dt><dd class="tabular">{{ my_row.rank }}{% if n_participants %} <small>/ {{ n_participants }}</small>{% endif %}</dd></div>
-          {% if my_row.rating_delta is not None and my_participation.rating_after is not None %}<div><dt>Reyting</dt><dd class="tabular"><span class="{% if my_row.rating_delta >= 0 %}is-up{% else %}is-down{% endif %}">{{ my_row.rating_delta|stringformat:"+d" }}</span> → {{ my_participation.rating_after }}</dd></div>{% endif %}
+          {% if my_row.rating_delta is not None and my_participation.rating_after is not None %}<div><dt>Reyting</dt><dd class="tabular"><span class="{% if my_row.rating_delta >= 0 %}is-up{% else %}is-down{% endif %}">{{ my_row.rating_delta|signed }}</span> → {{ my_participation.rating_after }}</dd></div>{% endif %}
         </dl>
         {% endif %}
         {% if not contest.has_ended %}

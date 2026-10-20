@@ -44,13 +44,15 @@ TEMPLATES = [{
     "BACKEND": "django.template.backends.django.DjangoTemplates",
     "DIRS": [BASE_DIR / "templates"],
     "APP_DIRS": True,
-    "OPTIONS": {"context_processors": [
+    "OPTIONS": {"builtins": ["apps.problems.templatetags.numbers"], "context_processors": [
         "django.template.context_processors.request",
         "django.contrib.auth.context_processors.auth",
         "django.contrib.messages.context_processors.messages",
         "apps.problems.context_processors.streak",
         "apps.accounts.context_processors.tier_up",
         "apps.accounts.context_processors.new_badges",
+        "apps.accounts.context_processors.gate_nudge",
+        "apps.home.context_processors.analytics",
         "apps.accounts.notifications.bell",
         "apps.home.context_processors.nav",
     ]},
@@ -96,8 +98,15 @@ EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "1") == "1"
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@codearena.local")
 # Signed-in users fill in their profile and confirm their email before any page opens (apps.accounts.onboarding).
+# Visitor statistics (privacy-friendly, no cookies): set ANALYTICS_DOMAIN to the site's host to switch the script on.
+# ANALYTICS_SRC points at a self-hosted Plausible or Umami script if there is one.
+ANALYTICS_DOMAIN = os.environ.get("ANALYTICS_DOMAIN", "")
+ANALYTICS_SRC = os.environ.get("ANALYTICS_SRC", "https://plausible.io/js/script.js")
+
 # Needs working mail in production: set the EMAIL_* above first, or ACCOUNT_GATE=0 holds it off.
 ACCOUNT_GATE = os.environ.get("ACCOUNT_GATE", "1") == "1"
+# an avatar is checked at 2 MB in ProfileEditForm; larger uploads spill to disk instead of memory
+FILE_UPLOAD_MAX_MEMORY_SIZE = 2 * 1024 * 1024
 USERNAME_CHANGE_DAYS = 90  # a user may rename themselves once in this many days
 
 # Telegram Bot API: create the bot with @BotFather, then configure its webhook after deploy.

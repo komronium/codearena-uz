@@ -913,3 +913,27 @@ def test_a_name_from_the_hidden_ai_note_is_evidence(client, flag_contest, flag_p
     assert honest.pk not in ev and close.pk not in ev
     client.force_login(User.objects.create_user("boss", password="x", is_staff=True))
     assert "AI belgisi" in client.get(reverse("integrity:contest_report", args=[flag_contest.pk])).content.decode()
+
+
+@pytest.mark.django_db
+def test_report_and_appeal_reach_staff_who_close_them(client):
+    from .models import Report
+    now = timezone.now()
+    contest = Contest.objects.create(title="C", start=now - timezone.timedelta(hours=3), end=now - timezone.timedelta(hours=1))
+    ali, cheat = (User.objects.create_user(n, password="x") for n in ("ali", "cheat"))
+    boss = User.objects.create_user("boss", password="x", is_staff=True)
+    Participation.objects.create(user=ali, contest=contest)
+    client.force_login(ali)
+    post = lambda **kw: client.post(reverse("integrity:report"), {"next": "/", **kw})  # noqa: E731
+    assert post(kind="user", target="cheat", text="o‘z kodini boshqadan oldi").status_code == 302
+    post(kind="appeal", contest=contest.pk, text="menimcha, qaror noto‘g‘ri")
+    post(kind="appeal", contest=contest.pk + 99, text="bu musobaqada qatnashmaganman")  # not a participant: refused
+    assert Report.objects.count() == 2 and Report.objects.get(kind="user").target == cheat
+    assert client.get(reverse("integrity:reports")).status_code in (302, 403)  # staff only
+    client.force_login(boss)
+    page = client.get(reverse("integrity:reports")).content.decode()
+    assert "o‘z kodini boshqadan oldi" in page and "Apellyatsiya" in page
+    report = Report.objects.get(kind="user")
+    client.post(reverse("integrity:report_done", args=[report.pk]))
+    report.refresh_from_db()
+    assert report.done_by == boss

@@ -6,7 +6,7 @@ ticks (optional: the levels' thresholds under the bar, for the badges page).{% e
 <li class="ca-bt ca-t{{ b.tier }}{% if not b.tier %} is-locked{% endif %}"{% if b.earned_at %} title="{{ b.level_name }} · {{ b.earned_at|date:'d.m.Y' }}da olingan"{% endif %}>
   <span class="ca-bt-ico" aria-hidden="true"><i data-lucide="{{ b.icon }}" class="lu"></i></span>
   <div class="ca-bt-main">
-    <p class="ca-bt-head"><b>{{ b.name }}</b><span class="ca-bt-lv">{% if b.tier %}{{ b.level_name }}{% else %}—{% endif %}</span></p>
+    <p class="ca-bt-head"><b>{{ b.name }}</b><span class="ca-bt-lv">{% if b.tier %}{{ b.level_name }}{% else %}Hali olinmagan{% endif %}</span></p>
     <span class="ca-bt-bar" role="img" aria-label="{{ b.tier }} / {{ b.max }} daraja">{% for p in b.segs %}<i style="--p: {{ p }}%"></i>{% endfor %}</span>
     {% if ticks %}<span class="ca-bt-ticks" aria-hidden="true">{% for l in ticks %}<span title="{{ l.metal|capfirst }}{% if l.pct %} · o‘yinchilarning {{ l.pct }}% ida bor{% endif %}">{{ l.at }}</span>{% endfor %}</span>{% endif %}
     <small>{% if owner and b.next %}{{ b.next.text }}{% elif owner and b.tier %}Eng yuqori daraja olingan{% elif b.tier %}{{ b.sub }}{% else %}{{ b.next.text }}{% endif %}</small>

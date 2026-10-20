@@ -7,6 +7,7 @@
   {% include "registration/_auth_brand.html" %}
   <form method="post" novalidate class="ca-panel ca-auth-card space-y-3">{% csrf_token %}
     {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+    <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" class="sr-only" value="">
     <div>
       <h1 class="text-xl font-bold">Ro‘yxatdan o‘tish</h1>
       <p class="mt-1 text-sm text-mute">Bir daqiqa — va masalalar sizniki.</p>

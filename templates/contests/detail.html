@@ -14,17 +14,18 @@ it is scored, virtual participation.{% endcomment %}
   {% if contest.has_ended and leaders and not leaders_any %}
   <section aria-labelledby="final-title">
     <div class="ca7-sec-h"><h2 id="final-title">Yakuniy natijalar</h2><a class="ca-link" href="{% url 'contests:standings' contest.pk %}">To‘liq jadval</a></div>
-    <p class="ca7-empty"><b>Bu raundda hech kim masala yechmadi</b>Ball hech kimda yo‘q. Masalalar ro‘yxatidan ularni o‘zingiz sinab ko‘rishingiz mumkin.</p>
+    <p class="ca7-empty"><b>Bu raundda hech kim masala yechmadi</b>Ball hech kimda yo‘q. Masalalarni o‘zingiz sinab ko‘rishingiz mumkin.</p>
+    <p class="mt-3"><a class="ca-btn ca-btn-gold" href="#contest-problems">Masalalarni sinab ko‘rish</a></p>
   </section>
   {% elif contest.has_ended and leaders %}
   <section aria-labelledby="final-title">
     <div class="ca7-sec-h"><h2 id="final-title">Yakuniy natijalar</h2><a class="ca-link" href="{% url 'contests:standings' contest.pk %}">To‘liq jadval</a></div>
     <table class="ca-table ca-table-flat">
       <thead><tr>
-        <th class="w-16 text-center">O‘rin</th><th>Ishtirokchi</th>
-        <th class="w-24 text-right">{% if contest.type == "icpc" %}Yechildi{% else %}Ball{% endif %}</th>
-        {% if contest.wrong_try_minutes is not None %}<th class="w-24 text-right">Jarima</th>{% else %}<th class="w-24 text-right">Yechilgan</th>{% endif %}
-        {% if contest.rating_applied %}<th class="w-24 text-right">Reyting</th>{% endif %}
+        <th scope="col" class="w-16 text-center">O‘rin</th><th scope="col">Ishtirokchi</th>
+        <th scope="col" class="w-24 text-right">{% if contest.type == "icpc" %}Yechildi{% else %}Ball{% endif %}</th>
+        {% if contest.wrong_try_minutes is not None %}<th scope="col" class="w-24 text-right">Jarima</th>{% else %}<th scope="col" class="w-24 text-right">Yechilgan</th>{% endif %}
+        {% if contest.rating_applied %}<th scope="col" class="w-24 text-right">Reyting</th>{% endif %}
       </tr></thead>
       <tbody>
       {% for r in leaders %}
@@ -33,7 +34,7 @@ it is scored, virtual participation.{% endcomment %}
         <td>{% if r.user == user %}{% include "accounts/_u7.html" with u=r.user you=True %}{% else %}{% include "accounts/_u7.html" with u=r.user you=False %}{% endif %}</td>
         <td class="text-right font-semibold tabular">{% if contest.type == "icpc" %}{{ r.solved }}{% else %}{{ r.score }}{% endif %}</td>
         <td class="text-right tabular text-mute">{% if contest.wrong_try_minutes is not None %}{{ r.penalty }}{% else %}{{ r.solved }}{% endif %}</td>
-        {% if contest.rating_applied %}<td class="text-right font-semibold tabular{% if r.rating_delta > 0 %} text-ok{% elif r.rating_delta < 0 %} text-bad{% else %} text-mute{% endif %}">{% if r.rating_delta is not None %}{{ r.rating_delta|stringformat:"+d" }}{% endif %}</td>{% endif %}
+        {% if contest.rating_applied %}<td class="text-right font-semibold tabular{% if r.rating_delta > 0 %} text-ok{% elif r.rating_delta < 0 %} text-bad{% else %} text-mute{% endif %}">{% if r.rating_delta is not None %}{{ r.rating_delta|signed }}{% endif %}</td>{% endif %}
       </tr>
       {% endfor %}
       </tbody>
@@ -69,8 +70,8 @@ it is scored, virtual participation.{% endcomment %}
       <p class="ca-personal-clock"><span>Qolgan vaqt</span><b class="tabular" role="timer" data-countdown="{{ personal.end|date:'c' }}" data-label="" data-suffix="1"></b></p>
       <p class="text-sm text-mute">Vaqt tugagach yuborish yopiladi. Natijalar jadvali musobaqa tugagach ochiladi.</p>
       {% elif personal.state == "ready" %}
-      <p>Musobaqa {{ contest.end|date:"d.m.Y H:i" }} gacha ochiq, lekin <b>sizga {{ personal.minutes }} daqiqa</b> beriladi: «Boshlash»ni bosgan paytdan hisoblanadi. Masalalar shundan keyin ochiladi. Soatni to‘xtatib yoki qayta boshlab bo‘lmaydi.</p>
-      <form method="post" action="{% url 'contests:begin' contest.pk %}" class="mt-3" onsubmit="return confirm('{{ personal.minutes }} daqiqalik vaqtingiz hozir boshlanadi va to‘xtamaydi. Boshlaymizmi?');">{% csrf_token %}
+      <p>Musobaqa {{ contest.end|ztime:"d.m.Y H:i" }} gacha ochiq, lekin <b>sizga {{ personal.minutes }} daqiqa</b> beriladi: «Boshlash»ni bosgan paytdan hisoblanadi. Masalalar shundan keyin ochiladi. Soatni to‘xtatib yoki qayta boshlab bo‘lmaydi.</p>
+      <form method="post" action="{% url 'contests:begin' contest.pk %}" class="mt-3" data-confirm="{{ personal.minutes }} daqiqalik vaqtingiz hozir boshlanadi va to‘xtamaydi. Boshlaymizmi?">{% csrf_token %}
         <button class="ca-btn ca-btn-gold"><i data-lucide="play" class="lu" aria-hidden="true"></i>Boshlash</button>
       </form>
       {% elif personal.state == "over" %}
@@ -78,7 +79,7 @@ it is scored, virtual participation.{% endcomment %}
       {% elif personal.state == "join" %}
       <p>Qatnashish uchun avval yoziling, keyin «Boshlash» tugmasi chiqadi. Sizga {{ personal.minutes }} daqiqa beriladi.</p>
       {% else %}
-      <p>Musobaqa {{ contest.start|date:"d.m.Y H:i" }} da ochiladi. Har bir ishtirokchiga {{ personal.minutes }} daqiqa beriladi: istalgan paytda boshlaysiz, oxirigacha {{ contest.end|date:"d.m.Y H:i" }}.</p>
+      <p>Musobaqa {{ contest.start|ztime:"d.m.Y H:i" }} da ochiladi. Har bir ishtirokchiga {{ personal.minutes }} daqiqa beriladi: istalgan paytda boshlaysiz, oxirigacha {{ contest.end|ztime:"d.m.Y H:i" }}.</p>
       {% endif %}
     </div>
   </section>
@@ -103,12 +104,12 @@ it is scored, virtual participation.{% endcomment %}
     <div class="overflow-x-auto">
     <table class="ca-table ca-table-flat">
       <thead><tr>
-        <th class="w-12"><span class="sr-only">Harf</span></th><th>Masala</th>
-        <th class="hidden w-28 md:table-cell">Qiyinlik</th>
-        <th class="hidden w-32 lg:table-cell">Cheklov</th>
-        {% if contest.type != "icpc" %}<th class="w-24 text-right"{% if contest.type == "cf" %} title="To‘liq baho; vaqt o‘tishi bilan kamayadi"{% endif %}>Ball</th>{% endif %}
-        <th class="w-28 text-right">{% if contest.has_started %}Yechdi / urindi{% else %}Yechganlar{% endif %}</th>
-        {% if my_row %}<th class="w-28 text-right">Holatingiz</th>{% endif %}
+        <th scope="col" class="w-12"><span class="sr-only">Harf</span></th><th scope="col">Masala</th>
+        <th scope="col" class="hidden w-28 md:table-cell">Qiyinlik</th>
+        <th scope="col" class="hidden w-32 lg:table-cell">Cheklov</th>
+        {% if contest.type != "icpc" %}<th scope="col" class="w-24 text-right"{% if contest.type == "cf" %} title="To‘liq baho; vaqt o‘tishi bilan kamayadi"{% endif %}>Ball</th>{% endif %}
+        <th scope="col" class="w-28 text-right">{% if contest.has_started %}Yechdi / urindi{% else %}Yechganlar{% endif %}</th>
+        {% if my_row %}<th scope="col" class="w-28 text-right">Holatingiz</th>{% endif %}
       </tr></thead>
       <tbody>
       {% for cp in problems %}
@@ -161,7 +162,7 @@ it is scored, virtual participation.{% endcomment %}
       <dl class="ca-stat-tiles">
         <div><dt>O‘rin</dt><dd>{% if my_row.disqualified or not my_row.solved and contest.is_running %}—{% else %}{{ my_row.rank }}{% endif %}<small>/ {{ n_participants }}</small></dd></div>
         <div><dt>{% if contest.type == "icpc" %}Yechildi{% else %}Ball{% endif %}</dt><dd>{% if contest.type == "icpc" %}{{ my_row.solved }}{% else %}{{ my_row.score }}{% endif %}</dd></div>
-        {% if my_row.rating_delta is not None %}<div><dt>Reyting</dt><dd class="{% if my_row.rating_delta > 0 %}text-ok{% elif my_row.rating_delta < 0 %}text-bad{% endif %}">{{ my_row.rating_delta|stringformat:"+d" }}</dd></div>
+        {% if my_row.rating_delta is not None %}<div><dt>Reyting</dt><dd class="{% if my_row.rating_delta > 0 %}text-ok{% elif my_row.rating_delta < 0 %}text-bad{% endif %}">{{ my_row.rating_delta|signed }}</dd></div>
         {% elif contest.wrong_try_minutes is not None %}<div><dt>Jarima</dt><dd>{{ my_row.penalty }}</dd></div>
         {% else %}<div><dt>Yechilgan</dt><dd>{{ my_row.solved }}<small>/ {{ problems|length }}</small></dd></div>{% endif %}
       </dl>
@@ -177,7 +178,7 @@ it is scored, virtual participation.{% endcomment %}
   <section class="ca-box" aria-labelledby="lead-title">
     <div class="ca-box-cap ca-hd"><h2 id="lead-title">Natijalar</h2><a class="ca-box-tools ca-link" href="{% url 'contests:standings' contest.pk %}">To‘liq jadval</a></div>
     <table class="ca-table ca7-top">
-      <thead><tr><th class="w-10 text-center">#</th><th>Ishtirokchi</th><th class="text-right">{% if contest.type == "icpc" %}Yechildi{% else %}Ball{% endif %}</th></tr></thead>
+      <thead><tr><th scope="col" class="w-10 text-center">#</th><th scope="col">Ishtirokchi</th><th scope="col" class="text-right">{% if contest.type == "icpc" %}Yechildi{% else %}Ball{% endif %}</th></tr></thead>
       <tbody>
       {% for r in leaders|slice:":5" %}
       <tr{% if r.user == user %} class="ca-row-me"{% endif %}><td class="text-center">{% if r.rank <= 3 and r.solved %}<span class="ca7-medal m{{ r.rank }}">{{ r.rank }}</span>{% elif r.score or r.solved %}<span class="tabular text-mute">{{ r.rank }}</span>{% else %}<span class="text-mute" title="Hali ball yo‘q">—</span>{% endif %}</td>
@@ -202,7 +203,7 @@ it is scored, virtual participation.{% endcomment %}
   <section class="ca-box" aria-labelledby="who-title">
     <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="users" class="lu" aria-hidden="true"></i></span><h2 id="who-title">Ro‘yxatdan o‘tganlar<small class="ca-box-tools">{{ n_participants }}</small></h2></div>
     <div class="ca-box-body ca-box-pad">
-      <p class="ca-faces">{% for u in registrants %}<a class="ca-avatar h-8 w-8 text-xs{% if not u.avatar %} ca-art-{{ u.rating|tier_slug }}{% endif %}" style="--tier: {{ u.rating|tier_color }}" href="{% url 'profile' u.username %}" title="{{ u.username }}" translate="no">{% if u.avatar %}<img src="{{ u.avatar.url }}" alt="">{% else %}{{ u.username|first }}{% endif %}</a>{% endfor %}{% if n_participants > 8 %}<span>+{{ n_participants|add:"-8" }}</span>{% endif %}</p>
+      <p class="ca-faces">{% for u in registrants %}<a class="ca-avatar h-8 w-8 text-xs{% if not u.avatar %} ca-art-{{ u.rating|tier_slug }}{% endif %}" style="--tier: {{ u.rating|tier_color }}" href="{% url 'profile' u.username %}" title="{{ u.username }}" translate="no">{% if u.avatar %}<img src="{{ u.avatar.url }}" alt="" width="32" height="32" loading="lazy" decoding="async">{% else %}{{ u.username|first }}{% endif %}</a>{% endfor %}{% if n_participants > 8 %}<span>+{{ n_participants|add:"-8" }}</span>{% endif %}</p>
       <p class="mt-2.5 text-xs text-mute">«Google Kalendarga qo‘shish» bilan saqlasangiz, Google Kalendar sizning odatdagi eslatmangiz bilan eslatadi.</p>
     </div>
   </section>
@@ -224,7 +225,7 @@ it is scored, virtual participation.{% endcomment %}
   {% elif can_virtual %}
   <section class="ca-box" aria-labelledby="virtual-title">
     <div class="ca-box-cap ca-hd"><span class="ca-hd-icon"><i data-lucide="rewind" class="lu" aria-hidden="true"></i></span><h2 id="virtual-title">Virtual ishtirok</h2></div>
-    <form method="post" action="{% url 'contests:virtual' contest.pk %}" class="ca-box-body ca-box-pad" onsubmit="return confirm('Virtual ishtirok hozir boshlanadi va {{ contest.duration_label }} davom etadi. Boshlaysizmi?');">{% csrf_token %}
+    <form method="post" action="{% url 'contests:virtual' contest.pk %}" class="ca-box-body ca-box-pad" data-confirm="Virtual ishtirok hozir boshlanadi va {{ contest.duration_label }} davom etadi. Boshlaysizmi?">{% csrf_token %}
       <p class="text-mute">Musobaqani o‘z vaqtingizda, xuddi jonli kabi ishlang va haqiqiy ishtirokchilar orasida qaysi o‘rinda bo‘lishingizni ko‘ring. Reytingga ta’sir qilmaydi.</p>
       <button class="ca-btn ca-btn-primary mt-3"><i data-lucide="rewind" class="lu" aria-hidden="true"></i>Boshlash</button>
     </form>

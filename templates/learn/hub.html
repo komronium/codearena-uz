@@ -9,7 +9,7 @@ progress or where it stands).{% endcomment %}
   <div class="ca-hud-in">
     <div>
       <h1 id="learn-title">O‘rganish</h1>
-      <p class="ca-hud-sub">Har kurs bitta mavzu: qisqa nazariya, keyin osonidan qiyinga masalalar.</p>
+      <p class="ca-hud-sub">Har kurs bitta mavzu: qisqa nazariya, keyin osonidan qiyinga masalalar.{% if soon %} Yana {{ soon|length }} ta kurs tayyorlanmoqda.{% endif %}</p>
     </div>
     {% if stages %}<label class="ca7-hsearch ml-auto"><span class="sr-only">Kurslarni filtrlash</span><i data-lucide="search" class="lu" aria-hidden="true"></i><input type="search" id="course-filter" placeholder="Kurs yoki mavzu…" autocomplete="off" spellcheck="false"></label>{% endif %}
   </div>

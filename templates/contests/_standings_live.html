@@ -14,25 +14,25 @@ a grey −N, accepted / tried per problem last. Codeforces rules have no penalty
   {% else %}<span><b class="tabular">{{ my_row.rank }}-o‘rin</b> <span class="text-mute tabular">/ {{ rows|length }}</span></span>{% endif %}
   <span>{% if contest.type == "icpc" %}<b class="tabular">{{ my_row.solved }}</b> ta masala{% else %}<b class="tabular">{{ my_row.score }}</b> ball{% endif %}{% if contest.wrong_try_minutes is not None %} · jarima <b class="tabular">{{ my_row.penalty }}</b>{% endif %}</span>
   <span class="ca-st-mine-cells">{% for cell in my_row.cells %}{% with cp=problems|slice:forloop.counter|last %}{% if cell.solved %}<span><b>{{ cp.label }}</b> yechildi <span class="text-mute tabular">{{ cell.time }}</span></span>{% elif cell.wrong %}<span><b>{{ cp.label }}</b> masalada {{ cell.wrong }} ta noto‘g‘ri urinish</span>{% endif %}{% endwith %}{% endfor %}</span>
-  {% if my_row.rating_delta is not None and my_participation.rating_after is not None %}<span class="ml-auto">Reyting <b class="tabular {% if my_row.rating_delta >= 0 %}text-ok{% else %}text-bad{% endif %}">{{ my_row.rating_delta|stringformat:"+d" }}</b> → <b class="tabular text-accent">{{ my_participation.rating_after }}</b></span>{% endif %}
+  {% if my_row.rating_delta is not None and my_participation.rating_after is not None %}<span class="ml-auto">Reyting <b class="tabular {% if my_row.rating_delta >= 0 %}text-ok{% else %}text-bad{% endif %}">{{ my_row.rating_delta|signed }}</b> → <b class="tabular text-accent">{{ my_participation.rating_after }}</b></span>{% endif %}
 </div>
 {% endif %}
 <div class="ca-st-wrap overflow-x-auto" id="st-scroll" tabindex="0" aria-label="Natijalar jadvali (gorizontal suriladi)">
 <table class="ca-standings">
   <thead>
     <tr>
-      <th class="ca-sticky ca-sticky-rank">#</th>
-      <th class="ca-sticky ca-sticky-user !text-left">Ishtirokchi</th>
-      <th title="{% if contest.type == 'icpc' %}Yechilgan masalalar{% else %}Jami ball{% endif %}">{% if contest.type == 'icpc' %}Yechildi{% else %}Ball{% endif %}</th>
-      {% if contest.wrong_try_minutes is not None %}<th title="AC daqiqasi + {{ contest.wrong_try_minutes }} × noto‘g‘ri urinish (yechilgan masalalar bo‘yicha)">Jarima</th>{% endif %}
+      <th scope="col" class="ca-sticky ca-sticky-rank">#</th>
+      <th scope="col" class="ca-sticky ca-sticky-user !text-left">Ishtirokchi</th>
+      <th scope="col" title="{% if contest.type == 'icpc' %}Yechilgan masalalar{% else %}Jami ball{% endif %}">{% if contest.type == 'icpc' %}Yechildi{% else %}Ball{% endif %}</th>
+      {% if contest.wrong_try_minutes is not None %}<th scope="col" title="AC daqiqasi + {{ contest.wrong_try_minutes }} × noto‘g‘ri urinish (yechilgan masalalar bo‘yicha)">Jarima</th>{% endif %}
       {% for cp in problems %}
-      <th class="ca-st-prob">
+      <th scope="col" class="ca-st-prob">
         {% if contest.has_started and registered or contest.has_ended or contest.has_started and user.is_staff %}<a class="ca-st-label" href="{% url 'problems:detail' cp.problem.slug %}" title="{{ cp.problem.title }}">{{ cp.label }}</a>{% else %}<span class="ca-st-label">{{ cp.label }}</span>{% endif %}
         {% if contest.type != "icpc" %}<span class="ca-st-sub tabular">{{ cp.points }}</span>{% endif %}
       </th>
       {% endfor %}
-      {% if contest.rating_applied %}<th class="whitespace-nowrap" title="Reyting o‘zgarishi">Reyting ±</th>{% endif %}
-      {% if user.is_staff %}<th class="w-10"><span class="sr-only">Amal</span></th>{% endif %}
+      {% if contest.rating_applied %}<th scope="col" class="whitespace-nowrap" title="Reyting o‘zgarishi">Reyting ±</th>{% endif %}
+      {% if user.is_staff %}<th scope="col" class="w-10"><span class="sr-only">Amal</span></th>{% endif %}
     </tr>
   </thead>
   <tbody>
@@ -61,11 +61,11 @@ a grey −N, accepted / tried per problem last. Codeforces rules have no penalty
     </td>
     {% endfor %}
     {% if contest.rating_applied %}
-    <td class="tabular">{% if r.rating_delta is not None %}<span class="{% if r.rating_delta > 0 %}text-ok{% elif r.rating_delta < 0 %}text-mute{% endif %} font-semibold" title="{{ r.participation.rating_before }} → {{ r.participation.rating_after }}">{{ r.rating_delta|stringformat:"+d" }}</span>{% endif %}</td>
+    <td class="tabular">{% if r.rating_delta is not None %}<span class="{% if r.rating_delta > 0 %}text-ok{% elif r.rating_delta < 0 %}text-bad{% endif %} font-semibold" title="{{ r.participation.rating_before }} → {{ r.participation.rating_after }}">{{ r.rating_delta|signed }}</span>{% endif %}</td>
     {% endif %}
     {% if user.is_staff %}
     <td>
-      <form method="post" action="{% url 'contests:disqualify' contest.pk r.user.pk %}" {% if not r.disqualified %}onsubmit="const s=prompt('Diskvalifikatsiya sababi (ixtiyoriy):',''); if(s===null) return false; this.reason.value=s;"{% endif %}>{% csrf_token %}
+      <form method="post" action="{% url 'contests:disqualify' contest.pk r.user.pk %}" {% if not r.disqualified %}data-confirm="Diskvalifikatsiya sababi (ixtiyoriy):" data-reason data-reason-default=""{% endif %}>{% csrf_token %}
         <input type="hidden" name="reason" value=""><input type="hidden" name="disqualified" value="{% if r.disqualified %}0{% else %}1{% endif %}">
         <button class="ca-st-action" title="{% if r.disqualified %}Diskvalifikatsiyani bekor qilish{% else %}Diskvalifikatsiya qilish{% endif %}" aria-label="{% if r.disqualified %}Diskvalifikatsiyani bekor qilish{% else %}Diskvalifikatsiya qilish{% endif %}: {{ r.user.username }}">
           <i data-lucide="{% if r.disqualified %}undo-2{% else %}ban{% endif %}" class="lu" aria-hidden="true"></i>

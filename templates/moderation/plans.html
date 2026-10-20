@@ -24,7 +24,7 @@
     </div>
     <div class="ca-row-side">
       <a href="{% url 'moderation:plan_edit' p.pk %}" class="ca-btn ca-btn-ghost !px-2 !py-1.5" title="Tahrirlash" aria-label="Tahrirlash: {{ p.title }}"><i data-lucide="pencil" class="lu" aria-hidden="true"></i></a>
-      <form method="post" action="{% url 'moderation:plan_delete' p.pk %}" onsubmit="return confirm('«{{ p.title|escapejs }}» kursi o‘chiriladi. Masalalar va teglar o‘chmaydi. Davom etasizmi?');">{% csrf_token %}
+      <form method="post" action="{% url 'moderation:plan_delete' p.pk %}" data-confirm="«{{ p.title }}» kursi o‘chiriladi. Masalalar va teglar o‘chmaydi. Davom etasizmi?">{% csrf_token %}
         <button class="ca-btn ca-btn-ghost !px-2 !py-1.5 text-bad" title="O‘chirish" aria-label="O‘chirish: {{ p.title }}"><i data-lucide="trash-2" class="lu" aria-hidden="true"></i></button>
       </form>
     </div>

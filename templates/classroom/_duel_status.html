@@ -4,9 +4,10 @@
   <span class="ca-dres-ico" aria-hidden="true"><i data-lucide="{% if result.state == 'win' %}trophy{% elif result.state == 'loss' %}shield{% else %}handshake{% endif %}" class="lu"></i></span>
   <div class="min-w-0">
     <p class="ca-dres-title">{% if result.state == "win" %}G‘alaba!{% elif result.state == "loss" %}Mag‘lubiyat{% else %}Durang{% endif %}</p>
-    <p class="ca-dres-sub"><b class="tabular">{{ result.mine }} : {{ result.theirs }}</b>{% if result.other %} — {{ result.other.username }} bilan{% endif %} · duel reytingi <b class="tabular ca-dres-delta" data-delta="{{ result.delta }}">{{ result.delta|stringformat:"+d" }}</b></p>
+    <p class="ca-dres-sub"><b class="tabular">{{ result.mine }} : {{ result.theirs }}</b>{% if result.other %} — {{ result.other.username }} bilan{% endif %} · duel reytingi <b class="tabular ca-dres-delta" data-delta="{{ result.delta }}">{{ result.delta|signed }}</b></p>
   </div>
   <div class="ca-dres-go">
+    {% if review %}<a class="ca-btn ca-btn-soft" href="#review-title"><i data-lucide="list-checks" class="lu" aria-hidden="true"></i>Savollarni ko‘rish</a>{% endif %}
     <button type="button" class="ca-btn ca-btn-ghost" data-copy-text="CodeArena duel: {% if result.state == 'win' %}{{ user.username }} {{ result.other.username }} ustidan {{ result.mine }}:{{ result.theirs }} hisobida g‘alaba qozondi{% elif result.state == 'loss' %}{{ result.other.username }} {{ user.username }} ustidan {{ result.theirs }}:{{ result.mine }} hisobida g‘alaba qozondi{% else %}{{ user.username }} va {{ result.other.username }} durang qildi, {{ result.mine }}:{{ result.theirs }}{% endif %}. Siz ham sinab ko‘ring: {{ request.scheme }}://{{ request.get_host }}{% url 'classroom:duels' %}"><i data-lucide="copy" class="lu" aria-hidden="true"></i><span data-copy-label>Natijani nusxalash</span></button>
     {% if result.offer %}
     <form method="post" action="{% url 'classroom:duel_answer' result.offer.pk %}">{% csrf_token %}<input type="hidden" name="accept" value="1"><button class="ca-btn ca-btn-gold"><i data-lucide="swords" class="lu" aria-hidden="true"></i>{{ result.other.username }} revansh so‘radi — qabul qilish</button></form>
@@ -26,7 +27,7 @@ per_question, n_questions, expires, user. A coding duel from before the quiz sho
     <span class="ca-avatar h-11 w-11 shrink-0 text-lg ca-art-{{ p.user.rating|tier_slug }}" style="--tier: {{ p.user.rating|tier_color }}" aria-hidden="true">{{ p.user.username|first }}</span>
     <div class="min-w-0 flex-1">
       <p class="truncate font-semibold">{{ p.user.username }}{% if p.user == user %} <span class="text-xs font-normal text-mute">(siz)</span>{% endif %}</p>
-      <p class="text-xs text-mute">Duel reytingi <b class="text-ink">{{ p.user.duel_rating }}</b>{% if p.delta is not None %} <span class="font-semibold {% if p.delta > 0 %}text-ok{% elif p.delta < 0 %}text-bad{% endif %}">{{ p.delta|stringformat:"+d" }}</span>{% endif %}</p>
+      <p class="text-xs text-mute">Duel reytingi <b class="text-ink">{{ p.user.duel_rating }}</b>{% if p.delta is not None %} <span class="font-semibold {% if p.delta > 0 %}text-ok{% elif p.delta < 0 %}text-bad{% endif %}">{{ p.delta|signed }}</span>{% endif %}</p>
       {% if duel.mode == "quiz" %}
       <p class="mt-1.5 text-sm">
         {% if p.over %}<b class="tabular text-ink">{{ p.right }}/{{ n_questions }}</b> to‘g‘ri
@@ -34,7 +35,7 @@ per_question, n_questions, expires, user. A coding duel from before the quiz sho
         {% else %}<span class="text-mute">Hali boshlamadi</span>{% endif %}
       </p>
       {% if p.run %}<ol class="ca-quiz-steps mt-2" aria-label="{{ p.user.username }}ning javoblari">
-        {% for c in p.cells %}<li class="{% if c.state %}is-{{ c.state }}{% endif %}" title="{{ forloop.counter }}-savol"><span class="sr-only">{{ forloop.counter }}-savol: {% if c.state == "ok" %}to‘g‘ri{% elif c.state == "bad" %}noto‘g‘ri{% elif c.state == "now" %}javob kutilmoqda{% else %}hali yo‘q{% endif %}</span></li>{% endfor %}
+        {% for c in p.cells %}<li class="{% if c.state %}is-{{ c.state }}{% endif %}" title="{{ forloop.counter }}-savol"><span class="sr-only">{{ forloop.counter }}-savol: {% if c.state == "ok" %}to‘g‘ri{% elif c.state == "bad" %}noto‘g‘ri{% elif c.state == "now" %}javob kutilmoqda{% elif c.state == "skip" %}javob berilmadi{% else %}hali yo‘q{% endif %}</span></li>{% endfor %}
       </ol>{% endif %}
       {% endif %}
     </div>

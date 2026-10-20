@@ -26,7 +26,19 @@ if os.environ.get("USE_HTTPS", "0") == "1":
     MIDDLEWARE.insert(0, "config.middleware.real_client_ip")
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+    # HSTS: set HSTS_SECONDS (e.g. 31536000) in .env once every subdomain is on HTTPS; 0 leaves it off.
+    SECURE_HSTS_SECONDS = int(os.environ.get("HSTS_SECONDS", "0"))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = False
 
 # Reuse DB connections across requests: with gthread every request would otherwise
 # open a fresh Postgres connection, which dominates the 1s status-poll cost.
 DATABASES["default"]["CONN_MAX_AGE"] = 60  # noqa: F405
+
+# Error tracking: set SENTRY_DSN (and install sentry-sdk) to send unhandled errors to Sentry; unset, nothing happens.
+if os.environ.get("SENTRY_DSN"):
+    try:
+        import sentry_sdk
+
+        sentry_sdk.init(dsn=os.environ["SENTRY_DSN"], traces_sample_rate=0.0, send_default_pii=False)
+    except ImportError:
+        pass

@@ -73,6 +73,9 @@ def _live(user, running) -> dict | None:
 
 
 def home(request):
+    ref = request.GET.get("ref", "").strip()[:150]
+    if ref and not request.user.is_authenticated:
+        request.session["ref"] = ref  # an invite link: remembered until they sign up (accounts.views.register)
     now = timezone.now()
     daily = daily_for()
     contests = Contest.objects.annotate(n_participants=Count("participations"))  # contests/_row.html shows it
@@ -142,7 +145,7 @@ def home(request):
 # and students' photos stay out of image search
 _NOT_FOR_CRAWLERS = ["/moderation/", "/integrity/", "/submissions/", "/classroom/", "/django-rq/",
                      "/accounts/profile/edit/", "/accounts/password-", "/accounts/reset/", "/accounts/verify/",
-                     "/accounts/logout/", "/accounts/teacher-request/", "/problems/suggest/", "/learn/search/",
+                     "/accounts/logout/", "/problems/suggest/", "/learn/search/",
                      "/media/avatars/"]
 # a list's search, sorting, own-progress filter and random pick: endless addresses for the one list
 # (its tag and level filters stay open; their canonical URL folds them into the list)
@@ -154,6 +157,28 @@ def robots_txt(request):
              *(f"Disallow: /*{sep}{param}=" for param in _LIST_PARAMS for sep in "?&"),
              "", f"Sitemap: {request.build_absolute_uri(reverse('sitemap'))}"]
     return HttpResponse("\n".join(lines) + "\n", content_type="text/plain")
+
+
+def healthz(request):
+    """For an uptime monitor: 200 when the database and the cache answer, else 503 with what failed."""
+    from django.core.cache import cache
+    from django.db import connection
+    failed = []
+    try:
+        connection.ensure_connection()
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+    except Exception:  # noqa: BLE001 - any failure is "down" to a monitor
+        failed.append("db")
+    try:
+        cache.set("healthz", 1, 5)
+        if cache.get("healthz") != 1:
+            failed.append("cache")
+    except Exception:  # noqa: BLE001
+        failed.append("cache")
+    response = JsonResponse({"ok": not failed, "failed": failed}, status=503 if failed else 200)
+    response["Cache-Control"] = "no-store"
+    return response
 
 
 @cache_control(public=True, max_age=7 * 24 * 3600)
@@ -170,5 +195,5 @@ def manifest(request):
                                          ("icon-maskable-512", 512, "maskable"))]
     return JsonResponse({"name": SITE_NAME, "short_name": SITE_NAME, "description": SITE_DESCRIPTION, "lang": "uz",
                          "start_url": "/", "scope": "/", "display": "standalone",
-                         "background_color": "#FFFFFF", "theme_color": "#FFFFFF", "icons": icons},
+                         "background_color": "#FFFFFF", "theme_color": "#132A6B", "icons": icons},
                         content_type="application/manifest+json", json_dumps_params={"ensure_ascii": False})

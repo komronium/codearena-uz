@@ -17,6 +17,7 @@ urlpatterns = [
     path("badges/", views.badges_page, name="badges"),
     path("profile/edit/", views.profile_edit, name="profile_edit"),
     path("welcome/", views.welcome, name="welcome"),
+    path("export/", views.export_data, name="export_data"),
     path("notifications/<int:pk>/", views.notification_open, name="notification_open"),
     path("notifications/read/", views.notifications_read, name="notifications_read"),
     path("verify-email/<str:token>/", views.verify_email, name="verify_email"),
@@ -30,7 +31,7 @@ urlpatterns = [
     path("verify/<int:user_id>/", views.verify_user, name="verify_user"),
     path("password-change/", views.PasswordChange.as_view(), name="password_change"),
     path("profile/<str:username>/", views.profile, name="profile"),
-    path("password-reset/", auth_views.PasswordResetView.as_view(
+    path("password-reset/", views.PasswordReset.as_view(
         success_url=reverse_lazy("password_reset_done")), name="password_reset"),
     path("password-reset/done/", auth_views.PasswordResetDoneView.as_view(), name="password_reset_done"),
     path("reset/<uidb64>/<token>/", auth_views.PasswordResetConfirmView.as_view(

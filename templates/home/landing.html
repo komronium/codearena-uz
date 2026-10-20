@@ -25,8 +25,8 @@ the next round) and one closing call.{% endcomment %}
       </div>
       <p class="ca7-facts">Hozir saytda <b>{{ stats.problems|compact }}</b> ta masala, <b>{{ stats.contests|compact }}</b> ta musobaqa va <b>{{ stats.submissions|compact }}</b> ta tekshirilgan yechim bor.</p>
     </div>
-    {# what a solve looks like; decorative, so inert #}
-    <div class="ca7-arena" inert>
+    {# what a solve looks like, with the way to try one without an account #}
+    <div class="ca7-arena">
       <div class="ca7-term">
         <div class="ca7-term-h"><i></i><i></i><i></i><span>main.py · namuna</span></div>
         <pre><span class="ln">1</span>n = <span class="f">int</span>(<span class="f">input</span>())
@@ -34,8 +34,7 @@ the next round) and one closing call.{% endcomment %}
 <span class="ln">3</span><span class="f">print</span>(<span class="f">max</span>(a) - <span class="f">min</span>(a))</pre>
         <div class="ca7-term-f"><span><i data-lucide="check" class="lu"></i>Qabul qilindi</span><span class="text-white/70">12/12 test</span><span class="ml-auto text-white/60">48 ms</span></div>
       </div>
-      <div class="ca7-float is-a"><i data-lucide="flame" class="lu" style="color: #E8590C"></i>7 kunlik Olov<small class="ca7-float-n">namuna</small></div>
-      <div class="ca7-float is-b"><i data-lucide="trending-up" class="lu text-ok"></i>Reyting <b class="tabular">1112</b><span class="ca7-pill is-ok">+61</span><small class="ca7-float-n">namuna</small></div>
+      <a class="ca7-try" href="{% url 'problems:list' %}">Shu kabi masalani o‘zingiz yeching: ro‘yxatdan o‘tmasdan ham ochib ko‘rish mumkin<i data-lucide="arrow-right" class="lu" aria-hidden="true"></i></a>
     </div>
   </div>
 </section>
@@ -70,7 +69,7 @@ the next round) and one closing call.{% endcomment %}
       {% if podium %}
       <p class="ca7-found !mt-0">So‘nggi reytingli raund, {{ last_rated.end|date:"d.m.Y" }} · <b class="text-ink">{{ last_rated.title }}</b></p>
       <table class="ca-table ca-table-flat">
-        <thead><tr><th class="w-12 text-center">#</th><th>Ishtirokchi</th><th class="text-right">{% if last_rated.type == "icpc" %}Masala{% else %}Ball{% endif %}</th></tr></thead>
+        <thead><tr><th scope="col" class="w-12 text-center">#</th><th scope="col">Ishtirokchi</th><th scope="col" class="text-right">{% if last_rated.type == "icpc" %}Masala{% else %}Ball{% endif %}</th></tr></thead>
         <tbody>
         {% for p in podium %}
         <tr><td class="text-center">{% if p.rank <= 3 %}<span class="ca7-medal m{{ p.rank }}">{{ p.rank }}</span>{% else %}<span class="tabular text-mute">{{ p.rank }}</span>{% endif %}</td>
@@ -106,7 +105,7 @@ the next round) and one closing call.{% endcomment %}
       <h2 id="cta-title">Bugun boshlang</h2>
       <p class="ca-hud-sub">Ro‘yxatdan o‘tish bir daqiqa oladi.</p>
     </div>
-    <a class="ca-btn ca-btn-gold ca-btn-lg ml-auto" href="{% url 'register' %}">Ro‘yxatdan o‘tish</a>
+    <a class="ca7-hbtn is-wide ca-btn-lg ml-auto" href="{% url 'register' %}">Ro‘yxatdan o‘tish</a>
   </div>
 </section>
 {% endblock %}

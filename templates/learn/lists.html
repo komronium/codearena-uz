@@ -12,7 +12,7 @@
     <div class="ca7-sec-h"><h2 id="lists-title">Ro‘yxatlar{% if lists %} <small class="tabular text-mute">{{ lists|length }}</small>{% endif %}</h2></div>
     {% if lists %}
     <table class="ca-table ca-table-flat">
-      <thead><tr><th>Nomi</th><th class="w-24 text-center">Masala</th><th class="hidden w-32 text-center sm:table-cell">Yaratilgan</th></tr></thead>
+      <thead><tr><th scope="col">Nomi</th><th scope="col" class="w-24 text-center">Masala</th><th scope="col" class="hidden w-32 text-center sm:table-cell">Yaratilgan</th></tr></thead>
       <tbody>
       {% for l in lists %}
       <tr>

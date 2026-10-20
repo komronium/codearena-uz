@@ -49,7 +49,7 @@ numbers are plain text.{% endcomment %}
 {% if subs %}
 <div class="overflow-x-auto">
 <table class="ca-table ca-table-flat">
-  <thead><tr><th class="w-20">#</th><th class="hidden w-28 sm:table-cell">Yuborilgan</th>{% if not own %}<th class="w-40">Muallif</th>{% endif %}<th>Masala</th><th class="hidden md:table-cell">Til</th><th>Natija</th><th class="hidden w-24 text-right sm:table-cell">Vaqt</th><th class="hidden w-20 text-right md:table-cell">Xotira</th></tr></thead>
+  <thead><tr><th scope="col" class="w-20">#</th><th scope="col" class="hidden w-28 sm:table-cell">Yuborilgan</th>{% if not own %}<th scope="col" class="w-40">Muallif</th>{% endif %}<th scope="col">Masala</th><th scope="col" class="hidden md:table-cell">Til</th><th scope="col">Natija</th><th scope="col" class="hidden w-24 text-right sm:table-cell">Vaqt</th><th scope="col" class="hidden w-20 text-right md:table-cell">Xotira</th></tr></thead>
   <tbody>
   {% for s in subs %}
   <tr>

@@ -19,7 +19,7 @@ there first; each player's badges beside them, best first.{% endcomment %}
 {% if rows %}
 <div class="overflow-x-auto">
 <table class="ca-table ca-table-flat">
-  <thead><tr><th class="w-16 text-center">#</th><th>Foydalanuvchi</th><th>Nishonlar</th><th class="w-24 text-right">Nishon</th><th class="w-28 text-right" title="Olingan bosqichlar, {{ max_levels }} tadan">Bosqich</th></tr></thead>
+  <thead><tr><th scope="col" class="w-16 text-center">#</th><th scope="col">Foydalanuvchi</th><th scope="col">Nishonlar</th><th scope="col" class="w-24 text-right">Nishon</th><th scope="col" class="w-28 text-right" title="Olingan bosqichlar, {{ max_levels }} tadan">Bosqich</th></tr></thead>
   <tbody>
   {% for r in rows %}
   <tr{% if r.u == user %} class="ca-row-me" id="me"{% endif %}>

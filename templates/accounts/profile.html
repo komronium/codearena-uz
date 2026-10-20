@@ -13,7 +13,7 @@ Colour carries meaning only: the tier colour is the person, green/red the result
 <section class="ca-hud ca7-ptier-band" aria-labelledby="hero-name" style="--tier: {{ tier_color }}">
   <div class="ca-hud-in ca7-phud">
     <div class="ca7-pwho">
-      <span class="ca7-pav{% if not profile_user.avatar %} ca-art-{{ banner.0 }}{% endif %}">{% if profile_user.avatar %}<img src="{{ profile_user.avatar.url }}" alt="">{% else %}<span aria-hidden="true">{{ profile_user.username|slice:":1"|upper }}</span>{% endif %}</span>
+      <span class="ca7-pav{% if not profile_user.avatar %} ca-art-{{ banner.0 }}{% endif %}">{% if profile_user.avatar %}<img src="{{ profile_user.avatar.url }}" alt="" width="96" height="96" decoding="async">{% else %}<span aria-hidden="true">{{ profile_user.username|slice:":1"|upper }}</span>{% endif %}</span>
       <div class="min-w-0">
         <h1 id="hero-name"><span translate="no">{{ profile_user.username }}</span><span class="ca7-ptier">{% if rating_history %}{{ tier }}{% else %}Reytingsiz{% endif %}</span></h1>
         {% if profile_user.get_full_name %}<p class="ca-hud-sub">{{ profile_user.get_full_name }}</p>{% endif %}
@@ -33,9 +33,9 @@ Colour carries meaning only: the tier colour is the person, green/red the result
       </div>{% endif %}
     </div>
     <dl class="ca7-pstats">
-      <div><dt>Musobaqa reytingi</dt><dd>{% if rating_history %}<b class="ca7-prt tabular">{{ profile_user.rating }}</b>{% if last_delta %} <span class="ca7-pdelta{% if last_delta < 0 %} is-down{% endif %}">{{ last_delta|stringformat:"+d" }}</span>{% endif %}{% else %}<b>—</b>{% endif %}</dd>
+      <div><dt>Musobaqa reytingi</dt><dd>{% if rating_history %}<b class="ca7-prt tabular">{{ profile_user.rating }}</b>{% if last_delta %} <span class="ca7-pdelta{% if last_delta < 0 %} is-down{% endif %}">{{ last_delta|signed }}</span>{% endif %}{% else %}<b>—</b>{% endif %}</dd>
         <dd><small>{% if max_rating %}eng yuqori {{ max_rating }}{% else %}hali reytingli raund yo‘q{% endif %}</small></dd></div>
-      <div><dt>Reytingdagi o‘rni</dt><dd>{% if rating_rank %}<b class="tabular">{{ rating_rank }}</b> <span class="ca7-of">/ {{ total_rated }}</span>{% else %}<b>—</b>{% endif %}</dd><dd><small>{{ rating_history|length }} ta reytingli musobaqa</small></dd></div>
+      <div><dt>Reytingdagi o‘rni</dt><dd>{% if rating_rank %}<b class="tabular">{{ rating_rank }}</b> <span class="ca7-of">/ {{ total_rated }}</span>{% else %}<b>—</b>{% endif %}</dd><dd><small>{% if rating_inactive %}nofaol: 90 kundan beri reytingli musobaqa yo‘q{% else %}{{ rating_history|length }} ta reytingli musobaqa{% endif %}</small></dd></div>
       <div><dt>Amaliyot balli</dt><dd><b class="tabular">{{ profile_user.practice_points }}</b></dd><dd><small>{{ solved|length }} ta masala{% if points_rank %} · {{ points_rank }}-o‘rin{% endif %}</small></dd></div>
       <div><dt>Olov</dt><dd><b class="tabular">{{ streak.0 }}</b> <span class="ca7-of">kun</span></dd><dd><small>{% if streak.1 %}eng uzuni {{ streak.1 }} kun{% else %}kun masalasini yechib boshlang{% endif %}</small></dd></div>
     </dl>
@@ -62,8 +62,8 @@ Colour carries meaning only: the tier colour is the person, green/red the result
         <polyline points="{{ rating_chart.polyline }}" fill="none" stroke="rgb(var(--ca-accent-rgb))" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" />
         {% for pt in rating_chart.points %}
         <text x="{{ pt.x }}" y="{{ rating_chart.bottom|add:20 }}" text-anchor="middle" font-size="12.5" class="fill-mute tabular">{{ pt.date }}</text>
-        <g class="ca7-pt" tabindex="0" role="button" aria-label="{{ pt.title }}: {{ pt.rank }}-o‘rin{% if pt.of %} {{ pt.of }} tadan{% endif %}, {{ pt.delta|stringformat:'+d' }}, reyting {{ pt.rating }}"
-           data-title="{{ pt.title }}" data-date="{{ pt.date }}" data-rank="{{ pt.rank }}" data-of="{{ pt.of|default:'' }}" data-delta="{{ pt.delta|stringformat:'+d' }}" data-rating="{{ pt.rating }}" data-x="{{ pt.x }}" data-y="{{ pt.y }}">
+        <g class="ca7-pt" tabindex="0" role="button" aria-label="{{ pt.title }}: {{ pt.rank }}-o‘rin{% if pt.of %} {{ pt.of }} tadan{% endif %}, {{ pt.delta|signed }}, reyting {{ pt.rating }}"
+           data-title="{{ pt.title }}" data-date="{{ pt.date }}" data-rank="{{ pt.rank }}" data-of="{{ pt.of|default:'' }}" data-delta="{{ pt.delta|signed }}" data-rating="{{ pt.rating }}" data-x="{{ pt.x }}" data-y="{{ pt.y }}">
           <circle cx="{{ pt.x }}" cy="{{ pt.y }}" r="14" fill="transparent" />
           <circle class="dot" cx="{{ pt.x }}" cy="{{ pt.y }}" r="5.5" fill="rgb(var(--ca-paper-rgb))" stroke="{{ pt.color }}" stroke-width="2.5" />
         </g>
@@ -98,13 +98,13 @@ Colour carries meaning only: the tier colour is the person, green/red the result
     </script>
     {% endif %}
     <table class="ca-table ca-table-flat mt-3">
-      <thead><tr><th>Musobaqa</th><th class="w-24 text-right">O‘rin</th><th class="w-16 text-right" title="Reyting o‘zgarishi">±</th><th class="w-20 text-right">Reyting</th></tr></thead>
+      <thead><tr><th scope="col">Musobaqa</th><th scope="col" class="w-24 text-right">O‘rin</th><th scope="col" class="w-16 text-right" title="Reyting o‘zgarishi">±</th><th scope="col" class="w-20 text-right">Reyting</th></tr></thead>
       <tbody>
       {% for p in rating_history reversed %}
       <tr{% if p.disqualified %} class="ca-row-dq"{% endif %}>
         <td><a class="ca-link" href="{% url 'contests:standings' p.contest_id %}">{{ p.contest.title }}</a>{% if p.disqualified %} <span class="ca-tag !text-bad">DQ</span>{% endif %}<span class="block text-xs text-mute tabular">{{ p.contest.end|date:"d.m.Y" }}</span></td>
         <td class="text-right tabular">{{ p.rank }}<span class="text-xs text-mute"> / {{ p.n_participants }}</span></td>
-        <td class="text-right tabular font-semibold {% if p.delta > 0 %}text-ok{% elif p.delta < 0 %}text-bad{% else %}text-mute{% endif %}">{{ p.delta|stringformat:"+d" }}</td>
+        <td class="text-right tabular font-semibold {% if p.delta > 0 %}text-ok{% elif p.delta < 0 %}text-bad{% else %}text-mute{% endif %}">{{ p.delta|signed }}</td>
         <td class="text-right tabular font-semibold"><span class="ca-tier-ink" style="--tier: {{ p.rating_after|tier_color }}">{{ p.rating_after }}</span></td>
       </tr>
       {% endfor %}
@@ -115,6 +115,7 @@ Colour carries meaning only: the tier colour is the person, green/red the result
     {% endif %}
   </section>
 
+  <div class="space-y-9">
   <section aria-labelledby="solved-title">
     <div class="ca7-sec-h"><h2 id="solved-title">Masalalar</h2><a class="ca-link" href="{% url 'problems:list' %}">Barchasi</a></div>
     <div class="ca7-psolved mb-4">
@@ -125,8 +126,6 @@ Colour carries meaning only: the tier colour is the person, green/red the result
       {% if solved_hidden > 0 %}Yana <b class="tabular text-ink">{{ solved_hidden }}</b> ta yechilgan masala hozir kelgusi musobaqada, shuning uchun yashirin.{% endif %}
     </p>{% endif %}
   </section>
-</div>
-
 {% if held_badges or contest_badges or badge_owner %}
 <section aria-labelledby="badges-title">
   <div class="ca7-sec-h"><h2 id="badges-title">Nishonlar</h2><span class="ca7-r text-mute"><span class="tabular">{{ badges_earned }} / {{ badges_total }}</span>{% if badge_owner %} · <a class="ca-link" href="{% url 'badges' %}">Barcha nishonlar</a>{% endif %}</span></div>
@@ -146,6 +145,9 @@ Colour carries meaning only: the tier colour is the person, green/red the result
   </div>
 </section>
 {% endif %}
+  </div>
+</div>
+
 
 <section aria-labelledby="act-title">
   <div class="ca7-sec-h"><h2 id="act-title">Faollik</h2>
@@ -181,13 +183,25 @@ Colour carries meaning only: the tier colour is the person, green/red the result
       <a class="ca-link{% if t.kind == 'sql' %} !text-[rgb(var(--ca-sql-rgb))]{% endif %}" href="{% url 'problems:list' %}?tag={{ t.row.tag.name|urlencode }}">{{ t.row.tag.name|tag_uz }}</a>
       <span class="ca7-topic-bar" role="img" aria-label="{{ t.total }} tadan {{ t.solved }} tasi yechilgan, {{ t.tried }} tasida urinish bor"><i class="is-solved" style="width: {{ t.pct_solved }}%"></i><i class="is-tried" style="width: {{ t.pct_tried }}%"></i></span>
       <b class="tabular">{{ t.solved }} / {{ t.total }}</b>
-      <span class="ca7-topic-next">{% if t.next %}<a class="ca-link" href="{% url 'problems:detail' t.next.slug %}" title="{{ t.next.title }}">Keyingisi: {{ t.next.title|truncatechars:16 }}</a>{% else %}<span class="font-semibold text-ok"><i data-lucide="check" class="lu" aria-hidden="true"></i> hammasi</span>{% endif %}</span>
+      <span class="ca7-topic-next">{% if t.next %}<a class="ca-link" href="{% url 'problems:detail' t.next.slug %}" title="{{ t.next.title }}">Keyingisi: {{ t.next.title }}</a>{% else %}<span class="font-semibold text-ok"><i data-lucide="check" class="lu" aria-hidden="true"></i> hammasi</span>{% endif %}</span>
     </div>
     {% if forloop.last and forloop.counter > 5 %}</details>{% endif %}
     {% endfor %}
     <p class="ca7-topics-key" aria-hidden="true"><i class="is-solved"></i>yechilgan <i class="is-tried"></i>urinilgan <i></i>qolgan</p>
   </div>
 </section>
+{% endif %}
+
+{% if user.is_authenticated and user != profile_user %}
+<details class="ca7-report">
+  <summary class="ca-link">Bu foydalanuvchi haqida shikoyat qilish</summary>
+  <form method="post" action="{% url 'integrity:report' %}" class="mt-2 grid max-w-xl gap-2">{% csrf_token %}
+    <input type="hidden" name="kind" value="user"><input type="hidden" name="target" value="{{ profile_user.username }}"><input type="hidden" name="next" value="{{ request.get_full_path }}">
+    <label class="text-sm font-medium" for="report-text">Nima bo‘ldi?</label>
+    <textarea class="ca-input" id="report-text" name="text" rows="3" maxlength="600" required minlength="5"></textarea>
+    <button class="ca-btn ca-btn-ghost self-start">Adminlarga yuborish</button>
+  </form>
+</details>
 {% endif %}
 
 </div>

@@ -62,6 +62,7 @@
           + (it.keys ? `<kbd class="ca-kbd">${esc(it.keys)}</kbd>` : "") + "</a>";
       }
     }
+    input.setAttribute("aria-expanded", html ? "true" : "false");
     list.innerHTML = html || `<p class="ca-pal-empty">Hech narsa topilmadi. Boshqa so‘z bilan urinib ko‘ring.</p>`;
     window.caIcons?.();
     setActive(Math.min(active, rows.length - 1));
@@ -125,7 +126,7 @@
     input.focus();
   };
   window.caPalette = open;
-  document.querySelectorAll("[data-palette-open]").forEach((b) => b.addEventListener("click", open));
+  document.querySelectorAll("[data-palette-open]").forEach((b) => { b.setAttribute("aria-haspopup", "dialog"); b.addEventListener("click", open); });
 
   // keyboard: Ctrl/⌘ K anywhere; "/", "?" and "g <key>" only when not typing
   const typing = (t) => t.closest?.("input, textarea, select, [contenteditable], .cm-editor");

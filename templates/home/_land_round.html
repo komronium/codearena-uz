@@ -4,7 +4,7 @@
   <div class="min-w-0 flex-1">
     <small>{% if state == "running" %}Jonli musobaqa{% else %}Kelgusi musobaqa{% endif %}</small>
     <a class="ca-link ca7-mis-t" href="{% url 'contests:detail' c.pk %}">{{ c.title }}</a>
-    <small class="tabular">{{ c.start|date:"d.m.Y H:i" }} · {{ c.duration_label }} · {{ c.n_participants }} ishtirokchi</small>
+    <small class="tabular">{{ c.start|ztime:"d.m.Y H:i" }} · {{ c.duration_label }} · {{ c.n_participants }} ishtirokchi</small>
     <div class="ca7-mis-f"><span class="ca7-pill is-warn tabular" data-countdown="{% if state == 'running' %}{{ c.end|date:'c' }}{% else %}{{ c.start|date:'c' }}{% endif %}" data-label="{% if state == 'running' %}qoldi{% else %}keyin{% endif %}" data-suffix="1"></span></div>
   </div>
 </div>

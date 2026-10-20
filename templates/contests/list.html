@@ -31,7 +31,7 @@ the right.{% endcomment %}
     {% for c in upcoming %}{% include "contests/_card.html" with state="upcoming" %}{% endfor %}
   </section>
   {% else %}
-  <p class="ca7-empty"><b>Hozircha rejalashtirilgan musobaqa yo‘q</b>Yangi raund e’lon qilinganda shu yerda chiqadi.</p>
+  <p class="ca7-quiet">Hozircha rejalashtirilgan musobaqa yo‘q. Yangi raund e’lon qilinganda shu yerda chiqadi.</p>
   {% endif %}
 
   <section aria-labelledby="end-title">
@@ -47,10 +47,10 @@ the right.{% endcomment %}
     <div class="overflow-x-auto">
     <table class="ca-table ca-table-flat ca7-past">
       <thead><tr>
-        <th class="w-16">Sana</th>
-        <th>Musobaqa</th>
-        <th class="hidden w-28 text-right md:table-cell">Ishtirokchi</th>
-        {% if user.is_authenticated %}<th class="w-24 text-right">O‘rningiz</th><th class="w-24 text-right">Reyting</th>{% endif %}
+        <th scope="col" class="w-16">Sana</th>
+        <th scope="col">Musobaqa</th>
+        <th scope="col" class="hidden w-28 text-right md:table-cell">Ishtirokchi</th>
+        {% if user.is_authenticated %}<th scope="col" class="w-24 text-right">O‘rningiz</th><th scope="col" class="w-24 text-right">Reyting</th>{% endif %}
       </tr></thead>
       {% regroup ended by start_month as months %}
       {% for m in months %}
@@ -58,13 +58,13 @@ the right.{% endcomment %}
       <tr class="ca-month"><th colspan="{% if user.is_authenticated %}5{% else %}3{% endif %}" scope="rowgroup">{{ m.grouper }}</th></tr>
       {% for c in m.list %}
       <tr>
-        <td><span class="ca7-date" aria-hidden="true"><b>{{ c.start|date:"d" }}</b>{{ c.start|weekday_uz }}</span><span class="sr-only">{{ c.start|date:"d.m.Y" }}</span></td>
+        <td><span class="ca7-date" aria-hidden="true" title="{{ c.start|weekday_full }}"><b>{{ c.start|date:"d" }}</b>{{ c.start|month_uz }}</span><span class="sr-only">{{ c.start|weekday_full }}, {{ c.start|date:"d.m.Y" }}</span></td>
         <td><a class="ca-link" href="{% url 'contests:standings' c.pk %}" title="Natijalar jadvali">{{ c.title }}</a>{% if c.division %} <span class="ca-tag ca-tag-div" title="{{ c.get_division_display }}">Div. {{ c.division }}</span>{% endif %}{% if not c.is_rated %} <span class="ca-tag" title="Natija reytingga ta’sir qilmaydi">Mashq</span>{% endif %}
-          <span class="block text-xs text-mute"><span class="tabular">{{ c.start|date:"H:i" }}</span> · {{ c.duration_label }}</span></td>
+          <span class="block text-xs text-mute"><span class="tabular">{{ c.start|ztime:"H:i" }}</span> · {{ c.duration_label }}</span></td>
         <td class="hidden text-right tabular md:table-cell">{{ c.n_participants }}</td>
         {% if user.is_authenticated %}
         <td class="text-right">{% if c.me and c.me.rank %}<b class="font-semibold tabular">{{ c.me.rank }}</b>{% elif c.me %}<span class="text-mute">qatnashgan</span>{% else %}<span class="text-mute" title="Siz bu raundda qatnashmagansiz">—</span>{% endif %}</td>
-        <td class="text-right">{% if c.my_delta is not None %}<b class="font-semibold tabular {% if c.my_delta > 0 %}text-ok{% elif c.my_delta < 0 %}text-bad{% else %}text-mute{% endif %}">{{ c.my_delta|stringformat:"+d" }}</b>{% else %}<span class="text-mute">—</span>{% endif %}</td>
+        <td class="text-right">{% if c.my_delta is not None %}<b class="font-semibold tabular {% if c.my_delta > 0 %}text-ok{% elif c.my_delta < 0 %}text-bad{% else %}text-mute{% endif %}">{{ c.my_delta|signed }}</b>{% else %}<span class="text-mute">—</span>{% endif %}</td>
         {% endif %}
       </tr>
       {% endfor %}
@@ -84,7 +84,7 @@ the right.{% endcomment %}
   <section class="ca-box" aria-labelledby="top-title">
     <div class="ca-box-cap ca-hd"><h2 id="top-title">Eng yuqori reyting</h2><a class="ca-box-tools ca-link" href="{% url 'rating' %}">Hammasi</a></div>
     <table class="ca-table ca7-top">
-      <thead><tr><th class="w-10 text-center">#</th><th>Ishtirokchi</th><th class="text-right">Reyting</th></tr></thead>
+      <thead><tr><th scope="col" class="w-10 text-center">#</th><th scope="col">Ishtirokchi</th><th scope="col" class="text-right">Reyting</th></tr></thead>
       <tbody>
       {% for u in top_rated %}
       <tr{% if u == user %} class="ca-row-me"{% endif %}><td class="text-center">{% if forloop.counter <= 3 %}<span class="ca7-medal m{{ forloop.counter }}">{{ forloop.counter }}</span>{% else %}<span class="tabular text-mute">{{ forloop.counter }}</span>{% endif %}</td><td>{% include "accounts/_u7.html" with u=u you=False %}</td><td class="text-right font-bold tabular">{{ u.rating }}</td></tr>

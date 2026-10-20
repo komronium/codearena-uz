@@ -7,8 +7,9 @@ from django.contrib.auth import views as auth_views
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.http import JsonResponse
 from django.db import IntegrityError, transaction
-from django.db.models import Count, F, OuterRef, Q, Subquery, Window
+from django.db.models import Count, F, Max, OuterRef, Q, Subquery, Window
 from django.db.models.functions import Rank
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
@@ -24,7 +25,7 @@ from apps.problems.progress import solved_ring
 from apps.problems.skills import skill_map
 from apps.submissions.models import Submission
 
-from . import onboarding
+from . import onboarding, throttle
 from .forms import ProfileEditForm, RegisterForm, WelcomeForm
 from .geo import board_geo
 from .models import Follow, Notification, TelegramLink, User
@@ -70,8 +71,9 @@ def _rating_chart(history: list) -> dict:
                  for floor, _ceiling, _name, _color in _RATING_TIERS if floor is not None and lo < floor < hi]
     # The chart's own top and bottom get a label too, unless a tier line sits too close to read both.
     for edge in (hi, lo):
-        if all(abs(y_for(edge) - g["y"]) >= 14 for g in gridlines):
-            gridlines.append({"y": round(y_for(edge), 1), "value": round(edge)})
+        nice = round(edge / 10) * 10  # 1271 reads as 1270, at the place 1270 has
+        if lo <= nice <= hi and all(abs(y_for(nice) - g["y"]) >= 14 for g in gridlines):
+            gridlines.append({"y": round(y_for(nice), 1), "value": nice})
 
     n = len(history)
     step = (_CHART_R - _CHART_L) / (n - 1) if n > 1 else 0
@@ -150,6 +152,13 @@ def _safe_next(request):
 def register(request):
     form = RegisterForm(request.POST or None)
     nxt = _safe_next(request)
+    if request.GET.get("ref"):
+        request.session["ref"] = request.GET["ref"].strip()[:150]
+    if request.method == "POST":
+        # a bot fills the hidden "website" field; a person never sees it. Per address, a class of students fits.
+        if request.POST.get("website") or throttle.ip_blocked(request, "register", 40, 3600):
+            form.add_error(None, throttle.TOO_MANY)
+            return render(request, "registration/register.html", {"form": form, "next": nxt}, status=429)
     if request.method == "POST" and form.is_valid():
         try:
             with transaction.atomic():
@@ -164,6 +173,9 @@ def register(request):
             else:
                 form.add_error(None, "Ro‘yxatdan o‘tishda xatolik yuz berdi. Qayta urinib ko‘ring.")
         else:
+            inviter = User.objects.filter(username__iexact=request.session.pop("ref", ""), is_active=True).exclude(pk=user.pk).first()
+            if inviter:
+                User.objects.filter(pk=user.pk).update(invited_by=inviter)
             login(request, user)
             onboarding.send_verification(request, user, force=True)
             return redirect(nxt or "home")
@@ -176,6 +188,26 @@ class Login(auth_views.LoginView):
     def get_context_data(self, **kwargs):
         from .telegram import bot_configured
         return super().get_context_data(**kwargs, telegram_login=bot_configured())
+
+    def post(self, request, *args, **kwargs):
+        who = (request.POST.get("username") or "").strip().lower()[:150]
+        if throttle.ip_blocked(request, "login", 60, 600) or (who and throttle.blocked(f"thr:login-who:{who}", 10, 600)):
+            form = self.get_form()
+            form.add_error(None, throttle.TOO_MANY)
+            return self.render_to_response(self.get_context_data(form=form), status=429)
+        return super().post(request, *args, **kwargs)
+
+
+class PasswordReset(auth_views.PasswordResetView):
+    """The reset mail, at most a few per address and per mailbox an hour (it spends the mail quota)."""
+
+    def post(self, request, *args, **kwargs):
+        who = (request.POST.get("email") or "").strip().lower()[:254]
+        if throttle.ip_blocked(request, "reset", 10, 3600) or (who and throttle.blocked(f"thr:reset-who:{who}", 3, 3600)):
+            form = self.get_form()
+            form.add_error(None, throttle.TOO_MANY)
+            return self.render_to_response(self.get_context_data(form=form), status=429)
+        return super().post(request, *args, **kwargs)
 
 
 class PasswordChange(SuccessMessageMixin, auth_views.PasswordChangeView):
@@ -206,6 +238,7 @@ def profile_edit(request):
         "form": form,
         "telegram_link": TelegramLink.objects.filter(user=request.user).first(),
         "telegram_configured": bot_configured(),
+        "invited_count": user.invited_users.count(),
     })
 
 
@@ -215,11 +248,13 @@ def welcome(request):
     confirmation. A user with nothing owed goes home."""
     user = request.user
     if not onboarding.needs_gate(user):
-        return redirect("home")
+        return redirect(request.session.pop("gate_next", None) or "home")
     old_email = user.email.lower()
     form = WelcomeForm(request.POST or None, instance=User.objects.get(pk=user.pk))
     if request.method == "POST" and "resend" in request.POST:
-        if onboarding.send_verification(request, user):
+        if throttle.ip_blocked(request, "verify-mail", 20, 3600):
+            messages.warning(request, throttle.TOO_MANY)
+        elif onboarding.send_verification(request, user):
             messages.success(request, f"Havola {user.email} manziliga qayta yuborildi.")
         else:
             messages.warning(request, "Havola hozirgina yuborildi. Bir daqiqadan keyin qayta urinib ko‘ring.")
@@ -381,14 +416,23 @@ def _rating_spread(ratings: list[int], mine: int | None) -> dict:
             "bars": bars, "ticks": ticks}
 
 
+INACTIVE_DAYS = 90  # no rated contest for this long: off the board (the rating is kept and returns with the next one)
+
+
+def _board_cutoff():
+    return timezone.now() - datetime.timedelta(days=INACTIVE_DAYS)
+
+
 def rating(request):
-    # Only users who finished a rated contest; a default 0 says nothing about anyone.
+    # Only users who finished a rated contest lately; a default 0 says nothing about anyone, and a rating that
+    # nobody has earned for INACTIVE_DAYS days holds no place.
     rated = Participation.objects.filter(rating_after__isnull=False)
     last = rated.filter(user=OuterRef("pk")).order_by("-contest__end").annotate(d=F("rating_after") - F("rating_before"))
     qs = (User.objects.filter(is_active=True)
           .annotate(contest_count=Count("participations", filter=Q(participations__rating_after__isnull=False)),
-                    last_delta=Subquery(last.values("d")[:1]))
-          .filter(contest_count__gt=0).order_by("-rating", "username"))
+                    last_delta=Subquery(last.values("d")[:1]),
+                    last_rated=Max("participations__contest__end", filter=Q(participations__rating_after__isnull=False)))
+          .filter(contest_count__gt=0, last_rated__gte=_board_cutoff()).order_by("-rating", "username"))
     rows = list(qs.values_list("rating", "country", "location", "school"))  # highest first
     everyone = [r[0] for r in rows]
     cond, geo = board_geo(request, [r[1:] for r in rows])
@@ -424,8 +468,9 @@ def rating(request):
                 if request.user.rating >= lo and (hi is None or request.user.rating < hi):
                     t["here"] = True
                     t["pct"] = round(100 * (request.user.rating - lo) / (hi - lo)) if hi else 100
-            row = list(qs.values_list("pk", flat=True)).index(request.user.pk)
-            me = {"rank": sum(1 for r in everyone if r > request.user.rating) + 1, "page": row // 50 + 1,
+            pks = list(qs.values_list("pk", flat=True))
+            row = pks.index(request.user.pk) if request.user.pk in pks else None  # None: inactive, no place
+            me = None if row is None else {"rank": sum(1 for r in everyone if r > request.user.rating) + 1, "page": row // 50 + 1,
                   "delta": mine.rating_after - mine.rating_before, "next": _next_tier(request.user.rating),
                   "contests": rated.filter(user=request.user).count()}
     spread = _rating_spread(ratings, request.user.rating if me else None)
@@ -554,14 +599,15 @@ def profile(request, username):
     # blocked (inactive) users hold no place on the boards and push nobody down; the
     # rating rank only counts users who finished a rated contest, like /rating
     ranked = User.objects.filter(is_active=True)
-    rated = ranked.filter(participations__rating_after__isnull=False).distinct()
+    rated = ranked.filter(participations__rating_after__isnull=False,
+                          participations__contest__end__gte=_board_cutoff()).distinct()  # active ones, like /rating
     board = practice_board()  # the same people as /top: no points or staff, no place
     total_users, total_rated = board.count(), rated.count()
     rating_rank = points_rank = None
     if profile_user.is_active:
         if board.filter(pk=profile_user.pk).exists():
             points_rank = board.filter(practice_points__gt=profile_user.practice_points).count() + 1
-        if rating_history:
+        if rating_history and rated.filter(pk=profile_user.pk).exists():
             rating_rank = rated.filter(rating__gt=profile_user.rating).count() + 1
 
     cur_streak, best_streak = streaks(profile_user)
@@ -579,6 +625,7 @@ def profile(request, username):
         "total_users": total_users,
         "total_rated": total_rated,
         "rating_rank": rating_rank,
+        "rating_inactive": bool(rating_history) and rating_rank is None and profile_user.is_active,
         "points_rank": points_rank,
         "solved": solved,
         "total_public_problems": len(problem_map),
@@ -706,3 +753,38 @@ def verify_user(request, user_id):
         messages.success(request, f"{student.username}: shaxs {'tasdiqlandi' if want else 'tasdig‘i bekor qilindi'}.")
     nxt = _safe_next(request)
     return redirect(nxt) if nxt else redirect("profile", student.username)
+
+
+@login_required
+def export_data(request):
+    """"Ma'lumotlarimni yuklab olish": everything the site holds about the signed-in user as one JSON file."""
+    from apps.classroom.models import Duel
+
+    user = request.user
+    data = {
+        "exported_at": timezone.now().isoformat(),
+        "profile": {
+            "username": user.username, "first_name": user.first_name, "last_name": user.last_name, "email": user.email,
+            "country": user.country, "city": user.location, "school": user.school,
+            "joined": user.date_joined.isoformat(), "rating": user.rating, "practice_points": user.practice_points,
+            "duel_rating": user.duel_rating,
+        },
+        "submissions": [
+            {"id": s.pk, "problem": s.problem.slug, "language": s.language.code, "verdict": s.verdict,
+             "created": s.created.isoformat(), "contest": s.contest_id, "source": s.source}
+            for s in Submission.objects.filter(user=user).select_related("problem", "language").order_by("pk")],
+        "contests": [
+            {"contest": p.contest_id, "title": p.contest.title, "rank": p.rank, "score": p.score,
+             "rating_before": p.rating_before, "rating_after": p.rating_after, "registered": p.registered_at.isoformat()}
+            for p in Participation.objects.filter(user=user).select_related("contest").order_by("pk")],
+        "duels": [
+            {"id": d.pk, "challenger": d.challenger.username, "opponent": d.opponent.username if d.opponent else None,
+             "language": d.language, "status": d.status, "created": d.created.isoformat(),
+             "winner": d.winner.username if d.winner else None}
+            for d in Duel.objects.filter(Q(challenger=user) | Q(opponent=user))
+            .select_related("challenger", "opponent", "winner").order_by("pk")],
+        "badges": list(user.badges.values("family", "tier", "earned_at")),
+    }
+    response = JsonResponse(data, json_dumps_params={"ensure_ascii": False, "indent": 2})
+    response["Content-Disposition"] = f'attachment; filename="codearena-{user.username}.json"'
+    return response

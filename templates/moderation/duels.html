@@ -41,7 +41,7 @@ for staff too, with every question and both players' answers.{% endcomment %}
 {% if page.object_list %}
 <div class="overflow-x-auto">
 <table class="ca-table ca-table-flat ca-aduels">
-  <thead><tr><th class="w-14">#</th><th>Chaqirgan</th><th class="text-center">Hisob</th><th>Raqib</th><th>Duel</th><th>Holat</th><th class="text-right">Tugagan</th></tr></thead>
+  <thead><tr><th scope="col" class="w-14">#</th><th scope="col">Chaqirgan</th><th scope="col" class="text-center">Hisob</th><th scope="col">Raqib</th><th scope="col">Duel</th><th scope="col">Holat</th><th scope="col" class="text-right">Tugagan</th></tr></thead>
   <tbody>
   {% for d in page %}
   <tr>
@@ -51,7 +51,7 @@ for staff too, with every question and both players' answers.{% endcomment %}
     <td class="ca-aduels-p{% if s.won %} is-won{% endif %}">
       {% if s.user %}
       <span class="flex items-center gap-1.5">{% include "accounts/_u7.html" with u=s.user you=False %}{% if s.won %}<i data-lucide="trophy" class="lu text-gold" aria-label="g‘olib"></i>{% endif %}</span>
-      <small>{% if d.mode == "quiz" and s.over %}{{ s.right }}/{{ n_questions }} to‘g‘ri · {{ s.spent }} s{% elif d.mode == "quiz" and s.seen %}o‘ynamoqda · {{ s.seen }}/{{ n_questions }}{% elif d.mode == "quiz" and d.status == "pending" and forloop.last %}qabul qilmagan{% endif %}{% if s.delta is not None %} <b class="{% if s.delta > 0 %}text-ok{% elif s.delta < 0 %}text-bad{% endif %}">{{ s.delta|stringformat:"+d" }}</b>{% endif %}</small>
+      <small>{% if d.mode == "quiz" and s.over %}{{ s.right }}/{{ n_questions }} to‘g‘ri · {{ s.spent }} s{% elif d.mode == "quiz" and s.seen %}o‘ynamoqda · {{ s.seen }}/{{ n_questions }}{% elif d.mode == "quiz" and d.status == "pending" and forloop.last %}qabul qilmagan{% endif %}{% if s.delta is not None %} <b class="{% if s.delta > 0 %}text-ok{% elif s.delta < 0 %}text-bad{% endif %}">{{ s.delta|signed }}</b>{% endif %}</small>
       {% else %}<span class="text-mute">raqib kutilmoqda</span>{% endif %}
     </td>
     {% endfor %}

@@ -28,7 +28,7 @@
 {% if q %}<p class="ca7-found">«{{ q }}»: {{ found }} ta topildi · <a class="ca-link" href="{% url 'top' %}">hammasi</a></p>{% endif %}
 {% if users %}<div class="overflow-x-auto ca7-board">
 <table class="ca-table ca-table-flat">
-  <thead><tr><th class="w-16 text-center">#</th><th>Foydalanuvchi</th><th class="w-32 text-right">Yechilgan</th><th class="w-28 text-right">Ball</th></tr></thead>
+  <thead><tr><th scope="col" class="w-16 text-center">#</th><th scope="col">Foydalanuvchi</th><th scope="col" class="w-32 text-right">Yechilgan</th><th scope="col" class="w-28 text-right">Ball</th></tr></thead>
   <tbody>
   {% for u in users %}
   <tr{% if u == user %} class="ca-row-me" id="me"{% endif %}>

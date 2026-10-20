@@ -4,11 +4,24 @@ from django import template
 register = template.Library()
 
 WEEKDAYS = ["Du", "Se", "Ch", "Pa", "Ju", "Sh", "Ya"]
+WEEKDAYS_FULL = ["Dushanba", "Seshanba", "Chorshanba", "Payshanba", "Juma", "Shanba", "Yakshanba"]
+MONTHS = ["Yan", "Fev", "Mar", "Apr", "May", "Iyn", "Iyl", "Avg", "Sen", "Okt", "Noy", "Dek"]
 
 
 @register.filter
 def weekday_uz(value) -> str:
     return WEEKDAYS[value.weekday()] if value else ""
+
+
+@register.filter
+def month_uz(value) -> str:
+    """Three letters of the month: Okt."""
+    return MONTHS[value.month - 1] if value else ""
+
+
+@register.filter
+def weekday_full(value) -> str:
+    return WEEKDAYS_FULL[value.weekday()] if value else ""
 
 
 @register.filter

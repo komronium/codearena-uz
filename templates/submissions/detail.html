@@ -67,6 +67,7 @@ is among the accepted ones and the next step.{% endcomment %}
       <p>{% if next_pick.1 %}Shu mavzudagi keyingi masala ({{ next_pick.1 }}):{% else %}Darajangizga mos keyingi masala:{% endif %}</p>
       <a class="ca-link font-medium" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a> <span class="ca-diff ca-diff-{{ p.difficulty }} !text-xs">{{ p.get_difficulty_display }}</span>
       {% endwith %}{% elif s.verdict == "AC" %}<p>Qabul qilindi. <a class="ca-link" href="{% url 'problems:list' %}">Masalalar ro‘yxatiga</a> qayting.</p>
+      {% elif s.verdict == "PENDING" or s.verdict == "RUNNING" %}<p>Yechim tekshirilmoqda, odatda bir necha soniya. Sahifa o‘zi yangilanadi.</p>
       {% else %}<p>Xato topilgan testni qayta ko‘ring, keyin <a class="ca-link" href="{% url 'problems:detail' s.problem.slug %}">masalada</a> tuzatib qayta yuboring.</p>{% endif %}
     </div>
   </section>

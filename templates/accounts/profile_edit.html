@@ -9,8 +9,10 @@
   <nav class="ca-setnav" aria-label="Sozlamalar bo‘limlari">
     <a href="#profil"><i data-lucide="user" class="lu" aria-hidden="true"></i>Profil</a>
     <a href="#xavfsizlik"><i data-lucide="shield-check" class="lu" aria-hidden="true"></i>Xavfsizlik</a>
-    <a href="#bildirishnoma"><i data-lucide="bell" class="lu" aria-hidden="true"></i>Bildirishnomalar</a>
+    {% if telegram_configured or user.is_staff %}<a href="#bildirishnoma"><i data-lucide="bell" class="lu" aria-hidden="true"></i>Bildirishnomalar</a>{% endif %}
     <a href="#korinish"><i data-lucide="sun-moon" class="lu" aria-hidden="true"></i>Ko‘rinish</a>
+    <a href="#taklif"><i data-lucide="user-plus" class="lu" aria-hidden="true"></i>Taklif</a>
+    <a href="#malumot"><i data-lucide="download" class="lu" aria-hidden="true"></i>Ma’lumotlarim</a>
   </nav>
   <div class="min-w-0 max-w-lg">
   <form method="post" enctype="multipart/form-data" class="ca-panel !p-0 overflow-hidden scroll-mt-20" id="profil">{% csrf_token %}
@@ -19,7 +21,7 @@
         {% if user.avatar %}
         <img id="avatar-preview" src="{{ user.avatar.url }}" alt="" class="h-20 w-20 rounded-[var(--ca-radius)] object-cover">
         {% else %}
-        <div class="ca-avatar ca-art-{{ user.rating|tier_slug }} h-20 w-20 !rounded-[var(--ca-radius)] text-3xl" style="--tier: {{ user.rating|tier_color }}"><span id="avatar-letter">{{ user.username|first }}</span><img id="avatar-preview" src="" alt="" class="hidden h-20 w-20 rounded-[var(--ca-radius)] object-cover"></div>
+        <div class="ca-avatar ca-art-{{ user.rating|tier_slug }} h-20 w-20 !rounded-[var(--ca-radius)] text-3xl" style="--tier: {{ user.rating|tier_color }}"><span id="avatar-letter">{{ user.username|first }}</span><img id="avatar-preview" alt="" class="hidden h-20 w-20 rounded-[var(--ca-radius)] object-cover"></div>
         {% endif %}
       </div>
       <div class="min-w-0">
@@ -61,7 +63,7 @@
     </div>
     <div class="flex items-center justify-between gap-3 border-t border-line bg-paper/60 px-6 py-4">
       <span></span>
-      <button type="submit" class="ca-btn ca-btn-primary"><i data-lucide="check" class="lu" aria-hidden="true"></i>Saqlash</button>
+      <button type="submit" class="ca-btn ca-btn-gold"><i data-lucide="check" class="lu" aria-hidden="true"></i>Saqlash</button>
     </div>
   </form>
   <section class="ca-panel mt-6 flex scroll-mt-20 flex-wrap items-center justify-between gap-3" id="xavfsizlik" aria-labelledby="security-title">
@@ -71,6 +73,7 @@
     </div>
     <a class="ca-btn ca-btn-ghost" href="{% url 'password_change' %}">Parolni almashtirish</a>
   </section>
+  {% if telegram_configured or user.is_staff %}
   <section class="ca-panel mt-6 scroll-mt-20" id="bildirishnoma" aria-labelledby="telegram-title">
     <div class="flex flex-wrap items-start justify-between gap-3">
       <div class="min-w-0">
@@ -87,7 +90,7 @@
       </div>
       {% if telegram_configured %}
         {% if telegram_link and telegram_link.is_active %}
-        <form method="post" action="{% url 'telegram_disconnect' %}" onsubmit="return confirm('Telegram hisobingizni CodeArena’dan uzasizmi?');">{% csrf_token %}<button class="ca-btn ca-btn-ghost !py-1.5 text-sm"><i data-lucide="unlink" class="lu" aria-hidden="true"></i>Uzish</button></form>
+        <form method="post" action="{% url 'telegram_disconnect' %}" data-confirm="Telegram hisobingizni CodeArena’dan uzasizmi?">{% csrf_token %}<button class="ca-btn ca-btn-ghost !py-1.5 text-sm"><i data-lucide="unlink" class="lu" aria-hidden="true"></i>Uzish</button></form>
         {% else %}
         <form method="post" action="{% url 'telegram_connect' %}">{% csrf_token %}<button class="ca-btn ca-btn-primary !py-1.5 text-sm"><i data-lucide="send" class="lu" aria-hidden="true"></i>{% if telegram_link %}Qayta ulash{% else %}Telegramni ulash{% endif %}</button></form>
         {% endif %}
@@ -115,6 +118,7 @@
     </form>
     {% endif %}
   </section>
+  {% endif %}
   <section class="ca-panel mt-6 scroll-mt-20" id="korinish" aria-labelledby="look-title">
     <h2 id="look-title" class="text-[1.0625rem] font-bold"><i data-lucide="sun-moon" class="lu mr-1.5 text-accent" aria-hidden="true"></i>Ko‘rinish</h2>
     <p class="mt-1 text-sm text-mute">Bu qurilmada saqlanadi.</p>
@@ -123,6 +127,20 @@
       <button type="button" data-theme-set="light" aria-pressed="false"><i data-lucide="sun" class="lu mr-1.5" aria-hidden="true"></i>Kunduzgi</button>
       <button type="button" data-theme-set="dark" aria-pressed="false"><i data-lucide="moon" class="lu mr-1.5" aria-hidden="true"></i>Tungi</button>
     </div>
+  </section>
+  <section class="ca-panel mt-6 scroll-mt-20" id="taklif" aria-labelledby="invite-title">
+    <h2 id="invite-title" class="flex items-center gap-2 text-[1.0625rem] font-bold"><i data-lucide="user-plus" class="lu text-accent" aria-hidden="true"></i>Do‘stlarni taklif qilish</h2>
+    <p class="mt-1 text-sm text-mute">Havolangiz orqali ro‘yxatdan o‘tgan har bir kishi sizning taklifingiz bilan qo‘shilgan hisoblanadi.</p>
+    <div class="mt-3 flex flex-wrap items-center gap-2">
+      <input class="ca-input max-w-sm" id="invite-link" readonly value="{{ request.scheme }}://{{ request.get_host }}/?ref={{ user.username }}" aria-label="Taklif havolasi" onfocus="this.select()">
+      <button type="button" class="ca-btn ca-btn-ghost" data-copy-text="{{ request.scheme }}://{{ request.get_host }}/?ref={{ user.username }}" data-copied="Nusxalandi"><i data-lucide="copy" class="lu" aria-hidden="true"></i>Nusxalash</button>
+    </div>
+    {% if invited_count %}<p class="mt-2 text-sm text-mute">Hozirgacha qo‘shilganlar: <b class="tabular text-ink">{{ invited_count }}</b></p>{% endif %}
+  </section>
+  <section class="ca-panel mt-6 scroll-mt-20" id="malumot" aria-labelledby="data-title">
+    <h2 id="data-title" class="flex items-center gap-2 text-[1.0625rem] font-bold"><i data-lucide="download" class="lu text-accent" aria-hidden="true"></i>Ma’lumotlarim</h2>
+    <p class="mt-1 text-sm text-mute">Profilingiz, yuborgan kodlaringiz, musobaqa natijalari, duellar va nishonlaringiz bitta JSON faylda.</p>
+    <a class="ca-btn ca-btn-ghost mt-3" href="{% url 'export_data' %}" download><i data-lucide="file-down" class="lu" aria-hidden="true"></i>Yuklab olish</a>
   </section>
   </div>
   </div>
@@ -135,5 +153,17 @@
     img.classList.remove("hidden");
     const letter = document.getElementById("avatar-letter"); if (letter) letter.hidden = true;
   });
+</script>
+<script>
+  // the section list marks where you are as the page scrolls
+  (() => {
+    const links = [...document.querySelectorAll(".ca-setnav a[href^='#']")];
+    const secs = links.map((a) => document.getElementById(a.getAttribute("href").slice(1))).filter(Boolean);
+    if (!secs.length || !("IntersectionObserver" in window)) return;
+    const mark = (id) => links.forEach((a) => a.toggleAttribute("aria-current", a.getAttribute("href") === "#" + id));
+    const io = new IntersectionObserver((es) => { const e = es.filter((x) => x.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0]; if (e) mark(e.target.id); }, { rootMargin: "-20% 0px -65% 0px" });
+    secs.forEach((el) => io.observe(el));
+    mark(secs[0].id);
+  })();
 </script>
 {% endblock %}

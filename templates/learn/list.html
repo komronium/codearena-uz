@@ -20,7 +20,7 @@ deletes it from the box on the side.{% endcomment %}
       {% if rows %}<span class="ca7-r flex items-center gap-3 text-mute"><b class="tabular text-ink">{{ n_solved }} / {{ rows|length }}</b> yechilgan{% if next_row %}<a class="ca-btn ca-btn-primary !py-1" href="{% url 'problems:detail' next_row.slug %}"><i data-lucide="play" class="lu" aria-hidden="true"></i>Boshlash</a>{% endif %}</span>{% endif %}</div>
     {% if rows %}
     <table class="ca-table ca-table-flat">
-      <thead><tr><th class="w-12 text-center"><span class="sr-only">Holat</span></th><th>Masala</th><th class="w-32 text-center">Qiyinlik</th>{% if is_owner %}<th class="w-14 text-center"><span class="sr-only">Olish</span></th>{% endif %}</tr></thead>
+      <thead><tr><th scope="col" class="w-12 text-center"><span class="sr-only">Holat</span></th><th scope="col">Masala</th><th scope="col" class="w-32 text-center">Qiyinlik</th>{% if is_owner %}<th scope="col" class="w-14 text-center"><span class="sr-only">Olish</span></th>{% endif %}</tr></thead>
       <tbody>
       {% for p in rows %}
       <tr{% if p.solved %} class="ca-row-ac"{% endif %}>
@@ -53,7 +53,7 @@ deletes it from the box on the side.{% endcomment %}
         <button class="ca-btn ca-btn-primary w-full"><i data-lucide="check" class="lu" aria-hidden="true"></i>Saqlash</button>
       </form>
     </section>
-    <form method="post" action="{% url 'learn:list_delete' lst.pk %}" onsubmit="return confirm('«{{ lst.name|escapejs }}» ro‘yxati o‘chiriladi. Davom etasizmi?');">{% csrf_token %}
+    <form method="post" action="{% url 'learn:list_delete' lst.pk %}" data-confirm="«{{ lst.name }}» ro‘yxati o‘chiriladi. Davom etasizmi?">{% csrf_token %}
       <button class="ca-btn ca-btn-ghost w-full text-bad"><i data-lucide="trash-2" class="lu" aria-hidden="true"></i>Ro‘yxatni o‘chirish</button>
     </form>
   </aside>

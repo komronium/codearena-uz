@@ -293,7 +293,7 @@ def test_the_play_page_shows_one_question_never_its_answer_and_then_how_it_went(
         client.post(url, {"index": str(a.index), "answer": ""})
     assert client.get(url).url == reverse("classroom:duel", args=[duel.pk])  # run over: to the results
     page = client.get(reverse("classroom:duel", args=[duel.pk])).content.decode()
-    assert "1/5" in page and "Savollar" in page and "hali o‘ynamadi" in page
+    assert "1/5" in page and "Savollar" in page and "Hali boshlamadi" in page
 
 
 @pytest.mark.django_db
@@ -541,7 +541,7 @@ def test_telegram_tells_of_a_challenge_a_duel_result_and_a_badge(bank, settings,
         results = {o.link.user.username: o.text for o in TelegramOutbox.objects.filter(event_key=f"duel:{duel.pk}:result")}
         assert "G‘alaba" in results["p1"] and "5 : 1" in results["p1"] and "Mag‘lubiyat" in results["p2"]
         badge = TelegramOutbox.objects.filter(link__user=p1, preference="notify_badges").first()
-        assert badge is not None and "Mukammal I" in badge.text  # 5/5 in a duel
+        assert badge is not None and "Mukammal · Bronza" in badge.text  # 5/5 in a duel
         link = TelegramLink.objects.get(user=p2)
         link.notify_duels = False
         link.save()
@@ -717,3 +717,15 @@ def test_a_variant_with_a_long_decimal_or_a_new_zero_is_not_worth_asking():
     assert acceptable("print(7 / 4)", "1.75", "print(7 / 2)")
     assert not acceptable("print(10 - 0 * 3)", "10", "print(10 - 2 * 3)")  # a 0 that was not there
     assert acceptable("print(0 + 5)", "5", "print(0 + 3)")  # one the original had
+
+
+@pytest.mark.django_db
+def test_unanswered_questions_of_a_finished_run_are_skipped_not_wrong(client, bank):
+    from . import duels
+    from .models import Duel
+    p1, p2 = _players()
+    duel, _ = duels.challenge(p1, "p2", "python")
+    _age(duel, challenger=duels.RUN_LIMIT + duels.timedelta(minutes=1))  # p1's run ran out with no answer
+    client.force_login(p1)
+    cells = client.get(reverse("classroom:duel", args=[duel.pk])).context["players"][0]["cells"]
+    assert {c["state"] for c in cells} == {"skip"}

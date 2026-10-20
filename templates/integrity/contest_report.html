@@ -39,7 +39,7 @@ participants by risk, the similar code pairs, the fast solves and the journal.{%
   <div class="overflow-x-auto">
   <table class="ca-table ca-table-flat">
     <thead>
-      <tr><th>Ishtirokchi</th><th class="text-right">Chiqish</th><th class="text-right">Tashqarida</th><th class="text-right">Paste</th><th class="text-right">Tez</th><th class="text-right">Nusxa</th><th>Dalillar</th><th class="text-right">Xavf</th><th class="hidden md:table-cell">Oxirgi hodisa</th><th class="text-right">Amal</th></tr>
+      <tr><th scope="col">Ishtirokchi</th><th scope="col" class="text-right">Chiqish</th><th scope="col" class="text-right">Tashqarida</th><th scope="col" class="text-right">Paste</th><th scope="col" class="text-right">Tez</th><th scope="col" class="text-right">Nusxa</th><th scope="col">Dalillar</th><th scope="col" class="text-right">Xavf</th><th scope="col" class="hidden md:table-cell">Oxirgi hodisa</th><th scope="col" class="text-right">Amal</th></tr>
     </thead>
     <tbody>
     {% for user, c in rows %}
@@ -65,12 +65,12 @@ participants by risk, the similar code pairs, the fast solves and the journal.{%
             <button class="ca-btn ca-btn-ghost !px-2 !py-0.5 text-xs" title="{{ label }} bekor qilingan — tiklash"><i data-lucide="undo-2" class="lu" aria-hidden="true"></i>{{ label }}</button>
           </form>
           {% else %}
-          <form method="post" action="{% url 'contests:void' contest.pk user.pk %}" onsubmit="const s=prompt('{{ label }} masalasi natijasini bekor qilish. Sabab (ixtiyoriy, faqat adminlar ko‘radi):','Nazorat hisoboti: {{ label }}'); if(s===null) return false; this.reason.value=s;">{% csrf_token %}
+          <form method="post" action="{% url 'contests:void' contest.pk user.pk %}" data-confirm="{{ label }} masalasi natijasini bekor qilish. Sabab (ixtiyoriy, faqat adminlar ko‘radi):" data-reason data-reason-default="Nazorat hisoboti: {{ label }}">{% csrf_token %}
             <input type="hidden" name="label" value="{{ label }}"><input type="hidden" name="voided" value="1">
             <input type="hidden" name="reason" value=""><input type="hidden" name="next" value="{% url 'integrity:contest_report' contest.pk %}">
             <button class="ca-btn ca-btn-ghost !px-2 !py-0.5 text-xs text-bad" title="Faqat {{ label }} masalasi natijasini bekor qilish"><i data-lucide="circle-slash" class="lu" aria-hidden="true"></i>{{ label }}</button>
           </form>
-          <form method="post" action="{% url 'contests:void' contest.pk user.pk %}" onsubmit="const s=prompt('{{ label }} masalasi natijasini AI tufayli bekor qilish: xato urinish hisoblanadi va masala bloklanadi. Sabab (ixtiyoriy, faqat adminlar ko‘radi):','AI ishlatgan'); if(s===null) return false; this.reason.value=s;">{% csrf_token %}
+          <form method="post" action="{% url 'contests:void' contest.pk user.pk %}" data-confirm="{{ label }} masalasi natijasini AI tufayli bekor qilish: xato urinish hisoblanadi va masala bloklanadi. Sabab (ixtiyoriy, faqat adminlar ko‘radi):" data-reason data-reason-default="AI ishlatgan">{% csrf_token %}
             <input type="hidden" name="label" value="{{ label }}"><input type="hidden" name="voided" value="1"><input type="hidden" name="penalty" value="1">
             <input type="hidden" name="reason" value=""><input type="hidden" name="next" value="{% url 'integrity:contest_report' contest.pk %}">
             <button class="ca-btn ca-btn-ghost !px-2 !py-0.5 text-xs text-bad" title="AI tufayli: {{ label }} natijasi xato urinish sifatida qaytariladi va masala bloklanadi"><i data-lucide="bot" class="lu" aria-hidden="true"></i>{{ label }}</button>
@@ -90,7 +90,7 @@ participants by risk, the similar code pairs, the fast solves and the journal.{%
           <button class="ca-btn ca-btn-ghost !px-2 !py-1" title="Chuqur tekshirish: barcha urinishlari hammaniki va oldingi yechimlar bilan solishtiriladi" aria-label="{{ user.username }}: chuqur tekshirish"><i data-lucide="scan-search" class="lu" aria-hidden="true"></i></button>
         </form>
         {% if c.participation.disqualified or c.advice == "dq" %}
-        <form method="post" action="{% url 'contests:disqualify' contest.pk user.pk %}" {% if not c.participation.disqualified %}onsubmit="const s=prompt('Sabab (ixtiyoriy):',''); if(s===null) return false; this.reason.value=s;"{% endif %}>{% csrf_token %}
+        <form method="post" action="{% url 'contests:disqualify' contest.pk user.pk %}" {% if not c.participation.disqualified %}data-confirm="Sabab (ixtiyoriy):" data-reason data-reason-default=""{% endif %}>{% csrf_token %}
           <input type="hidden" name="back" value="report"><input type="hidden" name="reason" value=""><input type="hidden" name="disqualified" value="{% if c.participation.disqualified %}0{% else %}1{% endif %}">
           {% if c.participation.disqualified %}
           <button class="ca-btn ca-btn-ghost !py-1 text-xs"><i data-lucide="undo-2" class="lu" aria-hidden="true"></i>DQ bekor</button>
@@ -102,7 +102,7 @@ participants by risk, the similar code pairs, the fast solves and the journal.{%
         <details class="ca-dropdown" data-dropdown>
           <summary class="ca-btn ca-btn-ghost !px-2 !py-1" aria-label="{{ user.username }}: boshqa amallar" title="Boshqa amallar"><i data-lucide="ellipsis" class="lu" aria-hidden="true"></i></summary>
           <div class="ca-dropdown-panel !w-60">
-        <form method="post" action="{% url 'contests:disqualify' contest.pk user.pk %}" {% if not c.participation.disqualified %}onsubmit="const s=prompt('Sabab (ixtiyoriy):',''); if(s===null) return false; this.reason.value=s;"{% endif %}>{% csrf_token %}
+        <form method="post" action="{% url 'contests:disqualify' contest.pk user.pk %}" {% if not c.participation.disqualified %}data-confirm="Sabab (ixtiyoriy):" data-reason data-reason-default=""{% endif %}>{% csrf_token %}
           <input type="hidden" name="back" value="report"><input type="hidden" name="reason" value=""><input type="hidden" name="disqualified" value="{% if c.participation.disqualified %}0{% else %}1{% endif %}">
           {% if c.participation.disqualified %}
           <button class="ca-btn ca-btn-ghost !py-1 text-xs"><i data-lucide="undo-2" class="lu" aria-hidden="true"></i>DQ bekor</button>
@@ -207,7 +207,7 @@ participants by risk, the similar code pairs, the fast solves and the journal.{%
             </div>
             <pre class="ca-cmp-code" aria-label="{{ side.user.username }} kodi">{% for n, text, hit in side.lines %}<span class="ca-cmp-line{% if hit %} is-hit{% endif %}"><span class="ca-cmp-n">{{ n }}</span>{{ text }}</span>{% endfor %}</pre>
             {% if side.participation %}
-            <form method="post" action="{% url 'contests:disqualify' contest.pk side.user.pk %}" class="border-t border-line px-4 py-2 text-right" {% if not side.participation.disqualified %}onsubmit="const s=prompt('Sabab (ixtiyoriy):','O‘xshash kod: #{{ f.sides.0.sub.pk }} / #{{ f.sides.1.sub.pk }}'); if(s===null) return false; this.reason.value=s;"{% endif %}>{% csrf_token %}
+            <form method="post" action="{% url 'contests:disqualify' contest.pk side.user.pk %}" class="border-t border-line px-4 py-2 text-right" {% if not side.participation.disqualified %}data-confirm="Sabab (ixtiyoriy):" data-reason data-reason-default="O‘xshash kod: #{{ f.sides.0.sub.pk }} / #{{ f.sides.1.sub.pk }}"{% endif %}>{% csrf_token %}
               <input type="hidden" name="back" value="report"><input type="hidden" name="reason" value=""><input type="hidden" name="disqualified" value="{% if side.participation.disqualified %}0{% else %}1{% endif %}">
               {% if side.participation.disqualified %}
               <button class="ca-btn ca-btn-ghost !py-1 text-xs"><i data-lucide="undo-2" class="lu" aria-hidden="true"></i>{{ side.user.username }}: DQ bekor</button>
@@ -218,13 +218,13 @@ participants by risk, the similar code pairs, the fast solves and the journal.{%
             {# only this problem: the rest of the participant's round stands; silent for them #}
             {% if f.label %}
             {% if not side.voided %}
-            <form method="post" action="{% url 'contests:void' contest.pk side.user.pk %}" class="border-t border-line px-4 py-2 text-right" onsubmit="const s=prompt('{{ f.label }} masalasi natijasini AI tufayli bekor qilish: xato urinish hisoblanadi va masala bloklanadi. Sabab (ixtiyoriy, faqat adminlar ko‘radi):','O‘xshash kod: #{{ f.sides.0.sub.pk }} / #{{ f.sides.1.sub.pk }}'); if(s===null) return false; this.reason.value=s;">{% csrf_token %}
+            <form method="post" action="{% url 'contests:void' contest.pk side.user.pk %}" class="border-t border-line px-4 py-2 text-right" data-confirm="{{ f.label }} masalasi natijasini AI tufayli bekor qilish: xato urinish hisoblanadi va masala bloklanadi. Sabab (ixtiyoriy, faqat adminlar ko‘radi):" data-reason data-reason-default="O‘xshash kod: #{{ f.sides.0.sub.pk }} / #{{ f.sides.1.sub.pk }}">{% csrf_token %}
               <input type="hidden" name="label" value="{{ f.label }}"><input type="hidden" name="voided" value="1"><input type="hidden" name="penalty" value="1">
               <input type="hidden" name="reason" value=""><input type="hidden" name="next" value="{% url 'integrity:contest_report' contest.pk %}#flag-{{ f.pk }}">
               <button class="ca-btn ca-btn-ghost !py-1 text-xs text-bad"><i data-lucide="bot" class="lu" aria-hidden="true"></i>{{ side.user.username }}: faqat {{ f.label }} ni AI tufayli bekor qilish</button>
             </form>
             {% endif %}
-            <form method="post" action="{% url 'contests:void' contest.pk side.user.pk %}" class="border-t border-line px-4 py-2 text-right"{% if not side.voided %} onsubmit="const s=prompt('{{ f.label }} masalasi natijasini bekor qilish. Sabab (ixtiyoriy, faqat adminlar ko‘radi):','O‘xshash kod: #{{ f.sides.0.sub.pk }} / #{{ f.sides.1.sub.pk }}'); if(s===null) return false; this.reason.value=s;"{% endif %}>{% csrf_token %}
+            <form method="post" action="{% url 'contests:void' contest.pk side.user.pk %}" class="border-t border-line px-4 py-2 text-right"{% if not side.voided %} data-confirm="{{ f.label }} masalasi natijasini bekor qilish. Sabab (ixtiyoriy, faqat adminlar ko‘radi):" data-reason data-reason-default="O‘xshash kod: #{{ f.sides.0.sub.pk }} / #{{ f.sides.1.sub.pk }}"{% endif %}>{% csrf_token %}
               <input type="hidden" name="label" value="{{ f.label }}"><input type="hidden" name="voided" value="{% if side.voided %}0{% else %}1{% endif %}">
               <input type="hidden" name="reason" value=""><input type="hidden" name="next" value="{% url 'integrity:contest_report' contest.pk %}#flag-{{ f.pk }}">
               {% if side.voided %}
