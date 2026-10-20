@@ -36,7 +36,7 @@ def attempters():
     from django.db.models import Count, Q
 
     return Count("submissions__user", distinct=True,
-                 filter=Q(submissions__verdict__in=JUDGED, submissions__user__practice_points__gt=0))
+                 filter=Q(submissions__verdict__in=JUDGED, submissions__user__userproblemsolved__isnull=False))
 
 
 def price(problem) -> int:

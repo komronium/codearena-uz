@@ -600,7 +600,7 @@ def test_solve_follows_verdict_changes(problem, python, user):
     assert _solve(user, problem) is None and user.practice_points == 0
 
 
-def test_points_are_live_and_skip_own_problems(problem, python, user):
+def test_points_are_frozen_at_the_solve_and_skip_own_problems(problem, python, user):
     from apps.submissions.solves import refresh_solves, sync_practice_points
     own = Problem.objects.create(slug="own", title="Own", statement_md="x", author=user, points=50)
     for p in (problem, own):
@@ -608,10 +608,15 @@ def test_points_are_live_and_skip_own_problems(problem, python, user):
         refresh_solves(p.pk, [user.pk])
     user.refresh_from_db()
     assert _solve(user, own) is not None and user.practice_points == 10  # solved, but no points for own
-    Problem.objects.filter(pk=problem.pk).update(points=40)
+    Problem.objects.filter(pk=problem.pk).update(points=40)  # the price moves later...
     sync_practice_points()
     user.refresh_from_db()
-    assert user.practice_points == 40
+    assert user.practice_points == 10  # ...what was earned does not
+    late = User.objects.create_user("late", password="x")
+    Submission.objects.create(user=late, problem=problem, language=python, source="x", verdict="AC")
+    refresh_solves(problem.pk, [late.pk])
+    late.refresh_from_db()
+    assert late.practice_points == 40  # a later solve is frozen at the price of its day
 
 
 @patch("apps.submissions.views.django_rq.enqueue")
