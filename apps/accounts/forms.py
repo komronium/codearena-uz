@@ -46,14 +46,28 @@ class RegisterForm(UserCreationForm):
 
     def clean_email(self):
         email = self.cleaned_data["email"]
-        if User.objects.filter(email__iexact=email).exists():
+        if not _free_stale_email(email):
             raise forms.ValidationError("Bu email allaqachon ro'yxatdan o'tgan.")
         return email
 
 
 
+def _free_stale_email(email: str, exclude_pk=None) -> bool:
+    """True when `email` is free to take. An address nobody confirmed within 3 days of signing up is released (the
+    old account keeps working with a blank email), so pre-registering somebody else's address cannot lock them out."""
+    from datetime import timedelta
+    from django.utils import timezone
+    taken = User.objects.filter(email__iexact=email)
+    if exclude_pk:
+        taken = taken.exclude(pk=exclude_pk)
+    stale = taken.filter(email_verified_at__isnull=True, is_staff=False,
+                         date_joined__lt=timezone.now() - timedelta(days=3))
+    stale.update(email="")
+    return not taken.exists()
+
+
 def _unique_email(email: str, user) -> str:
-    if User.objects.filter(email__iexact=email).exclude(pk=user.pk).exists():
+    if not _free_stale_email(email, user.pk):
         raise forms.ValidationError("Bu email boshqa hisobda ishlatilgan.")
     return email
 

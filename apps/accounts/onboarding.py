@@ -38,6 +38,14 @@ def needs_gate(user) -> bool:
     return bool(missing(user)) or user.email_verified_at is None
 
 
+def needs_profile(user) -> bool:
+    """Only the profile fields (name, country, city, email address) are missing, whatever the email's state: what a
+    contest asks for. The mail link can wait; until it is clicked a round is joined but not rated, and duels wait."""
+    if not getattr(settings, "ACCOUNT_GATE", True) or not user.is_authenticated or user.is_staff:
+        return False
+    return bool(missing(user))
+
+
 def nudge(user) -> dict | None:
     """What the slim banner says to a signed-in user who still owes the gate: labels of the empty profile
     fields, or the pending email confirmation."""
@@ -107,7 +115,8 @@ class OnboardingMiddleware:
 
     def __call__(self, request):
         user = getattr(request, "user", None)
-        if user is not None and needs_gate(user) and self._walled(request) and not self._open(request):
+        if user is not None and self._walled(request) and not self._open(request) and (
+                needs_profile(user) if request.path_info.startswith(_WALLED_WRITES) else needs_gate(user)):
             if request.method == "GET":
                 request.session["gate_next"] = request.get_full_path()
             return redirect("welcome")

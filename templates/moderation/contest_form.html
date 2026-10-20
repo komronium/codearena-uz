@@ -75,6 +75,8 @@
       <div><label class="ca-label" for="{{ form.personal_minutes.id_for_label }}">Shaxsiy vaqt (daqiqa)</label>{{ form.personal_minutes }}
         <p class="mt-1 text-xs text-mute">Marafon uchun: har kim «Boshlash»ni bosgandan keyin shuncha daqiqa oladi (musobaqa tugashidan oshmaydi). 0 — hamma uchun bir soat.</p>
         {% if form.personal_minutes.errors %}<p class="mt-1 text-sm text-bad">{{ form.personal_minutes.errors.0 }}</p>{% endif %}</div>
+      <div><label class="flex items-center gap-2 text-sm font-medium" for="{{ form.auto_finish.id_for_label }}">{{ form.auto_finish }} Natijani avtomatik e’lon qilish</label>
+        <p class="mt-1 text-xs text-mute">Musobaqa tugagach 12 soat o‘tib, ko‘rilmagan o‘xshashlik belgisi qolmasa, masalalar ochiladi va (reytingli bo‘lsa) reyting hisoblanadi. O‘chiq bo‘lsa, buni o‘zingiz qilasiz.</p></div>
       <div><label class="ca-label" for="{{ form.badge.id_for_label }}">Nishon (ixtiyoriy)</label>{{ form.badge }}
         <p class="mt-1 text-xs text-mute">Masalalar ochilgach, kamida bitta masala yechganlar profiliga shu nomli nishon qo‘shiladi; birinchi uchtalikka — medal.</p>
         {% if form.badge.errors %}<p class="mt-1 text-sm text-bad">{{ form.badge.errors.0 }}</p>{% endif %}</div>

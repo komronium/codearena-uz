@@ -12,6 +12,7 @@ from apps.accounts.models import User
 from apps.accounts.tiers import next_tier as _next_tier
 from apps.classroom import duels
 from apps.classroom.models import Duel
+from apps.contests import rating as contest_rating
 from apps.contests.models import Contest, Participation
 from apps.contests.views import _standings  # cached, the standings page's own numbers
 from apps.learn.models import StudyPlan
@@ -35,7 +36,7 @@ def _rating_card(user) -> dict:
     """The rating block: the last rated change, the place among rated users, the next tier."""
     rated = Participation.objects.filter(rating_after__isnull=False)
     last = rated.filter(user=user).order_by("-contest__end").first()
-    rated_users = User.objects.filter(is_active=True, participations__rating_after__isnull=False).distinct()
+    rated_users = contest_rating.pool()
     return {
         "delta": last.rating_after - last.rating_before if last else None,
         "rank": rated_users.filter(rating__gt=user.rating).count() + 1 if last else None,
@@ -117,7 +118,7 @@ def home(request):
                          or open_problems().order_by("pk").first())
     return render(request, "home/dashboard.html", {
         "is_new": is_new, "first_problem": first_problem,
-        "n_courses": StudyPlan.objects.filter(is_public=True).count() if is_new else 0,
+        "n_courses": StudyPlan.objects.filter(is_public=True, tags__isnull=False).distinct().count() if is_new else 0,  # the ones with problems, not the "soon" list
         "joined_any": Participation.objects.filter(user=user).exists() if is_new else False,
         "daily": daily,
         "daily_done": bool(daily) and DailySolve.objects.filter(user=user, daily=daily).exists(),

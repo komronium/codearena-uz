@@ -69,7 +69,10 @@ def _rated_rows(contest) -> list:
     # Registered but never submitted = didn't take part; rated only if you played
     # (Codeforces/AtCoder rule). Disqualified stays in: ranking last is the penalty.
     # Out of the division: on the board, not rated.
-    return [r for r in compute_standings(contest) if (r["attempted"] or r["disqualified"]) and not r["out"]]
+    from django.conf import settings
+    gated = getattr(settings, "ACCOUNT_GATE", True)  # an unconfirmed email can join a round but is not rated until confirmed
+    return [r for r in compute_standings(contest) if (r["attempted"] or r["disqualified"]) and not r["out"]
+            and (not gated or r["user"].email_verified_at is not None or r["user"].is_staff)]
 
 
 def _new_ratings(rows, shown: list[int], rated: list[int]) -> list[int]:
@@ -94,10 +97,30 @@ def _rated_counts(user_ids) -> dict[int, int]:
                 .values("user").annotate(n=Count("pk")).values_list("user", "n"))
 
 
+INACTIVE_DAYS = 90  # no rated contest for this long: off the open board (the rating is kept; a new one brings it back)
+
+
+def pool():
+    """The people on the open rating board: active users with a rated contest in the last INACTIVE_DAYS days. The
+    one definition every place, count and "top ten" on the site reads, so a person has one place everywhere."""
+    from datetime import timedelta
+    from django.utils import timezone
+    return (User.objects.filter(is_active=True, participations__rating_after__isnull=False,
+                                participations__contest__end__gte=timezone.now() - timedelta(days=INACTIVE_DAYS))
+            .distinct())
+
+
 def apply_rating(contest) -> bool:
-    """Rate a finished contest once; False if it was already applied."""
-    if contest.rating_applied:
-        return False
+    """Rate a finished contest once; False if it was already applied. The contest row is locked while it runs, so a
+    double click or a staff POST racing the command cannot apply the same round twice."""
+    with transaction.atomic():
+        if Contest.objects.select_for_update().filter(pk=contest.pk, rating_applied=True).exists():
+            contest.rating_applied = True
+            return False
+        return _apply_locked(contest)
+
+
+def _apply_locked(contest) -> bool:
     rows = _rated_rows(contest)
     ids = [r["user"].pk for r in rows]
     shown = dict(User.objects.filter(pk__in=ids).values_list("pk", "rating"))  # standings may be an older read
@@ -194,3 +217,17 @@ def recompute(contest) -> None:
     with transaction.atomic():
         rollback(contest)
         apply_rating(contest)
+
+
+def recompute_from(contest) -> int:
+    """Redo this contest and every rated contest after it, in order: roll the later ones back (newest first), then
+    apply them again from this one forward. Manual rating edits are kept, since only each round's own change is
+    taken away. For a late disqualification or void, when the person has played since. Returns how many rounds."""
+    with transaction.atomic():
+        later = list(Contest.objects.filter(rating_applied=True, end__gte=contest.end).order_by("end", "pk"))
+        for c in reversed(later):
+            rollback(c)
+        for c in later:
+            c.refresh_from_db()
+            apply_rating(c)
+    return len(later)

@@ -9,17 +9,30 @@ from .models import Duel, DuelAnswer
 
 START = 1200
 LIGHTNING = timedelta(seconds=30)
+MIN_LOSER_ANSWERS = 3  # a win over somebody who barely played (or idled) is a walkover: no badge, no quest
+
+
+def walkovers(duels, user) -> set[int]:
+    """Ids of `duels` the other player answered fewer than MIN_LOSER_ANSWERS questions in."""
+    ids = [d.pk for d in duels]
+    answered = {}
+    for duel_id, uid in (DuelAnswer.objects.filter(duel_id__in=ids, answered_at__isnull=False)
+                         .exclude(user=user).values_list("duel_id", "user_id")):
+        answered[duel_id] = answered.get(duel_id, 0) + 1
+    return {d.pk for d in duels if d.opponent_id and answered.get(d.pk, 0) < MIN_LOSER_ANSWERS}
 
 
 def duel_stats(user) -> dict[str, int]:
     duels = list(Duel.objects.filter(Q(challenger=user) | Q(opponent=user), status=Duel.Status.FINISHED)
                  .order_by("created", "pk"))
-    wins = [d for d in duels if d.winner_id == user.pk]
+    walk = walkovers([d for d in duels if d.winner_id == user.pk], user)
+    wins = [d for d in duels if d.winner_id == user.pk and d.pk not in walk]
     best_run = run = 0
     rating = peak = START
     for d in duels:
-        run = run + 1 if d.winner_id == user.pk else 0
-        best_run = max(best_run, run)
+        if d.pk not in walk:  # a walkover is neither a win nor a loss for the run (its Elo change still counts)
+            run = run + 1 if d.winner_id == user.pk else 0
+            best_run = max(best_run, run)
         rating += (d.challenger_delta if d.challenger_id == user.pk else d.opponent_delta) or 0
         peak = max(peak, rating)
     runs = {}

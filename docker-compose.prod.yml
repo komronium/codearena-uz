@@ -47,6 +47,7 @@ services:
                python manage.py recalc_points;
                python manage.py recalc_difficulty;
                python manage.py flag_similarity --pending;
+               python manage.py finish_contests;
                python manage.py telegram_notifications;
              sleep 300;
              done"

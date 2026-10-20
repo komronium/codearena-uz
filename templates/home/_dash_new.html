@@ -10,29 +10,23 @@ ctx: the dashboard's, with first_problem, n_courses, joined_any, learning, upcom
     <ol class="ca7-steps7">
       <li class="{% if s1 %}is-done{% else %}is-cur{% endif %}"><span aria-hidden="true">{% if s1 %}<i data-lucide="check" class="lu"></i>{% else %}1{% endif %}</span>
         <div><h3>Birinchi masalani yeching</h3><p>{% if first_problem %}{{ first_problem.title }}: kod yozish, yuborish va natijani o‘qishni shu masalada o‘rganasiz.{% else %}Kod yozish, yuborish va natijani o‘qishni birinchi masalada o‘rganasiz.{% endif %}</p></div>
-        {% if first_problem %}<a class="ca-btn ca-btn-soft" href="{% url 'problems:detail' first_problem.slug %}">{{ first_problem.title }}ni ochish</a>{% endif %}</li>
+        </li>
       <li class="{% if s2 %}is-done{% elif s1 %}is-cur{% endif %}"><span aria-hidden="true">{% if s2 %}<i data-lucide="check" class="lu"></i>{% else %}2{% endif %}</span>
         <div><h3>Asoslarni o‘rganing</h3><p>O‘rganish bo‘limida {{ n_courses }} ta kurs: qisqa nazariya va har biridan keyin mashq masalalari{% if learning %}, birinchisi «{{ learning.plan.title }}»{% endif %}.</p></div>
         <a class="ca-btn ca-btn-soft" href="{% url 'learn:hub' %}">Darslarni ko‘rish</a></li>
+      {% if upcoming %}
       <li class="{% if s3 %}is-done{% elif s1 and s2 %}is-cur{% endif %}"><span aria-hidden="true">{% if s3 %}<i data-lucide="check" class="lu"></i>{% else %}3{% endif %}</span>
-        <div><h3>Birinchi musobaqaga yoziling</h3><p>{% with c=upcoming.0 %}{% if c %}{{ c.title }}, {{ c.start|ztime:"d.m H:i" }}. Reytingingiz musobaqada boshlanadi{% if not c.is_rated %}; bu raund reytingga ta’sir qilmaydi, mashq uchun{% endif %}.{% else %}Reytingingiz birinchi reytingli musobaqada boshlanadi. Yangi raund e’lon qilinganda shu yerda chiqadi.{% endif %}{% endwith %}</p></div>
-        <a class="ca-btn ca-btn-soft" href="{% if upcoming %}{% url 'contests:detail' upcoming.0.pk %}{% else %}{% url 'contests:list' %}{% endif %}">{% if upcoming %}Ro‘yxatdan o‘tish{% else %}Musobaqalar{% endif %}</a></li>
+        <div><h3>Birinchi musobaqaga yoziling</h3><p>{% with c=upcoming.0 %}{{ c.title }}, {{ c.start|ztime:"d.m H:i" }}. Reytingingiz musobaqada boshlanadi{% if not c.is_rated %}; bu raund reytingga ta’sir qilmaydi, mashq uchun{% endif %}.{% endwith %}</p></div>
+        <a class="ca-btn ca-btn-soft" href="{% url 'contests:detail' upcoming.0.pk %}">Ro‘yxatdan o‘tish</a></li>
+      {% elif not user.is_superuser %}
+      <li class="{% if s1 and s2 %}is-cur{% endif %}"><span aria-hidden="true">3</span>
+        <div><h3>Duelda kuchingizni sinang</h3><p>Raqib bilan 5 ta savol, har biriga 20 soniya. Yangi musobaqa e’lon qilinganda shu yerda chiqadi.</p></div>
+        <a class="ca-btn ca-btn-soft" href="{% url 'classroom:duels' %}">Raqib topish</a></li>
+      {% endif %}
     </ol>
   </section>
   {% endwith %}
 
-  <section aria-labelledby="map-title">
-    <div class="ca7-sec-h"><h2 id="map-title">CodeArena’da nimalar bor</h2></div>
-    <table class="ca-table ca-table-flat ca7-tour">
-      <tbody>
-        <tr><td><a class="ca-link" href="{% url 'problems:list' %}">Masalalar</a></td><td class="text-mute">{% if ring %}{{ ring.total }} ta masala, {% endif %}Beginner’dan Hard’gacha. Har biriga kod yuborasiz, tizim testlar bilan tekshiradi.</td></tr>
-        <tr><td><a class="ca-link" href="{% url 'learn:hub' %}">O‘rganish</a></td><td class="text-mute">Mavzular bo‘yicha darslar va mashqlar. Boshlovchilar uchun eng yaxshi joy.</td></tr>
-        <tr><td><a class="ca-link" href="{% url 'contests:list' %}">Musobaqalar</a></td><td class="text-mute">Belgilangan vaqtda hamma bir xil masalalarni yechadi. Natijaga qarab reyting o‘zgaradi.</td></tr>
-        <tr><td><a class="ca-link" href="{% url 'rating' %}">Reyting</a></td><td class="text-mute">Ishtirokchilar ro‘yxati va darajalar (masalan, Specialist, Expert).</td></tr>
-        <tr><td><a class="ca-link" href="{% url 'classroom:duels' %}">Duel</a></td><td class="text-mute">Bitta raqib, 5 ta savol, har biriga 20 soniya.</td></tr>
-      </tbody>
-    </table>
-  </section>
 </div>
 
 <aside class="ca7-aside" aria-label="Qo‘shimcha">

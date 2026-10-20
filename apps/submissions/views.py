@@ -5,6 +5,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http import Http404, HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
@@ -82,7 +83,9 @@ def _gate(request, slug):
 
 def _refused(request, problem, message, status):
     """A refused submit as a page, not bare text: the draft is still in the editor (localStorage), so the way
-    back is one click. The status code stays what it was."""
+    back is one click. The status code stays what it was. The editor's own fetch gets the message as JSON."""
+    if request.headers.get("X-Fetch") == "1":
+        return JsonResponse({"error": message}, status=status)
     return render(request, "submissions/refused.html", {"message": message, "problem": problem}, status=status)
 
 
@@ -127,6 +130,9 @@ def submit(request, slug):
         **telemetry,
     )
     django_rq.enqueue(run_submission, sub.pk)
+    if request.headers.get("X-Fetch") == "1":  # the workspace shows the verdict itself (problems/detail.html)
+        return JsonResponse({"id": sub.pk, "status": reverse("submissions:status", args=[sub.pk]),
+                             "url": reverse("submissions:detail", args=[sub.pk])})
     return redirect(
         "submissions:detail", sub.pk
     )  # the result as it comes in; "Masalaga qaytish" leads back
@@ -435,3 +441,47 @@ def mine(request):
             "lang": lang,
         },
     )
+
+
+GUEST_TRIAL_PER_MIN = 6
+GUEST_TRIAL_PER_HOUR = 40
+
+
+@require_POST
+def guest_trial(request, slug):
+    """"Sinab ko‘rish" without an account: the sample tests only, on an open practice problem, with a tight limit per
+    address. Nothing is saved; sign-up is only needed to submit."""
+    from apps.accounts import throttle
+
+    if request.user.is_authenticated:
+        return JsonResponse({"error": "Tizimga kirgansiz: sahifani yangilang."}, status=400)
+    problem = get_object_or_404(Problem, slug=slug, is_public=True)
+    if problem.kind == Problem.Kind.SQL or problem.contest_problems.filter(contest__end__gt=timezone.now()).exists():
+        return JsonResponse({"error": "Bu masalada sinash uchun ro‘yxatdan o‘ting."}, status=403)
+    source = request.POST.get("source", "")
+    if not source.strip() or len(source) > MAX_SOURCE:
+        return JsonResponse({"error": "Kod bo‘sh yoki juda katta"}, status=400)
+    if (throttle.ip_blocked(request, "guest-trial-min", GUEST_TRIAL_PER_MIN, 60)
+            or throttle.ip_blocked(request, "guest-trial-hour", GUEST_TRIAL_PER_HOUR, 3600)):
+        return JsonResponse({"error": "Juda tez-tez. Ro‘yxatdan o‘tsangiz, limit ancha keng."}, status=429)
+    language = get_object_or_404(Language, code=request.POST.get("language"), is_active=True)
+    samples = list(problem.samples)
+    if not samples:
+        return JsonResponse({"error": "Namunaviy test yo‘q"}, status=400)
+    job = django_rq.get_queue("run").enqueue(
+        run_trial, language.code, source, [t.input for t in samples], [t.expected for t in samples],
+        problem.tl_ms, problem.ml_mb, result_ttl=300, failure_ttl=300,
+        meta={"guest_ip": request.META.get("REMOTE_ADDR", "")})
+    return JsonResponse({"id": job.id})
+
+
+def guest_trial_status(request, job_id):
+    job = django_rq.get_queue("run").fetch_job(job_id)
+    if job is None or not job.meta.get("guest_ip") or job.meta["guest_ip"] != request.META.get("REMOTE_ADDR", ""):
+        raise Http404
+    status = job.get_status()
+    if status == "finished":
+        return JsonResponse({"done": True, **job.return_value()})
+    if status in ("failed", "stopped", "canceled"):
+        return JsonResponse({"done": True, "verdict": "IE", "log": "", "cases": []})
+    return JsonResponse({"done": False, "status": status})

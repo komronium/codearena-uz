@@ -7,6 +7,7 @@ from urllib.parse import quote
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.cache import cache
 from django.contrib.auth import login as auth_login
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import render
@@ -17,6 +18,7 @@ from django.views.decorators.http import require_POST
 
 from .models import TelegramLink, TelegramLinkToken
 from .telegram import (bot_configured, claim_login_request, confirm_login_request, consume_link_token, issue_link_token,
+                       login_code,
                        issue_login_request, send_chat_message)
 
 log = logging.getLogger(__name__)
@@ -42,7 +44,8 @@ def login_start(request):
     request.session["tg_login_next"] = request.POST.get("next", "")
     username = settings.TELEGRAM_BOT_USERNAME.lstrip("@")
     return render(request, "registration/telegram_login.html", {
-        "bot_url": f"https://t.me/{quote(username)}?start=login_{quote(request.session['tg_login'])}", "bot": username})
+        "bot_url": f"https://t.me/{quote(username)}?start=login_{quote(request.session['tg_login'])}", "bot": username,
+        "code": login_code(request.session["tg_login"])})
 
 
 def login_status(request):
@@ -109,7 +112,21 @@ def _handle_bot_message(message):
     parts = text.split(maxsplit=1)
     command = parts[0].split("@", 1)[0].lower() if parts else ""
     if command == "/start" and len(parts) == 2 and parts[1].startswith("login_"):
-        status = confirm_login_request(parts[1][len("login_"):][:64], str(chat_id))
+        # step 1: remember which attempt this chat was sent; the person confirms with the code their browser shows
+        cache.set(f"tg-login-pending:{chat_id}", parts[1][len("login_"):][:64], 300)
+        try:
+            send_chat_message(str(chat_id), "Saytga kirish so‘rovi. Brauzeringizdagi <b>4 xonali kodni</b> shu yerga yozing. "
+                                            "Agar bu havolani sizga boshqa kishi yuborgan bo‘lsa, hech narsa yozmang.")
+        except Exception:
+            log.exception("Could not send Telegram login prompt")
+        return
+    pending = cache.get(f"tg-login-pending:{chat_id}") if text.isdigit() and len(text) == 4 else None
+    if pending:
+        cache.delete(f"tg-login-pending:{chat_id}")
+        if text != login_code(pending):
+            send_chat_message(str(chat_id), "Kod mos kelmadi. Saytda «Telegram orqali kirish»ni qaytadan bosing.")
+            return
+        status = confirm_login_request(pending, str(chat_id))
         replies = {
             "ok": "Tayyor! Brauzerga qayting: u o‘zi kirib oladi.",
             "expired": "Kirish so‘rovi eskirgan. Saytda «Telegram orqali kirish»ni qaytadan bosing.",

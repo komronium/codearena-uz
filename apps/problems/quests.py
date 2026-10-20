@@ -6,7 +6,7 @@ A freeze is earned for every 7 active days in a row (at most MAX_FREEZES kept) a
 day, so one slip does not end a run. It is worked out by replaying the days, which keeps it deterministic."""
 import datetime
 
-from django.db.models import Case, When
+from django.db.models import Case, Count, F, Q, When
 from django.db.models.functions import TruncDate
 from django.urls import reverse
 from django.utils import timezone
@@ -20,7 +20,8 @@ def quest_dates(user, since: datetime.date | None = None) -> dict[str, set[datet
     """Quest key -> the days (local) it was done."""
     from apps.classroom.models import Duel
     from apps.learn.models import PlanRead
-    from apps.submissions.models import Submission
+    from apps.classroom.duel_badges import MIN_LOSER_ANSWERS
+    from apps.submissions.models import UserProblemSolved
 
     def days(qs, field):
         qs = qs.annotate(d=TruncDate(field))
@@ -29,10 +30,14 @@ def quest_dates(user, since: datetime.date | None = None) -> dict[str, set[datet
         return set(qs.values_list("d", flat=True).distinct())
 
     won_at = Case(When(challenger=user, then="ends_at"), default="opponent_ends_at")
+    # only a FIRST accepted solve counts (a re-submit, a contest AC and a virtual run do not make a day), and a duel
+    # win only when the loser really played (answered at least MIN_LOSER_ANSWERS questions)
+    answered_by_other = Count("answers", filter=Q(answers__answered_at__isnull=False) & ~Q(answers__user=user))
     return {
-        "easy": days(Submission.objects.filter(user=user, verdict=Submission.Verdict.AC,
-                                               problem__difficulty__in=EASY_LEVELS), "created"),
-        "duel": days(Duel.objects.filter(winner=user, status=Duel.Status.FINISHED).annotate(won_at=won_at), "won_at"),
+        "easy": days(UserProblemSolved.objects.filter(user=user, problem__difficulty__in=EASY_LEVELS)
+                     .annotate(first_at=F("first_ac_submission__created")), "first_at"),
+        "duel": days(Duel.objects.filter(winner=user, status=Duel.Status.FINISHED).annotate(won_at=won_at)
+                     .annotate(played=answered_by_other).filter(played__gte=MIN_LOSER_ANSWERS), "won_at"),
         "course": days(PlanRead.objects.filter(user=user), "read_at"),
     }
 

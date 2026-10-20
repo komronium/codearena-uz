@@ -18,6 +18,7 @@ urlpatterns = [
     path("profile/edit/", views.profile_edit, name="profile_edit"),
     path("welcome/", views.welcome, name="welcome"),
     path("export/", views.export_data, name="export_data"),
+    path("delete/", views.delete_account, name="delete_account"),
     path("notifications/<int:pk>/", views.notification_open, name="notification_open"),
     path("notifications/read/", views.notifications_read, name="notifications_read"),
     path("verify-email/<str:token>/", views.verify_email, name="verify_email"),

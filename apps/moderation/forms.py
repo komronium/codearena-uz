@@ -158,7 +158,7 @@ class ContestForm(ModelForm):
     class Meta:
         model = Contest
         fields = ["title", "description_md", "start", "end", "type", "is_rated", "division", "is_official", "review_top_n",
-                  "allowed_ip_prefix", "badge", "personal_minutes"]
+                  "allowed_ip_prefix", "badge", "personal_minutes", "auto_finish"]
         widgets = {
             "personal_minutes": forms.NumberInput(attrs={**_CA_INPUT, "min": 0, "max": 1440, "placeholder": "0 — hamma uchun bir soat"}),
             "title": forms.TextInput(attrs=_CA_INPUT),

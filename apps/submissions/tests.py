@@ -667,3 +667,63 @@ def test_a_refused_submit_is_a_page_with_the_way_back_not_bare_text(client, pyth
     assert r.status_code == 400  # the code is what it was; the body is now a page
     page = r.content.decode()
     assert "Yechim yuborilmadi" in page and "Kod bo‘sh yoki juda katta" in page and problem.slug in page
+
+
+@pytest.mark.django_db
+def test_only_a_first_accepted_solve_makes_a_streak_day(python, problem):
+    from datetime import timedelta
+    from apps.problems.quests import quest_dates
+    from .solves import refresh_solves
+    problem.difficulty = "easy"
+    problem.is_public = True
+    problem.save()
+    u = User.objects.create_user("ali", password="x")
+    first = timezone.now() - timedelta(days=3)
+    for when in (first, first + timedelta(days=2)):  # the second AC is a re-submit two days later
+        s = Submission.objects.create(user=u, problem=problem, language=python, source="x", verdict="AC")
+        Submission.objects.filter(pk=s.pk).update(created=when)
+    refresh_solves(problem.pk)
+    assert quest_dates(u)["easy"] == {timezone.localtime(first).date()}
+
+
+@pytest.mark.django_db
+def test_a_duel_win_over_someone_who_did_not_play_is_a_walkover(python):
+    from apps.classroom.duel_badges import duel_stats, walkovers
+    from apps.classroom.models import Duel, DuelAnswer, DuelQuestion
+    from apps.problems.quests import quest_dates
+    a, b = (User.objects.create_user(n, password="x") for n in ("a", "b"))
+    now = timezone.now()
+    q = DuelQuestion.objects.create(key="q1", language="python", level="easy", kind="output", code="print(1)", answer="1")
+    d = Duel.objects.create(challenger=a, opponent=b, language="python", questions=[q.pk], status=Duel.Status.FINISHED,
+                            winner=a, started_at=now, ends_at=now, opponent_started_at=now, opponent_ends_at=now)
+    DuelAnswer.objects.create(duel=d, user=a, index=0, question=q, answer="1", correct=True, shown_at=now, answered_at=now)
+    assert walkovers([d], a) == {d.pk}  # b answered nothing
+    assert duel_stats(a)["wins"] == 0 and quest_dates(a)["duel"] == set()
+
+
+@pytest.mark.django_db
+def test_the_workspace_submit_by_fetch_answers_with_json_not_a_redirect(client, python, problem):
+    client.force_login(User.objects.create_user("ali", password="x"))
+    with patch("apps.submissions.views.django_rq.enqueue"):
+        r = client.post(reverse("submissions:submit", args=[problem.slug]),
+                        {"language": python.code, "source": "print(3)"}, headers={"X-Fetch": "1"})
+    j = r.json()
+    assert r.status_code == 200 and j["url"].startswith("/submissions/") and j["status"].endswith("/status/")
+    r = client.post(reverse("submissions:submit", args=[problem.slug]), {"language": python.code, "source": ""},
+                    headers={"X-Fetch": "1"})
+    assert r.status_code == 400 and "Kod bo‘sh" in r.json()["error"]
+
+
+@pytest.mark.django_db
+def test_a_guest_can_try_the_samples_but_not_submit_and_is_limited(client, python, problem):
+    problem.is_public = True
+    problem.save()
+    url = reverse("submissions:guest_trial", args=[problem.slug])
+    with patch("apps.submissions.views.django_rq.get_queue") as queue:
+        queue.return_value.enqueue.return_value.id = "job1"
+        r = client.post(url, {"language": python.code, "source": "print(3)"})
+    assert r.status_code == 200 and r.json() == {"id": "job1"}
+    for _ in range(8):
+        r = client.post(url, {"language": python.code, "source": "print(3)"})
+    assert r.status_code == 429
+    assert client.post(reverse("submissions:submit", args=[problem.slug]), {"language": python.code, "source": "x"}).status_code == 302  # login

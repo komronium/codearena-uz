@@ -28,4 +28,13 @@ urlpatterns = [
 ]
 
 # ponytail: Django serves avatars itself in prod too; put nginx in front when traffic grows.
-urlpatterns += [re_path(r"^media/(?P<path>.*)$", serve, {"document_root": settings.MEDIA_ROOT})]
+def _media(request, path):
+    """Uploaded files (avatars, statement images) are data, never a page: a sandboxed, non-sniffed response, so an
+    uploaded SVG cannot run script on the site's origin."""
+    response = serve(request, path, document_root=settings.MEDIA_ROOT)
+    response["Content-Security-Policy"] = "sandbox; default-src 'none'; img-src 'self'; style-src 'unsafe-inline'"
+    response["X-Content-Type-Options"] = "nosniff"
+    return response
+
+
+urlpatterns += [re_path(r"^media/(?P<path>.*)$", _media)]

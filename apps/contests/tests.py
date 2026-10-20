@@ -3,6 +3,7 @@ from io import StringIO
 from unittest.mock import patch
 
 import pytest
+from django.db.models import F
 from django.core.cache import cache
 from django.core.management import call_command, CommandError
 from django.urls import reverse
@@ -897,7 +898,7 @@ def test_a_disqualified_newcomer_gets_no_ramp_bonus_and_keeps_the_step(problem_a
 
 
 @pytest.mark.django_db
-def test_dq_after_rating_leaves_older_contests_alone(client, problem_a, python):
+def test_a_late_dq_redoes_the_later_rounds_too_and_keeps_manual_edits(client, problem_a, python):
     from .rating import apply_rating
 
     staff = User.objects.create_user("boss", password="x", is_staff=True)
@@ -906,12 +907,45 @@ def test_dq_after_rating_leaves_older_contests_alone(client, problem_a, python):
     apply_rating(old)
     newer = _rated_contest("Newer", 1, problem_a, python, [ali, cheat])
     apply_rating(newer)
+    User.objects.filter(pk=ali.pk).update(rating=F("rating") + 11)  # a manual edit made since stays
     before = dict(User.objects.values_list("username", "rating"))
 
     client.force_login(staff)
     r = client.post(reverse("contests:disqualify", args=[old.pk, cheat.pk]), {"disqualified": "1"}, follow=True)
-    assert dict(User.objects.values_list("username", "rating")) == before
-    assert "reyting o‘zgarmadi" in r.content.decode()
+    after = dict(User.objects.values_list("username", "rating"))
+    assert after["cheat"] < before["cheat"]  # last place in the old round, and the round after it is redone from there
+    p_ali = Participation.objects.get(contest=newer, user=ali)
+    assert after["ali"] == p_ali.rating_after  # the open rating agrees with the last round's result
+    assert "2 ta raund" in r.content.decode()
+
+
+@pytest.mark.django_db
+def test_a_round_is_rated_once_even_when_asked_twice(problem_a, python):
+    from .rating import apply_rating
+
+    ali, bob = (User.objects.create_user(n, password="x") for n in ("ali", "bob"))
+    c = _rated_contest("Once", 3, problem_a, python, [ali], [bob])
+    assert apply_rating(c) is True
+    stale = Contest.objects.get(pk=c.pk)  # an older read, as a racing request would hold
+    stale.rating_applied = False
+    ratings = dict(User.objects.values_list("username", "rating"))
+    assert apply_rating(stale) is False
+    assert dict(User.objects.values_list("username", "rating")) == ratings
+
+
+@pytest.mark.django_db
+def test_the_rating_pool_is_one_definition_everywhere(client, problem_a, python):
+    from . import rating
+    from .rating import apply_rating
+
+    ali, bob = (User.objects.create_user(n, password="x") for n in ("ali", "bob"))
+    old = _rated_contest("Old", 24 * 120, problem_a, python, [bob])  # 120 days ago: bob is inactive
+    apply_rating(old)
+    new = _rated_contest("New", 24, problem_a, python, [ali])
+    apply_rating(new)
+    assert set(rating.pool()) == {ali}
+    page = client.get(reverse("contests:list")).content.decode()
+    assert "ali" in page and "bob" not in page.split("Eng yuqori reyting")[-1]
 
 
 # ---- virtual contests ---------------------------------------------------------------------------
@@ -1673,3 +1707,38 @@ def test_personal_clock_under_codeforces_rules_decays_over_the_persons_own_minut
     cell = compute_standings(c)[0]["cells"][0]
     # 60 own minutes of 120: 1000 - 120*1000*60/(250*120) = 760, one wrong try -50; over the 2-day window it would barely decay
     assert cell["minutes"] == 60 and cell["points"] == 710 and cell["wrong"] == 1
+
+
+@pytest.mark.django_db
+def test_finish_contests_publishes_and_rates_only_rounds_left_on_automatic(problem_a, python):
+    from apps.integrity.models import SimilarityFlag
+
+    ali, bob = (User.objects.create_user(n, password="x") for n in ("ali", "bob"))
+    auto = _rated_contest("Auto", 20, problem_a, python, [ali], [bob])
+    manual = _rated_contest("Manual", 21, problem_a, python, [ali], [bob])
+    Contest.objects.filter(pk=auto.pk).update(auto_finish=True)
+    call_command("finish_contests", stdout=StringIO())
+    auto.refresh_from_db(), manual.refresh_from_db()
+    assert auto.published_at and auto.rating_applied and not manual.published_at and not manual.rating_applied
+    # an open similarity flag holds an automatic round back
+    held = _rated_contest("Held", 22, problem_a, python, [ali], [bob])
+    Contest.objects.filter(pk=held.pk).update(auto_finish=True)
+    a, b = Submission.objects.filter(contest=held)[:2]
+    SimilarityFlag.objects.create(submission_a=a, submission_b=b, score=0.9)
+    call_command("finish_contests", stdout=StringIO())
+    held.refresh_from_db()
+    assert not held.published_at and not held.rating_applied
+
+
+@pytest.mark.django_db
+def test_an_unconfirmed_email_can_join_a_round_but_is_not_rated(client, settings, problem_a, python):
+    from .rating import apply_rating
+    settings.ACCOUNT_GATE = True
+    from django.utils import timezone as tz
+    fresh = User.objects.create_user("fresh", password="x", email="f@example.com", first_name="F", country="UZ", location="Toshkent")
+    done = User.objects.create_user("done", password="x", email="d@example.com", first_name="D", country="UZ",
+                                    location="Toshkent", email_verified_at=tz.now())
+    c = _rated_contest("Gate", 3, problem_a, python, [fresh, done])
+    apply_rating(c)
+    rows = {p.user.username: p for p in Participation.objects.filter(contest=c)}
+    assert rows["done"].rating_after is not None and rows["fresh"].rating_after is None

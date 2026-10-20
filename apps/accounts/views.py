@@ -302,13 +302,6 @@ def verify_email(request, token):
     return redirect("login")
 
 
-def _ranked(page):
-    """A leaderboard page with each user's place on the whole board as .rank."""
-    for i, u in enumerate(page):
-        u.rank = page.start_index() + i
-    return page
-
-
 def practice_board():
     """Who stands on the practice-points board: active non-staff users with points. A 0 says nothing
     about anyone, and the admin account is not a student."""
@@ -381,8 +374,10 @@ def duel_board(request):
         u.eff = duel_rules.carried(u.duel_rating, u.duel_season, season)
     people.sort(key=lambda u: (-u.eff, u.username))
     page = Paginator(people, 50).get_page(request.GET.get("page"))
-    users = _ranked(page)
-    for u in users:
+    users = page
+    effs = [p.eff for p in people]
+    for u in users:  # equal duel ratings share a place, as on every other board ("1, 2, 2, 2, 5")
+        u.rank = sum(1 for e in effs if e > u.eff) + 1
         u.duels, u.wins = played[u.pk], wins[u.pk]
     podium_season = (DuelSeasonResult.objects.filter(rank__gt=0).order_by("-season").values_list("season", flat=True).first())
     podium = list(DuelSeasonResult.objects.filter(season=podium_season, rank__gt=0).select_related("user")) if podium_season else []
@@ -415,7 +410,7 @@ def _rating_spread(ratings: list[int], mine: int | None) -> dict:
             "bars": bars, "ticks": ticks}
 
 
-INACTIVE_DAYS = 90  # no rated contest for this long: off the board (the rating is kept and returns with the next one)
+from apps.contests.rating import INACTIVE_DAYS  # no rated contest for this long: off the board (the rating is kept)
 
 
 def _board_cutoff():
@@ -787,3 +782,31 @@ def export_data(request):
     response = JsonResponse(data, json_dumps_params={"ensure_ascii": False, "indent": 2})
     response["Content-Disposition"] = f'attachment; filename="codearena-{user.username}.json"'
     return response
+
+
+@login_required
+@require_POST
+def delete_account(request):
+    """"Hisobni o‘chirish": the person's identity goes (name, email, photo, Telegram link, bell), the account is closed and
+    the password cannot be used again. What they did stays under a neutral name, because contest standings and
+    other people's ratings were worked out from it. Staff accounts are closed by another admin, not by themselves."""
+    user = request.user
+    if user.is_staff or not user.check_password(request.POST.get("password", "")):
+        messages.error(request, "Parol noto‘g‘ri" if not user.is_staff else "Xodim hisobi bu yerdan o‘chirilmaydi.")
+        return redirect("profile_edit")
+    TelegramLink.objects.filter(user=user).delete()
+    Notification.objects.filter(user=user).delete()
+    Follow.objects.filter(Q(user=user) | Q(target=user)).delete()
+    if user.avatar:
+        user.avatar.delete(save=False)
+    user.username = f"deleted-{user.pk}"
+    user.first_name = user.last_name = user.email = user.school = user.location = ""
+    user.country = ""
+    user.avatar = None
+    user.is_active = False
+    user.set_unusable_password()
+    user.save()
+    from django.contrib.auth import logout
+    logout(request)
+    messages.success(request, "Hisobingiz o‘chirildi.")
+    return redirect("home")

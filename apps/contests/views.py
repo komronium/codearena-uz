@@ -1,5 +1,4 @@
 from django.contrib import messages
-from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.core.paginator import Paginator
@@ -64,7 +63,7 @@ def contest_list(request):
         row = c.me and next((r for r in _standings(c) if r["user"].pk == request.user.pk), None)
         c.my_rank, c.my_solved = (row["rank"], row["solved"]) if row else (None, None)
     # the sidebar's top ten, from the rating page's pool: users with a finished rated contest
-    pool = get_user_model().objects.filter(is_active=True, participations__rating_after__isnull=False).distinct()
+    pool = rating.pool()
     top_rated = pool.order_by("-rating", "username")[:10]
     # the cover's numbers: your rating, your place in that same pool, the rounds you finished
     me = None
@@ -285,9 +284,12 @@ def submissions(request, pk):
     if f["verdict"] in Submission.TERMINAL:
         qs = qs.filter(verdict=f["verdict"])
     page = Paginator(qs.order_by("-id"), 50).get_page(request.GET.get("page"))
+    # the time column counts from the person's own start in a personal-clock round, as the standings do
+    own_start = ({uid: st for uid, st in contest.participations.filter(started_at__isnull=False)
+                  .values_list("user_id", "started_at")} if contest.personal_minutes else {})
     for s in page:
         s.label = label.get(s.problem_id, "?")
-        s.elapsed = elapsed(max(0, int((s.created - contest.start).total_seconds()) // 60))
+        s.elapsed = elapsed(max(0, int((s.created - own_start.get(s.user_id, contest.start)).total_seconds()) // 60))
     if request.headers.get("HX-Request"):
         return render(request, "contests/_submissions_live.html", {"contest": contest, "page": page, "f": f})
     return render(request, "contests/submissions.html", {
@@ -397,15 +399,16 @@ def _back(request, pk):
 
 def _rerate(request, contest):
     """A DQ moves the participant to last place, and a voided problem lowers their score, which
-    changes everyone's delta. Only the latest rated contest can be redone without breaking later
-    rating chains."""
+    changes everyone's delta. When the people in it have played since, the later rounds are redone too
+    (rating.recompute_from), so the open rating never disagrees with the official one."""
     if rating.is_latest(contest):
         rating.recompute(contest)
         audit.record(request, audit.Action.RATING_RECOMPUTE, contest=contest)
         messages.success(request, "Reyting qayta hisoblandi.")
     else:
-        messages.warning(request, "Ishtirokchilar keyinroq boshqa reytingli musobaqada qatnashgan — "
-                                  "bu musobaqaning reyting o‘zgarmadi.")
+        n = rating.recompute_from(contest)
+        audit.record(request, audit.Action.RATING_RECOMPUTE, contest=contest, note=f"keyingi raundlar bilan: {n} ta")
+        messages.success(request, f"Reyting shu raunddan boshlab {n} ta raund bo‘yicha qayta hisoblandi.")
 
 
 @login_required

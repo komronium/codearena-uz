@@ -841,3 +841,56 @@ def test_a_unix_socket_peer_still_gets_the_clients_own_address():
     assert seen["ip"] == "203.0.113.7"
     assert client_ip(RequestFactory().get("/", REMOTE_ADDR="", HTTP_X_FORWARDED_FOR="203.0.113.9")) == "203.0.113.9"
     assert client_ip(RequestFactory().get("/", REMOTE_ADDR="198.51.100.4")) == "198.51.100.4"
+
+
+# ---- audit round 2: security ----
+
+@pytest.mark.django_db
+def test_telegram_login_needs_the_code_the_browser_shows():
+    from unittest.mock import patch
+    from . import telegram, telegram_views
+    from .models import TelegramLink
+    u = User.objects.create_user("ali", password="x")
+    TelegramLink.objects.create(user=u, chat_id="42", is_active=True)
+    raw = telegram.issue_login_request()
+    msg = lambda text: {"chat": {"type": "private", "id": 42}, "text": text}  # noqa: E731
+    with patch.object(telegram_views, "send_chat_message") as send:
+        telegram_views._handle_bot_message(msg(f"/start login_{raw}"))
+        assert telegram.claim_login_request(raw) is None  # tapping the link is not enough
+        telegram_views._handle_bot_message(msg("0000" if telegram.login_code(raw) != "0000" else "0001"))
+        assert telegram.claim_login_request(raw) is None and "mos kelmadi" in send.call_args[0][1]
+        telegram_views._handle_bot_message(msg(f"/start login_{raw}"))
+        telegram_views._handle_bot_message(msg(telegram.login_code(raw)))
+    assert telegram.claim_login_request(raw) == u
+
+
+@pytest.mark.django_db
+def test_an_unconfirmed_address_older_than_three_days_can_be_taken(client):
+    from django.utils import timezone
+    squatter = User.objects.create_user("squatter", password="x", email="vali@example.com")
+    r = client.post(reverse("register"), {"username": "vali", "email": "vali@example.com", "first_name": "V",
+                                          "password1": "StrongPass123!"})
+    assert r.status_code == 200 and "allaqachon" in r.content.decode()  # fresh: still held
+    User.objects.filter(pk=squatter.pk).update(date_joined=timezone.now() - timezone.timedelta(days=4))
+    client.post(reverse("register"), {"username": "vali", "email": "vali@example.com", "first_name": "V",
+                                      "password1": "StrongPass123!"})
+    assert User.objects.get(username="vali").email == "vali@example.com"
+    assert User.objects.get(pk=squatter.pk).email == ""
+
+
+@pytest.mark.django_db
+def test_deleting_an_account_removes_the_person_and_keeps_the_record(client):
+    u = User.objects.create_user("ali", password="secret12", email="a@example.com", first_name="Ali")
+    client.force_login(u)
+    assert client.post(reverse("delete_account"), {"password": "wrong"}).status_code == 302
+    u.refresh_from_db()
+    assert u.is_active and u.email == "a@example.com"
+    client.post(reverse("delete_account"), {"password": "secret12"})
+    u.refresh_from_db()
+    assert not u.is_active and u.username == f"deleted-{u.pk}" and u.email == "" and not u.has_usable_password()
+
+
+def test_statement_images_must_come_from_this_site():
+    from apps.problems.views import _render_statement
+    page = _render_statement("![x](https://tracker.example/p.png) ![y](/media/problem/a.png)")
+    assert "tracker.example" not in page and "/media/problem/a.png" in page

@@ -15,7 +15,7 @@ Colour carries meaning only: the tier colour is the person, green/red the result
     <div class="ca7-pwho">
       <span class="ca7-pav{% if not profile_user.avatar %} ca-art-{{ banner.0 }}{% endif %}">{% if profile_user.avatar %}<img src="{{ profile_user.avatar.url }}" alt="" width="96" height="96" decoding="async">{% else %}<span aria-hidden="true">{{ profile_user.username|slice:":1"|upper }}</span>{% endif %}</span>
       <div class="min-w-0">
-        <h1 id="hero-name"><span translate="no">{{ profile_user.username }}</span><span class="ca7-ptier">{% if rating_history %}{{ tier }}{% else %}Reytingsiz{% endif %}</span></h1>
+        <h1 id="hero-name"><span translate="no">{{ profile_user.username }}</span><span class="ca7-ptier">{% if rating_history %}{{ tier }}{% else %}Reytingsiz{% endif %}</span>{% if profile_user.verified_at %}<span class="ca7-ptier" title="Shaxsi adminlar tomonidan tasdiqlangan: rasmiy reyting faqat tasdiqlanganlar uchun">Tasdiqlangan</span>{% endif %}</h1>
         {% if profile_user.get_full_name %}<p class="ca-hud-sub">{{ profile_user.get_full_name }}</p>{% endif %}
         <p class="ca7-pmeta">
           {% if profile_user.location or profile_user.country %}<span>{% if profile_user.country %}{% flag profile_user.country %}{% else %}<i data-lucide="map-pin" class="lu" aria-hidden="true"></i>{% endif %} {{ profile_user.location }}{% if profile_user.location and profile_user.country %}, {% endif %}{{ profile_user.country_name }}</span>{% endif %}
@@ -34,7 +34,7 @@ Colour carries meaning only: the tier colour is the person, green/red the result
     </div>
     <dl class="ca7-pstats">
       <div><dt>Musobaqa reytingi</dt><dd>{% if rating_history %}<b class="ca7-prt tabular">{{ profile_user.rating }}</b>{% if last_delta %} <span class="ca7-pdelta{% if last_delta < 0 %} is-down{% endif %}">{{ last_delta|signed }}</span>{% endif %}{% else %}<b>—</b>{% endif %}</dd>
-        <dd><small>{% if max_rating %}eng yuqori {{ max_rating }}{% else %}hali reytingli raund yo‘q{% endif %}</small></dd></div>
+        <dd><small>{% if max_rating %}eng yuqori {{ max_rating }}{% else %}hali reytingli raund yo‘q{% endif %}{% if profile_user.official_rating is not None %} · rasmiy {{ profile_user.official_rating }}{% endif %}</small></dd></div>
       <div><dt>Reytingdagi o‘rni</dt><dd>{% if rating_rank %}<b class="tabular">{{ rating_rank }}</b> <span class="ca7-of">/ {{ total_rated }}</span>{% else %}<b>—</b>{% endif %}</dd><dd><small>{% if rating_inactive %}nofaol: 90 kundan beri reytingli musobaqa yo‘q{% else %}{{ rating_history|length }} ta reytingli musobaqa{% endif %}</small></dd></div>
       <div><dt>Amaliyot balli</dt><dd><b class="tabular">{{ profile_user.practice_points }}</b></dd><dd><small>{{ solved|length }} ta masala{% if points_rank %} · {{ points_rank }}-o‘rin{% endif %}</small></dd></div>
       <div><dt>Olov</dt><dd><b class="tabular">{{ streak.0 }}</b> <span class="ca7-of">kun</span></dd><dd><small>{% if streak.1 %}eng uzuni {{ streak.1 }} kun{% else %}kun masalasini yechib boshlang{% endif %}</small></dd></div>

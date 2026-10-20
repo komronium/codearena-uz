@@ -141,6 +141,16 @@
     <h2 id="data-title" class="flex items-center gap-2 text-[1.0625rem] font-bold"><i data-lucide="download" class="lu text-accent" aria-hidden="true"></i>Ma’lumotlarim</h2>
     <p class="mt-1 text-sm text-mute">Profilingiz, yuborgan kodlaringiz, musobaqa natijalari, duellar va nishonlaringiz bitta JSON faylda.</p>
     <a class="ca-btn ca-btn-ghost mt-3" href="{% url 'export_data' %}" download><i data-lucide="file-down" class="lu" aria-hidden="true"></i>Yuklab olish</a>
+    {% if not user.is_staff %}
+    <form method="post" action="{% url 'delete_account' %}" class="mt-5 border-t border-line pt-4" data-confirm="Hisob o‘chiriladi: ism, email, rasm va Telegram ulanishi olib tashlanadi, qaytarib bo‘lmaydi. Davom etasizmi?">{% csrf_token %}
+      <h3 class="text-sm font-bold text-bad">Hisobni o‘chirish</h3>
+      <p class="mt-1 text-sm text-mute">Shaxsiy ma’lumotlaringiz o‘chadi; musobaqa natijalaringiz «deleted-{{ user.pk }}» nomi ostida qoladi, chunki boshqalarning reytingi ularga tayanadi.</p>
+      <div class="mt-2 flex flex-wrap items-center gap-2">
+        <input class="ca-input max-w-xs" type="password" name="password" autocomplete="current-password" placeholder="Parolingiz" aria-label="Parolingiz" required>
+        <button class="ca-btn ca-btn-ghost text-bad">O‘chirish</button>
+      </div>
+    </form>
+    {% endif %}
   </section>
   </div>
   </div>

@@ -82,9 +82,17 @@ _ALLOWED_TAGS = [
     "a",
     "img",
 ]
+def _own_image(tag, name, value) -> bool:
+    """A statement image may only come from this site (/media/..., /static/...): an image from another host would
+    tell that host who reads the problem."""
+    if name == "src":
+        return value.startswith(("/media/", "/static/", "data:image/png", "data:image/jpeg", "data:image/gif"))
+    return name in ("alt", "title", "class", "width", "height")
+
+
 _ALLOWED_ATTRS = {
     "a": ["href", "title"],
-    "img": ["src", "alt", "title", "class", "width", "height"],
+    "img": _own_image,
     "code": ["class"],
 }
 
@@ -275,7 +283,12 @@ def problem_list(request):
         )
         .distinct()
     )
-    sort = request.GET.get("sort", "id")
+    sort = request.GET.get("sort", "")
+    if not sort and not request.GET.get("q"):
+        # somebody who has solved nothing yet (or a guest) is shown the easiest problems first: "start here"
+        from apps.submissions.models import UserProblemSolved as _Solved
+        newcomer = not request.user.is_authenticated or not _Solved.objects.filter(user=request.user).exists()
+        sort = "difficulty" if newcomer else "id"
     if sort not in _SORTS:
         sort = "id"
     desc = request.GET.get("dir") == "desc"

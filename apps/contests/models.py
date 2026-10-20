@@ -42,6 +42,9 @@ class Contest(models.Model):
     # A round with a window longer than the time each person gets (a marathon): every participant starts their
     # own clock with "Boshlash" and has this many minutes from then, never past `end`. 0 = one clock for all.
     personal_minutes = models.PositiveSmallIntegerField(default=0)
+    # the scheduler publishes the problems and applies the rating by itself once the round has been over for a while
+    # and no similarity flag is left open (contests.management.commands.finish_contests); off unless staff turn it on
+    auto_finish = models.BooleanField(default=False)
     # Rated only for users in the division's range; the rest take part out of competition:
     # on the board, but not rated (apps.contests.rating).
     division = models.PositiveSmallIntegerField(choices=Division.choices, default=Division.OPEN)

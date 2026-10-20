@@ -108,6 +108,13 @@ def issue_login_request() -> str:
     return raw
 
 
+def login_code(raw_token: str) -> str:
+    """The four digits the browser shows for a "Telegram orqali kirish" attempt. The bot asks for them back in the
+    chat, so tapping a link somebody else sent is not enough to sign them in: the person has to type a code they
+    can only have got from that other browser, and the bot says so."""
+    return f"{int(hashlib.sha256(('code:' + raw_token).encode()).hexdigest()[:8], 16) % 10000:04d}"
+
+
 def confirm_login_request(raw_token: str, chat_id: str) -> str:
     """The bot's side: tie an open attempt to the account linked to this chat. Staff accounts never sign in this way.
     Returns "ok", "expired", "unlinked" or "staff"."""
