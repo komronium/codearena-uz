@@ -992,3 +992,17 @@ def test_google_links_the_account_that_has_that_verified_email_and_refuses_staff
     monkeypatch.setattr(google, "_post_form", lambda url, data: pytest.fail("must not call Google"))
     client.get(reverse("google_callback"), {"state": "forged", "code": "c"})
     assert "_auth_user_id" not in client.session
+
+
+@pytest.mark.django_db
+def test_google_gives_a_new_account_its_picture_only_from_googles_own_host(client, google_on, monkeypatch, settings, tmp_path):
+    from . import google
+    settings.MEDIA_ROOT = tmp_path
+    fetched = []
+    monkeypatch.setattr(google, "_fetch_avatar", lambda url: fetched.append(url) or b"\xff\xd8\xff fake jpeg")
+    _google_callback(client, monkeypatch, {"sub": "g-9", "email": "pic@example.com", "email_verified": True,
+                                           "picture": "https://lh3.googleusercontent.com/a/abc=s96-c"})
+    u = User.objects.get(google_sub="g-9")
+    assert u.avatar and fetched == ["https://lh3.googleusercontent.com/a/abc=s96-c"]
+    monkeypatch.undo()
+    assert google._fetch_avatar("https://evil.example/x.png") is None and google._fetch_avatar("http://lh3.googleusercontent.com/a") is None

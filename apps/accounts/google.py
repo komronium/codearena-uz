@@ -16,6 +16,7 @@ import urllib.request
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login as auth_login
+from django.core.files.base import ContentFile
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils import timezone
@@ -44,6 +45,31 @@ def _get_json(url: str, token: str) -> dict:
     req = urllib.request.Request(url, headers={"Authorization": f"Bearer {token}"})
     with urllib.request.urlopen(req, timeout=8) as resp:  # noqa: S310
         return json.loads(resp.read().decode())
+
+
+def _fetch_avatar(url: str) -> bytes | None:
+    """The Google profile picture, if it is a normal small image from Google's own host (a fixed size, at most 1 MB)."""
+    parsed = urllib.parse.urlparse(url or "")
+    if parsed.scheme != "https" or not (parsed.hostname or "").endswith((".googleusercontent.com", ".ggpht.com")):
+        return None
+    url = re.sub(r"=s\d+(-c)?$", "=s256-c", url)  # Google resizes by a suffix: ask for a 256px square
+    try:
+        with urllib.request.urlopen(urllib.request.Request(url), timeout=8) as resp:  # noqa: S310
+            if not resp.headers.get("Content-Type", "").startswith("image/"):
+                return None
+            data = resp.read(1024 * 1024 + 1)
+    except (urllib.error.URLError, OSError, ValueError):
+        return None
+    return data if 0 < len(data) <= 1024 * 1024 else None
+
+
+def _give_avatar(user, picture_url: str) -> None:
+    """A new account (or an old one with no photo) gets the Google picture as its avatar; never an error."""
+    if user.avatar:
+        return
+    data = _fetch_avatar(picture_url)
+    if data:
+        user.avatar.save(f"google-{user.pk}.jpg", ContentFile(data), save=True)
 
 
 def _redirect_uri(request) -> str:
@@ -102,6 +128,7 @@ def _user_for(request, info: dict):
         return None, "Bu hisob yopilgan."
     if user.is_staff or user.is_superuser:
         return None, "Xodim hisoblari Google orqali kira olmaydi. Parol bilan kiring."
+    _give_avatar(user, info.get("picture", ""))  # only for the people who really sign in
     return user, ""
 
 
