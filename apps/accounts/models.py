@@ -90,6 +90,8 @@ class TelegramLoginRequest(models.Model):
 
     token_hash = models.CharField(max_length=64, unique=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.CASCADE, related_name="+")
+    # asked from the sign-up page: a chat that is linked to nobody gets a new account instead of "unlinked"
+    signup = models.BooleanField(default=False)
     expires_at = models.DateTimeField()
     used_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

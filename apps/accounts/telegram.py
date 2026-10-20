@@ -99,13 +99,38 @@ def consume_link_token(raw_token: str, chat_id: str, username: str = ""):
     return link, "ok"
 
 
-def issue_login_request() -> str:
-    """A raw token for one "Telegram orqali kirish" attempt; the browser keeps it, the bot gets it in /start."""
+def issue_login_request(signup: bool = False) -> str:
+    """A raw token for one "Telegram orqali kirish" attempt; the browser keeps it, the bot gets it in /start.
+    `signup`: asked from the sign-up page, so an unlinked chat opens an account."""
     raw = secrets.token_urlsafe(32)
     now = timezone.now()
     TelegramLoginRequest.objects.filter(expires_at__lt=now).delete()
-    TelegramLoginRequest.objects.create(token_hash=hashlib.sha256(raw.encode()).hexdigest(), expires_at=now + LOGIN_TTL)
+    TelegramLoginRequest.objects.create(token_hash=hashlib.sha256(raw.encode()).hexdigest(), signup=signup,
+                                        expires_at=now + LOGIN_TTL)
     return raw
+
+
+def _new_user_from_telegram(tg: dict, chat_id: str):
+    """A new account for a Telegram chat that has none: handle from the Telegram username (or tg<id>), first name from
+    the profile, no password and no email. The account counts as confirmed (the chat is the proof), and the chat is
+    linked, so notifications work from day one."""
+    import re
+
+    from .models import User
+
+    base = re.sub(r"[^A-Za-z0-9_]", "", tg.get("username") or "")[:20]
+    if len(base) < 3:
+        base = f"tg{chat_id}"[:20]
+    name, n = base, 1
+    while User.objects.filter(username__iexact=name).exists():
+        n += 1
+        name = f"{base}{n}"
+    user = User(username=name, first_name=(tg.get("first_name") or "")[:150], last_name=(tg.get("last_name") or "")[:150],
+                email_verified_at=timezone.now())
+    user.set_unusable_password()
+    user.save()
+    TelegramLink.objects.create(user=user, chat_id=chat_id, username=(tg.get("username") or "")[:64])
+    return user
 
 
 def login_code(raw_token: str) -> str:
@@ -115,9 +140,10 @@ def login_code(raw_token: str) -> str:
     return f"{int(hashlib.sha256(('code:' + raw_token).encode()).hexdigest()[:8], 16) % 10000:04d}"
 
 
-def confirm_login_request(raw_token: str, chat_id: str) -> str:
-    """The bot's side: tie an open attempt to the account linked to this chat. Staff accounts never sign in this way.
-    Returns "ok", "expired", "unlinked" or "staff"."""
+def confirm_login_request(raw_token: str, chat_id: str, tg: dict | None = None) -> str:
+    """The bot's side: tie an open attempt to the account linked to this chat; on a sign-up attempt, a chat linked to
+    nobody gets a new account made from `tg` (Telegram's "from" object). Staff accounts never sign in this way.
+    Returns "ok", "created", "expired", "unlinked" or "staff"."""
     digest = hashlib.sha256(raw_token.encode()).hexdigest()
     with transaction.atomic():
         req = (TelegramLoginRequest.objects.select_for_update()
@@ -125,6 +151,10 @@ def confirm_login_request(raw_token: str, chat_id: str) -> str:
         if req is None:
             return "expired"
         link = TelegramLink.objects.select_related("user").filter(chat_id=chat_id, is_active=True).first()
+        if link is None and req.signup and not TelegramLink.objects.filter(chat_id=chat_id).exists():
+            req.user = _new_user_from_telegram(tg or {}, chat_id)
+            req.save(update_fields=["user"])
+            return "created"
         if link is None or not link.user.is_active:
             return "unlinked"
         if link.user.is_staff or link.user.is_superuser:

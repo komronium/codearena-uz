@@ -90,9 +90,12 @@ class _ProfileFields(forms.ModelForm):
         self.fields["country"].error_messages["required"] = "Davlatni tanlang."
         if not self.initial.get("country"):
             self.initial["country"] = "UZ"  # most users are from here
+        if self.instance.pk and not self.instance.email and self.instance.email_verified_at:
+            self.fields["email"].required = False  # signed up through Telegram: an email can be added later
 
     def clean_email(self):
-        return _unique_email(self.cleaned_data["email"], self.instance)
+        email = self.cleaned_data["email"]
+        return _unique_email(email, self.instance) if email else ""
 
     def clean(self):
         data = super().clean()

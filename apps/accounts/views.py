@@ -180,7 +180,9 @@ def register(request):
             onboarding.send_verification(request, user, force=True)
             return redirect(nxt or "home")
     from . import google
-    return render(request, "registration/register.html", {"form": form, "next": nxt, "google_login": google.configured()})
+    from .telegram import bot_configured
+    return render(request, "registration/register.html", {"form": form, "next": nxt, "google_login": google.configured(),
+                                                          "telegram_login": bot_configured()})
 
 
 class Login(auth_views.LoginView):
