@@ -40,7 +40,7 @@ def login_start(request):
     """"Telegram orqali kirish", step 1: remember a fresh token in this browser's session and send the user to the bot."""
     if request.user.is_authenticated or not bot_configured():
         return redirect("login")
-    request.session["tg_login"] = issue_login_request(signup=request.POST.get("signup") == "1")
+    request.session["tg_login"] = issue_login_request()
     request.session["tg_login_next"] = request.POST.get("next", "")
     username = settings.TELEGRAM_BOT_USERNAME.lstrip("@")
     return render(request, "registration/telegram_login.html", {
@@ -126,12 +126,11 @@ def _handle_bot_message(message):
         if text != login_code(pending):
             send_chat_message(str(chat_id), "Kod mos kelmadi. Saytda «Telegram orqali kirish»ni qaytadan bosing.")
             return
-        status = confirm_login_request(pending, str(chat_id), message.get("from") or {})
+        status = confirm_login_request(pending, str(chat_id))
         replies = {
             "ok": "Tayyor! Brauzerga qayting: u o‘zi kirib oladi.",
-            "created": "Hisobingiz ochildi! Brauzerga qayting: u o‘zi kirib oladi. Bildirishnomalar shu chatga keladi.",
             "expired": "Kirish so‘rovi eskirgan. Saytda «Telegram orqali kirish»ni qaytadan bosing.",
-            "unlinked": "Bu Telegram hech bir CodeArena profiliga ulanmagan. Saytda «Ro‘yxatdan o‘tish» → «Telegram orqali» ni tanlang yoki parol bilan kirib, Sozlamalar → Telegram orqali ulang.",
+            "unlinked": "Bu Telegram hech bir CodeArena profiliga ulanmagan. Avval parol bilan kirib, Sozlamalar → Telegram orqali ulang.",
             "staff": "Xodim hisoblari Telegram orqali kira olmaydi. Parol bilan kiring.",
         }
         try:

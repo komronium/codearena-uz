@@ -902,3 +902,39 @@ def test_upload_image_endpoint(client):
     r = client.post(reverse("moderation:upload_image"), {"image": SimpleUploadedFile("test.txt", b"hello", content_type="text/plain")})
     assert r.status_code == 400
 
+
+
+@pytest.mark.django_db
+def test_a_setter_writes_problems_that_wait_for_staff(client):
+    from django.core.exceptions import PermissionDenied  # noqa: F401
+    from apps.accounts.models import Notification
+    setter = User.objects.create_user("setter", password="x", is_setter=True)
+    plain = User.objects.create_user("plain", password="x")
+    staff = User.objects.create_user("boss", password="x", is_staff=True)
+    client.force_login(plain)
+    assert client.get(reverse("moderation:submit")).status_code == 403
+    client.force_login(setter)
+    assert client.get(reverse("moderation:queue")).status_code == 403  # the staff's pages stay closed
+    page = client.get(reverse("moderation:submit"))
+    assert page.status_code == 200 and "form-control" not in "" and 'name="is_public"' not in page.content.decode()
+    data = {"title": "Yangi", "kind": "code", "statement_md": "s", "input_md": "i", "output_md": "o", "difficulty": "easy",
+            "tl_ms": 1000, "ml_mb": 256, "is_public": "on",  # a forged "publish" is ignored
+            "testcases-TOTAL_FORMS": 1, "testcases-INITIAL_FORMS": 0, "testcases-MIN_NUM_FORMS": 0, "testcases-MAX_NUM_FORMS": 1000,
+            "testcases-0-input": "1", "testcases-0-expected": "2", "testcases-0-is_sample": "on"}
+    r = client.post(reverse("moderation:submit"), data)
+    assert r.status_code == 302
+    p = Problem.objects.get(title="Yangi")
+    assert p.author == setter and p.status == Problem.Status.PENDING and not p.is_public
+    assert client.get(reverse("moderation:mine")).status_code == 200
+    # somebody else's problem is not theirs to open
+    other = Problem.objects.create(title="Staff", slug="staff", statement_md="x", author=staff, status=Problem.Status.APPROVED)
+    assert client.get(reverse("moderation:problem_edit", args=[other.pk])).status_code == 403
+    # the staff approve: it goes public and the writer is told
+    client.force_login(staff)
+    assert client.post(reverse("moderation:approve", args=[p.pk])).status_code == 302
+    p.refresh_from_db()
+    assert p.status == Problem.Status.APPROVED and p.is_public
+    assert Notification.objects.filter(user=setter, kind="report", text__contains="tasdiqlandi").exists()
+    # once published it is no longer the writer's to edit
+    client.force_login(setter)
+    assert client.get(reverse("moderation:problem_edit", args=[p.pk])).status_code == 403

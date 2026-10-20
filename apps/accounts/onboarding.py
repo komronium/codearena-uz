@@ -29,9 +29,7 @@ _WALLED_WRITES = ("/contests/",)
 
 def missing(user) -> list[str]:
     """Labels of the profile fields still empty."""
-    # an email is asked unless the account was confirmed another way (Telegram sign-up has none to give)
-    return [label for field, label in REQUIRED
-            if not (getattr(user, field) or "").strip() and not (field == "email" and user.email_verified_at)]
+    return [label for field, label in REQUIRED if not (getattr(user, field) or "").strip()]
 
 
 def needs_gate(user) -> bool:

@@ -4,6 +4,7 @@ import uuid
 
 import django_rq
 from django.contrib import messages
+from django.core.exceptions import PermissionDenied
 from django.core.files.storage import default_storage
 from django.core.management import CommandError, call_command
 from django.core.paginator import Paginator
@@ -17,7 +18,7 @@ from django.utils import timezone
 from django.utils.text import slugify
 from django.views.decorators.http import require_POST
 
-from apps.accounts.decorators import staff_required
+from apps.accounts.decorators import setter_required, staff_required
 from apps.accounts.models import User
 from apps.contests.models import Contest, Participation
 from apps.contests.rating import recalc_official, review_queue
@@ -229,7 +230,7 @@ def ai_generate(request):
     return render(request, "moderation/ai_generate.html", {"form": form, "max_count": MAX_COUNT})
 
 
-@staff_required
+@setter_required
 @require_POST
 def upload_image(request):
     """AJAX image upload endpoint for markdown editors (EasyMDE) and problem statements."""
@@ -251,10 +252,16 @@ def upload_image(request):
     return JsonResponse({"data": {"filePath": url}, "url": url})
 
 
-@staff_required
+@setter_required
 def submit(request, pk=None):
     problem = get_object_or_404(Problem, pk=pk) if pk else None
+    writer = not request.user.is_staff  # a trusted writer: their own pending or rejected problems only, never published
+    if writer and problem is not None and not (problem.author_id == request.user.pk
+                                               and problem.status in (Problem.Status.PENDING, Problem.Status.REJECTED)):
+        raise PermissionDenied
     form = ProblemForm(request.POST or None, request.FILES or None, instance=problem)
+    if writer:
+        form.fields.pop("is_public")  # staff publish, writers do not
     formset = TestCaseFormSet(request.POST or None, instance=form.instance, prefix="testcases")
     # A client that doesn't send the hints block (older forms, scripts) leaves hints as they are.
     hint_data = request.POST if "hints-TOTAL_FORMS" in request.POST else None
@@ -276,7 +283,12 @@ def submit(request, pk=None):
                 if problem is None:
                     obj.author = request.user
                     obj.slug = _unique_slug(obj.title)
-                    obj.status = Problem.Status.APPROVED
+                    obj.status = Problem.Status.PENDING if writer else Problem.Status.APPROVED
+                    if writer:
+                        obj.is_public = False
+                elif writer:
+                    obj.status = Problem.Status.PENDING  # an edit, or a rejected one sent again, goes back to the queue
+                    obj.is_public = False
                 obj.save()
                 form.save_m2m()
                 formset.save()
@@ -293,11 +305,21 @@ def submit(request, pk=None):
                     dataset = sql_form.save(commit=False)
                     dataset.problem = obj
                     dataset.save()
+            if writer:
+                messages.success(request, "Masala adminlar ko‘rib chiqishi uchun yuborildi. Tasdiqlansa, sizning nomingiz bilan chiqadi.")
+                return redirect("moderation:mine")
             messages.success(request, "Masala saqlandi.")
             return redirect("problems:detail", obj.slug)
     return render(request, "moderation/submit.html",
                   {"form": form, "formset": formset, "sql_form": sql_form, "error": error, "problem": problem,
                    "hint_formset": hint_formset})
+
+
+@setter_required
+def mine(request):
+    """A writer's own problems and where each stands: waiting for the staff, published, or sent back."""
+    rows = Problem.objects.filter(author=request.user).order_by("-pk")
+    return render(request, "moderation/mine.html", {"problems": rows})
 
 
 @staff_required
@@ -395,6 +417,13 @@ def problem_rejudge(request, pk):
     return redirect("moderation:problems")
 
 
+def _tell_author(problem, text: str, url: str) -> None:
+    """The writer hears the staff's decision in the bell (nothing for a problem the staff wrote themselves)."""
+    if problem.author_id and not problem.author.is_staff:
+        from apps.accounts.notifications import notify
+        notify(problem.author_id, "report", f"problem:{problem.pk}:{problem.status}", text, url)
+
+
 @staff_required
 def queue(request):
     problems = (Problem.objects.filter(status=Problem.Status.PENDING)
@@ -409,6 +438,7 @@ def approve(request, pk):
     problem.status = Problem.Status.APPROVED
     problem.is_public = True
     problem.save(update_fields=["status", "is_public"])
+    _tell_author(problem, f"«{problem.title}» masalangiz tasdiqlandi va saytda chiqdi", reverse("problems:detail", args=[problem.slug]))
     return redirect("moderation:queue")
 
 
@@ -418,6 +448,7 @@ def reject(request, pk):
     problem = get_object_or_404(Problem, pk=pk, status=Problem.Status.PENDING)
     problem.status = Problem.Status.REJECTED
     problem.save(update_fields=["status"])
+    _tell_author(problem, f"«{problem.title}» masalangiz rad etildi: tahrirlab qayta yuborishingiz mumkin", reverse("moderation:mine"))
     return redirect("moderation:queue")
 
 

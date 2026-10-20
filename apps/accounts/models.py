@@ -20,6 +20,9 @@ class User(AbstractUser):
     country = models.CharField(max_length=2, blank=True)  # ISO 3166-1 alpha-2, see apps.accounts.countries
     location = models.CharField(max_length=100, blank=True)  # the city
     school = models.CharField(max_length=150, blank=True)
+    # may write problems (moderation.submit): they land in the staff queue as pending and carry the author's name once
+    # approved. Set by staff in the user's edit form.
+    is_setter = models.BooleanField(default=False)
     # a school or club the person belongs to (accounts.clubs): one at a time, read-only pages, no teacher role
     club = models.ForeignKey("accounts.Club", null=True, blank=True, on_delete=models.SET_NULL, related_name="members")
     # Google's stable account id ("sub") once the person has signed in with Google (accounts.google); empty otherwise
@@ -90,8 +93,6 @@ class TelegramLoginRequest(models.Model):
 
     token_hash = models.CharField(max_length=64, unique=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.CASCADE, related_name="+")
-    # asked from the sign-up page: a chat that is linked to nobody gets a new account instead of "unlinked"
-    signup = models.BooleanField(default=False)
     expires_at = models.DateTimeField()
     used_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

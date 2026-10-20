@@ -252,7 +252,7 @@ ContestProblemFormSet = inlineformset_factory(
 class UserForm(ModelForm):
     class Meta:
         model = User
-        fields = ["username", "email", "first_name", "last_name", "role", "is_staff", "is_active",
+        fields = ["username", "email", "first_name", "last_name", "role", "is_staff", "is_setter", "is_active",
                   "rating", "school", "country", "location"]
         widgets = {
             "country": forms.Select(attrs={"class": "ca-select"}, choices=[("", "—")] + COUNTRY_CHOICES),

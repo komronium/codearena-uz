@@ -38,6 +38,7 @@
       <h2 class="ca-section-title !mb-0">Huquqlar</h2>
       <div><label class="ca-label" for="{{ form.role.id_for_label }}">Rol</label>{{ form.role }}</div>
       <label class="flex items-center gap-2 text-sm">{{ form.is_staff }} Admin (boshqaruvga kirish)</label>
+      <label class="flex items-center gap-2 text-sm">{{ form.is_setter }} Muallif (masala yozadi; admin tasdiqlaydi)</label>
       <label class="flex items-center gap-2 text-sm">{{ form.is_active }} Faol (o‘chirilsa — kira olmaydi)</label>
     </section>
     <button type="submit" class="ca-btn ca-btn-primary w-full"><i data-lucide="check" class="lu" aria-hidden="true"></i>Saqlash</button>

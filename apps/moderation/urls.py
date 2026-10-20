@@ -14,6 +14,7 @@ urlpatterns = [
     path("problems/", views.problems, name="problems"),
     path("upload-image/", views.upload_image, name="upload_image"),
     path("ai/", views.ai_generate, name="ai_generate"),
+    path("mine/", views.mine, name="mine"),
     path("submit/", views.submit, name="submit"),
     path("problems/<int:pk>/edit/", views.submit, name="problem_edit"),
     path("problems/<int:pk>/toggle/", views.problem_toggle, name="problem_toggle"),
