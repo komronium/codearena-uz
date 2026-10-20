@@ -456,7 +456,8 @@ def guest_trial(request, slug):
     if request.user.is_authenticated:
         return JsonResponse({"error": "Tizimga kirgansiz: sahifani yangilang."}, status=400)
     problem = get_object_or_404(Problem, slug=slug, is_public=True)
-    if problem.kind == Problem.Kind.SQL or problem.contest_problems.filter(contest__end__gt=timezone.now()).exists():
+    from apps.contests.models import ContestProblem
+    if problem.kind == Problem.Kind.SQL or ContestProblem.objects.filter(problem=problem, contest__end__gt=timezone.now()).exists():
         return JsonResponse({"error": "Bu masalada sinash uchun ro‘yxatdan o‘ting."}, status=403)
     source = request.POST.get("source", "")
     if not source.strip() or len(source) > MAX_SOURCE:

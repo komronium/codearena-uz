@@ -474,5 +474,11 @@ def report_done(request, pk):
     report = get_object_or_404(Report, pk=pk)
     report.done_at = None if report.done_at else timezone.now()
     report.done_by = request.user if report.done_at else None
-    report.save(update_fields=["done_at", "done_by"])
+    report.outcome = request.POST.get("outcome", "").strip()[:400] if report.done_at else ""
+    report.save(update_fields=["done_at", "done_by", "outcome"])
+    if report.done_at:  # the person who wrote hears the outcome, in the bell
+        from apps.accounts.notifications import notify
+        what = "Apellyatsiyangiz" if report.kind == Report.Kind.APPEAL else "Shikoyatingiz"
+        notify(report.reporter_id, "report", f"report:{report.pk}:done",
+               f"{what} ko‘rib chiqildi" + (f": {report.outcome}" if report.outcome else ""), "/")
     return redirect("integrity:reports")

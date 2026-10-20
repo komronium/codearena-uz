@@ -20,12 +20,12 @@
   {% for p in problems %}
   <tr>
     <td><a class="ca-link font-medium" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a>
-      <span class="mt-0.5 block max-w-[34rem] truncate text-[0.8125rem] text-mute">{{ p.statement_md|truncatechars:140 }}</span></td>
+      <span class="mt-0.5 block max-w-[22rem] truncate text-[0.8125rem] text-mute">{{ p.statement_md|truncatechars:140 }}</span></td>
     <td>{% include "accounts/_user.html" with u=p.author %}</td>
     <td><span class="ca-diff ca-diff-{{ p.difficulty }}">{{ p.get_difficulty_display }}</span></td>
     <td class="tabular whitespace-nowrap text-mute">{{ p.created|date:"d.m.Y H:i" }}</td>
     <td class="text-right">
-      <div class="flex justify-end gap-2 whitespace-nowrap">
+      <div class="flex flex-wrap justify-end gap-2">
         <form method="post" action="{% url 'moderation:approve' p.pk %}">{% csrf_token %}
           <button type="submit" class="ca-btn ca-btn-success !py-1.5"><i data-lucide="check" class="lu" aria-hidden="true"></i>Tasdiqlash</button>
         </form>

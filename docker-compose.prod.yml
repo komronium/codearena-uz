@@ -49,6 +49,7 @@ services:
                python manage.py flag_similarity --pending;
                python manage.py finish_contests;
                python manage.py telegram_notifications;
+               python manage.py weekly_digest;
              sleep 300;
              done"
 

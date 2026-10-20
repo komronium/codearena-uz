@@ -94,7 +94,9 @@ def home(request):
             "daily": daily, "running": running, "upcoming": upcoming, "next_round": next_round,
             "last_rated": last_rated, "podium": podium, "n_last": len(board),
             "languages": list(Language.objects.filter(is_active=True).order_by("id").values_list("name", flat=True)),
-            "stats": {"problems": open_problems().count(), "users": User.objects.filter(is_active=True).count(),
+            "stats": {"problems": open_problems().count(),
+                      # people who actually tried something, not every empty account
+                      "users": User.objects.filter(is_active=True, submissions__isnull=False).distinct().count(),
                       "contests": Contest.objects.count(), "submissions": Submission.objects.count()},
         })
 

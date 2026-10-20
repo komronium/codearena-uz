@@ -173,6 +173,7 @@ class Report(models.Model):
     done_at = models.DateTimeField(null=True, blank=True)
     done_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
                                 related_name="+")
+    outcome = models.CharField(max_length=400, blank=True)  # what staff tell the reporter when they close it
 
     class Meta:
         ordering = ["done_at", "-created", "-id"]

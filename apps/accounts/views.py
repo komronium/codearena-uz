@@ -703,6 +703,11 @@ def _skill_groups(user) -> list[tuple[str, str, list[dict]]]:
             if (group := [r for r in rows if r["tag"].kind == kind])]
 
 
+def how_ratings(request):
+    """"Reyting qanday ishlaydi": what the four numbers are and what moves them."""
+    return render(request, "accounts/how_ratings.html")
+
+
 def honor(request):
     """The honesty rules; a signed-in user accepts them once (POST), and the problem page asks
     before the first submission until they have."""

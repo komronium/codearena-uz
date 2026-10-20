@@ -18,7 +18,9 @@
     <td><a class="ca-link" href="{% url 'profile' r.reporter.username %}">{{ r.reporter.username }}</a></td>
     <td>{% if r.target %}<a class="ca-link" href="{% url 'profile' r.target.username %}">{{ r.target.username }}</a>{% elif r.contest %}<a class="ca-link" href="{% url 'integrity:contest_report' r.contest.pk %}">{{ r.contest.title }}</a>{% else %}—{% endif %}</td>
     <td class="tabular text-mute">{{ r.created|date:"d.m.Y H:i" }}</td>
-    <td><form method="post" action="{% url 'integrity:report_done' r.pk %}">{% csrf_token %}<button class="ca-btn {% if r.done_at %}ca-btn-ghost{% else %}ca-btn-soft{% endif %} !py-1.5 text-sm">{% if r.done_at %}Qayta ochish{% else %}Yopish{% endif %}</button></form></td>
+    <td><form method="post" action="{% url 'integrity:report_done' r.pk %}" class="grid gap-1">{% csrf_token %}
+      {% if not r.done_at %}<input class="ca-input !py-1 text-sm" name="outcome" maxlength="400" placeholder="Javob (yuboruvchiga ko‘rinadi)" aria-label="Javob">{% elif r.outcome %}<p class="text-sm text-mute">Javob: {{ r.outcome }}</p>{% endif %}
+      <button class="ca-btn {% if r.done_at %}ca-btn-ghost{% else %}ca-btn-soft{% endif %} !py-1.5 text-sm">{% if r.done_at %}Qayta ochish{% else %}Yopish{% endif %}</button></form></td>
   </tr>
   {% endfor %}
   </tbody>

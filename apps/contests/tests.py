@@ -945,7 +945,7 @@ def test_the_rating_pool_is_one_definition_everywhere(client, problem_a, python)
     apply_rating(new)
     assert set(rating.pool()) == {ali}
     page = client.get(reverse("contests:list")).content.decode()
-    assert "ali" in page and "bob" not in page.split("Eng yuqori reyting")[-1]
+    assert "/profile/ali/" in page and "/profile/bob/" not in page
 
 
 # ---- virtual contests ---------------------------------------------------------------------------

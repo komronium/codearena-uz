@@ -181,7 +181,8 @@ def test_list_sorts_by_column_and_direction(client, problem):
     assert ids(sort="title") == [problem.id, easy.id, hard.id]  # "A + B" < "Bbb" < "Zzz"
     assert ids(sort="title", dir="desc") == [hard.id, easy.id, problem.id]
     assert ids(sort="difficulty")[0] == easy.id and ids(sort="difficulty", dir="desc")[0] == hard.id
-    assert ids(sort="bogus") == ids()  # unknown column falls back to id
+    assert ids(sort="bogus") == ids(sort="id")  # unknown column falls back to id
+    assert ids()[0] == easy.id  # nobody has solved anything yet: the easiest come first
 
 
 def test_list_pagination_keeps_filters_and_shows_page_numbers(client, problem):

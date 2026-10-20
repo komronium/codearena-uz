@@ -168,6 +168,13 @@
       <p class="mt-1 text-sm text-mute">{{ c.start|ztime:"d.m, H:i" }} · {{ c.duration_label }}</p></div>
   </section>
   {% endif %}{% endwith %}
+  {% if not user.is_superuser %}
+  <section class="ca-box" aria-labelledby="invite-card-title">
+    <div class="ca-box-cap ca-hd"><h2 id="invite-card-title">Do‘stlarni taklif qiling</h2></div>
+    <div class="ca7-pad"><p class="text-sm">Birga mashq qilish va duelda bellashish qiziqroq. Havolangiz orqali kelganlar sizning taklifingiz bilan qo‘shiladi.</p>
+      <button type="button" class="ca-btn ca-btn-soft mt-3" data-copy-text="{{ request.scheme }}://{{ request.get_host }}/?ref={{ user.username }}" data-copied="Nusxalandi"><i data-lucide="link" class="lu" aria-hidden="true"></i>Havolani nusxalash</button></div>
+  </section>
+  {% endif %}
 </aside>
 </div>
 {% endif %}

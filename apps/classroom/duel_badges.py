@@ -19,7 +19,8 @@ def walkovers(duels, user) -> set[int]:
     for duel_id, uid in (DuelAnswer.objects.filter(duel_id__in=ids, answered_at__isnull=False)
                          .exclude(user=user).values_list("duel_id", "user_id")):
         answered[duel_id] = answered.get(duel_id, 0) + 1
-    return {d.pk for d in duels if d.opponent_id and answered.get(d.pk, 0) < MIN_LOSER_ANSWERS}
+    # only quiz duels have answers to count; the old coding races stay as they were
+    return {d.pk for d in duels if d.mode == Duel.Mode.QUIZ and d.opponent_id and answered.get(d.pk, 0) < MIN_LOSER_ANSWERS}
 
 
 def duel_stats(user) -> dict[str, int]:
