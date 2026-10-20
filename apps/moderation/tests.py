@@ -920,7 +920,7 @@ def test_a_setter_writes_problems_that_wait_for_staff(client):
     data = {"title": "Yangi", "kind": "code", "statement_md": "s", "input_md": "i", "output_md": "o", "difficulty": "easy",
             "tl_ms": 1000, "ml_mb": 256, "is_public": "on",  # a forged "publish" is ignored
             "testcases-TOTAL_FORMS": 1, "testcases-INITIAL_FORMS": 0, "testcases-MIN_NUM_FORMS": 0, "testcases-MAX_NUM_FORMS": 1000,
-            "testcases-0-input": "1", "testcases-0-expected": "2", "testcases-0-is_sample": "on"}
+            "testcases-0-input": "1", "testcases-0-expected": "2", "testcases-0-is_sample": "on", "testcases-0-order": "0"}
     r = client.post(reverse("moderation:submit"), data)
     assert r.status_code == 302, (r.context["form"].errors, r.context["formset"].errors, r.context["error"])
     p = Problem.objects.get(title="Yangi")
