@@ -722,8 +722,8 @@ def test_a_guest_can_try_the_samples_but_not_submit_and_is_limited(client, pytho
     with patch("apps.submissions.views.django_rq.get_queue") as queue:
         queue.return_value.enqueue.return_value.id = "job1"
         r = client.post(url, {"language": python.code, "source": "print(3)"})
-    assert r.status_code == 200 and r.json() == {"id": "job1"}
-    for _ in range(8):
-        r = client.post(url, {"language": python.code, "source": "print(3)"})
+        assert r.status_code == 200 and r.json() == {"id": "job1"}
+        for _ in range(8):
+            r = client.post(url, {"language": python.code, "source": "print(3)"})
     assert r.status_code == 429
     assert client.post(reverse("submissions:submit", args=[problem.slug]), {"language": python.code, "source": "x"}).status_code == 302  # login
