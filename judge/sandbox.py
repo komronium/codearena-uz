@@ -5,6 +5,7 @@ swapped for `isolate` later."""
 import os
 import shlex
 import subprocess
+import threading
 import time
 import uuid
 
@@ -80,7 +81,7 @@ def compile(lang, src_dir: str) -> tuple[bool, str]:
 
 
 def run_tests(lang, src_dir: str, inputs: list[str], tl_ms: int, ml_mb: int,
-              output_limit: int = DEFAULT_OUTPUT_LIMIT) -> list[tuple[str, str, int, int]]:
+              output_limit: int = DEFAULT_OUTPUT_LIMIT, progress=None) -> list[tuple[str, str, int, int]]:
     """Run every input in one container. Returns (stdout, verdict, ms, kb) per test in
     order, verdict in {OK, TLE, MLE, RE, OLE}; stops after the first non-OK test, so
     the list is shorter than `inputs` only when it ends in a failure. `output_limit`
@@ -109,8 +110,30 @@ def run_tests(lang, src_dir: str, inputs: list[str], tl_ms: int, ml_mb: int,
                                   "--memory", f"{ml_mb}m", "--memory-swap", f"{ml_mb}m",
                                   "-v", f"{src_dir}:/work:ro", "-v", f"{out_dir}:/out", lang.docker_image,
                                   "sh", "/work/run.sh"]
+    # `progress(n)` is told how many tests have finished while the container is still running: the runner script
+    # appends a line to /out/result after each one, and that directory is the host's too.
+    stop, watcher = threading.Event(), None
+    if progress is not None:
+        def watch():
+            path, last = os.path.join(out_dir, "result"), 0
+            while not stop.wait(0.2):
+                try:
+                    with open(path) as f:
+                        n = sum(1 for line in f if line.strip())
+                except OSError:
+                    continue
+                if n != last:
+                    last = n
+                    progress(n)
+        watcher = threading.Thread(target=watch, daemon=True)
+        watcher.start()
     # Outer guard only: per-test TL is enforced by `timeout` inside the container.
-    _, _, timed_out = _run(cmd, "", len(inputs) * (tl_s + 0.5) + 10, name)
+    try:
+        _, _, timed_out = _run(cmd, "", len(inputs) * (tl_s + 0.5) + 10, name)
+    finally:
+        stop.set()
+        if watcher is not None:
+            watcher.join(1)
 
     results = []
     try:

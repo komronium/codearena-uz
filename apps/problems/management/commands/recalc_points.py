@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand
 from django.db.models import Count
 
 from apps.problems.models import Problem
-from apps.problems.scoring import compute_points
+from apps.problems.scoring import attempters, compute_points
 from apps.submissions.solves import sync_practice_points
 
 
@@ -13,7 +13,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **opts):
         problems = Problem.objects.filter(status=Problem.Status.APPROVED).annotate(
-            attempts=Count("submissions__user", distinct=True),
+            attempts=attempters(),
             solvers=Count("userproblemsolved", distinct=True),
         )
         updated = 0

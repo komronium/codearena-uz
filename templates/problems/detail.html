@@ -65,7 +65,7 @@ the console (samples, your own input, the run's result) and the one gold "Yubori
       <button type="button" role="tab" id="tab-doc-statement" aria-controls="doc-statement" aria-selected="true" data-doc-tab="statement">Shart</button>
       {% if hints or editorial_html or problem.editorial_md %}<button type="button" role="tab" id="tab-doc-help" aria-controls="doc-help" aria-selected="false" tabindex="-1" data-doc-tab="help"><i data-lucide="lightbulb" class="lu mr-1" aria-hidden="true"></i>Yordam</button>{% endif %}
       {% if show_leaders %}<button type="button" role="tab" id="tab-doc-leaders" aria-controls="doc-leaders" aria-selected="false" tabindex="-1" data-doc-tab="leaders">Eng yaxshi yechimlar</button>{% endif %}
-      {% if my_subs %}<button type="button" role="tab" id="tab-doc-mine" aria-controls="doc-mine" aria-selected="false" tabindex="-1" data-doc-tab="mine">Urinishlarim <em class="tabular">{{ my_subs_n }}</em></button>{% endif %}
+      {% if user.is_authenticated %}<button type="button" role="tab" id="tab-doc-mine" aria-controls="doc-mine" aria-selected="false" tabindex="-1" data-doc-tab="mine">Urinishlarim <em class="tabular" id="mine-count">{{ my_subs_n }}</em></button>{% endif %}
     </div>
     {% endif %}
     <div class="ca-doc" id="doc-statement" role="tabpanel" aria-labelledby="tab-doc-statement">
@@ -256,22 +256,10 @@ the console (samples, your own input, the run's result) and the one gold "Yubori
       {% include "problems/_leaders_mini.html" with title="Eng qisqa" icon="scissors" rows=shortest by="length" %}
     </div>
     {% endif %}
-    {% if my_subs %}
+    {% if user.is_authenticated %}
     <div class="ca-doc" id="doc-mine" role="tabpanel" aria-labelledby="tab-doc-mine" hidden>
       <div class="ca7-sec-h"><h2>Urinishlarim</h2><a class="ca-link" href="{% url 'submissions:mine' %}?mine=1">Barchasi</a></div>
-      <table class="ca-table ca-table-flat">
-        <thead><tr><th scope="col">Natija</th><th scope="col" class="hidden sm:table-cell">Til</th><th scope="col" class="text-right">Vaqt</th><th scope="col" class="text-right">Yuborilgan</th></tr></thead>
-        <tbody>
-        {% for s in my_subs %}
-        <tr>
-          <td class="whitespace-nowrap"><a href="{% url 'submissions:detail' s.pk %}" class="no-underline" title="#{{ s.pk|stringformat:'06d' }}">{% include "submissions/_vd.html" with v=s.verdict sub=s %}</a></td>
-          <td class="hidden whitespace-nowrap text-mute sm:table-cell">{{ s.language.name }}</td>
-          <td class="whitespace-nowrap text-right tabular">{% if s.is_terminal and s.verdict != "CE" %}{{ s.exec_ms }}&nbsp;ms{% else %}<span class="text-mute">—</span>{% endif %}</td>
-          <td class="whitespace-nowrap text-right tabular text-mute">{{ s.created|date:"d.m H:i" }}</td>
-        </tr>
-        {% endfor %}
-        </tbody>
-      </table>
+      {% include "problems/_my_subs.html" %}
     </div>
     {% endif %}
   </section>
@@ -806,6 +794,17 @@ resolves their bare imports so @codemirror/state loads once — two copies break
   const form = document.getElementById("submit-form");
   const btn = document.getElementById("submit-btn");
   const sendLabel = btn.innerHTML;
+  // the "Urinishlarim" tab follows what you send: the new row now, the verdict when it lands
+  const refreshMine = async () => {
+    const host = document.getElementById("doc-mine-body");
+    if (!host) return;
+    try {
+      const html = await (await fetch("{% url 'problems:my_attempts' problem.slug %}", { credentials: "same-origin" })).text();
+      host.outerHTML = html;
+      const n = document.getElementById("doc-mine-body")?.dataset.n;
+      if (n !== undefined) document.getElementById("mine-count").textContent = n;
+    } catch { /* the tab refreshes on the next visit */ }
+  };
   form.addEventListener("submit", async (e) => {
     source.value = view.state.doc.toString();
     btn.disabled = true;
@@ -825,6 +824,7 @@ resolves their bare imports so @codemirror/state loads once — two copies break
       resultOut.innerHTML = '<div id="sub-live"></div><p class="mt-3 flex flex-wrap items-center gap-3 text-sm"><a class="ca-link" href="' + j.url + '">To‘liq natija sahifasi</a>' +
         '{% if next_problem %}<a id="sub-next" class="ca-btn ca-btn-gold !py-1 text-sm" hidden href="{% url 'problems:detail' next_problem.slug %}">Keyingi masala</a>{% endif %}</p>';
       htmx.ajax("GET", j.status, { target: "#sub-live", swap: "innerHTML" });
+      refreshMine();
     } catch (err) {
       resultTab?.click();
       document.getElementById("trial-empty")?.setAttribute("hidden", "");
@@ -839,7 +839,10 @@ resolves their bare imports so @codemirror/state loads once — two copies break
   });
   // on an accept the "Keyingi masala" button appears under the verdict
   document.body.addEventListener("htmx:afterSettle", () => {
-    if (document.querySelector('#sub-live [data-verdict="AC"]')) document.getElementById("sub-next")?.removeAttribute("hidden");
+    const live = document.querySelector("#sub-live [data-verdict]");
+    if (!live) return;
+    if (live.dataset.verdict === "AC") document.getElementById("sub-next")?.removeAttribute("hidden");
+    if (!live.hasAttribute("hx-get") && live.dataset.mined !== "1") { live.dataset.mined = "1"; refreshMine(); }  // judged
   });
   document.addEventListener("keydown", (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key === "Enter" && !btn.disabled) {

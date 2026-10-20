@@ -91,7 +91,6 @@
       <a href="{% url 'learn:hub' %}">O‘rganish</a>
       <a href="{% url 'contests:list' %}">Musobaqalar</a>
       <a href="{% url 'rating' %}">Reyting</a>
-      <a href="{% url 'top' %}">Amaliyot ballari</a>
       <a href="{% url 'honor' %}">Halollik qoidalari</a>
     </nav>
     <p class="ca-footer-note">© {% now "Y" %} CodeArena · o‘zbek tilida dasturlash</p>
@@ -286,7 +285,6 @@ from /problems/suggest/. "go" is the second key of a "g <key>" shortcut.{% endco
   {"group": "Sahifalar", "icon": "list-checks", "label": "Masalalar", "words": "problems practice mashq", "keys": "g p", "go": "p", "url": "{% url 'problems:list' %}"},
   {"group": "Sahifalar", "icon": "trophy", "label": "Musobaqalar", "words": "contests olimpiada", "keys": "g c", "go": "c", "url": "{% url 'contests:list' %}"},
   {"group": "Sahifalar", "icon": "chart-column", "label": "Reyting", "words": "rating leaderboard darajalar", "keys": "g r", "go": "r", "url": "{% url 'rating' %}"},
-  {"group": "Sahifalar", "icon": "users", "label": "Amaliyot ballari", "words": "top points ball", "url": "{% url 'top' %}"},
   {"group": "Sahifalar", "icon": "handshake", "label": "Halollik qoidalari", "words": "honor rules ai qoida adolat", "url": "{% url 'honor' %}"},
   {% if user.is_authenticated %}
   {"group": "Sahifalar", "icon": "swords", "label": "Duellar", "words": "duel 1v1 bellashuv", "keys": "g d", "go": "d", "url": "{% url 'classroom:duels' %}"},

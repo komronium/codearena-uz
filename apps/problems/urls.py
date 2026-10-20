@@ -7,6 +7,7 @@ urlpatterns = [
     path("", views.problem_list, name="list"),
     path("suggest/", views.suggest, name="suggest"),  # before <slug>: "suggest" is not a problem
     path("<slug:slug>/", views.problem_detail, name="detail"),
+    path("<slug:slug>/attempts/", views.my_attempts, name="my_attempts"),
     path("<slug:slug>/leaders/", views.problem_leaders, name="leaders"),
     path("<slug:slug>/rate/", views.rate_problem, name="rate"),
     path("<slug:slug>/hints/<int:hint_id>/", views.hint_unlock, name="hint"),

@@ -3695,3 +3695,23 @@ small { font-size: max(12.25px, .8em); }
 /* a badge's level word on the dark panels: lifted toward white so Bronza and Kumush read at 4.5:1 */
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .ca-bt:not(.is-locked) .ca-bt-lv { color: color-mix(in srgb, var(--bg2, #fff) 55%, #fff); } }
 :root[data-theme="dark"] .ca-bt:not(.is-locked) .ca-bt-lv { color: color-mix(in srgb, var(--bg2, #fff) 55%, #fff); }
+
+/* ---- the verdict card (workspace console and submission page) ------------------------------------------------
+   Running: a quiet tinted card whose ink follows the theme (it sat white inside the dark console before) and a live
+   "7 / 50" counter with its bar. Finished: the time and memory used against the limits, bars instead of 50 ticks. */
+.ca7-vhero.is-run { --vt: rgb(var(--ca-ink-rgb)); --vb: color-mix(in srgb, rgb(var(--ca-accent-rgb)) 12%, transparent); box-shadow: inset 0 0 0 1px rgb(var(--ca-accent-rgb) / .28); }
+.ca7-vhero.is-run .ca7-vhero-ico { background: rgb(var(--ca-accent-rgb)); }
+.ca7-vhero.is-run .ca7-vhero-h p { color: rgb(var(--ca-ink-rgb)); font-size: 1rem; }
+.ca7-vhero.is-run .ca7-vhero-h p b { font-size: 1.2rem; }
+.ca7-vhero.is-run .ca7-pg { height: 8px; background: rgb(var(--ca-ink-rgb) / .14); }
+.ca7-vhero.is-run .ca7-pg i { transition: width .35s ease; }
+@media (prefers-reduced-motion: reduce) { .ca7-vhero.is-run .ca7-pg i { transition: none; } }
+.ca7-vhero-h p { color: rgb(var(--ca-ink-rgb) / .78); }
+.ca7-meters { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: 1rem 2rem; margin-top: 1.15rem; }
+.ca7-meter dt { font-size: 0.8125rem; color: rgb(var(--ca-ink-rgb) / .72); }
+.ca7-meter dd { margin: 0; color: rgb(var(--ca-ink-rgb)); }
+.ca7-meter dd b { font-size: 1.3rem; font-weight: 700; }
+.ca7-meter dd small { color: rgb(var(--ca-ink-rgb) / .68); font-size: 0.875rem; }
+.ca7-meter-bar { display: block; height: 6px; margin-top: .4rem; overflow: hidden; border-radius: 3px; background: rgb(var(--ca-ink-rgb) / .14); }
+.ca7-meter-bar i { display: block; height: 100%; max-width: 100%; border-radius: inherit; background: var(--vt); }
+.ca7-meter.is-high .ca7-meter-bar i { background: rgb(var(--ca-warn-rgb)); }

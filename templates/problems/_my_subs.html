@@ -1,0 +1,18 @@
+{% comment %}The person's last attempts at this problem (the "Urinishlarim" tab); refreshed by the workspace after a submit.
+ctx: my_subs, my_subs_n.{% endcomment %}<div id="doc-mine-body" data-n="{{ my_subs_n }}">
+{% if my_subs %}
+<table class="ca-table ca-table-flat">
+  <thead><tr><th scope="col">Natija</th><th scope="col" class="hidden sm:table-cell">Til</th><th scope="col" class="text-right">Vaqt</th><th scope="col" class="text-right">Yuborilgan</th></tr></thead>
+  <tbody>
+  {% for s in my_subs %}
+  <tr>
+    <td class="whitespace-nowrap"><a href="{% url 'submissions:detail' s.pk %}" class="no-underline" title="#{{ s.pk|stringformat:'06d' }}">{% include "submissions/_vd.html" with v=s.verdict sub=s %}</a></td>
+    <td class="hidden whitespace-nowrap text-mute sm:table-cell">{{ s.language.name }}</td>
+    <td class="whitespace-nowrap text-right tabular">{% if s.is_terminal and s.verdict != "CE" %}{{ s.exec_ms }}&nbsp;ms{% else %}<span class="text-mute">—</span>{% endif %}</td>
+    <td class="whitespace-nowrap text-right tabular text-mute">{{ s.created|date:"d.m H:i" }}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}<p class="ca-con-note">Bu masalaga hali urinish yubormagansiz.</p>{% endif %}
+</div>

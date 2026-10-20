@@ -15,17 +15,17 @@ compact=True: the verdict chip only.{% endcomment %}
       <p>{% if s.verdict == "AC" %}Barcha {{ s.total }} testdan o‘tdi · <span translate="no">AC</span>
         {% elif s.verdict == "CE" %}Kod kompilyatsiya bo‘lmadi · <span translate="no">CE</span>
         {% elif s.is_terminal %}{% if s.total %}{{ s.passed|add:1 }}-testda · {{ s.passed }}/{{ s.total }} test o‘tdi · {% endif %}<span translate="no">{{ s.verdict }}</span>
-        {% elif progress %}{{ progress.done }}/{{ progress.total }} test tekshirildi{% elif s.is_stale %}Tekshiruv odatdagidan uzoq cho‘zildi. Bir necha daqiqadan keyin ham o‘zgarmasa, qayta yuboring yoki adminga yozing.{% else %}Tez orada boshlanadi{% endif %}</p>
+        {% elif progress %}<b class="tabular">{{ progress.done }}</b> / {{ progress.total }} test tekshirildi{% elif s.is_stale %}Tekshiruv odatdagidan uzoq cho‘zildi. Bir necha daqiqadan keyin ham o‘zgarmasa, qayta yuboring yoki adminga yozing.{% else %}Tez orada boshlanadi{% endif %}</p>
     </div>
   </div>
-  {% if s.is_terminal and s.verdict != 'CE' and strip|length > 1 %}<ol class="ca7-vstrip" aria-label="Testlar: {{ s.passed }} / {{ s.total }} o‘tdi">{% for c in strip %}<li class="is-{{ c }}" title="{{ forloop.counter }}-test: {% if c == 'ok' %}o‘tdi{% elif c == 'bad' %}xato{% else %}tekshirilmadi{% endif %}"><i data-lucide="{% if c == 'ok' %}check{% elif c == 'bad' %}x{% else %}minus{% endif %}" class="lu" aria-hidden="true"></i><span class="sr-only">{{ forloop.counter }}-test {% if c == 'ok' %}o‘tdi{% elif c == 'bad' %}xato{% else %}tekshirilmadi{% endif %}</span></li>{% endfor %}</ol>{% endif %}
-  {% if s.verdict == 'RUNNING' and progress %}<span class="ca7-pg max-w-sm" aria-hidden="true"><i style="width: {{ progress.pct }}%"></i></span>{% endif %}
-  <dl class="ca7-vhero-nums">
-    <div><dt>Vaqt</dt><dd class="tabular">{% if s.is_terminal and s.verdict != 'CE' %}{{ s.exec_ms }} ms{% else %}—{% endif %}</dd></div>
-    <div><dt>Xotira</dt><dd class="tabular">{% if s.is_terminal and s.verdict != 'CE' and s.mem_kb %}{% widthratio s.mem_kb 1024 1 %} MB{% else %}—{% endif %}</dd></div>
-    <div><dt>Cheklov</dt><dd class="tabular">{{ s.problem.tl_ms }} ms{% if s.problem.kind != "sql" %} · {{ s.problem.ml_mb }} MB{% endif %}</dd></div>
-    <div><dt>Qiyinlik</dt><dd><span class="ca-diff ca-diff-{{ s.problem.difficulty }} !text-[1.05rem]">{{ s.problem.get_difficulty_display }}</span></dd></div>
+  {% if s.verdict == 'RUNNING' and progress %}<span class="ca7-pg" aria-hidden="true"><i style="width: {{ progress.pct }}%"></i></span>{% endif %}
+  {% if s.is_terminal and s.verdict != 'CE' %}
+  <dl class="ca7-meters">
+    {% widthratio s.exec_ms limits.ms 100 as t_pct %}{% widthratio s.mem_kb limits.kb 100 as m_pct %}
+    <div class="ca7-meter{% if t_pct|add:0 >= 85 %} is-high{% endif %}" title="Masalaning chegarasi {{ s.problem.tl_ms }} ms, {{ s.language.name }} uchun ×{{ s.language.tl_multiplier|floatformat:"-1" }}"><dt>Vaqt</dt><dd><b class="tabular">{{ s.exec_ms }} ms</b> <small class="tabular">/ {{ limits.ms }} ms</small></dd><span class="ca7-meter-bar" aria-hidden="true"><i style="width: {{ t_pct }}%"></i></span></div>
+    <div class="ca7-meter{% if m_pct|add:0 >= 85 %} is-high{% endif %}"><dt>Xotira</dt><dd><b class="tabular">{% if s.mem_kb %}{% widthratio s.mem_kb 1024 1 %} MB{% else %}—{% endif %}</b> <small class="tabular">/ {{ limits.mb }} MB</small></dd><span class="ca7-meter-bar" aria-hidden="true"><i style="width: {{ m_pct }}%"></i></span></div>
   </dl>
+  {% endif %}
   {% if s.is_terminal and s.verdict != 'AC' %}
   <p class="ca7-vhero-hint"><i data-lucide="lightbulb" class="lu" aria-hidden="true"></i>{% if s.verdict == 'WA' %}Dastur ishladi, lekin javob kutilganidan farq qildi. Chegaraviy holatlarni (0, 1, eng katta qiymat) va chiqish formatini tekshiring.{% elif s.verdict == 'TLE' %}Dastur vaqt chegarasiga sig‘madi. Tezroq algoritm kerak — masalan, ichma-ich sikllarni kamaytiring.{% elif s.verdict == 'MLE' %}Dastur ruxsat etilganidan ko‘p xotira ishlatdi. Katta massivlar va rekursiya chuqurligini tekshiring.{% elif s.verdict == 'OLE' %}Dastur juda ko‘p narsa chiqardi. Ortiqcha yoki sikl ichidagi chiqarishlarni olib tashlang.{% elif s.verdict == 'RE' %}Dastur xato bilan to‘xtadi: nolga bo‘lish, massiv chegarasidan chiqish yoki noto‘g‘ri kiritishni o‘qish bo‘lishi mumkin.{% elif s.verdict == 'CE' %}Kod kompilyatsiya bo‘lmadi. Til to‘g‘ri tanlanganini va sintaksisni tekshiring.{% else %}Tekshiruvda xato yuz berdi. Qayta yuborib ko‘ring.{% endif %}</p>
   {% endif %}

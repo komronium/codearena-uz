@@ -37,7 +37,7 @@ Colour carries meaning only: the tier colour is the person, green/red the result
       <div><dt>Musobaqa reytingi</dt><dd>{% if rating_history %}<b class="ca7-prt tabular">{{ profile_user.rating }}</b>{% if last_delta %} <span class="ca7-pdelta{% if last_delta < 0 %} is-down{% endif %}">{{ last_delta|signed }}</span>{% endif %}{% else %}<b>—</b>{% endif %}</dd>
         <dd><small>{% if max_rating %}eng yuqori {{ max_rating }}{% else %}hali reytingli raund yo‘q{% endif %}{% if profile_user.official_rating is not None %} · rasmiy {{ profile_user.official_rating }}{% endif %}</small></dd></div>
       <div><dt>Reytingdagi o‘rni</dt><dd>{% if rating_rank %}<b class="tabular">{{ rating_rank }}</b> <span class="ca7-of">/ {{ total_rated }}</span>{% else %}<b>—</b>{% endif %}</dd><dd><small>{% if rating_inactive %}nofaol: 90 kundan beri reytingli musobaqa yo‘q{% else %}{{ rating_history|length }} ta reytingli musobaqa{% endif %}</small></dd></div>
-      <div><dt>Amaliyot balli</dt><dd><b class="tabular">{{ profile_user.practice_points }}</b></dd><dd><small>{{ solved|length }} ta masala{% if points_rank %} · {{ points_rank }}-o‘rin{% endif %}</small></dd></div>
+      <div><dt>Yechilgan masalalar</dt><dd><b class="tabular">{{ solved|length }}</b></dd><dd><small>{% if user == profile_user %}amaliyot balingiz {{ profile_user.practice_points }}{% else %}musobaqadan tashqari{% endif %}</small></dd></div>
       <div><dt>Olov</dt><dd><b class="tabular">{{ streak.0 }}</b> <span class="ca7-of">kun</span></dd><dd><small>{% if streak.1 %}eng uzuni {{ streak.1 }} kun{% else %}kun masalasini yechib boshlang{% endif %}</small></dd></div>
     </dl>
   </div>

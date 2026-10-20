@@ -108,6 +108,9 @@ class UserProblemSolved(models.Model):
     first_ac_submission = models.ForeignKey(Submission, on_delete=models.CASCADE)
     # Share of the price lost to hints opened before that AC (0..MAX_HINT_PCT).
     hint_pct = models.PositiveSmallIntegerField(default=0)
+    # The problem's price when this was solved, kept: a later change in the price (others solving or failing it) does
+    # not move what the person earned. NULL only on rows from before this was kept (backfilled by the migration).
+    points = models.PositiveIntegerField(null=True, blank=True)
     solved_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

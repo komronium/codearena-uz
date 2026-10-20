@@ -93,8 +93,10 @@ def _run_code_submission(sub: Submission) -> None:
         final, passed, max_ms, max_kb = Submission.Verdict.AC, 0, 0, 0
         # The cap covers all tests together; a problem with big answers gets room for them.
         output_limit = max(sandbox.DEFAULT_OUTPUT_LIMIT, 2 * sum(len(tc.expected.encode()) for tc in tests))
+        # the status card shows "7 / 50" while this runs: the count goes through the shared cache
         results = sandbox.run_tests(lang, src_dir, [tc.input for tc in tests], problem.tl_ms, problem.ml_mb,
-                                    output_limit=output_limit)
+                                    output_limit=output_limit,
+                                    progress=lambda n: cache.set(f"judge-progress:{sub.pk}", n, 300))
         rows = []
         for tc, (out, v, ms, kb) in zip(tests, results):
             max_ms, max_kb = max(max_ms, ms), max(max_kb, kb)

@@ -314,6 +314,16 @@ def _beats(s) -> dict | None:
     }
 
 
+def _progress(s, saved: int, total: int) -> dict:
+    """How far the judge is: the tests finished so far. While it runs, the judge keeps that count in the cache
+    after each test (judge.runner), so the card can show 1/50, 2/50, 3/50…; the saved results only exist at the end."""
+    from django.core.cache import cache
+
+    done = saved if s.is_terminal else max(saved, cache.get(f"judge-progress:{s.pk}") or 0)
+    done = min(done, total) if total else done
+    return {"done": done, "total": total, "pct": int(done * 100 / total) if total else 0}
+
+
 def _results_ctx(s):
     results = list(s.results.select_related("testcase"))
     first_fail = next((r for r in results if r.verdict != "AC"), None)
@@ -334,11 +344,10 @@ def _results_ctx(s):
         "strip": strip,
         "slowest": max((r.exec_ms for r in results), default=None),
         "beats": _beats(s) if s.verdict == "AC" else None,
-        "progress": {
-            "done": len(results),
-            "total": total,
-            "pct": int(len(results) * 100 / total) if total else 0,
-        },
+        "progress": _progress(s, len(results), total),
+        # the limits this run was held to (Python gets its time multiplier), for the usage bars
+        "limits": {"ms": int(s.problem.tl_ms * s.language.tl_multiplier), "mb": s.problem.ml_mb,
+                   "kb": s.problem.ml_mb * 1024},
     }
 
 

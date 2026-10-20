@@ -27,6 +27,18 @@ def compute_points(difficulty: str, solvers: int, attempts: int) -> int:
     return round(raw / 5) * 5
 
 
+JUDGED = ("AC", "WA", "TLE", "MLE", "OLE", "RE")  # a compile error or a queued run is not an attempt at the problem
+
+
+def attempters():
+    """The count of people who really tried a problem: a judged submission (not a compile error or a queued one) from
+    somebody who has solved something, so empty or throwaway accounts failing it cannot push its price up."""
+    from django.db.models import Count, Q
+
+    return Count("submissions__user", distinct=True,
+                 filter=Q(submissions__verdict__in=JUDGED, submissions__user__practice_points__gt=0))
+
+
 def price(problem) -> int:
     """The problem's points now: band maximum until enough people have tried it."""
     if problem.pk is None:
@@ -36,7 +48,7 @@ def price(problem) -> int:
     from .models import Problem
 
     n = Problem.objects.filter(pk=problem.pk).aggregate(
-        attempts=Count("submissions__user", distinct=True), solvers=Count("userproblemsolved", distinct=True))
+        attempts=attempters(), solvers=Count("userproblemsolved", distinct=True))
     return compute_points(problem.difficulty, n["solvers"], n["attempts"])
 
 

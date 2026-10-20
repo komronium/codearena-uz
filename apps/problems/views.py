@@ -460,19 +460,33 @@ def _problem_stats(problem) -> dict:
     return {"total": total, "accepted": accepted, "rate": 100 * accepted / total if total else None}
 
 
+def _my_subs(request, problem, contest):
+    """The person's last five attempts at the problem and how many there are (in a contest, only what counts for it)."""
+    if not request.user.is_authenticated:
+        return [], 0
+    subs = Submission.objects.filter(user=request.user, problem=problem)
+    if contest is not None:
+        subs = subs.filter(contest=contest)
+    rows = list(subs.select_related("language")[:5])
+    return rows, (len(rows) if len(rows) < 5 else subs.count())
+
+
+def my_attempts(request, slug):
+    """The "Urinishlarim" table as a fragment, for the workspace to refresh after a submit."""
+    if not request.user.is_authenticated:
+        raise Http404
+    problem, contest = _visible_problem(request, slug)
+    rows, n = _my_subs(request, problem, contest)
+    return render(request, "problems/_my_subs.html", {"my_subs": rows, "my_subs_n": n})
+
+
 def problem_detail(request, slug):
     problem, contest = _visible_problem(request, slug)
     if problem.kind == Problem.Kind.SQL:
         languages = Language.objects.filter(is_active=True, code="sql")
     else:
         languages = Language.objects.filter(is_active=True).exclude(code="sql")
-    my_subs, my_subs_n = [], 0
-    if request.user.is_authenticated:
-        subs = Submission.objects.filter(user=request.user, problem=problem)
-        if contest is not None:
-            subs = subs.filter(contest=contest)  # in a contest, only what counts for it
-        my_subs = list(subs.select_related("language")[:5])
-        my_subs_n = len(my_subs) if len(my_subs) < 5 else subs.count()
+    my_subs, my_subs_n = _my_subs(request, problem, contest)
     # Running contest that has this problem but the user hasn't joined: solving now
     # would count as practice, not for the standings — tell them before they submit.
     open_contest = None

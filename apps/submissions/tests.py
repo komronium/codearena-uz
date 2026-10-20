@@ -727,3 +727,41 @@ def test_a_guest_can_try_the_samples_but_not_submit_and_is_limited(client, pytho
             r = client.post(url, {"language": python.code, "source": "print(3)"})
     assert r.status_code == 429
     assert client.post(reverse("submissions:submit", args=[problem.slug]), {"language": python.code, "source": "x"}).status_code == 302  # login
+
+
+@pytest.mark.django_db
+def test_the_status_card_counts_tests_while_the_judge_runs(client, python, problem):
+    from django.core.cache import cache
+    u = User.objects.create_user("ali", password="x")
+    for i in range(3):
+        TestCase.objects.create(problem=problem, input=f"{i}\n", expected="1\n", order=10 + i)
+    s = Submission.objects.create(user=u, problem=problem, language=python, source="x", verdict="RUNNING")
+    client.force_login(u)
+    cache.set(f"judge-progress:{s.pk}", 3, 60)
+    page = client.get(reverse("submissions:status", args=[s.pk])).content.decode()
+    assert '<b class="tabular">3</b> / 5 test tekshirildi' in page  # 2 problem tests + 3 added
+    cache.set(f"judge-progress:{s.pk}", 4, 60)
+    assert '<b class="tabular">4</b>' in client.get(reverse("submissions:status", args=[s.pk])).content.decode()
+
+
+@pytest.mark.django_db
+def test_a_finished_card_shows_usage_against_the_limits_not_a_row_of_ticks(client, python, problem):
+    u = User.objects.create_user("ali", password="x")
+    s = Submission.objects.create(user=u, problem=problem, language=python, source="x", verdict="AC", passed=2, total=2,
+                                  exec_ms=119, mem_kb=9 * 1024)
+    client.force_login(u)
+    page = client.get(reverse("submissions:status", args=[s.pk])).content.decode()
+    assert "ca7-vstrip" not in page and "119 ms" in page and "9 MB" in page and "ca7-meter-bar" in page and "/ 3000 ms" in page
+
+
+@pytest.mark.django_db
+def test_the_attempts_tab_exists_before_the_first_attempt_and_refreshes(client, python, problem):
+    u = User.objects.create_user("ali", password="x")
+    problem.is_public = True
+    problem.save()
+    client.force_login(u)
+    page = client.get(reverse("problems:detail", args=[problem.slug])).content.decode()
+    assert 'id="tab-doc-mine"' in page and "hali urinish yubormagansiz" in page
+    Submission.objects.create(user=u, problem=problem, language=python, source="x", verdict="WA")
+    part = client.get(reverse("problems:my_attempts", args=[problem.slug])).content.decode()
+    assert 'data-n="1"' in part and "WA" in part
