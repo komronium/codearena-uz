@@ -828,3 +828,16 @@ def test_signed_filter_uses_a_real_minus():
 def test_healthz_answers_for_a_monitor(client):
     r = client.get("/healthz")
     assert r.status_code == 200 and r.json() == {"ok": True, "failed": []}
+
+
+def test_a_unix_socket_peer_still_gets_the_clients_own_address():
+    """gunicorn on a unix socket has an empty REMOTE_ADDR: the throttles must not put everybody in one bucket."""
+    from django.test import RequestFactory
+    from config.middleware import real_client_ip
+    from .throttle import client_ip
+    seen = {}
+    real_client_ip(lambda r: seen.setdefault("ip", r.META["REMOTE_ADDR"]))(
+        RequestFactory().get("/", REMOTE_ADDR="", HTTP_X_FORWARDED_FOR="203.0.113.7"))
+    assert seen["ip"] == "203.0.113.7"
+    assert client_ip(RequestFactory().get("/", REMOTE_ADDR="", HTTP_X_FORWARDED_FOR="203.0.113.9")) == "203.0.113.9"
+    assert client_ip(RequestFactory().get("/", REMOTE_ADDR="198.51.100.4")) == "198.51.100.4"

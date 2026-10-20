@@ -2,6 +2,8 @@ import ipaddress
 
 
 def _from_local_proxy(addr: str) -> bool:
+    if not addr:  # gunicorn on a unix socket reports no peer address: the peer is the local nginx
+        return True
     try:
         ip = ipaddress.ip_address(addr)
     except ValueError:

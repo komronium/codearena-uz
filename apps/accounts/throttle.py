@@ -10,7 +10,10 @@ TOO_MANY = "Juda ko‘p urinish. Biroz kutib, qayta urinib ko‘ring."
 def client_ip(request) -> str:
     """The client's address: config.middleware.real_client_ip has already put the one nginx saw into REMOTE_ADDR
     (and only trusts the header from the local proxy), so a spoofed X-Forwarded-For does not count."""
-    return request.META.get("REMOTE_ADDR", "")[:45]
+    addr = request.META.get("REMOTE_ADDR", "")
+    if not addr:  # a unix-socket peer with no real_client_ip middleware in front: nginx's own entry is the last one
+        addr = request.META.get("HTTP_X_FORWARDED_FOR", "").rsplit(",", 1)[-1].strip()
+    return addr[:45]
 
 
 def blocked(key: str, limit: int, window: int) -> bool:
