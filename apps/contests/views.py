@@ -122,10 +122,15 @@ def contest_detail(request, pk):
             for i, cp in enumerate(problems):
                 cp.my_cell = my_row["cells"][i] if my_row else None
         if contest.is_running:
-            # Codeforces rules: what a problem is worth if solved now, without wrong tries
-            minutes = int((timezone.now() - (me.clock_start if me else contest.start)).total_seconds()) // 60
+            # Codeforces rules: what a problem is worth if solved now, without wrong tries. In a personal-clock round
+            # it falls with the person's own time: before "Boshlash" (or after their time is up) there is no "now".
+            if contest.personal_minutes:
+                ticking = me is not None and me.started_at is not None and timezone.now() < me.personal_end
+                minutes = int((timezone.now() - me.started_at).total_seconds()) // 60 if ticking else None
+            else:
+                minutes = int((timezone.now() - (me.clock_start if me else contest.start)).total_seconds()) // 60
             for cp in problems:
-                cp.now_points = problem_points(contest, cp.points, minutes, 0)
+                cp.now_points = None if minutes is None else problem_points(contest, cp.points, minutes, 0)
             if registered and not (personal and personal["hide"]):
                 next_cp = next((cp for cp in problems if not (cp.my_cell and cp.my_cell["solved"])), None)
     else:

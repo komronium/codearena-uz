@@ -118,7 +118,7 @@ it is scored, virtual participation.{% endcomment %}
         <td>{% if open %}<a class="ca-link" href="{% url 'problems:detail' cp.problem.slug %}">{{ cp.problem.title }}</a>{% else %}<span class="text-mute">Qatnashgach ko‘rinadi</span>{% endif %}</td>
         <td class="hidden md:table-cell">{% if open %}<span class="ca-diff ca-diff-{{ cp.problem.difficulty }}">{{ cp.problem.get_difficulty_display }}</span>{% endif %}</td>
         <td class="hidden whitespace-nowrap text-sm text-mute lg:table-cell">{{ cp.problem.tl_ms }} ms{% if cp.problem.kind != "sql" %} · {{ cp.problem.ml_mb }} MB{% endif %}</td>
-        {% if contest.type != "icpc" %}<td class="text-right"><span class="ca-worth"><b>{{ cp.points }}</b>{% if contest.type == "cf" and contest.is_running %}<small title="Hozir yechsangiz, xatosiz">hozir {{ cp.now_points }}</small>{% endif %}</span></td>{% endif %}
+        {% if contest.type != "icpc" %}<td class="text-right"><span class="ca-worth"><b>{{ cp.points }}</b>{% if contest.type == "cf" and contest.is_running and cp.now_points is not None %}<small title="Hozir yechsangiz, xatosiz">hozir {{ cp.now_points }}</small>{% endif %}</span></td>{% endif %}
         <td class="text-right tabular">{% if contest.has_started %}{{ cp.solved_count }} / {{ cp.n_tried }}{% else %}{{ cp.solved_count }}{% endif %}</td>
         {% if my_row %}<td class="text-right">
           {% if cp.my_cell.solved %}<span class="ca-cf-cell" title="Yechilgan: {{ cp.my_cell.time }}{% if cp.my_cell.wrong %}, {{ cp.my_cell.wrong }} ta xatodan keyin{% endif %}"><b class="ca-cf-ac">{{ cp.my_cell.mark }}</b><span class="ca-cf-time">{{ cp.my_cell.time }}</span></span>

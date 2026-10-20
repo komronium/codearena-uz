@@ -184,11 +184,14 @@ A native dialog gives focus trapping and Esc for free.{% endcomment %}
           box.lastElementChild.textContent = parts[i][1];
         });
       });
-      // a round's time gone out of its length, "1:47 / 3:00"
+      // time gone out of the length, in words: "37 soat 36 daq / 60 soat", "45 daq / 120 daq"
       document.querySelectorAll("[data-elapsed-from]").forEach((el) => {
         const from = new Date(el.dataset.elapsedFrom), to = new Date(el.dataset.elapsedTo);
-        const hm = (ms) => { const m = Math.max(0, Math.floor(ms / 60000)); return Math.floor(m / 60) + ":" + String(m % 60).padStart(2, "0"); };
-        el.textContent = hm(Math.min(now, to) - from) + " / " + hm(to - from);
+        const words = (ms) => {
+          const m = Math.max(0, Math.floor(ms / 60000)), h = Math.floor(m / 60), r = m % 60;
+          return h ? h + " soat" + (r ? " " + r + " daq" : "") : r + " daq";
+        };
+        el.textContent = words(Math.min(now, to) - from) + " / " + words(to - from);
       });
       // a round's clock line: the share of [from, to] already gone
       document.querySelectorAll("[data-span-from]").forEach((el) => {

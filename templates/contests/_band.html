@@ -34,11 +34,20 @@ and optionally problems, n_participants, next_cp (the first problem you have not
         {% endif %}
         {% if not contest.has_ended %}
         {# the clock as #7 draws it: one big time, how much of the round is gone, a line of it #}
+        {% if contest.personal_minutes and contest.is_running and my_participation.started_at %}
+        {# a personal-clock round, after "Boshlash": the person's own time, not the round's #}
         <div class="ca7-clock">
-          <p><span>{% if contest.is_running %}Tugashiga{% else %}Boshlanishiga{% endif %}</span>{% if contest.is_running %}<span class="tabular" data-elapsed-from="{{ contest.start|date:'c' }}" data-elapsed-to="{{ contest.end|date:'c' }}" title="O‘tgan vaqt / davomiyligi"></span>{% endif %}</p>
+          <p><span>Sizning vaqtingiz tugashiga</span><span class="tabular" data-elapsed-from="{{ my_participation.started_at|date:'c' }}" data-elapsed-to="{{ my_participation.personal_end|date:'c' }}" title="Boshlaganingizdan beri o‘tgan vaqt / sizga berilgan vaqt"></span></p>
+          <b class="tabular" role="timer" data-countdown="{{ my_participation.personal_end|date:'c' }}" data-label=""></b>
+          <span class="ca7-clock-bar" aria-hidden="true"><i data-span-from="{{ my_participation.started_at|date:'c' }}" data-span-to="{{ my_participation.personal_end|date:'c' }}" style="width: 0"></i></span>
+        </div>
+        {% else %}
+        <div class="ca7-clock">
+          <p><span>{% if contest.is_running %}Raund tugashiga{% else %}Boshlanishiga{% endif %}</span>{% if contest.is_running %}<span class="tabular" data-elapsed-from="{{ contest.start|date:'c' }}" data-elapsed-to="{{ contest.end|date:'c' }}" title="Raundning o‘tgan vaqti / umumiy davomiyligi"></span>{% endif %}</p>
           <b class="tabular" role="timer" data-countdown="{% if contest.is_running %}{{ contest.end|date:'c' }}{% else %}{{ contest.start|date:'c' }}{% endif %}" data-label=""></b>
           {% if contest.is_running %}<span class="ca7-clock-bar" aria-hidden="true"><i data-span-from="{{ contest.start|date:'c' }}" data-span-to="{{ contest.end|date:'c' }}" style="width: 0"></i></span>{% endif %}
         </div>
+        {% endif %}
         {% endif %}
         {% if active == "overview" %}
         <div class="ca-band-actions">

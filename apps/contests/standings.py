@@ -108,10 +108,16 @@ def compute_standings(contest):
     for i, r in enumerate(rows, start=1):
         r["rank"] = i if i == 1 or key(r) != key(rows[i - 2]) else rows[i - 2]["rank"]
 
+    # the first solve of a problem: who got it in first. In a personal-clock round everybody starts at their own
+    # time, so "first" is the shortest time from one's own start, not the earliest moment on the wall clock.
+    def took(r, col):
+        c = r["cells"][col]
+        return (c["ac_at"] - r["participation"].clock_start) if contest.personal_minutes else c["ac_at"]
+
     for col in range(len(problems)):
-        times = [r["cells"][col]["ac_at"] for r in rows if r["cells"][col]["solved"] and not r["disqualified"]]
-        first_at = min(times) if times else None
+        times = [took(r, col) for r in rows if r["cells"][col]["solved"] and not r["disqualified"]]
+        first = min(times) if times else None
         for r in rows:
-            r["cells"][col]["first"] = first_at is not None and r["cells"][col]["ac_at"] == first_at
+            r["cells"][col]["first"] = first is not None and r["cells"][col]["solved"] and took(r, col) == first
 
     return rows

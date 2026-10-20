@@ -1613,6 +1613,39 @@ def test_personal_clock_times_a_solve_from_the_persons_own_start_and_shuts_the_b
 
 
 @pytest.mark.django_db
+def test_personal_clock_first_solve_is_the_shortest_own_time_not_the_earliest_wall_clock(client):
+    c, p = _marathon()
+    slow, fast = (User.objects.create_user(n, password="x") for n in ("slow", "fast"))
+    lang = Language.objects.create(code="python", name="Python", docker_image="x", run_cmd="x")
+    now = timezone.now()
+    # slow started long ago and solved at wall-clock time T; fast started later and solved after T but in less time
+    t_slow, t_fast = now - timedelta(minutes=100), now - timedelta(minutes=40)
+    Participation.objects.create(user=slow, contest=c, started_at=t_slow - timedelta(minutes=30))
+    Participation.objects.create(user=fast, contest=c, started_at=t_fast - timedelta(minutes=5))
+    for u, t in ((slow, t_slow), (fast, t_fast)):
+        Submission.objects.create(user=u, problem=p, language=lang, contest=c, source="x", verdict="AC")
+        Submission.objects.filter(user=u).update(created=t)
+    cells = {r["user"].username: r["cells"][0] for r in compute_standings(c)}
+    assert cells["fast"]["first"] and not cells["slow"]["first"]
+
+
+@pytest.mark.django_db
+def test_personal_clock_shows_no_hozir_value_until_boshlash(client):
+    c, p = _marathon()
+    c.type = "cf"
+    c.save()
+    u = User.objects.create_user("ali", password="x")
+    client.force_login(u)
+    client.post(reverse("contests:register", args=[c.pk]))
+    me = Participation.objects.get(user=u, contest=c)
+    client.post(reverse("contests:begin", args=[c.pk]))
+    page = client.get(reverse("contests:detail", args=[c.pk])).content.decode()
+    assert "hozir 100" in page or "hozir 99" in page  # the clock is theirs: it has only just started
+    Participation.objects.filter(pk=me.pk).update(started_at=None)
+    assert "hozir" not in client.get(reverse("contests:detail", args=[c.pk])).content.decode().split("Masalalar")[-1]
+
+
+@pytest.mark.django_db
 def test_marathon_2_command_builds_a_rated_personal_clock_round():
     out = StringIO()
     admin = User.objects.create_user("boss", password="x", is_superuser=True, is_staff=True)
