@@ -120,6 +120,7 @@ the console (samples, your own input, the run's result) and the one gold "Yubori
         </div>
       </div>
 
+      {% if translation_pending %}<p class="ca-alert mb-3 text-sm" role="note">{% trans "Bu masalaning tarjimasi hali tayyor emas: shart asl tilda ko‘rsatilmoqda." %}</p>{% endif %}
       <div class="ca-statement">
         <div class="prose max-w-none">{{ statement_html|safe }}</div>
         {% if problem.statement_image %}

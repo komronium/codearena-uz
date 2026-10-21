@@ -31,6 +31,7 @@ from apps.submissions.models import UserProblemSolved
 from .models import PracticeEvent, PracticeReview, PracticeSnapshot
 from .similarity import MIN_LINES, THRESHOLD, similarity
 from django.utils.translation import gettext as _t
+from django.utils.translation import gettext as _t
 
 MIN_AWAY_MS = 20_000
 QUICK_AFTER_RETURN = datetime.timedelta(minutes=3)

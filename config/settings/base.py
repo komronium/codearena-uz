@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     "apps.moderation.apps.ModerationConfig",
     "apps.classroom.apps.ClassroomConfig",
     "apps.learn.apps.LearnConfig",
+    "apps.translations.apps.TranslationsConfig",  # the other-language text of problems, courses and contests
     "apps.home",  # no models: the front page, sitemap and the head tags' template filters
 ]
 

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}{% trans "Tarjimalar — boshqaruv" %}{% endblock %}
+{% block content %}
+{% comment %}The other-language text of problems, courses and contests: what is missing, the AI draft and the admin's confirmation. Only
+confirmed text is shown to readers. ctx: kind, kinds, page (rows: obj, status, target), counts, q, want.{% endcomment %}
+<div class="mb-5">{% include "moderation/_header.html" with title=_("Tarjimalar") subtitle=_("Muallif bitta tilda yozadi; ikkinchi tilni AI yoki admin to‘ldiradi. Admin tasdiqlamaguncha u o‘quvchilarga ko‘rinmaydi.") %}</div>
+<nav class="mb-4 flex flex-wrap gap-2" aria-label="{% trans 'Tarjima turi' %}">
+  {% for k, label in kinds %}<a class="ca-btn {% if k == kind %}ca-btn-primary{% else %}ca-btn-ghost{% endif %} !py-1.5" href="?kind={{ k }}">{{ label }}</a>{% endfor %}
+</nav>
+<div class="mb-4 flex flex-wrap items-center gap-3 text-sm">
+  <a class="ca-chip {% if not want %}ca-chip-score{% endif %}" href="?kind={{ kind }}">{% trans "Hammasi" %}</a>
+  <a class="ca-chip {% if want == 'none' %}ca-chip-score{% endif %}" href="?kind={{ kind }}&status=none">{% trans "Tarjimasiz" %} <b class="tabular">{{ counts.none }}</b></a>
+  <a class="ca-chip {% if want == 'draft' %}ca-chip-score{% endif %}" href="?kind={{ kind }}&status=draft">{% trans "Qoralama" %} <b class="tabular">{{ counts.draft }}</b></a>
+  <a class="ca-chip {% if want == 'confirmed' %}ca-chip-score{% endif %}" href="?kind={{ kind }}&status=confirmed">{% trans "Tasdiqlangan" %} <b class="tabular">{{ counts.confirmed }}</b></a>
+  <span class="ml-auto flex flex-wrap gap-2">
+    <form method="post" action="{% url 'moderation:translation_ai_all' kind %}" data-confirm="{% blocktrans with n=counts.none %}Tarjimasiz {{ n }} ta matn AI bilan tarjima qilinadi. Davom etasizmi?{% endblocktrans %}">{% csrf_token %}<button class="ca-btn ca-btn-soft !py-1.5"><i data-lucide="sparkles" class="lu" aria-hidden="true"></i>{% trans "Tarjimasizlarni AI bilan tarjima qilish" %}</button></form>
+    <form method="post" action="{% url 'moderation:translation_confirm_all' kind %}" data-confirm="{% blocktrans with n=counts.draft %}{{ n }} ta qoralama tasdiqlanadi va o‘quvchilarga ko‘rinadi. Davom etasizmi?{% endblocktrans %}">{% csrf_token %}<button class="ca-btn ca-btn-gold !py-1.5"><i data-lucide="check" class="lu" aria-hidden="true"></i>{% trans "Qoralamalarni tasdiqlash" %}</button></form>
+  </span>
+</div>
+<form method="get" class="mb-4"><input type="hidden" name="kind" value="{{ kind }}"><input type="search" name="q" value="{{ q }}" class="ca-input max-w-sm" placeholder="{% trans 'Sarlavha yoki raqam…' %}" aria-label="{% trans 'Qidirish' %}"></form>
+{% if page.object_list %}
+<div class="ca-panel !p-0 overflow-x-auto">
+<table class="ca-table">
+  <thead><tr><th scope="col">{% trans "Sarlavha" %}</th><th scope="col">{% trans "Asl til" %}</th><th scope="col">{% trans "Tarjima" %}</th><th scope="col" class="text-right">{% trans "Amal" %}</th></tr></thead>
+  <tbody>
+  {% for r in page.object_list %}
+  <tr>
+    <td class="font-medium"><a class="ca-link" href="{% url 'moderation:translation_edit' kind r.obj.pk %}">{{ r.obj.title }}</a></td>
+    <td>{% if r.obj.source_lang == "en" %}{% trans "English" %}{% else %}{% trans "O‘zbekcha" %}{% endif %}</td>
+    <td>{% if r.status == "confirmed" %}<span class="ca-chip ca-chip-ok">{% trans "Tasdiqlangan" %}</span>{% elif r.status == "draft" %}<span class="ca-chip ca-chip-warn">{% trans "Qoralama" %}</span>{% else %}<span class="ca-chip">{% trans "Yo‘q" %}</span>{% endif %}</td>
+    <td class="text-right"><div class="flex flex-wrap justify-end gap-2">
+      <form method="post" action="{% url 'moderation:translation_ai' kind r.obj.pk %}">{% csrf_token %}<button class="ca-btn ca-btn-ghost !py-1.5" title="{% trans 'AI bilan tarjima qilish' %}"><i data-lucide="sparkles" class="lu" aria-hidden="true"></i>{% trans "AI" %}</button></form>
+      {% if r.status == "draft" %}<form method="post" action="{% url 'moderation:translation_confirm' kind r.obj.pk %}">{% csrf_token %}<button class="ca-btn ca-btn-success !py-1.5"><i data-lucide="check" class="lu" aria-hidden="true"></i>{% trans "Tasdiqlash" %}</button></form>{% endif %}
+      <a class="ca-btn ca-btn-ghost !py-1.5" href="{% url 'moderation:translation_edit' kind r.obj.pk %}">{% trans "Tahrirlash" %}</a>
+    </div></td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% if page.has_other_pages %}<nav class="mt-4 flex justify-center gap-2" aria-label="{% trans 'Sahifalar' %}">
+  {% if page.has_previous %}<a class="ca-btn ca-btn-ghost !py-1.5" href="?kind={{ kind }}&status={{ want }}&q={{ q|urlencode }}&page={{ page.previous_page_number }}">{% trans "Oldingi" %}</a>{% endif %}
+  <span class="px-2 py-1.5 text-sm text-mute tabular">{{ page.number }} / {{ page.paginator.num_pages }}</span>
+  {% if page.has_next %}<a class="ca-btn ca-btn-ghost !py-1.5" href="?kind={{ kind }}&status={{ want }}&q={{ q|urlencode }}&page={{ page.next_page_number }}">{% trans "Keyingi" %}</a>{% endif %}
+</nav>{% endif %}
+{% else %}
+<div class="ca-panel text-center text-mute">{% trans "Hech narsa topilmadi." %}</div>
+{% endif %}
+{% endblock %}

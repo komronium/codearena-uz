@@ -23,6 +23,7 @@ from .models import (AuditEntry, CodeSnapshot, DeviceSeen, FocusEvent, PracticeE
 from .practice import suspicious_solves
 from .similarity import MIN_LINES, THRESHOLD, matched_lines
 from django.utils.translation import gettext as _t
+from django.utils.translation import gettext as _t
 
 # First-open-to-AC time no genuine read-think-type pass beats, per difficulty (beginner: none).
 _SPEED_LIMITS_S = {Problem.Difficulty.EASY: 90, Problem.Difficulty.MEDIUM: 240, Problem.Difficulty.HARD: 420}

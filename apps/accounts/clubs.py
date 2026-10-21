@@ -18,6 +18,7 @@ from apps.contests.models import Participation
 from . import throttle
 from .models import Club, User
 from django.utils.translation import gettext as _t
+from django.utils.translation import gettext as _t
 
 TEAM_SIZE = 5  # a club's rating is the sum of its best five members' ratings
 

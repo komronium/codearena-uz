@@ -1299,6 +1299,18 @@ msgid "Div. 1 (reyting 1900 va yuqori)"
 msgstr "Div. 1 (rating 1900 and above)"
 
 #: apps/contests/models.py
+msgid "Div. 2 (reyting 1900 dan past)"
+msgstr "Div. 2 (rating below 1900)"
+
+#: apps/contests/models.py
+msgid "Div. 3 (reyting 1600 dan past)"
+msgstr "Div. 3 (rating below 1600)"
+
+#: apps/contests/models.py
+msgid "Div. 4 (reyting 1400 dan past)"
+msgstr "Div. 4 (rating below 1400)"
+
+#: apps/contests/models.py
 msgid "0 daq"
 msgstr "0 min"
 
@@ -1706,6 +1718,34 @@ msgstr "0 — one hour for everyone"
 #: apps/moderation/forms.py
 msgid "Jami 1 dan {max_count} tagacha masala so‘rang."
 msgstr "Ask for 1 to {max_count} problems in total."
+
+#: apps/moderation/translations.py apps/moderation/translations.py
+msgid "AI kaliti sozlanmagan (ANTHROPIC_API_KEY)."
+msgstr "The AI key isn't set (ANTHROPIC_API_KEY)."
+
+#: apps/moderation/translations.py
+msgid "Tarjima tasdiqlandi."
+msgstr "The translation was confirmed."
+
+#: apps/moderation/translations.py
+msgid "Qoralama saqlandi."
+msgstr "The draft was saved."
+
+#: apps/moderation/translations.py
+msgid "AI tarjima qilmoqda: bir necha soniyadan keyin sahifani yangilang."
+msgstr "The AI translation is ready."
+
+#: apps/moderation/translations.py
+msgid "AI tarjimasi tayyor."
+msgstr "The AI is translating: refresh the page in a few seconds."
+
+#: apps/moderation/translations.py apps/moderation/translations.py
+msgid "{n} ta matn tasdiqlandi."
+msgstr "{n} texts were confirmed."
+
+#: apps/moderation/translations.py
+msgid "{n} ta tarjima navbatga qo‘yildi."
+msgstr "{n} translations were queued."
 
 #: apps/moderation/views.py templates/moderation/duels.html
 msgid "masala"
@@ -2135,6 +2175,10 @@ msgstr "No sample test"
 #: apps/submissions/views.py
 msgid "Namunaviy test yo‘q — o‘z inputingizni kiriting"
 msgstr "No sample test — enter your own input"
+
+#: apps/translations/models.py templates/_lang_switch.html
+msgid "O‘zbekcha"
+msgstr "O‘zbekcha"
 
 #: templates/403.html templates/_nav.html
 msgid "Bosh sahifa"
@@ -4234,6 +4278,15 @@ msgstr ""
 #: templates/moderation/tags.html
 msgid "O‘chirish: %(t_name)s"
 msgstr "Delete: %(t_name)s"
+
+#: templates/moderation/translations.html
+msgid "Tarjimasiz %(n)s ta matn AI bilan tarjima qilinadi. Davom etasizmi?"
+msgstr "%(n)s untranslated texts will be translated with AI. Continue?"
+
+#: templates/moderation/translations.html
+msgid ""
+"%(n)s ta qoralama tasdiqlanadi va o‘quvchilarga ko‘rinadi. Davom etasizmi?"
+msgstr "%(n)s drafts will be confirmed and shown to readers. Continue?"
 
 #: templates/moderation/user_form.html
 msgid "%(obj_username)s — tahrirlash"

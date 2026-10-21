@@ -5,6 +5,7 @@ from django.core.paginator import Paginator
 from django.db.models import Count, Q
 import datetime as dt
 
+from apps.translations.mixin import localized
 from django.http import Http404, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -23,6 +24,7 @@ from . import rating, virtual
 from .models import Clarification, Contest, ContestProblem, Participation, VirtualParticipation, VoidedProblem
 from .services import access_allowed
 from .standings import compute_standings, elapsed, problem_points
+from django.utils.translation import gettext as _t
 from django.utils.translation import gettext as _t
 
 
@@ -142,7 +144,7 @@ def contest_detail(request, pk):
         "contest": contest, "problems": problems_shown, "n_problems": len(problems), "personal": personal,
         "registered": registered, "my_row": my_row,
         "leaders": leaders, "leaders_any": any(r["score"] or r["solved"] for r in leaders), "next_cp": next_cp, "registrants": registrants,
-        "description_html": _render_statement(contest.description_md) if contest.description_md else "",
+        "description_html": _render_statement(localized(contest, "description_md")) if contest.description_md else "",
         "my_participation": me,
         "n_participants": contest.participations.count(),
         # the board's latest answered questions (what every participant sees), for the overview

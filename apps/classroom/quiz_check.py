@@ -2,6 +2,7 @@
 `run` (the judge sandbox's run_trial in production) does the running."""
 from .quiz_bank import XATO
 from django.utils.translation import gettext as _t
+from django.utils.translation import gettext as _t
 
 BLANK = "___"
 _CPP = "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n%s\n}\n"

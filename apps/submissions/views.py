@@ -25,6 +25,7 @@ from judge.runner import run_submission, run_trial
 from .models import VERDICT_LABELS, Submission, UserProblemSolved
 from .ratelimit import rate_limited
 from django.utils.translation import gettext as _t
+from django.utils.translation import gettext as _t
 
 MAX_SOURCE = 64 * 1024
 RATE_LIMIT_MAX = 10  # submissions per minute

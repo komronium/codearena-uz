@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import views
+from . import translations, views
 
 app_name = "moderation"
 urlpatterns = [
@@ -12,6 +12,12 @@ urlpatterns = [
     path("<int:pk>/reject/", views.reject, name="reject"),
 
     path("problems/", views.problems, name="problems"),
+    path("translations/", translations.index, name="translations"),
+    path("translations/ai-all/<str:kind>/", translations.ai_all, name="translation_ai_all"),
+    path("translations/confirm-all/<str:kind>/", translations.confirm_all, name="translation_confirm_all"),
+    path("translations/<str:kind>/<int:pk>/", translations.edit, name="translation_edit"),
+    path("translations/<str:kind>/<int:pk>/ai/", translations.ai_one, name="translation_ai"),
+    path("translations/<str:kind>/<int:pk>/confirm/", translations.confirm_one, name="translation_confirm"),
     path("upload-image/", views.upload_image, name="upload_image"),
     path("ai/", views.ai_generate, name="ai_generate"),
     path("mine/", views.mine, name="mine"),

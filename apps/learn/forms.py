@@ -2,6 +2,7 @@ from django import forms
 
 from .models import MAX_LISTS, ProblemList
 from django.utils.translation import gettext as _t
+from django.utils.translation import gettext as _t
 
 
 class ListForm(forms.ModelForm):

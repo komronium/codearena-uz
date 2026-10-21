@@ -11,6 +11,7 @@ from django.db.models.functions import TruncDate
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _t
+from django.utils.translation import gettext as _t
 
 MAX_FREEZES = 2
 FREEZE_EVERY = 7

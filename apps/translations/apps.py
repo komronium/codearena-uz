@@ -1,0 +1,11 @@
+from django.apps import AppConfig
+
+
+class TranslationsConfig(AppConfig):
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "apps.translations"
+    label = "translations"
+
+    def ready(self):
+        from . import mixin
+        mixin.install()

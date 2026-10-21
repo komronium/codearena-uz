@@ -48,6 +48,7 @@ from .forms import (
     UserForm,
 )
 from django.utils.translation import gettext as _t
+from django.utils.translation import gettext as _t
 
 
 def _unique_slug(title: str) -> str:
@@ -320,6 +321,9 @@ def submit(request, pk=None):
                         TestCase(problem=obj, input=i, expected=o, order=start + n)
                         for n, (i, o) in enumerate(zipped)
                     ])
+                if problem is not None and set(form.changed_data) & set(Problem.TRANSLATABLE):
+                    from apps.translations import service as translations
+                    translations.stale(obj)  # the original changed: the other language waits for an admin again
                 if is_sql:
                     dataset = sql_form.save(commit=False)
                     dataset.problem = obj

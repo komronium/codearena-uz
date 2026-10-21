@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}{% trans "Tarjima" %}: {{ obj.title }}{% endblock %}
+{% block content %}
+{% comment %}One piece of content, its original beside the other-language text. Saving keeps it a draft; "Save and confirm" shows it to
+readers. ctx: kind, obj, rows (i, label, source, text, confirmed, by_ai, long), target, source, status.{% endcomment %}
+{% url 'moderation:translations' as back %}
+<div class="mb-5">{% include "moderation/_header.html" with title=obj.title subtitle=_("Asl matn chapda, tarjima o‘ngda.") back_url=back back_label=_("Tarjimalar") %}</div>
+<p class="mb-4 text-sm text-mute">{{ source }} → <b class="text-ink">{{ target }}</b> ·
+  {% if status == "confirmed" %}<span class="ca-chip ca-chip-ok">{% trans "Tasdiqlangan" %}</span>{% elif status == "draft" %}<span class="ca-chip ca-chip-warn">{% trans "Qoralama" %}</span>{% else %}<span class="ca-chip">{% trans "Tarjima yo‘q" %}</span>{% endif %}</p>
+<div class="mb-5 flex flex-wrap gap-2">
+  <form method="post" action="{% url 'moderation:translation_ai' kind obj.pk %}">{% csrf_token %}<button class="ca-btn ca-btn-soft"><i data-lucide="sparkles" class="lu" aria-hidden="true"></i>{% trans "AI bilan tarjima qilish" %}</button></form>
+</div>
+<form method="post" class="space-y-5">{% csrf_token %}
+  {% for r in rows %}
+  <section class="ca-panel grid gap-3 lg:grid-cols-2">
+    <div><p class="ca-label">{{ r.label }}</p><div class="max-h-96 overflow-auto whitespace-pre-wrap rounded-lg bg-soft p-3 text-sm">{{ r.source }}</div></div>
+    <div><p class="ca-label">{{ target }}{% if r.confirmed %} · <span class="text-ok">{% trans "tasdiqlangan" %}</span>{% elif r.text %} · <span class="text-warn">{% trans "qoralama" %}{% if r.by_ai %} {% trans "(AI)" %}{% endif %}</span>{% endif %}</p>
+      {% if r.long %}<textarea name="t{{ r.i }}" rows="10" class="ca-input w-full font-mono text-sm">{{ r.text }}</textarea>{% else %}<input type="text" name="t{{ r.i }}" value="{{ r.text }}" class="ca-input w-full">{% endif %}</div>
+  </section>
+  {% endfor %}
+  <div class="flex flex-wrap gap-2">
+    <button type="submit" class="ca-btn ca-btn-soft">{% trans "Qoralama sifatida saqlash" %}</button>
+    <button type="submit" name="confirm" value="1" class="ca-btn ca-btn-gold"><i data-lucide="check" class="lu" aria-hidden="true"></i>{% trans "Saqlash va tasdiqlash" %}</button>
+  </div>
+</form>
+{% endblock %}

@@ -9,6 +9,7 @@ templates/base.html: script/style block
 templates/base.html: script/style block
 templates/base.html: script/style block
 templates/base.html: script/style block
+templates/base.html: script/style block
 templates/classroom/duel.html: script/style block
 templates/classroom/duel_play.html: script/style block
 templates/classroom/duels.html: script/style block

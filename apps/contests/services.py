@@ -2,6 +2,7 @@ from django.utils import timezone
 
 from .models import ContestProblem, Participation
 from django.utils.translation import gettext as _t
+from django.utils.translation import gettext as _t
 
 
 def active_contest_for(user, problem):

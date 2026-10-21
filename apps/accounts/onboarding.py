@@ -17,6 +17,7 @@ from django.utils import timezone
 
 from .usernames import valid_username
 from django.utils.translation import gettext as _t
+from django.utils.translation import gettext as _t
 
 _SALT = "accounts.verify-email"
 MAX_AGE = 3 * 24 * 3600  # a link works for three days

@@ -98,6 +98,8 @@ def main():
             if len(n.value) <= 3 or not UZ.search(n.value) or isinstance(parents.get(n), ast.JoinedStr):
                 continue
             p = parents.get(n)
+            if isinstance(p, ast.Call) and isinstance(p.func, ast.Name) and p.func.id in ("_t", "_tl", "gettext", "gettext_lazy"):
+                continue  # already translated
             if isinstance(p, (ast.Dict,)) and n in p.keys:
                 todo.append(f"{f.relative_to(ROOT)}:{n.lineno}: dict key"); continue
             if isinstance(p, ast.Compare):

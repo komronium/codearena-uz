@@ -4,6 +4,7 @@ from urllib.parse import urlencode
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Q
+from apps.translations.mixin import localized
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -19,6 +20,7 @@ from apps.submissions.models import UserProblemSolved
 from .forms import ListForm
 from .models import PlanRead, ProblemList, ProblemListItem, StudyPlan
 from .progress import COURSE_MIN, course_rows, plan_progress, plan_sections, solved_ids
+from django.utils.translation import gettext as _t
 from django.utils.translation import gettext as _t
 
 # Old addresses that moved: the first study plans, and topics whose tag was renamed or that
@@ -128,12 +130,12 @@ def course_detail(request, slug):
         groups[-1]["done"] += p.solved
     progress = plan_progress(request.user, [plan])[plan.pk]
     next_id = next((i for i, _ in rows if i not in solved), None)
-    theory_html, toc = _with_toc(_render_statement(plan.theory_md))
+    theory_html, toc = _with_toc(_render_statement(localized(plan, "theory_md")))
     following = _plans_for(request.user).filter(order__gt=plan.order).order_by("order", "id").first()
     return render(request, "learn/course.html", {
         "plan": plan, "groups": groups, "progress": progress, "next_problem": problems.get(next_id),
         "theory_html": theory_html, "toc": toc, "next_plan": following,
-        "description_html": _render_statement(plan.description_md),
+        "description_html": _render_statement(localized(plan, "description_md")),
     })
 
 

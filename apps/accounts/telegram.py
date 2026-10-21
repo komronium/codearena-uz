@@ -17,6 +17,7 @@ from django.utils import timezone
 
 from .models import TelegramLink, TelegramLinkToken, TelegramLoginRequest, TelegramOutbox
 from django.utils.translation import gettext as _t
+from django.utils.translation import gettext as _t
 
 log = logging.getLogger(__name__)
 LINK_TOKEN_TTL = timedelta(minutes=10)

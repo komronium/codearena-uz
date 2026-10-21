@@ -21,6 +21,7 @@ from .telegram import (bot_configured, claim_login_request, confirm_login_reques
                        login_code,
                        issue_login_request, send_chat_message)
 from django.utils.translation import gettext as _t
+from django.utils.translation import gettext as _t
 
 log = logging.getLogger(__name__)
 

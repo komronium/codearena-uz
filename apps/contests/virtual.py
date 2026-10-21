@@ -5,6 +5,7 @@ from apps.submissions.models import Submission
 from .models import ContestProblem, Participation, VirtualParticipation
 from .standings import cell, compute_standings, totals
 from django.utils.translation import gettext as _t
+from django.utils.translation import gettext as _t
 
 
 def start_refusal(user, contest) -> str:

@@ -6474,5 +6474,37 @@
 ],
 "Namunaviy test yo‘q — o‘z inputingizni kiriting": [
 "apps/submissions/views.py"
+],
+"uz": [
+"templates/_lang_switch.html"
+],
+"O‘zbekcha": [
+"templates/_lang_switch.html",
+"templates/moderation/translations.html"
+],
+"UZ": [
+"templates/_lang_switch.html"
+],
+"en": [
+"templates/_lang_switch.html"
+],
+"English": [
+"templates/_lang_switch.html",
+"templates/moderation/translations.html"
+],
+"EN": [
+"templates/_lang_switch.html"
+],
+"(AI)": [
+"templates/moderation/translation_edit.html"
+],
+"AI tarjima qilmoqda: bir necha soniyadan keyin sahifani yangilang.": [
+"apps/moderation/translations.py"
+],
+"{n} ta matn tasdiqlandi.": [
+"apps/moderation/translations.py"
+],
+"{n} ta tarjima navbatga qo‘yildi.": [
+"apps/moderation/translations.py"
 ]
 }

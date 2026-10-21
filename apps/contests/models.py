@@ -8,6 +8,8 @@ from django.utils import timezone
 from apps.problems.models import Problem
 from django.utils.translation import gettext as _t, gettext_lazy as _tl
 
+from apps.translations.mixin import Translatable
+
 
 _UZ_MONTHS_SHORT = "Yan Fev Mar Apr May Iyn Iyl Avg Sen Okt Noy Dek".split()
 _UZ_MONTHS = "Yanvar Fevral Mart Aprel May Iyun Iyul Avgust Sentabr Oktabr Noyabr Dekabr".split()
@@ -16,7 +18,7 @@ _UZ_MONTHS = "Yanvar Fevral Mart Aprel May Iyun Iyul Avgust Sentabr Oktabr Noyab
 DIVISION_RANGE = {1: (1900, None), 2: (None, 1900), 3: (None, 1600), 4: (None, 1400)}
 
 
-class Contest(models.Model):
+class Contest(Translatable, models.Model):
     class Type(models.TextChoices):
         # The contest's rules; apps.contests.standings ranks by them. Codeforces runs its own
         # rules for Div. 1/2 rounds and ICPC for Div. 3/4; "score" is the original rule, kept
@@ -28,9 +30,13 @@ class Contest(models.Model):
     class Division(models.IntegerChoices):
         OPEN = 0, _tl("Ochiq (hamma uchun)")
         DIV1 = 1, _tl("Div. 1 (reyting 1900 va yuqori)")
-        DIV2 = 2, "Div. 2 (reyting 1900 dan past)"
-        DIV3 = 3, "Div. 3 (reyting 1600 dan past)"
-        DIV4 = 4, "Div. 4 (reyting 1400 dan past)"
+        DIV2 = 2, _tl("Div. 2 (reyting 1900 dan past)")
+        DIV3 = 3, _tl("Div. 3 (reyting 1600 dan past)")
+        DIV4 = 4, _tl("Div. 4 (reyting 1400 dan past)")
+
+    TRANSLATABLE = ("title", "description_md", "badge")
+    SHORT = ("title", "badge")
+    source_lang = models.CharField(max_length=2, default="uz", choices=[("uz", "O‘zbekcha"), ("en", "English")])
 
     title = models.CharField(max_length=200)
     description_md = models.TextField(blank=True)

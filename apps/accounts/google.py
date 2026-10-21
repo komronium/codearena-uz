@@ -25,6 +25,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from . import throttle
 from .models import User
 from django.utils.translation import gettext as _t
+from django.utils.translation import gettext as _t
 
 AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth"
 TOKEN_URL = "https://oauth2.googleapis.com/token"

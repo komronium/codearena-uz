@@ -3,6 +3,8 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _tl
 
+from apps.translations.mixin import Translatable
+
 
 class Tag(models.Model):
     class Kind(
@@ -34,7 +36,10 @@ class Language(models.Model):
         return self.name
 
 
-class Problem(models.Model):
+SOURCE_LANGS = [("uz", "O‘zbekcha"), ("en", "English")]
+
+
+class Problem(Translatable, models.Model):
     class Difficulty(models.TextChoices):
         BEGINNER = "beginner", "Beginner"
         EASY = "easy", "Easy"
@@ -57,6 +62,11 @@ class Problem(models.Model):
             "sql",
             "SQL",
         )  # query problem, judged via judge.sql_judge against a SQLDataset
+
+    TRANSLATABLE = ("title", "statement_md", "input_md", "output_md", "editorial_md")
+    SHORT = ("title",)
+    # the language the author wrote the text above in; the other one is added later and shown once an admin confirms it
+    source_lang = models.CharField(max_length=2, default="uz", choices=SOURCE_LANGS)
 
     slug = models.SlugField(unique=True)
     title = models.CharField(max_length=200)
@@ -221,7 +231,9 @@ class ProblemRating(models.Model):
 MAX_HINT_PCT = 90
 
 
-class ProblemHint(models.Model):
+class ProblemHint(Translatable, models.Model):
+    TRANSLATABLE = ("body_md",)
+
     problem = models.ForeignKey(Problem, on_delete=models.CASCADE, related_name="hints")
     order = models.PositiveIntegerField(default=0)
     body_md = models.TextField()
@@ -231,6 +243,10 @@ class ProblemHint(models.Model):
 
     class Meta:
         ordering = ["order", "id"]
+
+    @property
+    def source_lang(self):
+        return self.problem.source_lang
 
 
 class HintUnlock(models.Model):

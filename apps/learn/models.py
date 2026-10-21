@@ -4,6 +4,8 @@ from django.db import models
 from apps.problems.models import Problem, Tag
 from django.utils.translation import gettext_lazy as _tl
 
+from apps.translations.mixin import Translatable
+
 
 # A fixed set: the lucide bundle only carries icon names quoted in the code (frontend/build.mjs).
 ICONS = ["book-open", "footprints", "brackets", "route", "database", "graduation-cap", "binary", "network",
@@ -17,7 +19,7 @@ ICONS = ["book-open", "footprints", "brackets", "route", "database", "graduation
 RESERVED_SLUGS = {"lists", "topics", "plans", "save", "search"}
 
 
-class StudyPlan(models.Model):
+class StudyPlan(Translatable, models.Model):
     """A course: one topic's theory and every open problem carrying any of its tags, easiest
     first. Progress is never stored: it is read from solves against the problems open right
     now (apps.learn.progress)."""
@@ -33,6 +35,10 @@ class StudyPlan(models.Model):
         GRAPHS = "graphs", _tl("Graflar")
         ADVANCED = "advanced", _tl("Ilg‘or")
         SQL = "sql", "SQL"
+
+    TRANSLATABLE = ("title", "summary", "description_md", "theory_md")
+    SHORT = ("title", "summary")
+    source_lang = models.CharField(max_length=2, default="uz", choices=[("uz", "O‘zbekcha"), ("en", "English")])
 
     slug = models.SlugField(unique=True)
     title = models.CharField(max_length=120)
@@ -55,7 +61,10 @@ class StudyPlan(models.Model):
         return self.title
 
 
-class PlanSection(models.Model):
+class PlanSection(Translatable, models.Model):
+    TRANSLATABLE = ("title", "intro_md")
+    SHORT = ("title",)
+
     plan = models.ForeignKey(StudyPlan, on_delete=models.CASCADE, related_name="sections")
     title = models.CharField(max_length=120)
     intro_md = models.TextField(blank=True)
@@ -63,6 +72,10 @@ class PlanSection(models.Model):
 
     class Meta:
         ordering = ["order", "id"]
+
+    @property
+    def source_lang(self):
+        return self.plan.source_lang
 
 
 class PlanItem(models.Model):

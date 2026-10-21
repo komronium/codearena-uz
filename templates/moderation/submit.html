@@ -19,6 +19,11 @@
     <section class="ca-panel scroll-mt-20 space-y-4" id="sec-shart">
       <h2 class="ca-section-title !mb-0">{% trans "Shart" %}</h2>
       <div>
+        <label class="ca-label" for="{{ form.source_lang.id_for_label }}">{% trans "Qaysi tilda yozyapsiz?" %}</label>
+        {{ form.source_lang }}{{ form.source_lang.errors }}
+        <p class="mt-1 text-xs text-mute">{% trans "Faqat bitta tilda yozing: ikkinchi tilni admin yoki AI keyin to‘ldiradi va tasdiqlaydi." %}</p>
+      </div>
+      <div>
         <label class="ca-label" for="{{ form.title.id_for_label }}">{% trans "Sarlavha" %}</label>
         {{ form.title }}{{ form.title.errors }}
       </div>

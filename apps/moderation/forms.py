@@ -31,9 +31,10 @@ class ProblemForm(ModelForm):
 
     class Meta:
         model = Problem
-        fields = ["title", "kind", "statement_md", "statement_image", "input_md", "output_md", "difficulty", "rating_guess", "tags",
+        fields = ["source_lang", "title", "kind", "statement_md", "statement_image", "input_md", "output_md", "difficulty", "rating_guess", "tags",
                   "tl_ms", "ml_mb", "is_public", "editorial_md"]
         widgets = {
+            "source_lang": forms.Select(attrs={"class": "ca-select"}),
             "title": forms.TextInput(attrs=_CA_INPUT),
             "kind": forms.Select(attrs={"class": "ca-select"}),
             "statement_md": forms.Textarea(attrs=_MD),

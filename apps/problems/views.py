@@ -16,6 +16,7 @@ from django.db.models import (
     When,
 )
 from django.db.models.functions import Coalesce, Length
+from apps.translations.mixin import localized
 from django.http import Http404, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -46,6 +47,7 @@ from .models import (
 )
 from . import ai_marks
 from .skills import next_problems, shared_reason
+from django.utils.translation import gettext as _t
 from django.utils.translation import gettext as _t
 
 # Markdown itself passes raw HTML straight through; sanitize the rendered
@@ -527,7 +529,7 @@ def problem_detail(request, slug):
         )
     for i, h in enumerate(hints):
         h.opened = h.pk in opened and not help_locked
-        h.html = _render_statement(h.body_md) if h.opened else ""
+        h.html = _render_statement(localized(h, "body_md")) if h.opened else ""
         h.can_open = (
             not help_locked and not h.opened and all(x.pk in opened for x in hints[:i])
         )
@@ -599,7 +601,7 @@ def problem_detail(request, slug):
             "show_leaders": show_leaders,
             "hints": hints,
             "help_locked": help_locked,
-            "editorial_html": _render_statement(problem.editorial_md)
+            "editorial_html": _render_statement(localized(problem, "editorial_md"))
             if editorial_open
             else "",
             "open_contest": open_contest,
@@ -612,13 +614,14 @@ def problem_detail(request, slug):
             "stats": _problem_stats(problem) if contest is None else None,
             "prev_problem": public.filter(id__lt=problem.id).order_by("-id").first(),
             "next_problem": public.filter(id__gt=problem.id).order_by("id").first(),
-            "statement_html": _render_statement(problem.statement_md),
+            "statement_html": _render_statement(localized(problem, "statement_md")),
+            "translation_pending": problem.pending(),
             # KaTeX (300 KB) only for a statement that has a formula in it
-            "has_math": any("$" in (text or "") for text in (problem.statement_md, problem.input_md, problem.output_md)),
-            "input_html": _render_statement(problem.input_md)
+            "has_math": any("$" in (text or "") for text in (localized(problem, "statement_md"), localized(problem, "input_md"), localized(problem, "output_md"))),
+            "input_html": _render_statement(localized(problem, "input_md"))
             if problem.input_md
             else "",
-            "output_html": _render_statement(problem.output_md)
+            "output_html": _render_statement(localized(problem, "output_md"))
             if problem.output_md
             else "",
             "contest_problem": contest.contest_problems.filter(problem=problem).first()

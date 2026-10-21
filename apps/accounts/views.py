@@ -38,6 +38,7 @@ from .tiers import tier_banner
 from .tiers import tier_color as _tier_color
 from .telegram import bot_configured
 from django.utils.translation import gettext as _t
+from django.utils.translation import gettext as _t
 
 _CHART_W, _CHART_H = 640, 300
 _CHART_L, _CHART_R = 46, 600
