@@ -1,11 +1,12 @@
-"""CodeArena Kontest 6: the class's 80-minute final on week 6 (strings): seven hidden problems A..G (10+10+10+15+15+20+20 =
-100 points) and a reserve one (Parol kuchi, 15 points) that stays off the contest until it is needed. Source:
+"""CodeArena Kontest 6: the class's 80-minute final on week 6 (strings): eight hidden problems A..H under Codeforces
+rules: 200, 200, 200, 300, 300, 400, 400, 300 points (the cheapest is worth 200 because every mistake costs 50); the
+eighth, Parol kuchi, was the reserve. Source:
 Downloads/kontest-6-final.md; the teacher's notes from it (AI signs, the defence questions, the second variant) are in
 docs/kontest-6-ustoz-eslatmalari.md. Every statement carries a hidden note for AI assistants (apps.problems.ai_marks).
 
 Every expected output comes from the reference solution here (the one in the md, run in Python), never typed by hand; the
 md's own tests come first (the first two are the samples), then generated ones up to 22. Safe to re-run: while nobody has
-submitted to a k6-* problem it is rebuilt from the specs below. Creates the contest when it does not exist.
+submitted to a k6-* problem it is rebuilt from the specs below. Creates the contest when it does not exist; --pk attaches to one that exists.
 
     python manage.py add_codearena_kontest_6 [--start "2026-10-26 10:00"] [--minutes 80] [--rated] [--author admin] [--dry-run]
 """
@@ -22,8 +23,8 @@ from apps.contests.management.commands.add_weekend_contest_1 import PRACTICE_POI
 from apps.contests.models import Contest, ContestProblem
 from apps.problems.models import Problem, Tag, TestCase
 
-TITLE = "Kontest 6"
-LABELS = "ABCDEFG"
+TITLE = "CodeArena Round #6"
+LABELS = "ABCDEFGH"
 
 
 def _case(rng, word):
@@ -256,24 +257,24 @@ PROBLEMS = [
           "bo'lishi va domen «.» bilan boshlanmasligi ham, tugamasligi ham kerak. To'g'ri bo'lsa «Ha», aks holda «Yo'q» "
           "chiqaring.",
           "Bitta qator.", "Ha yoki Yo'q.", "pochta_zx"),
+    _spec("k6-parol", "Parol kuchi", "easy", 300, ["strings", "conditionals"], parol_solve, parol_tests,
+          "Ilova parol qo'yishda uning kuchini baholaydi.\n\nParol kiritiladi. Uzunligi kamida 8 ta bo'lsa va faqat "
+          "raqamlardan ham, faqat harflardan ham iborat bo'lmasa — «Yaxshi», aks holda «Zaif» chiqaring.",
+          "Bitta qator.", "Yaxshi yoki Zaif.", "kuch_wq"),
 ]
-RESERVE = _spec("k6-parol", "Parol kuchi", "easy", 15, ["strings", "conditionals"], parol_solve, parol_tests,
-                "Ilova parol qo'yishda uning kuchini baholaydi.\n\nParol kiritiladi. Uzunligi kamida 8 ta bo'lsa va faqat "
-                "raqamlardan ham, faqat harflardan ham iborat bo'lmasa — «Yaxshi», aks holda «Zaif» chiqaring.",
-                "Bitta qator.", "Yaxshi yoki Zaif.", "kuch_wq")
 
 DESCRIPTION = (
-    "**80 daqiqa · jami 100 ball · 7 masala.** Mavzu: satrlar (indeks, kesma, `upper` `lower` `count` `strip` "
-    "`capitalize`, `split` `join`, `startswith` `endswith` `isdigit` `isalpha`).\n\n"
+    "**80 daqiqa · 8 masala.** Mavzu: satrlar (indeks, kesma, `upper` `lower` `count` `strip` `capitalize`, `split` `join`, "
+    "`startswith` `endswith` `isdigit` `isalpha`).\n\n"
+    "- Codeforces qoidasi: masala bali vaqt o'tishi bilan kamayadi, har noto'g'ri urinish −50 ball (kamida 30%). "
+    "Eng arzon masala 200 ball.\n"
     "- Kirish `input()` bilan o'qiladi, faqat javob chiqariladi. Kirishdagi ortiqcha probellar ham test bo'lishi mumkin.\n"
-    "- Masalalarni istalgan tartibda yechishingiz mumkin. 1–3-masalalar 10 balldan, 4–5-masalalar 15 balldan, "
-    "6–7-masalalar 20 balldan.\n"
-    "- Ball teng bo'lsa, oxirgi to'g'ri javobni oldinroq yuborgan yuqori o'rinda turadi.\n"
+    "- Masalalarni istalgan tartibda yechishingiz mumkin.\n"
     "- Kontestdan keyin ba'zi yechimlar bo'yicha qisqa suhbat (himoya) o'tkazilishi mumkin: kodni o'zingiz yozing.")
 
 
 class Command(WeekendCommand):
-    help = "Creates Kontest 6 and attaches its seven problems (hidden) as A..G; the reserve one stays off the contest."
+    help = "Creates CodeArena Round #6 and attaches its eight problems (hidden) as A..H."
     ml_mb = 64
     min_tests = 20
 
@@ -283,6 +284,7 @@ class Command(WeekendCommand):
         parser.add_argument("--start", default=None, help='Start, Tashkent time: "2026-10-26 10:00" (new contest)')
         parser.add_argument("--minutes", type=int, default=80, help="Length in minutes (new contest)")
         parser.add_argument("--rated", action="store_true", help="Make a new contest rated (default: not rated)")
+        parser.add_argument("--pk", type=int, default=None, help="Attach to the contest with this id (titles can repeat)")
 
     def handle(self, *args, **opts):
         User = get_user_model()
@@ -291,7 +293,8 @@ class Command(WeekendCommand):
         if author is None:
             raise CommandError("Muallif topilmadi — --author bilan mavjud login bering.")
         with transaction.atomic():
-            contest = Contest.objects.filter(title__iexact=opts["contest"]).first()
+            contest = (Contest.objects.filter(pk=opts["pk"]).first() if opts["pk"]
+                       else Contest.objects.filter(title__iexact=opts["contest"]).order_by("-start").first())
             if contest is None:
                 if opts["start"]:
                     start = timezone.make_aware(datetime.strptime(opts["start"], "%Y-%m-%d %H:%M"))
@@ -300,7 +303,7 @@ class Command(WeekendCommand):
                                                 .replace(hour=10))
                 contest = Contest.objects.create(
                     title=opts["contest"], description_md=DESCRIPTION, start=start,
-                    end=start + timedelta(minutes=opts["minutes"]), type=Contest.Type.SCORE, is_rated=opts["rated"])
+                    end=start + timedelta(minutes=opts["minutes"]), type=Contest.Type.CF, is_rated=opts["rated"])
                 self.stdout.write(f"«{contest.title}» yaratildi: {timezone.localtime(contest.start):%d.%m.%Y %H:%M}"
                                   f"{'' if opts['start'] else ' (vaqtni musobaqa formasida o‘zgartiring)'}.")
             elif contest.start <= timezone.now() and not opts["force"]:
@@ -308,36 +311,18 @@ class Command(WeekendCommand):
             for problem in Problem.objects.filter(slug__startswith="k6-", is_public=False):
                 if not problem.submissions.exists():
                     problem.delete()
-            self._drop_old(contest, PROBLEMS + [RESERVE], "k6-")
+            self._drop_old(contest, PROBLEMS, "k6-")
             taken = set(contest.contest_problems.values_list("label", flat=True))
             for i, spec in enumerate(PROBLEMS):
                 self._add(contest, spec, LABELS[i], i, author, taken)
-            self._reserve(author)
+                # an earlier run may have attached it with other points
+                ContestProblem.objects.filter(contest=contest, problem__slug=spec["slug"]).update(points=spec["points"],
+                                                                                                    label=LABELS[i], order=i)
             if opts["dry_run"]:
                 transaction.set_rollback(True)
                 self.stdout.write(self.style.WARNING("Dry run — hech narsa saqlanmadi."))
                 return
         self.stdout.write(self.style.SUCCESS(
             f"Tayyor: «{contest.title}» da {contest.contest_problems.count()} ta masala (jami "
-            f"{sum(cp.points for cp in contest.contest_problems.all())} ball). Zaxira «{RESERVE['title']}» musobaqadan tashqarida. "
+            f"{sum(cp.points for cp in contest.contest_problems.all())} ball). "
             "Masalalar yashirin; musobaqa tugagach Boshqaruv → Musobaqalar → «Masalalarni ochish»."))
-
-    def _reserve(self, author):
-        """The reserve problem exists (hidden, with its tests) but belongs to no contest until the teacher swaps it in."""
-        import random
-
-        spec = RESERVE
-        if Problem.objects.filter(slug=spec["slug"]).exists():
-            return
-        rng = random.Random(spec["slug"])
-        problem = Problem.objects.create(
-            slug=spec["slug"], title=spec["title"], statement_md=spec["statement"], input_md=spec["input"],
-            output_md=spec["output"], difficulty=spec["difficulty"], tl_ms=spec["tl_ms"], ml_mb=self.ml_mb,
-            points=PRACTICE_POINTS[spec["difficulty"]], is_public=False, status=Problem.Status.APPROVED, author=author)
-        for name in spec["tags"]:
-            problem.tags.add(Tag.objects.get_or_create(name=name)[0])
-        inputs = spec["tests"](rng)
-        TestCase.objects.bulk_create(
-            TestCase(problem=problem, input=inp.rstrip("\n") + "\n", expected=spec["solve"](inp), is_sample=k < spec["samples"],
-                     order=k) for k, inp in enumerate(inputs))
-        self.stdout.write(f"  zaxira. {problem.title}: yaratildi, {len(inputs)} ta test (musobaqaga ulanmagan)")
