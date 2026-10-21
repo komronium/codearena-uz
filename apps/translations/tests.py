@@ -12,8 +12,9 @@ from apps.translations.models import ContentTranslation
 
 @pytest.fixture
 def problem(db):
+    author = User.objects.create_user("author", password="x", is_staff=True)
     p = Problem.objects.create(slug="sum", title="Yig‘indi", statement_md="Ikki sonning yig‘indisini toping.", is_public=True,
-                               status=Problem.Status.APPROVED)
+                               status=Problem.Status.APPROVED, author=author)
     ProblemHint.objects.create(problem=p, order=1, body_md="Ikkalasini qo‘shing.", cost_pct=10)
     return p
 
