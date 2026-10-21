@@ -17,7 +17,10 @@ as a dashed line. ctx: chart, title (optional), id. Columns are keyboard-readabl
     </div>
     <span class="rc-median" style="left: {{ chart.median_left }}%" aria-hidden="true"><em>{% trans "median" %}</em></span>
   </div>
-  <div class="rc-x" aria-hidden="true">{% for t in chart.xticks %}<span style="left: {{ t.left }}%"><em class="tabular">{{ t.value }}</em>{% if t.name %}<small style="color: {{ t.color }}">{{ t.name }}</small>{% endif %}</span>{% endfor %}</div>
-  {% if chart.present %}<ul class="rc-legend">{% for p in chart.present %}<li><i style="background: {{ p.color }}"></i>{{ p.name }} <b class="tabular">{{ p.n }}</b></li>{% endfor %}</ul>{% endif %}
+  <div class="rc-x" aria-hidden="true">{% for t in chart.xticks %}<span style="left: {{ t.left }}%"><em class="tabular"{% if t.color %} style="color: {{ t.color }}"{% endif %}>{{ t.value }}</em></span>{% endfor %}</div>
+  {% if chart.present or chart.empty %}<div class="rc-foot">
+    <ul class="rc-legend">{% for p in chart.present %}<li><i style="background: {{ p.color }}"></i>{{ p.name }} <b class="tabular">{{ p.n }}</b></li>{% endfor %}</ul>
+    {% if chart.empty %}<ul class="rc-empty" title="{% trans 'Hozircha hech kim yetmagan darajalar' %}">{% for p in chart.empty %}<li style="color: {{ p.color }}">{{ p.name }} <span class="tabular">{{ p.from }}+</span></li>{% endfor %}</ul>{% endif %}
+  </div>{% endif %}
 </figure>
 {% endif %}

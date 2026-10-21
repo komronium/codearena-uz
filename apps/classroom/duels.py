@@ -28,6 +28,7 @@ from django.utils.translation import gettext as _t, gettext_lazy as _tl
 QUESTIONS = 7  # of a new duel; a duel keeps the number it was made with (len(duel.questions))
 WEIGHT = {"beginner": 1, "easy": 1, "medium": 1}  # every right answer is one point; levels only shape the mix of a duel
 PER_QUESTION = timedelta(seconds=20)
+AWAY_MS = 1500  # out of the window this long on a question is a sign worth a look (a chat window, an AI, a snip tool)
 GRACE = timedelta(seconds=2)  # an answer's trip to the server at the last second
 RUN_LIMIT = timedelta(minutes=5)
 WAIT_FOR = timedelta(days=3)  # for someone to join an open duel, or for a friend to accept
@@ -255,15 +256,18 @@ def current(duel, user, now=None):
         return DuelAnswer.objects.select_related("question").get(duel=duel, user=user, index=index)
 
 
-def answer(duel, user, index: int, given: str, now=None) -> DuelAnswer | None:
-    """Record an answer to question `index`; one too late counts as wrong. The first answer stays."""
+def answer(duel, user, index: int, given: str, now=None, away_ms: int = 0, blurs: int = 0) -> DuelAnswer | None:
+    """Record an answer to question `index`; one too late counts as wrong. The first answer stays. `away_ms`/`blurs` are
+    what the page reports of its own focus (a sign for staff, never a rule: a player who blocks the script sends none)."""
     now = now or timezone.now()
     a = DuelAnswer.objects.select_related("question").filter(duel=duel, user=user, index=index).first()
     if a is None or a.answered_at is not None:
         return a
     a.answered_at, a.answer = now, given.strip()[:200]
     a.correct = now <= a.shown_at + PER_QUESTION + GRACE and is_right(a.question, a.answer)
-    a.save(update_fields=["answered_at", "answer", "correct"])
+    open_ms = int((now - a.shown_at).total_seconds() * 1000)
+    a.away_ms, a.blurs = max(0, min(away_ms, open_ms)), max(0, min(blurs, 50))
+    a.save(update_fields=["answered_at", "answer", "correct", "away_ms", "blurs"])
     settle(duel)
     return a
 

@@ -3873,15 +3873,17 @@ small { font-size: max(12.25px, .8em); }
 .rc-me::after { content: ""; position: absolute; left: 50%; bottom: -4px; width: 7px; height: 7px; background: inherit; transform: translateX(-50%) rotate(45deg); }
 .rc-median { position: absolute; top: 1.25rem; bottom: 0; width: 0; border-left: 2px dashed rgb(var(--ca-ink-rgb) / .55); pointer-events: none; }
 .rc-median em { position: absolute; top: -1.2rem; left: 4px; font-size: 0.75rem; font-style: normal; color: rgb(var(--ca-mute-rgb)); }
-.rc-x { position: relative; height: 2.4rem; margin: .35rem 0 0 2.25rem; }
+.rc-x { position: relative; height: 1.1rem; margin: .35rem 0 0 2.25rem; }
 .rc-x span { position: absolute; top: 0; display: grid; transform: translateX(-50%); text-align: center; }
 .rc-x span:first-child { transform: none; text-align: left; }
-.rc-x em { font-size: 0.8125rem; font-style: normal; color: rgb(var(--ca-ink-rgb)); }
-.rc-x small { font-size: 0.6875rem; font-weight: 600; white-space: nowrap; }
-.rc-legend { display: flex; flex-wrap: wrap; gap: .3rem 1rem; margin: .5rem 0 0 2.25rem; padding: 0; list-style: none; font-size: 0.8125rem; color: rgb(var(--ca-mute-rgb)); }
+.rc-x em { font-size: 0.8125rem; font-style: normal; font-weight: 600; color: rgb(var(--ca-ink-rgb)); }
+.rc-foot { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .3rem 1.5rem; margin: .45rem 0 0 2.25rem; }
+.rc-empty { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .3rem 1rem; margin: 0; padding: 0; list-style: none; font-size: 0.8125rem; font-weight: 600; opacity: .8; }
+.rc-empty span { font-weight: 400; color: rgb(var(--ca-mute-rgb)); }
+.rc-legend { display: flex; flex-wrap: wrap; gap: .3rem 1rem; margin: 0; padding: 0; list-style: none; font-size: 0.8125rem; color: rgb(var(--ca-mute-rgb)); }
 .rc-legend li { display: inline-flex; align-items: center; gap: .35rem; }
 .rc-legend i { width: 9px; height: 9px; border-radius: 2px; }
-@media (max-width: 639px) { .rc-n { display: none; } .rc-x small { display: none; } .rc-plot { height: 9rem; } }
+@media (max-width: 639px) { .rc-n { display: none; } .rc-plot { height: 9rem; } }
 @media (prefers-reduced-motion: reduce) { .rc-col i { transition: none; } }
 /* staff duel statistics: podium, head-to-head records */
 .rs-podium { display: grid; margin: 0; padding: 0; list-style: none; }
@@ -3947,3 +3949,7 @@ small { font-size: max(12.25px, .8em); }
 .mt-n-soft { background: rgb(var(--ca-mute-rgb)); }
 .ca7-admin-nav a .mt-n { margin-left: auto; }
 .mt .ca-dropdown { display: inline-block; vertical-align: middle; }
+
+.ca-quiz-card > .ca-quiz-watch { margin: .35rem 0 0; font-size: 0.75rem; opacity: .85; }
+.ca-quiz-away { display: flex; align-items: center; gap: .4rem; margin: .6rem 0 0; padding: .4rem .6rem; border-radius: .5rem; font-size: 0.8125rem; font-weight: 600; background: rgb(var(--ca-warn-rgb, 180 100 0) / .12); color: rgb(var(--ca-warn-rgb, 180 100 0)); }
+.ca-quiz-away[hidden] { display: none; }

@@ -52,17 +52,18 @@ def rating_histogram(ratings: list[int], me: int | None = None, size: int | None
     if tiers:
         for floor_, _ceil, name, color in RATING_TIERS:
             if floor_ is not None and lo <= floor_ < hi + size:
-                xticks.append({"left": round(100 * (floor_ - lo) / span, 2), "value": floor_, "name": TIER_UZ[name], "color": color})
+                xticks.append({"left": round(100 * (floor_ - lo) / span, 2), "value": floor_, "color": color})
     else:
         every = max(1, round(len(cols) / 6))
         for i in range(0, len(cols), every):
-            xticks.append({"left": round(100 * i / len(cols), 2), "value": cols[i]["from"], "name": "", "color": ""})
+            xticks.append({"left": round(100 * i / len(cols), 2), "value": cols[i]["from"], "color": ""})
     yticks = [{"value": v, "bottom": round(100 * v / top_axis, 2)} for v in range(0, top_axis + 1, step)]
     median = statistics.median(ratings)
-    present = []
+    present, empty = [], []
     if tiers:
         seen = Counter(rating_tier(r) for r in ratings)
         present = [{"name": TIER_UZ[n], "color": c, "n": seen[n]} for _f, _c, n, c in RATING_TIERS if seen.get(n)]
+        empty = [{"name": TIER_UZ[n], "color": c, "from": f} for f, _c, n, c in RATING_TIERS if f is not None and not seen.get(n)]
     return {"cols": cols, "xticks": xticks, "yticks": yticks, "n": len(ratings), "median": round(median),
-            "median_left": round(100 * (median - lo) / span, 2), "present": present, "size": size, "tiers": tiers,
+            "median_left": round(100 * (median - lo) / span, 2), "present": present, "empty": empty, "size": size, "tiers": tiers,
             "mine": me}

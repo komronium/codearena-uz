@@ -1157,6 +1157,7 @@ def submissions(request):
 @staff_required
 def duel_detail(request, pk):
     """One duel under the lens: each player's answers with the time each took, and the very fast ones marked."""
+    from apps.classroom.duels import AWAY_MS
     from apps.classroom.models import Duel, DuelAnswer
 
     duel = get_object_or_404(Duel.objects.select_related("challenger", "opponent", "winner"), pk=pk)
@@ -1167,9 +1168,11 @@ def duel_detail(request, pk):
         rows = []
         for a in DuelAnswer.objects.filter(duel=duel, user=u).select_related("question").order_by("index"):
             took = (a.answered_at - a.shown_at).total_seconds() if a.answered_at else None
-            rows.append({"a": a, "took": None if took is None else round(took, 1), "fast": took is not None and took < 1.5})
+            rows.append({"a": a, "took": None if took is None else round(took, 1), "fast": took is not None and took < 1.5,
+                         "away": round(a.away_ms / 1000, 1), "left": a.away_ms >= AWAY_MS})
         avg = [r["took"] for r in rows if r["took"] is not None]
-        sides.append({"user": u, "rows": rows, "fast": sum(r["fast"] for r in rows),
+        sides.append({"user": u, "rows": rows, "fast": sum(r["fast"] for r in rows), "left": sum(r["left"] for r in rows),
+                      "left_right": sum(r["left"] and r["a"].correct for r in rows),
                       "avg": round(sum(avg) / len(avg), 1) if avg else None})
     return render(request, "moderation/duel_detail.html", {"duel": duel, "sides": sides})
 

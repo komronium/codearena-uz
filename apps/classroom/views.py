@@ -250,7 +250,11 @@ def duel_play(request, pk):
             index = int(request.POST.get("index", ""))
         except ValueError:
             return HttpResponseBadRequest()
-        a = duels.answer(duel, request.user, index, request.POST.get("answer", ""))
+        def _int(key):
+            raw = request.POST.get(key, "")
+            return int(raw) if raw.isdigit() else 0
+
+        a = duels.answer(duel, request.user, index, request.POST.get("answer", ""), away_ms=_int("away_ms"), blurs=_int("blurs"))
         if request.headers.get("X-Duel-Answer") == "1":
             if a is None:
                 return JsonResponse({"next": play_url})
@@ -273,7 +277,7 @@ def duel_play(request, pk):
     return render(request, "classroom/duel_play.html", {
         "duel": duel, "a": current, "q": q, "n": current.index + 1, "n_questions": r.total,
         "remaining_ms": max(0, int((current.shown_at + duels.PER_QUESTION - timezone.now()).total_seconds() * 1000)),
-        "per_question": int(duels.PER_QUESTION.total_seconds()),
+        "per_question": int(duels.PER_QUESTION.total_seconds()), "away_ms": duels.AWAY_MS,
         "options": _shuffled(q.options, f"{duel.pk}-{request.user.pk}-{current.index}"),
         "cells": _my_cells(r), "language": duel.get_language_display(),
         "my_points": r.points,

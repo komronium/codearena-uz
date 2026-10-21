@@ -132,6 +132,8 @@ class DuelAnswer(models.Model):
     answered_at = models.DateTimeField(null=True, blank=True)
     answer = models.CharField(max_length=200, blank=True)
     correct = models.BooleanField(default=False)
+    away_ms = models.PositiveIntegerField(default=0, help_text="how long the page was out of focus while the question was open (the browser's word)")
+    blurs = models.PositiveSmallIntegerField(default=0, help_text="how many times the page lost focus on this question")
 
     class Meta:
         ordering = ["index"]

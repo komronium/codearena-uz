@@ -3535,6 +3535,10 @@ msgid "median"
 msgstr "median"
 
 #: templates/accounts/_rating_chart.html
+msgid "Hozircha hech kim yetmagan darajalar"
+msgstr "Not reached by anyone yet"
+
+#: templates/accounts/_rating_chart.html
 msgid "%(n)s kishi · median %(median)s"
 msgstr "%(n)s people · median %(median)s"
 
@@ -5752,6 +5756,16 @@ msgstr "Answer"
 #: templates/classroom/duel_play.html
 msgid "Bo‘sh joylar hisobga olinmaydi; katta-kichik harf hisobga olinadi."
 msgstr "Spaces don't count; upper and lower case do."
+
+#: templates/classroom/duel_play.html
+msgid "Savol vaqtida boshqa oynaga o‘tish qayd etiladi."
+msgstr "Switching to another window during a question is recorded."
+
+#: templates/classroom/duel_play.html
+msgid "Savol vaqtida oynadan chiqdingiz: bu qayd etildi va tekshiriladi."
+msgstr ""
+"You left the window during the question: this was recorded and will be "
+"reviewed."
 
 #: templates/classroom/duel_play.html
 msgid "Duel · %(n)s/%(n_questions)s-savol"
@@ -9828,6 +9842,10 @@ msgid "g‘olib"
 msgstr "winner"
 
 #: templates/moderation/duel_detail.html
+msgid "Oynadan tashqari"
+msgstr "Out of window"
+
+#: templates/moderation/duel_detail.html
 msgid "Hali javob yo‘q"
 msgstr "No answers yet"
 
@@ -9840,6 +9858,16 @@ msgstr ""
 "question: a sign of suspicion, not proof."
 
 #: templates/moderation/duel_detail.html
+msgid ""
+"«Oynadan tashqari»: savol ochiq turganda sahifa fokusini yo‘qotgan vaqt "
+"(boshqa oyna, skrinshot vositasi, AI). Brauzer aytganiga tayanadi: gumon "
+"belgisi, isbot emas."
+msgstr ""
+"“Out of window”: how long the page lost focus while the question was open "
+"(another window, a snipping tool, an AI). It relies on what the browser "
+"reports: a sign, not proof."
+
+#: templates/moderation/duel_detail.html
 msgid "Duel #%(n)s"
 msgstr "Duel #%(n)s"
 
@@ -9850,6 +9878,10 @@ msgstr "average %(a)s s"
 #: templates/moderation/duel_detail.html
 msgid "%(n)s ta 1,5 s dan tez"
 msgstr "%(n)s under 1.5 s"
+
+#: templates/moderation/duel_detail.html
+msgid "%(n)s savolda oynadan chiqqan (%(r)s tasi to‘g‘ri)"
+msgstr "Left the window on %(n)s questions (%(r)s of them right)"
 
 #: templates/moderation/duels.html
 msgid "Duellar — boshqaruv"

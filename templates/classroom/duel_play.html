@@ -45,6 +45,7 @@ second. Copying out of the question is blocked, so it can't be pasted into an AI
     {% include "classroom/_quiz_code.html" %}
     <form method="post" id="quiz-form" autocomplete="off">{% csrf_token %}
       <input type="hidden" name="index" value="{{ a.index }}">
+      <input type="hidden" name="away_ms" value="0"><input type="hidden" name="blurs" value="0">
       {% if options %}
       <div class="ca-quiz-options">
         {% for o in options %}<button name="answer" value="{{ o }}" class="ca-quiz-option"><kbd>{{ forloop.counter }}</kbd><code>{{ o }}</code></button>{% endfor %}
@@ -59,6 +60,8 @@ second. Copying out of the question is blocked, so it can't be pasted into an AI
       <p class="ca-quiz-note">{% trans "Bo‘sh joylar hisobga olinmaydi; katta-kichik harf hisobga olinadi." %}</p>
       {% endif %}
     </form>
+    <p class="ca-quiz-note ca-quiz-watch">{% trans "Savol vaqtida boshqa oynaga o‘tish qayd etiladi." %}</p>
+    <p class="ca-quiz-away" id="quiz-away" hidden role="status"><i data-lucide="eye-off" class="lu" aria-hidden="true"></i>{% trans "Savol vaqtida oynadan chiqdingiz: bu qayd etildi va tekshiriladi." %}</p>
     {# the verdict, drawn over the card once the answer is in #}
     <div class="ca-quiz-flash" id="quiz-flash" role="status" aria-live="assertive">
       <span class="ca-quiz-flash-ico" aria-hidden="true"><i data-lucide="check" class="lu" data-v="ok"></i><i data-lucide="x" class="lu" data-v="bad"></i><i data-lucide="timer-off" class="lu" data-v="late"></i></span>
@@ -99,9 +102,22 @@ second. Copying out of the question is blocked, so it can't be pasted into an AI
     flash.classList.add("is-on");
   };
 
+  // how long the window was out of focus on this question: the server keeps it for staff to see
+  let away = 0, blurs = 0, since = null;
+  const off = () => { if (since === null) { since = performance.now(); blurs++; } };
+  const on = () => {
+    if (since === null) return;
+    away += performance.now() - since; since = null;
+    if (away > {{ away_ms }}) document.getElementById("quiz-away").hidden = false;
+  };
+  window.addEventListener("blur", off); window.addEventListener("focus", on);
+  document.addEventListener("visibilitychange", () => (document.hidden ? off() : on()));
+
   const send = (picked) => {
     if (sent) return;
     sent = true;
+    on();
+    form.elements.away_ms.value = Math.round(away); form.elements.blurs.value = blurs;
     card.classList.add("is-sent");
     form.querySelectorAll("button, input").forEach((el) => { if (el.type !== "hidden") el.setAttribute("aria-disabled", "true"); });
     const data = new FormData(form);

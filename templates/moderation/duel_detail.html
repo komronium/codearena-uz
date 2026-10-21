@@ -24,13 +24,14 @@
   {% for s in sides %}
   <section aria-label="{{ s.user.username }}">
     <h2 class="rs-h flex items-center gap-2">{% include "accounts/_u7.html" with u=s.user you=False %}{% if duel.winner_id == s.user.pk %}<i data-lucide="trophy" class="lu text-gold" aria-label="{% trans 'g‘olib' %}"></i>{% endif %}
-      <span class="ml-auto text-sm font-normal text-mute tabular">{% if s.avg is not None %}{% blocktrans with a=s.avg %}o‘rtacha {{ a }} s{% endblocktrans %}{% endif %}{% if s.fast %} · <b class="text-warn">{% blocktrans with n=s.fast %}{{ n }} ta 1,5 s dan tez{% endblocktrans %}</b>{% endif %}</span></h2>
+      <span class="ml-auto text-sm font-normal text-mute tabular">{% if s.avg is not None %}{% blocktrans with a=s.avg %}o‘rtacha {{ a }} s{% endblocktrans %}{% endif %}{% if s.fast %} · <b class="text-warn">{% blocktrans with n=s.fast %}{{ n }} ta 1,5 s dan tez{% endblocktrans %}</b>{% endif %}{% if s.left %} · <b class="text-warn">{% blocktrans with n=s.left r=s.left_right %}{{ n }} savolda oynadan chiqqan ({{ r }} tasi to‘g‘ri){% endblocktrans %}</b>{% endif %}</span></h2>
     <table class="ca-table ca-table-flat mt">
-      <thead><tr><th scope="col" class="w-10">#</th><th scope="col">{% trans "Savol" %}</th><th scope="col">{% trans "Javob" %}</th><th scope="col" class="w-20 text-right">{% trans "Vaqt" %}</th><th scope="col" class="w-16"></th></tr></thead>
-      <tbody>{% for r in s.rows %}<tr><td class="tabular text-mute">{{ r.a.index|add:1 }}</td><td class="text-sm">{{ r.a.question.level|default:"" }}</td><td class="text-sm" translate="no">{{ r.a.answer|default:"—" }}</td><td class="text-right tabular {% if r.fast %}font-bold text-warn{% endif %}">{% if r.took is not None %}{{ r.took }} s{% else %}—{% endif %}</td><td>{% if r.a.correct %}<span class="st st-ok">✓</span>{% else %}<span class="st st-bad">✗</span>{% endif %}</td></tr>{% empty %}<tr><td colspan="5" class="text-mute">{% trans "Hali javob yo‘q" %}</td></tr>{% endfor %}</tbody>
+      <thead><tr><th scope="col" class="w-10">#</th><th scope="col">{% trans "Savol" %}</th><th scope="col">{% trans "Javob" %}</th><th scope="col" class="w-20 text-right">{% trans "Vaqt" %}</th><th scope="col" class="w-24 text-right">{% trans "Oynadan tashqari" %}</th><th scope="col" class="w-16"></th></tr></thead>
+      <tbody>{% for r in s.rows %}<tr><td class="tabular text-mute">{{ r.a.index|add:1 }}</td><td class="text-sm">{{ r.a.question.level|default:"" }}</td><td class="text-sm" translate="no">{{ r.a.answer|default:"—" }}</td><td class="text-right tabular {% if r.fast %}font-bold text-warn{% endif %}">{% if r.took is not None %}{{ r.took }} s{% else %}—{% endif %}</td><td class="text-right tabular {% if r.left %}font-bold text-warn{% endif %}">{% if r.a.blurs %}{{ r.away }} s · {{ r.a.blurs }}×{% else %}—{% endif %}</td><td>{% if r.a.correct %}<span class="st st-ok">✓</span>{% else %}<span class="st st-bad">✗</span>{% endif %}</td></tr>{% empty %}<tr><td colspan="6" class="text-mute">{% trans "Hali javob yo‘q" %}</td></tr>{% endfor %}</tbody>
     </table>
   </section>
   {% endfor %}
 </div>
 <p class="ca7-foot-note">{% trans "Juda tez javoblar (1,5 soniyadan kam) savolni o‘qib ulgurish uchun juda qisqa: gumon belgisi, isbot emas." %}</p>
+<p class="ca7-foot-note">{% trans "«Oynadan tashqari»: savol ochiq turganda sahifa fokusini yo‘qotgan vaqt (boshqa oyna, skrinshot vositasi, AI). Brauzer aytganiga tayanadi: gumon belgisi, isbot emas." %}</p>
 {% endblock %}

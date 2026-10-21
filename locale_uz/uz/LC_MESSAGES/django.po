@@ -1348,6 +1348,9 @@ msgstr "Öquv joyi <span class=\"font-normal text-mute\">(ixtiyoriy)</span>"
 msgid "%(rank)s-o‘rin"
 msgstr "%(rank)s-örin"
 
+msgid "Hozircha hech kim yetmagan darajalar"
+msgstr "Hozirça heç kim yetmagan darajalar"
+
 msgid "%(n)s kishi · median %(median)s"
 msgstr "%(n)s kişi · median %(median)s"
 
@@ -2560,6 +2563,12 @@ msgstr "Javob beriş"
 
 msgid "Bo‘sh joylar hisobga olinmaydi; katta-kichik harf hisobga olinadi."
 msgstr "Böş joylar hisobga olinmaydi; katta-kiçik harf hisobga olinadi."
+
+msgid "Savol vaqtida boshqa oynaga o‘tish qayd etiladi."
+msgstr "Savol vaqtida boşqa oynaga ötiş qayd etiladi."
+
+msgid "Savol vaqtida oynadan chiqdingiz: bu qayd etildi va tekshiriladi."
+msgstr "Savol vaqtida oynadan çiqdingiz: bu qayd etildi va tekşiriladi."
 
 msgid "Sizni duelga chaqirishdi"
 msgstr "Sizni duelga çaqirişdi"
@@ -4804,6 +4813,9 @@ msgstr "Duelni bekor qiliş"
 msgid "g‘olib"
 msgstr "ğolib"
 
+msgid "Oynadan tashqari"
+msgstr "Oynadan taşqari"
+
 msgid "Hali javob yo‘q"
 msgstr "Hali javob yöq"
 
@@ -4814,8 +4826,20 @@ msgstr ""
 "Juda tez javoblar (1,5 soniyadan kam) savolni öqib ulguriş uçun juda qisqa: "
 "gumon belgisi, isbot emas."
 
+msgid ""
+"«Oynadan tashqari»: savol ochiq turganda sahifa fokusini yo‘qotgan vaqt "
+"(boshqa oyna, skrinshot vositasi, AI). Brauzer aytganiga tayanadi: gumon "
+"belgisi, isbot emas."
+msgstr ""
+"«Oynadan taşqari»: savol oçiq turganda sahifa fokusini yöqotgan vaqt (boşqa "
+"oyna, skrinşot vositasi, AI). Brauzer aytganiga tayanadi: gumon belgisi, "
+"isbot emas."
+
 msgid "o‘rtacha %(a)s s"
 msgstr "örtaça %(a)s s"
+
+msgid "%(n)s savolda oynadan chiqqan (%(r)s tasi to‘g‘ri)"
+msgstr "%(n)s savolda oynadan çiqqan (%(r)s tasi töğri)"
 
 msgid "Duellar — boshqaruv"
 msgstr "Duellar — boşqaruv"
