@@ -1,4 +1,6 @@
 """/ : what to do next for a signed-in student, what CodeArena is for a guest."""
+from django.conf import settings
+from django.core.cache import cache
 from django.contrib.staticfiles import finders
 from django.db.models import Count, Q
 from django.http import FileResponse, HttpResponse, JsonResponse
@@ -86,18 +88,23 @@ def home(request):
         # the latest rated contest whose ratings are applied: its real top three, not a mock-up
         last_rated = (Contest.objects.filter(is_rated=True, end__lte=now, participations__rating_after__isnull=False)
                       .order_by("-end").distinct().first())
-        board = [r for r in _standings(last_rated) if not r["disqualified"]] if last_rated else []
-        podium = board[:5]
         # the hero's first line: the round running now, else the next one, that anyone may enter
         next_round = (running + upcoming or [None])[0]
+
+        def figures():  # the same for every guest: the last podium (a standings pass) and the site's counts
+            board = [r for r in _standings(last_rated) if not r["disqualified"]] if last_rated else []
+            return {"podium": board[:5], "n_last": len(board),
+                    "stats": {"problems": open_problems().count(),
+                              # people who actually tried something, not every empty account
+                              "users": User.objects.filter(is_active=True, submissions__isnull=False).distinct().count(),
+                              "contests": Contest.objects.count(), "submissions": Submission.objects.count()}}
+
+        ttl = settings.GUEST_CACHE_SECONDS
+        facts = cache.get_or_set(f"landing-facts:{last_rated.pk if last_rated else 0}", figures, ttl) if ttl else figures()
         return render(request, "home/landing.html", {
             "daily": daily, "running": running, "upcoming": upcoming, "next_round": next_round,
-            "last_rated": last_rated, "podium": podium, "n_last": len(board),
+            "last_rated": last_rated, **facts,
             "languages": list(Language.objects.filter(is_active=True).order_by("id").values_list("name", flat=True)),
-            "stats": {"problems": open_problems().count(),
-                      # people who actually tried something, not every empty account
-                      "users": User.objects.filter(is_active=True, submissions__isnull=False).distinct().count(),
-                      "contests": Contest.objects.count(), "submissions": Submission.objects.count()},
         })
 
     user = request.user

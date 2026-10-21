@@ -3,6 +3,7 @@ import os
 import uuid
 
 import django_rq
+from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.core.files.storage import default_storage
@@ -609,12 +610,19 @@ def contest_publish(request, pk):
 @staff_required
 @require_POST
 def contest_apply_rating(request, pk):
-    try:
-        call_command("recalc_rating", pk)
-        audit.record(request, audit.Action.RATING_APPLY, contest=Contest.objects.get(pk=pk))
-        messages.success(request, "Reyting hisoblandi.")
-    except CommandError as e:
-        messages.error(request, f"Reyting hisoblanmadi: {e}")
+    from apps.contests import jobs
+    contest = get_object_or_404(Contest, pk=pk)
+    if not contest.is_rated:
+        messages.error(request, "Reyting hisoblanmadi: musobaqa reytingli emas.")
+    elif not contest.rating_applied and not contest.has_ended:
+        messages.error(request, "Reyting hisoblanmadi: musobaqa hali tugamagan.")
+    elif contest.rating_applied:
+        messages.info(request, "Bu musobaqaning reytingi allaqachon hisoblangan.")
+    else:
+        jobs.run(jobs.apply_rating, contest.pk)
+        audit.record(request, audit.Action.RATING_APPLY, contest=contest)
+        messages.success(request, "Reyting hisoblanmoqda: bir necha soniyadan keyin sahifani yangilang." if settings.RQ_ASYNC
+                         else "Reyting hisoblandi.")
     return redirect("moderation:contests")
 
 

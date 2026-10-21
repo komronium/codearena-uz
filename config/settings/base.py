@@ -83,6 +83,8 @@ RQ_QUEUES = {"default": {"URL": REDIS_URL, "DEFAULT_TIMEOUT": 600},
              "run": {"URL": REDIS_URL, "DEFAULT_TIMEOUT": 120},
              "rejudge": {"URL": REDIS_URL, "DEFAULT_TIMEOUT": 600},
              "notifications": {"URL": REDIS_URL, "DEFAULT_TIMEOUT": 60}}
+RQ_ASYNC = True  # staff actions that touch every rating (apply a contest's rating) run in the worker, not in the request
+GUEST_CACHE_SECONDS = 60  # the landing page's figures and last podium: the same for every guest, so work them out once a minute
 CACHES = {"default": {"BACKEND": "django.core.cache.backends.redis.RedisCache", "LOCATION": REDIS_URL}}
 
 # Host path shared between worker container and docker daemon; must be identical on both sides.

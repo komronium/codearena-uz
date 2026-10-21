@@ -938,3 +938,25 @@ def test_a_setter_writes_problems_that_wait_for_staff(client):
     # once published it is no longer the writer's to edit
     client.force_login(setter)
     assert client.get(reverse("moderation:problem_edit", args=[p.pk])).status_code == 403
+
+
+@pytest.mark.django_db
+def test_applying_a_rating_is_queued_for_the_worker_and_runs_once(client, settings):
+    from datetime import timedelta
+    from unittest.mock import patch
+    from django.utils import timezone
+    from apps.contests.models import Contest
+    staff = User.objects.create_user("boss", password="x", is_staff=True)
+    now = timezone.now()
+    c = Contest.objects.create(title="R", start=now - timedelta(hours=3), end=now - timedelta(hours=1), is_rated=True)
+    client.force_login(staff)
+    settings.RQ_ASYNC = True
+    with patch("apps.contests.jobs.django_rq.get_queue") as get_queue:
+        r = client.post(reverse("moderation:contest_apply_rating", args=[c.pk]))
+    assert r.status_code == 302 and get_queue.return_value.enqueue.call_args[0][1] == c.pk  # queued, not run in the request
+    c.refresh_from_db()
+    assert not c.rating_applied
+    settings.RQ_ASYNC = False  # no worker: the same click runs it in place
+    client.post(reverse("moderation:contest_apply_rating", args=[c.pk]))
+    c.refresh_from_db()
+    assert c.rating_applied

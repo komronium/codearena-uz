@@ -6,6 +6,8 @@ EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
 
 # Most tests post submissions directly; the editor rule has its own tests (override_settings).
 PRACTICE_REQUIRE_EDITOR = False
+RQ_ASYNC = False  # jobs run inline, so a test sees their result
+GUEST_CACHE_SECONDS = 0
 
 # The account gate has its own tests (override_settings); everyone else's test users go straight in.
 ACCOUNT_GATE = False
