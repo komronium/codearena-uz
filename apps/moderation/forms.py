@@ -187,8 +187,13 @@ class ContestForm(_SourceLang, ModelForm):
             "type": forms.Select(attrs={"class": "ca-select"}),
         }
 
+    authors_text = forms.CharField(required=False, label=_tl("Mualliflar"), widget=forms.TextInput(attrs={
+        **_CA_INPUT, "placeholder": _tl("login, login … (tanlovdan tashqari qatnashadi)")}))
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        if self.instance.pk:
+            self.initial["authors_text"] = ", ".join(self.instance.authors.values_list("username", flat=True))
         self.fields["review_top_n"].required = False
         self.fields["division"].required = False
         self.fields["type"].required = False
@@ -205,6 +210,23 @@ class ContestForm(_SourceLang, ModelForm):
         elif self.instance.pk is None and data.get("end") and data["end"] <= timezone.now():
             self.add_error("end", _t("Tugash vaqti allaqachon o'tib ketgan — sana va yilni tekshiring."))
         return data
+
+    def clean_authors_text(self):
+        names = [n for n in re.split(r"[,\s]+", self.cleaned_data.get("authors_text") or "") if n]
+        found = {n: User.objects.filter(username__iexact=n).first() for n in names}
+        missing = [n for n, u in found.items() if u is None]
+        if missing:
+            raise forms.ValidationError(_t("Bunday foydalanuvchi yo‘q: {names}").format(names=", ".join(missing)))
+        return list({u.pk: u for u in found.values()}.values())
+
+    def save(self, commit=True):
+        contest = super().save(commit)
+        if commit:
+            contest.authors.set(self.cleaned_data.get("authors_text") or [])
+        else:
+            old = self.save_m2m
+            self.save_m2m = lambda: (old(), contest.authors.set(self.cleaned_data.get("authors_text") or []))
+        return contest
 
     def clean_review_top_n(self):
         # left empty = the model default, not a validation error on an otherwise filled form

@@ -150,6 +150,7 @@ def replay() -> int:
     with transaction.atomic():
         contests = list(Contest.objects.filter(rating_applied=True).order_by("end", "pk"))
         Participation.objects.filter(rating_after__isnull=False).update(rating_before=None, rating_after=None)
+        Participation.objects.filter(contest__rating_applied=True).update(rank=None)  # re-set by the rated rows below
         User.objects.update(rating=0)
         Contest.objects.filter(rating_applied=True).update(rating_applied=False)
         for contest in contests:

@@ -160,7 +160,7 @@ it is scored, virtual participation.{% endcomment %}
     <div class="ca-box-cap ca-hd"><h2 id="me-title">{% trans "Sizning holatingiz" %}</h2><a class="ca-box-tools ca-link" href="{% url 'contests:standings' contest.pk %}#me">{% trans "Jadvalda" %}</a></div>
     <div class="ca-box-body ca-box-pad">
       <dl class="ca-stat-tiles">
-        <div><dt>{% trans "O‘rin" %}</dt><dd>{% if my_row.disqualified or not my_row.solved and contest.is_running %}—{% else %}{{ my_row.rank }}{% endif %}<small>/ {{ n_participants }}</small></dd></div>
+        <div><dt>{% trans "O‘rin" %}</dt><dd>{% if my_row.disqualified or my_row.author or not my_row.solved and contest.is_running %}—{% else %}{{ my_row.rank }}{% endif %}<small>/ {{ n_participants }}</small></dd></div>
         <div><dt>{% if contest.type == "icpc" %}{% trans "Yechildi" %}{% else %}{% trans "Ball" %}{% endif %}</dt><dd>{% if contest.type == "icpc" %}{{ my_row.solved }}{% else %}{{ my_row.score }}{% endif %}</dd></div>
         {% if my_row.rating_delta is not None %}<div><dt>{% trans "Reyting" %}</dt><dd class="{% if my_row.rating_delta > 0 %}text-ok{% elif my_row.rating_delta < 0 %}text-bad{% endif %}">{{ my_row.rating_delta|signed }}</dd></div>
         {% elif contest.wrong_try_minutes is not None %}<div><dt>{% trans "Jarima" %}</dt><dd>{{ my_row.penalty }}</dd></div>

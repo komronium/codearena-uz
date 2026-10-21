@@ -21,12 +21,13 @@ and optionally problems, n_participants, next_cp (the first problem you have not
         <p class="ca7-bmeta tabular">
           <span><i data-lucide="calendar" class="lu" aria-hidden="true"></i>{{ contest.start|ztime:"d.m.Y · H:i" }}–{% if contest.start|date:"Ymd" != contest.end|date:"Ymd" %}{{ contest.end|ztime:"d.m.Y H:i" }}{% else %}{{ contest.end|ztime:"H:i" }}{% endif %}</span>
           <span><i data-lucide="hourglass" class="lu" aria-hidden="true"></i>{{ contest.duration_label }}</span>
+          {% with authors=contest.authors.all %}{% if authors %}<span><i data-lucide="pen-line" class="lu" aria-hidden="true"></i>{% trans "Mualliflar:" %} {% for a in authors %}<a class="text-white hover:underline" href="{% url 'profile' a.username %}">{{ a.username }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</span>{% endif %}{% endwith %}
           {% if problems %}<span><i data-lucide="list" class="lu" aria-hidden="true"></i>{% blocktrans with problems=problems|length %}{{ problems }} masala{% endblocktrans %}</span>{% endif %}
           {% if n_participants is not None %}<span><i data-lucide="users" class="lu" aria-hidden="true"></i>{% blocktrans with n_participants=n_participants %}{{ n_participants }} ishtirokchi{% endblocktrans %}</span>{% endif %}
         </p>
       </div>
       <div class="ca-band-side">
-        {% if contest.has_ended and my_row and not my_row.disqualified %}
+        {% if contest.has_ended and my_row and not my_row.disqualified and not my_row.author %}
         <dl class="ca7-band-me">
           <div><dt>{% trans "O‘rningiz" %}</dt><dd class="tabular">{{ my_row.rank }}{% if n_participants %} <small>/ {{ n_participants }}</small>{% endif %}</dd></div>
           {% if my_row.rating_delta is not None and my_participation.rating_after is not None %}<div><dt>{% trans "Reyting" %}</dt><dd class="tabular"><span class="{% if my_row.rating_delta >= 0 %}is-up{% else %}is-down{% endif %}">{{ my_row.rating_delta|signed }}</span> → {{ my_participation.rating_after }}</dd></div>{% endif %}

@@ -550,7 +550,7 @@ def _contest_badges(user) -> list[dict]:
     for p in (Participation.objects.filter(user=user, disqualified=False, contest__published_at__isnull=False)
               .exclude(contest__badge="").select_related("contest").order_by("contest__end")):
         row = next((r for r in _standings(p.contest) if r["user"].pk == user.pk), None)
-        if row is not None and row["solved"]:
+        if row is not None and row["solved"] and not row["author"]:  # a round's author is out of competition: no badge
             badges.append({"contest": p.contest, "name": p.contest.badge, "solved": row["solved"],
                            "total": len(row["cells"]), "medal": row["rank"] if row["rank"] <= 3 else None})
     return badges

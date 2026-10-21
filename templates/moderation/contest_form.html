@@ -78,6 +78,9 @@
         {% if form.personal_minutes.errors %}<p class="mt-1 text-sm text-bad">{{ form.personal_minutes.errors.0 }}</p>{% endif %}</div>
       <div><label class="flex items-center gap-2 text-sm font-medium" for="{{ form.auto_finish.id_for_label }}">{% blocktrans with form_auto_finish=form.auto_finish %}{{ form_auto_finish }} Natijani avtomatik e’lon qilish{% endblocktrans %}</label>
         <p class="mt-1 text-xs text-mute">{% trans "Musobaqa tugagach 12 soat o‘tib, ko‘rilmagan o‘xshashlik belgisi qolmasa, masalalar ochiladi va (reytingli bo‘lsa) reyting hisoblanadi. O‘chiq bo‘lsa, buni o‘zingiz qilasiz." %}</p></div>
+      <div><label class="ca-label" for="{{ form.authors_text.id_for_label }}">{% trans "Mualliflar" %}</label>{{ form.authors_text }}
+        <p class="mt-1 text-xs text-mute">{% trans "Ular raund sahifasida ko‘rinadi, tanlovdan tashqari qatnashadi: reytingga, o‘ringa va nishonga ta’sir qilmaydi." %}</p>
+        {% if form.authors_text.errors %}<p class="mt-1 text-sm text-bad">{{ form.authors_text.errors.0 }}</p>{% endif %}</div>
       <div><label class="ca-label" for="{{ form.badge.id_for_label }}">{% trans "Nishon (ixtiyoriy)" %}</label>{{ form.badge }}
         <p class="mt-1 text-xs text-mute">{% trans "Masalalar ochilgach, kamida bitta masala yechganlar profiliga shu nomli nishon qo‘shiladi; birinchi uchtalikka — medal." %}</p>
         {% if form.badge.errors %}<p class="mt-1 text-sm text-bad">{{ form.badge.errors.0 }}</p>{% endif %}</div>

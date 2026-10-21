@@ -39,7 +39,7 @@ def virtual_result(vp) -> dict:
     cells = [{**cell(contest, cp, [s for s in subs if s.problem_id == cp.problem_id], vp.start), "cp": cp}
              for cp in problems]
     score, penalty, solved = totals(contest, cells)
-    real = [r for r in compute_standings(contest) if not r["disqualified"] and r["attempted"]]
+    real = [r for r in compute_standings(contest) if not r["disqualified"] and r["attempted"] and not r["author"]]
     rank = 1 + sum(1 for r in real if (-r["score"], r["penalty"]) < (-score, penalty))
     return {"score": score, "penalty": penalty, "solved": solved, "cells": cells, "rank": rank,
             "field": len(real), "running": vp.is_running, "end": vp.end}

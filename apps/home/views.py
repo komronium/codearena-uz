@@ -72,7 +72,7 @@ def _live(user, running) -> dict | None:
     if not contest:
         return None
     row = next((r for r in _standings(contest) if r["user"].pk == user.pk), None)
-    return {"contest": contest, "joined": row is not None, "rank": row and row["rank"],
+    return {"contest": contest, "joined": row is not None, "rank": row and row["rank"], "author": bool(row and row["author"]),
             "solved": row and row["solved"], "n_problems": contest.contest_problems.count()}
 
 
@@ -93,7 +93,7 @@ def home(request):
         next_round = (running + upcoming or [None])[0]
 
         def figures():  # the same for every guest: the last podium (a standings pass) and the site's counts
-            board = [r for r in _standings(last_rated) if not r["disqualified"]] if last_rated else []
+            board = [r for r in _standings(last_rated) if not r["disqualified"] and not r["author"]] if last_rated else []
             return {"podium": board[:5], "n_last": len(board),
                     "stats": {"problems": open_problems().count(),
                               # people who actually tried something, not every empty account

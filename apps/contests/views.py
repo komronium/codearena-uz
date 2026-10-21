@@ -30,7 +30,8 @@ from django.utils.translation import gettext as _t
 
 def contest_list(request):
     now = timezone.now()
-    contests = Contest.objects.annotate(n_participants=Count("participations")).order_by("-start")
+    contests = (Contest.objects.annotate(n_participants=Count("participations")).prefetch_related("authors")
+                .order_by("-start"))
     running = [c for c in contests if c.start <= now < c.end]
     upcoming = sorted((c for c in contests if c.start > now), key=lambda c: c.start)
     past = [c for c in contests if c.end <= now]
@@ -113,7 +114,7 @@ def contest_detail(request, pk):
         problems_shown = problems
     if contest.has_started:
         rows = _standings(contest, problems)
-        counted = [r for r in rows if not r["disqualified"]]
+        counted = [r for r in rows if not r["disqualified"] and not r["author"]]
         # the board's top: the leaders while it runs, the final results once it is over
         leaders = [] if personal and not contest.has_ended and not request.user.is_staff else counted[:6]
         for i, cp in enumerate(problems):
@@ -260,7 +261,7 @@ def standings(request, pk):
         out.writerow([_t("O‘rin"), "Login", "Ball", "Yechildi", "Jarima", *[cp.label for cp in problems], "Reyting ±"])
         for r in rows:
             cells = [(c["mark"] if c["solved"] else (f"-{c['wrong']}" if c["wrong"] else "")) for c in r["cells"]]
-            out.writerow(["DQ" if r["disqualified"] else r["rank"], r["user"].username, r["score"], r["solved"],
+            out.writerow(["DQ" if r["disqualified"] else "*" if r["author"] else r["rank"], r["user"].username, r["score"], r["solved"],
                           r["penalty"], *cells, "" if r.get("rating_delta") is None else r["rating_delta"]])
         return resp
     # the live refresh asks for the table only: no header, menu or streak queries per poll

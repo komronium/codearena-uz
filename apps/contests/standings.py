@@ -58,6 +58,7 @@ def compute_standings(contest):
     the penalty is always 0, so equal points share a place."""
     problems = list(contest.contest_problems.select_related("problem"))
     participations = list(contest.participations.select_related("user"))
+    author_ids = set(contest.authors.values_list("pk", flat=True))
 
     subs_by_user_problem = {}
     for cp in problems:
@@ -94,19 +95,24 @@ def compute_standings(contest):
         attempted = any(subs_by_user_problem.get((p.user_id, cp.id)) for cp in problems)
         # Out of the contest's division: on the board, never rated. Judged by the rating it
         # was rated from once applied, so a later climb doesn't relabel an old result.
-        out = not contest.rates(p.user.rating if p.rating_before is None else p.rating_before)
+        author = p.user_id in author_ids
+        out = author or not contest.rates(p.user.rating if p.rating_before is None else p.rating_before)
         rows.append({"participation": p, "user": p.user, "solved": solved, "penalty": penalty,
                      "score": score, "cells": cells, "rating_delta": delta,
-                     "disqualified": p.disqualified, "attempted": attempted, "out": out})
+                     "disqualified": p.disqualified, "attempted": attempted, "out": out, "author": author})
 
     # Disqualified participants always sort below everyone else: they keep their cells
     # for the record but take the last ranks, which is what makes their rating drop.
     def key(r): return (r["disqualified"], -r["score"], r["penalty"])
     rows.sort(key=key)
     # Equal results share a rank ("1, 1, 3"): the order between them is arbitrary,
-    # so distinct ranks would hand out arbitrary rating deltas.
-    for i, r in enumerate(rows, start=1):
-        r["rank"] = i if i == 1 or key(r) != key(rows[i - 2]) else rows[i - 2]["rank"]
+    # so distinct ranks would hand out arbitrary rating deltas. The round's authors are out of competition: they
+    # stand in the table by their result but have no rank (None), and nobody's place counts them.
+    ranked = [r for r in rows if not r["author"]]
+    for r in rows:
+        r["rank"] = None
+    for i, r in enumerate(ranked, start=1):
+        r["rank"] = i if i == 1 or key(r) != key(ranked[i - 2]) else ranked[i - 2]["rank"]
 
     # the first solve of a problem: who got it in first. In a personal-clock round everybody starts at their own
     # time, so "first" is the shortest time from one's own start, not the earliest moment on the wall clock.
@@ -115,9 +121,10 @@ def compute_standings(contest):
         return (c["ac_at"] - r["participation"].clock_start) if contest.personal_minutes else c["ac_at"]
 
     for col in range(len(problems)):
-        times = [took(r, col) for r in rows if r["cells"][col]["solved"] and not r["disqualified"]]
+        times = [took(r, col) for r in rows if r["cells"][col]["solved"] and not r["disqualified"] and not r["author"]]
         first = min(times) if times else None
         for r in rows:
-            r["cells"][col]["first"] = first is not None and r["cells"][col]["solved"] and took(r, col) == first
+            r["cells"][col]["first"] = (first is not None and r["cells"][col]["solved"] and not r["author"]
+                                        and took(r, col) == first)
 
     return rows

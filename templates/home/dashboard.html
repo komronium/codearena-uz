@@ -48,7 +48,7 @@
     <span class="ca-tag ca-tag-live">{% trans "<span class=\"ca-live-dot\" aria-hidden=\"true\"></span>Jonli" %}</span>
     <div class="min-w-0 flex-1">
       <h2 id="live-title"><a href="{% url 'contests:detail' live.contest.pk %}">{{ live.contest.title }}</a></h2>
-      <p>{% if live.joined %}{% blocktrans with live_rank=live.rank live_n_problems=live.n_problems live_solved=live.solved %}Siz <b>{{ live_rank }}-o‘rin</b>dasiz, {{ live_n_problems }} masaladan {{ live_solved }} tasi yechilgan.{% endblocktrans %}{% else %}{% blocktrans with live_n_problems=live.n_problems %}{{ live_n_problems }} ta masala. Hali qatnashmagansiz.{% endblocktrans %}{% endif %}</p>
+      <p>{% if live.joined and live.author %}{% blocktrans with live_n_problems=live.n_problems live_solved=live.solved %}Siz bu raundning muallifisiz: tanlovdan tashqari qatnashasiz. {{ live_n_problems }} masaladan {{ live_solved }} tasi yechilgan.{% endblocktrans %}{% elif live.joined %}{% blocktrans with live_rank=live.rank live_n_problems=live.n_problems live_solved=live.solved %}Siz <b>{{ live_rank }}-o‘rin</b>dasiz, {{ live_n_problems }} masaladan {{ live_solved }} tasi yechilgan.{% endblocktrans %}{% else %}{% blocktrans with live_n_problems=live.n_problems %}{{ live_n_problems }} ta masala. Hali qatnashmagansiz.{% endblocktrans %}{% endif %}</p>
     </div>
     <p class="ca-live-clock"><span>{% trans "Tugashiga" %}</span><b class="tabular" data-countdown="{{ live.contest.end|date:'c' }}" data-label="" data-suffix="1"></b></p>
     <a class="ca-btn ca-btn-primary" href="{% url 'contests:detail' live.contest.pk %}">{% if live.joined %}{% trans "Davom etish" %}{% else %}{% trans "Qatnashish" %}{% endif %}</a>
