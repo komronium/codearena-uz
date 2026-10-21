@@ -2,7 +2,7 @@
 level) tinted by the verdict, a hint after a failure, the compiler's log, then every test as a row; while it is judged
 the card polls itself every 1.5 s while the tab is visible; below it only the test it stopped on, not a row per test.
 compact=True: the verdict chip only.{% endcomment %}
-<div data-verdict="{{ s.verdict }}" data-sub="{{ s.pk }}"{% if first_solve %} data-first="1"{% endif %} {% if not s.is_terminal %}hx-get="{% url 'submissions:status' s.pk %}{% if compact %}?compact=1{% endif %}" hx-trigger="every 500ms [!document.hidden]" hx-swap="outerHTML"{% endif %}
+<div data-verdict="{{ s.verdict }}" data-sub="{{ s.pk }}"{% if first_solve %} data-first="1"{% endif %}{% if stamp %} data-stamp="{{ stamp.label }}" data-pts="{{ stamp.points }}"{% endif %} {% if not s.is_terminal %}hx-get="{% url 'submissions:status' s.pk %}{% if compact %}?compact=1{% endif %}" hx-trigger="every 500ms [!document.hidden]" hx-swap="outerHTML"{% endif %}
      aria-busy="{% if not s.is_terminal %}true{% else %}false{% endif %}">
 {% if s.is_terminal %}{% load verdicts %}<span class="sr-only" role="status">{{ s.verdict|verdict_words }}</span>{% endif %}
 {% if compact %}{% include "submissions/_verdict.html" with v=s.verdict sub=s %}

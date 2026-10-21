@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}{% trans "Qabul qilindi: ko‘rinishi" %}{% endblock %}
+{% block band %}{% url 'moderation:dashboard' as back %}{% include "moderation/_band.html" with title=_("Qabul qilindi: ko‘rinishi") subtitle=_("O‘yinchi AC olganda ko‘radigan va eshitadigan narsa") back_url=back back_label=_("Boshqaruv") %}{% endblock %}
+{% block content %}
+{% comment %}A staff page to try the accepted moment without solving: the card, the chord, the confetti inside the card and
+the stamp a round's accept gets. The buttons call the same window.caAccepted the live card does.{% endcomment %}
+<div class="mx-auto max-w-3xl space-y-5">
+  <section class="ca7-vhero is-ac" aria-label="{% trans 'Namuna' %}" data-sub="preview">
+    <div class="ca7-vhero-h">
+      <span class="ca7-vhero-ico" aria-hidden="true"><svg class="ca7-tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 12.5 10 17l8.5-9.5" pathLength="1"/></svg></span>
+      <div><h2>{% trans "Qabul qilindi" %}</h2><p><b class="tabular">50</b> / 50 {% trans "test o‘tdi" %}</p></div>
+      <button type="button" class="ca7-snd" data-sound-toggle aria-label="{% trans 'Ovoz' %}" aria-pressed="true"><span data-snd="on"><i data-lucide="volume-2" class="lu" aria-hidden="true"></i></span><span data-snd="off" hidden><i data-lucide="volume-x" class="lu" aria-hidden="true"></i></span></button>
+    </div>
+    <dl class="ca7-meters">
+      <div class="ca7-meter"><dt>{% trans "Vaqt" %}</dt><dd><b class="tabular">29 ms</b> <small>/ 3000 ms</small></dd><span class="ca7-meter-bar" aria-hidden="true"><i style="width: 2%"></i></span></div>
+      <div class="ca7-meter"><dt>{% trans "Xotira" %}</dt><dd><b class="tabular">11 MB</b> <small>/ 64 MB</small></dd><span class="ca7-meter-bar" aria-hidden="true"><i style="width: 17%"></i></span></div>
+    </dl>
+  </section>
+  <div class="flex flex-wrap gap-3">
+    <button type="button" class="ca-btn ca-btn-soft" data-prev="quiet"><i data-lucide="check" class="lu" aria-hidden="true"></i>{% trans "Oddiy AC" %}</button>
+    <button type="button" class="ca-btn ca-btn-soft" data-prev="first"><i data-lucide="party-popper" class="lu" aria-hidden="true"></i>{% trans "Masalaning birinchi AC si" %}</button>
+    <button type="button" class="ca-btn ca-btn-soft" data-prev="round"><i data-lucide="trophy" class="lu" aria-hidden="true"></i>{% trans "Raund: A masalasi, +487" %}</button>
+    <button type="button" class="ca-btn ca-btn-soft" data-prev="icpc"><i data-lucide="trophy" class="lu" aria-hidden="true"></i>{% trans "Raund (ICPC): C masalasi, +2" %}</button>
+  </div>
+  <p class="text-sm text-mute">{% trans "Ovoz brauzerda tugma bosilgach chalinadi; kartadagi karnay tugmasi uni o‘chiradi." %}</p>
+</div>
+<script>
+document.querySelectorAll("[data-prev]").forEach((b) => b.addEventListener("click", () => {
+  const k = b.dataset.prev;
+  window.caAccepted({ first: k !== "quiet", stamp: k === "round" ? { label: "A", points: "+487" } : k === "icpc" ? { label: "C", points: "+2" } : null });
+}));
+</script>
+{% endblock %}

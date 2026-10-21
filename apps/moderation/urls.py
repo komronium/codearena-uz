@@ -55,6 +55,7 @@ urlpatterns = [
     path("duels/<int:pk>/", views.duel_detail, name="duel_detail"),
     path("duels/<int:pk>/void/", views.duel_void, name="duel_void"),
     path("rating/", views.rating_stats, name="rating_stats"),
+    path("accepted-preview/", views.accepted_preview, name="accepted_preview"),
     path("search/", views.search, name="search"),
     path("users/", views.users, name="users"),
     path("users/<int:pk>/edit/", views.user_edit, name="user_edit"),

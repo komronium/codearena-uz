@@ -1260,3 +1260,9 @@ def user_delete(request, pk):
         user.delete()
     messages.success(request, _t("{user_username} o‘chirildi.").format(user_username=user.username))
     return redirect("moderation:users")
+
+
+@staff_required
+def accepted_preview(request):
+    """What a player sees and hears on an accepted attempt, to try without solving anything."""
+    return render(request, "moderation/accepted_preview.html")

@@ -329,6 +329,27 @@ def _progress(s, saved: int, total: int) -> dict:
     return {"done": done, "total": total, "pct": int(done * 100 / total) if total else 0}
 
 
+def _stamp(s) -> dict | None:
+    """What a round's accept earns, for the stamp shown over the page: the problem's letter and the points this solve is
+    worth by the round's rules (the same cell the board prints). Only the first accept of a problem in a round."""
+    from apps.contests.models import Contest, ContestProblem
+    from apps.contests.standings import cell
+
+    if s.contest_id is None or s.verdict != Submission.Verdict.AC:
+        return None
+    cp = ContestProblem.objects.filter(contest_id=s.contest_id, problem_id=s.problem_id).first()
+    p = Participation.objects.select_related("contest").filter(contest_id=s.contest_id, user_id=s.user_id).first()
+    if cp is None or p is None:
+        return None
+    subs = list(Submission.objects.filter(contest_id=s.contest_id, problem_id=s.problem_id, user_id=s.user_id).order_by("created", "id"))
+    first = next((x for x in subs if x.verdict == Submission.Verdict.AC), None)
+    if first is None or first.pk != s.pk:
+        return None
+    c = cell(p.contest, cp, subs, p.clock_start)
+    icpc = p.contest.type == Contest.Type.ICPC
+    return {"label": cp.label, "points": c["mark"] if icpc else f"+{c['points']}"}
+
+
 def _results_ctx(s):
     results = list(s.results.select_related("testcase"))
     first_fail = next((r for r in results if r.verdict != "AC"), None)
@@ -349,6 +370,7 @@ def _results_ctx(s):
         "strip": strip,
         "slowest": max((r.exec_ms for r in results), default=None),
         "beats": _beats(s) if s.verdict == "AC" else None,
+        "stamp": _stamp(s),
         # the first accepted attempt at this problem by this person gets the full celebration, later ones a quiet one
         "first_solve": s.verdict == Submission.Verdict.AC and not Submission.objects.filter(
             user_id=s.user_id, problem_id=s.problem_id, verdict=Submission.Verdict.AC, pk__lt=s.pk).exists(),
