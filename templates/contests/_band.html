@@ -21,7 +21,7 @@ and optionally problems, n_participants, next_cp (the first problem you have not
         <p class="ca7-bmeta tabular">
           <span><i data-lucide="calendar" class="lu" aria-hidden="true"></i>{{ contest.start|ztime:"d.m.Y · H:i" }}–{% if contest.start|date:"Ymd" != contest.end|date:"Ymd" %}{{ contest.end|ztime:"d.m.Y H:i" }}{% else %}{{ contest.end|ztime:"H:i" }}{% endif %}</span>
           <span><i data-lucide="hourglass" class="lu" aria-hidden="true"></i>{{ contest.duration_label }}</span>
-          {% with authors=contest.authors.all %}{% if authors %}<span><i data-lucide="pen-line" class="lu" aria-hidden="true"></i>{% trans "Mualliflar:" %} {% for a in authors %}<a class="text-white hover:underline" href="{% url 'profile' a.username %}">{{ a.username }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</span>{% endif %}{% endwith %}
+          {% with authors=contest.authors.all %}{% if authors %}<span><i data-lucide="pen-line" class="lu" aria-hidden="true"></i>{% trans "Mualliflar:" %} <span class="ca7-authors">{% for a in authors %}{% include "accounts/_u7.html" with u=a you=False %}{% endfor %}</span></span>{% endif %}{% endwith %}
           {% if problems %}<span><i data-lucide="list" class="lu" aria-hidden="true"></i>{% blocktrans with problems=problems|length %}{{ problems }} masala{% endblocktrans %}</span>{% endif %}
           {% if n_participants is not None %}<span><i data-lucide="users" class="lu" aria-hidden="true"></i>{% blocktrans with n_participants=n_participants %}{{ n_participants }} ishtirokchi{% endblocktrans %}</span>{% endif %}
         </p>

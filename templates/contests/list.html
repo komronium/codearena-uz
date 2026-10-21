@@ -49,18 +49,20 @@ the right.{% endcomment %}
       <thead><tr>
         <th scope="col" class="w-16">{% trans "Sana" %}</th>
         <th scope="col">{% trans "Musobaqa" %}</th>
+        <th scope="col" class="hidden w-56 lg:table-cell">{% trans "Mualliflar" %}</th>
         <th scope="col" class="hidden w-28 text-right md:table-cell">{% trans "Ishtirokchi" %}</th>
         {% if user.is_authenticated %}<th scope="col" class="w-24 text-right">{% trans "O‘rningiz" %}</th><th scope="col" class="w-24 text-right">{% trans "Reyting" %}</th>{% endif %}
       </tr></thead>
       {% regroup ended by start_month as months %}
       {% for m in months %}
       <tbody>
-      <tr class="ca-month"><th colspan="{% if user.is_authenticated %}5{% else %}3{% endif %}" scope="rowgroup">{{ m.grouper }}</th></tr>
+      <tr class="ca-month"><th colspan="{% if user.is_authenticated %}6{% else %}4{% endif %}" scope="rowgroup">{{ m.grouper }}</th></tr>
       {% for c in m.list %}
       <tr>
         <td><span class="ca7-date" aria-hidden="true" title="{{ c.start|weekday_full }}"><b>{{ c.start|date:"d" }}</b>{{ c.start|month_uz }}</span><span class="sr-only">{{ c.start|weekday_full }}, {{ c.start|date:"d.m.Y" }}</span></td>
         <td><a class="ca-link" href="{% url 'contests:standings' c.pk %}" title="{% trans 'Natijalar jadvali' %}">{{ c.title }}</a>{% if c.division %} <span class="ca-tag ca-tag-div" title="{{ c.get_division_display }}">{% blocktrans with c_division=c.division %}Div. {{ c_division }}{% endblocktrans %}</span>{% endif %}{% if not c.is_rated %} <span class="ca-tag" title="Natija reytingga ta’sir qilmaydi">{% trans "Mashq" %}</span>{% endif %}
-          <span class="block text-xs text-mute"><span class="tabular">{{ c.start|ztime:"H:i" }}</span> · {{ c.duration_label }}{% with authors=c.authors.all %}{% if authors %} · {% trans "Mualliflar:" %} {% for a in authors %}{{ a.username }}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}{% endwith %}</span></td>
+          <span class="block text-xs text-mute"><span class="tabular">{{ c.start|ztime:"H:i" }}</span> · {{ c.duration_label }}</span></td>
+        <td class="hidden lg:table-cell ca7-authors ca7-authors-td">{% for a in c.authors.all %}{% include "accounts/_u7.html" with u=a you=False %}{% if not forloop.last %} {% endif %}{% empty %}<span class="text-mute">—</span>{% endfor %}</td>
         <td class="hidden text-right tabular md:table-cell">{{ c.n_participants }}</td>
         {% if user.is_authenticated %}
         <td class="text-right">{% if c.me and c.me.rank %}<b class="font-semibold tabular">{{ c.me.rank }}</b>{% elif c.me %}<span class="text-mute">{% trans "qatnashgan" %}</span>{% else %}<span class="text-mute" title="Siz bu raundda qatnashmagansiz">—</span>{% endif %}</td>

@@ -3810,3 +3810,10 @@ small { font-size: max(12.25px, .8em); }
 
 /* save menu: both icons are drawn, the row's state shows one (so a tick can change in place) */
 .ca-save-row[aria-pressed="true"] .ic-off, .ca-save-row[aria-pressed="false"] .ic-on { display: none; }
+
+/* a round's authors: the same user chip (accounts/_u7.html, in the tier's colour) at one size in the list, the cards and the
+   round's header; on the header's dark band the chip sits on a light pill so every tier colour stays readable */
+.ca7-authors { display: inline-flex; flex-wrap: wrap; align-items: center; gap: .3rem .75rem; }
+.ca7-authors .ca7-u { font-size: 0.9375rem; }
+.ca-band .ca7-authors .ca7-u { padding: .1rem .7rem .1rem .15rem; border-radius: 9999px; background: rgb(255 255 255 / .94); }
+.ca7-ccard-meta .ca7-authors { color: rgb(var(--ca-ink-rgb)); }

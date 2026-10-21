@@ -12,7 +12,7 @@ ctx: c (from contests.views.contest_list), state ("running" | "upcoming").{% end
   <ul class="ca7-ccard-meta">
     <li><i data-lucide="calendar" class="lu" aria-hidden="true"></i><span class="tabular">{{ c.start|ztime:"d.m.Y · H:i" }}{% if state == "running" %}–{{ c.end|ztime:"H:i" }}{% endif %}</span></li>
     <li><i data-lucide="list" class="lu" aria-hidden="true"></i>{% blocktrans with c_duration_label=c.duration_label c_n_problems=c.n_problems %}{{ c_duration_label }} · {{ c_n_problems }} masala ·{% endblocktrans %} {% if c.type == "cf" %}{% trans "Codeforces qoidasi" %}{% elif c.type == "icpc" %}{% trans "ICPC qoidasi" %}{% else %}{% trans "ball qoidasi" %}{% endif %}</li>
-    {% with authors=c.authors.all %}{% if authors %}<li><i data-lucide="pen-line" class="lu" aria-hidden="true"></i><span>{% trans "Mualliflar:" %} {% for a in authors %}{{ a.username }}{% if not forloop.last %}, {% endif %}{% endfor %}</span></li>{% endif %}{% endwith %}
+    {% with authors=c.authors.all %}{% if authors %}<li><i data-lucide="pen-line" class="lu" aria-hidden="true"></i><span class="ca7-authors">{% trans "Mualliflar:" %} {% for a in authors %}{% include "accounts/_u7.html" with u=a you=False %}{% endfor %}</span></li>{% endif %}{% endwith %}
     <li><i data-lucide="users" class="lu" aria-hidden="true"></i>{% if state == "running" %}{% blocktrans with c_n_participants=c.n_participants %}{{ c_n_participants }} ishtirokchi{% endblocktrans %}{% if c.me and c.my_rank %} {% blocktrans with c_my_rank=c.my_rank %}· siz {{ c_my_rank }}-o‘rinda{% endblocktrans %}{% endif %}{% else %}{% blocktrans with c_n_participants=c.n_participants %}hozircha {{ c_n_participants }} kishi{% endblocktrans %}{% endif %}</li>
   </ul>
   <div class="ca7-ccard-foot">
