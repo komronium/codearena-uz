@@ -808,11 +808,17 @@ msgstr "Duelda ğalaba qozoning"
 msgid "Kurs nazariyasini o‘qing"
 msgstr "Kurs nazariyasini öqing"
 
+msgid "qaytish usuli"
+msgstr "qaytiş usuli"
+
 msgid "kenglik bo‘yicha qidiruv"
 msgstr "kenglik böyiça qidiruv"
 
 msgid "to‘liq saralash"
 msgstr "töliq saralaş"
+
+msgid "shartlar"
+msgstr "şartlar"
 
 msgid "chuqurlik bo‘yicha qidiruv"
 msgstr "çuqurlik böyiça qidiruv"
@@ -820,11 +826,20 @@ msgstr "çuqurlik böyiça qidiruv"
 msgid "bo‘l va hukm qil"
 msgstr "böl va hukm qil"
 
+msgid "dinamik dasturlash"
+msgstr "dinamik dasturlaş"
+
 msgid "ochko‘z algoritm"
 msgstr "oçköz algoritm"
 
+msgid "xesh jadval"
+msgstr "xeş jadval"
+
 msgid "kiritish va chiqarish"
 msgstr "kiritiş va çiqariş"
+
+msgid "ichma-ich sikllar"
+msgstr "içma-iç sikllar"
 
 msgid "sonlar bilan ishlash"
 msgstr "sonlar bilan işlaş"
@@ -834,6 +849,12 @@ msgstr "prefiks yiğindilar"
 
 msgid "eng qisqa yo‘llar"
 msgstr "eng qisqa yöllar"
+
+msgid "sirpanuvchi oyna"
+msgstr "sirpanuvçi oyna"
+
+msgid "saralash"
+msgstr "saralaş"
 
 msgid "ichki so‘rov"
 msgstr "içki sörov"

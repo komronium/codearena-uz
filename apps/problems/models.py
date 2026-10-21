@@ -56,7 +56,7 @@ class Problem(Translatable, models.Model):
     class Kind(models.TextChoices):
         CODE = (
             "code",
-            "Dasturlash",
+            _tl("Dasturlash"),
         )  # classic stdin/stdout program, judged via judge.runner + Docker sandbox
         SQL = (
             "sql",

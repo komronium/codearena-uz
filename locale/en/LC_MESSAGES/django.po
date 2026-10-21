@@ -2255,7 +2255,7 @@ msgstr "AI error: {e}"
 msgid "{problem_title}: {len_ids} ta urinish"
 msgstr "{problem_title}: {len_ids} submissions"
 
-#: apps/problems/models.py
+#: apps/problems/models.py apps/problems/models.py
 msgid "Dasturlash"
 msgstr "Programming"
 
@@ -2284,52 +2284,240 @@ msgid "Kurs nazariyasini o‘qing"
 msgstr "Read a course lesson"
 
 #: apps/problems/templatetags/tagnames.py
+msgid "agregatsiya"
+msgstr "aggregation"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "arifmetika"
+msgstr "arithmetic"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "massivlar"
+msgstr "arrays"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "qaytish usuli"
+msgstr "backtracking"
+
+#: apps/problems/templatetags/tagnames.py
 msgid "kenglik bo‘yicha qidiruv"
 msgstr "breadth-first search"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "ikkilik qidiruv"
+msgstr "binary search"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "bit amallari"
+msgstr "bit manipulation"
 
 #: apps/problems/templatetags/tagnames.py
 msgid "to‘liq saralash"
 msgstr "full sort"
 
 #: apps/problems/templatetags/tagnames.py
+msgid "case-when"
+msgstr "case-when"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "kombinatorika"
+msgstr "combinatorics"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "shartlar"
+msgstr "conditionals"
+
+#: apps/problems/templatetags/tagnames.py
 msgid "ma’lumotlar tuzilmalari"
 msgstr "data structures"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "sana funksiyalari"
+msgstr "date functions"
 
 #: apps/problems/templatetags/tagnames.py
 msgid "chuqurlik bo‘yicha qidiruv"
 msgstr "depth-first search"
 
 #: apps/problems/templatetags/tagnames.py
+msgid "distinct"
+msgstr "distinct"
+
+#: apps/problems/templatetags/tagnames.py
 msgid "bo‘l va hukm qil"
 msgstr "divide and conquer"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "dinamik dasturlash"
+msgstr "dynamic programming"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "for sikli"
+msgstr "for loop"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "geometriya"
+msgstr "geometry"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "graflar"
+msgstr "graphs"
 
 #: apps/problems/templatetags/tagnames.py
 msgid "ochko‘z algoritm"
 msgstr "greedy algorithm"
 
 #: apps/problems/templatetags/tagnames.py
+msgid "group by"
+msgstr "group by"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "xesh jadval"
+msgstr "hash table"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "having"
+msgstr "having"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "uyum (heap)"
+msgstr "heap"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "simulyatsiya"
+msgstr "implementation"
+
+#: apps/problems/templatetags/tagnames.py
 msgid "kiritish va chiqarish"
 msgstr "input and output"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "join"
+msgstr "join"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "left join"
+msgstr "left join"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "like"
+msgstr "like"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "limit"
+msgstr "limit"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "sikllar"
+msgstr "loops"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "matematika"
+msgstr "math"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "matritsalar"
+msgstr "matrices"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "ichma-ich sikllar"
+msgstr "nested loops"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "null qiymatlar"
+msgstr "null values"
 
 #: apps/problems/templatetags/tagnames.py
 msgid "sonlar bilan ishlash"
 msgstr "working with numbers"
 
 #: apps/problems/templatetags/tagnames.py
+msgid "sonlar nazariyasi"
+msgstr "number theory"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "order by"
+msgstr "order by"
+
+#: apps/problems/templatetags/tagnames.py
 msgid "prefiks yig‘indilar"
 msgstr "prefix sums"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "navbat"
+msgstr "queue"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "rekursiya"
+msgstr "recursion"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "kesmalar daraxti"
+msgstr "segment tree"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "select"
+msgstr "select"
 
 #: apps/problems/templatetags/tagnames.py
 msgid "eng qisqa yo‘llar"
 msgstr "shortest paths"
 
 #: apps/problems/templatetags/tagnames.py
+msgid "sirpanuvchi oyna"
+msgstr "sliding window"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "saralash"
+msgstr "sorting"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "sql"
+msgstr "sql"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "stek"
+msgstr "stack"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "satr algoritmlari"
+msgstr "string algorithms"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "satr funksiyalari"
+msgstr "string functions"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "satrlar"
+msgstr "strings"
+
+#: apps/problems/templatetags/tagnames.py
 msgid "ichki so‘rov"
 msgstr "subquery"
 
 #: apps/problems/templatetags/tagnames.py
+msgid "daraxtlar"
+msgstr "trees"
+
+#: apps/problems/templatetags/tagnames.py
 msgid "ikki ko‘rsatkich"
 msgstr "two pointers"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "dsu"
+msgstr "dsu"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "where"
+msgstr "where"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "while sikli"
+msgstr "while loop"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "oyna funksiyalari"
+msgstr "window functions"
 
 #: apps/problems/templatetags/uzdates.py
 msgid "Du"

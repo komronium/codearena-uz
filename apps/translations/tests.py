@@ -131,3 +131,19 @@ def test_the_problem_form_asks_which_language_the_author_writes_in(client, db):
     client.force_login(setter)
     page = client.get(reverse("moderation:submit")).content.decode()
     assert 'name="source_lang"' in page
+
+
+def test_the_new_uzbek_spelling_catalog_converts_the_ui_strings(settings):
+    from django.conf import settings as s
+    from django.utils import translation
+    settings.LOCALE_PATHS = [s.BASE_DIR / "locale", s.BASE_DIR / "locale_uz"]
+    with translation.override("uz"):
+        assert translation.gettext("O‘zbekcha") == "Özbekça"
+        assert translation.gettext("Noto‘g‘ri javob") == "Notöğri javob"
+        assert translation.gettext("Chiqish") == "Çiqiş"
+        assert translation.gettext("Qabul qilindi") == "Qabul qilindi"  # nothing to change
+    import sys
+    sys.path.insert(0, str(s.BASE_DIR / "tools"))
+    from uz_alphabet import convert
+    assert convert('<span class="ca-chip">Ko‘rish</span> %(user_name)s {n} ${x} ChatGPT') == '<span class="ca-chip">Köriş</span> %(user_name)s {n} ${x} ChatGPT'
+    assert convert("AQSH, SHART, TO‘G‘RI") == "AQŞ, ŞART, TÖĞRI"
