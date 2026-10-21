@@ -1,4 +1,4 @@
-"""Erase one user's duels, submissions and contest participations, then rebuild what they had touched
+"""Erase one user's duels, submissions, contest participations, badges and bell lines, then rebuild what they had touched
 (contest and official rating, duel Elo and season podiums, solves and practice points) so nobody else keeps a
 rank or a rating that depended on them. The account itself stays. Prints the counts and stops unless --yes."""
 from django.core.management import call_command
@@ -6,7 +6,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.db.models import Q
 
-from apps.accounts.models import User
+from apps.accounts.models import Notification, User, UserBadge
 from apps.classroom.models import Duel, DuelSeasonResult
 from apps.contests.models import Clarification, Participation, VirtualParticipation
 from apps.submissions.models import Submission, UserProblemSolved
@@ -33,6 +33,9 @@ class Command(BaseCommand):
             "contest participations": Participation.objects.filter(user=user),
             "virtual runs": VirtualParticipation.objects.filter(user=user),
             "clarifications": Clarification.objects.filter(user=user),
+            # kept for good once earned (badges.sync never takes one back), so erasing what earned them leaves them behind
+            "badges": UserBadge.objects.filter(user=user),
+            "bell lines": Notification.objects.filter(user=user),
         }
         for name, qs in sets.items():
             self.stdout.write(f"{name}: {qs.count()}")

@@ -1032,3 +1032,17 @@ def test_usernames_are_plain_and_an_old_odd_one_is_fixed_at_the_start(client, se
     assert r.status_code == 302
     assert User.objects.get(pk=u.pk).username == "dilshod_7"
     assert client.get(reverse("home"), HTTP_ACCEPT="text/html").status_code == 200
+
+
+@pytest.mark.django_db
+def test_wiping_a_users_activity_takes_their_badges_and_bell_lines_too():
+    from django.core.management import call_command
+    from .models import Notification, UserBadge
+    u = User.objects.create_user("wiped", password="x")
+    other = User.objects.create_user("other", password="x")
+    for who in (u, other):
+        UserBadge.objects.create(user=who, family="solved", tier=1)
+        Notification.objects.create(user=who, kind="badge", key="k", text="t", url="/")
+    call_command("wipe_user_activity", "wiped", "--yes", verbosity=0)
+    assert not UserBadge.objects.filter(user=u).exists() and not Notification.objects.filter(user=u).exists()
+    assert UserBadge.objects.filter(user=other).count() == 1 and Notification.objects.filter(user=other).count() == 1
