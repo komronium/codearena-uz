@@ -73,6 +73,45 @@ def shape(s: str):
             sorted(re.findall(r"\$\{[^}]*\}", s)), sorted(re.findall(r"</?[A-Za-z][A-Za-z0-9]*", s)))  # tag names: an attribute inside a tag may be translated
 
 
+def build_uzbek(ids):
+    """locale/uz: every Uzbek source string in the new spelling (tools/uz_alphabet.py), plus Django's own Uzbek messages
+    converted the same way. Delete the folder to go back to the old spelling."""
+    import sys
+    sys.path.insert(0, str(ROOT / "tools"))
+    from uz_alphabet import convert
+
+    po = polib.POFile()
+    po.metadata = {"Project-Id-Version": "CodeArena", "Language": "uz", "MIME-Version": "1.0",
+                   "Content-Type": "text/plain; charset=UTF-8", "Content-Transfer-Encoding": "8bit"}
+    seen = set()
+    for msgid in ids:
+        kinds = KINDS.get(msgid, {"plain"})
+        forms = []
+        if "trans" in kinds:
+            forms.append(msgid.replace("%", "%%"))
+        if kinds - {"trans"}:
+            forms.append(msgid)
+        for mid in dict.fromkeys(forms):
+            new = convert(mid)
+            if new != mid and mid not in seen:
+                seen.add(mid)
+                po.append(polib.POEntry(msgid=mid, msgstr=new))
+    import django
+    core = Path(django.__file__).parent / "conf" / "locale" / "uz" / "LC_MESSAGES" / "django.po"
+    if core.exists():
+        for e in polib.pofile(str(core)):
+            if e.msgstr and e.msgid not in seen and not e.msgid_plural:
+                new = convert(e.msgstr)
+                if new != e.msgstr:
+                    seen.add(e.msgid)
+                    po.append(polib.POEntry(msgid=e.msgid, msgstr=new))
+    out = ROOT / "locale_uz" / "uz" / "LC_MESSAGES"
+    out.mkdir(parents=True, exist_ok=True)
+    po.save(str(out / "django.po"))
+    po.save_as_mofile(str(out / "django.mo"))
+    print(f"uz: {len(po)} strings in the new spelling")
+
+
 def main():
     ids = extract()
     tr = json.loads(TR.read_text(encoding="utf-8")) if TR.exists() else {}
@@ -122,6 +161,7 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     po.save(str(out / "django.po"))
     po.save_as_mofile(str(out / "django.mo"))
+    build_uzbek(ids)
     stale = [m for m in tr if m not in ids]
     print(f"{len(ids)} msgids, {len(ids) - missing} translated, {missing} missing, {bad} shape errors, {len(stale)} stale translations")
 

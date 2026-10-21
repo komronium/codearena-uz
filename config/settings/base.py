@@ -127,7 +127,9 @@ SITE_URL = os.environ.get("SITE_URL", "https://codearena.uz").rstrip("/")
 
 LANGUAGE_CODE = "uz"  # the language of the source strings (msgids); English is locale/en
 LANGUAGES = [("uz", "O‘zbekcha"), ("en", "English")]
-LOCALE_PATHS = [BASE_DIR / "locale"]
+# locale: English; locale_uz: the Uzbek source strings in the new spelling (O‘ -> Ö, G‘ -> Ğ, Sh -> Ş, Ch -> Ç; tools/uz_alphabet.py).
+# Take locale_uz out of the list to go back to the old spelling.
+LOCALE_PATHS = [BASE_DIR / "locale", BASE_DIR / "locale_uz"]
 FORMAT_MODULE_PATH = ["config.formats"]  # one decimal point in both languages: numbers also land in CSS and scripts
 TIME_ZONE = "Asia/Tashkent"
 USE_TZ = True
