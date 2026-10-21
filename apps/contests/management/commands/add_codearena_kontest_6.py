@@ -23,7 +23,7 @@ from apps.contests.management.commands.add_weekend_contest_1 import PRACTICE_POI
 from apps.contests.models import Contest, ContestProblem
 from apps.problems.models import Problem, Tag, TestCase
 
-TITLE = "CodeArena Round #6"
+TITLE = "CodeArena Round #7"
 LABELS = "ABCDEFGH"
 
 
@@ -274,7 +274,7 @@ DESCRIPTION = (
 
 
 class Command(WeekendCommand):
-    help = "Creates CodeArena Round #6 and attaches its eight problems (hidden) as A..H."
+    help = "Creates CodeArena Round #7 and attaches its eight problems (hidden) as A..H."
     ml_mb = 64
     min_tests = 20
 

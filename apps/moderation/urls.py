@@ -49,6 +49,7 @@ urlpatterns = [
     path("submissions/", views.submissions, name="submissions"),
     path("duels/", views.duels, name="duels"),
     path("duels/switch/", views.duel_switch, name="duel_switch"),
+    path("rating/", views.rating_stats, name="rating_stats"),
     path("users/", views.users, name="users"),
     path("users/<int:pk>/edit/", views.user_edit, name="user_edit"),
     path("users/<int:pk>/delete/", views.user_delete, name="user_delete"),

@@ -14,6 +14,7 @@ the page. A contest's integrity report and replay count as Musobaqalar.{% endcom
   <a href="{% url 'moderation:contests' %}"{% if ns == 'moderation' and un in 'contests,contest_new,contest_edit,contest_official' or ns == 'integrity' and un in 'contest_report,replay' %} aria-current="page"{% endif %}><i data-lucide="trophy" class="lu" aria-hidden="true"></i>{% trans "Musobaqalar" %}</a>
   <a href="{% url 'moderation:submissions' %}"{% if ns == 'moderation' and un == 'submissions' %} aria-current="page"{% endif %}><i data-lucide="send" class="lu" aria-hidden="true"></i>{% trans "Urinishlar" %}</a>
   <a href="{% url 'moderation:duels' %}"{% if ns == 'moderation' and un == 'duels' %} aria-current="page"{% endif %}><i data-lucide="swords" class="lu" aria-hidden="true"></i>{% trans "Duellar" %}</a>
+  <a href="{% url 'moderation:rating_stats' %}"{% if ns == 'moderation' and un == 'rating_stats' %} aria-current="page"{% endif %}><i data-lucide="chart-no-axes-column" class="lu" aria-hidden="true"></i>{% trans "Reyting statistikasi" %}</a>
   <p>{% trans "Odamlar" %}</p>
   <a href="{% url 'moderation:users' %}"{% if ns == 'moderation' and un in 'users,user_edit' %} aria-current="page"{% endif %}><i data-lucide="users" class="lu" aria-hidden="true"></i>{% trans "Foydalanuvchilar" %}</a>
   <p>{% trans "Halollik" %}</p>

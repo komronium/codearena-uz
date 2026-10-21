@@ -1,0 +1,118 @@
+{% extends "base.html" %}{% load tiers %}
+{% block title %}{% trans "Reyting statistikasi" %}{% endblock %}
+{% block band %}
+<section class="ca-hud" aria-labelledby="rs-title">
+  <div class="ca-hud-in">
+    <div>
+      <h1 id="rs-title">{% trans "Reyting statistikasi" %}</h1>
+      <p class="ca-hud-sub">{% trans "Reyting hozir qanday, nima kutilmoqda va shu sur’atda nima bo‘ladi" %}</p>
+    </div>
+    <dl class="ca-hud-stats">
+      <div><dt><small>{% trans "Ochiq reytingda" %}</small></dt><dd><b class="tabular">{{ cr.pool.n }}</b></dd></div>
+      <div><dt><small>{% trans "O‘rtacha" %}</small></dt><dd><b class="tabular">{{ cr.pool.avg }}</b></dd></div>
+      <div><dt><small>{% trans "Duelda" %}</small></dt><dd><b class="tabular">{{ dr.players }}</b></dd></div>
+    </dl>
+  </div>
+</section>
+{% endblock %}
+{% block content %}
+{% comment %}Staff only. Section 1: where the contest rating stands; 2: what is about to happen; 3: where it heads at this pace;
+4: the rounds and the months; 5: facts; 6: the same for the duel rating.{% endcomment %}
+<div class="ca7-col rs">
+  <section aria-labelledby="rs-now">
+    <div class="ca7-sec-h"><h2 id="rs-now">{% trans "Hozir" %}</h2><span class="ca7-r text-mute">{% blocktrans with ever=cr.ever_rated rounds=cr.rated_rounds %}{{ ever }} kishi reytingli o‘ynagan · {{ rounds }} ta reytingli raund{% endblocktrans %}</span></div>
+    {% if cr.pool.n %}
+    <dl class="rs-nums">
+      <div><dt>{% trans "O‘rtacha" %}</dt><dd class="tabular">{{ cr.pool.avg }}</dd></div>
+      <div><dt>{% trans "Median" %}</dt><dd class="tabular">{{ cr.pool.median }}</dd></div>
+      <div><dt>{% trans "Tarqoqlik (σ)" %}</dt><dd class="tabular">{{ cr.pool.sd }}</dd></div>
+      <div><dt>{% trans "Eng past" %}</dt><dd class="tabular">{{ cr.pool.lo }}</dd></div>
+      <div><dt>{% trans "Eng yuqori" %}</dt><dd class="tabular">{{ cr.pool.hi }}</dd></div>
+      <div><dt>{% trans "1- va 2-o‘rin farqi" %}</dt><dd class="tabular">{{ cr.gap_1_2|default:"—" }}</dd></div>
+    </dl>
+    <div class="rs-two">
+      <div>
+        <h3 class="rs-h">{% trans "Bosqichlar bo‘yicha" %}</h3>
+        <ul class="rs-bars">{% for t in cr.tiers %}<li><span style="color: {{ t.color }}">{{ t.uz }}</span><i><b style="width: {{ t.pct }}%; background: {{ t.color }}"></b></i><span class="tabular">{{ t.n }}</span></li>{% endfor %}</ul>
+      </div>
+      <div>
+        <h3 class="rs-h">{% trans "100 balllik oraliqlar" %}</h3>
+        <div class="ca-actbars rs-hist" role="img" aria-label="{% trans 'Reyting taqsimoti' %}">{% for b in cr.buckets %}<span title="{{ b.from }}–{{ b.from|add:99 }}: {{ b.n }}"><i style="height: {{ b.pct }}%"></i></span>{% endfor %}</div>
+        <p class="rs-axis tabular"><span>{{ cr.buckets.0.from }}</span><span>{{ cr.pool.hi }}</span></p>
+      </div>
+    </div>
+    <p class="rs-top">{% for u in cr.top %}{% if not forloop.first %} · {% endif %}<b class="tabular">{{ forloop.counter }}.</b> <a class="ca-link" href="{% url 'profile' u.username %}">{{ u.username }}</a> <span class="tabular text-mute">{{ u.rating }}</span>{% endfor %}</p>
+    {% else %}<p class="ca7-empty"><b>{% trans "Hali ochiq reytingda hech kim yo‘q" %}</b></p>{% endif %}
+  </section>
+
+  <section aria-labelledby="rs-soon">
+    <div class="ca7-sec-h"><h2 id="rs-soon">{% trans "Nima kutilmoqda" %}</h2></div>
+    <ul class="rs-list">
+      <li><i data-lucide="calendar" class="lu" aria-hidden="true"></i><span>{% if cr.upcoming.n %}{% blocktrans with n=cr.upcoming.n %}{{ n }} ta reytingli raund kutilmoqda.{% endblocktrans %}{% if cr.upcoming.next %} {% trans "Eng yaqini:" %} <a class="ca-link" href="{% url 'moderation:contest_edit' cr.upcoming.next.pk %}">{{ cr.upcoming.next.title }}</a>, {{ cr.upcoming.next.start|date:"d.m H:i" }}.{% endif %}{% else %}{% trans "Rejalashtirilgan reytingli raund yo‘q: reyting qotib turadi, 90 kundan keyin o‘yinchilar jadvaldan tusha boshlaydi." %}{% endif %}</span></li>
+      <li><i data-lucide="sprout" class="lu" aria-hidden="true"></i><span>{% blocktrans with n=cr.ramping %}{{ n }} kishi hali yangi o‘yinchi bosqichida: shu raundlarda ularning ko‘rsatilgan reytingi bonus bilan ko‘tariladi.{% endblocktrans %}</span></li>
+      <li><i data-lucide="hourglass" class="lu" aria-hidden="true"></i><span>{% blocktrans with n=cr.n_fading %}{{ n }} kishi 90 kunlik chegaraga yaqin: yaqin kunlarda reytingli raundda qatnashmasa, ochiq jadvaldan tushadi.{% endblocktrans %}{% for u in cr.fading %}{% if forloop.first %} {% endif %}<a class="ca-link" href="{% url 'profile' u.username %}">{{ u.username }}</a> <span class="text-mute tabular">({{ u.left }} {% trans "kun" %})</span>{% if not forloop.last %}, {% endif %}{% endfor %}</span></li>
+    </ul>
+    <div class="rs-two">
+      <div><h3 class="rs-h">{% trans "Yangi bosqichga oz qolgan" %}</h3>
+        {% if cr.near_up %}<ul class="rs-rows">{% for u in cr.near_up %}<li><a class="ca-link" href="{% url 'profile' u.username %}">{{ u.username }}</a><span class="tabular text-mute">{{ u.rating }}</span><span class="text-ok tabular">+{{ u.need }} → {{ u.to }}</span></li>{% endfor %}</ul>
+        {% else %}<p class="text-sm text-mute">{% trans "Hozircha hech kim bosqich chegarasiga 40 balldan yaqin emas." %}</p>{% endif %}</div>
+      <div><h3 class="rs-h">{% trans "Bosqichdan tushish xavfida" %}</h3>
+        {% if cr.near_down %}<ul class="rs-rows">{% for u in cr.near_down %}<li><a class="ca-link" href="{% url 'profile' u.username %}">{{ u.username }}</a><span class="tabular text-mute">{{ u.rating }}</span><span class="text-bad tabular">−{{ u.room }} → {{ u.tier }}</span></li>{% endfor %}</ul>
+        {% else %}<p class="text-sm text-mute">{% trans "Hozircha hech kim bosqich pastki chegarasiga 25 balldan yaqin emas." %}</p>{% endif %}</div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rs-pace">
+    <div class="ca7-sec-h"><h2 id="rs-pace">{% trans "Shunday ketsa" %}</h2><span class="ca7-r text-mute">{% trans "taxminiy, chiziqli hisob" %}</span></div>
+    <ul class="rs-list">
+      <li><i data-lucide="user-plus" class="lu" aria-hidden="true"></i><span>{% blocktrans with pace=cr.forecast.pace leaving=cr.forecast.leaving pool=cr.forecast.pool_in_3 now=cr.pool.n %}Oxirgi oylarda oyiga o‘rtacha {{ pace }} yangi kishi birinchi reytingli raundini o‘ynadi. Shu sur’atda va {{ leaving }} kishi chiqib ketsa, ochiq reytingda 3 oydan keyin taxminan <b>{{ pool }}</b> kishi bo‘ladi (hozir {{ now }}).{% endblocktrans %}</span></li>
+      <li><i data-lucide="scale" class="lu" aria-hidden="true"></i><span>{% blocktrans with avg=cr.pool.avg avg3=cr.forecast.avg_in_3 settle=cr.forecast.settle %}Yangilar reyting bonusi bilan tajribali o‘yinchilar darajasiga (~{{ settle }}) ko‘tariladi, shuning uchun o‘rtacha reyting {{ avg }} dan taxminan <b>{{ avg3 }}</b> ga qarab siljiydi.{% endblocktrans %}</span></li>
+      <li><i data-lucide="activity" class="lu" aria-hidden="true"></i><span>{% blocktrans with drift=cr.drift d10=cr.forecast.drift_10 %}Raund boshiga o‘rtacha o‘zgarish {{ drift }} ball: 10 raunddan keyin umumiy darajaga ta’siri taxminan {{ d10 }} ball (tizim ataylab nolga yaqin ushlaydi).{% endblocktrans %}</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="rs-rounds">
+    <div class="ca7-sec-h"><h2 id="rs-rounds">{% trans "So‘nggi raundlar" %}</h2><span class="ca7-r text-mute">{% blocktrans with f=cr.field_avg %}raundda o‘rtacha {{ f }} reytingli ishtirokchi{% endblocktrans %}</span></div>
+    {% if cr.rounds %}
+    <div class="overflow-x-auto"><table class="ca-table ca-table-flat">
+      <thead><tr><th scope="col">{% trans "Raund" %}</th><th scope="col" class="text-right">{% trans "Ishtirokchi" %}</th><th scope="col" class="text-right">{% trans "Yangi" %}</th><th scope="col" class="text-right">{% trans "Maydon o‘rtachasi" %}</th><th scope="col" class="text-right">{% trans "O‘rtacha ±" %}</th><th scope="col" class="text-right">{% trans "Ko‘tarilgan" %}</th></tr></thead>
+      <tbody>{% for r in cr.rounds %}<tr><td><a class="ca-link" href="{% url 'contests:standings' r.contest.pk %}">{{ r.contest.title }}</a> <span class="text-mute tabular text-sm">{{ r.contest.end|date:"d.m.Y" }}</span></td><td class="text-right tabular">{{ r.n }}</td><td class="text-right tabular">{{ r.newcomers }}</td><td class="text-right tabular">{{ r.avg_before }}</td><td class="text-right tabular {% if r.avg_delta > 0 %}text-ok{% elif r.avg_delta < 0 %}text-bad{% endif %}">{{ r.avg_delta }}</td><td class="text-right tabular">{{ r.up_pct }}%</td></tr>{% endfor %}</tbody>
+    </table></div>
+    <h3 class="rs-h mt-5">{% trans "Oylar bo‘yicha" %}</h3>
+    <ul class="rs-bars rs-months">{% for m in cr.months %}<li><span class="tabular">{{ m.month }}</span><i><b style="width: {{ m.pct }}%"></b></i><span class="tabular">{% blocktrans with e=m.entries r=m.rounds n=m.new %}{{ e }} ishtirok · {{ r }} raund · {{ n }} yangi{% endblocktrans %}</span></li>{% endfor %}</ul>
+    {% else %}<p class="ca7-empty"><b>{% trans "Hali reyting qo‘llangan raund yo‘q" %}</b></p>{% endif %}
+  </section>
+
+  {% if cr.facts %}
+  <section aria-labelledby="rs-facts">
+    <div class="ca7-sec-h"><h2 id="rs-facts">{% trans "Qiziq faktlar" %}</h2></div>
+    <ul class="rs-facts">{% for f in cr.facts %}<li><i data-lucide="{{ f.icon }}" class="lu" aria-hidden="true"></i><div><small>{{ f.title }}</small><b class="tabular">{{ f.value }}{% if f.unit %} <span class="text-mute">{{ f.unit }}</span>{% endif %}</b><span>{% if f.who %}<a class="ca-link" href="{% url 'profile' f.who.username %}">{{ f.who.username }}</a>{% endif %}{% if f.who and f.note %} · {% endif %}{{ f.note }}</span></div></li>{% endfor %}</ul>
+  </section>
+  {% endif %}
+
+  <section aria-labelledby="rs-duel">
+    <div class="ca7-sec-h"><h2 id="rs-duel">{% trans "Duel reytingi" %}</h2><span class="ca7-r text-mute">{% blocktrans with n=dr.n week=dr.week %}{{ n }} ta tugagan duel · so‘nggi 7 kunda {{ week }}{% endblocktrans %}</span></div>
+    {% if dr.n %}
+    <dl class="rs-nums">
+      <div><dt>{% trans "O‘yinchilar" %}</dt><dd class="tabular">{{ dr.players }}</dd></div>
+      <div><dt>{% trans "O‘rtacha" %}</dt><dd class="tabular">{{ dr.spread.avg }}</dd></div>
+      <div><dt>{% trans "Median" %}</dt><dd class="tabular">{{ dr.spread.median }}</dd></div>
+      <div><dt>{% trans "Eng yuqori" %}</dt><dd class="tabular">{{ dr.spread.hi }}</dd></div>
+      <div><dt>{% trans "Durang ulushi" %}</dt><dd class="tabular">{{ dr.draw_pct }}%</dd></div>
+      <div><dt>{% trans "O‘yinchiga duel" %}</dt><dd class="tabular">{{ dr.per_player }}</dd></div>
+    </dl>
+    <div class="rs-two">
+      <div><h3 class="rs-h">{% trans "100 balllik oraliqlar" %}</h3>
+        <div class="ca-actbars rs-hist" role="img" aria-label="{% trans 'Duel reyting taqsimoti' %}">{% for b in dr.buckets %}<span title="{{ b.from }}–{{ b.from|add:99 }}: {{ b.n }}"><i style="height: {{ b.pct }}%"></i></span>{% endfor %}</div>
+        <p class="rs-axis tabular"><span>{{ dr.buckets.0.from }}</span><span>{{ dr.spread.hi }}</span></p></div>
+      <div><h3 class="rs-h">{% trans "Faktlar" %}</h3>
+        <ul class="rs-rows">
+          <li><span>{% trans "Eng uzun g‘alaba seriyasi" %}</span><span>{% if dr.best_streak.who %}<a class="ca-link" href="{% url 'profile' dr.best_streak.who %}">{{ dr.best_streak.who }}</a> <b class="tabular">{{ dr.best_streak.n }}</b>{% else %}—{% endif %}</span></li>
+          <li><span>{% trans "Eng ko‘p o‘ynagan juftlik" %}</span><span>{% if dr.busiest_pair.who %}{{ dr.busiest_pair.who.0 }} – {{ dr.busiest_pair.who.1 }} <b class="tabular">{{ dr.busiest_pair.n }}</b>{% else %}—{% endif %}</span></li>
+          {% for u in dr.top %}<li><span>{{ forloop.counter }}-{% trans "o‘rin" %}</span><span><a class="ca-link" href="{% url 'profile' u.username %}">{{ u.username }}</a> <b class="tabular">{{ u.duel_rating }}</b></span></li>{% endfor %}
+        </ul></div>
+    </div>
+    {% else %}<p class="ca7-empty"><b>{% trans "Hali tugagan duel yo‘q" %}</b></p>{% endif %}
+  </section>
+</div>
+{% endblock %}

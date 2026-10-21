@@ -75,6 +75,13 @@ def duel_switch(request):
 
 
 @staff_required
+def rating_stats(request):
+    """Reyting statistikasi: the contest rating and the duel rating today, what is coming and the pace."""
+    from . import rating_stats as stats
+    return render(request, "moderation/rating_stats.html", {"cr": stats.contest_rating(), "dr": stats.duel_rating()})
+
+
+@staff_required
 def dashboard(request):
     from apps.classroom.switch import closed_until
     return render(request, "moderation/dashboard.html", {
