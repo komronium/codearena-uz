@@ -58,8 +58,25 @@ def _unique_slug(title: str) -> str:
 
 
 @staff_required
+@require_POST
+def duel_switch(request):
+    """Close the duels for the students (45 or 90 minutes, or until opened), or open them."""
+    from apps.classroom import switch
+    action = request.POST.get("do", "")
+    if action == "open":
+        switch.open_up(request.user)
+        messages.success(request, "Duellar ochildi.")
+    elif action in ("45", "90", "forever"):
+        switch.close(request.user, None if action == "forever" else int(action))
+        messages.success(request, "Duellar yopildi: talabalar duel sahifasini ko‘rmaydi.")
+    return redirect(request.POST.get("next") if (request.POST.get("next") or "").startswith("/") else "moderation:dashboard")
+
+
+@staff_required
 def dashboard(request):
+    from apps.classroom.switch import closed_until
     return render(request, "moderation/dashboard.html", {
+        "duel_switch": closed_until(),
         "counts": {
             "problems": Problem.objects.count(),
             "pending": Problem.objects.filter(status=Problem.Status.PENDING).count(),
@@ -717,7 +734,9 @@ def duels(request):
         "players": len(set(all_duels.values_list("challenger_id", flat=True))
                        | set(all_duels.exclude(opponent=None).values_list("opponent_id", flat=True))),
     }
+    from apps.classroom.switch import closed_until
     return render(request, "moderation/duels.html", {
+        "duel_switch": closed_until(),
         "page": page, "f": f, "counts": counts, "n_questions": QUESTIONS,
         "statuses": Duel.Status.choices, "languages": DuelQuestion.Lang.choices,
     })

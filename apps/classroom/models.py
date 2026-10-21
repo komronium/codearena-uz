@@ -148,3 +148,13 @@ class DuelSeasonResult(models.Model):
     class Meta:
         ordering = ["season", "rank"]
         constraints = [models.UniqueConstraint(fields=["season", "rank"], name="one_user_per_season_rank")]
+
+
+class DuelSwitch(models.Model):
+    """One row (pk 1): the staff's switch that closes the duels for the students, say for the length of a lesson.
+    `until` empty while closed means closed until the staff open it again."""
+
+    closed = models.BooleanField(default=False)
+    until = models.DateTimeField(null=True, blank=True)
+    changed_at = models.DateTimeField(auto_now=True)
+    changed_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")

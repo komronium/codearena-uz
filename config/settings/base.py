@@ -34,6 +34,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "apps.accounts.onboarding.OnboardingMiddleware",  # name, country, city and a confirmed email first
+    "apps.classroom.switch.DuelSwitchMiddleware",  # the staff can close the duels for a lesson
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 

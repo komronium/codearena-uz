@@ -1,0 +1,12 @@
+{% comment %}Closes the duels for the students (apps.classroom.switch); ctx: duel_switch = (closed, until).{% endcomment %}
+<form method="post" action="{% url 'moderation:duel_switch' %}" class="flex flex-wrap items-center gap-2">{% csrf_token %}
+  {% if duel_switch.0 %}
+  <span class="ca-chip ca-chip-bad"><i data-lucide="lock" class="lu" aria-hidden="true"></i>Duellar yopiq{% if duel_switch.1 %} · {{ duel_switch.1|date:"H:i" }} gacha{% endif %}</span>
+  <button class="ca-btn ca-btn-gold !py-1.5" name="do" value="open">Ochish</button>
+  {% else %}
+  <span class="text-sm text-mute">Duellar ochiq. Dars uchun yoping:</span>
+  <button class="ca-btn ca-btn-soft !py-1.5" name="do" value="45">45 daqiqa</button>
+  <button class="ca-btn ca-btn-soft !py-1.5" name="do" value="90">90 daqiqa</button>
+  <button class="ca-btn ca-btn-soft !py-1.5" name="do" value="forever">Men ochgunimcha</button>
+  {% endif %}
+</form>

@@ -188,7 +188,7 @@ def test_each_question_has_its_own_20_seconds_and_a_reload_doesnt_reset_them(ban
     DuelAnswer.objects.filter(pk=second.pk).update(shown_at=second.shown_at - timezone.timedelta(seconds=30))
     assert current(duel, p1).index == 2
 
-    typed, pick = bank[5], bank[4]
+    typed, pick = bank[7], bank[6]
     assert is_right(typed, " [1,4] ") and is_right(typed, "[1, 4]") and not is_right(typed, "") and not is_right(typed, "[1, 5]")
     assert is_right(pick, "b") and not is_right(pick, " b")
 
@@ -288,12 +288,12 @@ def test_the_play_page_shows_one_question_never_its_answer_and_then_how_it_went(
     assert client.get(url).context["n"] == 2  # the next question
     assert client.post(url, {"index": "x"}).status_code == 400
 
-    for i in range(1, 5):
+    for i in range(1, 7):
         a = client.get(url).context["a"]
         client.post(url, {"index": str(a.index), "answer": ""})
     assert client.get(url).url == reverse("classroom:duel", args=[duel.pk])  # run over: to the results
     page = client.get(reverse("classroom:duel", args=[duel.pk])).content.decode()
-    assert "1/5" in page and "Savollar" in page and "Hali boshlamadi" in page
+    assert "1/7" in page and "Savollar" in page and "Hali boshlamadi" in page
 
 
 @pytest.mark.django_db
@@ -490,7 +490,7 @@ def test_an_answer_gets_only_its_verdict_then_the_next_question(client, bank):
     card = page[page.index('<section class="ca-quiz-card'):page.index("</section>", page.index('<section class="ca-quiz-card'))]
     assert "Noto‘g‘ri" in card and 'http-equiv="refresh"' in page and f"<code>{q.answer}</code>" not in card
     assert "To‘g‘ri javob" not in card
-    for i in (3, 4):
+    for i in (3, 4, 5, 6):
         client.get(url)
         last = client.post(url, {"index": str(i), "answer": "x"}, HTTP_X_DUEL_ANSWER="1").json()
     assert last["next"] == reverse("classroom:duel", args=[duel.pk])  # the run is over: to the results
@@ -757,3 +757,35 @@ def test_a_harder_right_answer_counts_more_and_a_five_question_duel_still_runs()
     from .duels import run
     assert (run(duel, p1.pk).right, run(duel, p1.pk).points) == (4, 6) and (run(duel, p2.pk).right, run(duel, p2.pk).points) == (3, 7)
     assert run(duel, p1.pk).total == 5
+
+
+@pytest.mark.django_db
+def test_staff_can_close_the_duels_for_a_lesson(client, bank):
+    from django.core.cache import cache
+    from . import switch
+    cache.clear()
+    p1, _ = _players()
+    admin = User.objects.create_user("boss", password="x", is_staff=True)
+    client.force_login(p1)
+    assert client.get(reverse("classroom:duels")).status_code == 200
+    # a student cannot close them
+    assert client.post(reverse("moderation:duel_switch"), {"do": "45"}).status_code == 403
+    client.force_login(admin)
+    assert client.post(reverse("moderation:duel_switch"), {"do": "45"}).status_code == 302
+    assert switch.is_closed() and switch.closed_until()[1] is not None
+    page = client.get(reverse("classroom:duels"), HTTP_ACCEPT="text/html")
+    assert page.status_code == 200 and "Duellar hozir yopiq" not in page.content.decode()  # the staff still get in
+    client.force_login(p1)
+    page = client.get(reverse("classroom:duels"), HTTP_ACCEPT="text/html").content.decode()
+    assert "Duellar hozir yopiq" in page
+    assert client.post(reverse("classroom:duel_play", args=[1]), {"index": "0"}).status_code == 403
+    # it opens by itself when the time is up, and the staff can open it earlier
+    from .models import DuelSwitch
+    DuelSwitch.objects.filter(pk=1).update(until=timezone.now() - timezone.timedelta(minutes=1))
+    cache.clear()
+    assert not switch.is_closed() and client.get(reverse("classroom:duels")).status_code == 200
+    client.force_login(admin)
+    client.post(reverse("moderation:duel_switch"), {"do": "forever"})
+    assert switch.is_closed() and switch.closed_until()[1] is None
+    client.post(reverse("moderation:duel_switch"), {"do": "open"})
+    assert not switch.is_closed()

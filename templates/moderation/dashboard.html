@@ -19,6 +19,7 @@ site's figures; the side column has every staff section.{% endcomment %}
 {% endblock %}
 {% block content %}
 <div class="ca7-col">
+  <section class="mb-4" aria-label="Duellarni yopish">{% include "moderation/_duel_switch.html" %}</section>
   <section aria-labelledby="queue-title">
     <div class="ca7-sec-h"><h2 id="queue-title">Tasdiq kutayotgan masalalar</h2>{% if counts.pending %}<span class="ca7-pill is-warn tabular">{{ counts.pending }}</span>{% endif %}<a class="ca-link" href="{% url 'moderation:queue' %}">Navbatni ochish</a></div>
     {% if pending %}

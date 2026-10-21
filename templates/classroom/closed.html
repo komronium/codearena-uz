@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Duellar yopiq{% endblock %}
+{% block content %}
+<div class="mx-auto max-w-md py-16 text-center">
+  <i data-lucide="lock" class="lu mx-auto mb-4 !h-10 !w-10 text-mute" aria-hidden="true"></i>
+  <h1 class="text-2xl font-bold">Duellar hozir yopiq</h1>
+  <p class="mt-2 text-mute">{% if until %}Dars tugagach, soat <b class="text-ink tabular">{{ until|date:"H:i" }}</b> da ochiladi.{% else %}Dars payti chalg‘imaslik uchun vaqtincha yopilgan. Ustoz ochgach qaytib keling.{% endif %}</p>
+  <p class="mt-6"><a class="ca-btn ca-btn-primary" href="{% url 'problems:list' %}">Masalalar</a></p>
+</div>
+{% endblock %}
