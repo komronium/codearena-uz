@@ -19,8 +19,8 @@ def _q(key, level="easy", language="python", **kw):
 
 @pytest.fixture
 def bank(db):
-    """Six Python questions: two answered from options, the rest typed."""
-    qs = [_q(f"e{i}") for i in range(4)]
+    """Eight Python questions (a duel asks seven): one answered from options, the rest typed."""
+    qs = [_q(f"e{i}") for i in range(6)]
     qs.append(_q("pick", options=["a", "b", "c", "d"], answer="b"))
     qs.append(_q("list", answer="[1, 4]"))
     return qs
@@ -53,7 +53,7 @@ def _play(duel, user, right: int, secs: float = 3):
     from .models import Duel
 
     duel = Duel.objects.get(pk=duel.pk)  # as a request would load it
-    for i in range(5):
+    for i in range(len(duel.questions)):
         a = current(duel, user)
         q = a.question
         answer(duel, user, a.index, q.answer if i < right else "nope", now=a.shown_at + timezone.timedelta(seconds=secs))
@@ -87,7 +87,7 @@ def test_a_challenge_starts_the_challengers_run_and_accepting_starts_the_opponen
     assert r.status_code == 302 and r.url == reverse("classroom:duel_play", args=[duel.pk])
     # nobody waits for anybody: the challenger's run starts at once, on five Python questions
     assert duel.status == "pending" and duel.mode == "quiz" and duel.language == "python"
-    assert len(duel.questions) == 5 and len(set(duel.questions)) == 5 and duel.opponent_started_at is None
+    assert len(duel.questions) == 7 and len(set(duel.questions)) == 7 and duel.opponent_started_at is None
     assert client.post(url, form).status_code == 200  # one run at a time
     assert Duel.objects.count() == 1
 
@@ -167,7 +167,7 @@ def test_new_questions_come_first_and_seen_ones_only_fill_up(bank):
     seen = set(duel.questions)
     picked = _pick([p1], "python")
     unseen = {q.pk for q in bank} - seen
-    assert len(picked) == 5 and unseen <= set(picked)  # the one unseen question, then four seen ones
+    assert len(picked) == 7 and unseen <= set(picked)  # the unseen questions first, then seen ones
 
 
 @pytest.mark.django_db
@@ -577,17 +577,17 @@ def test_a_duel_mixes_levels_by_rating_and_takes_the_least_asked_first():
     for level in ("beginner", "easy", "medium"):
         for i in range(6):
             _q(f"{level}{i}", level=level)
-    p1, p2 = _players()  # both 1200: mostly easy ones, no medium
+    p1, p2 = _players()  # both 1200: a middle mix
 
     def levels(ids):
         return Counter(DuelQuestion.objects.get(pk=i).level for i in ids)
 
-    assert levels(_pick([p1, p2], "python")) == {"beginner": 2, "easy": 3}
+    assert levels(_pick([p1, p2], "python")) == {"beginner": 2, "easy": 3, "medium": 2}
     User.objects.filter(pk=p1.pk).update(duel_rating=900)
     User.objects.filter(pk=p2.pk).update(duel_rating=1000)
-    assert levels(_pick([p1, p2], "python")) == {"beginner": 3, "easy": 2}
-    User.objects.filter(pk__in=[p1.pk, p2.pk]).update(duel_rating=1700)  # only the strong get a medium
-    assert levels(_pick([p1, p2], "python")) == {"beginner": 1, "easy": 3, "medium": 1}
+    assert levels(_pick([p1, p2], "python")) == {"beginner": 3, "easy": 3, "medium": 1}
+    User.objects.filter(pk__in=[p1.pk, p2.pk]).update(duel_rating=1700)  # the strong get mostly mediums
+    assert levels(_pick([p1, p2], "python")) == {"beginner": 1, "easy": 3, "medium": 3}
     # a question asked many times to others waits behind the ones nobody was asked
     busy = DuelQuestion.objects.get(key="easy0")
     third = User.objects.create_user("p3", password="x")
@@ -729,3 +729,31 @@ def test_unanswered_questions_of_a_finished_run_are_skipped_not_wrong(client, ba
     client.force_login(p1)
     cells = client.get(reverse("classroom:duel", args=[duel.pk])).context["players"][0]["cells"]
     assert {c["state"] for c in cells} == {"skip"}
+
+
+@pytest.mark.django_db
+def test_a_harder_right_answer_counts_more_and_a_five_question_duel_still_runs():
+    from .duels import QUESTIONS, WEIGHT, answer, current, settle
+    from .models import Duel
+
+    assert QUESTIONS == 7 and WEIGHT == {"beginner": 1, "easy": 2, "medium": 3}
+    qs = [_q("b0", level="beginner"), _q("b1", level="beginner"), _q("e0"), _q("e1"), _q("m0", level="medium")]
+    p1, p2 = _players()
+    now = timezone.now()
+    duel = Duel.objects.create(challenger=p1, opponent=p2, language="python", mode="quiz", status="active",  # made when a duel had 5 questions
+                               questions=[q.pk for q in qs], started_at=now, ends_at=now + timezone.timedelta(minutes=5),
+                               opponent_started_at=now, opponent_ends_at=now + timezone.timedelta(minutes=5))
+
+    def play(user, right_keys):
+        d = Duel.objects.get(pk=duel.pk)
+        for _ in range(5):
+            a = current(d, user)
+            answer(d, user, a.index, a.question.answer if a.question.key in right_keys else "nope", now=a.shown_at + timezone.timedelta(seconds=3))
+
+    play(p1, {"b0", "b1", "e0", "e1"})  # four right: 1 + 1 + 2 + 2 = 6
+    play(p2, {"m0", "e0", "e1"})  # three right: 3 + 2 + 2 = 7, fewer answers but harder ones
+    duel.refresh_from_db()
+    assert duel.status == "finished" and duel.winner == p2
+    from .duels import run
+    assert (run(duel, p1.pk).right, run(duel, p1.pk).points) == (4, 6) and (run(duel, p2.pk).right, run(duel, p2.pk).points) == (3, 7)
+    assert run(duel, p1.pk).total == 5

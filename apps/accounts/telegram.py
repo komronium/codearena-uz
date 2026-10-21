@@ -280,7 +280,7 @@ def notify_duel_result(duel_id: int):
         right = {}
         for player in (duel.challenger, duel.opponent):
             r = duels.run(duel, player.pk)
-            right[player.pk] = r.right if r else 0
+            right[player.pk] = r.points if r else 0
         for me, them, delta in ((duel.challenger, duel.opponent, duel.challenger_delta),
                                 (duel.opponent, duel.challenger, duel.opponent_delta)):
             head = ("🏆 G‘alaba!" if duel.winner_id == me.pk else "Durang" if duel.winner_id is None else "Mag‘lubiyat")

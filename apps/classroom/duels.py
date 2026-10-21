@@ -1,8 +1,8 @@
 """1v1 quiz duels, played on two clocks. Opening a duel starts the challenger's run at once on QUESTIONS
 questions in one language, so nobody has to wait for anyone; the opponent gets the same
 questions and their own run when they join. Each question has PER_QUESTION from the moment it is first
-shown; a run left half-way ends RUN_LIMIT after its start, unseen questions counting as wrong. More right
-answers wins; equal is a draw (time is only the 20 seconds a question gets, never a tie-break). Duel Elo moves once both runs
+shown; a run left half-way ends RUN_LIMIT after its start, unseen questions counting as wrong. More points
+(a right answer is worth 1, 2 or 3 by the question's level) wins; equal is a draw (time is only the 20 seconds a question gets, never a tie-break). Duel Elo moves once both runs
 are over, by each player's own K (k_factor), as in chess: high for a newcomer, low at the top.
 
 A duel names its opponent (a friend, who has WAIT_FOR to accept) or leaves the seat open: find_opponent
@@ -24,7 +24,8 @@ from apps.accounts.models import User
 from .models import Duel, DuelAnswer, DuelQuestion
 from .quiz_check import norm
 
-QUESTIONS = 5
+QUESTIONS = 7  # of a new duel; a duel keeps the number it was made with (len(duel.questions))
+WEIGHT = {"beginner": 1, "easy": 2, "medium": 3}  # points of a right answer by the question's level
 PER_QUESTION = timedelta(seconds=20)
 GRACE = timedelta(seconds=2)  # an answer's trip to the server at the last second
 RUN_LIMIT = timedelta(minutes=5)
@@ -174,17 +175,24 @@ class Run(NamedTuple):
     start: datetime
     end: datetime
     answers: list  # DuelAnswer rows by index: the questions shown so far
+    total: int = QUESTIONS  # questions in this duel
 
     def closed(self, a, now) -> bool:
         """Answered, or its time is up."""
         return a.answered_at is not None or now > a.shown_at + PER_QUESTION + GRACE
 
     def over(self, now) -> bool:
-        return now >= self.end or (len(self.answers) == QUESTIONS and all(self.closed(a, now) for a in self.answers))
+        return now >= self.end or (len(self.answers) == self.total and all(self.closed(a, now) for a in self.answers))
 
     @property
     def right(self) -> int:
         return sum(1 for a in self.answers if a.correct)
+
+    @property
+    def points(self) -> int:
+        """What the right answers are worth: a harder question counts more, so a duel is not decided by who got
+        the easy ones right (a question of an unknown level counts as an easy one)."""
+        return sum(WEIGHT.get(a.question.level, 2) for a in self.answers if a.correct)
 
     def spent(self, now) -> timedelta:
         """Time on the questions: an answered one as taken, any other its full PER_QUESTION."""
@@ -192,7 +200,7 @@ class Run(NamedTuple):
         for a in self.answers:
             took = a.answered_at - a.shown_at if a.answered_at else PER_QUESTION
             total += min(took, PER_QUESTION)
-        return total + PER_QUESTION * (QUESTIONS - len(self.answers))
+        return total + PER_QUESTION * (self.total - len(self.answers))
 
 
 def run(duel, user_id) -> Run | None:
@@ -201,7 +209,7 @@ def run(duel, user_id) -> Run | None:
     if clock is None:
         return None
     answers = list(DuelAnswer.objects.filter(duel=duel, user_id=user_id).select_related("question").order_by("index"))
-    return Run(clock[0], clock[1], answers)
+    return Run(clock[0], clock[1], answers, len(duel.questions) or QUESTIONS)
 
 
 def _winner(duel, now) -> int | None:
@@ -209,9 +217,9 @@ def _winner(duel, now) -> int | None:
     a, b = run(duel, duel.challenger_id), run(duel, duel.opponent_id)
     if a is None or b is None or not a.over(now) or not b.over(now):
         return None
-    if a.right == b.right:
+    if a.points == b.points:
         return 0
-    return duel.challenger_id if a.right > b.right else duel.opponent_id
+    return duel.challenger_id if a.points > b.points else duel.opponent_id
 
 
 def is_right(question, given: str) -> bool:
@@ -270,9 +278,9 @@ def _seen(users) -> set[int]:
     return set(DuelAnswer.objects.filter(user__in=users).values_list("question_id", flat=True))
 
 
-# (beginner, easy, medium) questions of the five, by the pair's average duel rating: mostly easy ones for
-# everybody, a medium only for the strong
-MIX = ((1100, (3, 2, 0)), (1500, (2, 3, 0)), (10 ** 9, (1, 3, 1)))
+# (beginner, easy, medium) questions of the seven, by the pair's average duel rating: a medium for everybody (it is
+# what tells two players apart), more of them for the strong
+MIX = ((1100, (3, 3, 1)), (1500, (2, 3, 2)), (10 ** 9, (1, 3, 3)))
 
 
 def _mix(users) -> tuple[int, int, int]:

@@ -20,7 +20,7 @@ ctx: the dashboard's, with first_problem, n_courses, joined_any, learning, upcom
         <a class="ca-btn ca-btn-soft" href="{% url 'contests:detail' upcoming.0.pk %}">Ro‘yxatdan o‘tish</a></li>
       {% elif not user.is_superuser %}
       <li class="{% if s1 and s2 %}is-cur{% endif %}"><span aria-hidden="true">3</span>
-        <div><h3>Duelda kuchingizni sinang</h3><p>Raqib bilan 5 ta savol, har biriga 20 soniya. Yangi musobaqa e’lon qilinganda shu yerda chiqadi.</p></div>
+        <div><h3>Duelda kuchingizni sinang</h3><p>Raqib bilan 7 ta savol, har biriga 20 soniya. Yangi musobaqa e’lon qilinganda shu yerda chiqadi.</p></div>
         <a class="ca-btn ca-btn-soft" href="{% url 'classroom:duels' %}">Raqib topish</a></li>
       {% endif %}
     </ol>

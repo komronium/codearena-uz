@@ -5,7 +5,7 @@
   <div class="ca-hud-in">
     <div>
       <h1 id="duels-title">Duellar</h1>
-      <p class="ca-hud-sub">{{ n_questions }} ta savol, har biriga {{ per_question }} soniya. Ko‘proq to‘g‘ri javob bergan g‘olib.</p>
+      <p class="ca-hud-sub">{{ n_questions }} ta savol, har biriga {{ per_question }} soniya. Ko‘proq ball yig‘gan g‘olib: to‘g‘ri javob 1, 2 yoki 3 ball (savol qiyinligiga qarab).</p>
     </div>
     <dl class="ca-hud-stats">
       <div><dt><small>Duel reytingi</small></dt><dd><b class="tabular">{{ user.duel_rating }}</b></dd></div>
@@ -29,7 +29,7 @@ The duel rating is its own Elo and never touches the contest rating.{% endcommen
       {% for d in incoming %}
       <li>
         <div class="min-w-0">{% include "accounts/_u7.html" with u=d.challenger you=False %} <span class="text-sm text-mute tabular">duel {{ d.challenger.duel_rating }}</span>
-          <p class="text-sm text-mute">{{ d.get_language_display }} · {{ n_questions }} ta savol · {{ d.created|date:"d.m H:i" }}. Qabul qilsangiz, birinchi savol ochiladi.</p></div>
+          <p class="text-sm text-mute">{{ d.get_language_display }} · {{ d.questions|length }} ta savol · {{ d.created|date:"d.m H:i" }}. Qabul qilsangiz, birinchi savol ochiladi.</p></div>
         <div class="flex shrink-0 gap-2">
           <form method="post" action="{% url 'classroom:duel_answer' d.pk %}">{% csrf_token %}<button class="ca-btn ca-btn-ghost ca-btn-wb">Rad etish</button></form>
           <form method="post" action="{% url 'classroom:duel_answer' d.pk %}">{% csrf_token %}<input type="hidden" name="accept" value="1"><button class="ca-btn ca-btn-gold ca-btn-wb"><i data-lucide="play" class="lu" aria-hidden="true"></i>Qabul qilish</button></form>

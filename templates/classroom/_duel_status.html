@@ -30,7 +30,7 @@ per_question, n_questions, expires, user. A coding duel from before the quiz sho
       <p class="text-xs text-mute">Duel reytingi <b class="text-ink">{{ p.user.duel_rating }}</b>{% if p.delta is not None %} <span class="font-semibold {% if p.delta > 0 %}text-ok{% elif p.delta < 0 %}text-bad{% endif %}">{{ p.delta|signed }}</span>{% endif %}</p>
       {% if duel.mode == "quiz" %}
       <p class="mt-1.5 text-sm">
-        {% if p.over %}<b class="tabular text-ink">{{ p.right }}/{{ n_questions }}</b> to‘g‘ri
+        {% if p.over %}<b class="tabular text-ink">{{ p.right }}/{{ n_questions }}</b> to‘g‘ri · <b class="tabular text-ink">{{ p.points }}</b> ball
         {% elif p.run %}<span class="font-semibold text-ok">O‘ynamoqda…</span> <span class="tabular text-mute">{{ p.right }} ta to‘g‘ri</span>
         {% else %}<span class="text-mute">Hali boshlamadi</span>{% endif %}
       </p>

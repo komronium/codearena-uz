@@ -53,7 +53,7 @@ def duel_list(request):
             if request.user.pk in played else None)
     open_duels = [d for d in mine if d.status in duels.OPEN
                   and not (d.status == Duel.Status.PENDING and d.opponent_id == request.user.pk)]
-    # how far you are through each running duel: "3 / 5 savol"
+    # how far you are through each running duel: "3 / 7 savol"
     done = dict(DuelAnswer.objects.filter(duel__in=open_duels, user=request.user, answered_at__isnull=False)
                 .values_list("duel_id").annotate(n=Count("id")))
     for d in open_duels:
@@ -176,10 +176,11 @@ def _duel_board(duel, viewer) -> dict:
                 state = "ok" if a.correct else ("bad" if r.closed(a, now) else "now")
                 cells.append({"state": state})
             if r.over(now):
-                cells += [{"state": "skip"}] * (duels.QUESTIONS - len(cells))  # time ran out unanswered: not "wrong"
-            cells += [{"state": ""}] * (duels.QUESTIONS - len(cells))
+                cells += [{"state": "skip"}] * (r.total - len(cells))  # time ran out unanswered: not "wrong"
+            cells += [{"state": ""}] * (r.total - len(cells))
         rows.append({"user": u, "run": r, "delta": delta, "winner": u is not None and duel.winner_id == u.pk,
-                     "over": r is not None and r.over(now), "right": r.right if r else 0, "cells": cells})
+                     "over": r is not None and r.over(now), "right": r.right if r else 0,
+                     "points": r.points if r else 0, "cells": cells})
     mine = runs.get(viewer.pk)
     my_over = mine is not None and mine.over(now)
     review = []
@@ -208,7 +209,7 @@ def _duel_board(duel, viewer) -> dict:
         them = next((r for r in rows if r["user"] and r["user"].pk != viewer.pk), None)
         other = them["user"] if them else None
         result = {"state": "draw" if duel.winner_id is None else ("win" if duel.winner_id == viewer.pk else "loss"),
-                  "mine": me_row["right"], "theirs": them["right"] if them else 0, "delta": me_row["delta"] or 0,
+                  "mine": me_row["points"], "theirs": them["points"] if them else 0, "delta": me_row["delta"] or 0,
                   "other": other,
                   "offer": (Duel.objects.filter(challenger=other, opponent=viewer, status=Duel.Status.PENDING,
                                                 created__gt=duel.created).first() if other else None),
@@ -223,7 +224,7 @@ def _duel_board(duel, viewer) -> dict:
         "review_waits": duel.mode == Duel.Mode.QUIZ and my_over and not closed and not watcher,
         "my_playing": mine is not None and not my_over,
         "my_started": bool(mine and mine.answers),
-        "per_question": int(duels.PER_QUESTION.total_seconds()), "n_questions": duels.QUESTIONS,
+        "per_question": int(duels.PER_QUESTION.total_seconds()), "n_questions": len(duel.questions) or duels.QUESTIONS,
         "expires": duel.created + duels.WAIT_FOR,
     }
 
@@ -263,19 +264,19 @@ def duel_play(request, pk):
         if a is not None and r is not None and r.closed(a, timezone.now()):
             return render(request, "classroom/duel_play.html", {
                 "duel": duel, "verdict": _verdict(duel, request.user, a), "n": a.index + 1,
-                "n_questions": duels.QUESTIONS, "cells": _my_cells(r), "language": duel.get_language_display()})
+                "n_questions": r.total, "cells": _my_cells(r), "language": duel.get_language_display()})
     current = duels.current(duel, request.user)
     if current is None:
         return redirect("classroom:duel", duel.pk)
     q = current.question
     r = duels.run(duel, request.user.pk)
     return render(request, "classroom/duel_play.html", {
-        "duel": duel, "a": current, "q": q, "n": current.index + 1, "n_questions": duels.QUESTIONS,
+        "duel": duel, "a": current, "q": q, "n": current.index + 1, "n_questions": r.total,
         "remaining_ms": max(0, int((current.shown_at + duels.PER_QUESTION - timezone.now()).total_seconds() * 1000)),
         "per_question": int(duels.PER_QUESTION.total_seconds()),
         "options": _shuffled(q.options, f"{duel.pk}-{request.user.pk}-{current.index}"),
         "cells": _my_cells(r), "language": duel.get_language_display(),
-        "my_right": r.right,
+        "my_points": r.points,
     })
 
 
@@ -292,4 +293,4 @@ def _verdict(duel, user, a) -> dict:
 def _my_cells(r) -> list[str]:
     now = timezone.now()
     cells = ["ok" if a.correct else ("bad" if r.closed(a, now) else "now") for a in r.answers]
-    return cells + [""] * (duels.QUESTIONS - len(cells))
+    return cells + [""] * (r.total - len(cells))

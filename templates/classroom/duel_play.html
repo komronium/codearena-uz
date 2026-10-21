@@ -20,7 +20,7 @@ second. Copying out of the question is blocked, so it can't be pasted into an AI
       <ol class="ca-quiz-steps" aria-label="Sizning javoblaringiz">
         {% for c in cells %}<li class="{% if c %}is-{{ c }}{% endif %}{% if forloop.counter == n %} is-here{% endif %}"><span class="sr-only">{{ forloop.counter }}-savol: {% if c == "ok" %}to‘g‘ri{% elif c == "bad" %}noto‘g‘ri{% elif c == "now" %}hozirgi{% else %}hali yo‘q{% endif %}</span></li>{% endfor %}
       </ol>
-      <b class="ca-quiz-vs-score tabular" id="my-score">{{ my_right|default:0 }}</b>
+      <b class="ca-quiz-vs-score tabular" id="my-score">{{ my_points|default:0 }}</b>
     </div>
   </div>
 
