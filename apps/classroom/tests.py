@@ -310,10 +310,10 @@ def test_replay_works_the_ratings_out_again_keeping_every_result(db):
     Duel.objects.create(challenger=a, opponent=c, status="expired", mode="code")
     replay(Duel.objects.all(), User.objects.all())
     ratings = dict(User.objects.values_list("username", "duel_rating"))
-    # a beat b at 1200 each: ±20; then b (1180) drew with c (1200): the lower one gains a point
-    assert (ratings["a"], ratings["b"], ratings["c"], ratings["lonely"]) == (1220, 1181, 1199, 1200)
+    # a beat b at 1200 each: ±20; then b (1180) drew with c (1200): the lower one gains a point, the higher one loses none
+    assert (ratings["a"], ratings["b"], ratings["c"], ratings["lonely"]) == (1220, 1181, 1200, 1200)
     deltas = list(Duel.objects.order_by("pk").values_list("challenger_delta", "opponent_delta"))
-    assert deltas[:2] == [(20, -20), (1, -1)] and deltas[2] == (None, None)
+    assert deltas[:2] == [(20, -20), (1, 0)] and deltas[2] == (None, None)
 
 
 @pytest.mark.django_db
