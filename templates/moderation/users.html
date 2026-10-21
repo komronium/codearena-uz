@@ -61,6 +61,7 @@
     <td>
       {% if not u.is_active %}<span class="st st-bad">{% trans "Bloklangan" %}</span>{% endif %}
       {% if u.is_staff %}<span class="st st-wait"><i data-lucide="shield" class="lu" aria-hidden="true"></i>{% trans "Admin" %}</span>{% endif %}
+      {% if u.verified_at %}<span class="st st-ok" title="{% trans 'Haqiqiy talaba deb tasdiqlangan (rasmiy reyting oladi)' %}"><i data-lucide="badge-check" class="lu" aria-hidden="true"></i>{% trans "tasdiqlangan" %}</span>{% endif %}
       {% if u.is_setter %}<span class="st st-off">{% trans "Yozuvchi" %}</span>{% endif %}
       {% if not u.email_verified_at and not u.is_staff %}<span class="st st-warn" title="{% trans 'Emaili tasdiqlanmagan: yangi raundlarda reytingga kirmaydi' %}">{% trans "email ✗" %}</span>{% endif %}
     </td>
