@@ -17,22 +17,23 @@ def rendering() -> bool:
 
 
 def install():
-    """Mark the span of every template render, and keep the short-text cache fresh."""
+    """Mark the span of every template render (Template.render: the test runner swaps _render for its own, so that one is
+    not safe to patch), and keep the short-text cache fresh."""
     from django.template.base import Template
 
-    if getattr(Template._render, "_translations", False):
+    if getattr(Template.render, "_translations", False):
         return
-    original = Template._render
+    original = Template.render
 
-    def _render(self, context):
+    def render(self, context):
         _state.depth = getattr(_state, "depth", 0) + 1
         try:
             return original(self, context)
         finally:
             _state.depth -= 1
 
-    _render._translations = True
-    Template._render = _render
+    render._translations = True
+    Template.render = render
     from .models import ContentTranslation
     post_save.connect(_drop_cache, sender=ContentTranslation, dispatch_uid="translations-cache-save")
     post_delete.connect(_drop_cache, sender=ContentTranslation, dispatch_uid="translations-cache-delete")
