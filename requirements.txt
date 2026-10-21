@@ -1,4 +1,5 @@
 anthropic>=0.69
+cryptography>=43
 Django>=5.1,<5.3
 psycopg[binary]>=3.2
 django-rq>=3.0

@@ -24,8 +24,9 @@
     {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
   </form>
   {# one block for the other ways in (the page's grid pads each direct child, so they share one) #}
-  {% if google_login or telegram_login %}<div class="space-y-3">
+  {% if google_login or apple_login or telegram_login %}<div class="space-y-3">
   {% include "registration/_google_btn.html" %}
+  {% include "registration/_apple_btn.html" %}
   {% if telegram_login %}
   <form method="post" action="{% url 'telegram_login' %}">{% csrf_token %}
     {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}

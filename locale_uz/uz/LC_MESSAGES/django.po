@@ -7,6 +7,22 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+msgid ""
+"Apple orqali kirish bekor qilindi yoki eskirdi. Qaytadan urinib ko‘ring."
+msgstr ""
+"Apple orqali kiriş bekor qilindi yoki eskirdi. Qaytadan urinib köring."
+
+msgid ""
+"Apple emailingizni tasdiqlanmagan deb ko‘rsatdi: boshqa usul bilan kiring."
+msgstr ""
+"Apple emailingizni tasdiqlanmagan deb körsatdi: boşqa usul bilan kiring."
+
+msgid "Apple bilan aloqa bo‘lmadi. Birozdan keyin qayta urinib ko‘ring."
+msgstr "Apple bilan aloqa bölmadi. Birozdan keyin qayta urinib köring."
+
+msgid "Bu email bir nechta hisobda. Parol bilan kiring."
+msgstr "Bu email bir neçta hisobda. Parol bilan kiring."
+
 msgid "kumush"
 msgstr "kumuş"
 
@@ -167,9 +183,6 @@ msgstr ""
 
 msgid "Google bilan aloqa bo‘lmadi. Birozdan keyin qayta urinib ko‘ring."
 msgstr "Google bilan aloqa bölmadi. Birozdan keyin qayta urinib köring."
-
-msgid "Bu email bir nechta hisobda. Parol bilan kiring."
-msgstr "Bu email bir neçta hisobda. Parol bilan kiring."
 
 msgid ""
 "Masalani kodlashdan oldin kirish va chiqish formatini o‘qing. Kichik misolni"
@@ -5400,6 +5413,9 @@ msgid ""
 msgstr ""
 "%(plan_progress_done)s / %(plan_progress_total)s<span class=\"sr-only\"> "
 "masala yeçilgan</span>"
+
+msgid "Apple bilan davom etish"
+msgstr "Apple bilan davom etiş"
 
 msgid "Masala yeching, bellashing, reytingda ko‘tariling"
 msgstr "Masala yeçing, bellaşing, reytingda kötariling"
