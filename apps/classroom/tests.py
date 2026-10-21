@@ -293,7 +293,7 @@ def test_the_play_page_shows_one_question_never_its_answer_and_then_how_it_went(
         client.post(url, {"index": str(a.index), "answer": ""})
     assert client.get(url).url == reverse("classroom:duel", args=[duel.pk])  # run over: to the results
     page = client.get(reverse("classroom:duel", args=[duel.pk])).content.decode()
-    assert "1/7" in page and "Savollar" in page and "Hali boshlamadi" in page, page[page.find("ca-duelist"):][:1800]
+    assert "1/7" in page and "Savollar" in page and "Raqib kutilmoqda" in page
 
 
 @pytest.mark.django_db

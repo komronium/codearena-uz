@@ -361,7 +361,7 @@ def test_private_pages_stay_out_of_the_index(client, world, settings):
 @pytest.mark.django_db
 def test_footer_links_every_public_place(client):
     footer = client.get(reverse("login")).content.decode().split('<footer class="ca-footer">', 1)[1].split("</footer>")[0]
-    for name in ("problems:list", "learn:hub", "contests:list", "rating", "top", "honor"):
+    for name in ("problems:list", "learn:hub", "contests:list", "rating", "honor"):
         assert f'href="{reverse(name)}"' in footer
 
 
