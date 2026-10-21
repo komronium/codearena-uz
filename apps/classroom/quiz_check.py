@@ -1,6 +1,7 @@
 """Checks a duel question by running it: `problems(entry)` says what to run and what must come out, and
 `run` (the judge sandbox's run_trial in production) does the running."""
 from .quiz_bank import XATO
+from django.utils.translation import gettext as _t
 
 BLANK = "___"
 _CPP = "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n%s\n}\n"
@@ -43,12 +44,12 @@ def check(entry: dict, run) -> list[str]:
     options = entry["options"]
     if options:
         if entry["answer"] not in options:
-            errors.append("javob variantlar orasida yo‘q")
+            errors.append(_t("javob variantlar orasida yo‘q"))
         if len(set(options)) != len(options):
             errors.append("variantlar takrorlangan")
     if entry["kind"] == "output":
         if BLANK in code:
-            errors.append("output savolida ___ bor")
+            errors.append(_t("output savolida ___ bor"))
         ok, got = run(lang, program(lang, code, full))
         if entry["answer"] == XATO:
             if ok:
@@ -67,7 +68,7 @@ def check(entry: dict, run) -> list[str]:
                     errors.append(f"qabul qilinadigan {alt!r} chiqqanga mos emas")
     else:
         if code.count(BLANK) != 1:
-            errors.append("fill savolida bitta ___ bo‘lishi kerak")
+            errors.append(_t("fill savolida bitta ___ bo‘lishi kerak"))
             return errors
         for right in [entry["answer"], *entry["accept"]]:
             ok, got = run(lang, program(lang, code.replace(BLANK, right), full))

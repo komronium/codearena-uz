@@ -7,6 +7,7 @@ from .countries import COUNTRY_CHOICES
 from .models import TelegramLink, User
 from .usernames import USERNAME_RULE, valid_username
 from .places import OTHER, canon_city, canon_school
+from django.utils.translation import gettext as _t, gettext_lazy as _tl
 
 _CA_INPUT = {"class": "ca-input"}
 
@@ -14,7 +15,7 @@ _CA_INPUT = {"class": "ca-input"}
 def validate_public_username(username: str) -> str:
     # usernames are shown on standings and in profile URLs; an email there leaks it to everyone
     if "@" in username:
-        raise forms.ValidationError("Foydalanuvchi nomida @ bo‘lmasin — u hammaga ko‘rinadi. Email alohida maydonga yoziladi.")
+        raise forms.ValidationError(_t("Foydalanuvchi nomida @ bo‘lmasin — u hammaga ko‘rinadi. Email alohida maydonga yoziladi."))
     if not valid_username(username):
         raise forms.ValidationError(USERNAME_RULE)
     return username
@@ -73,13 +74,13 @@ def _free_stale_email(email: str, exclude_pk=None) -> bool:
 
 def _unique_email(email: str, user) -> str:
     if not _free_stale_email(email, user.pk):
-        raise forms.ValidationError("Bu email boshqa hisobda ishlatilgan.")
+        raise forms.ValidationError(_t("Bu email boshqa hisobda ishlatilgan."))
     return email
 
 
 class _ProfileFields(forms.ModelForm):
     """The fields the account gate asks for (apps.accounts.onboarding.REQUIRED), all required here."""
-    country = forms.ChoiceField(label="Davlat", choices=[("", "Davlatni tanlang")] + COUNTRY_CHOICES)
+    country = forms.ChoiceField(label=_tl("Davlat"), choices=[("", _tl("Davlatni tanlang"))] + COUNTRY_CHOICES)
     email = forms.EmailField(label="Email")
     # the city picker's "Boshqa…" (places.OTHER) sends the typed city here
     location_other = forms.CharField(required=False, max_length=100)
@@ -90,9 +91,9 @@ class _ProfileFields(forms.ModelForm):
             self.fields[name].required = True
         self.fields["last_name"].required = False  # the sign-up form says it is optional
         self.fields["location"].label = "Shahar"
-        self.fields["location"].error_messages["required"] = "Shaharni tanlang."
-        self.fields["first_name"].error_messages["required"] = "Ismingizni yozing."
-        self.fields["country"].error_messages["required"] = "Davlatni tanlang."
+        self.fields["location"].error_messages["required"] = _t("Shaharni tanlang.")
+        self.fields["first_name"].error_messages["required"] = _t("Ismingizni yozing.")
+        self.fields["country"].error_messages["required"] = _t("Davlatni tanlang.")
         if not self.initial.get("country"):
             self.initial["country"] = "UZ"  # most users are from here
 
@@ -107,7 +108,7 @@ class _ProfileFields(forms.ModelForm):
                 city = data.get("location_other", "")
             city = canon_city(data.get("country", ""), city)
             if not city:
-                self.add_error("location", "Shaharni yozing.")
+                self.add_error("location", _t("Shaharni yozing."))
             data["location"] = city
         return data
 
@@ -126,13 +127,13 @@ class WelcomeForm(_ProfileFields):
             del self.fields["username"]
         else:
             self.fields["username"].help_text = ""
-            self.fields["username"].error_messages["required"] = "Foydalanuvchi nomini yozing."
+            self.fields["username"].error_messages["required"] = _t("Foydalanuvchi nomini yozing.")
 
     def clean_username(self):
         name = self.cleaned_data["username"]
         validate_public_username(name)
         if User.objects.filter(username__iexact=name).exclude(pk=self.instance.pk).exists():
-            raise forms.ValidationError("Bu foydalanuvchi nomi band.")
+            raise forms.ValidationError(_t("Bu foydalanuvchi nomi band."))
         return name
 
 
@@ -165,7 +166,7 @@ class ProfileEditForm(_ProfileFields):
     def clean_avatar(self):
         avatar = self.cleaned_data.get("avatar")
         if avatar and hasattr(avatar, "size") and avatar.size > 2 * 1024 * 1024:
-            raise forms.ValidationError("Rasm 2 MB dan oshmasligi kerak.")
+            raise forms.ValidationError(_t("Rasm 2 MB dan oshmasligi kerak."))
         return avatar
 
     def clean_username(self):
@@ -174,7 +175,7 @@ class ProfileEditForm(_ProfileFields):
             return name
         validate_public_username(name)
         if User.objects.filter(username__iexact=name).exclude(pk=self.instance.pk).exists():
-            raise forms.ValidationError("Bu foydalanuvchi nomi band.")
+            raise forms.ValidationError(_t("Bu foydalanuvchi nomi band."))
         return name
 
 

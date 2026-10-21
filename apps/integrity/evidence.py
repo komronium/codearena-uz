@@ -9,6 +9,7 @@ from apps.submissions.models import Submission
 
 from .models import CodeSnapshot, DeviceSeen, SimilarityFlag
 from .similarity import similarity
+from django.utils.translation import gettext as _t, gettext_lazy as _tl
 
 SILENT_S = 90             # no tracker heartbeat for this long before a submit
 UNSEEN_AFTER_S = 60       # the submit-time snapshot may land a little after the submission
@@ -17,8 +18,8 @@ UNSEEN_MIN_SIMILARITY = 0.9
 JUMP_CHARS = 150          # appeared between two snapshots (at most one ~10 s tick of editing)
 
 WEIGHTS = {"ai_mark": 15, "silent": 6, "unseen": 8, "jump": 3, "shared_device": 10, "multi_device": 5, "similar": 8}
-LABELS = {"ai_mark": "AI belgisi", "silent": "Tracker o‘chiq", "unseen": "Muharrirda yozilmagan", "jump": "Kod sakrashi",
-          "shared_device": "Umumiy qurilma", "multi_device": "Ikki qurilma", "similar": "O‘xshash kod"}
+LABELS = {"ai_mark": "AI belgisi", "silent": _tl("Tracker o‘chiq"), "unseen": "Muharrirda yozilmagan", "jump": "Kod sakrashi",
+          "shared_device": "Umumiy qurilma", "multi_device": "Ikki qurilma", "similar": _tl("O‘xshash kod")}
 
 
 @dataclass
@@ -63,14 +64,14 @@ def contest_evidence(contest) -> dict[int, list[Evidence]]:
         for (user_id, problem_id), bad in hits.items():
             # the kind's label says what happened; the report lists one kind's problems on one line
             out.setdefault(user_id, []).append(Evidence(
-                kind, f"{labels.get(problem_id, '?')}: {len(bad)} ta yuborish", problem_id, bad[-1]))
+                kind, _t("{labels_get_problem_id}: {len_bad} ta yuborish").format(labels_get_problem_id=labels.get(problem_id, '?'), len_bad=len(bad)), problem_id, bad[-1]))
 
     for (user_id, problem_id), rows in snaps.items():
         # the first snapshot is the baseline: a starter template can be big
         grew = max((len(b.source) - len(a.source) for a, b in zip(rows, rows[1:])), default=0)
         if grew >= JUMP_CHARS:
             out.setdefault(user_id, []).append(Evidence(
-                "jump", f"{labels.get(problem_id, '?')}: {grew} belgi birdaniga paydo bo‘lgan", problem_id))
+                "jump", _t("{labels_get_problem_id}: {grew} belgi birdaniga paydo bo‘lgan").format(labels_get_problem_id=labels.get(problem_id, '?'), grew=grew), problem_id))
 
     _ai_marks(contest, labels, subs, out)
     _devices(contest, subs, out)
@@ -130,7 +131,7 @@ def _devices(contest, subs, out):
         # ponytail: pairwise over one user's devices; a handful per contest at most
         if any(a.first_at <= b.last_at and b.first_at <= a.last_at for a, b in combinations(devices, 2)):
             out.setdefault(u, []).append(Evidence(
-                "multi_device", f"Bir vaqtda {len(devices)} ta qurilmada ishlagan"))
+                "multi_device", _t("Bir vaqtda {len_devices} ta qurilmada ishlagan").format(len_devices=len(devices))))
 
 
 def _similar(contest, labels, out):
@@ -144,7 +145,7 @@ def _similar(contest, labels, out):
             if me.contest_id != contest.pk:
                 continue  # a prior solution's author isn't a participant of this contest
             out.setdefault(me.user_id, []).append(Evidence(
-                "similar", f"{label}: {other.user.username} bilan {pct}% o‘xshash", a.problem_id, me))
+                "similar", _t("{label}: {other_user_username} bilan {pct}% o‘xshash").format(label=label, other_user_username=other.user.username, pct=pct), a.problem_id, me))
 
 
 def _ai_marks(contest, labels, subs, out):

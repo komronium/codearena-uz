@@ -6,6 +6,7 @@ from django.db import models
 from django.utils import timezone
 
 from apps.problems.models import Problem
+from django.utils.translation import gettext as _t, gettext_lazy as _tl
 
 
 _UZ_MONTHS_SHORT = "Yan Fev Mar Apr May Iyn Iyl Avg Sen Okt Noy Dek".split()
@@ -20,13 +21,13 @@ class Contest(models.Model):
         # The contest's rules; apps.contests.standings ranks by them. Codeforces runs its own
         # rules for Div. 1/2 rounds and ICPC for Div. 3/4; "score" is the original rule, kept
         # for the contests played under it.
-        SCORE = "score", "Ball: to‘liq ball, tenglikda jarima"
-        CF = "cf", "Codeforces: ball vaqt bilan kamayadi"
-        ICPC = "icpc", "ICPC: yechilganlar soni va jarima"
+        SCORE = "score", _tl("Ball: to‘liq ball, tenglikda jarima")
+        CF = "cf", _tl("Codeforces: ball vaqt bilan kamayadi")
+        ICPC = "icpc", _tl("ICPC: yechilganlar soni va jarima")
 
     class Division(models.IntegerChoices):
-        OPEN = 0, "Ochiq (hamma uchun)"
-        DIV1 = 1, "Div. 1 (reyting 1900 va yuqori)"
+        OPEN = 0, _tl("Ochiq (hamma uchun)")
+        DIV1 = 1, _tl("Div. 1 (reyting 1900 va yuqori)")
         DIV2 = 2, "Div. 2 (reyting 1900 dan past)"
         DIV3 = 3, "Div. 3 (reyting 1600 dan past)"
         DIV4 = 4, "Div. 4 (reyting 1400 dan past)"
@@ -92,8 +93,9 @@ class Contest(models.Model):
         minutes = int((self.end - self.start).total_seconds() // 60)
         h, m = divmod(minutes, 60)
         d, h = divmod(h, 24)
-        parts = (f"{d} kun" if d else "", f"{h} soat" if h else "", f"{m} daq" if m else "")
-        return " ".join(p for p in parts if p) or "0 daq"
+        parts = (_t("{n} kun").format(n=d) if d else "", _t("{n} soat").format(n=h) if h else "",
+                 _t("{n} daq").format(n=m) if m else "")
+        return " ".join(p for p in parts if p) or _t("0 daq")
 
     @property
     def start_month_short(self) -> str:

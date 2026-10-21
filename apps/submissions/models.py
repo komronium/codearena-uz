@@ -6,16 +6,17 @@ from django.utils import timezone
 
 from apps.contests.models import Contest
 from apps.problems.models import Language, Problem, TestCase
+from django.utils.translation import gettext_lazy as _tl
 
 # What a learner reads instead of the judge's code (the code stays in the chip's tooltip).
 VERDICT_LABELS = {
-    "AC": "To‘g‘ri",
-    "WA": "Noto‘g‘ri javob",
-    "TLE": "Vaqt oshdi",
-    "MLE": "Xotira oshdi",
-    "OLE": "Chiqish juda katta",
-    "RE": "Dastur xatosi",
-    "CE": "Kompilyatsiya xatosi",
+    "AC": _tl("To‘g‘ri"),
+    "WA": _tl("Noto‘g‘ri javob"),
+    "TLE": _tl("Vaqt oshdi"),
+    "MLE": _tl("Xotira oshdi"),
+    "OLE": _tl("Chiqish juda katta"),
+    "RE": _tl("Dastur xatosi"),
+    "CE": _tl("Kompilyatsiya xatosi"),
 }
 
 

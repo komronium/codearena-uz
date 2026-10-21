@@ -3,7 +3,7 @@ lapis), the problem with its level and the way in, your streak and the next stre
 ctx: daily, ds (apps.problems.templatetags.daily.daily_stats), daily_done.{% endcomment %}
 <section class="ca-box" aria-labelledby="daily-title">
   <div class="ca-box-cap ca-hd"><h2 id="daily-title">{% trans "Kun masalasi" %}</h2>
-    {% if user.is_authenticated %}<span class="ca-box-tools ca7-streak" title="Olov{% if ds.best %}, eng uzuni {{ ds.best }} kun{% endif %}"><i data-lucide="flame" class="lu" aria-hidden="true"></i>{% blocktrans with ds_streak=ds.streak %}<b>{{ ds_streak }}</b> kun{% endblocktrans %}</span>
+    {% if user.is_authenticated %}<span class="ca-box-tools ca7-streak" title="{% trans 'Olov' %}{% if ds.best %}{% trans ', eng uzuni' %} {{ ds.best }} {% trans 'kun' %}{% endif %}"><i data-lucide="flame" class="lu" aria-hidden="true"></i>{% blocktrans with ds_streak=ds.streak %}<b>{{ ds_streak }}</b> kun{% endblocktrans %}</span>
     {% else %}<small class="ca-box-tools">{{ daily.date|date:"d.m.Y" }}</small>{% endif %}</div>
   <div class="ca7-pad">
     {% if user.is_authenticated %}{% include "problems/_month.html" with month=ds.month %}{% endif %}

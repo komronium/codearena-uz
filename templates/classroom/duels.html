@@ -172,14 +172,14 @@ The duel rating is its own Elo and never touches the contest rating.{% endcommen
       const b = document.createElement("button"), name = document.createElement("span"), meta = document.createElement("span");
       b.type = "button"; b.className = "ca-picker-hit";
       name.className = "ca-user-name min-w-0 flex-1"; name.style.setProperty("--tier", p.color); name.translate = false; name.textContent = p.username;
-      meta.className = "tabular text-xs text-mute"; meta.textContent = (p.followed ? "kuzatyapsiz · " : "") + `duel ${p.duel}`;
+      meta.className = "tabular text-xs text-mute"; meta.textContent = (p.followed ? "{% jt "kuzatyapsiz · " %}" : "") + `{% jt "duel ${p.duel}" %}`;
       b.append(name, meta);
       b.addEventListener("click", () => pick(p.username));
       const li = document.createElement("li"); li.append(b);
       return li;
     }));
     if (input.value.trim() && !people.length) {
-      const li = document.createElement("li"); li.className = "px-3 py-2 text-sm text-mute"; li.textContent = "Bunday foydalanuvchi topilmadi";
+      const li = document.createElement("li"); li.className = "px-3 py-2 text-sm text-mute"; li.textContent = "{% jt "Bunday foydalanuvchi topilmadi" %}";
       hits.append(li);
     }
     hits.hidden = !hits.children.length || document.activeElement !== input && !hits.contains(document.activeElement);

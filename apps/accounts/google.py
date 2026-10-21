@@ -24,6 +24,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 
 from . import throttle
 from .models import User
+from django.utils.translation import gettext as _t
 
 AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth"
 TOKEN_URL = "https://oauth2.googleapis.com/token"
@@ -116,7 +117,7 @@ def _user_for(request, info: dict):
                 user.email_verified_at = timezone.now()
             user.save(update_fields=["google_sub", "email_verified_at"])
         elif len(owners) > 1:
-            return None, "Bu email bir nechta hisobda. Parol bilan kiring."
+            return None, _t("Bu email bir nechta hisobda. Parol bilan kiring.")
     if user is None:
         user = User(username=_username_from(info), email=email, first_name=(info.get("given_name") or "")[:150],
                     last_name=(info.get("family_name") or "")[:150], google_sub=sub,
@@ -129,7 +130,7 @@ def _user_for(request, info: dict):
     if not user.is_active:
         return None, "Bu hisob yopilgan."
     if user.is_staff or user.is_superuser:
-        return None, "Xodim hisoblari Google orqali kira olmaydi. Parol bilan kiring."
+        return None, _t("Xodim hisoblari Google orqali kira olmaydi. Parol bilan kiring.")
     _give_avatar(user, info.get("picture", ""))  # only for the people who really sign in
     return user, ""
 
@@ -140,7 +141,7 @@ def callback(request):
     state, expected = request.GET.get("state", ""), request.session.pop("g_state", "")
     nxt = request.session.pop("g_next", "")
     if request.GET.get("error") or not state or not expected or not secrets.compare_digest(state, expected):
-        messages.error(request, "Google orqali kirish bekor qilindi yoki eskirdi. Qaytadan urinib ko‘ring.")
+        messages.error(request, _t("Google orqali kirish bekor qilindi yoki eskirdi. Qaytadan urinib ko‘ring."))
         return redirect("login")
     if throttle.ip_blocked(request, "google", 30, 600):
         messages.error(request, throttle.TOO_MANY)
@@ -152,10 +153,10 @@ def callback(request):
             "grant_type": "authorization_code"})
         info = _get_json(USERINFO_URL, token["access_token"])
     except (urllib.error.URLError, ValueError, KeyError, OSError):
-        messages.error(request, "Google bilan aloqa bo‘lmadi. Birozdan keyin qayta urinib ko‘ring.")
+        messages.error(request, _t("Google bilan aloqa bo‘lmadi. Birozdan keyin qayta urinib ko‘ring."))
         return redirect("login")
     if not (info.get("sub") and info.get("email") and info.get("email_verified")):
-        messages.error(request, "Google emailingizni tasdiqlanmagan deb ko‘rsatdi: boshqa usul bilan kiring.")
+        messages.error(request, _t("Google emailingizni tasdiqlanmagan deb ko‘rsatdi: boshqa usul bilan kiring."))
         return redirect("login")
     user, error = _user_for(request, info)
     if user is None:

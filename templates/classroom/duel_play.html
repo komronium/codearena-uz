@@ -80,7 +80,7 @@ second. Copying out of the question is blocked, so it can't be pasted into an AI
         bar = document.getElementById("quiz-bar"), secs = document.getElementById("quiz-secs"),
         flash = document.getElementById("quiz-flash"), all = {{ per_question }} * 1000,
         end = performance.now() + {{ remaining_ms }}, here = document.querySelector(".ca-quiz-steps .is-here");
-  const WORDS = { ok: "To‘g‘ri!", bad: "Noto‘g‘ri", late: "Vaqt tugadi" };
+  const WORDS = { ok: "{% jt "To‘g‘ri!" %}", bad: "{% jt "Noto‘g‘ri" %}", late: "{% jt "Vaqt tugadi" %}" };
 
   const PAUSE = { ok: 800, bad: 1100, late: 1100 };
   let sent = false;

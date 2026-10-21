@@ -1,5 +1,5 @@
 """What the duel badges (apps.accounts.badges) count, worked out from finished duels: wins, the longest run
-of wins, the best duel rating reached, quiz runs with all five right (and those in under LIGHTNING), and the
+of wins, the best duel rating reached, quiz runs with every question right (and those at under LIGHTNING a question), and the
 languages won in."""
 from datetime import timedelta
 
@@ -8,7 +8,7 @@ from django.db.models import Q
 from .models import Duel, DuelAnswer
 
 START = 1200
-LIGHTNING = timedelta(seconds=30)
+LIGHTNING = timedelta(seconds=6)  # per question: a flawless run faster than this on average
 MIN_LOSER_ANSWERS = 3  # a win over somebody who barely played (or idled) is a walkover: no badge, no quest
 
 
@@ -36,6 +36,7 @@ def duel_stats(user) -> dict[str, int]:
             best_run = max(best_run, run)
         rating += (d.challenger_delta if d.challenger_id == user.pk else d.opponent_delta) or 0
         peak = max(peak, rating)
+    total = {d.pk: len(d.questions) or 5 for d in duels}  # a duel's own question count (5 before the seven-question ones)
     runs = {}
     for duel_id, correct, shown, answered in (DuelAnswer.objects.filter(user=user, duel__in=[d.pk for d in duels])
                                               .values_list("duel_id", "correct", "shown_at", "answered_at")):
@@ -43,7 +44,8 @@ def duel_stats(user) -> dict[str, int]:
         runs[duel_id] = (right + correct, spent + (answered - shown if answered else timedelta(days=1)))
     return {
         "wins": len(wins), "win_run": best_run, "duel_peak": peak,
-        "perfect": sum(1 for right, _ in runs.values() if right == 5),
-        "lightning": sum(1 for right, spent in runs.values() if right == 5 and spent < LIGHTNING),
+        "perfect": sum(1 for duel_id, (right, _) in runs.items() if right == total[duel_id]),
+        "lightning": sum(1 for duel_id, (right, spent) in runs.items()
+                         if right == total[duel_id] and spent < LIGHTNING * total[duel_id]),
         "languages": len({d.language for d in wins if d.mode == Duel.Mode.QUIZ and d.language}),
     }

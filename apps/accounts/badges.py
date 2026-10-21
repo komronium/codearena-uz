@@ -9,9 +9,10 @@ from dataclasses import dataclass
 
 from django.db import IntegrityError
 from django.db.models import Q
+from django.utils.translation import gettext_lazy as _tl
 
 ROMAN = ["", "I", "II", "III", "IV", "V"]
-METALS = ["", "bronza", "kumush", "oltin", "platina", "olmos"]
+METALS = ["", _tl("bronza"), _tl("kumush"), _tl("oltin"), _tl("platina"), _tl("olmos")]
 
 
 def titled(name: str, tier: int) -> str:
@@ -30,20 +31,20 @@ class Family:
     base: int = 0  # where the progress to level I starts (a rating starts at 1200, not 0)
 
 
-GROUPS = {"problems": "Masalalar", "learn": "Kurslar", "contests": "Musobaqalar", "duels": "Duellar"}
+GROUPS = {"problems": _tl("Masalalar"), "learn": _tl("Kurslar"), "contests": _tl("Musobaqalar"), "duels": _tl("Duellar")}
 FAMILIES = [
-    Family("yechuvchi", "Yechuvchi", "circle-check-big", "problems", "{n} ta masala yechildi", (10, 25, 50, 100, 250)),
-    Family("choqqi", "Cho‘qqi", "mountain", "problems", "{n} ta Hard masala", (1, 5, 10, 25, 50)),
-    Family("olov", "Olov", "flame", "problems", "{n} kun ketma-ket", (3, 7, 30, 100, 365)),
-    Family("bilimdon", "Bilimdon", "graduation-cap", "learn", "{n} ta kurs tugatildi", (1, 3, 5, 10, 20)),
-    Family("musobaqachi", "Musobaqachi", "flag", "contests", "{n} ta reytingli musobaqa", (1, 5, 10, 25, 50)),
-    Family("sovrindor", "Sovrindor", "medal", "contests", "{n} marta top-3", (1, 3, 5, 10, 25)),
-    Family("duelchi", "Duelchi", "swords", "duels", "{n} ta g‘alaba", (5, 10, 50, 100, 250)),
-    Family("yengilmas", "Yengilmas", "shield-check", "duels", "{n} ta g‘alaba ketma-ket", (3, 5, 7, 10, 15)),
-    Family("duel_ustasi", "Duel ustasi", "trophy", "duels", "Duel reytingi {n}", (1300, 1400, 1500, 1700, 2000), base=1200),
-    Family("mukammal", "Mukammal", "target", "duels", "{n} marta 5/5", (1, 5, 10, 25, 50)),
-    Family("chaqmoq", "Chaqmoq", "zap", "duels", "{n} marta 5/5, 30 soniyadan tez", (1, 3, 10, 25, 50)),
-    Family("poliglot", "Poliglot", "languages", "duels", "{n} ta tilda g‘alaba", (2, 3, 4)),
+    Family("yechuvchi", _tl("Yechuvchi"), "circle-check-big", "problems", _tl("{n} ta masala yechildi"), (10, 25, 50, 100, 250)),
+    Family("choqqi", _tl("Cho‘qqi"), "mountain", "problems", _tl("{n} ta Hard masala"), (1, 5, 10, 25, 50)),
+    Family("olov", _tl("Olov"), "flame", "problems", _tl("{n} kun ketma-ket"), (3, 7, 30, 100, 365)),
+    Family("bilimdon", _tl("Bilimdon"), "graduation-cap", "learn", _tl("{n} ta kurs tugatildi"), (1, 3, 5, 10, 20)),
+    Family("musobaqachi", _tl("Musobaqachi"), "flag", "contests", _tl("{n} ta reytingli musobaqa"), (1, 5, 10, 25, 50)),
+    Family("sovrindor", _tl("Sovrindor"), "medal", "contests", _tl("{n} marta top-3"), (1, 3, 5, 10, 25)),
+    Family("duelchi", _tl("Duelchi"), "swords", "duels", _tl("{n} ta g‘alaba"), (5, 10, 50, 100, 250)),
+    Family("yengilmas", _tl("Yengilmas"), "shield-check", "duels", _tl("{n} ta g‘alaba ketma-ket"), (3, 5, 7, 10, 15)),
+    Family("duel_ustasi", _tl("Duel ustasi"), "trophy", "duels", _tl("Duel reytingi {n}"), (1300, 1400, 1500, 1700, 2000), base=1200),
+    Family("mukammal", _tl("Mukammal"), "target", "duels", _tl("{n} marta xatosiz duel"), (1, 5, 10, 25, 50)),
+    Family("chaqmoq", _tl("Chaqmoq"), "zap", "duels", _tl("{n} marta xatosiz va tez (savolga o‘rtacha 6 soniyadan kam)"), (1, 3, 10, 25, 50)),
+    Family("poliglot", _tl("Poliglot"), "languages", "duels", _tl("{n} ta tilda g‘alaba"), (2, 3, 4)),
 ]
 BY_KEY = {f.key: f for f in FAMILIES}
 # the metric each family counts, by key

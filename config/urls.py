@@ -4,6 +4,7 @@ from django.urls import include, path, re_path
 from django.views.static import serve
 
 from apps.home.sitemaps import SITEMAPS
+from apps.accounts.language import set_language
 from apps.home.views import favicon, healthz, home, manifest, robots_txt
 
 urlpatterns = [
@@ -23,6 +24,7 @@ urlpatterns = [
     path("sitemap-<section>.xml", sitemaps.sitemap, {"sitemaps": SITEMAPS}, name="sitemap_section"),
     path("favicon.ico", favicon, name="favicon"),
     path("healthz", healthz, name="healthz"),
+    path("i18n/language/", set_language, name="set_language"),
     path("manifest.webmanifest", manifest, name="manifest"),
     path("", home, name="home"),
 ]

@@ -4,6 +4,7 @@ from concurrent.futures import ThreadPoolExecutor
 import anthropic
 
 from apps.problems.models import Problem
+from django.utils.translation import gettext as _t, gettext_lazy as _tl
 
 MODEL_CHOICES = [
     ("claude-sonnet-5", "Sonnet 5 (tavsiya etiladi)"),
@@ -16,12 +17,12 @@ MAX_COUNT = 10
 MIN_TESTCASES = 20
 # What each level means, so "medium" is the same size of problem every time.
 LEVEL_BRIEFS = {
-    "beginner": "kiritish-chiqarish, arifmetika, bitta-ikkita shart; yechim bir necha qator",
-    "easy": "sikl, shartlar, massiv yoki satr ustida oddiy ishlov; to‘g‘ridan-to‘g‘ri yechim o‘tadi",
-    "medium": "saralash, prefiks yig‘indi, ikki ko‘rsatkich, ochko‘z usul yoki oddiy DP; "
-              "cheklovlar sodda (O(n²)) yechimni o‘tkazmaydi",
-    "hard": "murakkab DP, graflar, sonlar nazariyasi yoki ma’lumotlar tuzilmalari; "
-            "katta cheklovlar, samarali algoritm shart",
+    "beginner": _tl("kiritish-chiqarish, arifmetika, bitta-ikkita shart; yechim bir necha qator"),
+    "easy": _tl("sikl, shartlar, massiv yoki satr ustida oddiy ishlov; to‘g‘ridan-to‘g‘ri yechim o‘tadi"),
+    "medium": _tl("saralash, prefiks yig‘indi, ikki ko‘rsatkich, ochko‘z usul yoki oddiy DP; "
+              "cheklovlar sodda (O(n²)) yechimni o‘tkazmaydi"),
+    "hard": _tl("murakkab DP, graflar, sonlar nazariyasi yoki ma’lumotlar tuzilmalari; "
+            "katta cheklovlar, samarali algoritm shart"),
 }
 
 _PROBLEM_SCHEMA = {
@@ -83,12 +84,12 @@ def _request(slots, index: int, topics, focus: str) -> str:
     labels = dict(Problem.Difficulty.choices)
     key, level = slots[index]
     same = [k for k, lv in slots if lv == level]
-    lines = [f"Bitta masala tuz: {labels[level]} — {LEVEL_BRIEFS[level]}."]
+    lines = [_t("Bitta masala tuz: {labels_level} — {level_briefs_level}.").format(labels_level=labels[level], level_briefs_level=LEVEL_BRIEFS[level])]
     if len(slots) > 1:
-        lines.append(f"Bu {len(slots)} ta masaladan iborat to'plamning {index + 1}-masalasi"
-                     + (f" ({labels[level]} darajasida {same.index(key) + 1}-si, jami {len(same)} ta)"
+        lines.append(_t("Bu {len_slots} ta masaladan iborat to'plamning {index_1}-masalasi").format(len_slots=len(slots), index_1=index + 1)
+                     + (_t(" ({labels_level} darajasida {same_index_key_1}-si, jami {len_same} ta)").format(labels_level=labels[level], same_index_key_1=same.index(key) + 1, len_same=len(same))
                         if len(same) > 1 else "")
-                     + ". To'plamdagi boshqa masalalar bilan takrorlanmaydigan g'oya tanla.")
+                     + _t(". To'plamdagi boshqa masalalar bilan takrorlanmaydigan g'oya tanla."))
     if topics:
         # rotate the topic list so parallel requests don't all start from the same one
         shift = index % len(topics)
@@ -96,7 +97,7 @@ def _request(slots, index: int, topics, focus: str) -> str:
         lines.append(f"Mavzular: {', '.join(ordered)} (birinchisini asos qilib ol). Masala shulardan "
                      "kamida bittasiga tegishli bo'lsin; tags ga faqat shu ro'yxatdan yoz.")
     if focus:
-        lines.append(f"Aniq mavzu va talablar: {focus}")
+        lines.append(_t("Aniq mavzu va talablar: {focus}").format(focus=focus))
     return "\n".join(lines)
 
 
@@ -114,9 +115,9 @@ def _generate_one(client, model: str, schema: dict, prompt: str) -> dict:
         raise AIGenerationError(str(e)) from e
 
     if getattr(response, "stop_reason", None) == "max_tokens":
-        raise AIGenerationError("Javob uzilib qoldi — qayta urinib ko'ring.")
+        raise AIGenerationError(_t("Javob uzilib qoldi — qayta urinib ko'ring."))
     if getattr(response, "stop_reason", None) == "refusal":
-        raise AIGenerationError("AI bu so'rovni bajarmadi — mavzu yoki talabni o'zgartirib ko'ring.")
+        raise AIGenerationError(_t("AI bu so'rovni bajarmadi — mavzu yoki talabni o'zgartirib ko'ring."))
     text = next((b.text for b in response.content if b.type == "text"), None)
     if text is None:
         raise AIGenerationError("AI javobida matn topilmadi.")
@@ -134,7 +135,7 @@ def generate_problems(levels: dict[str, int], topics: list[str] = (), focus: str
     languages. One request per problem, run in parallel."""
     slots = _slots(levels)
     if not 1 <= len(slots) <= MAX_COUNT:
-        raise AIGenerationError(f"1 dan {MAX_COUNT} tagacha masala so'rang.")
+        raise AIGenerationError(_t("1 dan {max_count} tagacha masala so'rang.").format(max_count=MAX_COUNT))
     schema = _PROBLEM_SCHEMA
     if topics or allowed_tags:
         tags = {"type": "array", "items": {"type": "string", "enum": list(topics or allowed_tags)}}
@@ -149,7 +150,7 @@ def generate_problems(levels: dict[str, int], topics: list[str] = (), focus: str
     problems = []
     for (key, level), p in zip(slots, results):
         if not isinstance(p, dict):
-            raise AIGenerationError(f"AI javobida {key} masalasi yo'q. Qayta urinib ko'ring.")
+            raise AIGenerationError(_t("AI javobida {key} masalasi yo'q. Qayta urinib ko'ring.").format(key=key))
         if len(p.get("testcases", [])) < MIN_TESTCASES:
             raise AIGenerationError(
                 f"«{p.get('title', '?')}» uchun {len(p.get('testcases', []))} ta test bor, "

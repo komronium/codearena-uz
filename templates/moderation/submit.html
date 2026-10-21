@@ -230,7 +230,7 @@
       if (data.url || (data.data && data.data.filePath)) {
         onSuccess(data.url || data.data.filePath);
       } else {
-        onError(data.error || "Rasm yuklashda xatolik yuz berdi.");
+        onError(data.error || "{% jt "Rasm yuklashda xatolik yuz berdi." %}");
       }
     })
     .catch((err) => {
@@ -252,18 +252,18 @@
       imageAccept: "image/png, image/jpeg, image/gif, image/webp, image/svg+xml",
       imageMaxSize: 10 * 1024 * 1024,
       imageTexts: {
-        sbInit: "Rasmni tashlang yoki yuklang",
-        sbOnDragEnter: "Rasmni shu yerga tashlang",
-        sbOnDrop: "Rasm yuklanmoqda...",
-        sbProgress: "Yuklanmoqda: #cur#/#total# (#percent#%)",
-        sbOnUploaded: "Yuklandi: #filename#",
+        sbInit: "{% jt "Rasmni tashlang yoki yuklang" %}",
+        sbOnDragEnter: "{% jt "Rasmni shu yerga tashlang" %}",
+        sbOnDrop: "{% jt "Rasm yuklanmoqda..." %}",
+        sbProgress: "{% jt "Yuklanmoqda: #cur#/#total# (#percent#%)" %}",
+        sbOnUploaded: "{% jt "Yuklandi: #filename#" %}",
         sizeUnits: " B, KB, MB",
       },
       errorMessages: {
-        noFileGiven: "Hech qanday fayl tanlanmadi",
+        noFileGiven: "{% jt "Hech qanday fayl tanlanmadi" %}",
         typeNotAllowed: "Faqat rasm fayllari (PNG, JPG, GIF, WebP, SVG) ruxsat etilgan",
         fileTooLarge: "Fayl hajmi juda katta (maksimal #imageMaxSize#)",
-        importError: "Rasmni yuklashda xatolik yuz berdi",
+        importError: "{% jt "Rasmni yuklashda xatolik yuz berdi" %}",
       }
     });
     // typing goes into CodeMirror's own hidden textarea: give it the field's label for screen readers
@@ -286,7 +286,7 @@
           imgPreviewWrap.classList.remove("hidden");
         }
       } else {
-        if (imgFilename) imgFilename.textContent = "Fayl tanlanmagan";
+        if (imgFilename) imgFilename.textContent = "{% jt "Fayl tanlanmagan" %}";
         if (imgPreviewWrap) imgPreviewWrap.classList.add("hidden");
       }
     });

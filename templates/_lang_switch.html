@@ -1,0 +1,7 @@
+{% comment %}The language switch: one button for the other language (apps.accounts.language.set_language). Uzbek is the source
+language, English the other; the cookie it sets wins, then the account's saved language.{% endcomment %}
+<form method="post" action="{% url 'set_language' %}" class="ca-lang">{% csrf_token %}
+  <input type="hidden" name="next" value="{{ request.get_full_path }}">
+  {% if LANGUAGE_CODE == "en" %}<button type="submit" name="language" value="uz" class="ca-lang-btn" lang="uz" title="O‘zbekcha" aria-label="O‘zbekcha"><i data-lucide="globe" class="lu" aria-hidden="true"></i>UZ</button>
+  {% else %}<button type="submit" name="language" value="en" class="ca-lang-btn" lang="en" title="English" aria-label="English"><i data-lucide="globe" class="lu" aria-hidden="true"></i>EN</button>{% endif %}
+</form>

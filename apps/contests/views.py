@@ -23,6 +23,7 @@ from . import rating, virtual
 from .models import Clarification, Contest, ContestProblem, Participation, VirtualParticipation, VoidedProblem
 from .services import access_allowed
 from .standings import compute_standings, elapsed, problem_points
+from django.utils.translation import gettext as _t
 
 
 def contest_list(request):
@@ -254,7 +255,7 @@ def standings(request, pk):
         resp["Content-Disposition"] = f'attachment; filename="natijalar-{contest.pk}.csv"'
         resp.write("\ufeff")  # Excel reads the BOM as UTF-8
         out = csv.writer(resp)
-        out.writerow(["O‘rin", "Login", "Ball", "Yechildi", "Jarima", *[cp.label for cp in problems], "Reyting ±"])
+        out.writerow([_t("O‘rin"), "Login", "Ball", "Yechildi", "Jarima", *[cp.label for cp in problems], "Reyting ±"])
         for r in rows:
             cells = [(c["mark"] if c["solved"] else (f"-{c['wrong']}" if c["wrong"] else "")) for c in r["cells"]]
             out.writerow(["DQ" if r["disqualified"] else r["rank"], r["user"].username, r["score"], r["solved"],
@@ -335,7 +336,7 @@ def disqualify(request, pk, user_id):
         if p.contest.official_applied_at:
             rating.recalc_official()
             audit.record(request, audit.Action.RATING_RECOMPUTE, contest=p.contest, note="rasmiy")
-            messages.success(request, "Rasmiy reyting qayta hisoblandi.")
+            messages.success(request, _t("Rasmiy reyting qayta hisoblandi."))
     cache.delete(f"contest-standings-{pk}")
     if request.POST.get("back") == "report":
         return redirect("integrity:contest_report", pk)
@@ -368,7 +369,7 @@ def void(request, pk, user_id):
                      contest=p.contest, subject=p.user,
                      note=f"{cp.label}: {reason}" if reason else cp.label)
         if penalty:
-            messages.success(request, f"{p.user.username}: {cp.label} AI jarimasi — xato urinish hisoblandi, masala bloklandi.")
+            messages.success(request, _t("{p_user_username}: {cp_label} AI jarimasi — xato urinish hisoblandi, masala bloklandi.").format(p_user_username=p.user.username, cp_label=cp.label))
         else:
             messages.success(request, f"{p.user.username}: {cp.label} masalasi natijasi bekor qilindi.")
     elif not want and current is not None:
@@ -385,7 +386,7 @@ def void(request, pk, user_id):
     if p.contest.official_applied_at:
         rating.recalc_official()
         audit.record(request, audit.Action.RATING_RECOMPUTE, contest=p.contest, note="rasmiy")
-        messages.success(request, "Rasmiy reyting qayta hisoblandi.")
+        messages.success(request, _t("Rasmiy reyting qayta hisoblandi."))
     return _back(request, pk)
 
 
@@ -404,11 +405,11 @@ def _rerate(request, contest):
     if rating.is_latest(contest):
         rating.recompute(contest)
         audit.record(request, audit.Action.RATING_RECOMPUTE, contest=contest)
-        messages.success(request, "Reyting qayta hisoblandi.")
+        messages.success(request, _t("Reyting qayta hisoblandi."))
     else:
         n = rating.recompute_from(contest)
-        audit.record(request, audit.Action.RATING_RECOMPUTE, contest=contest, note=f"keyingi raundlar bilan: {n} ta")
-        messages.success(request, f"Reyting shu raunddan boshlab {n} ta raund bo‘yicha qayta hisoblandi.")
+        audit.record(request, audit.Action.RATING_RECOMPUTE, contest=contest, note=_t("keyingi raundlar bilan: {n} ta").format(n=n))
+        messages.success(request, _t("Reyting shu raunddan boshlab {n} ta raund bo‘yicha qayta hisoblandi.").format(n=n))
 
 
 @login_required

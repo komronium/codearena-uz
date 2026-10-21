@@ -2,7 +2,7 @@
 few, the unread ones marked; a line opens its page and is read from then on.{% endcomment %}
 {% with n=bell.unread %}
 <details class="ca-dropdown ca-bell" data-dropdown>
-  <summary class="ca-icon-btn" aria-label="Bildirishnomalar{% if n %}: {{ n }} ta yangi{% endif %}" title="{% trans 'Bildirishnomalar' %}">
+  <summary class="ca-icon-btn" aria-label="{% trans 'Bildirishnomalar' %}{% if n %}: {{ n }} {% trans 'ta yangi' %}{% endif %}" title="{% trans 'Bildirishnomalar' %}">
     <i data-lucide="bell" class="lu" aria-hidden="true"></i>{% if n %}<b class="ca-bell-n tabular" aria-hidden="true">{% if n > 9 %}9+{% else %}{{ n }}{% endif %}</b>{% endif %}
   </summary>
   <div class="ca-dropdown-panel ca-bell-panel">

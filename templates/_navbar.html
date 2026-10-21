@@ -23,7 +23,7 @@ menu sheet (base.html). Badges: a pulsing dot while a contest runs, waiting duel
   <div class="ca-nav-tools">
     {% with live=nav.live %}{% if live and not contest and ns != "contests" and un != "home" %}
     {# a contest is running: its clock and a way in, from every page #}
-    <a href="{% url 'contests:detail' live.pk %}" class="ca-live-pill" data-live-pill title="{{ live.title }}{% if live.count > 1 %} (+{{ live.count|add:'-1' }} ta boshqa jonli){% endif %}">
+    <a href="{% url 'contests:detail' live.pk %}" class="ca-live-pill" data-live-pill title="{{ live.title }}{% if live.count > 1 %} (+{{ live.count|add:'-1' }} {% trans 'ta boshqa jonli)' %}{% endif %}">
       <span class="ca-live-dot" aria-hidden="true"></span>
       <span class="ca-live-label sr-only">{% if live.joined %}{% trans "Musobaqangiz davom etmoqda" %}{% else %}{% trans "Jonli musobaqa" %}{% endif %}</span>
       <span class="tabular" data-countdown="{{ live.end|date:'c' }}" data-label="" data-suffix="1" data-ended="Tugadi"></span>
@@ -34,12 +34,13 @@ menu sheet (base.html). Badges: a pulsing dot while a contest runs, waiting duel
       <i data-lucide="search" class="lu" aria-hidden="true"></i>{% trans "<span>Qidirish…</span><kbd class=\"ca-kbd\" aria-hidden=\"true\">Ctrl K</kbd>" %}
     </button>
     <button type="button" class="ca-icon-btn lg:hidden" data-palette-open aria-label="{% trans 'Qidirish' %}"><i data-lucide="search" class="lu" aria-hidden="true"></i></button>
+    <span class="hidden md:block">{% include "_lang_switch.html" %}</span>
     <span class="hidden md:block">{% include "_theme_menu.html" %}</span>
     {% if user.is_authenticated %}
     {% include "_bell.html" %}
     {% with s=streak_pill %}{% if s.daily %}
     <a href="{% url 'problems:detail' s.daily.problem.slug %}" class="ca-streak{% if s.done %} is-done{% elif s.current %} is-risk{% endif %}"
-       title="{% if s.done %}Olov {{ s.current }} kun: bugungi masala yechildi{% elif s.current %}Olov {{ s.current }} kun: bugun kun masalasini yeching, aks holda uziladi{% else %}Olovni boshlang: bugungi kun masalasini yeching{% endif %}">
+       title="{% if s.done %}{% trans 'Olov' %} {{ s.current }} {% trans 'kun: bugungi masala yechildi' %}{% elif s.current %}{% trans 'Olov' %} {{ s.current }} {% trans 'kun: bugun kun masalasini yeching, aks holda uziladi' %}{% else %}{% trans 'Olovni boshlang: bugungi kun masalasini yeching' %}{% endif %}">
       <i data-lucide="flame" class="lu" aria-hidden="true"></i>{% if s.current %}<span class="tabular">{{ s.current }}</span>{% else %}<span class="ca-streak-lbl" aria-hidden="true">{% trans "Kun masalasi" %}</span>{% endif %}
       <span class="sr-only">{% trans "Olov" %}{% if s.current %} {% blocktrans with s_current=s.current %}{{ s_current }} kun{% endblocktrans %}{% endif %}{% if s.done %}{% trans ", bugungi masala yechilgan" %}{% else %}{% trans ", bugungi masala hali yechilmagan" %}{% endif %}</span>
     </a>

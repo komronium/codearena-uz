@@ -3,8 +3,9 @@ mail costs a send from a small daily quota and each sign-in is a password guess,
 address and, for sign-in and reset, per account name or email as well. Counters live in the Django cache (a fixed
 window). Schools share one address, so the per-address limits are generous; the per-account ones are tight."""
 from django.core.cache import cache
+from django.utils.translation import gettext_lazy as _tl
 
-TOO_MANY = "Juda ko‘p urinish. Biroz kutib, qayta urinib ko‘ring."
+TOO_MANY = _tl("Juda ko‘p urinish. Biroz kutib, qayta urinib ko‘ring.")
 
 
 def client_ip(request) -> str:

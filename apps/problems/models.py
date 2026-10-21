@@ -1,13 +1,14 @@
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.utils.translation import gettext_lazy as _tl
 
 
 class Tag(models.Model):
     class Kind(
         models.TextChoices
     ):  # same values as Problem.Kind: SQL topics get their own list and colour
-        CODE = "code", "Dasturlash"
+        CODE = "code", _tl("Dasturlash")
         SQL = "sql", "SQL"
 
     name = models.CharField(max_length=50, unique=True)
@@ -249,8 +250,8 @@ class DailyProblem(models.Model):
     """One problem for everyone per (Tashkent) day; see apps.problems.daily."""
 
     class SelectionMethod(models.TextChoices):
-        AUTO = "auto", "Avtomatik"
-        ADMIN = "admin", "Admin tanladi"
+        AUTO = "auto", _tl("Avtomatik")
+        ADMIN = "admin", _tl("Admin tanladi")
 
     date = models.DateField(unique=True)
     problem = models.ForeignKey(Problem, on_delete=models.CASCADE, related_name="+")

@@ -33,21 +33,21 @@
   function render() {
     const q = norm(input.value);
     const local = data.items.map((it) => ({ it, s: score(it, q) })).filter((x) => x.s >= 0)
-      .filter((x) => q || x.it.quick || x.it.group !== "Amallar")
+      .filter((x) => q || x.it.quick || x.it.group !== caT("Amallar"))
       .sort((a, b) => a.s - b.s);
     // Order: quick picks, then whichever of pages/actions or problems matches better (a page whose
     // name starts with the query beats a title that merely contains it); "all problems" goes last.
     const groups = new Map();
     const add = (group, row) => { if (!groups.has(group)) groups.set(group, []); groups.get(group).push(row); };
-    local.filter((x) => x.it.quick).slice(0, 4).forEach((x) => add("Tezkor", x.it));
+    local.filter((x) => x.it.quick).slice(0, 4).forEach((x) => add(caT("Tezkor"), x.it));
     const pages = local.filter((x) => !x.it.quick).slice(0, q ? 8 : 12);
     const addPages = () => pages.forEach((x) => add(x.it.group, x.it));
-    const addProblems = () => problems.forEach((p) => add("Masalalar", { label: p.title, url: p.url, icon: p.solved ? "circle-check" : "file-code-2",
+    const addProblems = () => problems.forEach((p) => add(caT("Masalalar"), { label: p.title, url: p.url, icon: p.solved ? "circle-check" : "file-code-2",
       hint: `${p.difficulty_label} · #${String(p.id).padStart(4, "0")}`, level: p.difficulty, solved: p.solved }));
     const pagesFirst = !q || (pages.length && pages[0].s <= 1) || !problems.length;
-    const addCourses = () => courses.forEach((c) => add("Kurslar", { label: c.title, url: c.url, icon: c.icon, hint: c.hint }));
+    const addCourses = () => courses.forEach((c) => add(caT("Kurslar"), { label: c.title, url: c.url, icon: c.icon, hint: c.hint }));
     if (pagesFirst) { addPages(); addCourses(); addProblems(); } else { addCourses(); addProblems(); addPages(); }
-    if (q) add("Masalalar", { label: `«${input.value.trim()}» bo‘yicha barcha masalalar`, url: `${data.all}?q=${encodeURIComponent(input.value.trim())}`, icon: "search" });
+    if (q) add(caT("Masalalar"), { label: caT("«{q}» bo‘yicha barcha masalalar").replace("{q}", input.value.trim()), url: `${data.all}?q=${encodeURIComponent(input.value.trim())}`, icon: "search" });
 
     rows = [];
     let html = "";
@@ -63,7 +63,7 @@
       }
     }
     input.setAttribute("aria-expanded", html ? "true" : "false");
-    list.innerHTML = html || `<p class="ca-pal-empty">Hech narsa topilmadi. Boshqa so‘z bilan urinib ko‘ring.</p>`;
+    list.innerHTML = html || `<p class="ca-pal-empty">${esc(caT("Hech narsa topilmadi. Boshqa so‘z bilan urinib ko‘ring."))}</p>`;
     window.caIcons?.();
     setActive(Math.min(active, rows.length - 1));
   }

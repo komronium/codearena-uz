@@ -16,6 +16,7 @@ from django.utils.html import escape
 from django.utils import timezone
 
 from .usernames import valid_username
+from django.utils.translation import gettext as _t
 
 _SALT = "accounts.verify-email"
 MAX_AGE = 3 * 24 * 3600  # a link works for three days
@@ -38,7 +39,7 @@ def bad_name(user) -> bool:
 def missing(user) -> list[str]:
     """Labels of the profile fields still empty."""
     left = [label for field, label in REQUIRED if not (getattr(user, field) or "").strip()]
-    return (["Foydalanuvchi nomi"] if not valid_username(user.username) else []) + left
+    return ([_t("Foydalanuvchi nomi")] if not valid_username(user.username) else []) + left
 
 
 def needs_gate(user) -> bool:

@@ -80,7 +80,7 @@ course note and its badge.{% endcomment %}
     {% if progress.total %}
     <section class="ca-box" aria-labelledby="award-title">
       <div class="ca-box-cap ca-hd"><h2 id="award-title">{% trans "Nishon" %}</h2></div>
-      <ul class="ca7-pad">{% if progress.completed %}{% include "accounts/_badge7.html" with tone="lapis" icon=plan.icon title=plan.title sub="Olingan — profilingizda ko‘rinadi" href=None total=None %}{% else %}{% include "accounts/_badge7.html" with tone="locked" icon=plan.icon title=plan.title sub="Kursni tugatsangiz profilingizga qo‘shiladi" href=None done=progress.done total=progress.total %}{% endif %}</ul>
+      <ul class="ca7-pad">{% if progress.completed %}{% include "accounts/_badge7.html" with tone="lapis" icon=plan.icon title=plan.title sub=_("Olingan — profilingizda ko‘rinadi") href=None total=None %}{% else %}{% include "accounts/_badge7.html" with tone="locked" icon=plan.icon title=plan.title sub=_("Kursni tugatsangiz profilingizga qo‘shiladi") href=None done=progress.done total=progress.total %}{% endif %}</ul>
     </section>
     {% endif %}
   </aside>
@@ -113,7 +113,7 @@ course note and its badge.{% endcomment %}
   body.querySelectorAll("pre").forEach((pre) => {
     const host = pre.closest(".ca-codetabs") || pre;
     const b = document.createElement("button");
-    b.type = "button"; b.className = "ca-copy-pre"; b.setAttribute("aria-label", "Kodni nusxalash"); b.title = "Nusxalash";
+    b.type = "button"; b.className = "ca-copy-pre"; b.setAttribute("aria-label", "{% jt "Kodni nusxalash" %}"); b.title = "{% jt "Nusxalash" %}";
     b.innerHTML = '<i data-lucide="copy" class="lu" aria-hidden="true"></i>';
     b.addEventListener("click", async () => {
       const shown = host.classList.contains("ca-codetabs") ? host.querySelector("pre:not([hidden])") : pre;

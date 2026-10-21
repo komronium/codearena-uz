@@ -34,7 +34,7 @@
     const label = inp.id && document.querySelector(`label[for="${inp.id}"]`);
     text.setAttribute("aria-label", (label ? label.textContent.trim() : inp.getAttribute("aria-label")) || (withTime ? "Sana va vaqt" : "Sana"));
     const pick = document.createElement("button");
-    pick.type = "button"; pick.className = "ca-btn ca-btn-soft ca-dt-pick"; pick.title = "Kalendardan tanlash"; pick.setAttribute("aria-label", "Kalendardan tanlash");
+    pick.type = "button"; pick.className = "ca-btn ca-btn-soft ca-dt-pick"; pick.title = caT("Kalendardan tanlash"); pick.setAttribute("aria-label", caT("Kalendardan tanlash"));
     pick.innerHTML = '<i data-lucide="calendar" class="lu" aria-hidden="true"></i>';
     row.append(text, pick);
     inp.before(wrap); wrap.append(row, inp);
@@ -45,22 +45,22 @@
       inp.value = iso || "";
       if (!fromNative) text.value = show(iso, withTime);
       text.setCustomValidity("");
-      if (inp.min && iso && iso < inp.min) text.setCustomValidity(`Sana ${show(inp.min, withTime)} dan oldin bo‘lmasin`);
-      if (inp.max && iso && iso > inp.max) text.setCustomValidity(`Sana ${show(inp.max, withTime)} dan keyin bo‘lmasin`);
+      if (inp.min && iso && iso < inp.min) text.setCustomValidity(caT("Sana {d} dan oldin bo‘lmasin").replace("{d}", show(inp.min, withTime)));
+      if (inp.max && iso && iso > inp.max) text.setCustomValidity(caT("Sana {d} dan keyin bo‘lmasin").replace("{d}", show(inp.max, withTime)));
     };
     text.addEventListener("input", () => {
       const iso = parse(text.value, withTime);
       if (iso) set(iso, true);
-      else { inp.value = ""; text.setCustomValidity(text.value.trim() ? "Sanani kk.oo.yyyy shaklida yozing" : ""); }
+      else { inp.value = ""; text.setCustomValidity(text.value.trim() ? caT("Sanani kk.oo.yyyy shaklida yozing") : ""); }
     });
     text.addEventListener("blur", () => { const iso = parse(text.value, withTime); if (iso) set(iso); });
     inp.addEventListener("change", () => { text.value = show(inp.value, withTime); set(inp.value, true); });
     pick.addEventListener("click", () => { try { inp.showPicker(); } catch { inp.focus(); } });
 
     const presets = withTime
-      ? [["Hozir", () => new Date()], ["Bugun 23:59", () => { const d = new Date(); d.setHours(23, 59, 0, 0); return d; }],
-         ["+7 kun 23:59", () => { const d = new Date(); d.setDate(d.getDate() + 7); d.setHours(23, 59, 0, 0); return d; }]]
-      : [["Bugun", () => new Date()], ["Ertaga", () => { const d = new Date(); d.setDate(d.getDate() + 1); return d; }]];
+      ? [[caT("Hozir"), () => new Date()], [caT("Bugun 23:59"), () => { const d = new Date(); d.setHours(23, 59, 0, 0); return d; }],
+         [caT("+7 kun 23:59"), () => { const d = new Date(); d.setDate(d.getDate() + 7); d.setHours(23, 59, 0, 0); return d; }]]
+      : [[caT("Bugun"), () => new Date()], [caT("Ertaga"), () => { const d = new Date(); d.setDate(d.getDate() + 1); return d; }]];
     const quick = document.createElement("div");
     quick.className = "ca-dt-quick";
     for (const [name, make] of presets) {
@@ -75,13 +75,13 @@
   const file = (inp) => {
     const wrap = document.createElement("label");
     wrap.className = "ca-file";
-    const btn = document.createElement("span"); btn.className = "ca-btn ca-btn-soft ca-file-btn"; btn.textContent = "Fayl tanlash";
-    const name = document.createElement("span"); name.className = "ca-file-name"; name.textContent = "Fayl tanlanmagan";
+    const btn = document.createElement("span"); btn.className = "ca-btn ca-btn-soft ca-file-btn"; btn.textContent = caT("Fayl tanlash");
+    const name = document.createElement("span"); name.className = "ca-file-name"; name.textContent = caT("Fayl tanlanmagan");
     inp.before(wrap); wrap.append(btn, name, inp);
     inp.classList.add("ca-file-native");
     inp.addEventListener("change", () => {
       const n = inp.files ? inp.files.length : 0;
-      name.textContent = n === 0 ? "Fayl tanlanmagan" : n === 1 ? inp.files[0].name : `${n} ta fayl tanlandi`;
+      name.textContent = n === 0 ? caT("Fayl tanlanmagan") : n === 1 ? inp.files[0].name : caT("{n} ta fayl tanlandi").replace("{n}", n);
     });
   };
 
@@ -91,8 +91,8 @@
     const wrap = document.createElement("div");
     wrap.className = "ca-multi";
     const q = document.createElement("input");
-    q.type = "search"; q.className = "ca-input ca-multi-q"; q.placeholder = "Qidirish…"; q.autocomplete = "off"; q.spellcheck = false;
-    q.setAttribute("aria-label", "Ro‘yxatdan qidirish");
+    q.type = "search"; q.className = "ca-input ca-multi-q"; q.placeholder = caT("Qidirish…"); q.autocomplete = "off"; q.spellcheck = false;
+    q.setAttribute("aria-label", caT("Ro‘yxatdan qidirish"));
     const list = document.createElement("div");
     list.className = "ca-multi-list"; list.setAttribute("role", "group");
     const count = document.createElement("p");

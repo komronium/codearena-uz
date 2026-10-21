@@ -2,6 +2,7 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _tl
 
 
 class User(AbstractUser):
@@ -45,6 +46,7 @@ class User(AbstractUser):
     email_verified_at = models.DateTimeField(null=True, blank=True)
     # the last time the user renamed themselves; once per USERNAME_CHANGE_DAYS
     username_changed_at = models.DateTimeField(null=True, blank=True)
+    language = models.CharField(max_length=5, blank=True, default="")  # the page language this person chose ("" = never chose)
 
     @property
     def country_name(self) -> str:
@@ -102,10 +104,10 @@ class TelegramOutbox(models.Model):
     """Durable notification queue; Redis delivery is fast, this row allows retry after outages."""
 
     class Status(models.TextChoices):
-        PENDING = "pending", "Kutilmoqda"
-        SENDING = "sending", "Yuborilmoqda"
-        SENT = "sent", "Yuborildi"
-        FAILED = "failed", "Xato"
+        PENDING = "pending", _tl("Kutilmoqda")
+        SENDING = "sending", _tl("Yuborilmoqda")
+        SENT = "sent", _tl("Yuborildi")
+        FAILED = "failed", _tl("Xato")
 
     link = models.ForeignKey(TelegramLink, on_delete=models.CASCADE, related_name="outbox")
     event_key = models.CharField(max_length=160)
@@ -155,8 +157,8 @@ class Notification(models.Model):
 
     class Kind(models.TextChoices):
         DUEL = "duel", "Duel"
-        BADGE = "badge", "Nishon"
-        REPORT = "report", "Murojaat"
+        BADGE = "badge", _tl("Nishon")
+        REPORT = "report", _tl("Murojaat")
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="notifications")
     kind = models.CharField(max_length=12, choices=Kind.choices)

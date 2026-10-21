@@ -205,9 +205,19 @@ class Wrapper:
             if name.lower() not in ATTRS and not (name.lower() == "value" and re.search(r"type=[\"'](submit|button)", html)):
                 return m.group(0)
             if "{%" in val:
-                if LETTER.search(re.sub(r"\{%.*?%\}|\{\{.*?\}\}", "", val)):
-                    self.review.append(f"{ref}: attribute with a tag: {m.group(0)[:100]}")
-                return m.group(0)
+                # an attribute with if/else inside: each literal piece between the template constructs is wrapped alone
+                inner = "'" if q == '"' else '"'
+                pieces = []
+                for pk, pt in tokenize(val):
+                    if pk == "text" and LETTER.search(re.sub(r"&[a-z]+;|&#\d+;", "", pt)):
+                        lead = re.match(r"\s*", pt).group(0); tail = re.search(r"\s*$", pt).group(0)
+                        core = ws(pt.strip())
+                        self.add(core, ref)
+                        lit = inner + core.replace("\\", "\\\\").replace(inner, "\\" + inner) + inner
+                        pieces.append(f"{lead}{{% trans {lit} %}}{tail}")
+                    else:
+                        pieces.append(pt)
+                return f"{name}={q}{''.join(pieces)}{q}"
             if not LETTER.search(re.sub(r"\{\{.*?\}\}|&[a-z]+;", "", val)):
                 return m.group(0)
             if "{{" in val:

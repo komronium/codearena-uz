@@ -37,6 +37,7 @@ from . import badges as badge_system
 from .tiers import tier_banner
 from .tiers import tier_color as _tier_color
 from .telegram import bot_configured
+from django.utils.translation import gettext as _t
 
 _CHART_W, _CHART_H = 640, 300
 _CHART_L, _CHART_R = 46, 600
@@ -169,11 +170,11 @@ def register(request):
             # A concurrent signup can pass the form's uniqueness checks before the other
             # request commits. Turn that race into an ordinary validation error, not a 500.
             if User.objects.filter(username__iexact=form.cleaned_data["username"]).exists():
-                form.add_error("username", "Bu foydalanuvchi nomi band.")
+                form.add_error("username", _t("Bu foydalanuvchi nomi band."))
             elif User.objects.filter(email__iexact=form.cleaned_data["email"]).exists():
-                form.add_error("email", "Bu email allaqachon ro‘yxatdan o‘tgan.")
+                form.add_error("email", _t("Bu email allaqachon ro‘yxatdan o‘tgan."))
             else:
-                form.add_error(None, "Ro‘yxatdan o‘tishda xatolik yuz berdi. Qayta urinib ko‘ring.")
+                form.add_error(None, _t("Ro‘yxatdan o‘tishda xatolik yuz berdi. Qayta urinib ko‘ring."))
         else:
             inviter = User.objects.filter(username__iexact=request.session.pop("ref", ""), is_active=True).exclude(pk=user.pk).first()
             if inviter:
@@ -258,9 +259,9 @@ def welcome(request):
         if throttle.ip_blocked(request, "verify-mail", 20, 3600):
             messages.warning(request, throttle.TOO_MANY)
         elif onboarding.send_verification(request, user):
-            messages.success(request, f"Havola {user.email} manziliga qayta yuborildi.")
+            messages.success(request, _t("Havola {user_email} manziliga qayta yuborildi.").format(user_email=user.email))
         else:
-            messages.warning(request, "Havola hozirgina yuborildi. Bir daqiqadan keyin qayta urinib ko‘ring.")
+            messages.warning(request, _t("Havola hozirgina yuborildi. Bir daqiqadan keyin qayta urinib ko‘ring."))
         return redirect("welcome")
     if request.method == "POST" and form.is_valid():
         user = form.save(commit=False)
@@ -298,7 +299,7 @@ def verify_email(request, token):
     data = onboarding.read_token(token)
     user = data and User.objects.filter(pk=data[0], is_active=True).first()
     if not user or not onboarding.confirm(user, data[1]):
-        messages.error(request, "Havola eskirgan yoki noto‘g‘ri. Yangi havola so‘rang.")
+        messages.error(request, _t("Havola eskirgan yoki noto‘g‘ri. Yangi havola so‘rang."))
         return redirect("welcome" if request.user.is_authenticated else "login")
     messages.success(request, "Email tasdiqlandi. Xush kelibsiz!")
     if request.user.is_authenticated and request.user.pk == user.pk:
@@ -768,7 +769,7 @@ def verify_user(request, user_id):
             recalc_official()
             audit.record(request, audit.Action.VERIFY if want else audit.Action.UNVERIFY,
                          subject=student, note=student.verified_note)
-        messages.success(request, f"{student.username}: shaxs {'tasdiqlandi' if want else 'tasdig‘i bekor qilindi'}.")
+        messages.success(request, f"{student.username}: shaxs {'tasdiqlandi' if want else _t('tasdig‘i bekor qilindi')}.")
     nxt = _safe_next(request)
     return redirect(nxt) if nxt else redirect("profile", student.username)
 
@@ -816,7 +817,7 @@ def delete_account(request):
     other people's ratings were worked out from it. Staff accounts are closed by another admin, not by themselves."""
     user = request.user
     if user.is_staff or not user.check_password(request.POST.get("password", "")):
-        messages.error(request, "Parol noto‘g‘ri" if not user.is_staff else "Xodim hisobi bu yerdan o‘chirilmaydi.")
+        messages.error(request, _t("Parol noto‘g‘ri") if not user.is_staff else _t("Xodim hisobi bu yerdan o‘chirilmaydi."))
         return redirect("profile_edit")
     TelegramLink.objects.filter(user=user).delete()
     Notification.objects.filter(user=user).delete()
@@ -832,5 +833,5 @@ def delete_account(request):
     user.save()
     from django.contrib.auth import logout
     logout(request)
-    messages.success(request, "Hisobingiz o‘chirildi.")
+    messages.success(request, _t("Hisobingiz o‘chirildi."))
     return redirect("home")

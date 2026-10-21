@@ -47,10 +47,11 @@ from .forms import (
     TestCaseFormSet,
     UserForm,
 )
+from django.utils.translation import gettext as _t
 
 
 def _unique_slug(title: str) -> str:
-    base = slugify(title) or "masala"
+    base = slugify(title) or _t("masala")
     slug, n = base, 2
     while Problem.objects.filter(slug=slug).exists():
         slug = f"{base}-{n}"
@@ -69,7 +70,7 @@ def duel_switch(request):
         messages.success(request, "Duellar ochildi.")
     elif action in ("45", "90", "forever"):
         switch.close(request.user, None if action == "forever" else int(action))
-        messages.success(request, "Duellar yopildi: talabalar duel sahifasini ko‘rmaydi.")
+        messages.success(request, _t("Duellar yopildi: talabalar duel sahifasini ko‘rmaydi."))
     return redirect(request.POST.get("next") if (request.POST.get("next") or "").startswith("/") else "moderation:dashboard")
 
 
@@ -163,19 +164,19 @@ def daily_problem_choose(request):
         day = datetime.date.fromisoformat(request.POST.get("date", ""))
         problem_id = int(request.POST.get("problem_id", ""))
     except (TypeError, ValueError):
-        messages.error(request, "Sana yoki masala noto‘g‘ri tanlandi.")
+        messages.error(request, _t("Sana yoki masala noto‘g‘ri tanlandi."))
         return redirect("moderation:daily_problem")
 
     if day < today or day > today + datetime.timedelta(days=365):
-        messages.error(request, "Faqat bugun yoki keyingi 365 kun uchun masala tanlash mumkin.")
+        messages.error(request, _t("Faqat bugun yoki keyingi 365 kun uchun masala tanlash mumkin."))
         return redirect("moderation:daily_problem")
     if day == today and DailyProblem.objects.filter(date=today).exists():
-        messages.error(request, "Bugungi masala allaqachon e’lon qilingan va almashtirilmaydi.")
+        messages.error(request, _t("Bugungi masala allaqachon e’lon qilingan va almashtirilmaydi."))
         return redirect("moderation:daily_problem")
 
     candidate_ids = {problem.pk for problem in daily_candidates(day)}
     if problem_id not in candidate_ids:
-        messages.error(request, "Bu masala tanlov ro‘yxatida yo‘q. Sahifani yangilab, variantlardan birini tanlang.")
+        messages.error(request, _t("Bu masala tanlov ro‘yxatida yo‘q. Sahifani yangilab, variantlardan birini tanlang."))
         return redirect(f"{reverse('moderation:daily_problem')}?date={day.isoformat()}")
 
     problem = Problem.objects.get(pk=problem_id)
@@ -183,7 +184,7 @@ def daily_problem_choose(request):
         with transaction.atomic():
             assignment = DailyProblem.objects.select_for_update().filter(date=day).first()
             if day == timezone.localdate() and assignment:
-                messages.error(request, "Bugungi masala tanlov paytida e’lon qilindi va endi almashtirilmaydi.")
+                messages.error(request, _t("Bugungi masala tanlov paytida e’lon qilindi va endi almashtirilmaydi."))
                 return redirect(f"{reverse('moderation:daily_problem')}?date={day.isoformat()}")
             if assignment:
                 assignment.problem = problem
@@ -204,7 +205,7 @@ def daily_problem_choose(request):
                 note=f"{day.isoformat()}: {problem.slug} — {problem.title}",
             )
     except IntegrityError:
-        messages.error(request, "Bu sana uchun masala boshqa so‘rovda tanlandi. Sahifani yangilang.")
+        messages.error(request, _t("Bu sana uchun masala boshqa so‘rovda tanlandi. Sahifani yangilang."))
         return redirect(f"{reverse('moderation:daily_problem')}?date={day.isoformat()}")
     if day == today:
         # If today's assignment was still unset, account for accepted runs already made today.
@@ -226,7 +227,7 @@ def ai_generate(request):
                 allowed_tags=list(Tag.objects.filter(kind=Tag.Kind.CODE).order_by("name")
                                   .values_list("name", flat=True)))
         except AIGenerationError as e:
-            messages.error(request, f"AI xato: {e}")  # the form stays filled in: try again as is
+            messages.error(request, _t("AI xato: {e}").format(e=e))  # the form stays filled in: try again as is
         else:
             with transaction.atomic():
                 for draft in drafts:
@@ -243,7 +244,7 @@ def ai_generate(request):
                                  is_sample=tc["is_sample"], order=i)
                         for i, tc in enumerate(draft["testcases"])
                     ])
-            messages.success(request, f"{len(drafts)} ta masala tuzildi — Navbat bo'limida ko'rib chiqing va tasdiqlang.")
+            messages.success(request, _t("{len_drafts} ta masala tuzildi — Navbat bo'limida ko'rib chiqing va tasdiqlang.").format(len_drafts=len(drafts)))
             return redirect("moderation:queue")
     return render(request, "moderation/ai_generate.html", {"form": form, "max_count": MAX_COUNT})
 
@@ -256,7 +257,7 @@ def upload_image(request):
     if not f:
         return JsonResponse({"error": "Fayl tanlanmadi."}, status=400)
     if f.size > 10 * 1024 * 1024:
-        return JsonResponse({"error": "Rasm hajmi 10 MB dan oshmasligi kerak."}, status=400)
+        return JsonResponse({"error": _t("Rasm hajmi 10 MB dan oshmasligi kerak.")}, status=400)
     ext = os.path.splitext(f.name)[1].lower()
     if ext not in {".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg"}:
         return JsonResponse({"error": "Faqat rasm fayllari (PNG, JPG, GIF, WebP, SVG) ruxsat etilgan."}, status=400)
@@ -292,9 +293,9 @@ def submit(request, pk=None):
         is_sql = form.cleaned_data["kind"] == Problem.Kind.SQL
         zipped = form.cleaned_data["tests_zip"]
         if is_sql and not sql_form.is_valid():
-            error = "SQL masala uchun jadval, ma'lumot va kutilgan natija kerak."
+            error = _t("SQL masala uchun jadval, ma'lumot va kutilgan natija kerak.")
         elif not is_sql and formset.filled_count + len(zipped) == 0:
-            error = "Kamida bitta test kerak: qo'lda kiriting yoki ZIP yuklang."
+            error = _t("Kamida bitta test kerak: qo'lda kiriting yoki ZIP yuklang.")
         else:
             with transaction.atomic():
                 obj = form.save(commit=False)
@@ -324,9 +325,9 @@ def submit(request, pk=None):
                     dataset.problem = obj
                     dataset.save()
             if writer:
-                messages.success(request, "Masala adminlar ko‘rib chiqishi uchun yuborildi. Tasdiqlansa, sizning nomingiz bilan chiqadi.")
+                messages.success(request, _t("Masala adminlar ko‘rib chiqishi uchun yuborildi. Tasdiqlansa, sizning nomingiz bilan chiqadi."))
                 return redirect("moderation:mine")
-            messages.success(request, "Masala saqlandi.")
+            messages.success(request, _t("Masala saqlandi."))
             return redirect("problems:detail", obj.slug)
     return render(request, "moderation/submit.html",
                   {"form": form, "formset": formset, "sql_form": sql_form, "error": error, "problem": problem,
@@ -426,8 +427,8 @@ def problem_rejudge(request, pk):
                 queue.enqueue(run_submission, submission_id)
         transaction.on_commit(enqueue)
         if ids:
-            audit.record(request, audit.Action.REJUDGE, note=f"{problem.title}: {len(ids)} ta urinish")
-    messages.success(request, f"{len(ids)} ta urinish qayta tekshirishga yuborildi.")
+            audit.record(request, audit.Action.REJUDGE, note=_t("{problem_title}: {len_ids} ta urinish").format(problem_title=problem.title, len_ids=len(ids)))
+    messages.success(request, _t("{len_ids} ta urinish qayta tekshirishga yuborildi.").format(len_ids=len(ids)))
     applied = list(problem.contests.filter(rating_applied=True).values_list("title", flat=True))
     if applied:
         messages.warning(request, f"{', '.join(applied)}: reyting allaqachon hisoblangan — "
@@ -456,7 +457,7 @@ def approve(request, pk):
     problem.status = Problem.Status.APPROVED
     problem.is_public = True
     problem.save(update_fields=["status", "is_public"])
-    _tell_author(problem, f"«{problem.title}» masalangiz tasdiqlandi va saytda chiqdi", reverse("problems:detail", args=[problem.slug]))
+    _tell_author(problem, _t("«{problem_title}» masalangiz tasdiqlandi va saytda chiqdi").format(problem_title=problem.title), reverse("problems:detail", args=[problem.slug]))
     return redirect("moderation:queue")
 
 
@@ -466,7 +467,7 @@ def reject(request, pk):
     problem = get_object_or_404(Problem, pk=pk, status=Problem.Status.PENDING)
     problem.status = Problem.Status.REJECTED
     problem.save(update_fields=["status"])
-    _tell_author(problem, f"«{problem.title}» masalangiz rad etildi: tahrirlab qayta yuborishingiz mumkin", reverse("moderation:mine"))
+    _tell_author(problem, _t("«{problem_title}» masalangiz rad etildi: tahrirlab qayta yuborishingiz mumkin").format(problem_title=problem.title), reverse("moderation:mine"))
     return redirect("moderation:queue")
 
 
@@ -527,7 +528,7 @@ def plan_edit(request, pk=None):
 def plan_delete(request, pk):
     plan = get_object_or_404(StudyPlan, pk=pk)
     plan.delete()  # problems and tags stay; only the course goes
-    messages.success(request, f"«{plan.title}» o‘chirildi.")
+    messages.success(request, _t("«{plan_title}» o‘chirildi.").format(plan_title=plan.title))
     return redirect("moderation:plans")
 
 
@@ -576,7 +577,7 @@ def contest_delete(request, pk):
         # Submission.contest is SET_NULL: deleting would turn its ACs, unpublished and
         # disqualified ones included, into practice ACs that count as solves.
         if contest.submissions.exists():
-            messages.error(request, f"«{contest.title}» musobaqasida urinishlar bor — o‘chirib bo‘lmaydi.")
+            messages.error(request, _t("«{contest_title}» musobaqasida urinishlar bor — o‘chirib bo‘lmaydi.").format(contest_title=contest.title))
             return redirect("moderation:contests")
         audit.record(request, audit.Action.CONTEST_DELETE, note=f"#{contest.pk} — {contest.title}")
         contest.delete()
@@ -592,7 +593,7 @@ def contest_publish(request, pk):
     Publishing again keeps the first time and re-applies the rule."""
     contest = get_object_or_404(Contest, pk=pk)
     if not contest.has_ended:
-        messages.error(request, "Musobaqa hali tugamagan.")
+        messages.error(request, _t("Musobaqa hali tugamagan."))
         return redirect("moderation:contests")
     with transaction.atomic():
         Problem.objects.filter(contests=contest).update(is_public=True)
@@ -603,7 +604,7 @@ def contest_publish(request, pk):
             refresh_solves(problem_id)
         audit.record(request, audit.Action.PUBLISH, contest=contest)
     granted = UserProblemSolved.objects.filter(first_ac_submission__contest=contest).count()
-    messages.success(request, f"Masalalar ochildi; {granted} ta yechim amaliyot balliga o'tkazildi.")
+    messages.success(request, _t("Masalalar ochildi; {granted} ta yechim amaliyot balliga o'tkazildi.").format(granted=granted))
     return redirect("moderation:contests")
 
 
@@ -615,13 +616,13 @@ def contest_apply_rating(request, pk):
     if not contest.is_rated:
         messages.error(request, "Reyting hisoblanmadi: musobaqa reytingli emas.")
     elif not contest.rating_applied and not contest.has_ended:
-        messages.error(request, "Reyting hisoblanmadi: musobaqa hali tugamagan.")
+        messages.error(request, _t("Reyting hisoblanmadi: musobaqa hali tugamagan."))
     elif contest.rating_applied:
         messages.info(request, "Bu musobaqaning reytingi allaqachon hisoblangan.")
     else:
         jobs.run(jobs.apply_rating, contest.pk)
         audit.record(request, audit.Action.RATING_APPLY, contest=contest)
-        messages.success(request, "Reyting hisoblanmoqda: bir necha soniyadan keyin sahifani yangilang." if settings.RQ_ASYNC
+        messages.success(request, _t("Reyting hisoblanmoqda: bir necha soniyadan keyin sahifani yangilang.") if settings.RQ_ASYNC
                          else "Reyting hisoblandi.")
     return redirect("moderation:contests")
 
@@ -668,11 +669,11 @@ def contest_review(request, pk, user_id):
 def contest_apply_official(request, pk):
     contest = get_object_or_404(Contest, pk=pk)
     if not contest.is_official or not contest.has_ended:
-        messages.error(request, "Faqat tugagan rasmiy musobaqa uchun.")
+        messages.error(request, _t("Faqat tugagan rasmiy musobaqa uchun."))
         return redirect("moderation:contest_official", pk)
     pending = sum(1 for r in review_queue(contest) if not r["participation"].reviewed_at)
     if pending:
-        messages.error(request, f"{pending} ta ishtirokchi hali tekshirilmagan.")
+        messages.error(request, _t("{pending} ta ishtirokchi hali tekshirilmagan.").format(pending=pending))
         return redirect("moderation:contest_official", pk)
     with transaction.atomic():
         if contest.official_applied_at is None:
@@ -680,7 +681,7 @@ def contest_apply_official(request, pk):
             contest.save(update_fields=["official_applied_at"])
         recalc_official()
         audit.record(request, audit.Action.OFFICIAL_APPLY, contest=contest)
-    messages.success(request, "Rasmiy reyting qo‘llandi.")
+    messages.success(request, _t("Rasmiy reyting qo‘llandi."))
     return redirect("moderation:contest_official", pk)
 
 
@@ -782,10 +783,10 @@ def user_edit(request, pk):
     form = UserForm(request.POST or None, instance=user)
     if request.method == "POST" and form.is_valid():
         if user == request.user and not (form.cleaned_data["is_staff"] and form.cleaned_data["is_active"]):
-            form.add_error(None, "O'zingizni admin huquqidan yoki faollikdan mahrum qila olmaysiz.")
+            form.add_error(None, _t("O'zingizni admin huquqidan yoki faollikdan mahrum qila olmaysiz."))
         else:
             form.save()
-            messages.success(request, "Foydalanuvchi saqlandi.")
+            messages.success(request, _t("Foydalanuvchi saqlandi."))
             return redirect("moderation:users")
     return render(request, "moderation/user_form.html", {"form": form, "obj": user})
 
@@ -798,10 +799,10 @@ def user_delete(request, pk):
     with transaction.atomic():
         user = get_object_or_404(User.objects.select_for_update(), pk=pk)
         if user == request.user or user.is_staff or user.is_superuser:
-            reason = "admin hisobini o‘chirib bo‘lmaydi — avval admin huquqini oling"
+            reason = _t("admin hisobini o‘chirib bo‘lmaydi — avval admin huquqini oling")
         # Problem.author is PROTECT
         elif user.authored_problems.exists():
-            reason = "uning masalalari bor — avval boshqasiga o‘tkazing yoki bloklang"
+            reason = _t("uning masalalari bor — avval boshqasiga o‘tkazing yoki bloklang")
         else:
             reason = None
         if reason:
@@ -809,5 +810,5 @@ def user_delete(request, pk):
             return redirect("moderation:user_edit", pk)
         audit.record(request, audit.Action.USER_DELETE, note=f"#{user.pk} — {user.username} ({user.email})")
         user.delete()
-    messages.success(request, f"{user.username} o‘chirildi.")
+    messages.success(request, _t("{user_username} o‘chirildi.").format(user_username=user.username))
     return redirect("moderation:users")

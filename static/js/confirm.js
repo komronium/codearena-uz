@@ -13,8 +13,8 @@
     dlg.innerHTML = '<form method="dialog" class="ca-confirm-in">' +
       '<p id="ca-confirm-msg" class="ca-confirm-msg"></p>' +
       '<label class="ca-confirm-why" hidden><span></span><textarea rows="2" maxlength="200"></textarea></label>' +
-      '<div class="ca-confirm-btns"><button value="no" class="ca-btn ca-btn-ghost">Bekor qilish</button>' +
-      '<button value="yes" class="ca-btn ca-btn-primary">Davom etish</button></div></form>';
+      '<div class="ca-confirm-btns"><button value="no" class="ca-btn ca-btn-ghost">' + caT("Bekor qilish") + '</button>' +
+      '<button value="yes" class="ca-btn ca-btn-primary">' + caT("Davom etish") + '</button></div></form>';
     document.body.appendChild(dlg);
   };
 
@@ -25,7 +25,7 @@
     dlg.querySelector(".ca-confirm-msg").textContent = form.dataset.confirm || form.dataset.reason;
     why.hidden = !("reason" in form.dataset);
     if (!why.hidden) {
-      why.querySelector("span").textContent = "Sabab (ixtiyoriy)";
+      why.querySelector("span").textContent = caT("Sabab (ixtiyoriy)");
       area.value = form.dataset.reasonDefault || "";
     }
     dlg.returnValue = "";

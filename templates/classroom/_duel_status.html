@@ -67,7 +67,7 @@ per_question, n_questions, expires, user. A coding duel from before the quiz sho
 
 {% if duel.status == "pending" %}
   {% if not duel.opponent_id %}
-  <p class="mx-auto mt-3 max-w-md text-center text-sm text-mute">{% blocktrans with expires=expires|date:"d.m H:i" %}Ochiq duel: shu tilda duel boshlagan keyingi o‘yinchi aynan shu savollarni oladi. Ko‘proq to‘g‘ri javob bergan g‘olib, teng bo‘lsa — durang. Raqib {{ expires }} gacha kutiladi.{% endblocktrans %}</p>
+  <p class="mx-auto mt-3 max-w-md text-center text-sm text-mute">{% blocktrans with expires=expires|date:"d.m H:i" %}Ochiq duel: shu tilda duel boshlagan keyingi o‘yinchi aynan shu savollarni oladi. Ko‘proq ball yig‘gan g‘olib, teng bo‘lsa — durang. Raqib {{ expires }} gacha kutiladi.{% endblocktrans %}</p>
   {% elif duel.opponent_id == user.pk %}
   <p class="mx-auto mt-3 max-w-md text-center text-sm text-mute">{% blocktrans with duel_challenger_username=duel.challenger.username duel_get_language_display=duel.get_language_display n_questions=n_questions %}<b class="text-ink">{{ duel_challenger_username }}</b> sizni chaqirdi: {{ duel_get_language_display }}, {{ n_questions }} ta savol. Qabul qilsangiz, birinchi savol ochiladi.{% endblocktrans %}</p>
   {% if rival %}<dl class="ca-rivalrec" aria-label="{% blocktrans with duel_challenger_username=duel.challenger.username %}{{ duel_challenger_username }} haqida{% endblocktrans %}">

@@ -33,6 +33,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+    "apps.accounts.language.LanguageMiddleware",  # the page language: cookie, then the account, else Uzbek
     "apps.accounts.onboarding.OnboardingMiddleware",  # name, country, city and a confirmed email first
     "apps.classroom.switch.DuelSwitchMiddleware",  # the staff can close the duels for a lesson
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -45,8 +46,9 @@ TEMPLATES = [{
     "BACKEND": "django.template.backends.django.DjangoTemplates",
     "DIRS": [BASE_DIR / "templates"],
     "APP_DIRS": True,
-    "OPTIONS": {"builtins": ["apps.problems.templatetags.numbers", "django.templatetags.i18n"], "context_processors": [
+    "OPTIONS": {"builtins": ["apps.problems.templatetags.numbers", "django.templatetags.i18n", "apps.accounts.templatetags.jstrans"], "context_processors": [
         "django.template.context_processors.request",
+        "django.template.context_processors.i18n",
         "django.contrib.auth.context_processors.auth",
         "django.contrib.messages.context_processors.messages",
         "apps.problems.context_processors.streak",
@@ -122,7 +124,10 @@ TELEGRAM_BOT_USERNAME = os.environ.get("TELEGRAM_BOT_USERNAME", "").lstrip("@")
 TELEGRAM_WEBHOOK_SECRET = os.environ.get("TELEGRAM_WEBHOOK_SECRET", "")
 SITE_URL = os.environ.get("SITE_URL", "https://codearena.uz").rstrip("/")
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "uz"  # the language of the source strings (msgids); English is locale/en
+LANGUAGES = [("uz", "O‘zbekcha"), ("en", "English")]
+LOCALE_PATHS = [BASE_DIR / "locale"]
+FORMAT_MODULE_PATH = ["config.formats"]  # one decimal point in both languages: numbers also land in CSS and scripts
 TIME_ZONE = "Asia/Tashkent"
 USE_TZ = True
 STATIC_URL = "static/"

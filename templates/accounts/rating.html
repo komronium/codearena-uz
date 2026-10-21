@@ -72,7 +72,7 @@ own row marked.{% endcomment %}
     <ol class="ca7-tiers">
       {% for t in tiers reversed %}
       <li style="--tier: {{ t.color }}" class="{% if me and t.here %}is-me{% endif %}{% if not t.count %} is-empty{% endif %}{% if tier_sel == t.name %} is-sel{% endif %}"{% if me and t.here %} aria-current="true"{% endif %}>
-        <a class="ca7-ladder-go" href="{% if tier_sel == t.name %}{% querystring tier=None page=None %}{% else %}{% querystring tier=t.name page=None %}{% endif %}" aria-label="{{ t.name }}: {% if tier_sel == t.name %}filtrni olib tashlash{% else %}shu darajadagilarni ko‘rsatish{% endif %}"></a>
+        <a class="ca7-ladder-go" href="{% if tier_sel == t.name %}{% querystring tier=None page=None %}{% else %}{% querystring tier=t.name page=None %}{% endif %}" aria-label="{{ t.name }}: {% if tier_sel == t.name %}{% trans 'filtrni olib tashlash' %}{% else %}{% trans 'shu darajadagilarni ko‘rsatish' %}{% endif %}"></a>
         <i class="ca7-ladder-dot" aria-hidden="true"></i>
         <span class="ca7-tier-n"><span><b class="ca-tier-ink{% if not t.ceiling %} ca-lg{% endif %}">{{ t.name }}</b>{% if me and t.here %}<em>{% trans "Siz" %}</em>{% endif %}</span><small class="tabular">{% if t.floor %}{{ t.floor }}{% else %}0{% endif %}{% if t.ceiling %}–{{ t.ceiling|add:"-1" }}{% else %}+{% endif %}</small></span>
         <span class="ca7-tier-c tabular">{% blocktrans with t_count=t.count %}<b>{{ t_count }}</b> kishi{% endblocktrans %}</span>

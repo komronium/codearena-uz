@@ -15,13 +15,13 @@
     {% if form.non_field_errors %}
     <div class="ca-alert ca-alert-bad" role="alert">{{ form.non_field_errors.0 }}</div>
     {% endif %}
-    {% include "registration/_auth_field.html" with name="username" label="Foydalanuvchi nomi" type="text" icon="at-sign" autocomplete="username" value=form.username.value errors=form.username.errors autofocus=True hint="Lotin harflari, raqamlar va _ (harf bilan boshlansin). Reyting jadvalida va profil havolangizda hammaga ko‘rinadi; email yozmang." %}
+    {% include "registration/_auth_field.html" with name="username" label=_("Foydalanuvchi nomi") type="text" icon="at-sign" autocomplete="username" value=form.username.value errors=form.username.errors autofocus=True hint=_("Lotin harflari, raqamlar va _ (harf bilan boshlansin). Reyting jadvalida va profil havolangizda hammaga ko‘rinadi; email yozmang.") %}
     <div class="grid grid-cols-2 gap-3">
       {% include "registration/_auth_field.html" with name="first_name" label="Ism" type="text" icon="user" autocomplete="given-name" value=form.first_name.value errors=form.first_name.errors %}
-      {% include "registration/_auth_field.html" with name="last_name" label="Familiya (ixtiyoriy)" type="text" icon="user" autocomplete="family-name" value=form.last_name.value errors=form.last_name.errors optional=True %}
+      {% include "registration/_auth_field.html" with name="last_name" label=_("Familiya (ixtiyoriy)") type="text" icon="user" autocomplete="family-name" value=form.last_name.value errors=form.last_name.errors optional=True %}
     </div>
     {% include "registration/_auth_field.html" with name="email" label="Email" type="email" icon="mail" autocomplete="email" value=form.email.value errors=form.email.errors %}
-    {% include "registration/_auth_field.html" with name="password1" label="Parol" type="password" icon="lock" autocomplete="new-password" errors=form.password1.errors hint="Kamida 8 ta belgi. Ko‘z tugmasi bilan tekshirib oling." %}
+    {% include "registration/_auth_field.html" with name="password1" label="Parol" type="password" icon="lock" autocomplete="new-password" errors=form.password1.errors hint=_("Kamida 8 ta belgi. Ko‘z tugmasi bilan tekshirib oling.") %}
     <button type="submit" class="ca-btn ca-btn-primary w-full !py-2.5"><i data-lucide="user-plus" class="lu" aria-hidden="true"></i>{% trans "Hisob yaratish" %}</button>
     <p class="text-center text-xs text-mute">{% trans "Hisob yaratib," %} <a class="ca-link" href="{% url 'honor' %}" target="_blank" rel="noopener">{% trans "halollik qoidalari</a>ga rozilik bildirasiz." %}</p>
   </form>

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{% trans "AI bilan masala yaratish" %}{% endblock %}
 {% block content %}
-<div class="mb-6">{% url "moderation:problems" as back %}{% include "moderation/_header.html" with title="AI bilan masala tuzish" back_url=back back_label="Masalalar" %}</div>
+<div class="mb-6">{% url "moderation:problems" as back %}{% include "moderation/_header.html" with title=_("AI bilan masala tuzish") back_url=back back_label="Masalalar" %}</div>
 
 <div class="max-w-2xl">
   <form method="post" class="ca-panel space-y-6" id="ai-form">
@@ -52,7 +52,7 @@
     const max = {{ max_count }};
     const show = () => {
       const n = counts.reduce((sum, el) => sum + (parseInt(el.value, 10) || 0), 0);
-      total.textContent = n > max ? `Jami ${n} ta — ko‘pi bilan ${max} ta bo‘lsin.` : `Jami ${n} ta masala (ko‘pi bilan ${max} ta).`;
+      total.textContent = n > max ? `{% jt "Jami ${n} ta — ko‘pi bilan ${max} ta bo‘lsin." %}` : `{% jt "Jami ${n} ta masala (ko‘pi bilan ${max} ta)." %}`;
       total.classList.toggle("text-bad", n < 1 || n > max);
     };
     counts.forEach((el) => el.addEventListener("input", show));
@@ -61,9 +61,9 @@
     form.addEventListener("submit", () => {
       const b = document.getElementById("ai-submit");
       b.disabled = true;
-      b.innerHTML = '<i data-lucide="loader-circle" class="lu ca-spin" aria-hidden="true"></i>Tuzilmoqda…';
+      b.innerHTML = '<i data-lucide="loader-circle" class="lu ca-spin" aria-hidden="true"></i>{% jt "Tuzilmoqda…" %}';
       window.caIcons();
-      document.getElementById("ai-status").textContent = "AI masalalar va testlarni tuzmoqda — bu bir necha daqiqa olishi mumkin. Sahifani yopmang.";
+      document.getElementById("ai-status").textContent = "{% jt "AI masalalar va testlarni tuzmoqda — bu bir necha daqiqa olishi mumkin. Sahifani yopmang." %}";
     });
   })();
 </script>

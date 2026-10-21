@@ -20,12 +20,12 @@
   const state = document.getElementById("tg-state");
   let tries = 0;
   const tick = async () => {
-    if (++tries > 100) { state.textContent = "Vaqt tugadi. Sahifani yangilab, qaytadan urinib ko‘ring."; return; }
+    if (++tries > 100) { state.textContent = "{% jt "Vaqt tugadi. Sahifani yangilab, qaytadan urinib ko‘ring." %}"; return; }
     try {
       const r = await fetch("{% url 'telegram_login_status' %}", { headers: { Accept: "application/json" }, credentials: "same-origin" });
       const d = await r.json();
-      if (d.ok) { state.textContent = "Kirildi…"; location.href = d.next || "/"; return; }
-      if (!d.waiting) { state.textContent = "So‘rov eskirgan. Kirish sahifasidan qayta boshlang."; return; }
+      if (d.ok) { state.textContent = "{% jt "Kirildi…" %}"; location.href = d.next || "/"; return; }
+      if (!d.waiting) { state.textContent = "{% jt "So‘rov eskirgan. Kirish sahifasidan qayta boshlang." %}"; return; }
     } catch {}
     setTimeout(tick, 3000);
   };

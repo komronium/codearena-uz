@@ -2,6 +2,7 @@ from django.conf import settings
 from django.db import models
 
 from apps.problems.models import Problem
+from django.utils.translation import gettext_lazy as _tl
 
 
 class DuelQuestion(models.Model):
@@ -10,8 +11,8 @@ class DuelQuestion(models.Model):
     and spacing doesn't count. The bank lives in apps.classroom.quiz_bank; load_duel_questions loads it and
     checks every answer by running the code in the judge sandbox."""
     class Kind(models.TextChoices):
-        OUTPUT = "output", "Nima chiqaradi?"
-        FILL = "fill", "Bo‘sh joyni to‘ldiring"
+        OUTPUT = "output", _tl("Nima chiqaradi?")
+        FILL = "fill", _tl("Bo‘sh joyni to‘ldiring")
 
     class Lang(models.TextChoices):
         PYTHON = "python", "Python"
@@ -68,15 +69,15 @@ class Duel(models.Model):
     in that language gets the same questions. Duels before the quiz were coding races on one
     problem (mode "code"); they stay as history."""
     class Mode(models.TextChoices):
-        QUIZ = "quiz", "Savollar"
-        CODE = "code", "Masala"
+        QUIZ = "quiz", _tl("Savollar")
+        CODE = "code", _tl("Masala")
 
     class Status(models.TextChoices):
-        PENDING = "pending", "Raqib kutilmoqda"
-        ACTIVE = "active", "Davom etmoqda"
-        FINISHED = "finished", "Tugagan"
-        DECLINED = "declined", "Rad etilgan"
-        EXPIRED = "expired", "Muddati o‘tgan"
+        PENDING = "pending", _tl("Raqib kutilmoqda")
+        ACTIVE = "active", _tl("Davom etmoqda")
+        FINISHED = "finished", _tl("Tugagan")
+        DECLINED = "declined", _tl("Rad etilgan")
+        EXPIRED = "expired", _tl("Muddati o‘tgan")
 
     challenger = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="+")
     opponent = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.CASCADE,

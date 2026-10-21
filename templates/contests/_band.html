@@ -64,7 +64,7 @@ and optionally problems, n_participants, next_cp (the first problem you have not
               document.getElementById("contest-register-form").addEventListener("submit", () => {
                 const b = document.getElementById("contest-register-btn");
                 b.disabled = true;
-                b.textContent = "Yuborilmoqda…";
+                b.textContent = "{% jt "Yuborilmoqda…" %}";
               });
             </script>
           {% elif contest.is_running and next_cp %}

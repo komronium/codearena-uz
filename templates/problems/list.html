@@ -65,7 +65,7 @@ table; on the right your progress per level, picks for you and, while browsing, 
       </details>
       {% endif %}
       <div class="ca7-tools-r">
-        <a href="{% querystring random=1 page=None %}" class="ca-btn ca-btn-soft" title="Shu filtrdan tasodifiy {% if user.is_authenticated %}yechilmagan {% endif %}masala" rel="nofollow"><i data-lucide="shuffle" class="lu" aria-hidden="true"></i>{% trans "Tasodifiy" %}</a>
+        <a href="{% querystring random=1 page=None %}" class="ca-btn ca-btn-soft" title="{% trans 'Shu filtrdan tasodifiy' %} {% if user.is_authenticated %}{% trans 'yechilmagan' %} {% endif %}{% trans 'masala' %}" rel="nofollow"><i data-lucide="shuffle" class="lu" aria-hidden="true"></i>{% trans "Tasodifiy" %}</a>
         {% if user.is_authenticated %}<a href="{% url 'learn:lists' %}" class="ca-btn ca-btn-soft" title="{% trans 'Saqlanganlar: keyinroq yechish uchun saqlangan masalalar' %}"><i data-lucide="bookmark" class="lu" aria-hidden="true"></i><span class="sr-only">{% trans "Saqlanganlar" %}</span></a>{% endif %}
         {% if user.is_staff %}<a href="{% url 'moderation:submit' %}" class="ca-btn ca-btn-soft" title="{% trans 'Masala qo‘shish' %}"><i data-lucide="plus" class="lu" aria-hidden="true"></i><span class="sr-only">{% trans "Masala qo‘shish" %}</span></a>{% endif %}
       </div>

@@ -1,6 +1,6 @@
 {% load static tiers seo %}
 {% trans "<!doctype html>" %}
-<html lang="uz" class="h-full">
+<html lang="{{ LANGUAGE_CODE|default:'uz' }}" class="h-full">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -39,6 +39,49 @@
     try { const t = localStorage.getItem("ca-theme"); if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch {}
   </script>
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <script>
+    // strings of the static scripts, in the page's language (caT falls back to the Uzbek text itself)
+    window.caStrings = {
+      "Rostdan ham?": "{% jt "Rostdan ham?" %}",
+      "Bekor qilish": "{% jt "Bekor qilish" %}", "Davom etish": "{% jt "Davom etish" %}", "Sabab (ixtiyoriy)": "{% jt "Sabab (ixtiyoriy)" %}",
+      "Kod o‘chiriladi. Davom etasizmi?": "{% jt "Kod o‘chiriladi. Davom etasizmi?" %}",
+      "To‘g‘ri! Masala yechildi 🎉": "{% jt "To‘g‘ri! Masala yechildi 🎉" %}",
+      "Fayl tanlash": "{% jt "Fayl tanlash" %}",
+      "Fayl tanlanmagan": "{% jt "Fayl tanlanmagan" %}",
+      "Sana va vaqt": "{% jt "Sana va vaqt" %}",
+      "Sana": "{% jt "Sana" %}",
+      "Kalendardan tanlash": "{% jt "Kalendardan tanlash" %}",
+      "Sanani kk.oo.yyyy shaklida yozing": "{% jt "Sanani kk.oo.yyyy shaklida yozing" %}",
+      "Hozir": "{% jt "Hozir" %}",
+      "Bugun 23:59": "{% jt "Bugun 23:59" %}",
+      "+7 kun 23:59": "{% jt "+7 kun 23:59" %}",
+      "Bugun": "{% jt "Bugun" %}",
+      "Ertaga": "{% jt "Ertaga" %}",
+      "Qidirish…": "{% jt "Qidirish…" %}",
+      "Ro‘yxatdan qidirish": "{% jt "Ro‘yxatdan qidirish" %}",
+      "Sana {d} dan oldin bo‘lmasin": "{% jt "Sana {d} dan oldin bo‘lmasin" %}",
+      "Sana {d} dan keyin bo‘lmasin": "{% jt "Sana {d} dan keyin bo‘lmasin" %}",
+      "{n} ta fayl tanlandi": "{% jt "{n} ta fayl tanlandi" %}",
+      "Shaharni tanlang": "{% jt "Shaharni tanlang" %}",
+      "Boshqa shahar…": "{% jt "Boshqa shahar…" %}",
+      "O‘quv joyini tanlang": "{% jt "O‘quv joyini tanlang" %}",
+      "Boshqa…": "{% jt "Boshqa…" %}",
+      "Tezkor": "{% jt "Tezkor" %}",
+      "Masalalar": "{% jt "Masalalar" %}",
+      "Kurslar": "{% jt "Kurslar" %}",
+      "Amallar": "{% jt "Amallar" %}",
+      "«{q}» bo‘yicha barcha masalalar": "{% jt "«{q}» bo‘yicha barcha masalalar" %}",
+      "Hech narsa topilmadi. Boshqa so‘z bilan urinib ko‘ring.": "{% jt "Hech narsa topilmadi. Boshqa so‘z bilan urinib ko‘ring." %}",
+      "o‘sish": "{% jt "o‘sish" %}",
+      "kun": "{% jt "kun" %}",
+      "soat": "{% jt "soat" %}",
+      "daqiqa": "{% jt "daqiqa" %}",
+      "soniya": "{% jt "soniya" %}",
+      "daq": "{% jt "daq" %}",
+      "Tekshirilmoqda": "{% jt "Tekshirilmoqda" %}",
+    };
+    window.caT = (s) => (window.caStrings && window.caStrings[s]) || s;
+  </script>
   <script src="{% static 'vendor/lucide.min.js' %}" defer></script>
   <script src="{% static 'vendor/htmx.min.js' %}" defer></script>
   <script src="{% static 'js/celebrate.js' %}" defer></script>
@@ -93,6 +136,7 @@
       <a href="{% url 'rating' %}">{% trans "Reyting" %}</a>
       <a href="{% url 'honor' %}">{% trans "Halollik qoidalari" %}</a>
     </nav>
+    <span class="md:hidden">{% include "_lang_switch.html" %}</span>
     <p class="ca-footer-note">© {% now "Y" %} {% trans "CodeArena · o‘zbek tilida dasturlash" %}</p>
   </div>
 </footer>
@@ -155,7 +199,7 @@ A native dialog gives focus trapping and Esc for free.{% endcomment %}
       const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60), sec = s % 60;
       const pad = (n) => String(n).padStart(2, "0");
       // a day or more away: days and hours ("4 kun 1 soat"); the last day: the ticking clock
-      if (d) return d + " kun" + (h ? " " + h + " soat" : "");
+      if (d) return d + " " + caT("kun") + (h ? " " + h + " " + caT("soat") : "");
       return pad(h) + ":" + pad(m) + ":" + pad(sec);
     };
     const tick = () => {
@@ -177,7 +221,7 @@ A native dialog gives focus trapping and Esc for free.{% endcomment %}
       document.querySelectorAll("[data-cd-boxes]").forEach((el) => {
         const s = Math.max(0, Math.floor((new Date(el.dataset.cdBoxes) - now) / 1000));
         const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60);
-        const parts = d ? [[d, "kun"], [h, "soat"], [m, "daqiqa"]] : [[h, "soat"], [m, "daqiqa"], [s % 60, "soniya"]];
+        const parts = d ? [[d, caT("kun")], [h, caT("soat")], [m, caT("daqiqa")]] : [[h, caT("soat")], [m, caT("daqiqa")], [s % 60, caT("soniya")]];
         el.querySelectorAll("[data-cd]").forEach((box, i) => {
           box.firstElementChild.textContent = String(parts[i][0]).padStart(2, "0");
           box.lastElementChild.textContent = parts[i][1];
@@ -188,7 +232,7 @@ A native dialog gives focus trapping and Esc for free.{% endcomment %}
         const from = new Date(el.dataset.elapsedFrom), to = new Date(el.dataset.elapsedTo);
         const words = (ms) => {
           const m = Math.max(0, Math.floor(ms / 60000)), h = Math.floor(m / 60), r = m % 60;
-          return h ? h + " soat" + (r ? " " + r + " daq" : "") : r + " daq";
+          return h ? h + " " + caT("soat") + (r ? " " + r + " " + caT("daq") : "") : r + " " + caT("daq");
         };
         el.textContent = words(Math.min(now, to) - from) + " / " + words(to - from);
       });
@@ -216,7 +260,7 @@ A native dialog gives focus trapping and Esc for free.{% endcomment %}
     // Theme: "system" follows the OS. The header's theme menu (_theme_menu.html) and the phone sheet
     // pick it; the menu's button shows the current choice.
     const icons = { system: "sun-moon", light: "sun", dark: "moon" };
-    const labels = { system: "Ko‘rinish: tizim bo‘yicha", light: "Ko‘rinish: kunduzgi", dark: "Ko‘rinish: tungi" };
+    const labels = { system: "{% jt "Ko‘rinish: tizim bo‘yicha" %}", light: "{% jt "Ko‘rinish: kunduzgi" %}", dark: "{% jt "Ko‘rinish: tungi" %}" };
     const btn = document.getElementById("theme-toggle");
     let cur = "system";
     try { cur = localStorage.getItem("ca-theme") || "system"; } catch {}
@@ -244,14 +288,14 @@ A native dialog gives focus trapping and Esc for free.{% endcomment %}
     }));
   })();
   document.addEventListener("click", async (e) => {
-    // Copy buttons anywhere: <button data-copy-text="…" [data-copied="Nusxalandi"]>. The label swaps for a moment.
+    // Copy buttons anywhere: <button data-copy-text="…" [data-copied="{% jt "Nusxalandi" %}"]>. The label swaps for a moment.
     const b = e.target.closest("[data-copy-text]");
     if (!b) return;
     const text = b.dataset.copyText === "url" ? location.href.split("#")[0] : b.dataset.copyText;
     try { await navigator.clipboard.writeText(text); } catch { return; }
     const label = b.querySelector("[data-copy-label]");
     b.classList.add("is-copied");
-    if (label) { const old = label.textContent; label.textContent = b.dataset.copied || "Nusxalandi"; setTimeout(() => { label.textContent = old; b.classList.remove("is-copied"); }, 1400); }
+    if (label) { const old = label.textContent; label.textContent = b.dataset.copied || "{% jt "Nusxalandi" %}"; setTimeout(() => { label.textContent = old; b.classList.remove("is-copied"); }, 1400); }
     else setTimeout(() => b.classList.remove("is-copied"), 1400);
   });
   (() => {
@@ -279,36 +323,36 @@ from /problems/suggest/. "go" is the second key of a "g <key>" shortcut.{% endco
   </div>
 </dialog>
 <script type="application/json" id="ca-palette-data">{"suggest": "{% url 'problems:suggest' %}", "courses": "{% url 'learn:search' %}", "all": "{% url 'problems:list' %}", "items": [
-  {% if nav.live %}{"group": "Tezkor", "quick": true, "icon": "radio", "label": "Jonli: {{ nav.live.title|escapejs }}", "hint": "musobaqa", "url": "{% url 'contests:detail' nav.live.pk %}"},{% endif %}
-  {% if streak_pill.daily %}{"group": "Tezkor", "quick": true, "icon": "calendar-check", "label": "Bugungi masala: {{ streak_pill.daily.problem.title|escapejs }}", "hint": "{% if streak_pill.done %}yechilgan{% else %}+5 ball{% endif %}", "url": "{% url 'problems:detail' streak_pill.daily.problem.slug %}"},{% endif %}
-  {"group": "Sahifalar", "icon": "house", "label": "Bosh sahifa", "words": "home dashboard", "keys": "g h", "go": "h", "url": "{% url 'home' %}"},
-  {"group": "Sahifalar", "icon": "list-checks", "label": "Masalalar", "words": "problems practice mashq", "keys": "g p", "go": "p", "url": "{% url 'problems:list' %}"},
-  {"group": "Sahifalar", "icon": "trophy", "label": "Musobaqalar", "words": "contests olimpiada", "keys": "g c", "go": "c", "url": "{% url 'contests:list' %}"},
-  {"group": "Sahifalar", "icon": "chart-column", "label": "Reyting", "words": "rating leaderboard darajalar", "keys": "g r", "go": "r", "url": "{% url 'rating' %}"},
-  {"group": "Sahifalar", "icon": "handshake", "label": "Halollik qoidalari", "words": "honor rules ai qoida adolat", "url": "{% url 'honor' %}"},
+  {% if nav.live %}{"group": "{% jt "Tezkor" %}", "quick": true, "icon": "radio", "label": "{% jt "Jonli:" %} {{ nav.live.title|escapejs }}", "hint": "{% jt "musobaqa" %}", "url": "{% url 'contests:detail' nav.live.pk %}"},{% endif %}
+  {% if streak_pill.daily %}{"group": "{% jt "Tezkor" %}", "quick": true, "icon": "calendar-check", "label": "{% jt "Bugungi masala:" %} {{ streak_pill.daily.problem.title|escapejs }}", "hint": "{% if streak_pill.done %}{% jt "yechilgan" %}{% else %}{% jt "+5 ball" %}{% endif %}", "url": "{% url 'problems:detail' streak_pill.daily.problem.slug %}"},{% endif %}
+  {"group": "{% jt "Sahifalar" %}", "icon": "house", "label": "{% jt "Bosh sahifa" %}", "words": "home dashboard", "keys": "g h", "go": "h", "url": "{% url 'home' %}"},
+  {"group": "{% jt "Sahifalar" %}", "icon": "list-checks", "label": "{% jt "Masalalar" %}", "words": "problems practice mashq", "keys": "g p", "go": "p", "url": "{% url 'problems:list' %}"},
+  {"group": "{% jt "Sahifalar" %}", "icon": "trophy", "label": "{% jt "Musobaqalar" %}", "words": "contests olimpiada", "keys": "g c", "go": "c", "url": "{% url 'contests:list' %}"},
+  {"group": "{% jt "Sahifalar" %}", "icon": "chart-column", "label": "{% jt "Reyting" %}", "words": "rating leaderboard darajalar", "keys": "g r", "go": "r", "url": "{% url 'rating' %}"},
+  {"group": "{% jt "Sahifalar" %}", "icon": "handshake", "label": "{% jt "Halollik qoidalari" %}", "words": "honor rules ai qoida adolat", "url": "{% url 'honor' %}"},
   {% if user.is_authenticated %}
-  {"group": "Sahifalar", "icon": "swords", "label": "Duellar", "words": "duel 1v1 bellashuv", "keys": "g d", "go": "d", "url": "{% url 'classroom:duels' %}"},
-  {"group": "Sahifalar", "icon": "history", "label": "Urinishlarim", "words": "submissions yechimlar natijalar", "keys": "g u", "go": "u", "url": "{% url 'submissions:mine' %}?mine=1"},
-  {"group": "Sahifalar", "icon": "user", "label": "Profilim", "words": "profile men", "keys": "g m", "go": "m", "url": "{% url 'profile' user.username %}"},
-  {"group": "Sahifalar", "icon": "pencil", "label": "Sozlamalar", "words": "settings sozlamalar rasm avatar", "url": "{% url 'profile_edit' %}"},
-  {"group": "Sahifalar", "icon": "key-round", "label": "Parolni almashtirish", "words": "password", "url": "{% url 'password_change' %}"},
+  {"group": "{% jt "Sahifalar" %}", "icon": "swords", "label": "{% jt "Duellar" %}", "words": "duel 1v1 bellashuv", "keys": "g d", "go": "d", "url": "{% url 'classroom:duels' %}"},
+  {"group": "{% jt "Sahifalar" %}", "icon": "history", "label": "{% jt "Urinishlarim" %}", "words": "submissions yechimlar natijalar", "keys": "g u", "go": "u", "url": "{% url 'submissions:mine' %}?mine=1"},
+  {"group": "{% jt "Sahifalar" %}", "icon": "user", "label": "{% jt "Profilim" %}", "words": "profile men", "keys": "g m", "go": "m", "url": "{% url 'profile' user.username %}"},
+  {"group": "{% jt "Sahifalar" %}", "icon": "pencil", "label": "{% jt "Sozlamalar" %}", "words": "settings sozlamalar rasm avatar", "url": "{% url 'profile_edit' %}"},
+  {"group": "{% jt "Sahifalar" %}", "icon": "key-round", "label": "{% jt "Parolni almashtirish" %}", "words": "password", "url": "{% url 'password_change' %}"},
   {% else %}
-  {"group": "Sahifalar", "icon": "log-in", "label": "Kirish", "words": "login sign in", "url": "{% url 'login' %}"},
-  {"group": "Sahifalar", "icon": "user-plus", "label": "Ro‘yxatdan o‘tish", "words": "register sign up", "url": "{% url 'register' %}"},
+  {"group": "{% jt "Sahifalar" %}", "icon": "log-in", "label": "{% jt "Kirish" %}", "words": "login sign in", "url": "{% url 'login' %}"},
+  {"group": "{% jt "Sahifalar" %}", "icon": "user-plus", "label": "{% jt "Ro‘yxatdan o‘tish" %}", "words": "register sign up", "url": "{% url 'register' %}"},
   {% endif %}
   {% if user.is_staff %}
-  {"group": "Admin", "icon": "layout-dashboard", "label": "Boshqaruv", "words": "admin dashboard", "keys": "g a", "go": "a", "url": "{% url 'moderation:dashboard' %}"},
-  {"group": "Admin", "icon": "inbox", "label": "Navbat", "words": "queue tasdiqlash", "hint": "{% if nav.staff.queue %}{{ nav.staff.queue }} ta kutmoqda{% endif %}", "url": "{% url 'moderation:queue' %}"},
-  {"group": "Admin", "icon": "circle-plus", "label": "Masala qo‘shish", "words": "new problem", "url": "{% url 'moderation:submit' %}"},
-  {"group": "Admin", "icon": "sparkles", "label": "AI bilan masala tuzish", "words": "ai generate", "url": "{% url 'moderation:ai_generate' %}"},
-  {"group": "Admin", "icon": "trophy", "label": "Musobaqa yaratish", "words": "new contest", "url": "{% url 'moderation:contest_new' %}"},
-  {"group": "Admin", "icon": "users-round", "label": "Foydalanuvchilar", "words": "users foydalanuvchilar", "url": "{% url 'moderation:users' %}"},
-  {"group": "Admin", "icon": "scroll-text", "label": "Amallar jurnali", "words": "audit log", "url": "{% url 'integrity:audit' %}"},
+  {"group": "{% jt "Admin" %}", "icon": "layout-dashboard", "label": "{% jt "Boshqaruv" %}", "words": "admin dashboard", "keys": "g a", "go": "a", "url": "{% url 'moderation:dashboard' %}"},
+  {"group": "{% jt "Admin" %}", "icon": "inbox", "label": "{% jt "Navbat" %}", "words": "queue tasdiqlash", "hint": "{% if nav.staff.queue %}{{ nav.staff.queue }} {% jt "ta kutmoqda" %}{% endif %}", "url": "{% url 'moderation:queue' %}"},
+  {"group": "{% jt "Admin" %}", "icon": "circle-plus", "label": "{% jt "Masala qo‘shish" %}", "words": "new problem", "url": "{% url 'moderation:submit' %}"},
+  {"group": "{% jt "Admin" %}", "icon": "sparkles", "label": "{% jt "AI bilan masala tuzish" %}", "words": "ai generate", "url": "{% url 'moderation:ai_generate' %}"},
+  {"group": "{% jt "Admin" %}", "icon": "trophy", "label": "{% jt "Musobaqa yaratish" %}", "words": "new contest", "url": "{% url 'moderation:contest_new' %}"},
+  {"group": "{% jt "Admin" %}", "icon": "users-round", "label": "{% jt "Foydalanuvchilar" %}", "words": "users foydalanuvchilar", "url": "{% url 'moderation:users' %}"},
+  {"group": "{% jt "Admin" %}", "icon": "scroll-text", "label": "{% jt "Amallar jurnali" %}", "words": "audit log", "url": "{% url 'integrity:audit' %}"},
   {% endif %}
-  {"group": "Amallar", "icon": "sun", "label": "Ko‘rinish: kunduzgi", "words": "theme light mavzu", "action": "theme:light"},
-  {"group": "Amallar", "icon": "moon", "label": "Ko‘rinish: tungi", "words": "theme dark tungi", "action": "theme:dark"},
-  {"group": "Amallar", "icon": "monitor", "label": "Ko‘rinish: tizim bo‘yicha", "words": "theme system auto", "action": "theme:system"},
-  {"group": "Amallar", "icon": "keyboard", "label": "Klaviatura yorliqlari", "words": "shortcuts keys hotkeys", "keys": "?", "action": "keys"}
+  {"group": "{% jt "Amallar" %}", "icon": "sun", "label": "{% jt "Ko‘rinish: kunduzgi" %}", "words": "theme light mavzu", "action": "theme:light"},
+  {"group": "{% jt "Amallar" %}", "icon": "moon", "label": "{% jt "Ko‘rinish: tungi" %}", "words": "theme dark tungi", "action": "theme:dark"},
+  {"group": "{% jt "Amallar" %}", "icon": "monitor", "label": "{% jt "Ko‘rinish: tizim bo‘yicha" %}", "words": "theme system auto", "action": "theme:system"},
+  {"group": "{% jt "Amallar" %}", "icon": "keyboard", "label": "{% jt "Klaviatura yorliqlari" %}", "words": "shortcuts keys hotkeys", "keys": "?", "action": "keys"}
 ]}</script>
 <dialog id="ca-keys" class="ca-dialog" aria-labelledby="ca-keys-title">
   <div class="ca-dialog-head">

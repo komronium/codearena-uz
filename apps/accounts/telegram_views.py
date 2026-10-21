@@ -20,6 +20,7 @@ from .models import TelegramLink, TelegramLinkToken
 from .telegram import (bot_configured, claim_login_request, confirm_login_request, consume_link_token, issue_link_token,
                        login_code,
                        issue_login_request, send_chat_message)
+from django.utils.translation import gettext as _t
 
 log = logging.getLogger(__name__)
 
@@ -28,7 +29,7 @@ log = logging.getLogger(__name__)
 @require_POST
 def connect(request):
     if not bot_configured():
-        messages.error(request, "Telegram bot hali sozlanmagan. Keyinroq urinib ko‘ring.")
+        messages.error(request, _t("Telegram bot hali sozlanmagan. Keyinroq urinib ko‘ring."))
         return redirect("profile_edit")
     token = issue_link_token(request.user)
     username = settings.TELEGRAM_BOT_USERNAME.lstrip("@")
@@ -76,7 +77,7 @@ def disconnect(request):
 def preferences(request):
     link = TelegramLink.objects.filter(user=request.user, is_active=True).first()
     if link is None:
-        messages.error(request, "Bildirishnoma sozlamalari uchun avval Telegramni ulang.")
+        messages.error(request, _t("Bildirishnoma sozlamalari uchun avval Telegramni ulang."))
         return redirect("profile_edit")
     from .forms import TelegramPreferencesForm
 
@@ -99,7 +100,7 @@ def preferences(request):
                 )
         messages.success(request, "Telegram bildirishnoma sozlamalari saqlandi.")
     else:
-        messages.error(request, "Sozlamalarni saqlab bo‘lmadi. Sahifani yangilab, qayta urinib ko‘ring.")
+        messages.error(request, _t("Sozlamalarni saqlab bo‘lmadi. Sahifani yangilab, qayta urinib ko‘ring."))
     return redirect("profile_edit")
 
 
@@ -115,8 +116,8 @@ def _handle_bot_message(message):
         # step 1: remember which attempt this chat was sent; the person confirms with the code their browser shows
         cache.set(f"tg-login-pending:{chat_id}", parts[1][len("login_"):][:64], 300)
         try:
-            send_chat_message(str(chat_id), "Saytga kirish so‘rovi. Brauzeringizdagi <b>4 xonali kodni</b> shu yerga yozing. "
-                                            "Agar bu havolani sizga boshqa kishi yuborgan bo‘lsa, hech narsa yozmang.")
+            send_chat_message(str(chat_id), _t("Saytga kirish so‘rovi. Brauzeringizdagi <b>4 xonali kodni</b> shu yerga yozing. "
+                                            "Agar bu havolani sizga boshqa kishi yuborgan bo‘lsa, hech narsa yozmang."))
         except Exception:
             log.exception("Could not send Telegram login prompt")
         return
@@ -128,10 +129,10 @@ def _handle_bot_message(message):
             return
         status = confirm_login_request(pending, str(chat_id))
         replies = {
-            "ok": "Tayyor! Brauzerga qayting: u o‘zi kirib oladi.",
-            "expired": "Kirish so‘rovi eskirgan. Saytda «Telegram orqali kirish»ni qaytadan bosing.",
-            "unlinked": "Bu Telegram hech bir CodeArena profiliga ulanmagan. Avval parol bilan kirib, Sozlamalar → Telegram orqali ulang.",
-            "staff": "Xodim hisoblari Telegram orqali kira olmaydi. Parol bilan kiring.",
+            "ok": _t("Tayyor! Brauzerga qayting: u o‘zi kirib oladi."),
+            "expired": _t("Kirish so‘rovi eskirgan. Saytda «Telegram orqali kirish»ni qaytadan bosing."),
+            "unlinked": _t("Bu Telegram hech bir CodeArena profiliga ulanmagan. Avval parol bilan kirib, Sozlamalar → Telegram orqali ulang."),
+            "staff": _t("Xodim hisoblari Telegram orqali kira olmaydi. Parol bilan kiring."),
         }
         try:
             send_chat_message(str(chat_id), replies[status])
@@ -141,9 +142,9 @@ def _handle_bot_message(message):
     if command == "/start" and len(parts) == 2:
         _link, status = consume_link_token(parts[1][:64], str(chat_id), (message.get("from") or {}).get("username", ""))
         replies = {
-            "ok": "CodeArena Telegram bildirishnomalari ulandi. Xabar turlarini saytdagi Sozlamalar bo‘limidan sozlashingiz mumkin.",
-            "expired": "Ulash kodi eskirgan yoki ishlatilgan. CodeArena profilidan yangi kod oling.",
-            "already_linked": "Bu Telegram hisob boshqa CodeArena profiliga ulangan. Avval o‘sha profildan uzing.",
+            "ok": _t("CodeArena Telegram bildirishnomalari ulandi. Xabar turlarini saytdagi Sozlamalar bo‘limidan sozlashingiz mumkin."),
+            "expired": _t("Ulash kodi eskirgan yoki ishlatilgan. CodeArena profilidan yangi kod oling."),
+            "already_linked": _t("Bu Telegram hisob boshqa CodeArena profiliga ulangan. Avval o‘sha profildan uzing."),
         }
         try:
             send_chat_message(str(chat_id), replies[status])
@@ -159,12 +160,12 @@ def _handle_bot_message(message):
                 status="failed", last_error="Telegram link was paused"
             )
         try:
-            send_chat_message(str(chat_id), "Bildirishnomalar to‘xtatildi. Qayta ulash uchun CodeArena profiliga kiring.")
+            send_chat_message(str(chat_id), _t("Bildirishnomalar to‘xtatildi. Qayta ulash uchun CodeArena profiliga kiring."))
         except Exception:
             log.exception("Could not send Telegram stop reply")
         return
     try:
-        send_chat_message(str(chat_id), "CodeArena bildirishnomalari uchun saytdagi Sozlamalar → Telegram bo‘limidan hisobingizni ulang.")
+        send_chat_message(str(chat_id), _t("CodeArena bildirishnomalari uchun saytdagi Sozlamalar → Telegram bo‘limidan hisobingizni ulang."))
     except Exception:
         log.exception("Could not send Telegram help reply")
 

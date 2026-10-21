@@ -1,6 +1,7 @@
 from django.utils import timezone
 
 from .models import ContestProblem, Participation
+from django.utils.translation import gettext as _t
 
 
 def active_contest_for(user, problem):
@@ -53,7 +54,7 @@ def access_allowed(user, contest, remote_addr: str) -> bool:
 def reuse_reason(problem, contest) -> str:
     """Why participants of `contest` may already know `problem`; "" when it is fresh."""
     if problem.is_public:
-        return "Ochiq masala — reytingli musobaqaga faqat yashirin, yangi masala qo‘shiladi."
+        return _t("Ochiq masala — reytingli musobaqaga faqat yashirin, yangi masala qo‘shiladi.")
     if ContestProblem.objects.filter(problem=problem).exclude(contest_id=contest.pk).exists():
-        return "Bu masala boshqa musobaqada ishlatilgan."
+        return _t("Bu masala boshqa musobaqada ishlatilgan.")
     return ""

@@ -58,7 +58,7 @@
     const el = document.createElement("div");
     el.setAttribute("role", "status");
     el.className = "ca-ac-toast";
-    el.textContent = text || "To‘g‘ri! Masala yechildi 🎉";
+    el.textContent = text || caT("To‘g‘ri! Masala yechildi 🎉");
     document.body.appendChild(el);
     setTimeout(() => el.classList.add("is-out"), 2600);
     setTimeout(() => el.remove(), 3200);

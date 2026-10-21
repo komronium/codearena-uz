@@ -19,6 +19,7 @@ from apps.submissions.models import UserProblemSolved
 from .forms import ListForm
 from .models import PlanRead, ProblemList, ProblemListItem, StudyPlan
 from .progress import COURSE_MIN, course_rows, plan_progress, plan_sections, solved_ids
+from django.utils.translation import gettext as _t
 
 # Old addresses that moved: the first study plans, and topics whose tag was renamed or that
 # have no course of their own. Any other topic goes to the course that carries its tag.
@@ -262,7 +263,7 @@ def list_edit(request, pk):
 def list_delete(request, pk):
     lst = get_object_or_404(ProblemList, pk=pk, owner=request.user)
     lst.delete()
-    messages.success(request, f"«{lst.name}» o‘chirildi.")
+    messages.success(request, _t("«{lst_name}» o‘chirildi.").format(lst_name=lst.name))
     return redirect("learn:lists")
 
 
@@ -287,7 +288,7 @@ def save(request, slug):
     removed, _ = ProblemListItem.objects.filter(list=lst, problem=problem).delete()
     if not removed:
         ProblemListItem.objects.get_or_create(list=lst, problem=problem)
-    done = "ro‘yxatidan olindi" if removed else "ro‘yxatiga saqlandi"
+    done = _t("ro‘yxatidan olindi") if removed else _t("ro‘yxatiga saqlandi")
     messages.success(request, f"«{problem.title}» — «{lst.name}» {done}.")
     return _back(request, problem)
 

@@ -2,7 +2,7 @@
 {% block title %}{% trans "Masalalar — boshqaruv" %}{% endblock %}
 {% block content %}
 <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
-  <div>{% include "moderation/_header.html" with title="Masalalar" subtitle="Barcha masalalar: ochiq, yashirin, kutilayotgan" %}</div>
+  <div>{% include "moderation/_header.html" with title="Masalalar" subtitle=_("Barcha masalalar: ochiq, yashirin, kutilayotgan") %}</div>
   <div class="flex flex-wrap gap-2">
     <a href="{% url 'moderation:ai_generate' %}" class="ca-btn ca-btn-ghost"><i data-lucide="sparkles" class="lu" aria-hidden="true"></i>{% trans "AI bilan tuzish" %}</a>
     <a href="{% url 'moderation:submit' %}" class="ca-btn ca-btn-primary"><i data-lucide="circle-plus" class="lu" aria-hidden="true"></i>{% trans "Masala qo‘shish" %}</a>

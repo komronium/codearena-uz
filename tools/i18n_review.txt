@@ -1,15 +1,9 @@
 templates/500.html: script/style block
-templates/_bell.html: attribute with a tag: aria-label="Bildirishnomalar{% if n %}: {{ n }} ta yangi{% endif %}"
 templates/_importmap.html: script/style block
-templates/_navbar.html: attribute with a tag: title="{{ live.title }}{% if live.count > 1 %} (+{{ live.count|add:'-1' }} ta boshqa jonli){% endif 
-templates/_navbar.html: attribute with a tag: title="{% if s.done %}Olov {{ s.current }} kun: bugungi masala yechildi{% elif s.current %}Olov {{ s
 templates/accounts/_badge_award.html: script/style block
-templates/accounts/_tbadge.html: attribute with a tag: title="{{ l.metal|capfirst }}{% if l.pct %} · o‘yinchilarning {{ l.pct }}% ida bor{% endif %}"
-templates/accounts/profile.html: attribute with a tag: aria-label="{{ pt.title }}: {{ pt.rank }}-o‘rin{% if pt.of %} {{ pt.of }} tadan{% endif %}, {{ pt.de
 templates/accounts/profile.html: script/style block
 templates/accounts/profile_edit.html: script/style block
 templates/accounts/profile_edit.html: script/style block
-templates/accounts/rating.html: attribute with a tag: aria-label="{{ t.name }}: {% if tier_sel == t.name %}filtrni olib tashlash{% else %}shu darajadagila
 templates/base.html: script/style block
 templates/base.html: script/style block
 templates/base.html: script/style block
@@ -19,32 +13,15 @@ templates/classroom/duel.html: script/style block
 templates/classroom/duel_play.html: script/style block
 templates/classroom/duels.html: script/style block
 templates/contests/_band.html: script/style block
-templates/contests/_standings_live.html: attribute with a tag: title="{% if contest.type == 'icpc' %}Yechilgan masalalar{% else %}Jami ball{% endif %}"
-templates/contests/_standings_live.html: attribute with a tag: title="{% if cell.first %}Birinchi bo‘lib yechdi: {% endif %}{{ cell.time }}{% if cell.wrong %}, {{ 
-templates/contests/_standings_live.html: attribute with a tag: title="{% if r.disqualified %}Diskvalifikatsiyani bekor qilish{% else %}Diskvalifikatsiya qilish{% e
-templates/contests/_standings_live.html: attribute with a tag: aria-label="{% if r.disqualified %}Diskvalifikatsiyani bekor qilish{% else %}Diskvalifikatsiya qilis
 templates/contests/clarifications.html: script/style block
-templates/contests/detail.html: attribute with a tag: aria-label="Masalalar: harfi{% if contest.type != 'icpc' %} va bali{% endif %}"
-templates/contests/detail.html: attribute with a tag: title="Yechilgan: {{ cp.my_cell.time }}{% if cp.my_cell.wrong %}, {{ cp.my_cell.wrong }} ta xatodan 
-templates/contests/detail.html: attribute with a tag: title="{{ cp.label }}: {% if cell.solved %}yechilgan {{ cell.time }}{% elif cell.wrong %}{{ cell.wro
-templates/contests/detail.html: attribute with a tag: title="{{ c.cp.label }}: {% if c.solved %}yechilgan {{ c.time }}{% elif c.wrong %}{{ c.wrong }} ta n
 templates/contests/standings.html: script/style block
-templates/home/_land_round.html: attribute with a tag: data-label="{% if state == 'running' %}qoldi{% else %}keyin{% endif %}"
 templates/integrity/_tracker.html: script/style block
-templates/integrity/practice_report.html: attribute with a tag: title="Kodni ko‘rdim, muammo yo‘q{% if r.review %} — ball qaytariladi{% endif %}"
 templates/integrity/replay.html: script/style block
-templates/learn/_save_menu.html: attribute with a tag: placeholder="{% if save_lists %}Yangi ro‘yxat{% else %}Keyinroq yechaman{% endif %}"
 templates/learn/course.html: script/style block
 templates/learn/hub.html: script/style block
 templates/moderation/ai_generate.html: script/style block
 templates/moderation/contest_form.html: script/style block
-templates/moderation/contests.html: attribute with a tag: data-confirm="{% if c.n_open_flags %}{{ c.n_open_flags }} ta o‘xshashlik hali ko‘rib chiqilmagan! {%
 templates/moderation/submit.html: script/style block
-templates/problems/_daily_card.html: attribute with a tag: title="Olov{% if ds.best %}, eng uzuni {{ ds.best }} kun{% endif %}"
-templates/problems/_month.html: attribute with a tag: title="{{ d.date|date:'d.m' }}{% if d.done %}: yechilgan{% elif d.today %}: bugun{% endif %}"
-templates/problems/_solved_ring.html: attribute with a tag: title="{{ s.label }}: {% if s.done < s.total %}yechilmaganlarni ochish{% else %}hammasi yechilgan{% 
-templates/problems/detail.html: attribute with a tag: title="Ctrl+Enter — yuborish. Ctrl+' — sinab ko‘rish. Esc, keyin Tab — muharrirdan chiqish.{% if not
-templates/problems/detail.html: attribute with a tag: title="{% if problem.kind == 'sql' %}So‘rovni namunaviy ma’lumotlarda ishga tushirish{% else %}Namun
 templates/problems/detail.html: script/style block
 templates/problems/detail.html: script/style block
 templates/problems/detail.html: script/style block
@@ -54,11 +31,7 @@ templates/problems/detail.html: script/style block
 templates/problems/detail.html: script/style block
 templates/problems/detail.html: script/style block
 templates/problems/detail.html: script/style block
-templates/problems/list.html: attribute with a tag: title="Shu filtrdan tasodifiy {% if user.is_authenticated %}yechilmagan {% endif %}masala"
 templates/problems/list.html: script/style block
 templates/registration/_auth_script.html: script/style block
 templates/registration/telegram_login.html: script/style block
-templates/submissions/_verdict.html: attribute with a tag: title="{% if brief %}{{ words }}{% if sub.total and v != 'CE' and sub.passed < sub.total %} {{ n }}-
 templates/submissions/detail.html: script/style block
-templates/submissions/list.html: attribute with a tag: placeholder="{% if own %}Masala nomi{% else %}Masala yoki foydalanuvchi{% endif %}…"
-templates/submissions/list.html: attribute with a tag: aria-label="{% if own %}Masala nomi bo‘yicha{% else %}Masala yoki foydalanuvchi bo‘yicha{% endif %} 

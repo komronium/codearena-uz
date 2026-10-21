@@ -251,8 +251,8 @@ the console (samples, your own input, the run's result) and the one gold "Yubori
     {% if show_leaders %}
     <div class="ca-doc" id="doc-leaders" role="tabpanel" aria-labelledby="tab-doc-leaders" hidden>
       <h2 class="sr-only">{% trans "Eng yaxshi yechimlar" %}</h2>
-      {% include "problems/_leaders_mini.html" with title="Eng tez" icon="zap" rows=fastest by="time" %}
-      {% include "problems/_leaders_mini.html" with title="Eng qisqa" icon="scissors" rows=shortest by="length" %}
+      {% include "problems/_leaders_mini.html" with title=_("Eng tez") icon="zap" rows=fastest by="time" %}
+      {% include "problems/_leaders_mini.html" with title=_("Eng qisqa") icon="scissors" rows=shortest by="length" %}
     </div>
     {% endif %}
     {% if user.is_authenticated %}
@@ -358,12 +358,12 @@ the console (samples, your own input, the run's result) and the one gold "Yubori
       </div>
       <div class="ca-act">
         {% if user.is_authenticated %}
-        <span class="ca-act-keys" title="Ctrl+Enter — yuborish. Ctrl+' — sinab ko‘rish. Esc, keyin Tab — muharrirdan chiqish.{% if not contest %} {% if problem.difficulty == "beginner" or problem.difficulty == "easy" %}Bu masalada uzun kodni qo‘yib bo‘lmaydi.{% endif %} Mashqda kod qanday yozilgani adminlarga ko‘rinadi; ko‘chirilgan yechim uchun ball berilmaydi.{% endif %}">{% trans "<kbd class=\"ca-kbd\">Ctrl</kbd>+<kbd class=\"ca-kbd\">Enter</kbd> yuborish" %} <i data-lucide="info" class="lu" aria-hidden="true"></i></span>
+        <span class="ca-act-keys" title="{% trans 'Ctrl+Enter — yuborish. Ctrl+\' — sinab ko‘rish. Esc, keyin Tab — muharrirdan chiqish.' %}{% if not contest %} {% if problem.difficulty == "beginner" or problem.difficulty == "easy" %}{% trans 'Bu masalada uzun kodni qo‘yib bo‘lmaydi.' %}{% endif %} {% trans 'Mashqda kod qanday yozilgani adminlarga ko‘rinadi; ko‘chirilgan yechim uchun ball berilmaydi.' %}{% endif %}">{% trans "<kbd class=\"ca-kbd\">Ctrl</kbd>+<kbd class=\"ca-kbd\">Enter</kbd> yuborish" %} <i data-lucide="info" class="lu" aria-hidden="true"></i></span>
         {% if contest_blocked %}
         <button type="button" id="trial-btn" class="ca-edb opacity-50 cursor-not-allowed" disabled title="{% trans 'Masala bloklangan — musobaqa tugaguncha sinab bo‘lmaydi' %}"><i data-lucide="play" class="lu" aria-hidden="true"></i>{% trans "Sinab ko‘rish" %}</button>
         <button type="button" id="submit-btn" class="ca-btn ca-btn-gold ca-btn-go opacity-50 cursor-not-allowed" disabled title="{% trans 'Masala bloklangan — musobaqa tugaguncha yechim yuborish mumkin emas' %}"><i data-lucide="send" class="lu" aria-hidden="true"></i>{% trans "Yuborish" %}</button>
         {% else %}
-        <button type="button" id="trial-btn" class="ca-edb" title="{% if problem.kind == 'sql' %}So‘rovni namunaviy ma’lumotlarda ishga tushirish{% else %}Namunaviy testlarda sinash{% endif %} — urinish hisoblanmaydi (Ctrl+')"><i data-lucide="play" class="lu" aria-hidden="true"></i>{% trans "Sinab ko‘rish" %}</button>
+        <button type="button" id="trial-btn" class="ca-edb" title="{% if problem.kind == 'sql' %}{% trans 'So‘rovni namunaviy ma’lumotlarda ishga tushirish' %}{% else %}{% trans 'Namunaviy testlarda sinash' %}{% endif %} {% trans '— urinish hisoblanmaydi (Ctrl+\')' %}"><i data-lucide="play" class="lu" aria-hidden="true"></i>{% trans "Sinab ko‘rish" %}</button>
         <button type="submit" id="submit-btn" class="ca-btn ca-btn-gold ca-btn-go" title="{% trans 'Yuborish (Ctrl+Enter)' %}"><i data-lucide="send" class="lu" aria-hidden="true"></i>{% trans "Yuborish" %}</button>
         {% endif %}
         {% else %}
@@ -503,8 +503,8 @@ resolves their bare imports so @codemirror/state loads once — two copies break
   // Boilerplate where the language demands it (Java's class name must be Main for the judge), and a short comment
   // where it doesn't, so the editor never opens as an empty black box.
   const STARTERS = {
-    python: "# Kirishni o‘qing, masalani yeching va natijani print() bilan chiqaring.\n# Masalan: a, b = map(int, input().split())\n\n",
-    sql: "-- So‘rovingizni shu yerda yozing.\nSELECT \n",
+    python: "# {% jt "Kirishni o‘qing, masalani yeching va natijani print() bilan chiqaring." %}\n# {% jt "Masalan:" %} a, b = map(int, input().split())\n\n",
+    sql: "-- {% jt "So‘rovingizni shu yerda yozing." %}\nSELECT \n",
     cpp: "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    ios::sync_with_stdio(false);\n    cin.tie(nullptr);\n\n    \n    return 0;\n}\n",
     java: "import java.util.*;\nimport java.io.*;\n\npublic class Main {\n    public static void main(String[] args) throws IOException {\n        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));\n        \n    }\n}\n",
     node: "const lines = require(\"fs\").readFileSync(0, \"utf8\").split(\"\\n\");\n\n",
@@ -518,9 +518,9 @@ resolves their bare imports so @codemirror/state loads once — two copies break
       S("fori", "for sikli", "for ${i} in range(${n}):\n\t${}"),
       S("inp", "bitta son", "int(input())"),
       S("ints", "qatordagi sonlar", "map(int, input().split())"),
-      S("lst", "sonlar ro‘yxati", "list(map(int, input().split()))"),
-      S("fastio", "tez o‘qish", "import sys\ninput = sys.stdin.readline\n"),
-      S("gcd", "EKUB", "def gcd(a, b):\n\twhile b:\n\t\ta, b = b, a % b\n\treturn a\n"),
+      S("lst", "{% jt "sonlar ro‘yxati" %}", "list(map(int, input().split()))"),
+      S("fastio", "{% jt "tez o‘qish" %}", "import sys\ninput = sys.stdin.readline\n"),
+      S("gcd", "{% jt "EKUB" %}", "def gcd(a, b):\n\twhile b:\n\t\ta, b = b, a % b\n\treturn a\n"),
       S("binsearch", "binar qidiruv", "lo, hi = ${0}, ${n}\nwhile lo < hi:\n\tmid = (lo + hi) // 2\n\tif ${check(mid)}:\n\t\thi = mid\n\telse:\n\t\tlo = mid + 1\n"),
       S("main", "main funksiya", "def main():\n\t${}\n\n\nmain()\n"),
     ],
@@ -528,19 +528,19 @@ resolves their bare imports so @codemirror/state loads once — two copies break
       S("fori", "for sikli", "for (int ${i} = 0; ${i} < ${n}; ${i}++) {\n\t${}\n}"),
       S("forr", "teskari for", "for (int ${i} = ${n} - 1; ${i} >= 0; ${i}--) {\n\t${}\n}"),
       S("fastio", "tez kiritish", "ios::sync_with_stdio(false);\ncin.tie(nullptr);"),
-      S("vi", "vector o‘qish", "vector<int> ${a}(${n});\nfor (auto &x : ${a}) cin >> x;"),
+      S("vi", "{% jt "vector o‘qish" %}", "vector<int> ${a}(${n});\nfor (auto &x : ${a}) cin >> x;"),
       S("ll", "long long", "typedef long long ll;"),
       S("all", "v.begin(), v.end()", "${v}.begin(), ${v}.end()"),
-      S("gcd", "EKUB", "long long gcd(long long a, long long b) { return b ? gcd(b, a % b) : a; }"),
+      S("gcd", "{% jt "EKUB" %}", "long long gcd(long long a, long long b) { return b ? gcd(b, a % b) : a; }"),
       S("binsearch", "binar qidiruv", "int lo = ${0}, hi = ${n};\nwhile (lo < hi) {\n\tint mid = lo + (hi - lo) / 2;\n\tif (${check(mid)}) hi = mid;\n\telse lo = mid + 1;\n}"),
     ],
     java: [
       S("fori", "for sikli", "for (int ${i} = 0; ${i} < ${n}; ${i}++) {\n\t${}\n}"),
       S("forr", "teskari for", "for (int ${i} = ${n} - 1; ${i} >= 0; ${i}--) {\n\t${}\n}"),
-      S("fastio", "tez o‘qish", "BufferedReader br = new BufferedReader(new InputStreamReader(System.in));\nStringTokenizer st = new StringTokenizer(br.readLine());"),
+      S("fastio", "{% jt "tez o‘qish" %}", "BufferedReader br = new BufferedReader(new InputStreamReader(System.in));\nStringTokenizer st = new StringTokenizer(br.readLine());"),
       S("nextint", "keyingi son", "Integer.parseInt(st.nextToken())"),
       S("sout", "chiqarish", "System.out.println(${});"),
-      S("gcd", "EKUB", "static long gcd(long a, long b) { return b == 0 ? a : gcd(b, a % b); }"),
+      S("gcd", "{% jt "EKUB" %}", "static long gcd(long a, long b) { return b == 0 ? a : gcd(b, a % b); }"),
       S("binsearch", "binar qidiruv", "int lo = ${0}, hi = ${n};\nwhile (lo < hi) {\n\tint mid = lo + (hi - lo) / 2;\n\tif (${check(mid)}) hi = mid;\n\telse lo = mid + 1;\n}"),
     ],
     node: [
@@ -548,24 +548,24 @@ resolves their bare imports so @codemirror/state loads once — two copies break
       S("lines", "stdin qatorlari", "const lines = require(\"fs\").readFileSync(0, \"utf8\").split(\"\\n\");"),
       S("nums", "qatordagi sonlar", "${line}.split(\" \").map(Number)"),
       S("log", "chiqarish", "console.log(${});"),
-      S("gcd", "EKUB", "const gcd = (a, b) => (b ? gcd(b, a % b) : a);"),
+      S("gcd", "{% jt "EKUB" %}", "const gcd = (a, b) => (b ? gcd(b, a % b) : a);"),
       S("binsearch", "binar qidiruv", "let lo = ${0}, hi = ${n};\nwhile (lo < hi) {\n\tconst mid = (lo + hi) >> 1;\n\tif (${check(mid)}) hi = mid;\n\telse lo = mid + 1;\n}"),
     ],
     c: [
       S("fori", "for sikli", "for (int ${i} = 0; ${i} < ${n}; ${i}++) {\n\t${}\n}"),
       S("forr", "teskari for", "for (int ${i} = ${n} - 1; ${i} >= 0; ${i}--) {\n\t${}\n}"),
-      S("scan", "son o‘qish", "scanf(\"%d\", &${x});"),
-      S("scanll", "long long o‘qish", "scanf(\"%lld\", &${x});"),
+      S("scan", "{% jt "son o‘qish" %}", "scanf(\"%d\", &${x});"),
+      S("scanll", "{% jt "long long o‘qish" %}", "scanf(\"%lld\", &${x});"),
       S("pr", "chiqarish", "printf(\"%d\\n\", ${x});"),
-      S("gcd", "EKUB", "long long gcd(long long a, long long b) { return b ? gcd(b, a % b) : a; }"),
-      S("cmp", "qsort uchun", "int cmp(const void *a, const void *b) { return (*(int *)a > *(int *)b) - (*(int *)a < *(int *)b); }"),
+      S("gcd", "{% jt "EKUB" %}", "long long gcd(long long a, long long b) { return b ? gcd(b, a % b) : a; }"),
+      S("cmp", "{% jt "qsort uchun" %}", "int cmp(const void *a, const void *b) { return (*(int *)a > *(int *)b) - (*(int *)a < *(int *)b); }"),
     ],
     rust: [
       S("next", "keyingi son", "let ${x}: ${i64} = it.next().unwrap().parse().unwrap();"),
-      S("vec", "n ta son", "let ${a}: Vec<${i64}> = (0..${n}).map(|_| it.next().unwrap().parse().unwrap()).collect();"),
+      S("vec", "{% jt "n ta son" %}", "let ${a}: Vec<${i64}> = (0..${n}).map(|_| it.next().unwrap().parse().unwrap()).collect();"),
       S("fori", "for sikli", "for ${i} in 0..${n} {\n\t${}\n}"),
       S("out", "tez chiqarish", "use std::io::Write;\nlet mut out = io::BufWriter::new(io::stdout().lock());\nwriteln!(out, \"{}\", ${x}).unwrap();"),
-      S("gcd", "EKUB", "fn gcd(a: u64, b: u64) -> u64 { if b == 0 { a } else { gcd(b, a % b) } }"),
+      S("gcd", "{% jt "EKUB" %}", "fn gcd(a: u64, b: u64) -> u64 { if b == 0 { a } else { gcd(b, a % b) } }"),
     ],
   };
   // Names worth suggesting while typing: the language's built-in functions and types, and after "." (or "::")
@@ -584,7 +584,7 @@ resolves their bare imports so @codemirror/state loads once — two copies break
       F("stoi"), F("stoll"), F("getline"), F("make_pair"), F("printf"), F("scanf"),
       T("vector"), T("string"), T("pair"), T("map"), T("set"), T("unordered_map"), T("unordered_set"), T("multiset"),
       T("queue"), T("stack"), T("deque"), T("priority_queue"), T("bitset"), T("long long"), T("greater<int>")],
-    c: [F("printf", "chiqarish"), F("scanf", "o‘qish"), F("puts"), F("getchar"), F("putchar"), F("strlen", "string.h"),
+    c: [F("printf", "{% jt "chiqarish" %}"), F("scanf", "{% jt "o‘qish" %}"), F("puts"), F("getchar"), F("putchar"), F("strlen", "string.h"),
       F("strcmp"), F("strcpy"), F("strcat"), F("memset"), F("memcpy"), F("qsort", "stdlib.h"), F("malloc"), F("calloc"),
       F("free"), F("abs"), F("llabs"), F("sqrt", "math.h"), F("pow", "math.h"), F("fabs"), F("floor"), F("ceil"),
       T("long long"), T("unsigned"), T("size_t")],
@@ -721,7 +721,7 @@ resolves their bare imports so @codemirror/state loads once — two copies break
       }),
       EditorView.updateListener.of((u) => {
         if (!u.docChanged) return;
-        try { localStorage.setItem(draftKey, u.state.doc.toString()); draftState.textContent = "Qoralama saqlandi"; } catch {}
+        try { localStorage.setItem(draftKey, u.state.doc.toString()); draftState.textContent = "{% jt "Qoralama saqlandi" %}"; } catch {}
         // Only keystrokes count: our own starter/reset edits and snippet completions are not pastes.
         if (!u.transactions.some((t) => t.annotation(Transaction.userEvent) && !t.isUserEvent("input.complete"))) return;
         let inserted = 0;
@@ -731,7 +731,7 @@ resolves their bare imports so @codemirror/state loads once — two copies break
       })],
     parent: document.getElementById("editor"),
   });
-  view.contentDOM.setAttribute("aria-label", "Kod muharriri");
+  view.contentDOM.setAttribute("aria-label", "{% jt "Kod muharriri" %}");
   window.caCode = () => ({ source: view.state.doc.toString(), language: langSel.value });  // integrity snapshots
   source.hidden = true;  // CodeMirror loaded — plain textarea was only the no-JS fallback
   const setLang = async () => {
@@ -786,7 +786,7 @@ resolves their bare imports so @codemirror/state loads once — two copies break
   // Esc belongs to Vim when it is on; otherwise it leaves full screen.
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !prefs.vim && pane.classList.contains("ca-ed-full")) setFull(false); });
   document.getElementById("editor-reset").addEventListener("click", async () => {
-    if (view.state.doc.length && !(await window.caConfirm("Kod o‘chiriladi. Davom etasizmi? (Ctrl+Z bilan qaytarish mumkin)"))) return;
+    if (view.state.doc.length && !(await window.caConfirm("{% jt "Kod o‘chiriladi. Davom etasizmi? (Ctrl+Z bilan qaytarish mumkin)" %}"))) return;
     view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: "" } });
     view.focus();
   });
@@ -807,7 +807,7 @@ resolves their bare imports so @codemirror/state loads once — two copies break
   form.addEventListener("submit", async (e) => {
     source.value = view.state.doc.toString();
     btn.disabled = true;
-    btn.textContent = {% if user.is_authenticated %}"Yuborilmoqda…"{% else %}"Ochilmoqda…"{% endif %};
+    btn.textContent = {% if user.is_authenticated %}"{% jt "Yuborilmoqda…" %}"{% else %}"{% jt "Ochilmoqda…" %}"{% endif %};
     {% if user.is_authenticated %}
     // the verdict comes back into the console's "Natija" tab: you stay in the editor. No script: the plain form post.
     if (!window.fetch || !window.htmx) return;
@@ -816,12 +816,12 @@ resolves their bare imports so @codemirror/state loads once — two copies break
     try {
       const r = await fetch(form.action, { method: "POST", body: new FormData(form), headers: { "X-Fetch": "1" }, credentials: "same-origin" });
       const j = await r.json();
-      if (!r.ok) throw new Error(j.error || "Yuborib bo‘lmadi");
+      if (!r.ok) throw new Error(j.error || "{% jt "Yuborib bo‘lmadi" %}");
       resultTab?.click();
       document.getElementById("trial-empty")?.setAttribute("hidden", "");
       resultOut.hidden = false;
-      resultOut.innerHTML = '<div id="sub-live"></div><p class="mt-3 flex flex-wrap items-center gap-3 text-sm"><a class="ca-link" href="' + j.url + '">To‘liq natija sahifasi</a>' +
-        '{% if next_problem %}<a id="sub-next" class="ca-btn ca-btn-gold !py-1 text-sm" hidden href="{% url 'problems:detail' next_problem.slug %}">Keyingi masala</a>{% endif %}</p>';
+      resultOut.innerHTML = '<div id="sub-live"></div><p class="mt-3 flex flex-wrap items-center gap-3 text-sm"><a class="ca-link" href="' + j.url + '">{% jt "To‘liq natija sahifasi" %}</a>' +
+        '{% if next_problem %}<a id="sub-next" class="ca-btn ca-btn-gold !py-1 text-sm" hidden href="{% url 'problems:detail' next_problem.slug %}">{% jt "Keyingi masala" %}</a>{% endif %}</p>';
       htmx.ajax("GET", j.status, { target: "#sub-live", swap: "innerHTML" });
       refreshMine();
     } catch (err) {
@@ -859,72 +859,72 @@ resolves their bare imports so @codemirror/state loads once — two copies break
   if (trialBtn) {
     const out = document.getElementById("trial-out"), stdinEl = document.getElementById("trial-stdin");  // no stdin box on SQL problems
     const esc = (t) => (t ?? "").replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
-    const V = { AC: ["ac", "check", "Qabul qilindi"], OK: ["ac", "check", "Bajarildi"], WA: ["bad", "x", "Noto‘g‘ri javob"],
-                TLE: ["warn", "clock", "Vaqt oshdi"], MLE: ["warn", "cpu", "Xotira oshdi"], OLE: ["warn", "scissors", "Chiqish juda katta"],
-                RE: ["bad", "triangle-alert", "Dastur xatosi"], CE: ["mute", "code", "Kompilyatsiya xatosi"], IE: ["mute", "circle-alert", "Xato"] };
+    const V = { AC: ["ac", "check", "{% jt "Qabul qilindi" %}"], OK: ["ac", "check", "{% jt "Bajarildi" %}"], WA: ["bad", "x", "{% jt "Noto‘g‘ri javob" %}"],
+                TLE: ["warn", "clock", "{% jt "Vaqt oshdi" %}"], MLE: ["warn", "cpu", "{% jt "Xotira oshdi" %}"], OLE: ["warn", "scissors", "{% jt "Chiqish juda katta" %}"],
+                RE: ["bad", "triangle-alert", "{% jt "Dastur xatosi" %}"], CE: ["mute", "code", "{% jt "Kompilyatsiya xatosi" %}"], IE: ["mute", "circle-alert", "{% jt "Xato" %}"] };
     const chip = (v) => { const [c, i, t] = V[v] || V.IE; return `<span class="ca-verdict ca-verdict-${c}"><i data-lucide="${i}" class="lu" aria-hidden="true"></i>${t}</span>`; };
-    const box = (label, text) => `<div class="ca-sample"><div class="ca-sample-head"><span>${label}</span></div><pre class="max-h-48">${text ? esc(text) : '<span class="text-mute">(bo‘sh)</span>'}</pre></div>`;
+    const box = (label, text) => `<div class="ca-sample"><div class="ca-sample-head"><span>${label}</span></div><pre class="max-h-48">${text ? esc(text) : '<span class="text-mute">{% jt "(bo‘sh)" %}</span>'}</pre></div>`;
     const empty = document.getElementById("trial-empty");
     const show = (html) => { out.hidden = false; if (empty) empty.hidden = true; out.innerHTML = html; window.caIcons?.(); window.caConsole?.("result"); };
-    const HINT = { TLE: "Vaqt chegarasi oshdi.", MLE: "Xotira chegarasi oshdi.", OLE: "Chiqish hajmi chegarasi oshdi.",
-                   RE: "Dastur xato bilan tugadi." };
+    const HINT = { TLE: "{% jt "Vaqt chegarasi oshdi." %}", MLE: "{% jt "Xotira chegarasi oshdi." %}", OLE: "{% jt "Chiqish hajmi chegarasi oshdi." %}",
+                   RE: "{% jt "Dastur xato bilan tugadi." %}" };
     const grid = (cols, rows) => `<div class="ca-sql-table overflow-x-auto"><table class="ca-table">${cols.length ? `<thead><tr>${cols.map((c) => `<th scope="col">${esc(c)}</th>`).join("")}</tr></thead>` : ""}<tbody>${
-      rows.length ? rows.map((row) => `<tr>${row.map((v) => `<td class="font-mono">${esc(v)}</td>`).join("")}</tr>`).join("") : '<tr><td class="text-mute">(bo‘sh natija)</td></tr>'}</tbody></table></div>`;
+      rows.length ? rows.map((row) => `<tr>${row.map((v) => `<td class="font-mono">${esc(v)}</td>`).join("")}</tr>`).join("") : '<tr><td class="text-mute">{% jt "(bo‘sh natija)" %}</td></tr>'}</tbody></table></div>`;
     function renderSql(r) {
       if (r.verdict === "RE" || r.verdict === "TLE") {
-        return show(`<p class="flex items-center gap-2">${chip(r.verdict)}${r.verdict === "TLE" ? "So‘rov vaqt chegarasidan oshdi." : "So‘rov bajarilmadi: sintaksisni tekshiring. Faqat bitta SELECT (yoki WITH … SELECT) ruxsat etiladi."}</p>`);
+        return show(`<p class="flex items-center gap-2">${chip(r.verdict)}${r.verdict === "TLE" ? "{% jt "So‘rov vaqt chegarasidan oshdi." %}" : "{% jt "So‘rov bajarilmadi: sintaksisni tekshiring. Faqat bitta SELECT (yoki WITH … SELECT) ruxsat etiladi." %}"}</p>`);
       }
-      const more = r.n_rows > r.rows.length ? `<p class="mt-1 text-xs text-mute">Jami ${r.n_rows} qator, birinchi ${r.rows.length} tasi ko‘rsatildi.</p>` : "";
-      show(`<p class="flex items-center gap-2 font-medium">${chip(r.verdict)}${r.verdict === "AC" ? "Namunaviy ma’lumotlarda natija to‘g‘ri" : "Natija kutilganidan farq qiladi"}</p>
+      const more = r.n_rows > r.rows.length ? `<p class="mt-1 text-xs text-mute">{% jt "Jami ${r.n_rows} qator, birinchi ${r.rows.length} tasi ko‘rsatildi." %}</p>` : "";
+      show(`<p class="flex items-center gap-2 font-medium">${chip(r.verdict)}${r.verdict === "AC" ? "{% jt "Namunaviy ma’lumotlarda natija to‘g‘ri" %}" : "{% jt "Natija kutilganidan farq qiladi" %}"}</p>
         <div class="mt-2 grid gap-3 lg:grid-cols-2">
-          <div><p class="mb-1 text-xs font-medium text-mute">Sizning natijangiz</p>${grid(r.columns, r.rows)}${more}</div>
-          <div><p class="mb-1 text-xs font-medium text-mute">Kutilgan</p>${grid([], r.expected)}</div>
+          <div><p class="mb-1 text-xs font-medium text-mute">{% jt "Sizning natijangiz" %}</p>${grid(r.columns, r.rows)}${more}</div>
+          <div><p class="mb-1 text-xs font-medium text-mute">{% jt "Kutilgan" %}</p>${grid([], r.expected)}</div>
         </div>
-        <p class="mt-2 text-xs text-mute">Sinov urinish hisoblanmaydi. Yuborilganda yashirin ma’lumotlarda ham tekshiriladi.</p>`);
+        <p class="mt-2 text-xs text-mute">{% jt "Sinov urinish hisoblanmaydi. Yuborilganda yashirin ma’lumotlarda ham tekshiriladi." %}</p>`);
     }
     function render(r) {
       if (r.sql) return renderSql(r);
       if (r.verdict === "CE") return show(`<p class="mb-2 flex items-center gap-2">${chip("CE")} Kompilyatsiya xatosi</p><pre class="ca-pre max-h-60 text-xs">${esc(r.log)}</pre>`);
-      if (!r.cases.length) return show(`<p class="flex items-center gap-2">${chip(r.verdict)} Sinovni ishga tushirib bo‘lmadi — qayta urinib ko‘ring.</p>`);
+      if (!r.cases.length) return show(`<p class="flex items-center gap-2">${chip(r.verdict)} {% jt "Sinovni ishga tushirib bo‘lmadi — qayta urinib ko‘ring." %}</p>`);
       const custom = r.cases[0].expected === null;
       const passed = r.cases.filter((c) => c.verdict === "AC").length;
-      const head = custom ? "O‘z inputingiz" : `Namunaviy testlar: ${passed}/${r.total} o‘tdi`;
+      const head = custom ? "{% jt "O‘z inputingiz" %}" : `{% jt "Namunaviy testlar: ${passed}/${r.total} o‘tdi" %}`;
       const cases = r.cases.map((c, i) => `
         <details class="mt-2 rounded-md border border-line"${c.verdict === "AC" ? "" : " open"}>
-          <summary class="flex cursor-pointer list-none items-center gap-2 px-3 py-2">${chip(c.verdict)}<span>${custom ? "Natija" : `Test ${i + 1}`}</span><span class="tabular ml-auto text-xs text-mute">${c.ms} ms${c.kb ? ` · ${Math.round(c.kb / 1024)} MB` : ""}</span></summary>
+          <summary class="flex cursor-pointer list-none items-center gap-2 px-3 py-2">${chip(c.verdict)}<span>${custom ? "{% jt "Natija" %}" : `{% jt "Test ${i + 1}" %}`}</span><span class="tabular ml-auto text-xs text-mute">${c.ms} ms${c.kb ? ` · ${Math.round(c.kb / 1024)} MB` : ""}</span></summary>
           <div class="grid gap-2 px-3 pb-3 ${custom ? "sm:grid-cols-2" : "sm:grid-cols-3"}">
-            ${box("Kirish", c.input)}${box(custom ? "Chiqish" : "Sizning chiqishingiz", c.output)}${custom ? "" : box("Kutilgan", c.expected)}
+            ${box("{% jt "Kirish" %}", c.input)}${box(custom ? "{% jt "Chiqish" %}" : "{% jt "Sizning chiqishingiz" %}", c.output)}${custom ? "" : box("{% jt "Kutilgan" %}", c.expected)}
           </div>
           ${HINT[c.verdict] ? `<p class="px-3 pb-3 text-xs text-mute">${HINT[c.verdict]}</p>` : ""}
         </details>`).join("");
-      show(`<p class="flex items-center gap-2 font-medium">${chip(r.verdict)}${head}</p>${cases}<p class="mt-2 text-xs text-mute">Sinov urinish hisoblanmaydi va jarima bermaydi.</p>`);
+      show(`<p class="flex items-center gap-2 font-medium">${chip(r.verdict)}${head}</p>${cases}<p class="mt-2 text-xs text-mute">{% jt "Sinov urinish hisoblanmaydi va jarima bermaydi." %}</p>`);
     }
     const busy = (on) => {
       trialBtn.disabled = on;
-      trialBtn.innerHTML = on ? '<i data-lucide="loader-circle" class="lu ca-spin" aria-hidden="true"></i>Ishlamoqda…'
-                              : '<i data-lucide="play" class="lu" aria-hidden="true"></i>Sinab ko‘rish';
+      trialBtn.innerHTML = on ? '<i data-lucide="loader-circle" class="lu ca-spin" aria-hidden="true"></i>{% jt "Ishlamoqda…" %}'
+                              : '<i data-lucide="play" class="lu" aria-hidden="true"></i>{% jt "Sinab ko‘rish" %}';
       window.caIcons?.();
     };
     trialBtn.addEventListener("click", async () => {
       busy(true);
-      show('<p class="text-mute">Navbatda…</p>');
+      show('<p class="text-mute">{% jt "Navbatda…" %}</p>');
       try {
         // your own input only from its tab; from the others the run takes the samples
         const custom = window.caInput === "custom";
         const body = new URLSearchParams({ source: view.state.doc.toString(), language: langSel.value, stdin: custom ? stdinEl?.value ?? "" : "" });
         const res = await fetch("{% if user.is_authenticated %}{% url 'submissions:trial' problem.slug %}{% else %}{% url 'submissions:guest_trial' problem.slug %}{% endif %}", { method: "POST", headers: { "X-CSRFToken": "{{ csrf_token }}" }, body });
-        const data = await res.json().catch(() => ({ error: "Server javob bermadi" }));
+        const data = await res.json().catch(() => ({ error: "{% jt "Server javob bermadi" %}" }));
         if (!res.ok) return show(`<p class="text-bad">${esc(data.error)}</p>`);
         if (data.done) return render(data);  // SQL: answered right away, no queue
         for (let t = 0; t < 90; t++) {  // ~60 s: queue wait + compile + run
           await new Promise((r) => setTimeout(r, t < 10 ? 400 : 800));
           const st = await (await fetch(`{% if user.is_authenticated %}{% url 'submissions:trial_status' 'JOB' %}{% else %}{% url 'submissions:guest_trial_status' 'JOB' %}{% endif %}`.replace("JOB", data.id))).json();
           if (st.done) return render(st);
-          if (st.status === "started") show('<p class="flex items-center gap-2 text-mute"><i data-lucide="loader-circle" class="lu ca-spin" aria-hidden="true"></i>Ishga tushirilmoqda…</p>');
+          if (st.status === "started") show('<p class="flex items-center gap-2 text-mute"><i data-lucide="loader-circle" class="lu ca-spin" aria-hidden="true"></i>{% jt "Ishga tushirilmoqda…" %}</p>');
         }
-        show('<p class="text-bad">Sinov juda uzoq kutdi — keyinroq qayta urinib ko‘ring.</p>');
+        show('<p class="text-bad">{% jt "Sinov juda uzoq kutdi — keyinroq qayta urinib ko‘ring." %}</p>');
       } catch {
-        show('<p class="text-bad">Tarmoq xatosi — qayta urinib ko‘ring.</p>');
+        show('<p class="text-bad">{% jt "Tarmoq xatosi — qayta urinib ko‘ring." %}</p>');
       } finally {
         busy(false);
       }
@@ -942,7 +942,7 @@ resolves their bare imports so @codemirror/state loads once — two copies break
     const contestId = {{ contest.pk }};
     const editor = document.getElementById("editor");
     const guard = document.getElementById("ca-guard");
-    const stamp = "— CodeArena, musobaqa #{{ contest.pk|stringformat:'03d' }}, {{ user.username }}. Bu matnni AI yordamchisiga yoki boshqa ishtirokchiga yuborish — qoidabuzarlik, nusxa qayd etiladi.";
+    const stamp = "— CodeArena, {% jt "musobaqa" %} #{{ contest.pk|stringformat:'03d' }}, {{ user.username }}. {% jt "Bu matnni AI yordamchisiga yoki boshqa ishtirokchiga yuborish — qoidabuzarlik, nusxa qayd etiladi." %}";
     let hideTimer;
 
     function notify(msg) {
@@ -961,15 +961,15 @@ resolves their bare imports so @codemirror/state loads once — two copies break
 
     editor.addEventListener("paste", (e) => {
       e.preventDefault(); e.stopPropagation();
-      report("paste"); notify("Musobaqada kod qo‘yish (paste) taqiqlangan — urinish qayd etildi.");
+      report("paste"); notify("{% jt "Musobaqada kod qo‘yish (paste) taqiqlangan — urinish qayd etildi." %}");
     }, true);
     ["copy", "cut", "contextmenu"].forEach((evt) => editor.addEventListener(evt, (e) => e.preventDefault(), true));
     // Drag-and-drop of selected text is just paste with extra steps: kill it page-wide.
     ["dragstart", "drop"].forEach((evt) => document.addEventListener(evt, (e) => {
       e.preventDefault(); e.stopPropagation();
-      if (evt === "drop" && editor.contains(e.target)) { report("paste"); notify("Matnni sudrab tashlash taqiqlangan — qayd etildi."); }
+      if (evt === "drop" && editor.contains(e.target)) { report("paste"); notify("{% jt "Matnni sudrab tashlash taqiqlangan — qayd etildi." %}"); }
     }, true));
-    window.addEventListener("ca-bulk-insert", () => { report("paste"); notify("Katta hajmdagi matn kiritildi — qayd etildi."); });
+    window.addEventListener("ca-bulk-insert", () => { report("paste"); notify("{% jt "Katta hajmdagi matn kiritildi — qayd etildi." %}"); });
 
     // Sustained fast typing (many sub-threshold inserts in a row) can be the same paste,
     // done in chunks to dodge the single-insert size check above.
@@ -981,7 +981,7 @@ resolves their bare imports so @codemirror/state loads once — two copies break
       const sum = typedWindow.reduce((a, [, n]) => a + n, 0);
       if (sum > 200 && now - fastReportedAt > 5000) {
         fastReportedAt = now;
-        report("fast"); notify("G‘ayrioddiy tez matn kiritish aniqlandi — qayd etildi.");
+        report("fast"); notify("{% jt "G‘ayrioddiy tez matn kiritish aniqlandi — qayd etildi." %}");
       }
     });
 
@@ -992,7 +992,7 @@ resolves their bare imports so @codemirror/state loads once — two copies break
       if (!text.trim()) return;
       e.clipboardData.setData("text/plain", text + "\n\n" + stamp);
       e.preventDefault();
-      report("copy"); notify("Nusxa olindi. Matnga ogohlantiruvchi belgi qo‘shildi.");
+      report("copy"); notify("{% jt "Nusxa olindi. Matnga ogohlantiruvchi belgi qo‘shildi." %}");
     });
   })();
 </script>
@@ -1025,7 +1025,7 @@ resolves their bare imports so @codemirror/state loads once — two copies break
     }
     report("view");
 
-    const LOCK_MSG = "Mashqda tashqaridan uzun kod qo‘yib bo‘lmaydi: o‘zingiz yozing, shunda o‘rganasiz. Qisqa qator (40 belgigacha) va shu muharrirdan olingan kodni qo‘yish mumkin.";
+    const LOCK_MSG = "{% jt "Mashqda tashqaridan uzun kod qo‘yib bo‘lmaydi: o‘zingiz yozing, shunda o‘rganasiz. Qisqa qator (40 belgigacha) va shu muharrirdan olingan kodni qo‘yish mumkin." %}";
     // Your own code, cut or copied in this editor, may come back by paste (moving a block, undoing a cut).
     let own = "";
     const keepOwn = () => { const t = String(window.getSelection() || ""); if (t) own = t; };

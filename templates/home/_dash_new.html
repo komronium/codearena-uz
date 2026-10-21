@@ -31,7 +31,7 @@ ctx: the dashboard's, with first_problem, n_courses, joined_any, learning, upcom
 
 <aside class="ca7-aside" aria-label="{% trans 'Qo‘shimcha' %}">
   {% if daily %}{% load daily %}{% daily_stats daily user as ds %}{% include "problems/_daily_card.html" %}{% endif %}
-  {% if ring %}{% url 'problems:list' as problems_url %}{% include "problems/_solved_card.html" with title="Yechilgan masalalar" more_url=problems_url %}{% endif %}
+  {% if ring %}{% url 'problems:list' as problems_url %}{% include "problems/_solved_card.html" with title=_("Yechilgan masalalar") more_url=problems_url %}{% endif %}
   <section class="ca-box" aria-labelledby="help-title">
     <div class="ca-box-cap ca-hd"><h2 id="help-title">{% trans "Natijalar nimani anglatadi" %}</h2></div>
     <dl class="ca7-pad ca7-legend7">

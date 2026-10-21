@@ -35,7 +35,7 @@ numbers are plain text.{% endcomment %}
     <form method="get" class="ca7-tools-r" role="search" aria-label="{% trans 'Urinishlarni qidirish' %}">
       <input type="hidden" name="mine" value="{% if own %}1{% else %}0{% endif %}">
       {% if verdict %}<input type="hidden" name="verdict" value="{{ verdict }}">{% endif %}
-      <span class="ca7-search"><i data-lucide="search" class="lu" aria-hidden="true"></i><input class="ca7-fld" type="search" name="q" value="{{ q }}" placeholder="{% if own %}Masala nomi{% else %}Masala yoki foydalanuvchi{% endif %}…" aria-label="{% if own %}Masala nomi bo‘yicha{% else %}Masala yoki foydalanuvchi bo‘yicha{% endif %} qidirish" autocomplete="off" spellcheck="false"></span>
+      <span class="ca7-search"><i data-lucide="search" class="lu" aria-hidden="true"></i><input class="ca7-fld" type="search" name="q" value="{{ q }}" placeholder="{% if own %}{% trans 'Masala nomi' %}{% else %}{% trans 'Masala yoki foydalanuvchi' %}{% endif %}…" aria-label="{% if own %}{% trans 'Masala nomi bo‘yicha' %}{% else %}{% trans 'Masala yoki foydalanuvchi bo‘yicha' %}{% endif %} {% trans 'qidirish' %}" autocomplete="off" spellcheck="false"></span>
       <label class="ca7-select"><span class="sr-only">{% trans "Til" %}</span>
         <select name="lang" onchange="this.form.submit()">
           <option value="">{% trans "Til: hammasi" %}</option>

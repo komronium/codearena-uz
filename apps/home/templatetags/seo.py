@@ -4,10 +4,12 @@ from html import unescape
 
 from django import template
 from django.conf import settings
+from django.core.serializers.json import DjangoJSONEncoder
 from django.templatetags.static import static
 from django.utils.html import format_html, format_html_join, strip_tags
 from django.utils.safestring import mark_safe
 from django.utils.text import Truncator
+from django.utils.translation import gettext_lazy as _tl
 
 register = template.Library()
 
@@ -15,8 +17,8 @@ SITE_NAME = "CodeArena"
 # Other projects are called CodeArena too, and Google won't show one site name for two sites; it falls
 # back to these, the domain last (its site-name guide).
 ALTERNATE_NAMES = ["CodeArena.uz", "codearena.uz"]
-SITE_DESCRIPTION = ("O‘zbek tilida dasturlash: masalalar yeching, mavzulab kurslarda o‘rganing, "
-                    "reytingli musobaqalarda bellashing. Kodingiz serverda shu zahoti testlanadi.")
+SITE_DESCRIPTION = (_tl("O‘zbek tilida dasturlash: masalalar yeching, mavzulab kurslarda o‘rganing, "
+                    "reytingli musobaqalarda bellashing. Kodingiz serverda shu zahoti testlanadi."))
 
 # staff tools and one person's own pages; robots.txt keeps crawlers out of them too
 _PRIVATE_NAMESPACES = {"moderation", "integrity", "classroom", "submissions"}
@@ -98,7 +100,7 @@ def capture(parser, token):
 def _ld(data: dict) -> str:
     """A JSON-LD block; <, > and & are escaped so no text can close the script early."""
     return format_html('<script type="application/ld+json">{}</script>',
-                       mark_safe(json.dumps(data, ensure_ascii=False).translate(_JSON_IN_SCRIPT)))
+                       mark_safe(json.dumps(data, ensure_ascii=False, cls=DjangoJSONEncoder).translate(_JSON_IN_SCRIPT)))
 
 
 @register.simple_tag(takes_context=True)

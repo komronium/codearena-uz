@@ -30,6 +30,7 @@ from apps.submissions.models import UserProblemSolved
 
 from .models import PracticeEvent, PracticeReview, PracticeSnapshot
 from .similarity import MIN_LINES, THRESHOLD, similarity
+from django.utils.translation import gettext as _t
 
 MIN_AWAY_MS = 20_000
 QUICK_AFTER_RETURN = datetime.timedelta(minutes=3)
@@ -45,7 +46,7 @@ RECENT_CODE = datetime.timedelta(minutes=10)
 
 def _fmt(seconds: float) -> str:
     s = int(seconds)
-    return f"{s} soniya" if s < 60 else f"{s // 60} daq {s % 60} s"
+    return _t("{n} soniya").format(n=s) if s < 60 else _t("{m} daq {s} s").format(m=s // 60, s=s % 60)
 
 
 def _norm(source: str) -> str:
@@ -59,16 +60,16 @@ def _browser_reasons(solve, before) -> tuple[int, list[str]]:
     if pastes:  # on Medium/Hard pasting from one's own editor is normal: little weight there
         locked = solve.problem.difficulty in (Problem.Difficulty.BEGINNER, Problem.Difficulty.EASY)
         score += (3 if locked else 1) * min(pastes, 3)
-        why.append(f"{pastes} marta uzun kod qo‘yishga urindi")
+        why.append(_t("{pastes} marta uzun kod qo‘yishga urindi").format(pastes=pastes))
     if any(e.kind == PracticeEvent.Kind.BULK for e in before):
         score += 4
-        why.append("kod bir zumda paydo bo‘ldi")
+        why.append(_t("kod bir zumda paydo bo‘ldi"))
     back = [e for e in before if e.kind == PracticeEvent.Kind.AWAY and (e.away_ms or 0) >= MIN_AWAY_MS
             and ac_at - e.at <= QUICK_AFTER_RETURN]
     if back:
         e = max(back, key=lambda e: e.away_ms)
         score += 4
-        why.append(f"{_fmt(e.away_ms / 1000)} boshqa oynada, qaytgach {_fmt((ac_at - e.at).total_seconds())} ichida yechdi")
+        why.append(_t("{fmt_e_away_ms_1000} boshqa oynada, qaytgach {fmt_ac_at_e_at_total_seconds} ichida yechdi").format(fmt_e_away_ms_1000=_fmt(e.away_ms / 1000), fmt_ac_at_e_at_total_seconds=_fmt((ac_at - e.at).total_seconds())))
     views = [e.at for e in before if e.kind == PracticeEvent.Kind.VIEW]
     limit = SPEED_LIMIT.get(solve.problem.difficulty)
     if views and limit and (ac_at - min(views)).total_seconds() < limit:
@@ -80,7 +81,7 @@ def _browser_reasons(solve, before) -> tuple[int, list[str]]:
 def _server_reasons(solve, before, snaps) -> tuple[int, list[str]]:
     sub = solve.first_ac_submission
     if not any(e.kind == PracticeEvent.Kind.VIEW for e in before):
-        return 6, ["kuzatuv ishlamagan: sahifa ochilgani ko‘rinmaydi (skript o‘chirilgan yoki kod tashqaridan yuborilgan)"]
+        return 6, [_t("kuzatuv ishlamagan: sahifa ochilgani ko‘rinmaydi (skript o‘chirilgan yoki kod tashqaridan yuborilgan)")]
     score, why = 0, []
     near = [s for s in snaps if sub.created - SNAPSHOT_WINDOW <= s.at <= sub.created + datetime.timedelta(minutes=1)]
     want = _norm(sub.source)
@@ -90,7 +91,7 @@ def _server_reasons(solve, before, snaps) -> tuple[int, list[str]]:
     grew = max((len(b.source) - len(a.source) for a, b in zip(snaps, snaps[1:]) if b.at <= sub.created), default=0)
     if grew >= JUMP_CHARS:
         score += 4
-        why.append(f"{grew} belgi birdaniga paydo bo‘lgan")
+        why.append(_t("{grew} belgi birdaniga paydo bo‘lgan").format(grew=grew))
     return score, why
 
 
@@ -133,7 +134,7 @@ def _assess(solve, events, snaps, similar, tracking_since) -> tuple[int, list[st
     if solve.pk in similar:
         name, pct = similar[solve.pk]
         score += 6
-        why.append(f"{name} yechimi bilan {pct}% bir xil")
+        why.append(_t("{name} yechimi bilan {pct}% bir xil").format(name=name, pct=pct))
     return score, why
 
 

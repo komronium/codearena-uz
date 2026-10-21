@@ -2,6 +2,7 @@ from django.conf import settings
 from django.db import models
 
 from apps.problems.models import Problem, Tag
+from django.utils.translation import gettext_lazy as _tl
 
 
 # A fixed set: the lucide bundle only carries icon names quoted in the code (frontend/build.mjs).
@@ -22,15 +23,15 @@ class StudyPlan(models.Model):
     now (apps.learn.progress)."""
 
     class Stage(models.TextChoices):  # the path's chapters, in this order
-        BASICS = "basics", "Asoslar"
-        PYTHON = "python", "Python vositalari"
-        ALGORITHMS = "algorithms", "Algoritmlar"
-        TECHNIQUES = "techniques", "Texnikalar"
-        STRUCTURES = "structures", "Ma’lumot tuzilmalari"
-        MATH = "math", "Matematika"
-        DP = "dp", "Dinamik dasturlash"
-        GRAPHS = "graphs", "Graflar"
-        ADVANCED = "advanced", "Ilg‘or"
+        BASICS = "basics", _tl("Asoslar")
+        PYTHON = "python", _tl("Python vositalari")
+        ALGORITHMS = "algorithms", _tl("Algoritmlar")
+        TECHNIQUES = "techniques", _tl("Texnikalar")
+        STRUCTURES = "structures", _tl("Ma’lumot tuzilmalari")
+        MATH = "math", _tl("Matematika")
+        DP = "dp", _tl("Dinamik dasturlash")
+        GRAPHS = "graphs", _tl("Graflar")
+        ADVANCED = "advanced", _tl("Ilg‘or")
         SQL = "sql", "SQL"
 
     slug = models.SlugField(unique=True)

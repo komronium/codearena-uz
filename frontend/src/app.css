@@ -3727,3 +3727,10 @@ small { font-size: max(12.25px, .8em); }
 .ca7-topic-next { display: none; }
 @media (max-width: 767px) { .ca7-topics, .ca7-topics-more[open] { grid-template-columns: minmax(0, 1fr); } .ca7-topic { grid-template-columns: minmax(0, 7rem) minmax(0, 1fr) 3.6rem; } .ca7-topic-bar { grid-column: auto; order: 0; } }
 .ca7-tip { padding: .6rem .9rem; font-size: 0.875rem; margin-bottom: .6rem; }
+
+/* the language switch: a small globe button beside the theme menu */
+.ca-lang { display: inline-flex; }
+.ca-lang-btn { display: inline-flex; align-items: center; gap: .3rem; height: 2.25rem; padding: 0 .65rem; border-radius: 10px; font-size: 0.8125rem; font-weight: 700; letter-spacing: .02em; color: inherit; background: transparent; cursor: pointer; }
+.ca-lang-btn:hover { background: rgb(var(--ca-ink-rgb) / .08); }
+.ca-lang-btn svg.lucide { width: 1rem; height: 1rem; }
+.ca-footer .ca-lang-btn { color: rgb(var(--ca-mute-rgb)); }

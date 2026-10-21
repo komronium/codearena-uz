@@ -17,6 +17,7 @@ from apps.problems.models import MAX_HINT_PCT, Problem, ProblemHint, SQLDataset,
 from judge import sql_judge
 
 from .ai import DEFAULT_LEVELS, DEFAULT_MODEL, MAX_COUNT, MODEL_CHOICES
+from django.utils.translation import gettext as _t, gettext_lazy as _tl
 
 _CA_INPUT = {"class": "ca-input"}
 _MD = {"class": "ca-input ca-md", "rows": 6}
@@ -58,7 +59,7 @@ class ProblemForm(ModelForm):
         if not img or not hasattr(img, "size"):
             return img
         if img.size > 10 * 1024 * 1024:
-            raise ValidationError("Rasm hajmi 10 MB dan oshmasligi kerak.")
+            raise ValidationError(_t("Rasm hajmi 10 MB dan oshmasligi kerak."))
         return img
 
     def clean_tests_zip(self):
@@ -91,7 +92,7 @@ class SQLDatasetForm(ModelForm):
                 except sql_judge.SQLJudgeError as exc:
                     self.add_error(field, f"SQL xatosi: {exc}")
         if data.get("check_seed_sql", "").strip() and not data.get("check_expected_result", "").strip():
-            self.add_error("check_expected_result", "Yashirin ma‘lumotlar uchun kutilgan natija kerak.")
+            self.add_error("check_expected_result", _t("Yashirin ma‘lumotlar uchun kutilgan natija kerak."))
         return data
 
 
@@ -160,7 +161,7 @@ class ContestForm(ModelForm):
         fields = ["title", "description_md", "start", "end", "type", "is_rated", "division", "is_official", "review_top_n",
                   "allowed_ip_prefix", "badge", "personal_minutes", "auto_finish"]
         widgets = {
-            "personal_minutes": forms.NumberInput(attrs={**_CA_INPUT, "min": 0, "max": 1440, "placeholder": "0 — hamma uchun bir soat"}),
+            "personal_minutes": forms.NumberInput(attrs={**_CA_INPUT, "min": 0, "max": 1440, "placeholder": _tl("0 — hamma uchun bir soat")}),
             "title": forms.TextInput(attrs=_CA_INPUT),
             "description_md": forms.Textarea(attrs={**_MD, "rows": 4}),
             "start": _DateTimeLocal(),
@@ -186,9 +187,9 @@ class ContestForm(ModelForm):
     def clean(self):
         data = super().clean()
         if data.get("start") and data.get("end") and data["end"] <= data["start"]:
-            self.add_error("end", "Tugash vaqti boshlanishdan keyin bo'lishi kerak.")
+            self.add_error("end", _t("Tugash vaqti boshlanishdan keyin bo'lishi kerak."))
         elif self.instance.pk is None and data.get("end") and data["end"] <= timezone.now():
-            self.add_error("end", "Tugash vaqti allaqachon o'tib ketgan — sana va yilni tekshiring.")
+            self.add_error("end", _t("Tugash vaqti allaqachon o'tib ketgan — sana va yilni tekshiring."))
         return data
 
     def clean_review_top_n(self):
@@ -284,7 +285,7 @@ class TagForm(ModelForm):
         # One standard English spelling per topic; free text is how "sikl", "cikl" and "loop" piled up.
         name = self.cleaned_data["name"].strip().lower()
         if not re.fullmatch(r"[a-z0-9]+(-[a-z0-9]+)*", name):
-            raise ValidationError("Inglizcha nom, kichik harflar va chiziqcha bilan: masalan, two-pointers.")
+            raise ValidationError(_t("Inglizcha nom, kichik harflar va chiziqcha bilan: masalan, two-pointers."))
         return name
 
 
@@ -316,7 +317,7 @@ class AIGenerateForm(forms.Form):
     def clean(self):
         cleaned = super().clean()
         if not 1 <= sum(self.levels().values()) <= MAX_COUNT:
-            raise ValidationError(f"Jami 1 dan {MAX_COUNT} tagacha masala so‘rang.")
+            raise ValidationError(_t("Jami 1 dan {max_count} tagacha masala so‘rang.").format(max_count=MAX_COUNT))
         return cleaned
 
 
@@ -344,5 +345,5 @@ class StudyPlanForm(ModelForm):
     def clean_slug(self):
         slug = self.cleaned_data["slug"]
         if slug in RESERVED_SLUGS:
-            raise ValidationError("Bu nom band (O‘rganish bo‘limidagi sahifa). Boshqa slug tanlang.")
+            raise ValidationError(_t("Bu nom band (O‘rganish bo‘limidagi sahifa). Boshqa slug tanlang."))
         return slug

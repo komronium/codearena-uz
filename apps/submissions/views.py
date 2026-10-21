@@ -24,6 +24,7 @@ from judge.runner import run_submission, run_trial
 
 from .models import VERDICT_LABELS, Submission, UserProblemSolved
 from .ratelimit import rate_limited
+from django.utils.translation import gettext as _t
 
 MAX_SOURCE = 64 * 1024
 RATE_LIMIT_MAX = 10  # submissions per minute
@@ -51,7 +52,7 @@ def _gate(request, slug):
     if contest is not None and not access_allowed(
         request.user, contest, request.META.get("REMOTE_ADDR")
     ):
-        return problem, contest, HttpResponseBadRequest("Bu musobaqaga shu tarmoqdan yuborib bo‘lmaydi.")
+        return problem, contest, HttpResponseBadRequest(_t("Bu musobaqaga shu tarmoqdan yuborib bo‘lmaydi."))
     if (
         contest is not None
         and Participation.objects.filter(
@@ -76,7 +77,7 @@ def _gate(request, slug):
         return (
             problem,
             contest,
-            HttpResponseBadRequest("Bu masala shu raundda bloklangan."),
+            HttpResponseBadRequest(_t("Bu masala shu raundda bloklangan.")),
         )
     return problem, contest, None
 
@@ -96,13 +97,13 @@ def submit(request, slug):
     if error:
         return _refused(request, problem, error.content.decode(), error.status_code)
     if rate_limited(request.user.id, "submit", RATE_LIMIT_MAX):
-        return _refused(request, problem, "Juda tez yuboryapsiz. Bir daqiqa kuting va qayta yuboring.", 429)
+        return _refused(request, problem, _t("Juda tez yuboryapsiz. Bir daqiqa kuting va qayta yuboring."), 429)
     language = get_object_or_404(
         Language, code=request.POST.get("language"), is_active=True
     )
     source = request.POST.get("source", "")
     if not source.strip() or len(source) > MAX_SOURCE:
-        return _refused(request, problem, "Kod bo‘sh yoki juda katta (64 KB gacha).", 400)
+        return _refused(request, problem, _t("Kod bo‘sh yoki juda katta (64 KB gacha)."), 400)
     if (
         request.POST.get("pledge") == "1" and not request.user.honor_pledged_at
     ):  # accepted in the dialog
@@ -147,10 +148,10 @@ def trial(request, slug):
         return JsonResponse({"error": error.content.decode()}, status=400)
     source, stdin = request.POST.get("source", ""), request.POST.get("stdin", "")
     if not source.strip() or len(source) > MAX_SOURCE or len(stdin) > MAX_TRIAL_INPUT:
-        return JsonResponse({"error": "Kod bo‘sh yoki juda katta"}, status=400)
+        return JsonResponse({"error": _t("Kod bo‘sh yoki juda katta")}, status=400)
     if rate_limited(request.user.id, "trial", TRIAL_RATE_MAX):
         return JsonResponse(
-            {"error": "Juda tez-tez — bir daqiqadan keyin urinib ko‘ring"}, status=429
+            {"error": _t("Juda tez-tez — bir daqiqadan keyin urinib ko‘ring")}, status=429
         )
     if problem.kind == Problem.Kind.SQL:
         return _sql_trial(problem, source)
@@ -163,7 +164,7 @@ def trial(request, slug):
         samples = list(problem.samples)
         if not samples:
             return JsonResponse(
-                {"error": "Namunaviy test yo‘q — o‘z inputingizni kiriting"}, status=400
+                {"error": _t("Namunaviy test yo‘q — o‘z inputingizni kiriting")}, status=400
             )
         inputs, expected = [t.input for t in samples], [t.expected for t in samples]
     job = django_rq.get_queue("run").enqueue(
@@ -186,7 +187,7 @@ def _sql_trial(problem, source):
     stopped at the time limit (judge.sql_judge), so no queue is needed."""
     dataset = getattr(problem, "sql_dataset", None)
     if dataset is None:
-        return JsonResponse({"error": "Masalada ma‘lumotlar bazasi yo‘q"}, status=400)
+        return JsonResponse({"error": _t("Masalada ma‘lumotlar bazasi yo‘q")}, status=400)
     try:
         verdict, columns, rows = sql_judge.run_query_table(
             dataset.schema_sql, dataset.seed_sql, source, problem.tl_ms
@@ -467,17 +468,17 @@ def guest_trial(request, slug):
     problem = get_object_or_404(Problem, slug=slug, is_public=True)
     from apps.contests.models import ContestProblem
     if problem.kind == Problem.Kind.SQL or ContestProblem.objects.filter(problem=problem, contest__end__gt=timezone.now()).exists():
-        return JsonResponse({"error": "Bu masalada sinash uchun ro‘yxatdan o‘ting."}, status=403)
+        return JsonResponse({"error": _t("Bu masalada sinash uchun ro‘yxatdan o‘ting.")}, status=403)
     source = request.POST.get("source", "")
     if not source.strip() or len(source) > MAX_SOURCE:
-        return JsonResponse({"error": "Kod bo‘sh yoki juda katta"}, status=400)
+        return JsonResponse({"error": _t("Kod bo‘sh yoki juda katta")}, status=400)
     if (throttle.ip_blocked(request, "guest-trial-min", GUEST_TRIAL_PER_MIN, 60)
             or throttle.ip_blocked(request, "guest-trial-hour", GUEST_TRIAL_PER_HOUR, 3600)):
-        return JsonResponse({"error": "Juda tez-tez. Ro‘yxatdan o‘tsangiz, limit ancha keng."}, status=429)
+        return JsonResponse({"error": _t("Juda tez-tez. Ro‘yxatdan o‘tsangiz, limit ancha keng.")}, status=429)
     language = get_object_or_404(Language, code=request.POST.get("language"), is_active=True)
     samples = list(problem.samples)
     if not samples:
-        return JsonResponse({"error": "Namunaviy test yo‘q"}, status=400)
+        return JsonResponse({"error": _t("Namunaviy test yo‘q")}, status=400)
     job = django_rq.get_queue("run").enqueue(
         run_trial, language.code, source, [t.input for t in samples], [t.expected for t in samples],
         problem.tl_ms, problem.ml_mb, result_ttl=300, failure_ttl=300,

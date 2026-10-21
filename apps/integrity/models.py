@@ -6,6 +6,7 @@ from django.db import models
 from apps.contests.models import Contest
 from apps.problems.models import Language, Problem
 from apps.submissions.models import Submission
+from django.utils.translation import gettext_lazy as _tl
 
 
 class FocusEvent(models.Model):
@@ -76,24 +77,24 @@ class DeviceSeen(models.Model):
 class AuditEntry(models.Model):
     """Who did what to a result, and why. Links are SET_NULL so the record outlives them."""
     class Action(models.TextChoices):
-        DISQUALIFY = "disqualify", "Diskvalifikatsiya"
-        REQUALIFY = "requalify", "Diskvalifikatsiya bekor"
-        VOID = "void", "Masala natijasi bekor"
-        UNVOID = "unvoid", "Masala natijasi tiklandi"
-        PENALTY = "penalty", "AI jarimasi: xato urinish, masala bloklandi"
-        REJUDGE = "rejudge", "Qayta tekshiruv"
-        PUBLISH = "publish", "Masalalar ochildi"
-        RATING_APPLY = "rating_apply", "Reyting hisoblandi"
-        RATING_RECOMPUTE = "rating_recompute", "Reyting qayta hisoblandi"
-        FLAG_REVIEW = "flag_review", "O‘xshashlik ko‘rildi"
-        PROBLEM_DELETE = "problem_delete", "Masala o‘chirildi"
-        DAILY_SELECT = "daily_select", "Kun masalasi tanlandi"
-        CONTEST_DELETE = "contest_delete", "Musobaqa o‘chirildi"
-        USER_DELETE = "user_delete", "Foydalanuvchi o‘chirildi"
-        VERIFY = "verify", "Shaxsi tasdiqlandi"
-        UNVERIFY = "unverify", "Shaxs tasdig‘i bekor"
-        OFFICIAL_REVIEW = "official_review", "Kodini tushuntirdi"
-        OFFICIAL_APPLY = "official_apply", "Rasmiy reyting qo‘llandi"
+        DISQUALIFY = "disqualify", _tl("Diskvalifikatsiya")
+        REQUALIFY = "requalify", _tl("Diskvalifikatsiya bekor")
+        VOID = "void", _tl("Masala natijasi bekor")
+        UNVOID = "unvoid", _tl("Masala natijasi tiklandi")
+        PENALTY = "penalty", _tl("AI jarimasi: xato urinish, masala bloklandi")
+        REJUDGE = "rejudge", _tl("Qayta tekshiruv")
+        PUBLISH = "publish", _tl("Masalalar ochildi")
+        RATING_APPLY = "rating_apply", _tl("Reyting hisoblandi")
+        RATING_RECOMPUTE = "rating_recompute", _tl("Reyting qayta hisoblandi")
+        FLAG_REVIEW = "flag_review", _tl("O‘xshashlik ko‘rildi")
+        PROBLEM_DELETE = "problem_delete", _tl("Masala o‘chirildi")
+        DAILY_SELECT = "daily_select", _tl("Kun masalasi tanlandi")
+        CONTEST_DELETE = "contest_delete", _tl("Musobaqa o‘chirildi")
+        USER_DELETE = "user_delete", _tl("Foydalanuvchi o‘chirildi")
+        VERIFY = "verify", _tl("Shaxsi tasdiqlandi")
+        UNVERIFY = "unverify", _tl("Shaxs tasdig‘i bekor")
+        OFFICIAL_REVIEW = "official_review", _tl("Kodini tushuntirdi")
+        OFFICIAL_APPLY = "official_apply", _tl("Rasmiy reyting qo‘llandi")
 
     actor = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="+")
     action = models.CharField(max_length=20, choices=Action.choices)
@@ -159,8 +160,8 @@ class Report(models.Model):
     """What a signed-in user tells staff: a report about another user (a profile, a duel) or an appeal against
     their own result in a contest. Staff read them at /integrity/reports/ and mark them done."""
     class Kind(models.TextChoices):
-        USER = "user", "Shikoyat"
-        APPEAL = "appeal", "Apellyatsiya"
+        USER = "user", _tl("Shikoyat")
+        APPEAL = "appeal", _tl("Apellyatsiya")
 
     reporter = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="+")
     kind = models.CharField(max_length=10, choices=Kind.choices)

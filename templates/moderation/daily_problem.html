@@ -2,7 +2,7 @@
 {% block title %}{% trans "Kun masalasi — boshqaruv" %}{% endblock %}
 {% block content %}
 <div class="mb-6">
-  {% include "moderation/_header.html" with title="Kun masalasi" subtitle="Algoritm sanaga mos 5 ta variant tayyorlaydi. Admin tanlamasa, kunlik masala odatdagidek avtomatik belgilanadi." %}
+  {% include "moderation/_header.html" with title=_("Kun masalasi") subtitle=_("Algoritm sanaga mos 5 ta variant tayyorlaydi. Admin tanlamasa, kunlik masala odatdagidek avtomatik belgilanadi.") %}
 </div>
 
 {% if invalid_date %}<div class="ca-alert mb-4">{% trans "Sana bugun bilan keyingi 365 kun oralig‘ida bo‘lishi kerak. Yaqin sanani tanlang." %}</div>{% endif %}

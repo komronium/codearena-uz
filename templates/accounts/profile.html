@@ -63,7 +63,7 @@ Colour carries meaning only: the tier colour is the person, green/red the result
         <polyline points="{{ rating_chart.polyline }}" fill="none" stroke="rgb(var(--ca-accent-rgb))" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" />
         {% for pt in rating_chart.points %}
         <text x="{{ pt.x }}" y="{{ rating_chart.bottom|add:20 }}" text-anchor="middle" font-size="12.5" class="fill-mute tabular">{{ pt.date }}</text>
-        <g class="ca7-pt" tabindex="0" role="button" aria-label="{{ pt.title }}: {{ pt.rank }}-o‘rin{% if pt.of %} {{ pt.of }} tadan{% endif %}, {{ pt.delta|signed }}, reyting {{ pt.rating }}"
+        <g class="ca7-pt" tabindex="0" role="button" aria-label="{{ pt.title }}: {{ pt.rank }}{% trans '-o‘rin' %}{% if pt.of %} {{ pt.of }} {% trans 'tadan' %}{% endif %}, {{ pt.delta|signed }}{% trans ', reyting' %} {{ pt.rating }}"
            data-title="{{ pt.title }}" data-date="{{ pt.date }}" data-rank="{{ pt.rank }}" data-of="{{ pt.of|default:'' }}" data-delta="{{ pt.delta|signed }}" data-rating="{{ pt.rating }}" data-x="{{ pt.x }}" data-y="{{ pt.y }}">
           <circle cx="{{ pt.x }}" cy="{{ pt.y }}" r="14" fill="transparent" />
           <circle class="dot" cx="{{ pt.x }}" cy="{{ pt.y }}" r="5.5" fill="rgb(var(--ca-paper-rgb))" stroke="{{ pt.color }}" stroke-width="2.5" />
@@ -80,7 +80,7 @@ Colour carries meaning only: the tier colour is the person, green/red the result
           const d = g.dataset, up = d.delta.startsWith("+") && d.delta !== "+0";
           card.innerHTML = "";
           const b = document.createElement("b"); b.textContent = d.title;
-          const meta = document.createElement("span"); meta.textContent = `${d.date} · ${d.rank}-o‘rin${d.of ? " / " + d.of : ""}`;
+          const meta = document.createElement("span"); meta.textContent = `${d.date} · ${"{% jt "{r}-o‘rin" %}".replace("{r}", d.rank)}${d.of ? " / " + d.of : ""}`;
           const r = document.createElement("span"); r.className = "ca7-tip-r";
           const delta = document.createElement("em"); delta.textContent = d.delta; delta.className = up ? "is-up" : d.delta.startsWith("-") ? "is-down" : "";
           r.append(delta, ` → ${d.rating}`);

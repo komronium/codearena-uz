@@ -55,13 +55,13 @@
 
   const cityGroups = () => data.cities[country.value] || [];
   function fillCity(value, text) {
-    fill(city, cityGroups(), value, text, "Shaharni tanlang", "Boshqa shahar…");
+    fill(city, cityGroups(), value, text, caT("Shaharni tanlang"), caT("Boshqa shahar…"));
   }
 
   function fillSchool(value, text) {
     if (!school.select) return;
     const groups = data.schools[country.value] || [];
-    fill(school, groups, value, text, "O‘quv joyini tanlang", "Boshqa…");
+    fill(school, groups, value, text, caT("O‘quv joyini tanlang"), caT("Boshqa…"));
   }
 
   const initial = (box) => [box.select.dataset.value || "", box.other.dataset.value || ""];

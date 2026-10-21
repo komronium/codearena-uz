@@ -5,7 +5,7 @@
       const show = input.type === "password";
       input.type = show ? "text" : "password";
       btn.setAttribute("aria-pressed", show);
-      btn.setAttribute("aria-label", show ? "Parolni yashirish" : "Parolni ko‘rsatish");
+      btn.setAttribute("aria-label", show ? "{% jt "Parolni yashirish" %}" : "{% jt "Parolni ko‘rsatish" %}");
       btn.innerHTML = `<i data-lucide="${show ? "eye-off" : "eye"}" class="lu" aria-hidden="true"></i>`;
       window.caIcons();
       input.focus();

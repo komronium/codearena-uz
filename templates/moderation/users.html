@@ -2,7 +2,7 @@
 {% block title %}{% trans "Foydalanuvchilar — boshqaruv" %}{% endblock %}
 {% block content %}
 <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
-  <div>{% include "moderation/_header.html" with title="Foydalanuvchilar" subtitle="Rol, huquq va profil ma’lumotlari" %}</div>
+  <div>{% include "moderation/_header.html" with title="Foydalanuvchilar" subtitle=_("Rol, huquq va profil ma’lumotlari") %}</div>
   <form method="get" class="relative w-full max-w-xs" role="search">
     <i data-lucide="search" class="lu pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-mute" aria-hidden="true"></i>
     <input type="search" name="q" value="{{ q }}" placeholder="{% trans 'Login, email, ism, o‘quv joyi…' %}" class="ca-input !py-1.5 pl-8 text-sm" aria-label="{% trans 'Foydalanuvchi qidirish' %}">

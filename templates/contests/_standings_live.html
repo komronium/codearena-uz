@@ -23,7 +23,7 @@ a grey −N, accepted / tried per problem last. Codeforces rules have no penalty
     <tr>
       <th scope="col" class="ca-sticky ca-sticky-rank">#</th>
       <th scope="col" class="ca-sticky ca-sticky-user !text-left">{% trans "Ishtirokchi" %}</th>
-      <th scope="col" title="{% if contest.type == 'icpc' %}Yechilgan masalalar{% else %}Jami ball{% endif %}">{% if contest.type == 'icpc' %}{% trans "Yechildi" %}{% else %}{% trans "Ball" %}{% endif %}</th>
+      <th scope="col" title="{% if contest.type == 'icpc' %}{% trans 'Yechilgan masalalar' %}{% else %}{% trans 'Jami ball' %}{% endif %}">{% if contest.type == 'icpc' %}{% trans "Yechildi" %}{% else %}{% trans "Ball" %}{% endif %}</th>
       {% if contest.wrong_try_minutes is not None %}<th scope="col" title="{% blocktrans with contest_wrong_try_minutes=contest.wrong_try_minutes %}AC daqiqasi + {{ contest_wrong_try_minutes }} × noto‘g‘ri urinish (yechilgan masalalar bo‘yicha){% endblocktrans %}">{% trans "Jarima" %}</th>{% endif %}
       {% for cp in problems %}
       <th scope="col" class="ca-st-prob">
@@ -47,7 +47,7 @@ a grey −N, accepted / tried per problem last. Codeforces rules have no penalty
     <td class="ca-st-score tabular">{{ r.score }}</td>
     {% if contest.wrong_try_minutes is not None %}<td class="tabular text-mute">{{ r.penalty }}</td>{% endif %}
     {% for cell in r.cells %}
-    <td class="ca-cell{% if cell.first %} ca-cell-first{% endif %}"{% if cell.solved %} title="{% if cell.first %}Birinchi bo‘lib yechdi: {% endif %}{{ cell.time }}{% if cell.wrong %}, {{ cell.wrong }} ta noto‘g‘ri urinishdan keyin{% endif %}"{% endif %}>
+    <td class="ca-cell{% if cell.first %} ca-cell-first{% endif %}"{% if cell.solved %} title="{% if cell.first %}{% trans 'Birinchi bo‘lib yechdi:' %} {% endif %}{{ cell.time }}{% if cell.wrong %}, {{ cell.wrong }} {% trans 'ta noto‘g‘ri urinishdan keyin' %}{% endif %}"{% endif %}>
       {# staff: the cell opens this participant's submissions to this problem #}
       {% if user.is_staff %}{% with cp=problems|slice:forloop.counter|last %}<a class="ca-cell-link" href="{% url 'contests:submissions' contest.pk %}?user={{ r.user.username|urlencode }}&amp;problem={{ cp.label|urlencode }}" aria-label="{% blocktrans with r_user_username=r.user.username cp_label=cp.label %}{{ r_user_username }}, {{ cp_label }}: urinishlar{% endblocktrans %}"{% if cell.penalty %} title="{% trans 'AI jarimasi: natija bekor qilingan, xato urinish hisoblandi, masala bloklangan' %}"{% elif cell.voided %} title="{% trans 'Bekor qilingan' %}"{% endif %}>{% endwith %}{% endif %}
       {% if cell.first %}<span class="sr-only">{% trans "birinchi bo‘lib yechdi," %}</span>{% endif %}
@@ -67,7 +67,7 @@ a grey −N, accepted / tried per problem last. Codeforces rules have no penalty
     <td>
       <form method="post" action="{% url 'contests:disqualify' contest.pk r.user.pk %}" {% if not r.disqualified %}data-confirm="{% trans 'Diskvalifikatsiya sababi (ixtiyoriy):' %}" data-reason data-reason-default=""{% endif %}>{% csrf_token %}
         <input type="hidden" name="reason" value=""><input type="hidden" name="disqualified" value="{% if r.disqualified %}0{% else %}1{% endif %}">
-        <button class="ca-st-action" title="{% if r.disqualified %}Diskvalifikatsiyani bekor qilish{% else %}Diskvalifikatsiya qilish{% endif %}" aria-label="{% if r.disqualified %}Diskvalifikatsiyani bekor qilish{% else %}Diskvalifikatsiya qilish{% endif %}: {{ r.user.username }}">
+        <button class="ca-st-action" title="{% if r.disqualified %}{% trans 'Diskvalifikatsiyani bekor qilish' %}{% else %}{% trans 'Diskvalifikatsiya qilish' %}{% endif %}" aria-label="{% if r.disqualified %}{% trans 'Diskvalifikatsiyani bekor qilish' %}{% else %}{% trans 'Diskvalifikatsiya qilish' %}{% endif %}: {{ r.user.username }}">
           <i data-lucide="{% if r.disqualified %}undo-2{% else %}ban{% endif %}" class="lu" aria-hidden="true"></i>
         </button>
       </form>

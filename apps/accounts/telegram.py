@@ -2,6 +2,7 @@
 import hashlib
 import html
 import json
+
 import logging
 import secrets
 import urllib.error
@@ -10,10 +11,12 @@ from datetime import timedelta
 
 import django_rq
 from django.conf import settings
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db import IntegrityError, transaction
 from django.utils import timezone
 
 from .models import TelegramLink, TelegramLinkToken, TelegramLoginRequest, TelegramOutbox
+from django.utils.translation import gettext as _t
 
 log = logging.getLogger(__name__)
 LINK_TOKEN_TTL = timedelta(minutes=10)
@@ -38,7 +41,7 @@ def bot_api(method: str, payload: dict):
         raise TelegramAPIError("Telegram bot token is not configured", retryable=False)
     request = urllib.request.Request(
         f"https://api.telegram.org/bot{token}/{method}",
-        data=json.dumps(payload).encode(),
+        data=json.dumps(payload, cls=DjangoJSONEncoder).encode(),
         headers={"Content-Type": "application/json"},
         method="POST",
     )
@@ -260,7 +263,7 @@ def notify_duel_challenge(duel_id: int):
             return
         text = (f"<b>⚔️ Sizni duelga chaqirishdi</b>\n\n"
                 f"<b>{html.escape(duel.challenger.username)}</b> — {duel.get_language_display()}: "
-                f"5 ta savol, har biriga 20 soniya.\n"
+                f"{len(duel.questions)} ta savol, har biriga 20 soniya.\n"
                 f"3 kun ichida qabul qiling.\n\n"
                 f'<a href="{_site()}/classroom/duels/{duel.pk}/">Duelni ochish →</a>')
         queue_notification(duel.opponent_id, "notify_duels", f"duel:{duel.pk}:challenge", text)
@@ -283,7 +286,7 @@ def notify_duel_result(duel_id: int):
             right[player.pk] = r.points if r else 0
         for me, them, delta in ((duel.challenger, duel.opponent, duel.challenger_delta),
                                 (duel.opponent, duel.challenger, duel.opponent_delta)):
-            head = ("🏆 G‘alaba!" if duel.winner_id == me.pk else "Durang" if duel.winner_id is None else "Mag‘lubiyat")
+            head = (_t("🏆 G‘alaba!") if duel.winner_id == me.pk else "Durang" if duel.winner_id is None else _t("Mag‘lubiyat"))
             text = (f"<b>{head}</b>\n\n"
                     f"{html.escape(them.username)} bilan duel: <b>{right[me.pk]} : {right[them.pk]}</b>\n"
                     f"Duel reytingi: {delta:+d}\n\n"

@@ -93,7 +93,7 @@ it is scored, virtual participation.{% endcomment %}
       </span></div>
     {% if problems and not contest.has_started %}
     {# sealed until start for everyone, staff included; staff edit problems in moderation #}
-    <ul class="ca-locks" aria-label="Masalalar: harfi{% if contest.type != 'icpc' %} va bali{% endif %}">
+    <ul class="ca-locks" aria-label="{% trans 'Masalalar: harfi' %}{% if contest.type != 'icpc' %} {% trans 'va bali' %}{% endif %}">
       {% for cp in problems %}<li><b>{{ cp.label }}</b>{% if contest.type != "icpc" %}<small class="tabular">{% blocktrans with cp_points=cp.points %}{{ cp_points }} ball{% endblocktrans %}</small>{% endif %}</li>{% endfor %}
     </ul>
     <p class="ca7-foot-note"><i data-lucide="lock-keyhole" class="lu mr-1" aria-hidden="true"></i>{% trans "Musobaqa boshlanganda ochiladi." %}{% if not registered and user.is_authenticated and not user.is_staff %} {% trans "Qatnashish uchun oldindan «Qatnashish» tugmasini bosing." %}{% endif %}</p>
@@ -121,7 +121,7 @@ it is scored, virtual participation.{% endcomment %}
         {% if contest.type != "icpc" %}<td class="text-right"><span class="ca-worth"><b>{{ cp.points }}</b>{% if contest.type == "cf" and contest.is_running and cp.now_points is not None %}<small title="Hozir yechsangiz, xatosiz">{% blocktrans with cp_now_points=cp.now_points %}hozir {{ cp_now_points }}{% endblocktrans %}</small>{% endif %}</span></td>{% endif %}
         <td class="text-right tabular">{% if contest.has_started %}{{ cp.solved_count }} / {{ cp.n_tried }}{% else %}{{ cp.solved_count }}{% endif %}</td>
         {% if my_row %}<td class="text-right">
-          {% if cp.my_cell.solved %}<span class="ca-cf-cell" title="Yechilgan: {{ cp.my_cell.time }}{% if cp.my_cell.wrong %}, {{ cp.my_cell.wrong }} ta xatodan keyin{% endif %}"><b class="ca-cf-ac">{{ cp.my_cell.mark }}</b><span class="ca-cf-time">{{ cp.my_cell.time }}</span></span>
+          {% if cp.my_cell.solved %}<span class="ca-cf-cell" title="{% trans 'Yechilgan:' %} {{ cp.my_cell.time }}{% if cp.my_cell.wrong %}, {{ cp.my_cell.wrong }} {% trans 'ta xatodan keyin' %}{% endif %}"><b class="ca-cf-ac">{{ cp.my_cell.mark }}</b><span class="ca-cf-time">{{ cp.my_cell.time }}</span></span>
           {% elif cp.my_cell.wrong %}<span class="ca-cf-wa" title="{% blocktrans with cp_my_cell_wrong=cp.my_cell.wrong %}{{ cp_my_cell_wrong }} ta noto‘g‘ri urinish{% endblocktrans %}">−{{ cp.my_cell.wrong }}</span>
           {% else %}{% trans "<span class=\"text-mute\" aria-hidden=\"true\">—</span><span class=\"sr-only\">urinish yo‘q</span>" %}{% endif %}
         </td>{% endif %}
@@ -167,7 +167,7 @@ it is scored, virtual participation.{% endcomment %}
         {% else %}<div><dt>{% trans "Yechilgan" %}</dt><dd>{{ my_row.solved }}<small>/ {{ problems|length }}</small></dd></div>{% endif %}
       </dl>
       <ul class="ca-pcells" aria-label="{% trans 'Masalalar bo‘yicha' %}">
-        {% for cell in my_row.cells %}{% with cp=problems|slice:forloop.counter|last %}<li class="{% if cell.solved %}is-ok{% elif cell.wrong %}is-try{% endif %}" title="{{ cp.label }}: {% if cell.solved %}yechilgan {{ cell.time }}{% elif cell.wrong %}{{ cell.wrong }} ta noto‘g‘ri urinish{% else %}urinish yo‘q{% endif %}"><b>{{ cp.label }}</b><small class="tabular">{% if cell.solved %}{{ cell.time }}{% elif cell.wrong %}−{{ cell.wrong }}{% else %}—{% endif %}</small></li>{% endwith %}{% endfor %}
+        {% for cell in my_row.cells %}{% with cp=problems|slice:forloop.counter|last %}<li class="{% if cell.solved %}is-ok{% elif cell.wrong %}is-try{% endif %}" title="{{ cp.label }}: {% if cell.solved %}{% trans 'yechilgan' %} {{ cell.time }}{% elif cell.wrong %}{{ cell.wrong }} {% trans 'ta noto‘g‘ri urinish' %}{% else %}{% trans 'urinish yo‘q' %}{% endif %}"><b>{{ cp.label }}</b><small class="tabular">{% if cell.solved %}{{ cell.time }}{% elif cell.wrong %}−{{ cell.wrong }}{% else %}—{% endif %}</small></li>{% endwith %}{% endfor %}
       </ul>
       {% if my_row.rating_delta is not None and my_participation.rating_after is not None %}<p class="mt-3 text-xs text-mute">{% blocktrans with my_participation_rating_before=my_participation.rating_before my_participation_rating_after=my_participation.rating_after %}Reyting <b class="text-ink">{{ my_participation_rating_before }}</b> dan <b class="text-ink">{{ my_participation_rating_after }}</b> ga{% endblocktrans %} {% if my_row.rating_delta >= 0 %}{% trans "chiqdi" %}{% else %}{% trans "tushdi" %}{% endif %}.</p>{% endif %}
     </div>
@@ -217,7 +217,7 @@ it is scored, virtual participation.{% endcomment %}
       <p>{% if virtual.running %}{% trans "Vaqt siz boshlagan paytdan hisoblanadi. Hozirgi natija bilan siz" %}{% else %}{% trans "Siz" %}{% endif %}
         {% blocktrans with virtual_rank=virtual.rank virtual_field=virtual.field %}<b>{{ virtual_rank }}-o‘rin</b>da bo‘lardingiz ({{ virtual_field }} ishtirokchidan):{% endblocktrans %} {% if contest.type == "icpc" %}{% blocktrans with virtual_solved=virtual.solved %}<b class="tabular">{{ virtual_solved }}</b> ta masala{% endblocktrans %}{% else %}{% blocktrans with virtual_score=virtual.score %}ball <b class="tabular">{{ virtual_score }}</b>{% endblocktrans %}{% endif %}{% if contest.wrong_try_minutes is not None %}{% blocktrans with virtual_penalty=virtual.penalty %}, jarima <b class="tabular">{{ virtual_penalty }}</b>{% endblocktrans %}{% endif %}.</p>
       <p class="mt-2 flex flex-wrap gap-x-3 gap-y-1">
-        {% for c in virtual.cells %}<span class="ca-st-pill" title="{{ c.cp.label }}: {% if c.solved %}yechilgan {{ c.time }}{% elif c.wrong %}{{ c.wrong }} ta noto‘g‘ri urinish{% else %}urinish yo‘q{% endif %}">{{ c.cp.label }}{% if c.solved %}<b class="ca-cf-ac">{{ c.mark }}</b>{% elif c.wrong %}<b class="ca-cf-wa">−{{ c.wrong }}</b>{% else %}<b class="text-line" aria-hidden="true">·</b>{% endif %}</span>{% endfor %}
+        {% for c in virtual.cells %}<span class="ca-st-pill" title="{{ c.cp.label }}: {% if c.solved %}{% trans 'yechilgan' %} {{ c.time }}{% elif c.wrong %}{{ c.wrong }} {% trans 'ta noto‘g‘ri urinish' %}{% else %}{% trans 'urinish yo‘q' %}{% endif %}">{{ c.cp.label }}{% if c.solved %}<b class="ca-cf-ac">{{ c.mark }}</b>{% elif c.wrong %}<b class="ca-cf-wa">−{{ c.wrong }}</b>{% else %}<b class="text-line" aria-hidden="true">·</b>{% endif %}</span>{% endfor %}
       </p>
       {% if not virtual.running %}<p class="mt-2 text-xs text-mute">{% trans "Reytingga ta’sir qilmaydi." %}</p>{% endif %}
     </div>

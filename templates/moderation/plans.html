@@ -2,7 +2,7 @@
 {% block title %}{% trans "Kurslar — boshqaruv" %}{% endblock %}
 {% block content %}
 <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
-  <div>{% include "moderation/_header.html" with title="Kurslar" subtitle="Har kurs — bitta mavzu. Masalalar kursga teglari orqali tushadi." %}</div>
+  <div>{% include "moderation/_header.html" with title="Kurslar" subtitle=_("Har kurs — bitta mavzu. Masalalar kursga teglari orqali tushadi.") %}</div>
   <a href="{% url 'moderation:plan_new' %}" class="ca-btn ca-btn-primary"><i data-lucide="plus" class="lu" aria-hidden="true"></i>{% trans "Kurs qo‘shish" %}</a>
 </div>
 {% if plans %}

@@ -7,7 +7,7 @@
     document.querySelectorAll("th a.ca-sort-on").forEach((a) => {
       const th = a.closest("th");
       if (!th || th.hasAttribute("aria-sort")) return;
-      th.setAttribute("aria-sort", /o‘sish/.test(a.textContent) ? "ascending" : "descending");
+      th.setAttribute("aria-sort", new RegExp(caT("o‘sish")).test(a.textContent) ? "ascending" : "descending");
     });
     const bad = document.querySelector('form [aria-invalid="true"]');
     if (bad && (document.activeElement === document.body || !document.activeElement)) {

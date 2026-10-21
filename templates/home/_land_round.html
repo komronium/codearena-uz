@@ -4,6 +4,6 @@
   <div class="min-w-0 flex-1">
     <small>{% if state == "running" %}{% trans "Jonli musobaqa" %}{% else %}{% trans "Kelgusi musobaqa" %}{% endif %}</small>
     <a class="ca-link ca7-mis-t" href="{% url 'contests:detail' c.pk %}">{% blocktrans with c_title=c.title c_start=c.start|ztime:"d.m.Y H:i" c_duration_label=c.duration_label c_n_participants=c.n_participants %}{{ c_title }}</a> <small class="tabular">{{ c_start }} · {{ c_duration_label }} · {{ c_n_participants }} ishtirokchi</small>{% endblocktrans %}
-    <div class="ca7-mis-f"><span class="ca7-pill is-warn tabular" data-countdown="{% if state == 'running' %}{{ c.end|date:'c' }}{% else %}{{ c.start|date:'c' }}{% endif %}" data-label="{% if state == 'running' %}qoldi{% else %}keyin{% endif %}" data-suffix="1"></span></div>
+    <div class="ca7-mis-f"><span class="ca7-pill is-warn tabular" data-countdown="{% if state == 'running' %}{{ c.end|date:'c' }}{% else %}{{ c.start|date:'c' }}{% endif %}" data-label="{% if state == 'running' %}{% trans 'qoldi' %}{% else %}{% trans 'keyin' %}{% endif %}" data-suffix="1"></span></div>
   </div>
 </div>

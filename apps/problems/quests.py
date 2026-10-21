@@ -10,6 +10,7 @@ from django.db.models import Case, Count, F, Q, When
 from django.db.models.functions import TruncDate
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import gettext as _t
 
 MAX_FREEZES = 2
 FREEZE_EVERY = 7
@@ -95,11 +96,11 @@ def today_quests(user) -> dict:
     daily = daily_for()
     daily_done = bool(daily) and DailySolve.objects.filter(user=user, daily=daily).exists()
     rows = [
-        {"key": "easy", "title": "Easy masala yeching", "hint": "Beginner yoki Easy darajali bitta masala", "icon": "code",
+        {"key": "easy", "title": _t("Easy masala yeching"), "hint": _t("Beginner yoki Easy darajali bitta masala"), "icon": "code",
          "href": reverse("problems:list") + "?difficulty=easy&status=new", "done": today in found["easy"]},
-        {"key": "duel", "title": "Duelda g‘alaba qozoning", "hint": "1 ga 1 savollar duelida yuting", "icon": "swords",
+        {"key": "duel", "title": _t("Duelda g‘alaba qozoning"), "hint": "1 ga 1 savollar duelida yuting", "icon": "swords",
          "href": reverse("classroom:duels"), "done": today in found["duel"]},
-        {"key": "course", "title": "Kurs nazariyasini o‘qing", "hint": "Kursda «Tushundim»ni bosing", "icon": "book-open",
+        {"key": "course", "title": _t("Kurs nazariyasini o‘qing"), "hint": "Kursda «Tushundim»ni bosing", "icon": "book-open",
          "href": reverse("learn:hub"), "done": today in found["course"]},
     ]
     done = sum(r["done"] for r in rows)

@@ -18,7 +18,7 @@ ctx: ring (apps.problems.progress.solved_ring), attempting (optional: tried, not
   <ul class="ca-sr-rows">
     {% for s in ring.segments %}
     <li style="--lvl: var(--ca-lvl-{{ s.value }}-ink); --dot: var(--ca-lvl-{{ s.value }})">
-      <a class="ca-sr-hit" data-i="{{ s.i }}" href="{% url 'problems:list' %}?difficulty={{ s.value }}{% if user.is_authenticated and s.done < s.total %}&amp;status=new{% endif %}" title="{{ s.label }}: {% if s.done < s.total %}yechilmaganlarni ochish{% else %}hammasi yechilgan{% endif %}">
+      <a class="ca-sr-hit" data-i="{{ s.i }}" href="{% url 'problems:list' %}?difficulty={{ s.value }}{% if user.is_authenticated and s.done < s.total %}&amp;status=new{% endif %}" title="{{ s.label }}: {% if s.done < s.total %}{% trans 'yechilmaganlarni ochish' %}{% else %}{% trans 'hammasi yechilgan' %}{% endif %}">
         <i class="ca-sr-dot" aria-hidden="true"></i>
         <span class="ca-sr-lv">{{ s.label }}</span>
         <b class="tabular"><span class="ca-sr-n">{{ s.done }}<small>/{{ s.total }}</small></span>{% if s.top is not None %}<span class="ca-sr-p" aria-hidden="true">{{ s.top }}<small>%</small></span>{% endif %}</b>

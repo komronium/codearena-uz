@@ -60,13 +60,13 @@ participant asks from the side card; staff answer, they never ask.{% endcomment 
   document.getElementById("ask-clar-form")?.addEventListener("submit", function () {
     const b = this.querySelector("button[type=submit]");
     b.disabled = true;
-    b.textContent = "Yuborilmoqda…";
+    b.textContent = "{% jt "Yuborilmoqda…" %}";
   });
   document.addEventListener("submit", function (e) {
     if (!e.target.matches(".clar-answer-form")) return;
     const b = e.target.querySelector("button[type=submit]");
     b.disabled = true;
-    b.textContent = "Yuborilmoqda…";
+    b.textContent = "{% jt "Yuborilmoqda…" %}";
   });
 </script>
 {% endblock %}

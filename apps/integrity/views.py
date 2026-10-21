@@ -22,6 +22,7 @@ from .models import (AuditEntry, CodeSnapshot, DeviceSeen, FocusEvent, PracticeE
                      PracticeSnapshot, SimilarityFlag)
 from .practice import suspicious_solves
 from .similarity import MIN_LINES, THRESHOLD, matched_lines
+from django.utils.translation import gettext as _t
 
 # First-open-to-AC time no genuine read-think-type pass beats, per difficulty (beginner: none).
 _SPEED_LIMITS_S = {Problem.Difficulty.EASY: 90, Problem.Difficulty.MEDIUM: 240, Problem.Difficulty.HARD: 420}
@@ -324,9 +325,9 @@ def flag_user(request, pk, user_id):
     user = get_object_or_404(User, pk=user_id)
     created = deep_check(contest, user)
     if created:
-        messages.success(request, f"{user.username}: {created} ta yangi o‘xshashlik topildi — pastda, «O‘xshash kodlar»da.")
+        messages.success(request, _t("{user_username}: {created} ta yangi o‘xshashlik topildi — pastda, «O‘xshash kodlar»da.").format(user_username=user.username, created=created))
     else:
-        messages.info(request, f"{user.username}: barcha urinishlari tekshirildi, yangi o‘xshashlik topilmadi.")
+        messages.info(request, _t("{user_username}: barcha urinishlari tekshirildi, yangi o‘xshashlik topilmadi.").format(user_username=user.username))
     return redirect(reverse("integrity:contest_report", args=[pk]) + "#flags")
 
 
@@ -336,10 +337,10 @@ def flag_run(request, pk):
     contest = get_object_or_404(Contest, pk=pk)
     labels = request.POST.getlist("problems")
     if not labels:
-        messages.error(request, "Tekshirish uchun kamida bitta masalani tanlang.")
+        messages.error(request, _t("Tekshirish uchun kamida bitta masalani tanlang."))
         return redirect("integrity:contest_report", contest.pk)
     call_command("flag_similarity", contest.pk, problems=",".join(labels))
-    messages.success(request, f"O‘xshashlik tekshirildi: {', '.join(labels)}.")
+    messages.success(request, _t("O‘xshashlik tekshirildi: {join_labels}.").format(join_labels=', '.join(labels)))
     return redirect("integrity:contest_report", contest.pk)
 
 
@@ -417,8 +418,8 @@ def practice_decide(request, user_id, problem_id):
     from apps.submissions.solves import sync_practice_points
 
     sync_practice_points([user_id])
-    messages.success(request, {"confirm": "Tasdiqlandi — bu yechim uchun ball berilmaydi.",
-                               "clear": "Belgilandi: shubha yo‘q.", "undo": "Qaror bekor qilindi."}[decision])
+    messages.success(request, {"confirm": _t("Tasdiqlandi — bu yechim uchun ball berilmaydi."),
+                               "clear": _t("Belgilandi: shubha yo‘q."), "undo": "Qaror bekor qilindi."}[decision])
     back = request.POST.get("back", "")
     if not url_has_allowed_host_and_scheme(back, allowed_hosts={request.get_host()}):
         back = reverse("integrity:practice_report")
@@ -437,10 +438,10 @@ def report_create(request):
     if not url_has_allowed_host_and_scheme(back, allowed_hosts={request.get_host()}):
         back = "/"
     if kind not in Report.Kind.values or len(text) < 5:
-        messages.error(request, "Xabarni kamida bir necha so‘z bilan yozing.")
+        messages.error(request, _t("Xabarni kamida bir necha so‘z bilan yozing."))
         return redirect(back)
     if rate_limited(request.user.id, "report", 5):  # a minute; the page is for real problems, not floods
-        messages.error(request, "Juda tez-tez. Bir daqiqadan keyin qayta urinib ko‘ring.")
+        messages.error(request, _t("Juda tez-tez. Bir daqiqadan keyin qayta urinib ko‘ring."))
         return redirect(back)
     report = Report(reporter=request.user, kind=kind, text=text, link=back[:300])
     if kind == Report.Kind.USER:
@@ -480,5 +481,5 @@ def report_done(request, pk):
         from apps.accounts.notifications import notify
         what = "Apellyatsiyangiz" if report.kind == Report.Kind.APPEAL else "Shikoyatingiz"
         notify(report.reporter_id, "report", f"report:{report.pk}:done",
-               f"{what} ko‘rib chiqildi" + (f": {report.outcome}" if report.outcome else ""), "/")
+               _t("{what} ko‘rib chiqildi").format(what=what) + (f": {report.outcome}" if report.outcome else ""), "/")
     return redirect("integrity:reports")

@@ -46,6 +46,7 @@ from .models import (
 )
 from . import ai_marks
 from .skills import next_problems, shared_reason
+from django.utils.translation import gettext as _t
 
 # Markdown itself passes raw HTML straight through; sanitize the rendered
 # output before any template marks it |safe, since statement_md is authored
@@ -211,7 +212,7 @@ def _random_pick(request, problems, status):
     slug = pool.order_by("?").values_list("slug", flat=True).first()
     if slug:
         return redirect("problems:detail", slug)
-    messages.info(request, "Bu filtrda yechilmagan masala qolmadi.")
+    messages.info(request, _t("Bu filtrda yechilmagan masala qolmadi."))
     params = request.GET.copy()
     params.pop("random")
     return redirect(f"{reverse('problems:list')}?{params.urlencode()}")

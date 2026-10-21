@@ -17,6 +17,7 @@ from apps.contests.models import Participation
 
 from . import throttle
 from .models import Club, User
+from django.utils.translation import gettext as _t
 
 TEAM_SIZE = 5  # a club's rating is the sum of its best five members' ratings
 
@@ -75,11 +76,11 @@ def club_create(request):
     if request.user.club_id:
         messages.error(request, "Avval hozirgi klubingizdan chiqing.")
     elif len(name) < 3:
-        messages.error(request, "Klub nomi kamida 3 belgi bo‘lsin.")
+        messages.error(request, _t("Klub nomi kamida 3 belgi bo‘lsin."))
     elif Club.objects.filter(name__iexact=name).exists():
-        messages.error(request, "Bunday nomli klub bor: unga qo‘shiling.")
+        messages.error(request, _t("Bunday nomli klub bor: unga qo‘shiling."))
     elif throttle.blocked(f"thr:club-create:{request.user.pk}", 3, 86400):
-        messages.error(request, "Kuniga 3 tadan ko‘p klub ochib bo‘lmaydi.")
+        messages.error(request, _t("Kuniga 3 tadan ko‘p klub ochib bo‘lmaydi."))
     else:
         try:
             with transaction.atomic():
@@ -87,9 +88,9 @@ def club_create(request):
                                            owner=request.user)
                 User.objects.filter(pk=request.user.pk).update(club=club)
         except IntegrityError:
-            messages.error(request, "Bunday nomli klub bor.")
+            messages.error(request, _t("Bunday nomli klub bor."))
         else:
-            messages.success(request, f"«{club.name}» klubi ochildi. Havolani do‘stlaringizga yuboring.")
+            messages.success(request, _t("«{club_name}» klubi ochildi. Havolani do‘stlaringizga yuboring.").format(club_name=club.name))
             return redirect("club", club.slug)
     return redirect("clubs")
 
@@ -99,12 +100,12 @@ def club_create(request):
 def club_join(request, slug):
     club = get_object_or_404(Club, slug=slug)
     if request.POST.get("code", "") != club.join_code:
-        messages.error(request, "Qo‘shilish havolasi noto‘g‘ri yoki eskirgan.")
+        messages.error(request, _t("Qo‘shilish havolasi noto‘g‘ri yoki eskirgan."))
     elif request.user.club_id and request.user.club_id != club.pk:
         messages.error(request, "Avval hozirgi klubingizdan chiqing.")
     else:
         User.objects.filter(pk=request.user.pk).update(club=club)
-        messages.success(request, f"«{club.name}» klubiga qo‘shildingiz.")
+        messages.success(request, _t("«{club_name}» klubiga qo‘shildingiz.").format(club_name=club.name))
     return redirect("club", club.slug)
 
 
@@ -121,7 +122,7 @@ def club_leave(request, slug):
                 club.save(update_fields=["owner"])
             else:
                 club.delete()
-                messages.success(request, "Klubdan chiqdingiz; u bo‘sh qolgani uchun yopildi.")
+                messages.success(request, _t("Klubdan chiqdingiz; u bo‘sh qolgani uchun yopildi."))
                 return redirect("clubs")
         messages.success(request, "Klubdan chiqdingiz.")
     return redirect("clubs")

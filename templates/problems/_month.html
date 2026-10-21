@@ -4,6 +4,6 @@ neighbouring months' days faint. ctx: month (apps.problems.daily.month_strip).{%
 <div class="ca7-cal" role="list" aria-label="{% blocktrans with month_label=month.label %}Kun masalasi, {{ month_label }}{% endblocktrans %}">
   {% for w in month.weekdays %}<span class="is-wd" aria-hidden="true">{{ w }}</span>{% endfor %}
   {% for week in month.weeks %}{% for d in week %}
-  <span role="listitem" class="{% if not d.in_month %}is-out{% endif %}{% if d.done %} is-done{% endif %}{% if d.today %} is-today{% endif %}" title="{{ d.date|date:'d.m' }}{% if d.done %}: yechilgan{% elif d.today %}: bugun{% endif %}">{{ d.day }}<span class="sr-only">{% if d.done %}{% trans ", yechilgan" %}{% elif d.today %}{% trans ", bugun" %}{% endif %}</span></span>
+  <span role="listitem" class="{% if not d.in_month %}is-out{% endif %}{% if d.done %} is-done{% endif %}{% if d.today %} is-today{% endif %}" title="{{ d.date|date:'d.m' }}{% if d.done %}{% trans ': yechilgan' %}{% elif d.today %}{% trans ': bugun' %}{% endif %}">{{ d.day }}<span class="sr-only">{% if d.done %}{% trans ", yechilgan" %}{% elif d.today %}{% trans ", bugun" %}{% endif %}</span></span>
   {% endfor %}{% endfor %}
 </div>

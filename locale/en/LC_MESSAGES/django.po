@@ -1,0 +1,4889 @@
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: CodeArena\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: apps/accounts/badges.py
+msgid "bronza"
+msgstr "bronze"
+
+#: apps/accounts/badges.py
+msgid "kumush"
+msgstr "silver"
+
+#: apps/accounts/badges.py
+msgid "oltin"
+msgstr "gold"
+
+#: apps/accounts/badges.py
+msgid "platina"
+msgstr "platinum"
+
+#: apps/accounts/badges.py
+msgid "olmos"
+msgstr "diamond"
+
+#: apps/accounts/badges.py templates/403.html
+msgid "Masalalar"
+msgstr "Problems"
+
+#: apps/accounts/badges.py templates/_mod_tabs.html
+msgid "Kurslar"
+msgstr "Courses"
+
+#: apps/accounts/badges.py templates/404.html
+msgid "Musobaqalar"
+msgstr "Contests"
+
+#: apps/accounts/badges.py templates/_mod_tabs.html
+msgid "Duellar"
+msgstr "Duels"
+
+#: apps/accounts/badges.py
+msgid "Yechuvchi"
+msgstr "Solver"
+
+#: apps/accounts/badges.py
+msgid "{n} ta masala yechildi"
+msgstr "{n} problems solved"
+
+#: apps/accounts/badges.py
+msgid "Cho‘qqi"
+msgstr "Summit"
+
+#: apps/accounts/badges.py
+msgid "{n} ta Hard masala"
+msgstr "{n} Hard problems"
+
+#: apps/accounts/badges.py templates/_navbar.html
+msgid "Olov"
+msgstr "Streak"
+
+#: apps/accounts/badges.py
+msgid "{n} kun ketma-ket"
+msgstr "{n} days in a row"
+
+#: apps/accounts/badges.py
+msgid "Bilimdon"
+msgstr "Scholar"
+
+#: apps/accounts/badges.py
+msgid "{n} ta kurs tugatildi"
+msgstr "{n} courses completed"
+
+#: apps/accounts/badges.py
+msgid "Musobaqachi"
+msgstr "Contestant"
+
+#: apps/accounts/badges.py
+msgid "{n} ta reytingli musobaqa"
+msgstr "{n} rated contests"
+
+#: apps/accounts/badges.py
+msgid "Sovrindor"
+msgstr "Podium"
+
+#: apps/accounts/badges.py
+msgid "{n} marta top-3"
+msgstr "{n} times in the top 3"
+
+#: apps/accounts/badges.py
+msgid "Duelchi"
+msgstr "Duelist"
+
+#: apps/accounts/badges.py
+msgid "{n} ta g‘alaba"
+msgstr "{n} wins"
+
+#: apps/accounts/badges.py
+msgid "Yengilmas"
+msgstr "Unbeatable"
+
+#: apps/accounts/badges.py
+msgid "{n} ta g‘alaba ketma-ket"
+msgstr "{n} wins in a row"
+
+#: apps/accounts/badges.py
+msgid "Duel ustasi"
+msgstr "Duel master"
+
+#: apps/accounts/badges.py
+msgid "Duel reytingi {n}"
+msgstr "Duel rating {n}"
+
+#: apps/accounts/badges.py
+msgid "Mukammal"
+msgstr "Flawless"
+
+#: apps/accounts/badges.py
+msgid "{n} marta xatosiz duel"
+msgstr "{n} flawless duels"
+
+#: apps/accounts/badges.py
+msgid "Chaqmoq"
+msgstr "Lightning"
+
+#: apps/accounts/badges.py
+msgid "{n} marta xatosiz va tez (savolga o‘rtacha 6 soniyadan kam)"
+msgstr "{n} flawless fast duels (under 6 seconds a question on average)"
+
+#: apps/accounts/badges.py
+msgid "Poliglot"
+msgstr "Polyglot"
+
+#: apps/accounts/badges.py
+msgid "{n} ta tilda g‘alaba"
+msgstr "Wins in {n} languages"
+
+#: apps/accounts/clubs.py
+msgid "Qo‘shilish havolasi noto‘g‘ri yoki eskirgan."
+msgstr "The join link is invalid or has expired."
+
+#: apps/accounts/clubs.py
+msgid "Klub nomi kamida 3 belgi bo‘lsin."
+msgstr "A club name needs at least 3 characters."
+
+#: apps/accounts/clubs.py
+msgid "Bunday nomli klub bor: unga qo‘shiling."
+msgstr "A club with this name exists: join it instead."
+
+#: apps/accounts/clubs.py
+msgid "Klubdan chiqdingiz; u bo‘sh qolgani uchun yopildi."
+msgstr "You left the club; it was closed because it is empty."
+
+#: apps/accounts/clubs.py
+msgid "Kuniga 3 tadan ko‘p klub ochib bo‘lmaydi."
+msgstr "You can't create more than 3 clubs a day."
+
+#: apps/accounts/clubs.py
+msgid "«{club_name}» klubiga qo‘shildingiz."
+msgstr "You joined the club “{club_name}”."
+
+#: apps/accounts/clubs.py
+msgid "Bunday nomli klub bor."
+msgstr "A club with this name already exists."
+
+#: apps/accounts/clubs.py
+msgid "«{club_name}» klubi ochildi. Havolani do‘stlaringizga yuboring."
+msgstr "The club “{club_name}” was created. Send the link to your friends."
+
+#: apps/accounts/countries.py
+msgid "O‘zbekiston"
+msgstr "Uzbekistan"
+
+#: apps/accounts/countries.py
+msgid "Qozog‘iston"
+msgstr "Kazakhstan"
+
+#: apps/accounts/countries.py
+msgid "Qirg‘iziston"
+msgstr "Kyrgyzstan"
+
+#: apps/accounts/countries.py
+msgid "Tojikiston"
+msgstr "Tajikistan"
+
+#: apps/accounts/countries.py
+msgid "Turkmaniston"
+msgstr "Turkmenistan"
+
+#: apps/accounts/countries.py
+msgid "Afg‘oniston"
+msgstr "Afghanistan"
+
+#: apps/accounts/countries.py
+msgid "Rossiya"
+msgstr "Russia"
+
+#: apps/accounts/countries.py
+msgid "Turkiya"
+msgstr "Turkey"
+
+#: apps/accounts/countries.py
+msgid "Albaniya"
+msgstr "Albania"
+
+#: apps/accounts/countries.py
+msgid "Jazoir"
+msgstr "Algeria"
+
+#: apps/accounts/countries.py
+msgid "Andorra"
+msgstr "Andorra"
+
+#: apps/accounts/countries.py
+msgid "Angola"
+msgstr "Angola"
+
+#: apps/accounts/countries.py
+msgid "Antigua va Barbuda"
+msgstr "Antigua and Barbuda"
+
+#: apps/accounts/countries.py
+msgid "Argentina"
+msgstr "Argentina"
+
+#: apps/accounts/countries.py
+msgid "Armaniston"
+msgstr "Armenia"
+
+#: apps/accounts/countries.py
+msgid "Avstraliya"
+msgstr "Australia"
+
+#: apps/accounts/countries.py
+msgid "Avstriya"
+msgstr "Austria"
+
+#: apps/accounts/countries.py
+msgid "Ozarbayjon"
+msgstr "Azerbaijan"
+
+#: apps/accounts/countries.py
+msgid "Bagama orollari"
+msgstr "Bahamas"
+
+#: apps/accounts/countries.py
+msgid "Bahrayn"
+msgstr "Bahrain"
+
+#: apps/accounts/countries.py
+msgid "Bangladesh"
+msgstr "Bangladesh"
+
+#: apps/accounts/countries.py
+msgid "Barbados"
+msgstr "Barbados"
+
+#: apps/accounts/countries.py
+msgid "Belarus"
+msgstr "Belarus"
+
+#: apps/accounts/countries.py
+msgid "Belgiya"
+msgstr "Belgium"
+
+#: apps/accounts/countries.py
+msgid "Beliz"
+msgstr "Belize"
+
+#: apps/accounts/countries.py
+msgid "Benin"
+msgstr "Benin"
+
+#: apps/accounts/countries.py
+msgid "Butan"
+msgstr "Bhutan"
+
+#: apps/accounts/countries.py
+msgid "Boliviya"
+msgstr "Bolivia"
+
+#: apps/accounts/countries.py
+msgid "Bosniya va Gersegovina"
+msgstr "Bosnia and Herzegovina"
+
+#: apps/accounts/countries.py
+msgid "Botsvana"
+msgstr "Botswana"
+
+#: apps/accounts/countries.py
+msgid "Braziliya"
+msgstr "Brazil"
+
+#: apps/accounts/countries.py
+msgid "Bruney"
+msgstr "Brunei"
+
+#: apps/accounts/countries.py
+msgid "Bolgariya"
+msgstr "Bulgaria"
+
+#: apps/accounts/countries.py
+msgid "Burkina-Faso"
+msgstr "Burkina Faso"
+
+#: apps/accounts/countries.py
+msgid "Burundi"
+msgstr "Burundi"
+
+#: apps/accounts/countries.py
+msgid "Kabo-Verde"
+msgstr "Cape Verde"
+
+#: apps/accounts/countries.py
+msgid "Kambodja"
+msgstr "Cambodia"
+
+#: apps/accounts/countries.py
+msgid "Kamerun"
+msgstr "Cameroon"
+
+#: apps/accounts/countries.py
+msgid "Kanada"
+msgstr "Canada"
+
+#: apps/accounts/countries.py
+msgid "Markaziy Afrika Respublikasi"
+msgstr "Central African Republic"
+
+#: apps/accounts/countries.py
+msgid "Chad"
+msgstr "Chad"
+
+#: apps/accounts/countries.py
+msgid "Chili"
+msgstr "Chile"
+
+#: apps/accounts/countries.py
+msgid "Xitoy"
+msgstr "China"
+
+#: apps/accounts/countries.py
+msgid "Kolumbiya"
+msgstr "Colombia"
+
+#: apps/accounts/countries.py
+msgid "Komor orollari"
+msgstr "Comoros"
+
+#: apps/accounts/countries.py
+msgid "Kongo"
+msgstr "Congo"
+
+#: apps/accounts/countries.py
+msgid "Kongo Demokratik Respublikasi"
+msgstr "Democratic Republic of the Congo"
+
+#: apps/accounts/countries.py
+msgid "Kosta-Rika"
+msgstr "Costa Rica"
+
+#: apps/accounts/countries.py
+msgid "Kot-d’Ivuar"
+msgstr "Côte d’Ivoire"
+
+#: apps/accounts/countries.py
+msgid "Xorvatiya"
+msgstr "Croatia"
+
+#: apps/accounts/countries.py
+msgid "Kuba"
+msgstr "Cuba"
+
+#: apps/accounts/countries.py
+msgid "Kipr"
+msgstr "Cyprus"
+
+#: apps/accounts/countries.py
+msgid "Chexiya"
+msgstr "Czechia"
+
+#: apps/accounts/countries.py
+msgid "Daniya"
+msgstr "Denmark"
+
+#: apps/accounts/countries.py
+msgid "Jibuti"
+msgstr "Djibouti"
+
+#: apps/accounts/countries.py
+msgid "Dominika"
+msgstr "Dominica"
+
+#: apps/accounts/countries.py
+msgid "Dominikan Respublikasi"
+msgstr "Dominican Republic"
+
+#: apps/accounts/countries.py
+msgid "Ekvador"
+msgstr "Ecuador"
+
+#: apps/accounts/countries.py
+msgid "Misr"
+msgstr "Egypt"
+
+#: apps/accounts/countries.py
+msgid "Salvador"
+msgstr "El Salvador"
+
+#: apps/accounts/countries.py
+msgid "Ekvatorial Gvineya"
+msgstr "Equatorial Guinea"
+
+#: apps/accounts/countries.py
+msgid "Eritreya"
+msgstr "Eritrea"
+
+#: apps/accounts/countries.py
+msgid "Estoniya"
+msgstr "Estonia"
+
+#: apps/accounts/countries.py
+msgid "Esvatini"
+msgstr "Eswatini"
+
+#: apps/accounts/countries.py
+msgid "Efiopiya"
+msgstr "Ethiopia"
+
+#: apps/accounts/countries.py
+msgid "Fiji"
+msgstr "Fiji"
+
+#: apps/accounts/countries.py
+msgid "Finlandiya"
+msgstr "Finland"
+
+#: apps/accounts/countries.py
+msgid "Fransiya"
+msgstr "France"
+
+#: apps/accounts/countries.py
+msgid "Gabon"
+msgstr "Gabon"
+
+#: apps/accounts/countries.py
+msgid "Gambiya"
+msgstr "Gambia"
+
+#: apps/accounts/countries.py
+msgid "Gruziya"
+msgstr "Georgia"
+
+#: apps/accounts/countries.py
+msgid "Germaniya"
+msgstr "Germany"
+
+#: apps/accounts/countries.py
+msgid "Gana"
+msgstr "Ghana"
+
+#: apps/accounts/countries.py
+msgid "Gretsiya"
+msgstr "Greece"
+
+#: apps/accounts/countries.py
+msgid "Grenada"
+msgstr "Grenada"
+
+#: apps/accounts/countries.py
+msgid "Gvatemala"
+msgstr "Guatemala"
+
+#: apps/accounts/countries.py
+msgid "Gvineya"
+msgstr "Guinea"
+
+#: apps/accounts/countries.py
+msgid "Gvineya-Bisau"
+msgstr "Guinea-Bissau"
+
+#: apps/accounts/countries.py
+msgid "Gayana"
+msgstr "Guyana"
+
+#: apps/accounts/countries.py
+msgid "Gaiti"
+msgstr "Haiti"
+
+#: apps/accounts/countries.py
+msgid "Gonduras"
+msgstr "Honduras"
+
+#: apps/accounts/countries.py
+msgid "Vengriya"
+msgstr "Hungary"
+
+#: apps/accounts/countries.py
+msgid "Islandiya"
+msgstr "Iceland"
+
+#: apps/accounts/countries.py
+msgid "Hindiston"
+msgstr "India"
+
+#: apps/accounts/countries.py
+msgid "Indoneziya"
+msgstr "Indonesia"
+
+#: apps/accounts/countries.py
+msgid "Eron"
+msgstr "Iran"
+
+#: apps/accounts/countries.py
+msgid "Iroq"
+msgstr "Iraq"
+
+#: apps/accounts/countries.py
+msgid "Irlandiya"
+msgstr "Ireland"
+
+#: apps/accounts/countries.py
+msgid "Isroil"
+msgstr "Israel"
+
+#: apps/accounts/countries.py
+msgid "Italiya"
+msgstr "Italy"
+
+#: apps/accounts/countries.py
+msgid "Yamayka"
+msgstr "Jamaica"
+
+#: apps/accounts/countries.py
+msgid "Yaponiya"
+msgstr "Japan"
+
+#: apps/accounts/countries.py
+msgid "Iordaniya"
+msgstr "Jordan"
+
+#: apps/accounts/countries.py
+msgid "Keniya"
+msgstr "Kenya"
+
+#: apps/accounts/countries.py
+msgid "Kiribati"
+msgstr "Kiribati"
+
+#: apps/accounts/countries.py
+msgid "Quvayt"
+msgstr "Kuwait"
+
+#: apps/accounts/countries.py
+msgid "Laos"
+msgstr "Laos"
+
+#: apps/accounts/countries.py
+msgid "Latviya"
+msgstr "Latvia"
+
+#: apps/accounts/countries.py
+msgid "Livan"
+msgstr "Lebanon"
+
+#: apps/accounts/countries.py
+msgid "Lesoto"
+msgstr "Lesotho"
+
+#: apps/accounts/countries.py
+msgid "Liberiya"
+msgstr "Liberia"
+
+#: apps/accounts/countries.py
+msgid "Liviya"
+msgstr "Libya"
+
+#: apps/accounts/countries.py
+msgid "Lixtenshteyn"
+msgstr "Liechtenstein"
+
+#: apps/accounts/countries.py
+msgid "Litva"
+msgstr "Lithuania"
+
+#: apps/accounts/countries.py
+msgid "Lyuksemburg"
+msgstr "Luxembourg"
+
+#: apps/accounts/countries.py
+msgid "Madagaskar"
+msgstr "Madagascar"
+
+#: apps/accounts/countries.py
+msgid "Malavi"
+msgstr "Malawi"
+
+#: apps/accounts/countries.py
+msgid "Malayziya"
+msgstr "Malaysia"
+
+#: apps/accounts/countries.py
+msgid "Maldiv orollari"
+msgstr "Maldives"
+
+#: apps/accounts/countries.py
+msgid "Mali"
+msgstr "Mali"
+
+#: apps/accounts/countries.py
+msgid "Malta"
+msgstr "Malta"
+
+#: apps/accounts/countries.py
+msgid "Marshall orollari"
+msgstr "Marshall Islands"
+
+#: apps/accounts/countries.py
+msgid "Mavritaniya"
+msgstr "Mauritania"
+
+#: apps/accounts/countries.py
+msgid "Mavrikiy"
+msgstr "Mauritius"
+
+#: apps/accounts/countries.py
+msgid "Meksika"
+msgstr "Mexico"
+
+#: apps/accounts/countries.py
+msgid "Mikroneziya"
+msgstr "Micronesia"
+
+#: apps/accounts/countries.py
+msgid "Moldova"
+msgstr "Moldova"
+
+#: apps/accounts/countries.py
+msgid "Monako"
+msgstr "Monaco"
+
+#: apps/accounts/countries.py
+msgid "Mo‘g‘uliston"
+msgstr "Mongolia"
+
+#: apps/accounts/countries.py
+msgid "Chernogoriya"
+msgstr "Montenegro"
+
+#: apps/accounts/countries.py
+msgid "Marokash"
+msgstr "Morocco"
+
+#: apps/accounts/countries.py
+msgid "Mozambik"
+msgstr "Mozambique"
+
+#: apps/accounts/countries.py
+msgid "Myanma"
+msgstr "Myanmar"
+
+#: apps/accounts/countries.py
+msgid "Namibiya"
+msgstr "Namibia"
+
+#: apps/accounts/countries.py
+msgid "Nauru"
+msgstr "Nauru"
+
+#: apps/accounts/countries.py
+msgid "Nepal"
+msgstr "Nepal"
+
+#: apps/accounts/countries.py
+msgid "Niderlandiya"
+msgstr "Netherlands"
+
+#: apps/accounts/countries.py
+msgid "Yangi Zelandiya"
+msgstr "New Zealand"
+
+#: apps/accounts/countries.py
+msgid "Nikaragua"
+msgstr "Nicaragua"
+
+#: apps/accounts/countries.py
+msgid "Niger"
+msgstr "Niger"
+
+#: apps/accounts/countries.py
+msgid "Nigeriya"
+msgstr "Nigeria"
+
+#: apps/accounts/countries.py
+msgid "Shimoliy Koreya"
+msgstr "North Korea"
+
+#: apps/accounts/countries.py
+msgid "Shimoliy Makedoniya"
+msgstr "North Macedonia"
+
+#: apps/accounts/countries.py
+msgid "Norvegiya"
+msgstr "Norway"
+
+#: apps/accounts/countries.py
+msgid "Ummon"
+msgstr "Oman"
+
+#: apps/accounts/countries.py
+msgid "Pokiston"
+msgstr "Pakistan"
+
+#: apps/accounts/countries.py
+msgid "Palau"
+msgstr "Palau"
+
+#: apps/accounts/countries.py
+msgid "Falastin"
+msgstr "Palestine"
+
+#: apps/accounts/countries.py
+msgid "Panama"
+msgstr "Panama"
+
+#: apps/accounts/countries.py
+msgid "Papua – Yangi Gvineya"
+msgstr "Papua New Guinea"
+
+#: apps/accounts/countries.py
+msgid "Paragvay"
+msgstr "Paraguay"
+
+#: apps/accounts/countries.py
+msgid "Peru"
+msgstr "Peru"
+
+#: apps/accounts/countries.py
+msgid "Filippin"
+msgstr "Philippines"
+
+#: apps/accounts/countries.py
+msgid "Polsha"
+msgstr "Poland"
+
+#: apps/accounts/countries.py
+msgid "Portugaliya"
+msgstr "Portugal"
+
+#: apps/accounts/countries.py
+msgid "Qatar"
+msgstr "Qatar"
+
+#: apps/accounts/countries.py
+msgid "Ruminiya"
+msgstr "Romania"
+
+#: apps/accounts/countries.py
+msgid "Ruanda"
+msgstr "Rwanda"
+
+#: apps/accounts/countries.py
+msgid "Sent-Kits va Nevis"
+msgstr "Saint Kitts and Nevis"
+
+#: apps/accounts/countries.py
+msgid "Sent-Lyusiya"
+msgstr "Saint Lucia"
+
+#: apps/accounts/countries.py
+msgid "Sent-Vinsent va Grenadin"
+msgstr "Saint Vincent and the Grenadines"
+
+#: apps/accounts/countries.py
+msgid "Samoa"
+msgstr "Samoa"
+
+#: apps/accounts/countries.py
+msgid "San-Marino"
+msgstr "San Marino"
+
+#: apps/accounts/countries.py
+msgid "San-Tome va Prinsipi"
+msgstr "São Tomé and Príncipe"
+
+#: apps/accounts/countries.py
+msgid "Saudiya Arabistoni"
+msgstr "Saudi Arabia"
+
+#: apps/accounts/countries.py
+msgid "Senegal"
+msgstr "Senegal"
+
+#: apps/accounts/countries.py
+msgid "Serbiya"
+msgstr "Serbia"
+
+#: apps/accounts/countries.py
+msgid "Seyshel orollari"
+msgstr "Seychelles"
+
+#: apps/accounts/countries.py
+msgid "Syerra-Leone"
+msgstr "Sierra Leone"
+
+#: apps/accounts/countries.py
+msgid "Singapur"
+msgstr "Singapore"
+
+#: apps/accounts/countries.py
+msgid "Slovakiya"
+msgstr "Slovakia"
+
+#: apps/accounts/countries.py
+msgid "Sloveniya"
+msgstr "Slovenia"
+
+#: apps/accounts/countries.py
+msgid "Solomon orollari"
+msgstr "Solomon Islands"
+
+#: apps/accounts/countries.py
+msgid "Somali"
+msgstr "Somalia"
+
+#: apps/accounts/countries.py
+msgid "Janubiy Afrika"
+msgstr "South Africa"
+
+#: apps/accounts/countries.py
+msgid "Janubiy Koreya"
+msgstr "South Korea"
+
+#: apps/accounts/countries.py
+msgid "Janubiy Sudan"
+msgstr "South Sudan"
+
+#: apps/accounts/countries.py
+msgid "Ispaniya"
+msgstr "Spain"
+
+#: apps/accounts/countries.py
+msgid "Shri-Lanka"
+msgstr "Sri Lanka"
+
+#: apps/accounts/countries.py
+msgid "Sudan"
+msgstr "Sudan"
+
+#: apps/accounts/countries.py
+msgid "Surinam"
+msgstr "Suriname"
+
+#: apps/accounts/countries.py
+msgid "Shvetsiya"
+msgstr "Sweden"
+
+#: apps/accounts/countries.py
+msgid "Shveytsariya"
+msgstr "Switzerland"
+
+#: apps/accounts/countries.py
+msgid "Suriya"
+msgstr "Syria"
+
+#: apps/accounts/countries.py
+msgid "Tayvan"
+msgstr "Taiwan"
+
+#: apps/accounts/countries.py
+msgid "Tanzaniya"
+msgstr "Tanzania"
+
+#: apps/accounts/countries.py
+msgid "Tailand"
+msgstr "Thailand"
+
+#: apps/accounts/countries.py
+msgid "Sharqiy Timor"
+msgstr "Timor-Leste"
+
+#: apps/accounts/countries.py
+msgid "Togo"
+msgstr "Togo"
+
+#: apps/accounts/countries.py
+msgid "Tonga"
+msgstr "Tonga"
+
+#: apps/accounts/countries.py
+msgid "Trinidad va Tobago"
+msgstr "Trinidad and Tobago"
+
+#: apps/accounts/countries.py
+msgid "Tunis"
+msgstr "Tunisia"
+
+#: apps/accounts/countries.py
+msgid "Tuvalu"
+msgstr "Tuvalu"
+
+#: apps/accounts/countries.py
+msgid "Uganda"
+msgstr "Uganda"
+
+#: apps/accounts/countries.py
+msgid "Ukraina"
+msgstr "Ukraine"
+
+#: apps/accounts/countries.py
+msgid "Birlashgan Arab Amirliklari"
+msgstr "United Arab Emirates"
+
+#: apps/accounts/countries.py
+msgid "Buyuk Britaniya"
+msgstr "United Kingdom"
+
+#: apps/accounts/countries.py
+msgid "AQSH"
+msgstr "USA"
+
+#: apps/accounts/countries.py
+msgid "Urugvay"
+msgstr "Uruguay"
+
+#: apps/accounts/countries.py
+msgid "Vanuatu"
+msgstr "Vanuatu"
+
+#: apps/accounts/countries.py
+msgid "Vatikan"
+msgstr "Vatican City"
+
+#: apps/accounts/countries.py
+msgid "Venesuela"
+msgstr "Venezuela"
+
+#: apps/accounts/countries.py
+msgid "Vyetnam"
+msgstr "Vietnam"
+
+#: apps/accounts/countries.py
+msgid "Yaman"
+msgstr "Yemen"
+
+#: apps/accounts/countries.py
+msgid "Zambiya"
+msgstr "Zambia"
+
+#: apps/accounts/countries.py
+msgid "Zimbabve"
+msgstr "Zimbabwe"
+
+#: apps/accounts/forms.py
+msgid "Shaharni tanlang."
+msgstr "Choose a city."
+
+#: apps/accounts/forms.py
+msgid "Ismingizni yozing."
+msgstr "Enter your first name."
+
+#: apps/accounts/forms.py
+msgid "Davlatni tanlang."
+msgstr "Choose a country."
+
+#: apps/accounts/forms.py
+msgid ""
+"Foydalanuvchi nomida @ bo‘lmasin — u hammaga ko‘rinadi. Email alohida "
+"maydonga yoziladi."
+msgstr ""
+"Don't put @ in a username — everyone can see it. The email goes in its own "
+"field."
+
+#: apps/accounts/forms.py
+msgid "Bu email boshqa hisobda ishlatilgan."
+msgstr "This email is used by another account."
+
+#: apps/accounts/forms.py templates/accounts/_geo_filters.html
+msgid "Davlat"
+msgstr "Country"
+
+#: apps/accounts/forms.py
+msgid "Foydalanuvchi nomini yozing."
+msgstr "Enter a username."
+
+#: apps/accounts/forms.py apps/accounts/forms.py
+msgid "Bu foydalanuvchi nomi band."
+msgstr "This username is taken."
+
+#: apps/accounts/forms.py
+msgid "Rasm 2 MB dan oshmasligi kerak."
+msgstr "The image must not exceed 2 MB."
+
+#: apps/accounts/forms.py
+msgid "Shaharni yozing."
+msgstr "Enter a city."
+
+#: apps/accounts/forms.py
+msgid "Davlatni tanlang"
+msgstr "Choose a country"
+
+#: apps/accounts/google.py
+msgid "Xodim hisoblari Google orqali kira olmaydi. Parol bilan kiring."
+msgstr "Staff accounts can't sign in with Google. Sign in with a password."
+
+#: apps/accounts/google.py
+msgid ""
+"Google orqali kirish bekor qilindi yoki eskirdi. Qaytadan urinib ko‘ring."
+msgstr "Google sign-in was cancelled or expired. Try again."
+
+#: apps/accounts/google.py
+msgid ""
+"Google emailingizni tasdiqlanmagan deb ko‘rsatdi: boshqa usul bilan kiring."
+msgstr "Google reports your email as unverified: sign in another way."
+
+#: apps/accounts/google.py
+msgid "Google bilan aloqa bo‘lmadi. Birozdan keyin qayta urinib ko‘ring."
+msgstr "Couldn't reach Google. Try again in a moment."
+
+#: apps/accounts/google.py
+msgid "Bu email bir nechta hisobda. Parol bilan kiring."
+msgstr "This email belongs to several accounts. Sign in with a password."
+
+#: apps/accounts/models.py templates/moderation/contests.html
+msgid "Kutilmoqda"
+msgstr "Pending"
+
+#: apps/accounts/models.py
+msgid "Yuborilmoqda"
+msgstr "Sending"
+
+#: apps/accounts/models.py
+msgid "Yuborildi"
+msgstr "Sent"
+
+#: apps/accounts/models.py templates/problems/detail.html
+msgid "Xato"
+msgstr "Error"
+
+#: apps/accounts/models.py templates/accounts/badge_board.html
+msgid "Nishon"
+msgstr "Badge"
+
+#: apps/accounts/models.py
+msgid "Murojaat"
+msgstr "Appeal"
+
+#: apps/accounts/onboarding.py templates/accounts/_board_tools.html
+msgid "Foydalanuvchi nomi"
+msgstr "Username"
+
+#: apps/accounts/telegram.py
+msgid "🏆 G‘alaba!"
+msgstr "🏆 Victory!"
+
+#: apps/accounts/telegram.py apps/classroom/duels.py
+msgid "Mag‘lubiyat"
+msgstr "Defeat"
+
+#: apps/accounts/telegram_views.py
+msgid "Telegram bot hali sozlanmagan. Keyinroq urinib ko‘ring."
+msgstr "The Telegram bot isn't set up yet. Try again later."
+
+#: apps/accounts/telegram_views.py
+msgid "Bildirishnoma sozlamalari uchun avval Telegramni ulang."
+msgstr "Connect Telegram first to set notification preferences."
+
+#: apps/accounts/telegram_views.py
+msgid "Sozlamalarni saqlab bo‘lmadi. Sahifani yangilab, qayta urinib ko‘ring."
+msgstr "Couldn't save the settings. Refresh the page and try again."
+
+#: apps/accounts/telegram_views.py
+msgid "Tayyor! Brauzerga qayting: u o‘zi kirib oladi."
+msgstr "Done! Go back to your browser: it will sign you in by itself."
+
+#: apps/accounts/telegram_views.py
+msgid ""
+"Kirish so‘rovi eskirgan. Saytda «Telegram orqali kirish»ni qaytadan bosing."
+msgstr ""
+"The sign-in request has expired. Press “Sign in with Telegram” on the site "
+"again."
+
+#: apps/accounts/telegram_views.py
+msgid ""
+"Bu Telegram hech bir CodeArena profiliga ulanmagan. Avval parol bilan kirib,"
+" Sozlamalar → Telegram orqali ulang."
+msgstr ""
+"This Telegram isn't linked to any CodeArena profile. Sign in with a password"
+" first, then link it in Settings → Telegram."
+
+#: apps/accounts/telegram_views.py
+msgid "Xodim hisoblari Telegram orqali kira olmaydi. Parol bilan kiring."
+msgstr "Staff accounts can't sign in with Telegram. Sign in with a password."
+
+#: apps/accounts/telegram_views.py
+msgid ""
+"CodeArena Telegram bildirishnomalari ulandi. Xabar turlarini saytdagi "
+"Sozlamalar bo‘limidan sozlashingiz mumkin."
+msgstr ""
+"CodeArena Telegram notifications are connected. You can choose the message "
+"types in Settings on the site."
+
+#: apps/accounts/telegram_views.py
+msgid ""
+"Ulash kodi eskirgan yoki ishlatilgan. CodeArena profilidan yangi kod oling."
+msgstr ""
+"The link code has expired or been used. Get a new code from your CodeArena "
+"profile."
+
+#: apps/accounts/telegram_views.py
+msgid ""
+"Bu Telegram hisob boshqa CodeArena profiliga ulangan. Avval o‘sha profildan "
+"uzing."
+msgstr ""
+"This Telegram account is linked to another CodeArena profile. Unlink it from"
+" that profile first."
+
+#: apps/accounts/telegram_views.py
+msgid ""
+"CodeArena bildirishnomalari uchun saytdagi Sozlamalar → Telegram bo‘limidan "
+"hisobingizni ulang."
+msgstr ""
+"To get CodeArena notifications, link your account in Settings → Telegram on "
+"the site."
+
+#: apps/accounts/telegram_views.py
+msgid ""
+"Saytga kirish so‘rovi. Brauzeringizdagi <b>4 xonali kodni</b> shu yerga "
+"yozing. Agar bu havolani sizga boshqa kishi yuborgan bo‘lsa, hech narsa "
+"yozmang."
+msgstr ""
+"A request to sign in to the site. Type the <b>4-digit code</b> shown in your"
+" browser here. If someone else sent you this link, don't type anything."
+
+#: apps/accounts/telegram_views.py
+msgid ""
+"Bildirishnomalar to‘xtatildi. Qayta ulash uchun CodeArena profiliga kiring."
+msgstr ""
+"Notifications are stopped. To reconnect, sign in to your CodeArena profile."
+
+#: apps/accounts/throttle.py templates/registration/login.html
+msgid "Juda ko‘p urinish. Biroz kutib, qayta urinib ko‘ring."
+msgstr "Too many attempts. Wait a bit and try again."
+
+#: apps/accounts/usernames.py
+msgid ""
+"Foydalanuvchi nomi lotin harfi bilan boshlansin va faqat lotin harflari, "
+"raqamlar va _ dan iborat bo‘lsin (3–20 belgi)."
+msgstr ""
+"A username must start with a Latin letter and contain only Latin letters, "
+"digits and _ (3–20 characters)."
+
+#: apps/accounts/views.py
+msgid "Hisobingiz o‘chirildi."
+msgstr "Your account has been deleted."
+
+#: apps/accounts/views.py
+msgid "Havola eskirgan yoki noto‘g‘ri. Yangi havola so‘rang."
+msgstr "The link has expired or is invalid. Request a new one."
+
+#: apps/accounts/views.py
+msgid "Parol noto‘g‘ri"
+msgstr "Wrong password"
+
+#: apps/accounts/views.py
+msgid "Xodim hisobi bu yerdan o‘chirilmaydi."
+msgstr "A staff account can't be deleted here."
+
+#: apps/accounts/views.py
+msgid "Havola hozirgina yuborildi. Bir daqiqadan keyin qayta urinib ko‘ring."
+msgstr "The link was just sent. Try again in a minute."
+
+#: apps/accounts/views.py
+msgid "tasdig‘i bekor qilindi"
+msgstr "verification revoked"
+
+#: apps/accounts/views.py
+msgid "Bu email allaqachon ro‘yxatdan o‘tgan."
+msgstr "This email is already registered."
+
+#: apps/accounts/views.py
+msgid "Ro‘yxatdan o‘tishda xatolik yuz berdi. Qayta urinib ko‘ring."
+msgstr "Something went wrong while signing up. Try again."
+
+#: apps/accounts/views.py
+msgid "Havola {user_email} manziliga qayta yuborildi."
+msgstr "The link was sent again to {user_email}."
+
+#: apps/classroom/duels.py
+msgid ""
+"Bu raqib bilan so‘nggi 24 soatda 20 ta duel o‘ynadingiz — keyinroq davom "
+"eting."
+msgstr ""
+"You've played 20 duels with this opponent in the last 24 hours — continue "
+"later."
+
+#: apps/classroom/duels.py
+msgid "Tilni tanlang."
+msgstr "Choose a language."
+
+#: apps/classroom/duels.py
+msgid "Bunday foydalanuvchi yo‘q."
+msgstr "No such user."
+
+#: apps/classroom/duels.py
+msgid "O‘zingizni chaqira olmaysiz."
+msgstr "You can't challenge yourself."
+
+#: apps/classroom/duels.py
+msgid "Chaqiriq muddati o‘tgan."
+msgstr "The challenge has expired."
+
+#: apps/classroom/duels.py templates/accounts/duel_board.html
+msgid "G‘alaba"
+msgstr "Victory"
+
+#: apps/classroom/duels.py apps/classroom/duels.py
+msgid "Bu tilda savollar hali yetarli emas — boshqasini tanlang."
+msgstr "There aren't enough questions in this language yet — choose another."
+
+#: apps/classroom/duels.py
+msgid "Bu raqib bilan ochiq duel bor."
+msgstr "You already have an open duel with this opponent."
+
+#: apps/classroom/duels.py
+msgid "{head}: {other_username} bilan duel tugadi"
+msgstr "{head}: duel with {other_username} is over"
+
+#: apps/classroom/models.py
+msgid "Nima chiqaradi?"
+msgstr "What does it print?"
+
+#: apps/classroom/models.py
+msgid "Bo‘sh joyni to‘ldiring"
+msgstr "Fill in the blank"
+
+#: apps/classroom/models.py templates/classroom/duel.html
+msgid "Savollar"
+msgstr "Questions"
+
+#: apps/classroom/models.py templates/contests/_submissions_live.html
+msgid "Masala"
+msgstr "Problem"
+
+#: apps/classroom/models.py templates/classroom/_duel_status.html
+msgid "Raqib kutilmoqda"
+msgstr "Waiting for an opponent"
+
+#: apps/classroom/models.py templates/moderation/duels.html
+msgid "Davom etmoqda"
+msgstr "In progress"
+
+#: apps/classroom/models.py templates/classroom/duels.html
+msgid "Tugagan"
+msgstr "Finished"
+
+#: apps/classroom/models.py templates/moderation/mine.html
+msgid "Rad etilgan"
+msgstr "Rejected"
+
+#: apps/classroom/models.py
+msgid "Muddati o‘tgan"
+msgstr "Expired"
+
+#: apps/classroom/quiz_check.py
+msgid "javob variantlar orasida yo‘q"
+msgstr "the answer is not among the options"
+
+#: apps/classroom/quiz_check.py
+msgid "output savolida ___ bor"
+msgstr "an output question needs ___"
+
+#: apps/classroom/quiz_check.py
+msgid "fill savolida bitta ___ bo‘lishi kerak"
+msgstr "a fill question needs exactly one ___"
+
+#: apps/contests/models.py
+msgid "Ball: to‘liq ball, tenglikda jarima"
+msgstr "Points: full points, penalty on a tie"
+
+#: apps/contests/models.py
+msgid "Codeforces: ball vaqt bilan kamayadi"
+msgstr "Codeforces: points decay with time"
+
+#: apps/contests/models.py
+msgid "ICPC: yechilganlar soni va jarima"
+msgstr "ICPC: problems solved and penalty"
+
+#: apps/contests/models.py
+msgid "Ochiq (hamma uchun)"
+msgstr "Open (everyone)"
+
+#: apps/contests/models.py
+msgid "Div. 1 (reyting 1900 va yuqori)"
+msgstr "Div. 1 (rating 1900 and above)"
+
+#: apps/contests/models.py
+msgid "0 daq"
+msgstr "0 min"
+
+#: apps/contests/models.py
+msgid "{n} kun"
+msgstr "{n} days"
+
+#: apps/contests/models.py
+msgid "{n} soat"
+msgstr "{n} hours"
+
+#: apps/contests/models.py
+msgid "{n} daq"
+msgstr "{n} min"
+
+#: apps/contests/services.py
+msgid ""
+"Ochiq masala — reytingli musobaqaga faqat yashirin, yangi masala qo‘shiladi."
+msgstr ""
+"An open problem — only a new, hidden problem can be added to a rated "
+"contest."
+
+#: apps/contests/services.py
+msgid "Bu masala boshqa musobaqada ishlatilgan."
+msgstr "This problem was used in another contest."
+
+#: apps/contests/views.py apps/contests/views.py
+msgid "Rasmiy reyting qayta hisoblandi."
+msgstr "The official rating was recalculated."
+
+#: apps/contests/views.py
+msgid "Reyting qayta hisoblandi."
+msgstr "The rating was recalculated."
+
+#: apps/contests/views.py templates/accounts/badges.html
+msgid "O‘rin"
+msgstr "Rank"
+
+#: apps/contests/views.py
+msgid "Reyting shu raunddan boshlab {n} ta raund bo‘yicha qayta hisoblandi."
+msgstr "The rating was recalculated over {n} rounds starting from this one."
+
+#: apps/contests/views.py
+msgid ""
+"{p_user_username}: {cp_label} AI jarimasi — xato urinish hisoblandi, masala "
+"bloklandi."
+msgstr ""
+"{p_user_username}: {cp_label} AI penalty — counted as a wrong attempt, the "
+"problem is blocked."
+
+#: apps/contests/views.py
+msgid "keyingi raundlar bilan: {n} ta"
+msgstr "with the following rounds: {n}"
+
+#: apps/contests/virtual.py
+msgid "Musobaqa hali ochilmagan — virtual ishtirok nashrdan keyin mumkin."
+msgstr ""
+"The contest hasn't opened yet — virtual participation is possible after it "
+"is published."
+
+#: apps/home/templatetags/seo.py
+msgid ""
+"O‘zbek tilida dasturlash: masalalar yeching, mavzulab kurslarda o‘rganing, "
+"reytingli musobaqalarda bellashing. Kodingiz serverda shu zahoti testlanadi."
+msgstr ""
+"Programming in Uzbek: solve problems, learn in topic-by-topic courses, "
+"compete in rated contests. Your code is tested on the server right away."
+
+#: apps/integrity/evidence.py
+msgid "Tracker o‘chiq"
+msgstr "Tracker off"
+
+#: apps/integrity/evidence.py
+msgid "O‘xshash kod"
+msgstr "Similar code"
+
+#: apps/integrity/evidence.py
+msgid "{labels_get_problem_id}: {len_bad} ta yuborish"
+msgstr "{labels_get_problem_id}: {len_bad} submissions"
+
+#: apps/integrity/evidence.py
+msgid "{labels_get_problem_id}: {grew} belgi birdaniga paydo bo‘lgan"
+msgstr "{labels_get_problem_id}: {grew} characters appeared at once"
+
+#: apps/integrity/evidence.py
+msgid "Bir vaqtda {len_devices} ta qurilmada ishlagan"
+msgstr "Worked on {len_devices} devices at the same time"
+
+#: apps/integrity/evidence.py
+msgid "{label}: {other_user_username} bilan {pct}% o‘xshash"
+msgstr "{label}: {pct}% similar to {other_user_username}"
+
+#: apps/integrity/models.py templates/integrity/contest_report.html
+msgid "Diskvalifikatsiya"
+msgstr "Disqualification"
+
+#: apps/integrity/models.py
+msgid "Diskvalifikatsiya bekor"
+msgstr "Disqualification lifted"
+
+#: apps/integrity/models.py
+msgid "Masala natijasi bekor"
+msgstr "Problem result voided"
+
+#: apps/integrity/models.py
+msgid "Masala natijasi tiklandi"
+msgstr "Problem result restored"
+
+#: apps/integrity/models.py
+msgid "AI jarimasi: xato urinish, masala bloklandi"
+msgstr "AI penalty: wrong attempt, problem blocked"
+
+#: apps/integrity/models.py
+msgid "Qayta tekshiruv"
+msgstr "Recheck"
+
+#: apps/integrity/models.py
+msgid "Masalalar ochildi"
+msgstr "Problems opened"
+
+#: apps/integrity/models.py
+msgid "Reyting hisoblandi"
+msgstr "Rating calculated"
+
+#: apps/integrity/models.py
+msgid "Reyting qayta hisoblandi"
+msgstr "Rating recalculated"
+
+#: apps/integrity/models.py
+msgid "O‘xshashlik ko‘rildi"
+msgstr "Similarity reviewed"
+
+#: apps/integrity/models.py
+msgid "Masala o‘chirildi"
+msgstr "Problem deleted"
+
+#: apps/integrity/models.py
+msgid "Kun masalasi tanlandi"
+msgstr "Daily problem picked"
+
+#: apps/integrity/models.py
+msgid "Musobaqa o‘chirildi"
+msgstr "Contest deleted"
+
+#: apps/integrity/models.py
+msgid "Foydalanuvchi o‘chirildi"
+msgstr "User deleted"
+
+#: apps/integrity/models.py
+msgid "Shaxsi tasdiqlandi"
+msgstr "Identity verified"
+
+#: apps/integrity/models.py
+msgid "Shaxs tasdig‘i bekor"
+msgstr "Identity verification revoked"
+
+#: apps/integrity/models.py
+msgid "Kodini tushuntirdi"
+msgstr "Explained their code"
+
+#: apps/integrity/models.py
+msgid "Rasmiy reyting qo‘llandi"
+msgstr "Official rating applied"
+
+#: apps/integrity/models.py
+msgid "Shikoyat"
+msgstr "Report"
+
+#: apps/integrity/models.py
+msgid "Apellyatsiya"
+msgstr "Appeal"
+
+#: apps/integrity/practice.py
+msgid "kod bir zumda paydo bo‘ldi"
+msgstr "the code appeared in an instant"
+
+#: apps/integrity/practice.py
+msgid "{n} soniya"
+msgstr "{n} seconds"
+
+#: apps/integrity/practice.py
+msgid "{m} daq {s} s"
+msgstr "{m} min {s} s"
+
+#: apps/integrity/practice.py
+msgid ""
+"kuzatuv ishlamagan: sahifa ochilgani ko‘rinmaydi (skript o‘chirilgan yoki "
+"kod tashqaridan yuborilgan)"
+msgstr ""
+"the tracker didn't work: opening the page isn't recorded (the script is off "
+"or the code was sent from outside)"
+
+#: apps/integrity/practice.py
+msgid "{pastes} marta uzun kod qo‘yishga urindi"
+msgstr "tried to paste long code {pastes} times"
+
+#: apps/integrity/practice.py
+msgid ""
+"{fmt_e_away_ms_1000} boshqa oynada, qaytgach {fmt_ac_at_e_at_total_seconds} "
+"ichida yechdi"
+msgstr ""
+"was in another window for {fmt_e_away_ms_1000}, solved it within "
+"{fmt_ac_at_e_at_total_seconds} after coming back"
+
+#: apps/integrity/practice.py
+msgid "{grew} belgi birdaniga paydo bo‘lgan"
+msgstr "{grew} characters appeared at once"
+
+#: apps/integrity/practice.py
+msgid "{name} yechimi bilan {pct}% bir xil"
+msgstr "{pct}% identical to {name}'s solution"
+
+#: apps/integrity/views.py
+msgid "Tekshirish uchun kamida bitta masalani tanlang."
+msgstr "Choose at least one problem to check."
+
+#: apps/integrity/views.py
+msgid "Xabarni kamida bir necha so‘z bilan yozing."
+msgstr "Write the message in at least a few words."
+
+#: apps/integrity/views.py
+msgid "Juda tez-tez. Bir daqiqadan keyin qayta urinib ko‘ring."
+msgstr "Too often. Try again in a minute."
+
+#: apps/integrity/views.py
+msgid "O‘xshashlik tekshirildi: {join_labels}."
+msgstr "Similarity checked: {join_labels}."
+
+#: apps/integrity/views.py
+msgid "Tasdiqlandi — bu yechim uchun ball berilmaydi."
+msgstr "Confirmed — no points are given for this solution."
+
+#: apps/integrity/views.py
+msgid "Belgilandi: shubha yo‘q."
+msgstr "Marked: no suspicion."
+
+#: apps/integrity/views.py
+msgid ""
+"{user_username}: {created} ta yangi o‘xshashlik topildi — pastda, «O‘xshash "
+"kodlar»da."
+msgstr ""
+"{user_username}: {created} new similarities found — below, in “Similar "
+"code”."
+
+#: apps/integrity/views.py
+msgid ""
+"{user_username}: barcha urinishlari tekshirildi, yangi o‘xshashlik "
+"topilmadi."
+msgstr "{user_username}: all attempts were checked, no new similarity found."
+
+#: apps/integrity/views.py
+msgid "{what} ko‘rib chiqildi"
+msgstr "{what} reviewed"
+
+#: apps/learn/forms.py
+msgid "Ko‘pi bilan {max_lists} ta ro‘yxat."
+msgstr "At most {max_lists} lists."
+
+#: apps/learn/models.py
+msgid "Asoslar"
+msgstr "Basics"
+
+#: apps/learn/models.py
+msgid "Python vositalari"
+msgstr "Python tools"
+
+#: apps/learn/models.py
+msgid "Algoritmlar"
+msgstr "Algorithms"
+
+#: apps/learn/models.py
+msgid "Texnikalar"
+msgstr "Techniques"
+
+#: apps/learn/models.py
+msgid "Ma’lumot tuzilmalari"
+msgstr "Data structures"
+
+#: apps/learn/models.py
+msgid "Matematika"
+msgstr "Math"
+
+#: apps/learn/models.py
+msgid "Dinamik dasturlash"
+msgstr "Dynamic programming"
+
+#: apps/learn/models.py
+msgid "Graflar"
+msgstr "Graphs"
+
+#: apps/learn/models.py
+msgid "Ilg‘or"
+msgstr "Advanced"
+
+#: apps/learn/views.py
+msgid "ro‘yxatidan olindi"
+msgstr "removed from the list"
+
+#: apps/learn/views.py
+msgid "ro‘yxatiga saqlandi"
+msgstr "saved to the list"
+
+#: apps/learn/views.py
+msgid "«{lst_name}» o‘chirildi."
+msgstr "“{lst_name}” deleted."
+
+#: apps/moderation/ai.py
+msgid ""
+"kiritish-chiqarish, arifmetika, bitta-ikkita shart; yechim bir necha qator"
+msgstr ""
+"input/output, arithmetic, one or two conditions; the solution is a few lines"
+
+#: apps/moderation/ai.py
+msgid ""
+"sikl, shartlar, massiv yoki satr ustida oddiy ishlov; to‘g‘ridan-to‘g‘ri "
+"yechim o‘tadi"
+msgstr ""
+"a loop, conditions, simple processing of an array or string; a direct "
+"solution passes"
+
+#: apps/moderation/ai.py
+msgid ""
+"saralash, prefiks yig‘indi, ikki ko‘rsatkich, ochko‘z usul yoki oddiy DP; "
+"cheklovlar sodda (O(n²)) yechimni o‘tkazmaydi"
+msgstr ""
+"sorting, prefix sums, two pointers, greedy or simple DP; the limits rule out"
+" a simple (O(n²)) solution"
+
+#: apps/moderation/ai.py
+msgid ""
+"murakkab DP, graflar, sonlar nazariyasi yoki ma’lumotlar tuzilmalari; katta "
+"cheklovlar, samarali algoritm shart"
+msgstr ""
+"hard DP, graphs, number theory or data structures; large limits, an "
+"efficient algorithm is required"
+
+#: apps/moderation/ai.py
+msgid "Javob uzilib qoldi — qayta urinib ko'ring."
+msgstr "The response was cut off — try again."
+
+#: apps/moderation/ai.py
+msgid "AI bu so'rovni bajarmadi — mavzu yoki talabni o'zgartirib ko'ring."
+msgstr ""
+"The AI did not carry out this request — change the topic or the requirement."
+
+#: apps/moderation/ai.py
+msgid "Bitta masala tuz: {labels_level} — {level_briefs_level}."
+msgstr "Write one problem: {labels_level} — {level_briefs_level}."
+
+#: apps/moderation/ai.py
+msgid ". To'plamdagi boshqa masalalar bilan takrorlanmaydigan g'oya tanla."
+msgstr ". Pick an idea that doesn't repeat the other problems in the set."
+
+#: apps/moderation/ai.py
+msgid "Aniq mavzu va talablar: {focus}"
+msgstr "Specific topic and requirements: {focus}"
+
+#: apps/moderation/ai.py
+msgid "1 dan {max_count} tagacha masala so'rang."
+msgstr "Ask for 1 to {max_count} problems."
+
+#: apps/moderation/ai.py
+msgid "AI javobida {key} masalasi yo'q. Qayta urinib ko'ring."
+msgstr "The AI's reply has no problem {key}. Try again."
+
+#: apps/moderation/ai.py
+msgid "Bu {len_slots} ta masaladan iborat to'plamning {index_1}-masalasi"
+msgstr "Problem {index_1} of a set of {len_slots} problems"
+
+#: apps/moderation/ai.py
+msgid " ({labels_level} darajasida {same_index_key_1}-si, jami {len_same} ta)"
+msgstr ""
+" ({same_index_key_1} of the {labels_level} level, {len_same} in total)"
+
+#: apps/moderation/forms.py apps/moderation/views.py
+msgid "Rasm hajmi 10 MB dan oshmasligi kerak."
+msgstr "The image must not exceed 10 MB."
+
+#: apps/moderation/forms.py
+msgid "Yashirin ma‘lumotlar uchun kutilgan natija kerak."
+msgstr "The expected result is required for the hidden data."
+
+#: apps/moderation/forms.py
+msgid "Tugash vaqti boshlanishdan keyin bo'lishi kerak."
+msgstr "The end time must be after the start."
+
+#: apps/moderation/forms.py
+msgid ""
+"Inglizcha nom, kichik harflar va chiziqcha bilan: masalan, two-pointers."
+msgstr "An English name in lowercase with hyphens: for example, two-pointers."
+
+#: apps/moderation/forms.py
+msgid "Bu nom band (O‘rganish bo‘limidagi sahifa). Boshqa slug tanlang."
+msgstr ""
+"This name is taken (a page in the Learn section). Choose another slug."
+
+#: apps/moderation/forms.py
+msgid "Tugash vaqti allaqachon o'tib ketgan — sana va yilni tekshiring."
+msgstr "The end time has already passed — check the date and year."
+
+#: apps/moderation/forms.py
+msgid "0 — hamma uchun bir soat"
+msgstr "0 — one hour for everyone"
+
+#: apps/moderation/forms.py
+msgid "Jami 1 dan {max_count} tagacha masala so‘rang."
+msgstr "Ask for 1 to {max_count} problems in total."
+
+#: apps/moderation/views.py templates/moderation/duels.html
+msgid "masala"
+msgstr "problem"
+
+#: apps/moderation/views.py
+msgid "Rasmiy reyting qo‘llandi."
+msgstr "Official rating applied."
+
+#: apps/moderation/views.py
+msgid "Faqat bugun yoki keyingi 365 kun uchun masala tanlash mumkin."
+msgstr "You can only pick a problem for today or the next 365 days."
+
+#: apps/moderation/views.py
+msgid "Bugungi masala allaqachon e’lon qilingan va almashtirilmaydi."
+msgstr "Today's problem has already been announced and won't be replaced."
+
+#: apps/moderation/views.py
+msgid ""
+"Bu masala tanlov ro‘yxatida yo‘q. Sahifani yangilab, variantlardan birini "
+"tanlang."
+msgstr ""
+"This problem isn't in the list of choices. Refresh the page and pick one of "
+"the options."
+
+#: apps/moderation/views.py
+msgid "SQL masala uchun jadval, ma'lumot va kutilgan natija kerak."
+msgstr "An SQL problem needs a table, data and the expected result."
+
+#: apps/moderation/views.py templates/moderation/contest_official.html
+msgid "Musobaqa hali tugamagan."
+msgstr "The contest hasn't ended yet."
+
+#: apps/moderation/views.py
+msgid "Faqat tugagan rasmiy musobaqa uchun."
+msgstr "Only for a finished official contest."
+
+#: apps/moderation/views.py
+msgid "admin hisobini o‘chirib bo‘lmaydi — avval admin huquqini oling"
+msgstr "the admin account can't be deleted — remove its admin rights first"
+
+#: apps/moderation/views.py
+msgid "Duellar yopildi: talabalar duel sahifasini ko‘rmaydi."
+msgstr "The duels are closed: students don't see the duel page."
+
+#: apps/moderation/views.py
+msgid "Sana yoki masala noto‘g‘ri tanlandi."
+msgstr "The date or the problem was chosen wrongly."
+
+#: apps/moderation/views.py
+msgid "Bu sana uchun masala boshqa so‘rovda tanlandi. Sahifani yangilang."
+msgstr ""
+"A problem for this date was chosen in another request. Refresh the page."
+
+#: apps/moderation/views.py
+msgid "Kamida bitta test kerak: qo'lda kiriting yoki ZIP yuklang."
+msgstr "At least one test is needed: enter it by hand or upload a ZIP."
+
+#: apps/moderation/views.py
+msgid "{len_ids} ta urinish qayta tekshirishga yuborildi."
+msgstr "{len_ids} submissions were sent for rechecking."
+
+#: apps/moderation/views.py
+msgid "«{problem_title}» masalangiz tasdiqlandi va saytda chiqdi"
+msgstr "Your problem “{problem_title}” was approved and is now on the site"
+
+#: apps/moderation/views.py
+msgid ""
+"«{problem_title}» masalangiz rad etildi: tahrirlab qayta yuborishingiz "
+"mumkin"
+msgstr ""
+"Your problem “{problem_title}” was rejected: you can edit it and send it "
+"again"
+
+#: apps/moderation/views.py
+msgid "«{plan_title}» o‘chirildi."
+msgstr "“{plan_title}” deleted."
+
+#: apps/moderation/views.py
+msgid "Masalalar ochildi; {granted} ta yechim amaliyot balliga o'tkazildi."
+msgstr ""
+"The problems are open; {granted} solutions were carried over to practice "
+"points."
+
+#: apps/moderation/views.py
+msgid "Reyting hisoblanmadi: musobaqa hali tugamagan."
+msgstr "The rating was not calculated: the contest hasn't ended yet."
+
+#: apps/moderation/views.py
+msgid "O'zingizni admin huquqidan yoki faollikdan mahrum qila olmaysiz."
+msgstr "You can't take away your own admin rights or activity."
+
+#: apps/moderation/views.py
+msgid "Foydalanuvchi saqlandi."
+msgstr "User saved."
+
+#: apps/moderation/views.py
+msgid "uning masalalari bor — avval boshqasiga o‘tkazing yoki bloklang"
+msgstr "they have problems — hand them to someone else first or block them"
+
+#: apps/moderation/views.py
+msgid "{user_username} o‘chirildi."
+msgstr "{user_username} deleted."
+
+#: apps/moderation/views.py
+msgid "Bugungi masala tanlov paytida e’lon qilindi va endi almashtirilmaydi."
+msgstr ""
+"Today's problem was announced at the time of the pick and won't be replaced "
+"now."
+
+#: apps/moderation/views.py
+msgid "Masala saqlandi."
+msgstr "Problem saved."
+
+#: apps/moderation/views.py
+msgid "{pending} ta ishtirokchi hali tekshirilmagan."
+msgstr "{pending} participants haven't been checked yet."
+
+#: apps/moderation/views.py
+msgid ""
+"{len_drafts} ta masala tuzildi — Navbat bo'limida ko'rib chiqing va "
+"tasdiqlang."
+msgstr ""
+"{len_drafts} problems were created — review and approve them in the Queue "
+"section."
+
+#: apps/moderation/views.py
+msgid ""
+"Masala adminlar ko‘rib chiqishi uchun yuborildi. Tasdiqlansa, sizning "
+"nomingiz bilan chiqadi."
+msgstr ""
+"The problem was sent for the admins to review. Once approved, it appears "
+"under your name."
+
+#: apps/moderation/views.py
+msgid "«{contest_title}» musobaqasida urinishlar bor — o‘chirib bo‘lmaydi."
+msgstr "The contest “{contest_title}” has submissions — it can't be deleted."
+
+#: apps/moderation/views.py
+msgid "Reyting hisoblanmoqda: bir necha soniyadan keyin sahifani yangilang."
+msgstr "The rating is being calculated: refresh the page in a few seconds."
+
+#: apps/moderation/views.py
+msgid "AI xato: {e}"
+msgstr "AI error: {e}"
+
+#: apps/moderation/views.py
+msgid "{problem_title}: {len_ids} ta urinish"
+msgstr "{problem_title}: {len_ids} submissions"
+
+#: apps/problems/models.py
+msgid "Dasturlash"
+msgstr "Programming"
+
+#: apps/problems/models.py templates/moderation/daily_problem.html
+msgid "Avtomatik"
+msgstr "Automatic"
+
+#: apps/problems/models.py templates/moderation/daily_problem.html
+msgid "Admin tanladi"
+msgstr "Chosen by an admin"
+
+#: apps/problems/quests.py
+msgid "Easy masala yeching"
+msgstr "Solve an Easy problem"
+
+#: apps/problems/quests.py
+msgid "Beginner yoki Easy darajali bitta masala"
+msgstr "One problem of Beginner or Easy level"
+
+#: apps/problems/quests.py
+msgid "Duelda g‘alaba qozoning"
+msgstr "Win a duel"
+
+#: apps/problems/quests.py
+msgid "Kurs nazariyasini o‘qing"
+msgstr "Read a course lesson"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "kenglik bo‘yicha qidiruv"
+msgstr "breadth-first search"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "to‘liq saralash"
+msgstr "full sort"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "ma’lumotlar tuzilmalari"
+msgstr "data structures"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "chuqurlik bo‘yicha qidiruv"
+msgstr "depth-first search"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "bo‘l va hukm qil"
+msgstr "divide and conquer"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "ochko‘z algoritm"
+msgstr "greedy algorithm"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "kiritish va chiqarish"
+msgstr "input and output"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "sonlar bilan ishlash"
+msgstr "working with numbers"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "prefiks yig‘indilar"
+msgstr "prefix sums"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "eng qisqa yo‘llar"
+msgstr "shortest paths"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "ichki so‘rov"
+msgstr "subquery"
+
+#: apps/problems/templatetags/tagnames.py
+msgid "ikki ko‘rsatkich"
+msgstr "two pointers"
+
+#: apps/problems/templatetags/uzdates.py
+msgid "Du"
+msgstr "Mo"
+
+#: apps/problems/templatetags/uzdates.py
+msgid "Se"
+msgstr "Tu"
+
+#: apps/problems/templatetags/uzdates.py
+msgid "Ch"
+msgstr "We"
+
+#: apps/problems/templatetags/uzdates.py
+msgid "Pa"
+msgstr "Th"
+
+#: apps/problems/templatetags/uzdates.py
+msgid "Ju"
+msgstr "Fr"
+
+#: apps/problems/templatetags/uzdates.py
+msgid "Sh"
+msgstr "Sa"
+
+#: apps/problems/templatetags/uzdates.py
+msgid "Ya"
+msgstr "Su"
+
+#: apps/problems/templatetags/uzdates.py
+msgid "Dushanba"
+msgstr "Monday"
+
+#: apps/problems/templatetags/uzdates.py
+msgid "Seshanba"
+msgstr "Tuesday"
+
+#: apps/problems/templatetags/uzdates.py
+msgid "Chorshanba"
+msgstr "Wednesday"
+
+#: apps/problems/templatetags/uzdates.py
+msgid "Payshanba"
+msgstr "Thursday"
+
+#: apps/problems/templatetags/uzdates.py
+msgid "Juma"
+msgstr "Friday"
+
+#: apps/problems/templatetags/uzdates.py
+msgid "Shanba"
+msgstr "Saturday"
+
+#: apps/problems/templatetags/uzdates.py
+msgid "Yakshanba"
+msgstr "Sunday"
+
+#: apps/problems/templatetags/uzdates.py
+msgid "Yan"
+msgstr "Jan"
+
+#: apps/problems/templatetags/uzdates.py
+msgid "Fev"
+msgstr "Feb"
+
+#: apps/problems/templatetags/uzdates.py
+msgid "Mar"
+msgstr "Mar"
+
+#: apps/problems/templatetags/uzdates.py
+msgid "Apr"
+msgstr "Apr"
+
+#: apps/problems/templatetags/uzdates.py
+msgid "May"
+msgstr "May"
+
+#: apps/problems/templatetags/uzdates.py
+msgid "Iyn"
+msgstr "Jun"
+
+#: apps/problems/templatetags/uzdates.py
+msgid "Iyl"
+msgstr "Jul"
+
+#: apps/problems/templatetags/uzdates.py
+msgid "Avg"
+msgstr "Aug"
+
+#: apps/problems/templatetags/uzdates.py
+msgid "Sen"
+msgstr "Sep"
+
+#: apps/problems/templatetags/uzdates.py
+msgid "Okt"
+msgstr "Oct"
+
+#: apps/problems/templatetags/uzdates.py
+msgid "Noy"
+msgstr "Nov"
+
+#: apps/problems/templatetags/uzdates.py
+msgid "Dek"
+msgstr "Dec"
+
+#: apps/problems/templatetags/uzdates.py apps/problems/templatetags/uzdates.py
+msgid "hozirgina"
+msgstr "just now"
+
+#: apps/problems/templatetags/uzdates.py
+msgid "{n} kun oldin"
+msgstr "{n} days ago"
+
+#: apps/problems/templatetags/uzdates.py
+msgid "{n} soat oldin"
+msgstr "{n} hours ago"
+
+#: apps/problems/templatetags/uzdates.py
+msgid "{n} daqiqa oldin"
+msgstr "{n} minutes ago"
+
+#: apps/problems/views.py
+msgid "Bu filtrda yechilmagan masala qolmadi."
+msgstr "No unsolved problems are left in this filter."
+
+#: apps/submissions/models.py
+msgid "To‘g‘ri"
+msgstr "Correct"
+
+#: apps/submissions/models.py templates/problems/detail.html
+msgid "Noto‘g‘ri javob"
+msgstr "Wrong answer"
+
+#: apps/submissions/models.py templates/problems/detail.html
+msgid "Vaqt oshdi"
+msgstr "Time limit exceeded"
+
+#: apps/submissions/models.py templates/problems/detail.html
+msgid "Xotira oshdi"
+msgstr "Memory limit exceeded"
+
+#: apps/submissions/models.py templates/problems/detail.html
+msgid "Chiqish juda katta"
+msgstr "Output too large"
+
+#: apps/submissions/models.py templates/problems/detail.html
+msgid "Dastur xatosi"
+msgstr "Runtime error"
+
+#: apps/submissions/models.py templates/problems/detail.html
+msgid "Kompilyatsiya xatosi"
+msgstr "Compilation error"
+
+#: apps/submissions/templatetags/verdicts.py templates/problems/detail.html
+msgid "Qabul qilindi"
+msgstr "Accepted"
+
+#: apps/submissions/templatetags/verdicts.py
+msgid "Tekshiruvchi xatosi"
+msgstr "Judge error"
+
+#: apps/submissions/views.py
+msgid "Juda tez yuboryapsiz. Bir daqiqa kuting va qayta yuboring."
+msgstr "You're submitting too fast. Wait a minute and submit again."
+
+#: apps/submissions/views.py
+msgid "Kod bo‘sh yoki juda katta (64 KB gacha)."
+msgstr "The code is empty or too large (up to 64 KB)."
+
+#: apps/submissions/views.py
+msgid "Bu musobaqaga shu tarmoqdan yuborib bo‘lmaydi."
+msgstr "You can't submit to this contest from this network."
+
+#: apps/submissions/views.py
+msgid "Bu masala shu raundda bloklangan."
+msgstr "This problem is blocked in this round."
+
+#: apps/submissions/views.py apps/submissions/views.py
+msgid "Kod bo‘sh yoki juda katta"
+msgstr "The code is empty or too large"
+
+#: apps/submissions/views.py
+msgid "Juda tez-tez — bir daqiqadan keyin urinib ko‘ring"
+msgstr "Too often — try again in a minute"
+
+#: apps/submissions/views.py
+msgid "Masalada ma‘lumotlar bazasi yo‘q"
+msgstr "The problem has no database"
+
+#: apps/submissions/views.py
+msgid "Bu masalada sinash uchun ro‘yxatdan o‘ting."
+msgstr "Sign up to try this problem."
+
+#: apps/submissions/views.py
+msgid "Juda tez-tez. Ro‘yxatdan o‘tsangiz, limit ancha keng."
+msgstr "Too often. If you sign up, the limit is much wider."
+
+#: apps/submissions/views.py
+msgid "Namunaviy test yo‘q"
+msgstr "No sample test"
+
+#: apps/submissions/views.py
+msgid "Namunaviy test yo‘q — o‘z inputingizni kiriting"
+msgstr "No sample test — enter your own input"
+
+#: templates/403.html templates/_nav.html
+msgid "Bosh sahifa"
+msgstr "Home"
+
+#: templates/_mod_tabs.html templates/_nav.html
+msgid "Boshqaruv"
+msgstr "Admin"
+
+#: templates/_mod_tabs.html templates/_nav.html
+msgid "Navbat"
+msgstr "Queue"
+
+#: templates/_mod_tabs.html templates/_nav.html
+msgid "Foydalanuvchilar"
+msgstr "Users"
+
+#: templates/_nav.html templates/_user_menu.html
+msgid "Urinishlarim"
+msgstr "My submissions"
+
+#: templates/_nav.html templates/_navbar.html
+msgid "Reyting"
+msgstr "Rating"
+
+#: templates/_nav.html templates/_navbar.html
+msgid "Admin"
+msgstr "Admin"
+
+#: templates/_nav.html templates/base.html
+msgid "Amallar jurnali"
+msgstr "Activity log"
+
+#: templates/_navbar.html templates/base.html
+msgid "Kirish"
+msgstr "Sign in"
+
+#: templates/_navbar.html templates/base.html
+msgid "Ro‘yxatdan o‘tish"
+msgstr "Sign up"
+
+#: templates/_navbar.html
+msgid "Jonli: %(nav_live_title)s"
+msgstr "Live: %(nav_live_title)s"
+
+#: templates/_navbar.html
+msgid "Duel chaqiruvi: %(n)s"
+msgstr "Duel challenge: %(n)s"
+
+#: templates/_navbar.html
+msgid "%(n)s<span class=\"sr-only\"> ta duel kutmoqda</span>"
+msgstr "%(n)s<span class=\"sr-only\"> duels waiting</span>"
+
+#: templates/_navbar.html
+msgid "%(nav_staff_total)s ta ish ko‘rib chiqishni kutmoqda"
+msgstr "%(nav_staff_total)s items waiting for review"
+
+#: templates/_navbar.html
+msgid "%(nav_staff_total)s<span class=\"sr-only\"> ta ish kutmoqda</span>"
+msgstr "%(nav_staff_total)s<span class=\"sr-only\"> items waiting</span>"
+
+#: templates/_navbar.html
+msgid "%(s_current)s kun"
+msgstr "%(s_current)s days"
+
+#: templates/_pagination.html templates/accounts/_leaderboard_nav.html
+msgid "Sahifalar"
+msgstr "Pages"
+
+#: templates/_user_menu.html templates/base.html
+msgid "Profilim"
+msgstr "My profile"
+
+#: templates/_user_menu.html templates/accounts/profile.html
+msgid "Sozlamalar"
+msgstr "Settings"
+
+#: templates/_user_menu.html templates/accounts/welcome.html
+msgid "Chiqish"
+msgstr "Sign out"
+
+#: templates/_user_menu.html
+msgid "Hisob: %(user_username)s"
+msgstr "Account: %(user_username)s"
+
+#: templates/_user_menu.html
+msgid ""
+"%(user_get_full_name)s</span> <span class=\"mt-1 flex items-center "
+"gap-2\"><span class=\"ca-tier\">%(user_rating)s</span><span class=\"text-xs "
+"text-mute tabular\">%(user_rating2)s · %(user_practice_points)s "
+"ball</span></span>"
+msgstr ""
+"%(user_get_full_name)s</span> <span class=\"mt-1 flex items-center "
+"gap-2\"><span class=\"ca-tier\">%(user_rating)s</span><span class=\"text-xs "
+"text-mute tabular\">%(user_rating2)s · %(user_practice_points)s "
+"points</span></span>"
+
+#: templates/accounts/_badge7.html
+msgid "%(medal)s-o‘rin"
+msgstr "rank %(medal)s"
+
+#: templates/accounts/_badge_award.html
+msgid "o‘yinchilarning %(b_pct)s%% ida bor"
+msgstr "earned by %(b_pct)s%% of players"
+
+#: templates/accounts/_badge_award.html
+msgid "Keyingisi — %(b_next)s"
+msgstr "Next — %(b_next)s"
+
+#: templates/accounts/_board_tools.html
+msgid ": %(total)s ta ·"
+msgstr ": %(total)s ·"
+
+#: templates/accounts/_board_tools.html
+msgid "«%(q)s»: %(found)s ta topildi ·"
+msgstr "“%(q)s”: %(found)s found ·"
+
+#: templates/accounts/_rank.html
+msgid "%(rank)s-o‘rin"
+msgstr "rank %(rank)s"
+
+#: templates/accounts/_tbadge.html
+msgid "%% ida bor"
+msgstr "%% of players"
+
+#: templates/accounts/_tbadge.html
+msgid "%(b_level_name)s · %(b_earned_at)sda olingan"
+msgstr "%(b_level_name)s · earned on %(b_earned_at)s"
+
+#: templates/accounts/_tbadge.html
+msgid "%(b_tier)s / %(b_max)s daraja"
+msgstr "level %(b_tier)s / %(b_max)s"
+
+#: templates/accounts/badge_board.html
+msgid ""
+"Nishonlar bo‘yicha reyting: %(total)s o‘yinchi, olingan bosqichlar soni "
+"bo‘yicha."
+msgstr "Badge ranking: %(total)s players, by the number of levels earned."
+
+#: templates/accounts/badge_board.html
+msgid "%(total)s o‘yinchi · har bir nishonning har bir bosqichi bitta ball"
+msgstr "%(total)s players · each level of each badge is one point"
+
+#: templates/accounts/badge_board.html
+msgid "Siz <b class=\"text-ink\">%(me_rank)s</b>-o‘rindasiz"
+msgstr "You are ranked <b class=\"text-ink\">%(me_rank)s</b>"
+
+#: templates/accounts/badge_board.html
+msgid "Olingan bosqichlar, %(max_levels)s tadan"
+msgstr "Levels earned, out of %(max_levels)s"
+
+#: templates/accounts/badges.html
+msgid ""
+"%(n_families)s ta nishon, har biri 5 bosqichli: bronza, kumush, oltin, "
+"platina, olmos ·"
+msgstr ""
+"%(n_families)s badges, each with 5 levels: bronze, silver, gold, platinum, "
+"diamond ·"
+
+#: templates/accounts/club.html
+msgid ""
+"%(club_name)s: CodeArena klubi, %(members)s a’zo, jamoa reytingi %(team)s."
+msgstr ""
+"%(club_name)s: a CodeArena club, %(members)s members, team rating %(team)s."
+
+#: templates/accounts/club.html
+msgid "%(members)s a’zo · jamoa reytingi %(team)s"
+msgstr "%(members)s members · team rating %(team)s"
+
+#: templates/accounts/club.html
+msgid "%(r_best_rank)s-o‘rin"
+msgstr "rank %(r_best_rank)s"
+
+#: templates/accounts/clubs.html
+msgid ""
+"Maktab yoki to‘garak: a’zolarning eng yaxshi %(v5)s tasi reytingi yig‘indisi"
+msgstr ""
+"A school or study group: sum of the ratings of the members' best %(v5)s"
+
+#: templates/accounts/clubs.html
+msgid ""
+"%(user_club_name)s</a> klubidasiz. Boshqa klub ochish uchun avval undan "
+"chiqing."
+msgstr ""
+"You are in the club %(user_club_name)s</a>. Leave it first to open another "
+"club."
+
+#: templates/accounts/duel_board.html
+msgid ""
+"Duel reytingi: 1 ga 1 savol duellarida %(total)s o‘yinchining Elo reytingi."
+msgstr ""
+"Duel rating: the Elo rating of %(total)s players in 1 vs 1 question duels."
+
+#: templates/accounts/duel_board.html
+msgid "%(total)s o‘yinchi · mavsum %(season)s,"
+msgstr "%(total)s players · season %(season)s,"
+
+#: templates/accounts/duel_board.html
+msgid "%(podium_season)s mavsumi g‘oliblari"
+msgstr "Winners of season %(podium_season)s"
+
+#: templates/accounts/duel_board.html
+msgid ""
+"Har oy boshida reyting 1200 ga qarab yarmigacha qaytadi: hamma yangi "
+"mavsumni yaqin joydan boshlaydi. Mavsum oxirida kamida %(min_duels)s ta duel"
+" o‘ynaganlar orasidan eng yuqori 3 kishi shu mavsum g‘olibi bo‘ladi."
+msgstr ""
+"At the start of every month ratings go back halfway toward 1200: everyone "
+"starts the new season near the middle. At the end of a season, the top 3 "
+"among those who played at least %(min_duels)s duels are its winners."
+
+#: templates/accounts/feed.html
+msgid "so‘nggi %(days)s kun · %(n_circle)s kishi"
+msgstr "last %(days)s days · %(n_circle)s people"
+
+#: templates/accounts/feed.html
+msgid "%(it_problem_title)s</a> masalasini yechdi"
+msgstr "solved the problem %(it_problem_title)s</a>"
+
+#: templates/accounts/feed.html
+msgid "<b>%(e_items)s ta</b> masala yechdi:"
+msgstr "solved <b>%(e_items)s</b> problems:"
+
+#: templates/accounts/feed.html
+msgid "va yana %(e_items)s ta"
+msgstr "and %(e_items)s more"
+
+#: templates/accounts/feed.html
+msgid "%(e_versus_username)s</a> ni yutdi"
+msgstr "beat %(e_versus_username)s</a>"
+
+#: templates/accounts/feed.html
+msgid "«%(e_items_0_badge)s · %(e_items_0_level)s» nishonini oldi"
+msgstr "earned the badge “%(e_items_0_badge)s · %(e_items_0_level)s”"
+
+#: templates/accounts/feed.html
+msgid "<b>%(e_items)s ta</b> nishon oldi:"
+msgstr "earned <b>%(e_items)s</b> badges:"
+
+#: templates/accounts/feed.html
+msgid "So‘nggi %(days)s kunda hech narsa bo‘lmadi."
+msgstr "Nothing happened in the last %(days)s days."
+
+#: templates/accounts/honor.html templates/accounts/honor.html
+msgid "Halollik qoidalari"
+msgstr "Honor code"
+
+#: templates/accounts/honor.html
+msgid "Siz bu qoidalarni %(user_honor_pledged_at)s da qabul qilgansiz."
+msgstr "You accepted these rules on %(user_honor_pledged_at)s."
+
+#: templates/accounts/profile.html
+msgid "{r}-o‘rin"
+msgstr "rank {r}"
+
+#: templates/accounts/profile.html
+msgid ""
+"%(profile_user_username)s — CodeArena’dagi profili: reyting "
+"%(profile_user_rating)s, %(solved)s ta yechilgan masala, musobaqalar tarixi."
+msgstr ""
+"%(profile_user_username)s — profile on CodeArena: rating "
+"%(profile_user_rating)s, %(solved)s problems solved, contest history."
+
+#: templates/accounts/profile.html
+msgid "%(profile_user_date_joined)s dan beri"
+msgstr "since %(profile_user_date_joined)s"
+
+#: templates/accounts/profile.html
+msgid ""
+"<b class=\"tabular\">%(badges_earned)s</b> nishon · <b "
+"class=\"tabular\">%(levels_earned)s</b> bosqich"
+msgstr ""
+"<b class=\"tabular\">%(badges_earned)s</b> badges · <b "
+"class=\"tabular\">%(levels_earned)s</b> levels"
+
+#: templates/accounts/profile.html
+msgid ""
+"<small>Duel hisobi</small><b class=\"tabular\">%(h2h_you)s : "
+"%(h2h_them)s</b>"
+msgstr ""
+"<small>Duel record</small><b class=\"tabular\">%(h2h_you)s : "
+"%(h2h_them)s</b>"
+
+#: templates/accounts/profile.html
+msgid "eng yuqori %(max_rating)s"
+msgstr "best %(max_rating)s"
+
+#: templates/accounts/profile.html
+msgid "· rasmiy %(profile_user_official_rating)s"
+msgstr "· official %(profile_user_official_rating)s"
+
+#: templates/accounts/profile.html
+msgid "%(rating_history)s ta reytingli musobaqa"
+msgstr "%(rating_history)s rated contests"
+
+#: templates/accounts/profile.html
+msgid "amaliyot balingiz %(profile_user_practice_points)s"
+msgstr "your practice points: %(profile_user_practice_points)s"
+
+#: templates/accounts/profile.html
+msgid "<b class=\"tabular\">%(streak_0)s</b> <span class=\"ca7-of\">kun</span>"
+msgstr "<b class=\"tabular\">%(streak_0)s</b> <span class=\"ca7-of\">days</span>"
+
+#: templates/accounts/profile.html
+msgid "eng uzuni %(streak_1)s kun"
+msgstr "longest %(streak_1)s days"
+
+#: templates/accounts/profile.html
+msgid "%(rating_history)s musobaqa"
+msgstr "%(rating_history)s contests"
+
+#: templates/accounts/profile.html
+msgid "Reyting tarixi grafigi, %(rating_history)s ta musobaqa"
+msgstr "Rating history chart, %(rating_history)s contests"
+
+#: templates/accounts/profile.html
+msgid ""
+"%(next_tier_name)s</span> darajasigacha <b class=\"text-ink "
+"tabular\">%(next_tier_need)s</b> reyting"
+msgstr ""
+"%(next_tier_name)s</span> level needs <b class=\"text-ink "
+"tabular\">%(next_tier_need)s</b> more rating"
+
+#: templates/accounts/profile.html
+msgid ""
+"Yana <b class=\"tabular text-ink\">%(solved_hidden)s</b> ta yechilgan masala"
+" hozir kelgusi musobaqada, shuning uchun yashirin."
+msgstr ""
+"<b class=\"tabular text-ink\">%(solved_hidden)s</b> more solved problems are"
+" in an upcoming contest right now, so they're hidden."
+
+#: templates/accounts/profile.html
+msgid ""
+"%(activity_first)s – %(activity_last)s: <b class=\"tabular text-"
+"ink\">%(activity_total)s</b> ta urinish · faol kunlar <b class=\"tabular "
+"text-ink\">%(activity_active_days)s</b> · eng uzun ketma-ket faol kunlar <b "
+"class=\"tabular text-ink\">%(activity_max_streak)s</b>"
+msgstr ""
+"%(activity_first)s – %(activity_last)s: <b class=\"tabular text-"
+"ink\">%(activity_total)s</b> submissions · active days <b class=\"tabular "
+"text-ink\">%(activity_active_days)s</b> · longest streak of active days <b "
+"class=\"tabular text-ink\">%(activity_max_streak)s</b>"
+
+#: templates/accounts/profile.html
+msgid ""
+"Faollik xaritasi: so‘nggi bir yilda %(activity_total)s ta urinish, "
+"%(activity_active_days)s faol kun"
+msgstr ""
+"Activity map: %(activity_total)s submissions in the past year, "
+"%(activity_active_days)s active days"
+
+#: templates/accounts/profile.html
+msgid "%(d_date)s: %(d_count)s ta urinish"
+msgstr "%(d_date)s: %(d_count)s submissions"
+
+#: templates/accounts/profile.html
+msgid ""
+"<b>Eng zaif mavzu: %(weakest_row_tag_name)s</b> · %(weakest_total)s tadan "
+"%(weakest_solved)s tasi yechilgan"
+msgstr ""
+"<b>Weakest topic: %(weakest_row_tag_name)s</b> · %(weakest_solved)s of "
+"%(weakest_total)s solved"
+
+#: templates/accounts/profile.html
+msgid ", %(weakest_tried)s tasida urinish bor"
+msgstr ", %(weakest_tried)s tried"
+
+#: templates/accounts/profile.html
+msgid "Barcha mavzular <span class=\"tabular\">(%(topic_map)s)</span>"
+msgstr "All topics <span class=\"tabular\">(%(topic_map)s)</span>"
+
+#: templates/accounts/profile.html templates/accounts/profile.html
+msgid "Keyingisi: %(t_next_title)s"
+msgstr "Next: %(t_next_title)s"
+
+#: templates/accounts/profile.html
+msgid ""
+"%(t_total)s tadan %(t_solved)s tasi yechilgan, %(t_tried)s tasida urinish "
+"bor"
+msgstr "%(t_solved)s of %(t_total)s solved, %(t_tried)s tried"
+
+#: templates/accounts/profile_edit.html templates/base.html
+msgid "Parolni almashtirish"
+msgstr "Change password"
+
+#: templates/accounts/profile_edit.html templates/learn/course.html
+msgid "Nusxalash"
+msgstr "Copy"
+
+#: templates/accounts/profile_edit.html
+msgid "Keyingi o‘zgartirish %(form_next_rename)s dan keyin mumkin."
+msgstr "The next change is possible after %(form_next_rename)s."
+
+#: templates/accounts/profile_edit.html
+msgid ""
+"Hozirgacha qo‘shilganlar: <b class=\"tabular text-"
+"ink\">%(invited_count)s</b>"
+msgstr "Joined so far: <b class=\"tabular text-ink\">%(invited_count)s</b>"
+
+#: templates/accounts/profile_edit.html
+msgid ""
+"Shaxsiy ma’lumotlaringiz o‘chadi; musobaqa natijalaringiz "
+"«deleted-%(user_pk)s» nomi ostida qoladi, chunki boshqalarning reytingi "
+"ularga tayanadi."
+msgstr ""
+"Your personal data is deleted; your contest results stay under the name "
+"“deleted-%(user_pk)s”, because other people's ratings rely on them."
+
+#: templates/accounts/rating.html
+msgid ""
+"CodeArena musobaqa reytingi: %(total)s ishtirokchi, Elo bo‘yicha o‘rinlar va"
+" darajalar."
+msgstr ""
+"CodeArena contest rating: %(total)s participants, ranks and levels by Elo."
+
+#: templates/accounts/rating.html
+msgid ""
+"%(total)s ishtirokchi · reytingli musobaqalar natijasi bo‘yicha (Elo) ·"
+msgstr "%(total)s participants · by the results of rated contests (Elo) ·"
+
+#: templates/accounts/rating.html
+msgid ": %(users_paginator_count)s ta ·"
+msgstr ": %(users_paginator_count)s ·"
+
+#: templates/accounts/rating.html
+msgid "%(me_next_name)s</b> gacha <b class=\"tabular\">+%(me_next_need)s</b>"
+msgstr "%(me_next_name)s</b> needs <b class=\"tabular\">+%(me_next_need)s</b>"
+
+#: templates/accounts/rating.html
+msgid "%(t_name)s darajasi ichidagi o‘rningiz"
+msgstr "Your rank within the %(t_name)s level"
+
+#: templates/accounts/rating.html
+msgid "<b>%(t_count)s</b> kishi"
+msgstr "<b>%(t_count)s</b> people"
+
+#: templates/accounts/top.html
+msgid ""
+"Amaliyot ballari: musobaqadan tashqari yechilgan masalalar uchun %(total)s "
+"ishtirokchining ballari."
+msgstr ""
+"Practice points: the points of %(total)s participants for problems solved "
+"outside contests."
+
+#: templates/accounts/top.html
+msgid ""
+"%(total)s ishtirokchi · musobaqadan tashqari yechilgan masalalar ballari"
+msgstr "%(total)s participants · points for problems solved outside contests"
+
+#: templates/accounts/welcome.html templates/base.html
+msgid "Davom etish"
+msgstr "Continue"
+
+#: templates/accounts/welcome.html
+msgid "Davom etish uchun quyidagilarni to‘ldiring: %(missing)s."
+msgstr "To continue, fill in: %(missing)s."
+
+#: templates/accounts/welcome.html
+msgid ""
+"<b class=\"text-ink\">%(user_email)s</b> manziliga havola yubordik. Xatni "
+"ochib, havolani bosing. Spam papkasini ham tekshiring."
+msgstr ""
+"We sent a link to <b class=\"text-ink\">%(user_email)s</b>. Open the message"
+" and click the link. Check the spam folder too."
+
+#: templates/base.html templates/base.html
+msgid "Klaviatura yorliqlari"
+msgstr "Keyboard shortcuts"
+
+#: templates/base.html
+msgid "Rostdan ham?"
+msgstr "Are you sure?"
+
+#: templates/base.html templates/contests/submissions.html
+msgid "Bekor qilish"
+msgstr "Cancel"
+
+#: templates/base.html
+msgid "Sabab (ixtiyoriy)"
+msgstr "Reason (optional)"
+
+#: templates/base.html
+msgid "Kod o‘chiriladi. Davom etasizmi?"
+msgstr "The code will be erased. Continue?"
+
+#: templates/base.html
+msgid "To‘g‘ri! Masala yechildi 🎉"
+msgstr "Correct! Problem solved 🎉"
+
+#: templates/base.html
+msgid "Fayl tanlash"
+msgstr "Choose a file"
+
+#: templates/base.html templates/moderation/submit.html
+msgid "Fayl tanlanmagan"
+msgstr "No file chosen"
+
+#: templates/base.html
+msgid "Sana va vaqt"
+msgstr "Date and time"
+
+#: templates/base.html templates/contests/list.html
+msgid "Sana"
+msgstr "Date"
+
+#: templates/base.html
+msgid "Kalendardan tanlash"
+msgstr "Pick from the calendar"
+
+#: templates/base.html
+msgid "Sanani kk.oo.yyyy shaklida yozing"
+msgstr "Type the date as dd.mm.yyyy"
+
+#: templates/base.html
+msgid "Hozir"
+msgstr "Now"
+
+#: templates/base.html
+msgid "Bugun 23:59"
+msgstr "Today 23:59"
+
+#: templates/base.html
+msgid "+7 kun 23:59"
+msgstr "+7 days 23:59"
+
+#: templates/base.html templates/moderation/duels.html
+msgid "Bugun"
+msgstr "Today"
+
+#: templates/base.html
+msgid "Ertaga"
+msgstr "Tomorrow"
+
+#: templates/base.html
+msgid "Qidirish…"
+msgstr "Search…"
+
+#: templates/base.html
+msgid "Ro‘yxatdan qidirish"
+msgstr "Search the list"
+
+#: templates/base.html
+msgid "Sana {d} dan oldin bo‘lmasin"
+msgstr "The date can't be before {d}"
+
+#: templates/base.html
+msgid "Sana {d} dan keyin bo‘lmasin"
+msgstr "The date can't be after {d}"
+
+#: templates/base.html
+msgid "{n} ta fayl tanlandi"
+msgstr "{n} files chosen"
+
+#: templates/base.html
+msgid "Shaharni tanlang"
+msgstr "Choose a city"
+
+#: templates/base.html
+msgid "Boshqa shahar…"
+msgstr "Another city…"
+
+#: templates/base.html
+msgid "O‘quv joyini tanlang"
+msgstr "Choose a school"
+
+#: templates/base.html
+msgid "Boshqa…"
+msgstr "Other…"
+
+#: templates/base.html templates/base.html
+msgid "Tezkor"
+msgstr "Quick"
+
+#: templates/base.html templates/base.html
+msgid "Amallar"
+msgstr "Actions"
+
+#: templates/base.html
+msgid "«{q}» bo‘yicha barcha masalalar"
+msgstr "All problems for “{q}”"
+
+#: templates/base.html
+msgid "Hech narsa topilmadi. Boshqa so‘z bilan urinib ko‘ring."
+msgstr "Nothing found. Try another word."
+
+#: templates/base.html templates/problems/_sort_th.html
+msgid "o‘sish"
+msgstr "ascending"
+
+#: templates/base.html templates/problems/_daily_card.html
+msgid "kun"
+msgstr "day"
+
+#: templates/base.html
+msgid "soat"
+msgstr "hour"
+
+#: templates/base.html
+msgid "daqiqa"
+msgstr "minute"
+
+#: templates/base.html
+msgid "soniya"
+msgstr "second"
+
+#: templates/base.html templates/integrity/contest_report.html
+msgid "daq"
+msgstr "min"
+
+#: templates/base.html templates/submissions/_vd.html
+msgid "Tekshirilmoqda"
+msgstr "Judging"
+
+#: templates/base.html templates/base.html
+msgid "Ko‘rinish: tizim bo‘yicha"
+msgstr "Appearance: system"
+
+#: templates/base.html templates/base.html
+msgid "Ko‘rinish: kunduzgi"
+msgstr "Appearance: light"
+
+#: templates/base.html templates/base.html
+msgid "Ko‘rinish: tungi"
+msgstr "Appearance: dark"
+
+#: templates/base.html templates/base.html
+msgid "Nusxalandi"
+msgstr "Copied"
+
+#: templates/base.html
+msgid "Jonli:"
+msgstr "Live:"
+
+#: templates/base.html templates/problems/detail.html
+msgid "musobaqa"
+msgstr "contest"
+
+#: templates/base.html
+msgid "Bugungi masala:"
+msgstr "Today's problem:"
+
+#: templates/base.html templates/contests/detail.html
+msgid "yechilgan"
+msgstr "solved"
+
+#: templates/base.html
+msgid "+5 ball"
+msgstr "+5 points"
+
+#: templates/base.html
+msgid "ta kutmoqda"
+msgstr "waiting"
+
+#: templates/base.html templates/moderation/dashboard.html
+msgid "Masala qo‘shish"
+msgstr "Add a problem"
+
+#: templates/base.html templates/moderation/ai_generate.html
+msgid "AI bilan masala tuzish"
+msgstr "Create a problem with AI"
+
+#: templates/base.html templates/moderation/contest_form.html
+msgid "Musobaqa yaratish"
+msgstr "Create a contest"
+
+#: templates/base.html
+msgid "Musobaqa va duellar uchun to‘ldiring: %(gate_nudge_missing)s."
+msgstr "To join contests and duels, fill in: %(gate_nudge_missing)s."
+
+#: templates/base.html
+msgid "%(nav_duels)s<span class=\"sr-only\"> ta duel chaqiruvi</span>"
+msgstr "%(nav_duels)s<span class=\"sr-only\"> duel challenges</span>"
+
+#: templates/base.html
+msgid ""
+"%(user_get_full_name)s</span><span class=\"block text-xs text-mute "
+"tabular\">%(user_rating)s · %(user_rating2)s · %(user_practice_points)s "
+"ball</span>"
+msgstr ""
+"%(user_get_full_name)s</span><span class=\"block text-xs text-mute "
+"tabular\">%(user_rating)s · %(user_rating2)s · %(user_practice_points)s "
+"points</span>"
+
+#: templates/base.html
+msgid "Tabriklaymiz! Siz endi %(tier_up_name)s"
+msgstr "Congratulations! You are now %(tier_up_name)s"
+
+#: templates/base.html
+msgid ""
+"Yangi banneringiz — «%(tier_up_picture)s». Profilingizda va avataringizda "
+"ko‘rinadi."
+msgstr ""
+"Your new banner is “%(tier_up_picture)s”. It shows on your profile and "
+"avatar."
+
+#: templates/classroom/_duel_row.html
+msgid ""
+"%(d_challenger_username)s <span class=\"text-mute\">vs</span> "
+"%(d_opponent_username)s"
+msgstr ""
+"%(d_challenger_username)s <span class=\"text-mute\">vs</span> "
+"%(d_opponent_username)s"
+
+#: templates/classroom/_duel_row.html
+msgid "Ochiq duel: %(d_challenger_username)s"
+msgstr "Open duel: %(d_challenger_username)s"
+
+#: templates/classroom/_duel_row.html
+msgid "· <b class=\"tabular text-ink\">%(d_my_done)s / %(d_questions)s</b> savol"
+msgstr ""
+"· <b class=\"tabular text-ink\">%(d_my_done)s / %(d_questions)s</b> "
+"questions"
+
+#: templates/classroom/_duel_row.html
+msgid "%(d_challenger_username)s va %(d_opponent_username)s dueli"
+msgstr "Duel of %(d_challenger_username)s and %(d_opponent_username)s"
+
+#: templates/classroom/_duel_status.html
+msgid "— %(result_other_username)s bilan"
+msgstr "— with %(result_other_username)s"
+
+#: templates/classroom/_duel_status.html
+msgid "%(result_other_username)s revansh so‘radi — qabul qilish"
+msgstr "%(result_other_username)s asked for a rematch — accept"
+
+#: templates/classroom/_duel_status.html
+msgid "Duel reytingi <b class=\"text-ink\">%(p_user_duel_rating)s</b>"
+msgstr "Duel rating <b class=\"text-ink\">%(p_user_duel_rating)s</b>"
+
+#: templates/classroom/_duel_status.html
+msgid ""
+"<b class=\"tabular text-ink\">%(p_right)s/%(n_questions)s</b> to‘g‘ri · <b "
+"class=\"tabular text-ink\">%(p_points)s</b> ball"
+msgstr ""
+"<b class=\"tabular text-ink\">%(p_right)s/%(n_questions)s</b> correct · <b "
+"class=\"tabular text-ink\">%(p_points)s</b> points"
+
+#: templates/classroom/_duel_status.html
+msgid ""
+"<span class=\"font-semibold text-ok\">O‘ynamoqda…</span> <span "
+"class=\"tabular text-mute\">%(p_right)s ta to‘g‘ri</span>"
+msgstr ""
+"<span class=\"font-semibold text-ok\">Playing…</span> <span class=\"tabular "
+"text-mute\">%(p_right)s correct</span>"
+
+#: templates/classroom/_duel_status.html
+msgid "%(p_user_username)sning javoblari"
+msgstr "Answers of %(p_user_username)s"
+
+#: templates/classroom/_duel_status.html
+msgid "%(forloop_counter)s-savol"
+msgstr "question %(forloop_counter)s"
+
+#: templates/classroom/_duel_status.html templates/classroom/duel_play.html
+msgid "%(forloop_counter)s-savol:"
+msgstr "question %(forloop_counter)s:"
+
+#: templates/classroom/_duel_status.html
+msgid "%(duel_get_language_display)s tilida duel boshlagan keyingi o‘yinchi"
+msgstr "The next player to start a duel in %(duel_get_language_display)s"
+
+#: templates/classroom/_duel_status.html
+msgid ""
+"%(n_questions)s ta savol, har biriga %(per_question)s soniya — vaqti savol "
+"ochilganda boshlanadi."
+msgstr ""
+"%(n_questions)s questions, %(per_question)s seconds each — the time starts "
+"when a question opens."
+
+#: templates/classroom/_duel_status.html
+msgid ""
+"Ochiq duel: shu tilda duel boshlagan keyingi o‘yinchi aynan shu savollarni "
+"oladi. Ko‘proq ball yig‘gan g‘olib, teng bo‘lsa — durang. Raqib %(expires)s "
+"gacha kutiladi."
+msgstr ""
+"An open duel: the next player who starts a duel in this language gets "
+"exactly these questions. The one with more points wins; if equal, it's a "
+"draw. The opponent is awaited until %(expires)s."
+
+#: templates/classroom/_duel_status.html
+msgid ""
+"<b class=\"text-ink\">%(duel_challenger_username)s</b> sizni chaqirdi: "
+"%(duel_get_language_display)s, %(n_questions)s ta savol. Qabul qilsangiz, "
+"birinchi savol ochiladi."
+msgstr ""
+"<b class=\"text-ink\">%(duel_challenger_username)s</b> challenged you: "
+"%(duel_get_language_display)s, %(n_questions)s questions. If you accept, the"
+" first question opens."
+
+#: templates/classroom/_duel_status.html
+msgid "%(duel_challenger_username)s haqida"
+msgstr "About %(duel_challenger_username)s"
+
+#: templates/classroom/_duel_status.html
+msgid ""
+"<b class=\"text-ink\">%(duel_opponent_username)s</b> qabul qilganda o‘sha "
+"savollar unga beriladi. %(expires)s gacha kutiladi."
+msgstr ""
+"When <b class=\"text-ink\">%(duel_opponent_username)s</b> accepts, they get "
+"those questions. Awaited until %(expires)s."
+
+#: templates/classroom/_duel_status.html
+msgid "<b>%(duel_winner_username)s</b> g‘olib!"
+msgstr "<b>%(duel_winner_username)s</b> wins!"
+
+#: templates/classroom/_quiz_ask.html
+msgid ""
+"Kod <code class=\"ca-quiz-want\">%(q_expect)s</code> chiqarishi uchun <mark "
+"class=\"ca-quiz-blank\">___</mark> o‘rniga nima yoziladi?"
+msgstr ""
+"What goes in place of <mark class=\"ca-quiz-blank\">___</mark> so that the "
+"code prints <code class=\"ca-quiz-want\">%(q_expect)s</code>?"
+
+#: templates/classroom/closed.html
+msgid ""
+"Dars tugagach, soat <b class=\"text-ink tabular\">%(until)s</b> da ochiladi."
+msgstr ""
+"It opens after the lesson, at <b class=\"text-ink tabular\">%(until)s</b>."
+
+#: templates/classroom/duel.html
+msgid "Duel: %(duel_challenger_username)s vs %(duel_opponent_username)s"
+msgstr "Duel: %(duel_challenger_username)s vs %(duel_opponent_username)s"
+
+#: templates/classroom/duel.html
+msgid "%(duel_challenger_username)s <span class=\"text-mute\">vs</span>"
+msgstr "%(duel_challenger_username)s <span class=\"text-mute\">vs</span>"
+
+#: templates/classroom/duel_play.html templates/classroom/duel_play.html
+msgid "To‘g‘ri!"
+msgstr "Correct!"
+
+#: templates/classroom/duel_play.html templates/classroom/duel_play.html
+msgid "Vaqt tugadi"
+msgstr "Time is up"
+
+#: templates/classroom/duel_play.html templates/classroom/duel_play.html
+msgid "Noto‘g‘ri"
+msgstr "Wrong"
+
+#: templates/classroom/duel_play.html
+msgid "Duel · %(n)s/%(n_questions)s-savol"
+msgstr "Duel · question %(n)s/%(n_questions)s"
+
+#: templates/classroom/duel_play.html
+msgid "Duel, %(n)s-savol, %(n_questions)s tadan"
+msgstr "Duel, question %(n)s of %(n_questions)s"
+
+#: templates/classroom/duel_play.html
+msgid ""
+"%(duel_challenger_username)s vs %(duel_opponent_username)s</a> <span "
+"class=\"ca-quiz-meta\"><b>%(language)s</b></span>"
+msgstr ""
+"%(duel_challenger_username)s vs %(duel_opponent_username)s</a> <span "
+"class=\"ca-quiz-meta\"><b>%(language)s</b></span>"
+
+#: templates/classroom/duel_play.html
+msgid "%(n)s-savol, %(n_questions)s tadan"
+msgstr "question %(n)s of %(n_questions)s"
+
+#: templates/classroom/duels.html templates/contests/_submissions_live.html
+msgid "Natija"
+msgstr "Result"
+
+#: templates/classroom/duels.html
+msgid "kuzatyapsiz · "
+msgstr "following · "
+
+#: templates/classroom/duels.html
+msgid "duel ${p.duel}"
+msgstr "duel ${p.duel}"
+
+#: templates/classroom/duels.html
+msgid "Bunday foydalanuvchi topilmadi"
+msgstr "No such user found"
+
+#: templates/classroom/duels.html
+msgid ""
+"%(n_questions)s ta savol, har biriga %(per_question)s soniya. Ko‘proq ball "
+"yig‘gan g‘olib: to‘g‘ri javob 1, 2 yoki 3 ball (savol qiyinligiga qarab)."
+msgstr ""
+"%(n_questions)s questions, %(per_question)s seconds each. The one with more "
+"points wins: a right answer is worth 1, 2 or 3 points (by the question's "
+"difficulty)."
+
+#: templates/classroom/duels.html
+msgid "Sizni %(incoming)s ta duelga chaqirishdi"
+msgstr "You've been challenged to %(incoming)s duels"
+
+#: templates/classroom/duels.html
+msgid "duel %(d_challenger_duel_rating)s"
+msgstr "duel %(d_challenger_duel_rating)s"
+
+#: templates/classroom/duels.html
+msgid ""
+"%(d_get_language_display)s · %(d_questions)s ta savol · %(d_created)s. Qabul"
+" qilsangiz, birinchi savol ochiladi."
+msgstr ""
+"%(d_get_language_display)s · %(d_questions)s questions · %(d_created)s. If "
+"you accept, the first question opens."
+
+#: templates/classroom/duels.html
+msgid "%(open)s ta"
+msgstr "%(open)s"
+
+#: templates/classroom/duels.html
+msgid "%(history)s ta duel"
+msgstr "%(history)s duels"
+
+#: templates/contests/_band.html templates/contests/clarifications.html
+msgid "Yuborilmoqda…"
+msgstr "Sending…"
+
+#: templates/contests/_band.html templates/integrity/contest_report.html
+msgid "Musobaqalar</a> / #%(contest_pk)s"
+msgstr "Contests</a> / #%(contest_pk)s"
+
+#: templates/contests/_band.html
+msgid "Div. %(contest_division)s"
+msgstr "Div. %(contest_division)s"
+
+#: templates/contests/_band.html
+msgid "%(problems)s masala"
+msgstr "%(problems)s problems"
+
+#: templates/contests/_band.html
+msgid "%(n_participants)s ishtirokchi"
+msgstr "%(n_participants)s participants"
+
+#: templates/contests/_card.html templates/contests/_tags.html
+msgid "Div. %(c_division)s"
+msgstr "Div. %(c_division)s"
+
+#: templates/contests/_card.html
+msgid "%(c_duration_label)s · %(c_n_problems)s masala ·"
+msgstr "%(c_duration_label)s · %(c_n_problems)s problems ·"
+
+#: templates/contests/_card.html templates/contests/_row.html
+msgid "%(c_n_participants)s ishtirokchi"
+msgstr "%(c_n_participants)s participants"
+
+#: templates/contests/_card.html
+msgid "· siz %(c_my_rank)s-o‘rinda"
+msgstr "· you are ranked %(c_my_rank)s"
+
+#: templates/contests/_card.html
+msgid "hozircha %(c_n_participants)s kishi"
+msgstr "%(c_n_participants)s so far"
+
+#: templates/contests/_dq_banner.html
+msgid "Sabab: %(participation_disqualified_reason)s"
+msgstr "Reason: %(participation_disqualified_reason)s"
+
+#: templates/contests/_row.html
+msgid "%(c_my_delta)s</b>reyting"
+msgstr "%(c_my_delta)s</b>rating"
+
+#: templates/contests/_standings_live.html
+msgid ""
+"<b class=\"ca-cf-ac !inline\">488</b> — yechildi: olingan ball (vaqt o‘tishi"
+" va har xato −50 bilan kamayadi, kamida 30%%), ostida vaqt"
+msgstr ""
+"<b class=\"ca-cf-ac !inline\">488</b> — solved: the points earned (they "
+"decrease with time and each mistake −50, at least 30%%), the time below"
+
+#: templates/contests/_standings_live.html
+msgid ""
+"<b class=\"tabular\">%(my_row_rank)s-o‘rin</b> <span class=\"text-mute "
+"tabular\">/ %(rows)s</span>"
+msgstr ""
+"<b class=\"tabular\">rank %(my_row_rank)s</b> <span class=\"text-mute "
+"tabular\">/ %(rows)s</span>"
+
+#: templates/contests/_standings_live.html
+msgid "<b class=\"tabular\">%(my_row_solved)s</b> ta masala"
+msgstr "<b class=\"tabular\">%(my_row_solved)s</b> problems"
+
+#: templates/contests/_standings_live.html
+msgid "<b class=\"tabular\">%(my_row_score)s</b> ball"
+msgstr "<b class=\"tabular\">%(my_row_score)s</b> points"
+
+#: templates/contests/_standings_live.html
+msgid "· jarima <b class=\"tabular\">%(my_row_penalty)s</b>"
+msgstr "· penalty <b class=\"tabular\">%(my_row_penalty)s</b>"
+
+#: templates/contests/_standings_live.html
+msgid ""
+"<b>%(cp_label)s</b> yechildi <span class=\"text-mute "
+"tabular\">%(cell_time)s</span>"
+msgstr ""
+"<b>%(cp_label)s</b> solved <span class=\"text-mute "
+"tabular\">%(cell_time)s</span>"
+
+#: templates/contests/_standings_live.html
+msgid "<b>%(cp_label)s</b> masalada %(cell_wrong)s ta noto‘g‘ri urinish"
+msgstr "%(cell_wrong)s wrong attempts on <b>%(cp_label)s</b>"
+
+#: templates/contests/_standings_live.html
+msgid ""
+"AC daqiqasi + %(contest_wrong_try_minutes)s × noto‘g‘ri urinish (yechilgan "
+"masalalar bo‘yicha)"
+msgstr ""
+"AC minute + %(contest_wrong_try_minutes)s × wrong attempts (over the solved "
+"problems)"
+
+#: templates/contests/_standings_live.html
+msgid "%(contest_get_division_display)s: natija reytingga ta’sir qilmaydi"
+msgstr ""
+"%(contest_get_division_display)s: the result doesn't affect the rating"
+
+#: templates/contests/_standings_live.html
+msgid "%(r_user_username)s, %(cp_label)s: urinishlar"
+msgstr "%(r_user_username)s, %(cp_label)s: attempts"
+
+#: templates/contests/_standings_live.html
+msgid "%(cp_n_solved)s kishi yechdi, %(cp_n_tried)s kishi urindi"
+msgstr "%(cp_n_solved)s people solved, %(cp_n_tried)s people tried"
+
+#: templates/contests/_standings_live.html
+msgid ""
+"<b class=\"text-ink\">Jarima</b> = yechish daqiqalari + "
+"%(contest_wrong_try_minutes)s × noto‘g‘ri urinish"
+msgstr ""
+"<b class=\"text-ink\">Penalty</b> = the minutes to solve + "
+"%(contest_wrong_try_minutes)s × wrong attempts"
+
+#: templates/contests/_submissions_live.html
+msgid "Urinishlar <small>%(page_paginator_count)s</small>"
+msgstr "Submissions <small>%(page_paginator_count)s</small>"
+
+#: templates/contests/_submissions_live.html templates/submissions/list.html
+msgid "Urinish #%(s_pk)s kodi"
+msgstr "Code of submission #%(s_pk)s"
+
+#: templates/contests/_submissions_live.html
+msgid "Faqat %(s_user_username)s urinishlari"
+msgstr "Only %(s_user_username)s's submissions"
+
+#: templates/contests/_submissions_live.html
+msgid "%(s_problem_title)s: faqat shu masala"
+msgstr "%(s_problem_title)s: only this problem"
+
+#: templates/contests/_submissions_live.html
+#: templates/problems/_leaders_mini.html
+msgid "%(s_exec_ms)s ms"
+msgstr "%(s_exec_ms)s ms"
+
+#: templates/contests/_submissions_live.html
+#: templates/moderation/submissions.html
+msgid "Kodni ko‘rish: #%(s_pk)s"
+msgstr "View the code: #%(s_pk)s"
+
+#: templates/contests/_submissions_live.html
+msgid "Yozilishini ko‘rish: %(s_user_username)s, %(s_label)s"
+msgstr "View how it was written: %(s_user_username)s, %(s_label)s"
+
+#: templates/contests/clarifications.html
+msgid "%(contest_title)s — Savollar"
+msgstr "%(contest_title)s — Q&A"
+
+#: templates/contests/clarifications.html
+msgid "%(clars)s ta"
+msgstr "%(clars)s"
+
+#: templates/contests/clarifications.html templates/contests/detail.html
+msgid "%(c_problem_label)s masala"
+msgstr "problem %(c_problem_label)s"
+
+#: templates/contests/clarifications.html templates/contests/detail.html
+msgid "<b>Javob</b> · %(c_answered_by_username)s"
+msgstr "<b>Answer</b> · %(c_answered_by_username)s"
+
+#: templates/contests/clarifications.html
+msgid "%(c_user_username)s savoliga javob"
+msgstr "Answer to the question of %(c_user_username)s"
+
+#: templates/contests/detail.html
+msgid "Oxirida 52%% qoladi"
+msgstr "52%% is left at the end"
+
+#: templates/contests/detail.html
+msgid "−50, eng kami 30%%"
+msgstr "−50, at least 30%%"
+
+#: templates/contests/detail.html
+msgid "dasturlash musobaqasi: %(contest_start)s, %(contest_duration_label)s"
+msgstr "a programming contest: %(contest_start)s, %(contest_duration_label)s"
+
+#: templates/contests/detail.html
+msgid ", %(problems)s ta masala"
+msgstr ", %(problems)s problems"
+
+#: templates/contests/detail.html
+msgid "Sizning vaqtingiz: %(personal_minutes)s daqiqa"
+msgstr "Your time: %(personal_minutes)s minutes"
+
+#: templates/contests/detail.html
+msgid ""
+"Musobaqa %(contest_end)s gacha ochiq, lekin <b>sizga %(personal_minutes)s "
+"daqiqa</b> beriladi: «Boshlash»ni bosgan paytdan hisoblanadi. Masalalar "
+"shundan keyin ochiladi. Soatni to‘xtatib yoki qayta boshlab bo‘lmaydi."
+msgstr ""
+"The contest is open until %(contest_end)s, but <b>you get "
+"%(personal_minutes)s minutes</b>: counted from the moment you press “Start”."
+" The problems open after that. The clock can't be stopped or restarted."
+
+#: templates/contests/detail.html
+msgid ""
+"%(personal_minutes)s daqiqalik vaqtingiz hozir boshlanadi va to‘xtamaydi. "
+"Boshlaymizmi?"
+msgstr ""
+"Your %(personal_minutes)s minutes start now and don't stop. Shall we start?"
+
+#: templates/contests/detail.html
+msgid ""
+"Qatnashish uchun avval yoziling, keyin «Boshlash» tugmasi chiqadi. Sizga "
+"%(personal_minutes)s daqiqa beriladi."
+msgstr ""
+"Sign up first, then the “Start” button appears. You get %(personal_minutes)s"
+" minutes."
+
+#: templates/contests/detail.html
+msgid ""
+"Musobaqa %(contest_start)s da ochiladi. Har bir ishtirokchiga "
+"%(personal_minutes)s daqiqa beriladi: istalgan paytda boshlaysiz, oxirigacha"
+" %(contest_end)s."
+msgstr ""
+"The contest opens on %(contest_start)s. Each participant gets "
+"%(personal_minutes)s minutes: you start at any time, up to the end at "
+"%(contest_end)s."
+
+#: templates/contests/detail.html
+msgid "%(cp_points)s ball"
+msgstr "%(cp_points)s points"
+
+#: templates/contests/detail.html
+msgid "<b>%(n_problems)s ta masala</b>Boshlaganingizdan keyin ochiladi."
+msgstr "<b>%(n_problems)s problems</b>They open after you start."
+
+#: templates/contests/detail.html
+msgid "%(cp_problem_tl_ms)s ms"
+msgstr "%(cp_problem_tl_ms)s ms"
+
+#: templates/contests/detail.html
+msgid "· %(cp_problem_ml_mb)s MB"
+msgstr "· %(cp_problem_ml_mb)s MB"
+
+#: templates/contests/detail.html
+msgid "hozir %(cp_now_points)s"
+msgstr "now %(cp_now_points)s"
+
+#: templates/contests/detail.html
+msgid "%(cp_my_cell_wrong)s ta noto‘g‘ri urinish"
+msgstr "%(cp_my_cell_wrong)s wrong attempts"
+
+#: templates/contests/detail.html
+msgid ""
+"Reyting <b class=\"text-ink\">%(my_participation_rating_before)s</b> dan <b "
+"class=\"text-ink\">%(my_participation_rating_after)s</b> ga"
+msgstr ""
+"Rating from <b class=\"text-ink\">%(my_participation_rating_before)s</b> to "
+"<b class=\"text-ink\">%(my_participation_rating_after)s</b>"
+
+#: templates/contests/detail.html
+msgid ""
+"<b>%(contest_badge)s</b><span>Masalalar ochilgach, kamida bitta masala "
+"yechganlar profiliga qo‘shiladi. Birinchi uchtalikka medal bilan.</span>"
+msgstr ""
+"<b>%(contest_badge)s</b><span>Once the problems open, it is added to the "
+"profile of everyone who solved at least one problem. With a medal for the "
+"top three.</span>"
+
+#: templates/contests/detail.html
+msgid ""
+"Ro‘yxatdan o‘tganlar<small class=\"ca-box-tools\">%(n_participants)s</small>"
+msgstr "Signed up<small class=\"ca-box-tools\">%(n_participants)s</small>"
+
+#: templates/contests/detail.html
+msgid ""
+"<b>%(virtual_rank)s-o‘rin</b>da bo‘lardingiz (%(virtual_field)s "
+"ishtirokchidan):"
+msgstr ""
+"You would be in <b>rank %(virtual_rank)s</b> (of %(virtual_field)s "
+"participants):"
+
+#: templates/contests/detail.html
+msgid "<b class=\"tabular\">%(virtual_solved)s</b> ta masala"
+msgstr "<b class=\"tabular\">%(virtual_solved)s</b> problems"
+
+#: templates/contests/detail.html
+msgid "ball <b class=\"tabular\">%(virtual_score)s</b>"
+msgstr "score <b class=\"tabular\">%(virtual_score)s</b>"
+
+#: templates/contests/detail.html
+msgid ", jarima <b class=\"tabular\">%(virtual_penalty)s</b>"
+msgstr ", penalty <b class=\"tabular\">%(virtual_penalty)s</b>"
+
+#: templates/contests/detail.html
+msgid ""
+"Virtual ishtirok hozir boshlanadi va %(contest_duration_label)s davom etadi."
+" Boshlaysizmi?"
+msgstr ""
+"Virtual participation starts now and lasts %(contest_duration_label)s. "
+"Start?"
+
+#: templates/contests/detail.html
+msgid ""
+"%(contest_get_division_display)s: diapazondan tashqaridagilar ham "
+"qatnashadi, lekin reytingi o‘zgarmaydi."
+msgstr ""
+"%(contest_get_division_display)s: people outside the range may take part "
+"too, but their rating doesn't change."
+
+#: templates/contests/standings.html
+msgid "%(contest_title)s — Natijalar"
+msgstr "%(contest_title)s — Results"
+
+#: templates/contests/standings.html
+msgid ""
+"%(contest_title)s natijalari: o‘rinlar, ballar va har bir masala bo‘yicha "
+"urinishlar."
+msgstr ""
+"Results of %(contest_title)s: ranks, scores and attempts on each problem."
+
+#: templates/contests/standings.html
+msgid "%(rows)s ishtirokchi"
+msgstr "%(rows)s participants"
+
+#: templates/contests/submissions.html
+msgid "%(contest_title)s — Urinishlar"
+msgstr "%(contest_title)s — Submissions"
+
+#: templates/contests/submissions.html
+msgid "<span translate=\"no\">%(p_user_username)s</span> — masalalar bo‘yicha"
+msgstr "<span translate=\"no\">%(p_user_username)s</span> — by problem"
+
+#: templates/contests/submissions.html
+msgid "· %(x_cell_wrong)s ta noto‘g‘ri urinishdan keyin"
+msgstr "· after %(x_cell_wrong)s wrong attempts"
+
+#: templates/contests/submissions.html
+msgid "%(x_cell_wrong)s ta noto‘g‘ri urinish"
+msgstr "%(x_cell_wrong)s wrong attempts"
+
+#: templates/contests/submissions.html
+msgid "Yozilishini ko‘rish: %(x_cp_label)s"
+msgstr "View how it was written: %(x_cp_label)s"
+
+#: templates/contests/submissions.html
+msgid ""
+"%(x_cp_label)s masalasi natijasini bekor qilish. Sabab (ixtiyoriy, faqat "
+"adminlar ko‘radi):"
+msgstr ""
+"Void the result of problem %(x_cp_label)s. Reason (optional, only admins see"
+" it):"
+
+#: templates/contests/submissions.html
+msgid ""
+"%(x_cp_label)s masalasi natijasini AI tufayli bekor qilish: xato urinish "
+"hisoblanadi va masala bloklanadi. Sabab (ixtiyoriy, faqat adminlar ko‘radi):"
+msgstr ""
+"Void the result of problem %(x_cp_label)s because of AI: it counts as a "
+"wrong attempt and the problem is blocked. Reason (optional, only admins see "
+"it):"
+
+#: templates/home/_dash_new.html
+msgid ""
+"%(first_problem_title)s: kod yozish, yuborish va natijani o‘qishni shu "
+"masalada o‘rganasiz."
+msgstr ""
+"%(first_problem_title)s: you'll learn to write code, submit it and read the "
+"result on this problem."
+
+#: templates/home/_dash_new.html
+msgid ""
+"O‘rganish bo‘limida %(n_courses)s ta kurs: qisqa nazariya va har biridan "
+"keyin mashq masalalari"
+msgstr ""
+"The Learn section has %(n_courses)s courses: short theory and practice "
+"problems after each"
+
+#: templates/home/_dash_new.html
+msgid ", birinchisi «%(learning_plan_title)s»"
+msgstr ", the first is “%(learning_plan_title)s”"
+
+#: templates/home/_dash_new.html
+msgid "%(c_title)s, %(c_start)s. Reytingingiz musobaqada boshlanadi"
+msgstr "%(c_title)s, %(c_start)s. Your rating starts with a contest"
+
+#: templates/home/_land_round.html
+msgid ""
+"%(c_title)s</a> <small class=\"tabular\">%(c_start)s · %(c_duration_label)s "
+"· %(c_n_participants)s ishtirokchi</small>"
+msgstr ""
+"%(c_title)s</a> <small class=\"tabular\">%(c_start)s · %(c_duration_label)s "
+"· %(c_n_participants)s participants</small>"
+
+#: templates/home/_quests.html
+msgid "<b>%(q_title)s</b><small>Bajarildi</small>"
+msgstr "<b>%(q_title)s</b><small>Done</small>"
+
+#: templates/home/_quests.html
+msgid ""
+"<b>%(freezes)s</b> ta muzlatish bor: bir kunlik tanaffus Olovni o‘chirmaydi."
+msgstr ""
+"You have <b>%(freezes)s</b> freezes: a one-day break won't break the streak."
+
+#: templates/home/dashboard.html
+msgid "Xush kelibsiz, %(user_first_name)s"
+msgstr "Welcome, %(user_first_name)s"
+
+#: templates/home/dashboard.html
+msgid "Salom, %(user_first_name)s"
+msgstr "Hello, %(user_first_name)s"
+
+#: templates/home/dashboard.html
+msgid "Musobaqa reytingi · <span class=\"ca-hud-tier\">%(user_rating)s</span>"
+msgstr "Contest rating · <span class=\"ca-hud-tier\">%(user_rating)s</span>"
+
+#: templates/home/dashboard.html
+msgid "%(rating_card_next_name)s darajasigacha"
+msgstr "to the %(rating_card_next_name)s level"
+
+#: templates/home/dashboard.html
+msgid ""
+"<span class=\"font-semibold text-white\">%(rating_card_next_name)s</span> "
+"darajasigacha %(rating_card_next_need)s ball"
+msgstr ""
+"<span class=\"font-semibold text-white\">%(rating_card_next_need)s</span> "
+"points to the %(rating_card_next_name)s level"
+
+#: templates/home/dashboard.html
+msgid ""
+"Siz <b>%(live_rank)s-o‘rin</b>dasiz, %(live_n_problems)s masaladan "
+"%(live_solved)s tasi yechilgan."
+msgstr ""
+"You are ranked <b>%(live_rank)s</b>, %(live_solved)s of %(live_n_problems)s "
+"problems solved."
+
+#: templates/home/dashboard.html
+msgid "%(live_n_problems)s ta masala. Hali qatnashmagansiz."
+msgstr "%(live_n_problems)s problems. You haven't taken part yet."
+
+#: templates/home/dashboard.html
+msgid "%(learning_progress_done)s / %(learning_progress_total)s masala"
+msgstr "%(learning_progress_done)s / %(learning_progress_total)s problems"
+
+#: templates/home/dashboard.html
+msgid "· keyingisi: %(learning_next_title)s"
+msgstr "· next: %(learning_next_title)s"
+
+#: templates/home/dashboard.html templates/problems/_my_subs.html
+msgid "%(s_exec_ms)s&nbsp;ms"
+msgstr "%(s_exec_ms)s&nbsp;ms"
+
+#: templates/home/dashboard.html
+msgid ""
+"Eng kam yechgan mavzuingiz <b class=\"text-ink\">%(picks_reason)s</b>. Shu "
+"masalalar aynan shu mavzuni mashq qildiradi."
+msgstr ""
+"The topic you've solved the least is <b class=\"text-"
+"ink\">%(picks_reason)s</b>. These problems practice exactly that topic."
+
+#: templates/home/dashboard.html
+msgid "%(d_challenger_username)s vs %(d_opponent_username)s"
+msgstr "%(d_challenger_username)s vs %(d_opponent_username)s"
+
+#: templates/home/dashboard.html
+msgid ""
+"<b>%(d_challenger_username)s</b> <span class=\"text-mute\">sizni chaqirdi, "
+"%(d_get_language_display)s</span>"
+msgstr ""
+"<b>%(d_challenger_username)s</b> <span class=\"text-mute\">challenged you, "
+"%(d_get_language_display)s</span>"
+
+#: templates/home/landing.html
+msgid ""
+"Hozir saytda <b>%(stats_problems)s</b> ta masala, <b>%(stats_contests)s</b> "
+"ta musobaqa va <b>%(stats_submissions)s</b> ta tekshirilgan yechim bor."
+msgstr ""
+"The site now has <b>%(stats_problems)s</b> problems, "
+"<b>%(stats_contests)s</b> contests and <b>%(stats_submissions)s</b> checked "
+"submissions."
+
+#: templates/home/landing.html
+msgid ""
+"Brauzerdagi muharrirda, %(languages)s tilda. Yuborishdan oldin misollarda "
+"sinab ko‘ring."
+msgstr ""
+"In an in-browser editor, in %(languages)s languages. Try it on the examples "
+"before submitting."
+
+#: templates/home/landing.html
+msgid "%(languages)s ta til"
+msgstr "%(languages)s languages"
+
+#: templates/home/landing.html
+msgid ""
+"%(languages)s. Har bir yechim cheklangan muhitda barcha testlarda "
+"tekshiriladi."
+msgstr ""
+"%(languages)s. Every solution is checked on all the tests in a restricted "
+"environment."
+
+#: templates/home/landing.html
+msgid ""
+"So‘nggi reytingli raund, %(last_rated_end)s · <b class=\"text-"
+"ink\">%(last_rated_title)s</b>"
+msgstr ""
+"The latest rated round, %(last_rated_end)s · <b class=\"text-"
+"ink\">%(last_rated_title)s</b>"
+
+#: templates/home/landing.html
+msgid "%(n_last)s ishtirokchining to‘liq jadvali"
+msgstr "The full table of %(n_last)s participants"
+
+#: templates/home/landing.html
+msgid "Kun masalasi · %(daily_date)s"
+msgstr "Daily problem · %(daily_date)s"
+
+#: templates/home/landing.html
+msgid ""
+"%(daily_problem_get_difficulty_display)s</span> · yechish uchun bir necha "
+"qator kifoya"
+msgstr ""
+"%(daily_problem_get_difficulty_display)s</span> · a few lines are enough to "
+"solve it"
+
+#: templates/integrity/contest_report.html
+msgid "%(contest_title)s — Nazorat hisoboti"
+msgstr "%(contest_title)s — Integrity report"
+
+#: templates/integrity/contest_report.html
+msgid ""
+"<span>%(contest_title)s</span><span "
+"class=\"tabular\">%(contest_start)s</span><span>%(rows)s ishtirokchida "
+"hodisa</span>"
+msgstr ""
+"<span>%(contest_title)s</span><span "
+"class=\"tabular\">%(contest_start)s</span><span>events for %(rows)s "
+"participants</span>"
+
+#: templates/integrity/contest_report.html
+msgid ""
+"<a href=\"#people\" aria-current=\"true\">Ishtirokchilar "
+"<span>%(rows)s</span></a> <a href=\"#flags\">O‘xshash kodlar"
+msgstr ""
+"<a href=\"#people\" aria-current=\"true\">Participants "
+"<span>%(rows)s</span></a> <a href=\"#flags\">Similar code"
+
+#: templates/integrity/contest_report.html
+msgid "%(open_flags)s yangi"
+msgstr "%(open_flags)s new"
+
+#: templates/integrity/contest_report.html
+msgid ""
+"<a href=\"#suspicious\">Shubhali yechimlar <span>%(suspicious)s</span></a> "
+"<a href=\"#journal\">Amallar jurnali <span>%(audit)s</span></a>"
+msgstr ""
+"<a href=\"#suspicious\">Suspicious solutions <span>%(suspicious)s</span></a>"
+" <a href=\"#journal\">Activity log <span>%(audit)s</span></a>"
+
+#: templates/integrity/contest_report.html
+msgid "Tavsiya: %(c_open_problems)s ni bekor qilish"
+msgstr "Recommended: void %(c_open_problems)s"
+
+#: templates/integrity/contest_report.html
+msgid "%(label)s bekor qilingan — tiklash"
+msgstr "%(label)s voided — restore"
+
+#: templates/integrity/contest_report.html
+msgid ""
+"%(label)s masalasi natijasini bekor qilish. Sabab (ixtiyoriy, faqat adminlar"
+" ko‘radi):"
+msgstr ""
+"Void the result of problem %(label)s. Reason (optional, only admins see it):"
+
+#: templates/integrity/contest_report.html
+msgid "Faqat %(label)s masalasi natijasini bekor qilish"
+msgstr "Void only the result of problem %(label)s"
+
+#: templates/integrity/contest_report.html
+msgid ""
+"%(label)s masalasi natijasini AI tufayli bekor qilish: xato urinish "
+"hisoblanadi va masala bloklanadi. Sabab (ixtiyoriy, faqat adminlar ko‘radi):"
+msgstr ""
+"Void the result of problem %(label)s because of AI: it counts as a wrong "
+"attempt and the problem is blocked. Reason (optional, only admins see it):"
+
+#: templates/integrity/contest_report.html
+msgid ""
+"AI tufayli: %(label)s natijasi xato urinish sifatida qaytariladi va masala "
+"bloklanadi"
+msgstr ""
+"Because of AI: the result of %(label)s is turned into a wrong attempt and "
+"the problem is blocked"
+
+#: templates/integrity/contest_report.html
+msgid "%(user_username)s: urinishlari"
+msgstr "%(user_username)s: attempts"
+
+#: templates/integrity/contest_report.html
+msgid "%(user_username)s: chuqur tekshirish"
+msgstr "%(user_username)s: deep check"
+
+#: templates/integrity/contest_report.html
+msgid "%(user_username)s: boshqa amallar"
+msgstr "%(user_username)s: other actions"
+
+#: templates/integrity/contest_report.html
+msgid ""
+"Juda tez — masala ochilgandan AC gacha: Easy &lt; %(speed_limits_easy)s s, "
+"Medium &lt; %(speed_limits_medium)s s, Hard &lt; %(speed_limits_hard)s s. "
+"Chiqib-qaytib — %(min_away_s)s+ s tashqarida bo‘lib, qaytgach "
+"%(quick_after_return_s)s s ichida AC."
+msgstr ""
+"Too fast — from opening the problem to AC: Easy &lt; %(speed_limits_easy)s "
+"s, Medium &lt; %(speed_limits_medium)s s, Hard &lt; %(speed_limits_hard)s s."
+" Leaving and returning — away for %(min_away_s)s+ s, then AC within "
+"%(quick_after_return_s)s s of returning."
+
+#: templates/integrity/contest_report.html
+msgid "%(r_elapsed)s s da AC"
+msgstr "AC in %(r_elapsed)s s"
+
+#: templates/integrity/contest_report.html
+msgid "%(r_away_s)s s tashqarida, qaytgach %(r_after_return)s s da AC"
+msgstr "away for %(r_away_s)s s, AC %(r_after_return)s s after returning"
+
+#: templates/integrity/contest_report.html
+#: templates/integrity/contest_report.html
+msgid "Yechim #%(r_submission_pk)s"
+msgstr "Solution #%(r_submission_pk)s"
+
+#: templates/integrity/contest_report.html
+msgid "%(open_flags)s ko‘rilmagan"
+msgstr "%(open_flags)s unreviewed"
+
+#: templates/integrity/contest_report.html
+msgid ""
+"Bir masala, bir til, kamida %(min_lines)s qator kod, o‘xshashlik ≥ "
+"%(threshold)s%%. AC yechimlar, AC olmaganlarning oxirgi urinishi, va "
+"musobaqadan oldingi yechimlar (amaliyot, oldingi musobaqalar, muallif) "
+"solishtiriladi; ishtirokchi qatoridagi"
+msgstr ""
+"One problem, one language, at least %(min_lines)s lines of code, similarity "
+"≥ %(threshold)s%%. AC solutions, the last attempt of those without AC, and "
+"pre-contest solutions (practice, earlier contests, the author) are compared;"
+" in the participant's row"
+
+#: templates/integrity/contest_report.html
+msgid ""
+"Barcha masalalar avtomatik tekshirildi: %(contest_similarity_checked_at)s."
+msgstr ""
+"All problems were checked automatically: %(contest_similarity_checked_at)s."
+
+#: templates/integrity/contest_report.html
+msgid ""
+"%(f_sides_0_sub_language_name)s · %(f_sides_0_n_hit)s / %(f_sides_0_n_code)s"
+" qator mos ·"
+msgstr ""
+"%(f_sides_0_sub_language_name)s · %(f_sides_0_n_hit)s / %(f_sides_0_n_code)s"
+" lines match ·"
+
+#: templates/integrity/contest_report.html
+msgid "%(f_gap_min)s daqiqa"
+msgstr "%(f_gap_min)s minutes"
+
+#: templates/integrity/contest_report.html
+msgid "paste %(side_paste)s"
+msgstr "paste %(side_paste)s"
+
+#: templates/integrity/contest_report.html
+msgid "chiqish %(side_blur)s"
+msgstr "leave %(side_blur)s"
+
+#: templates/integrity/contest_report.html
+msgid "%(side_user_username)s kodi"
+msgstr "code of %(side_user_username)s"
+
+#: templates/integrity/contest_report.html
+msgid "%(side_user_username)s: DQ bekor"
+msgstr "%(side_user_username)s: lift DQ"
+
+#: templates/integrity/contest_report.html
+msgid "%(side_user_username)sni diskvalifikatsiya"
+msgstr "Disqualify %(side_user_username)s"
+
+#: templates/integrity/contest_report.html
+msgid ""
+"%(f_label)s masalasi natijasini AI tufayli bekor qilish: xato urinish "
+"hisoblanadi va masala bloklanadi. Sabab (ixtiyoriy, faqat adminlar ko‘radi):"
+msgstr ""
+"Void the result of problem %(f_label)s because of AI: it counts as a wrong "
+"attempt and the problem is blocked. Reason (optional, only admins see it):"
+
+#: templates/integrity/contest_report.html
+msgid "%(side_user_username)s: faqat %(f_label)s ni AI tufayli bekor qilish"
+msgstr "%(side_user_username)s: void only %(f_label)s because of AI"
+
+#: templates/integrity/contest_report.html
+msgid ""
+"%(f_label)s masalasi natijasini bekor qilish. Sabab (ixtiyoriy, faqat "
+"adminlar ko‘radi):"
+msgstr ""
+"Void the result of problem %(f_label)s. Reason (optional, only admins see "
+"it):"
+
+#: templates/integrity/contest_report.html
+msgid "%(side_user_username)s: %(f_label)s natijasini tiklash"
+msgstr "%(side_user_username)s: restore the result of %(f_label)s"
+
+#: templates/integrity/contest_report.html
+msgid "%(side_user_username)s: faqat %(f_label)s ni bekor qilish"
+msgstr "%(side_user_username)s: void only %(f_label)s"
+
+#: templates/integrity/practice_report.html
+msgid "<b class=\"tabular\">%(rows)s</b> ta shubhali yechim"
+msgstr "<b class=\"tabular\">%(rows)s</b> suspicious solutions"
+
+#: templates/integrity/practice_report.html
+msgid ", <b class=\"tabular text-warn\">%(open)s</b> tasi ko‘rib chiqilmagan"
+msgstr ", <b class=\"tabular text-warn\">%(open)s</b> not reviewed"
+
+#: templates/integrity/replay.html
+msgid "To‘xtatish"
+msgstr "Stop"
+
+#: templates/integrity/replay.html
+msgid "%(participant_username)s · %(cp_label)s — yozilish tarixi"
+msgstr "%(participant_username)s · %(cp_label)s — writing history"
+
+#: templates/integrity/replay.html
+msgid ""
+"<b>%(jumps)s ta keskin sakrash</b> — 10 soniya atrofida %(jumps_0_chars)s+ "
+"belgi paydo bo‘lgan. Qo‘lda yozilgan kodda bu kam uchraydi."
+msgstr ""
+"<b>%(jumps)s sharp jumps</b> — %(jumps_0_chars)s+ characters appeared within"
+" about 10 seconds. This is rare in hand-written code."
+
+#: templates/integrity/replay.html
+msgid "+%(it_chars)s belgi %(it_secs)s s ichida"
+msgstr "+%(it_chars)s characters in %(it_secs)s s"
+
+#: templates/integrity/replay.html
+msgid "Qaytdi · %(it_away_s)s s tashqarida"
+msgstr "Returned · away for %(it_away_s)s s"
+
+#: templates/integrity/reports.html
+msgid "%(open_count)s ta ochiq. Ochiqlari tepada."
+msgstr "%(open_count)s open. The open ones are on top."
+
+#: templates/integrity/reports.html
+msgid "Javob: %(r_outcome)s"
+msgstr "Reply: %(r_outcome)s"
+
+#: templates/learn/_plan_strip.html
+msgid "<span class=\"sr-only\">Kurs: </span>%(nav_plan_title)s"
+msgstr "<span class=\"sr-only\">Course: </span>%(nav_plan_title)s"
+
+#: templates/learn/course.html
+msgid "Kodni nusxalash"
+msgstr "Copy the code"
+
+#: templates/learn/course.html
+msgid "%(plan_title)s — kurs"
+msgstr "%(plan_title)s — course"
+
+#: templates/learn/course.html
+msgid "O‘rganish</a> / %(plan_get_stage_display)s"
+msgstr "Learn</a> / %(plan_get_stage_display)s"
+
+#: templates/learn/course.html
+msgid "· %(progress_total)s masala"
+msgstr "· %(progress_total)s problems"
+
+#: templates/learn/course.html
+msgid "Keyingi kurs: %(next_plan_title)s"
+msgstr "Next course: %(next_plan_title)s"
+
+#: templates/learn/course.html
+msgid "<span>%(g_label)s</span> masalalar"
+msgstr "<span>%(g_label)s</span> problems"
+
+#: templates/learn/course.html
+msgid ""
+"<b class=\"text-2xl font-bold text-ink tabular\">%(progress_done)s</b> / "
+"%(progress_total)s masala"
+msgstr ""
+"<b class=\"text-2xl font-bold text-ink tabular\">%(progress_done)s</b> / "
+"%(progress_total)s problems"
+
+#: templates/learn/hub.html
+msgid "Yana %(soon)s ta kurs tayyorlanmoqda."
+msgstr "%(soon)s more courses are being prepared."
+
+#: templates/learn/hub.html
+msgid "Tez orada <span class=\"tabular\">%(soon)s</span>"
+msgstr "Coming soon <span class=\"tabular\">%(soon)s</span>"
+
+#: templates/learn/hub.html
+msgid "· %(current_progress_done)s / %(current_progress_total)s masala"
+msgstr "· %(current_progress_done)s / %(current_progress_total)s problems"
+
+#: templates/learn/hub.html
+msgid "Keyingi masala: %(next_problem_title)s ·"
+msgstr "Next problem: %(next_problem_title)s ·"
+
+#: templates/learn/hub.html
+msgid "%(s_courses)s kurs"
+msgstr "%(s_courses)s courses"
+
+#: templates/learn/hub.html
+msgid "%(p_progress_done)s / %(p_progress_total)s yechilgan"
+msgstr "%(p_progress_done)s / %(p_progress_total)s solved"
+
+#: templates/learn/hub.html
+msgid "%(p_progress_total)s masala"
+msgstr "%(p_progress_total)s problems"
+
+#: templates/learn/hub.html
+msgid ""
+"<b>Tez orada</b><span class=\"text-mute\">%(soon)s ta kurs tayyorlanmoqda — "
+"kursda 10 ta masala bo‘lganda ochiladi</span>"
+msgstr ""
+"<b>Coming soon</b><span class=\"text-mute\">%(soon)s courses are being "
+"prepared — a course opens when it has 10 problems</span>"
+
+#: templates/learn/hub.html
+msgid "%(p_ready)s/10 masala"
+msgstr "%(p_ready)s/10 problems"
+
+#: templates/learn/list.html
+msgid "%(lst_name)s — ro‘yxat"
+msgstr "%(lst_name)s — list"
+
+#: templates/learn/list.html
+msgid ""
+"«%(lst_name)s» — %(lst_owner_username)s tuzgan %(rows)s ta masalalik "
+"ro‘yxat."
+msgstr ""
+"“%(lst_name)s” — a list of %(rows)s problems made by %(lst_owner_username)s."
+
+#: templates/learn/list.html
+msgid "%(rows)s ta masala"
+msgstr "%(rows)s problems"
+
+#: templates/learn/list.html
+msgid "· %(n_hidden)s ta masala hozir yopiq"
+msgstr "· %(n_hidden)s problems are closed right now"
+
+#: templates/learn/list.html
+msgid "<b class=\"tabular text-ink\">%(n_solved)s / %(rows)s</b> yechilgan"
+msgstr "<b class=\"tabular text-ink\">%(n_solved)s / %(rows)s</b> solved"
+
+#: templates/learn/list.html
+msgid "Ro‘yxatdan olish: %(p_title)s"
+msgstr "Remove from the list: %(p_title)s"
+
+#: templates/learn/list.html templates/learn/lists.html
+msgid "%(form_is_public)s Havola orqali hamma ko‘ra oladi"
+msgstr "%(form_is_public)s Everyone can see it by the link"
+
+#: templates/learn/list.html
+msgid "«%(lst_name)s» ro‘yxati o‘chiriladi. Davom etasizmi?"
+msgstr "The list “%(lst_name)s” will be deleted. Continue?"
+
+#: templates/moderation/_duel_switch.html
+msgid "· %(duel_switch_1)s gacha"
+msgstr "· until %(duel_switch_1)s"
+
+#: templates/moderation/ai_generate.html
+msgid "Jami ${n} ta — ko‘pi bilan ${max} ta bo‘lsin."
+msgstr "In total ${n} — at most ${max} please."
+
+#: templates/moderation/ai_generate.html
+msgid "Jami ${n} ta masala (ko‘pi bilan ${max} ta)."
+msgstr "In total ${n} problems (at most ${max})."
+
+#: templates/moderation/ai_generate.html
+msgid "Tuzilmoqda…"
+msgstr "Creating…"
+
+#: templates/moderation/ai_generate.html
+msgid ""
+"AI masalalar va testlarni tuzmoqda — bu bir necha daqiqa olishi mumkin. "
+"Sahifani yopmang."
+msgstr ""
+"The AI is creating problems and tests — this may take a few minutes. Don't "
+"close the page."
+
+#: templates/moderation/ai_generate.html
+msgid "Jami ko‘pi bilan %(max_count)s ta masala."
+msgstr "At most %(max_count)s problems in total."
+
+#: templates/moderation/contest_form.html
+msgid ""
+"<b class=\"text-ink\">Codeforces</b>: masala balli oxirigacha 52%% ga "
+"tushadi, har xato −50, kamida 30%%. Ballarni 500, 1000, 1500… qiling."
+msgstr ""
+"<b class=\"text-ink\">Codeforces</b>: a problem's points fall to 52%% by the"
+" end, each mistake −50, at least 30%%. Make the points 500, 1000, 1500…"
+
+#: templates/moderation/contest_form.html templates/moderation/submit.html
+msgid "%(f_delete)s O‘chirish"
+msgstr "%(f_delete)s Delete"
+
+#: templates/moderation/contest_form.html
+msgid "%(form_is_rated)s Reytingli musobaqa"
+msgstr "%(form_is_rated)s Rated contest"
+
+#: templates/moderation/contest_form.html
+msgid "%(form_auto_finish)s Natijani avtomatik e’lon qilish"
+msgstr "%(form_auto_finish)s Publish the result automatically"
+
+#: templates/moderation/contest_official.html
+#: templates/moderation/contest_official.html
+msgid "%(contest_title)s — rasmiy reyting"
+msgstr "%(contest_title)s — official rating"
+
+#: templates/moderation/contest_official.html
+msgid ""
+"Auditoriya musobaqasi (IP %(contest_allowed_ip_prefix)s…): kod tekshiruvi "
+"shart emas. Cheaterlarni diskvalifikatsiya qilib, reytingni qo‘llang."
+msgstr ""
+"A classroom contest (IP %(contest_allowed_ip_prefix)s…): a code check isn't "
+"required. Disqualify the cheaters and apply the rating."
+
+#: templates/moderation/contest_official.html
+msgid ""
+"Tasdiqlangan ishtirokchilardan eng yuqori %(contest_review_top_n)s tasi o‘z "
+"kodini tushuntirishi kerak. Tushuntira olmasa — diskvalifikatsiya, keyingisi"
+" ro‘yxatga kiradi."
+msgstr ""
+"Of the verified participants, the top %(contest_review_top_n)s must explain "
+"their own code. If they can't — disqualification, and the next one enters "
+"the list."
+
+#: templates/moderation/contest_official.html
+msgid "%(r_solved)s ta masala"
+msgstr "%(r_solved)s problems"
+
+#: templates/moderation/contest_official.html
+msgid "%(r_score)s ball"
+msgstr "%(r_score)s points"
+
+#: templates/moderation/contest_official.html
+msgid "Tushuntirdi · %(r_participation_reviewed_at)s"
+msgstr "Explained · %(r_participation_reviewed_at)s"
+
+#: templates/moderation/contest_official.html
+msgid "%(r_user_username)s diskvalifikatsiya qilinadi. Davom etasizmi?"
+msgstr "%(r_user_username)s will be disqualified. Continue?"
+
+#: templates/moderation/contest_official.html
+msgid "%(pending)s ta ishtirokchi hali tekshirilmagan."
+msgstr "%(pending)s participants haven't been checked yet."
+
+#: templates/moderation/contest_official.html
+msgid "Qo‘llangan: %(contest_official_applied_at)s"
+msgstr "Applied: %(contest_official_applied_at)s"
+
+#: templates/moderation/contests.html
+msgid "%(c_n_problems)s masala"
+msgstr "%(c_n_problems)s problems"
+
+#: templates/moderation/contests.html
+msgid "· %(c_n_hidden)s yashirin"
+msgstr "· %(c_n_hidden)s hidden"
+
+#: templates/moderation/contests.html
+msgid "%(c_n_open_flags)s ta o‘xshashlik ko‘rilmagan"
+msgstr "%(c_n_open_flags)s similarities not seen"
+
+#: templates/moderation/contests.html
+msgid "Boshqa amallar: %(c_title)s"
+msgstr "Other actions: %(c_title)s"
+
+#: templates/moderation/contests.html
+msgid "«%(c_title)s» musobaqasi va natijalari o‘chiriladi. Davom etasizmi?"
+msgstr "The contest “%(c_title)s” and its results will be deleted. Continue?"
+
+#: templates/moderation/daily_problem.html
+msgid "%(day)s uchun tanlangan masala"
+msgstr "The problem chosen for %(day)s"
+
+#: templates/moderation/daily_problem.html
+msgid "%(candidates)s ta variant"
+msgstr "%(candidates)s options"
+
+#: templates/moderation/daily_problem.html
+msgid "Variant %(forloop_counter)s"
+msgstr "Option %(forloop_counter)s"
+
+#: templates/moderation/daily_problem.html
+msgid "%(p_rating)s rating"
+msgstr "%(p_rating)s rating"
+
+#: templates/moderation/daily_problem.html
+msgid ""
+"%(day)s uchun tanlangan masala ‘%(assignment_problem_title)s’ o‘rniga "
+"‘%(p_title)s’ bo‘ladi. Davom etasizmi?"
+msgstr ""
+"For %(day)s, ‘%(p_title)s’ will replace the chosen problem "
+"‘%(assignment_problem_title)s’. Continue?"
+
+#: templates/moderation/dashboard.html templates/moderation/queue.html
+msgid "«%(p_title)s» masalasini rad etishni tasdiqlaysizmi?"
+msgstr "Do you confirm rejecting the problem “%(p_title)s”?"
+
+#: templates/moderation/dashboard.html
+msgid ""
+"Bugun: %(daily_problem_title)s · %(daily_problem_get_difficulty_display)s"
+msgstr ""
+"Today: %(daily_problem_title)s · %(daily_problem_get_difficulty_display)s"
+
+#: templates/moderation/dashboard.html
+msgid ""
+"<b class=\"tabular text-ink\">%(activity_subs)s</b> urinish · <b "
+"class=\"tabular text-ink\">%(activity_users)s</b> yangi foydalanuvchi"
+msgstr ""
+"<b class=\"tabular text-ink\">%(activity_subs)s</b> submissions · <b "
+"class=\"tabular text-ink\">%(activity_users)s</b> new users"
+
+#: templates/moderation/dashboard.html
+msgid "%(r_day)s: %(r_subs)s urinish, %(r_users)s yangi foydalanuvchi"
+msgstr "%(r_day)s: %(r_subs)s submissions, %(r_users)s new users"
+
+#: templates/moderation/dashboard.html
+msgid "Tekshiruvchi: %(judge_stuck)s ta urinish 2 daqiqadan beri kutmoqda."
+msgstr ""
+"Judge: %(judge_stuck)s submissions have been waiting for over 2 minutes."
+
+#: templates/moderation/dashboard.html
+msgid "So‘nggi natija: %(judge_last)s."
+msgstr "The latest result: %(judge_last)s."
+
+#: templates/moderation/duels.html
+msgid "%(s_right)s/%(n_questions)s to‘g‘ri · %(s_spent)s s"
+msgstr "%(s_right)s/%(n_questions)s correct · %(s_spent)s s"
+
+#: templates/moderation/duels.html
+msgid "o‘ynamoqda · %(s_seen)s/%(n_questions)s"
+msgstr "playing · %(s_seen)s/%(n_questions)s"
+
+#: templates/moderation/plan_form.html
+msgid "%(plan_title)s — tahrirlash"
+msgstr "%(plan_title)s — edit"
+
+#: templates/moderation/plan_form.html
+msgid "%(form_is_public)s Hammaga ko‘rinadi"
+msgstr "%(form_is_public)s Visible to everyone"
+
+#: templates/moderation/plans.html
+msgid "%(p_get_level_display)s</span> <span>%(p_n_tags)s mavzu ·"
+msgstr "%(p_get_level_display)s</span> <span>%(p_n_tags)s topics ·"
+
+#: templates/moderation/plans.html
+msgid "%(p_n_open)s masala"
+msgstr "%(p_n_open)s problems"
+
+#: templates/moderation/plans.html
+msgid ""
+"· <span class=\"text-warn\">tayyorlanmoqda: kamida %(course_min)s ta "
+"kerak</span>"
+msgstr ""
+"· <span class=\"text-warn\">being prepared: at least %(course_min)s "
+"needed</span>"
+
+#: templates/moderation/plans.html
+msgid "· <span class=\"text-mute\">kursda %(course_max)s tasi</span>"
+msgstr "· <span class=\"text-mute\">%(course_max)s in the course</span>"
+
+#: templates/moderation/plans.html templates/moderation/problems.html
+msgid "Tahrirlash: %(p_title)s"
+msgstr "Edit: %(p_title)s"
+
+#: templates/moderation/plans.html
+msgid ""
+"«%(p_title)s» kursi o‘chiriladi. Masalalar va teglar o‘chmaydi. Davom "
+"etasizmi?"
+msgstr ""
+"The course “%(p_title)s” will be deleted. Problems and tags are not deleted."
+" Continue?"
+
+#: templates/moderation/plans.html
+msgid "O‘chirish: %(p_title)s"
+msgstr "Delete: %(p_title)s"
+
+#: templates/moderation/problems.html
+msgid "%(p_n_tests)s test"
+msgstr "%(p_n_tests)s tests"
+
+#: templates/moderation/problems.html
+msgid "Boshqa amallar: %(p_title)s"
+msgstr "Other actions: %(p_title)s"
+
+#: templates/moderation/problems.html
+msgid ""
+"«%(p_title)s»: %(p_n_subs)s ta urinish qayta tekshiriladi. Davom etasizmi?"
+msgstr "“%(p_title)s”: %(p_n_subs)s submissions will be rechecked. Continue?"
+
+#: templates/moderation/problems.html
+msgid "«%(p_title)s» va barcha urinishlari o‘chiriladi. Davom etasizmi?"
+msgstr ""
+"The problem “%(p_title)s” and all its submissions will be deleted. Continue?"
+
+#: templates/moderation/submissions.html
+msgid "%(s_passed)s/%(s_total)s · %(s_exec_ms)s ms"
+msgstr "%(s_passed)s/%(s_total)s · %(s_exec_ms)s ms"
+
+#: templates/moderation/submit.html
+msgid ""
+"Maslahat narxi — masala ballining foizi (yechishdan oldin ochilsa). Jami "
+"ko‘pi bilan 90%%."
+msgstr ""
+"A hint's price is a percentage of the problem's points (if opened before "
+"solving). At most 90%% in total."
+
+#: templates/moderation/submit.html
+msgid "Narx, %%"
+msgstr "Price, %%"
+
+#: templates/moderation/submit.html
+msgid "Rasm yuklashda xatolik yuz berdi."
+msgstr "Image upload failed."
+
+#: templates/moderation/submit.html
+msgid "Rasmni tashlang yoki yuklang"
+msgstr "Drop or upload an image"
+
+#: templates/moderation/submit.html
+msgid "Rasmni shu yerga tashlang"
+msgstr "Drop the image here"
+
+#: templates/moderation/submit.html
+msgid "Rasm yuklanmoqda..."
+msgstr "Uploading the image..."
+
+#: templates/moderation/submit.html
+msgid "Yuklanmoqda: #cur#/#total# (#percent#%)"
+msgstr "Uploading: #cur#/#total# (#percent#%)"
+
+#: templates/moderation/submit.html
+msgid "Yuklandi: #filename#"
+msgstr "Uploaded: #filename#"
+
+#: templates/moderation/submit.html
+msgid "Hech qanday fayl tanlanmadi"
+msgstr "No file was chosen"
+
+#: templates/moderation/submit.html
+msgid "Rasmni yuklashda xatolik yuz berdi"
+msgstr "Image upload failed"
+
+#: templates/moderation/submit.html
+msgid ""
+"%(sql_form_ordered)s Qatorlar tartibi muhim (shart ORDER BY talab qiladi)"
+msgstr ""
+"%(sql_form_ordered)s Row order matters (the statement requires ORDER BY)"
+
+#: templates/moderation/submit.html
+msgid "%(f_is_sample)s Namuna"
+msgstr "%(f_is_sample)s Sample"
+
+#: templates/moderation/submit.html
+msgid "Tartib %(f_order)s"
+msgstr "Order %(f_order)s"
+
+#: templates/moderation/submit.html
+msgid "%(formset_empty_form_is_sample)s Namuna"
+msgstr "%(formset_empty_form_is_sample)s Sample"
+
+#: templates/moderation/submit.html
+msgid "Tartib %(formset_empty_form_order)s"
+msgstr "Order %(formset_empty_form_order)s"
+
+#: templates/moderation/submit.html
+msgid "%(form_is_public)s Ochiq (masalalar ro‘yxatida ko‘rinadi)"
+msgstr "%(form_is_public)s Public (shown in the problem list)"
+
+#: templates/moderation/tag_form.html
+msgid "%(tag_name)s — teg"
+msgstr "%(tag_name)s — tag"
+
+#: templates/moderation/tags.html
+msgid "Tahrirlash: %(t_name)s"
+msgstr "Edit: %(t_name)s"
+
+#: templates/moderation/tags.html
+msgid ""
+"«%(t_name)s» tegini o‘chirasizmi? Masalalar o‘chmaydi, kurslardan ham "
+"chiqadi."
+msgstr ""
+"Delete the tag “%(t_name)s”? The problems aren't deleted; it also leaves the"
+" courses."
+
+#: templates/moderation/tags.html
+msgid "O‘chirish: %(t_name)s"
+msgstr "Delete: %(t_name)s"
+
+#: templates/moderation/user_form.html
+msgid "%(obj_username)s — tahrirlash"
+msgstr "%(obj_username)s — edit"
+
+#: templates/moderation/user_form.html
+msgid ""
+"%(form_instance_practice_points)s <span class=\"text-mute\">· yechilgan "
+"masalalardan hisoblanadi</span>"
+msgstr ""
+"%(form_instance_practice_points)s <span class=\"text-mute\">· computed from "
+"solved problems</span>"
+
+#: templates/moderation/user_form.html
+msgid "%(form_is_staff)s Admin (boshqaruvga kirish)"
+msgstr "%(form_is_staff)s Admin (access to the admin)"
+
+#: templates/moderation/user_form.html
+msgid "%(form_is_setter)s Muallif (masala yozadi; admin tasdiqlaydi)"
+msgstr "%(form_is_setter)s Author (writes problems; an admin approves)"
+
+#: templates/moderation/user_form.html
+msgid "%(form_is_active)s Faol (o‘chirilsa — kira olmaydi)"
+msgstr "%(form_is_active)s Active (if turned off — can't sign in)"
+
+#: templates/moderation/user_form.html
+msgid ""
+"«%(obj_username)s» va uning barcha urinishlari, natijalari butunlay "
+"o‘chiriladi. Qaytarib bo‘lmaydi. Davom etasizmi?"
+msgstr ""
+"“%(obj_username)s” and all their submissions and results will be deleted "
+"permanently. This can't be undone. Continue?"
+
+#: templates/moderation/users.html
+msgid "%(u_rating)s</b>reyting"
+msgstr "%(u_rating)s</b>rating"
+
+#: templates/moderation/users.html
+msgid "<b>%(u_n_subs)s</b>urinish"
+msgstr "<b>%(u_n_subs)s</b>submissions"
+
+#: templates/moderation/users.html
+msgid "Urinishlari: %(u_username)s"
+msgstr "Submissions of %(u_username)s"
+
+#: templates/moderation/users.html
+msgid "Tahrirlash: %(u_username)s"
+msgstr "Edit: %(u_username)s"
+
+#: templates/problems/_daily_card.html
+msgid "<b>%(ds_streak)s</b> kun"
+msgstr "<b>%(ds_streak)s</b> days"
+
+#: templates/problems/_daily_card.html
+msgid "bugun <b class=\"tabular text-ink\">%(ds_solvers)s</b> kishi yechdi"
+msgstr "<b class=\"tabular text-ink\">%(ds_solvers)s</b> people solved it today"
+
+#: templates/problems/_daily_card.html
+msgid "Bugun yechildi, Olov <b>%(ds_streak)s</b> kun."
+msgstr "Solved today, streak <b>%(ds_streak)s</b> days."
+
+#: templates/problems/_daily_card.html
+msgid "Bugun yechsangiz, Olov <b>%(ds_streak)s</b> kun bo‘ladi."
+msgstr "Solve today and your streak becomes <b>%(ds_streak)s</b> days."
+
+#: templates/problems/_daily_card.html
+msgid "Eng uzuni <b>%(ds_best)s</b> kun."
+msgstr "Longest: <b>%(ds_best)s</b> days."
+
+#: templates/problems/_daily_card.html
+msgid ""
+"«%(ds_next_badge_name)s» nishoniga yana <b>%(ds_next_badge_left)s</b> kun "
+"ketma-ket yechish kerak."
+msgstr ""
+"<b>%(ds_next_badge_left)s</b> more days in a row for the "
+"“%(ds_next_badge_name)s” badge."
+
+#: templates/problems/_difficulty.html
+msgid "%(p_get_difficulty_display)s, reyting %(p_rating)s"
+msgstr "%(p_get_difficulty_display)s, rating %(p_rating)s"
+
+#: templates/problems/_leaders_mini.html templates/problems/leaders.html
+msgid "%(s_code_len)s belgi"
+msgstr "%(s_code_len)s characters"
+
+#: templates/problems/_month.html
+msgid "Kun masalasi, %(month_label)s"
+msgstr "Daily problem, %(month_label)s"
+
+#: templates/problems/_solved_ring.html
+msgid "Yechilgan masalalar: %(ring_done)s / %(ring_total)s"
+msgstr "Problems solved: %(ring_done)s / %(ring_total)s"
+
+#: templates/problems/_solved_ring.html
+msgid ""
+"<b "
+"class=\"tabular\">%(ring_done)s<small>/%(ring_total)s</small></b><span>yechilgan"
+msgstr ""
+"<b "
+"class=\"tabular\">%(ring_done)s<small>/%(ring_total)s</small></b><span>solved"
+
+#: templates/problems/_solved_ring.html
+msgid ""
+"· <span class=\"tabular\" title=\"Urinilgan, hali "
+"yechilmagan\">%(attempting)s urinilgan</span>"
+msgstr ""
+"· <span class=\"tabular\" title=\"Tried, not solved yet\">%(attempting)s "
+"tried</span>"
+
+#: templates/problems/_solved_ring.html
+msgid ""
+"<b class=\"tabular\">%(ring_top)s<small>%%</small></b><span>yechuvchilardan "
+"oldindasiz</span>"
+msgstr ""
+"<b class=\"tabular\">%(ring_top)s<small>%%</small></b><span>you are ahead of"
+" solvers</span>"
+
+#: templates/problems/_solved_ring.html
+msgid ""
+"<b class=\"tabular\">%(s_top)s<small>%%</small></b><span>yechuvchilardan "
+"oldindasiz</span>"
+msgstr ""
+"<b class=\"tabular\">%(s_top)s<small>%%</small></b><span>you are ahead of "
+"solvers</span>"
+
+#: templates/problems/detail.html templates/problems/detail.html
+msgid "Keyingi masala"
+msgstr "Next problem"
+
+#: templates/problems/detail.html templates/problems/detail.html
+msgid "(bo‘sh natija)"
+msgstr "(empty result)"
+
+#: templates/problems/detail.html templates/problems/detail.html
+msgid "Kod muharriri"
+msgstr "Code editor"
+
+#: templates/problems/detail.html templates/problems/detail.html
+msgid "Sinab ko‘rish"
+msgstr "Try it"
+
+#: templates/problems/detail.html
+msgid "Kirishni o‘qing, masalani yeching va natijani print() bilan chiqaring."
+msgstr "Read the input, solve the problem and print the result with print()."
+
+#: templates/problems/detail.html
+msgid "Masalan:"
+msgstr "For example:"
+
+#: templates/problems/detail.html
+msgid "So‘rovingizni shu yerda yozing."
+msgstr "Write your query here."
+
+#: templates/problems/detail.html
+msgid "sonlar ro‘yxati"
+msgstr "list of numbers"
+
+#: templates/problems/detail.html templates/problems/detail.html
+msgid "tez o‘qish"
+msgstr "fast input"
+
+#: templates/problems/detail.html templates/problems/detail.html
+msgid "EKUB"
+msgstr "GCD"
+
+#: templates/problems/detail.html
+msgid "vector o‘qish"
+msgstr "read a vector"
+
+#: templates/problems/detail.html
+msgid "son o‘qish"
+msgstr "read a number"
+
+#: templates/problems/detail.html
+msgid "long long o‘qish"
+msgstr "read a long long"
+
+#: templates/problems/detail.html
+msgid "qsort uchun"
+msgstr "for qsort"
+
+#: templates/problems/detail.html
+msgid "n ta son"
+msgstr "n numbers"
+
+#: templates/problems/detail.html
+msgid "chiqarish"
+msgstr "print"
+
+#: templates/problems/detail.html
+msgid "o‘qish"
+msgstr "read"
+
+#: templates/problems/detail.html
+msgid "Qoralama saqlandi"
+msgstr "Draft saved"
+
+#: templates/problems/detail.html
+msgid "Kod o‘chiriladi. Davom etasizmi? (Ctrl+Z bilan qaytarish mumkin)"
+msgstr "The code will be erased. Continue? (You can undo it with Ctrl+Z)"
+
+#: templates/problems/detail.html
+msgid "Ochilmoqda…"
+msgstr "Opening…"
+
+#: templates/problems/detail.html
+msgid "Yuborib bo‘lmadi"
+msgstr "Couldn't submit"
+
+#: templates/problems/detail.html
+msgid "To‘liq natija sahifasi"
+msgstr "The full result page"
+
+#: templates/problems/detail.html
+msgid "Bajarildi"
+msgstr "Done"
+
+#: templates/problems/detail.html
+msgid "(bo‘sh)"
+msgstr "(empty)"
+
+#: templates/problems/detail.html
+msgid "Vaqt chegarasi oshdi."
+msgstr "The time limit was exceeded."
+
+#: templates/problems/detail.html
+msgid "Xotira chegarasi oshdi."
+msgstr "The memory limit was exceeded."
+
+#: templates/problems/detail.html
+msgid "Chiqish hajmi chegarasi oshdi."
+msgstr "The output size limit was exceeded."
+
+#: templates/problems/detail.html
+msgid "Dastur xato bilan tugadi."
+msgstr "The program ended with an error."
+
+#: templates/problems/detail.html
+msgid "So‘rov vaqt chegarasidan oshdi."
+msgstr "The query exceeded the time limit."
+
+#: templates/problems/detail.html
+msgid ""
+"So‘rov bajarilmadi: sintaksisni tekshiring. Faqat bitta SELECT (yoki WITH … "
+"SELECT) ruxsat etiladi."
+msgstr ""
+"The query failed: check the syntax. Only a single SELECT (or WITH … SELECT) "
+"is allowed."
+
+#: templates/problems/detail.html
+msgid "Jami ${r.n_rows} qator, birinchi ${r.rows.length} tasi ko‘rsatildi."
+msgstr "In total ${r.n_rows} rows, the first ${r.rows.length} shown."
+
+#: templates/problems/detail.html
+msgid "Namunaviy ma’lumotlarda natija to‘g‘ri"
+msgstr "The result on the sample data is correct"
+
+#: templates/problems/detail.html
+msgid "Natija kutilganidan farq qiladi"
+msgstr "The result differs from what was expected"
+
+#: templates/problems/detail.html
+msgid "Sizning natijangiz"
+msgstr "Your result"
+
+#: templates/problems/detail.html templates/problems/detail.html
+msgid "Kutilgan"
+msgstr "Expected"
+
+#: templates/problems/detail.html
+msgid ""
+"Sinov urinish hisoblanmaydi. Yuborilganda yashirin ma’lumotlarda ham "
+"tekshiriladi."
+msgstr ""
+"A trial doesn't count as an attempt. When you submit, it is also checked on "
+"the hidden data."
+
+#: templates/problems/detail.html
+msgid "Sinovni ishga tushirib bo‘lmadi — qayta urinib ko‘ring."
+msgstr "Couldn't run the trial — try again."
+
+#: templates/problems/detail.html
+msgid "O‘z inputingiz"
+msgstr "Your own input"
+
+#: templates/problems/detail.html
+msgid "Namunaviy testlar: ${passed}/${r.total} o‘tdi"
+msgstr "Sample tests: ${passed}/${r.total} passed"
+
+#: templates/problems/detail.html
+msgid "Test ${i + 1}"
+msgstr "Test ${i + 1}"
+
+#: templates/problems/detail.html templates/submissions/_status.html
+msgid "Sizning chiqishingiz"
+msgstr "Your output"
+
+#: templates/problems/detail.html
+msgid "Sinov urinish hisoblanmaydi va jarima bermaydi."
+msgstr "A trial doesn't count as an attempt and carries no penalty."
+
+#: templates/problems/detail.html
+msgid "Ishlamoqda…"
+msgstr "Running…"
+
+#: templates/problems/detail.html templates/submissions/_status.html
+msgid "Navbatda…"
+msgstr "Queued…"
+
+#: templates/problems/detail.html
+msgid "Server javob bermadi"
+msgstr "The server didn't respond"
+
+#: templates/problems/detail.html
+msgid "Ishga tushirilmoqda…"
+msgstr "Starting…"
+
+#: templates/problems/detail.html
+msgid "Sinov juda uzoq kutdi — keyinroq qayta urinib ko‘ring."
+msgstr "The trial waited too long — try again later."
+
+#: templates/problems/detail.html
+msgid "Tarmoq xatosi — qayta urinib ko‘ring."
+msgstr "Network error — try again."
+
+#: templates/problems/detail.html
+msgid ""
+"Bu matnni AI yordamchisiga yoki boshqa ishtirokchiga yuborish — "
+"qoidabuzarlik, nusxa qayd etiladi."
+msgstr ""
+"Sending this text to an AI assistant or another participant is a violation; "
+"the copy is recorded."
+
+#: templates/problems/detail.html
+msgid "Musobaqada kod qo‘yish (paste) taqiqlangan — urinish qayd etildi."
+msgstr "Pasting code in a contest is forbidden — the attempt was recorded."
+
+#: templates/problems/detail.html
+msgid "Matnni sudrab tashlash taqiqlangan — qayd etildi."
+msgstr "Dragging text in is forbidden — recorded."
+
+#: templates/problems/detail.html
+msgid "Katta hajmdagi matn kiritildi — qayd etildi."
+msgstr "A large amount of text was entered — recorded."
+
+#: templates/problems/detail.html
+msgid "G‘ayrioddiy tez matn kiritish aniqlandi — qayd etildi."
+msgstr "Unusually fast text entry was detected — recorded."
+
+#: templates/problems/detail.html
+msgid "Nusxa olindi. Matnga ogohlantiruvchi belgi qo‘shildi."
+msgstr "Copied. A warning mark was added to the text."
+
+#: templates/problems/detail.html
+msgid ""
+"Mashqda tashqaridan uzun kod qo‘yib bo‘lmaydi: o‘zingiz yozing, shunda "
+"o‘rganasiz. Qisqa qator (40 belgigacha) va shu muharrirdan olingan kodni "
+"qo‘yish mumkin."
+msgstr ""
+"In practice you can't paste long code from outside: write it yourself, and "
+"you'll learn. Short lines (up to 40 characters) and code taken from this "
+"editor can be pasted."
+
+#: templates/problems/detail.html
+msgid "Urinishlarim <em class=\"tabular\" id=\"mine-count\">%(my_subs_n)s</em>"
+msgstr "My submissions <em class=\"tabular\" id=\"mine-count\">%(my_subs_n)s</em>"
+
+#: templates/problems/detail.html
+msgid ""
+"Bu masala hozir <strong>«%(open_contest_title)s»</strong> musobaqasida. "
+"Natijalar jadvalida ko‘rinish uchun avval ro‘yxatdan o‘ting — aks holda "
+"yechim amaliyot sifatida hisoblanadi."
+msgstr ""
+"This problem is now in the contest "
+"<strong>“%(open_contest_title)s”</strong>. To appear in the results table, "
+"sign up first — otherwise the solution counts as practice."
+
+#: templates/problems/detail.html
+msgid "%(contest_title)s · %(contest_problem_label)s masala"
+msgstr "%(contest_title)s · problem %(contest_problem_label)s"
+
+#: templates/problems/detail.html
+msgid "<b class=\"tabular\">%(contest_problem_points)s</b> ball"
+msgstr "<b class=\"tabular\">%(contest_problem_points)s</b> points"
+
+#: templates/problems/detail.html
+msgid ""
+"Masala reytingi %(problem_rating)s: reytingi shu songa teng o‘quvchi uni "
+"taxminan yarim holda yechadi"
+msgstr ""
+"Problem rating %(problem_rating)s: a student whose rating equals this number"
+" solves it about half the time"
+
+#: templates/problems/detail.html
+msgid "<b class=\"tabular\">+%(problem_points)s</b> ball"
+msgstr "<b class=\"tabular\">+%(problem_points)s</b> points"
+
+#: templates/problems/detail.html
+msgid "%(problem_tl_ms)s ms"
+msgstr "%(problem_tl_ms)s ms"
+
+#: templates/problems/detail.html
+msgid "%(problem_ml_mb)s MB"
+msgstr "%(problem_ml_mb)s MB"
+
+#: templates/problems/detail.html templates/problems/detail.html
+msgid "%(problem_n_ratings)s ta baho"
+msgstr "%(problem_n_ratings)s ratings"
+
+#: templates/problems/detail.html
+msgid "Yana %(problem_tags_all)s ta mavzu"
+msgstr "%(problem_tags_all)s more topics"
+
+#: templates/problems/detail.html
+msgid "«%(problem_title)s» masalasining rasmi"
+msgstr "Picture of the problem “%(problem_title)s”"
+
+#: templates/problems/detail.html
+msgid ""
+"<span translate=\"no\">%(t_name)s</span><span class=\"text-mute\">· "
+"%(t_rows)s qator</span>"
+msgstr ""
+"<span translate=\"no\">%(t_name)s</span><span class=\"text-mute\">· "
+"%(t_rows)s rows</span>"
+
+#: templates/problems/detail.html
+msgid ""
+"<span>Misol %(forloop_counter)s</span><span class=\"ca-example-hint\">Kirish"
+" yoki chiqishni alohida nusxalash mumkin</span>"
+msgstr ""
+"<span>Example %(forloop_counter)s</span><span class=\"ca-example-hint\">The "
+"input or the output can be copied separately</span>"
+
+#: templates/problems/detail.html templates/problems/detail.html
+msgid "%(forloop_counter)s-maslahat"
+msgstr "hint %(forloop_counter)s"
+
+#: templates/problems/detail.html
+msgid "· <span class=\"font-semibold text-warn\">−%(h_cost_pct)s%%</span> ball"
+msgstr "· <span class=\"font-semibold text-warn\">−%(h_cost_pct)s%%</span> points"
+
+#: templates/problems/detail.html
+msgid ""
+"Maslahatni ochasizmi? Masalani yechganingizda ballning %(h_cost_pct)s%% i "
+"ayriladi."
+msgstr ""
+"Open the hint? When you solve the problem, %(h_cost_pct)s%% of the points is"
+" deducted."
+
+#: templates/problems/detail.html
+msgid "Kirish · Misol %(forloop_counter)s"
+msgstr "Input · Example %(forloop_counter)s"
+
+#: templates/problems/detail.html
+msgid "%(n)s yulduz"
+msgstr "%(n)s stars"
+
+#: templates/problems/leaders.html
+msgid "%(problem_title)s — eng yaxshi yechimlar"
+msgstr "%(problem_title)s — best solutions"
+
+#: templates/problems/leaders.html
+msgid "«%(problem_title)s» masalasining eng tez va eng qisqa yechimlari."
+msgstr ""
+"The fastest and shortest solutions of the problem “%(problem_title)s”."
+
+#: templates/problems/leaders.html
+msgid "%(s_user_username)s kodini ko‘rish"
+msgstr "View the code of %(s_user_username)s"
+
+#: templates/problems/list.html
+msgid "Qabul %%"
+msgstr "Accepted %%"
+
+#: templates/problems/list.html
+msgid ""
+"%(total)s ta dasturlash masalasi: boshlang‘ichdan qiyingacha, mavzular "
+"bo‘yicha. Yeching — kodingiz serverda shu zahoti testlanadi."
+msgstr ""
+"%(total)s programming problems: from beginner to hard, by topic. Solve them "
+"— your code is tested on the server right away."
+
+#: templates/problems/list.html
+msgid ""
+"%(total)s ta ochiq masala: boshlang‘ichdan qiyingacha, mavzular bo‘yicha."
+msgstr "%(total)s open problems: from beginner to hard, by topic."
+
+#: templates/problems/list.html
+msgid "Hammasi <em>%(level_total)s</em>"
+msgstr "All <em>%(level_total)s</em>"
+
+#: templates/problems/list.html
+msgid "«%(q)s» bo‘yicha:"
+msgstr "For “%(q)s”:"
+
+#: templates/problems/list.html
+msgid "%(problems_paginator_count)s ta masala ·"
+msgstr "%(problems_paginator_count)s problems ·"
+
+#: templates/problems/list.html
+msgid ""
+"%(p_solvers)s kishi yechgan, %(p_ac_count)s / %(p_attempts)s urinish qabul "
+"qilingan"
+msgstr ""
+"%(p_solvers)s people solved it, %(p_ac_count)s / %(p_attempts)s submissions "
+"accepted"
+
+#: templates/problems/list.html
+msgid ""
+"%(plan_progress_done)s / %(plan_progress_total)s<span class=\"sr-only\"> "
+"masala yechilgan</span>"
+msgstr ""
+"%(plan_progress_done)s / %(plan_progress_total)s<span class=\"sr-only\"> "
+"problems solved</span>"
+
+#: templates/registration/_auth_field.html
+#: templates/registration/_auth_script.html
+msgid "Parolni ko‘rsatish"
+msgstr "Show password"
+
+#: templates/registration/_auth_script.html
+msgid "Parolni yashirish"
+msgstr "Hide password"
+
+#: templates/registration/password_reset_email.html
+msgid ""
+"Salom %(user_username)s, CodeArena hisobingiz uchun parolni tiklash so‘rovi "
+"keldi. Davom etish uchun quyidagi havolani oching: %(protocol)s://%(domain)s"
+msgstr ""
+"Hello %(user_username)s, a password reset request came in for your CodeArena"
+" account. To continue, open the link below: %(protocol)s://%(domain)s"
+
+#: templates/registration/telegram_login.html
+msgid "Vaqt tugadi. Sahifani yangilab, qaytadan urinib ko‘ring."
+msgstr "Time is up. Refresh the page and try again."
+
+#: templates/registration/telegram_login.html
+msgid "Kirildi…"
+msgstr "Signed in…"
+
+#: templates/registration/telegram_login.html
+msgid "So‘rov eskirgan. Kirish sahifasidan qayta boshlang."
+msgstr "The request has expired. Start again from the sign-in page."
+
+#: templates/registration/telegram_login.html
+msgid ""
+"@%(bot)s ochilgach, <b>Start</b> tugmasini bosing va bot so‘ragan kodni "
+"yozing. Shu oyna o‘zi kirib oladi."
+msgstr ""
+"After @%(bot)s opens, press <b>Start</b> and type the code the bot asks for."
+" This window will sign you in by itself."
+
+#: templates/submissions/_status.html
+msgid "Barcha %(s_total)s testdan o‘tdi · <span translate=\"no\">AC</span>"
+msgstr "Passed all %(s_total)s tests · <span translate=\"no\">AC</span>"
+
+#: templates/submissions/_status.html
+msgid "%(s_passed)s-testda · %(s_passed2)s/%(s_total)s test o‘tdi ·"
+msgstr "on test %(s_passed)s · %(s_passed2)s/%(s_total)s tests passed ·"
+
+#: templates/submissions/_status.html
+msgid ""
+"<b class=\"tabular\">%(progress_done)s</b> / %(progress_total)s test "
+"tekshirildi"
+msgstr ""
+"<b class=\"tabular\">%(progress_done)s</b> / %(progress_total)s tests "
+"checked"
+
+#: templates/submissions/_status.html
+msgid ""
+"Masalaning chegarasi %(s_problem_tl_ms)s ms, %(s_language_name)s uchun "
+"×%(s_language_tl_multiplier)s"
+msgstr ""
+"The problem's limit is %(s_problem_tl_ms)s ms, ×%(s_language_tl_multiplier)s"
+" for %(s_language_name)s"
+
+#: templates/submissions/_status.html
+msgid ""
+"<b class=\"tabular\">%(s_exec_ms)s ms</b> <small class=\"tabular\">/ "
+"%(limits_ms)s ms</small>"
+msgstr ""
+"<b class=\"tabular\">%(s_exec_ms)s ms</b> <small class=\"tabular\">/ "
+"%(limits_ms)s ms</small>"
+
+#: templates/submissions/_status.html
+msgid "/ %(limits_mb)s MB"
+msgstr "/ %(limits_mb)s MB"
+
+#: templates/submissions/_status.html
+msgid "%(first_fail_index)s-test"
+msgstr "test %(first_fail_index)s"
+
+#: templates/submissions/_status.html
+msgid "%(first_fail_exec_ms)s ms"
+msgstr "%(first_fail_exec_ms)s ms"
+
+#: templates/submissions/_vd.html
+msgid "%(sub_passed)s-testda"
+msgstr "on test %(sub_passed)s"
+
+#: templates/submissions/_verdict.html templates/submissions/_verdict.html
+msgid "%(n)s-testda"
+msgstr "on test %(n)s"
+
+#: templates/submissions/detail.html
+msgid "Urinish #%(s_pk)s"
+msgstr "Submission #%(s_pk)s"
+
+#: templates/submissions/detail.html
+msgid "Urinish <span class=\"tabular\">#%(s_pk)s</span>"
+msgstr "Submission <span class=\"tabular\">#%(s_pk)s</span>"
+
+#: templates/submissions/detail.html
+msgid "Oldingi urinish #%(prev_sub_pk)s"
+msgstr "Previous submission #%(prev_sub_pk)s"
+
+#: templates/submissions/detail.html
+msgid "Keyingi urinish #%(next_sub_pk)s"
+msgstr "Next submission #%(next_sub_pk)s"
+
+#: templates/submissions/detail.html
+msgid "%(s_language_name)s · %(s_source)s belgi"
+msgstr "%(s_language_name)s · %(s_source)s characters"
+
+#: templates/submissions/detail.html
+msgid ""
+"Qabul qilingan %(beats_n)s ta yechimning ishlash vaqti taqsimoti; sizniki "
+"%(s_exec_ms)s ms"
+msgstr ""
+"The running-time distribution of %(beats_n)s accepted solutions; yours is "
+"%(s_exec_ms)s ms"
+
+#: templates/submissions/detail.html
+msgid ""
+"Siz <b class=\"text-ink tabular\">%(s_exec_ms)s ms</b>: %(s_language_name)s "
+"dagi %(beats_n)s ta qabul qilingan yechimning <b class=\"text-ink "
+"tabular\">%(beats_time)s%%</b> idan tezroq."
+msgstr ""
+"You: <b class=\"text-ink tabular\">%(s_exec_ms)s ms</b> — faster than <b "
+"class=\"text-ink tabular\">%(beats_time)s%%</b> of the %(beats_n)s accepted "
+"%(s_language_name)s solutions."
+
+#: templates/submissions/detail.html
+msgid "Xotira %(beats_mem)s%% idan kam."
+msgstr "Less memory than %(beats_mem)s%%."
+
+#: templates/submissions/detail.html
+msgid "Shu mavzudagi keyingi masala (%(next_pick_1)s):"
+msgstr "The next problem on this topic (%(next_pick_1)s):"
+
+#: templates/submissions/list.html
+msgid "%(subs_paginator_count)s ta urinish ·"
+msgstr "%(subs_paginator_count)s submissions ·"

@@ -23,6 +23,7 @@ from apps.accounts.models import User
 
 from .models import Duel, DuelAnswer, DuelQuestion
 from .quiz_check import norm
+from django.utils.translation import gettext as _t, gettext_lazy as _tl
 
 QUESTIONS = 7  # of a new duel; a duel keeps the number it was made with (len(duel.questions))
 WEIGHT = {"beginner": 1, "easy": 2, "medium": 3}  # points of a right answer by the question's level
@@ -60,7 +61,7 @@ PAIR_WINDOW = timedelta(hours=24)
 PAIR_FULL_K = 10  # the first duels of a pair in 24 hours move the rating in full,
 PAIR_LIMIT = 20  # the rest, up to this many, at half; the next one can't be sent, accepted or matched
 COUNTED = (Duel.Status.PENDING, Duel.Status.ACTIVE, Duel.Status.FINISHED)  # a declined or expired one doesn't use a slot
-PAIR_FULL = "Bu raqib bilan so‘nggi 24 soatda 20 ta duel o‘ynadingiz — keyinroq davom eting."
+PAIR_FULL = _tl("Bu raqib bilan so‘nggi 24 soatda 20 ta duel o‘ynadingiz — keyinroq davom eting.")
 
 
 def pair_weight(duel) -> float:
@@ -313,7 +314,7 @@ def _pick(users, language: str) -> list[int] | None:
 
 def _valid(language: str) -> str:
     if language not in dict(LANGUAGES):
-        return "Tilni tanlang."
+        return _t("Tilni tanlang.")
     return ""
 
 
@@ -372,7 +373,7 @@ def find_opponent(user, language: str) -> tuple[Duel | None, str]:
                 return duel, ""
         questions = _pick([user], language)
         if questions is None:
-            return None, "Bu tilda savollar hali yetarli emas — boshqasini tanlang."
+            return None, _t("Bu tilda savollar hali yetarli emas — boshqasini tanlang.")
         return _open(user, language, questions), ""
 
 
@@ -382,9 +383,9 @@ def challenge(challenger, opponent_username: str, language: str) -> tuple[Duel |
         return None, NO_ADMIN
     opponent = User.objects.filter(username=opponent_username.strip(), is_active=True, is_superuser=False).first()
     if opponent is None:
-        return None, "Bunday foydalanuvchi yo‘q."
+        return None, _t("Bunday foydalanuvchi yo‘q.")
     if opponent.pk == challenger.pk:
-        return None, "O‘zingizni chaqira olmaysiz."
+        return None, _t("O‘zingizni chaqira olmaysiz.")
     error = _valid(language)
     if error:
         return None, error
@@ -394,12 +395,12 @@ def challenge(challenger, opponent_username: str, language: str) -> tuple[Duel |
             return None, BUSY
         pair = [challenger.pk, opponent.pk]
         if Duel.objects.filter(status__in=OPEN, challenger_id__in=pair, opponent_id__in=pair).exists():
-            return None, "Bu raqib bilan ochiq duel bor."
+            return None, _t("Bu raqib bilan ochiq duel bor.")
         if pair_count(*pair) >= PAIR_LIMIT:
             return None, PAIR_FULL
         questions = _pick(pair, language)
         if questions is None:
-            return None, "Bu tilda savollar hali yetarli emas — boshqasini tanlang."
+            return None, _t("Bu tilda savollar hali yetarli emas — boshqasini tanlang.")
         duel = _open(challenger, language, questions, opponent=opponent)
         from apps.accounts.notifications import notify
         from apps.accounts.telegram import notify_duel_challenge
@@ -421,7 +422,7 @@ def accept(duel, user) -> str:
         if timezone.now() - duel.created > WAIT_FOR:
             duel.status = Duel.Status.EXPIRED
             duel.save(update_fields=["status"])
-            return "Chaqiriq muddati o‘tgan."
+            return _t("Chaqiriq muddati o‘tgan.")
         if _busy(user, timezone.now()):
             return BUSY
         if pair_count(duel.challenger_id, user.pk, exclude=duel.pk) >= PAIR_LIMIT:
@@ -473,8 +474,8 @@ def settle(duel) -> None:
     from apps.accounts.telegram import notify_duel_result
     for player, other in ((a, b), (b, a)):
         award(player, {"duels"})
-        head = "G‘alaba" if duel.winner_id == player.pk else "Durang" if duel.winner_id is None else "Mag‘lubiyat"
-        notify(player.pk, "duel", f"duel:{duel.pk}:result", f"{head}: {other.username} bilan duel tugadi",
+        head = _t("G‘alaba") if duel.winner_id == player.pk else "Durang" if duel.winner_id is None else _t("Mag‘lubiyat")
+        notify(player.pk, "duel", f"duel:{duel.pk}:result", _t("{head}: {other_username} bilan duel tugadi").format(head=head, other_username=other.username),
                f"/classroom/duels/{duel.pk}/")
     notify_duel_result(duel.pk)
 

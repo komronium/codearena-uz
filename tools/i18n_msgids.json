@@ -5736,5 +5736,743 @@
 ],
 "Kodingiz muharrirda saqlangan: masalaga qaytsangiz, u shu yerda turadi.": [
 "templates/submissions/refused.html"
+],
+"ta yangi": [
+"templates/_bell.html"
+],
+"ta boshqa jonli)": [
+"templates/_navbar.html"
+],
+"kun: bugungi masala yechildi": [
+"templates/_navbar.html"
+],
+"kun: bugun kun masalasini yeching, aks holda uziladi": [
+"templates/_navbar.html"
+],
+"Olovni boshlang: bugungi kun masalasini yeching": [
+"templates/_navbar.html"
+],
+"· o‘yinchilarning": [
+"templates/accounts/_tbadge.html"
+],
+"% ida bor": [
+"templates/accounts/_tbadge.html"
+],
+"-o‘rin": [
+"templates/accounts/profile.html"
+],
+"tadan": [
+"templates/accounts/profile.html"
+],
+", reyting": [
+"templates/accounts/profile.html"
+],
+"filtrni olib tashlash": [
+"templates/accounts/rating.html"
+],
+"shu darajadagilarni ko‘rsatish": [
+"templates/accounts/rating.html"
+],
+"Jami ball": [
+"templates/contests/_standings_live.html"
+],
+"Birinchi bo‘lib yechdi:": [
+"templates/contests/_standings_live.html"
+],
+"ta noto‘g‘ri urinishdan keyin": [
+"templates/contests/_standings_live.html"
+],
+"Diskvalifikatsiyani bekor qilish": [
+"templates/contests/_standings_live.html"
+],
+"Masalalar: harfi": [
+"templates/contests/detail.html"
+],
+"Yechilgan:": [
+"templates/contests/detail.html"
+],
+"ta xatodan keyin": [
+"templates/contests/detail.html"
+],
+"yechilgan": [
+"templates/contests/detail.html"
+],
+"ta noto‘g‘ri urinish": [
+"templates/contests/detail.html"
+],
+"Kodni ko‘rdim, muammo yo‘q": [
+"templates/integrity/practice_report.html"
+],
+"— ball qaytariladi": [
+"templates/integrity/practice_report.html"
+],
+"Keyinroq yechaman": [
+"templates/learn/_save_menu.html"
+],
+"ta o‘xshashlik hali ko‘rib chiqilmagan!": [
+"templates/moderation/contests.html"
+],
+"Reyting bir marta hisoblanadi va qaytarib bo‘lmaydi. Shubhali natijalar bekor qilinganmi?": [
+"templates/moderation/contests.html"
+],
+", eng uzuni": [
+"templates/problems/_daily_card.html"
+],
+"kun": [
+"templates/problems/_daily_card.html"
+],
+"yechilmaganlarni ochish": [
+"templates/problems/_solved_ring.html"
+],
+"Ctrl+Enter — yuborish. Ctrl+' — sinab ko‘rish. Esc, keyin Tab — muharrirdan chiqish.": [
+"templates/problems/detail.html"
+],
+"Bu masalada uzun kodni qo‘yib bo‘lmaydi.": [
+"templates/problems/detail.html"
+],
+"Mashqda kod qanday yozilgani adminlarga ko‘rinadi; ko‘chirilgan yechim uchun ball berilmaydi.": [
+"templates/problems/detail.html"
+],
+"So‘rovni namunaviy ma’lumotlarda ishga tushirish": [
+"templates/problems/detail.html"
+],
+"Namunaviy testlarda sinash": [
+"templates/problems/detail.html"
+],
+"— urinish hisoblanmaydi (Ctrl+')": [
+"templates/problems/detail.html"
+],
+"Shu filtrdan tasodifiy": [
+"templates/problems/list.html"
+],
+"yechilmagan": [
+"templates/problems/list.html"
+],
+"-testda": [
+"templates/submissions/_verdict.html"
+],
+"Masala nomi": [
+"templates/submissions/list.html"
+],
+"Masala yoki foydalanuvchi": [
+"templates/submissions/list.html"
+],
+"Masala nomi bo‘yicha": [
+"templates/submissions/list.html"
+],
+"Masala yoki foydalanuvchi bo‘yicha": [
+"templates/submissions/list.html"
+],
+"qidirish": [
+"templates/submissions/list.html"
+],
+"{n} ta masala yechildi": [
+"apps/accounts/badges.py"
+],
+"Cho‘qqi": [
+"apps/accounts/badges.py"
+],
+"{n} ta Hard masala": [
+"apps/accounts/badges.py"
+],
+"{n} ta kurs tugatildi": [
+"apps/accounts/badges.py"
+],
+"{n} ta reytingli musobaqa": [
+"apps/accounts/badges.py"
+],
+"{n} ta g‘alaba": [
+"apps/accounts/badges.py"
+],
+"{n} ta g‘alaba ketma-ket": [
+"apps/accounts/badges.py"
+],
+"{n} ta tilda g‘alaba": [
+"apps/accounts/badges.py"
+],
+"«{club_name}» klubiga qo‘shildingiz.": [
+"apps/accounts/clubs.py"
+],
+"«{club_name}» klubi ochildi. Havolani do‘stlaringizga yuboring.": [
+"apps/accounts/clubs.py"
+],
+"Qo‘shilish havolasi noto‘g‘ri yoki eskirgan.": [
+"apps/accounts/clubs.py"
+],
+"Klub nomi kamida 3 belgi bo‘lsin.": [
+"apps/accounts/clubs.py"
+],
+"Bunday nomli klub bor: unga qo‘shiling.": [
+"apps/accounts/clubs.py"
+],
+"Klubdan chiqdingiz; u bo‘sh qolgani uchun yopildi.": [
+"apps/accounts/clubs.py"
+],
+"Kuniga 3 tadan ko‘p klub ochib bo‘lmaydi.": [
+"apps/accounts/clubs.py"
+],
+"Bunday nomli klub bor.": [
+"apps/accounts/clubs.py"
+],
+"Shaharni tanlang.": [
+"apps/accounts/forms.py"
+],
+"Ismingizni yozing.": [
+"apps/accounts/forms.py"
+],
+"Davlatni tanlang.": [
+"apps/accounts/forms.py"
+],
+"Foydalanuvchi nomida @ bo‘lmasin — u hammaga ko‘rinadi. Email alohida maydonga yoziladi.": [
+"apps/accounts/forms.py"
+],
+"Bu email boshqa hisobda ishlatilgan.": [
+"apps/accounts/forms.py"
+],
+"Foydalanuvchi nomini yozing.": [
+"apps/accounts/forms.py"
+],
+"Bu foydalanuvchi nomi band.": [
+"apps/accounts/forms.py"
+],
+"Rasm 2 MB dan oshmasligi kerak.": [
+"apps/accounts/forms.py"
+],
+"Shaharni yozing.": [
+"apps/accounts/forms.py"
+],
+"Davlatni tanlang": [
+"apps/accounts/forms.py"
+],
+"Xodim hisoblari Google orqali kira olmaydi. Parol bilan kiring.": [
+"apps/accounts/google.py"
+],
+"Google orqali kirish bekor qilindi yoki eskirdi. Qaytadan urinib ko‘ring.": [
+"apps/accounts/google.py"
+],
+"Google emailingizni tasdiqlanmagan deb ko‘rsatdi: boshqa usul bilan kiring.": [
+"apps/accounts/google.py"
+],
+"Google bilan aloqa bo‘lmadi. Birozdan keyin qayta urinib ko‘ring.": [
+"apps/accounts/google.py"
+],
+"Bu email bir nechta hisobda. Parol bilan kiring.": [
+"apps/accounts/google.py"
+],
+"Xato": [
+"apps/accounts/models.py"
+],
+"🏆 G‘alaba!": [
+"apps/accounts/telegram.py"
+],
+"Telegram bot hali sozlanmagan. Keyinroq urinib ko‘ring.": [
+"apps/accounts/telegram_views.py"
+],
+"Bildirishnoma sozlamalari uchun avval Telegramni ulang.": [
+"apps/accounts/telegram_views.py"
+],
+"Sozlamalarni saqlab bo‘lmadi. Sahifani yangilab, qayta urinib ko‘ring.": [
+"apps/accounts/telegram_views.py"
+],
+"Tayyor! Brauzerga qayting: u o‘zi kirib oladi.": [
+"apps/accounts/telegram_views.py"
+],
+"Kirish so‘rovi eskirgan. Saytda «Telegram orqali kirish»ni qaytadan bosing.": [
+"apps/accounts/telegram_views.py"
+],
+"Bu Telegram hech bir CodeArena profiliga ulanmagan. Avval parol bilan kirib, Sozlamalar → Telegram orqali ulang.": [
+"apps/accounts/telegram_views.py"
+],
+"Xodim hisoblari Telegram orqali kira olmaydi. Parol bilan kiring.": [
+"apps/accounts/telegram_views.py"
+],
+"CodeArena Telegram bildirishnomalari ulandi. Xabar turlarini saytdagi Sozlamalar bo‘limidan sozlashingiz mumkin.": [
+"apps/accounts/telegram_views.py"
+],
+"Ulash kodi eskirgan yoki ishlatilgan. CodeArena profilidan yangi kod oling.": [
+"apps/accounts/telegram_views.py"
+],
+"Bu Telegram hisob boshqa CodeArena profiliga ulangan. Avval o‘sha profildan uzing.": [
+"apps/accounts/telegram_views.py"
+],
+"CodeArena bildirishnomalari uchun saytdagi Sozlamalar → Telegram bo‘limidan hisobingizni ulang.": [
+"apps/accounts/telegram_views.py"
+],
+"Saytga kirish so‘rovi. Brauzeringizdagi <b>4 xonali kodni</b> shu yerga yozing. Agar bu havolani sizga boshqa kishi yuborgan bo‘lsa, hech narsa yozmang.": [
+"apps/accounts/telegram_views.py"
+],
+"Bildirishnomalar to‘xtatildi. Qayta ulash uchun CodeArena profiliga kiring.": [
+"apps/accounts/telegram_views.py"
+],
+"Foydalanuvchi nomi lotin harfi bilan boshlansin va faqat lotin harflari, raqamlar va _ dan iborat bo‘lsin (3–20 belgi).": [
+"apps/accounts/usernames.py"
+],
+"Havola {user_email} manziliga qayta yuborildi.": [
+"apps/accounts/views.py"
+],
+"Hisobingiz o‘chirildi.": [
+"apps/accounts/views.py"
+],
+"Havola eskirgan yoki noto‘g‘ri. Yangi havola so‘rang.": [
+"apps/accounts/views.py"
+],
+"Parol noto‘g‘ri": [
+"apps/accounts/views.py"
+],
+"Xodim hisobi bu yerdan o‘chirilmaydi.": [
+"apps/accounts/views.py"
+],
+"Havola hozirgina yuborildi. Bir daqiqadan keyin qayta urinib ko‘ring.": [
+"apps/accounts/views.py"
+],
+"tasdig‘i bekor qilindi": [
+"apps/accounts/views.py"
+],
+"Bu email allaqachon ro‘yxatdan o‘tgan.": [
+"apps/accounts/views.py"
+],
+"Ro‘yxatdan o‘tishda xatolik yuz berdi. Qayta urinib ko‘ring.": [
+"apps/accounts/views.py"
+],
+"{head}: {other_username} bilan duel tugadi": [
+"apps/classroom/duels.py"
+],
+"Bu raqib bilan so‘nggi 24 soatda 20 ta duel o‘ynadingiz — keyinroq davom eting.": [
+"apps/classroom/duels.py"
+],
+"Tilni tanlang.": [
+"apps/classroom/duels.py"
+],
+"Bunday foydalanuvchi yo‘q.": [
+"apps/classroom/duels.py"
+],
+"O‘zingizni chaqira olmaysiz.": [
+"apps/classroom/duels.py"
+],
+"Chaqiriq muddati o‘tgan.": [
+"apps/classroom/duels.py"
+],
+"Bu tilda savollar hali yetarli emas — boshqasini tanlang.": [
+"apps/classroom/duels.py"
+],
+"Bu raqib bilan ochiq duel bor.": [
+"apps/classroom/duels.py"
+],
+"Bo‘sh joyni to‘ldiring": [
+"apps/classroom/models.py"
+],
+"Muddati o‘tgan": [
+"apps/classroom/models.py"
+],
+"javob variantlar orasida yo‘q": [
+"apps/classroom/quiz_check.py"
+],
+"output savolida ___ bor": [
+"apps/classroom/quiz_check.py"
+],
+"fill savolida bitta ___ bo‘lishi kerak": [
+"apps/classroom/quiz_check.py"
+],
+"Ball: to‘liq ball, tenglikda jarima": [
+"apps/contests/models.py"
+],
+"Codeforces: ball vaqt bilan kamayadi": [
+"apps/contests/models.py"
+],
+"ICPC: yechilganlar soni va jarima": [
+"apps/contests/models.py"
+],
+"Ochiq (hamma uchun)": [
+"apps/contests/models.py"
+],
+"Div. 1 (reyting 1900 va yuqori)": [
+"apps/contests/models.py"
+],
+"Ochiq masala — reytingli musobaqaga faqat yashirin, yangi masala qo‘shiladi.": [
+"apps/contests/services.py"
+],
+"Bu masala boshqa musobaqada ishlatilgan.": [
+"apps/contests/services.py"
+],
+"Reyting shu raunddan boshlab {n} ta raund bo‘yicha qayta hisoblandi.": [
+"apps/contests/views.py"
+],
+"{p_user_username}: {cp_label} AI jarimasi — xato urinish hisoblandi, masala bloklandi.": [
+"apps/contests/views.py"
+],
+"keyingi raundlar bilan: {n} ta": [
+"apps/contests/views.py"
+],
+"Rasmiy reyting qayta hisoblandi.": [
+"apps/contests/views.py"
+],
+"Reyting qayta hisoblandi.": [
+"apps/contests/views.py"
+],
+"Musobaqa hali ochilmagan — virtual ishtirok nashrdan keyin mumkin.": [
+"apps/contests/virtual.py"
+],
+"O‘zbek tilida dasturlash: masalalar yeching, mavzulab kurslarda o‘rganing, reytingli musobaqalarda bellashing. Kodingiz serverda shu zahoti testlanadi.": [
+"apps/home/templatetags/seo.py"
+],
+"{labels_get_problem_id}: {len_bad} ta yuborish": [
+"apps/integrity/evidence.py"
+],
+"{labels_get_problem_id}: {grew} belgi birdaniga paydo bo‘lgan": [
+"apps/integrity/evidence.py"
+],
+"Bir vaqtda {len_devices} ta qurilmada ishlagan": [
+"apps/integrity/evidence.py"
+],
+"{label}: {other_user_username} bilan {pct}% o‘xshash": [
+"apps/integrity/evidence.py"
+],
+"Tracker o‘chiq": [
+"apps/integrity/evidence.py"
+],
+"O‘xshash kod": [
+"apps/integrity/evidence.py"
+],
+"Masala natijasi bekor": [
+"apps/integrity/models.py"
+],
+"Masala natijasi tiklandi": [
+"apps/integrity/models.py"
+],
+"AI jarimasi: xato urinish, masala bloklandi": [
+"apps/integrity/models.py"
+],
+"Qayta tekshiruv": [
+"apps/integrity/models.py"
+],
+"Reyting qayta hisoblandi": [
+"apps/integrity/models.py"
+],
+"O‘xshashlik ko‘rildi": [
+"apps/integrity/models.py"
+],
+"Masala o‘chirildi": [
+"apps/integrity/models.py"
+],
+"Musobaqa o‘chirildi": [
+"apps/integrity/models.py"
+],
+"Foydalanuvchi o‘chirildi": [
+"apps/integrity/models.py"
+],
+"Shaxs tasdig‘i bekor": [
+"apps/integrity/models.py"
+],
+"Rasmiy reyting qo‘llandi": [
+"apps/integrity/models.py"
+],
+"{pastes} marta uzun kod qo‘yishga urindi": [
+"apps/integrity/practice.py"
+],
+"{fmt_e_away_ms_1000} boshqa oynada, qaytgach {fmt_ac_at_e_at_total_seconds} ichida yechdi": [
+"apps/integrity/practice.py"
+],
+"{grew} belgi birdaniga paydo bo‘lgan": [
+"apps/integrity/practice.py"
+],
+"{name} yechimi bilan {pct}% bir xil": [
+"apps/integrity/practice.py"
+],
+"kod bir zumda paydo bo‘ldi": [
+"apps/integrity/practice.py"
+],
+"kuzatuv ishlamagan: sahifa ochilgani ko‘rinmaydi (skript o‘chirilgan yoki kod tashqaridan yuborilgan)": [
+"apps/integrity/practice.py"
+],
+"O‘xshashlik tekshirildi: {join_labels}.": [
+"apps/integrity/views.py"
+],
+"{user_username}: {created} ta yangi o‘xshashlik topildi — pastda, «O‘xshash kodlar»da.": [
+"apps/integrity/views.py"
+],
+"{user_username}: barcha urinishlari tekshirildi, yangi o‘xshashlik topilmadi.": [
+"apps/integrity/views.py"
+],
+"{what} ko‘rib chiqildi": [
+"apps/integrity/views.py"
+],
+"Tekshirish uchun kamida bitta masalani tanlang.": [
+"apps/integrity/views.py"
+],
+"Xabarni kamida bir necha so‘z bilan yozing.": [
+"apps/integrity/views.py"
+],
+"Juda tez-tez. Bir daqiqadan keyin qayta urinib ko‘ring.": [
+"apps/integrity/views.py"
+],
+"Tasdiqlandi — bu yechim uchun ball berilmaydi.": [
+"apps/integrity/views.py"
+],
+"Belgilandi: shubha yo‘q.": [
+"apps/integrity/views.py"
+],
+"Ko‘pi bilan {max_lists} ta ro‘yxat.": [
+"apps/learn/forms.py"
+],
+"Ma’lumot tuzilmalari": [
+"apps/learn/models.py"
+],
+"Ilg‘or": [
+"apps/learn/models.py"
+],
+"«{lst_name}» o‘chirildi.": [
+"apps/learn/views.py"
+],
+"ro‘yxatidan olindi": [
+"apps/learn/views.py"
+],
+"ro‘yxatiga saqlandi": [
+"apps/learn/views.py"
+],
+"Bitta masala tuz: {labels_level} — {level_briefs_level}.": [
+"apps/moderation/ai.py"
+],
+"Aniq mavzu va talablar: {focus}": [
+"apps/moderation/ai.py"
+],
+"1 dan {max_count} tagacha masala so'rang.": [
+"apps/moderation/ai.py"
+],
+"AI javobida {key} masalasi yo'q. Qayta urinib ko'ring.": [
+"apps/moderation/ai.py"
+],
+"Bu {len_slots} ta masaladan iborat to'plamning {index_1}-masalasi": [
+"apps/moderation/ai.py"
+],
+" ({labels_level} darajasida {same_index_key_1}-si, jami {len_same} ta)": [
+"apps/moderation/ai.py"
+],
+"kiritish-chiqarish, arifmetika, bitta-ikkita shart; yechim bir necha qator": [
+"apps/moderation/ai.py"
+],
+"sikl, shartlar, massiv yoki satr ustida oddiy ishlov; to‘g‘ridan-to‘g‘ri yechim o‘tadi": [
+"apps/moderation/ai.py"
+],
+"saralash, prefiks yig‘indi, ikki ko‘rsatkich, ochko‘z usul yoki oddiy DP; cheklovlar sodda (O(n²)) yechimni o‘tkazmaydi": [
+"apps/moderation/ai.py"
+],
+"murakkab DP, graflar, sonlar nazariyasi yoki ma’lumotlar tuzilmalari; katta cheklovlar, samarali algoritm shart": [
+"apps/moderation/ai.py"
+],
+"Javob uzilib qoldi — qayta urinib ko'ring.": [
+"apps/moderation/ai.py"
+],
+"AI bu so'rovni bajarmadi — mavzu yoki talabni o'zgartirib ko'ring.": [
+"apps/moderation/ai.py"
+],
+". To'plamdagi boshqa masalalar bilan takrorlanmaydigan g'oya tanla.": [
+"apps/moderation/ai.py"
+],
+"Jami 1 dan {max_count} tagacha masala so‘rang.": [
+"apps/moderation/forms.py"
+],
+"Rasm hajmi 10 MB dan oshmasligi kerak.": [
+"apps/moderation/forms.py"
+],
+"Yashirin ma‘lumotlar uchun kutilgan natija kerak.": [
+"apps/moderation/forms.py"
+],
+"Tugash vaqti boshlanishdan keyin bo'lishi kerak.": [
+"apps/moderation/forms.py"
+],
+"Inglizcha nom, kichik harflar va chiziqcha bilan: masalan, two-pointers.": [
+"apps/moderation/forms.py"
+],
+"Bu nom band (O‘rganish bo‘limidagi sahifa). Boshqa slug tanlang.": [
+"apps/moderation/forms.py"
+],
+"Tugash vaqti allaqachon o'tib ketgan — sana va yilni tekshiring.": [
+"apps/moderation/forms.py"
+],
+"0 — hamma uchun bir soat": [
+"apps/moderation/forms.py"
+],
+"{len_ids} ta urinish qayta tekshirishga yuborildi.": [
+"apps/moderation/views.py"
+],
+"«{problem_title}» masalangiz tasdiqlandi va saytda chiqdi": [
+"apps/moderation/views.py"
+],
+"«{problem_title}» masalangiz rad etildi: tahrirlab qayta yuborishingiz mumkin": [
+"apps/moderation/views.py"
+],
+"«{plan_title}» o‘chirildi.": [
+"apps/moderation/views.py"
+],
+"Masalalar ochildi; {granted} ta yechim amaliyot balliga o'tkazildi.": [
+"apps/moderation/views.py"
+],
+"{user_username} o‘chirildi.": [
+"apps/moderation/views.py"
+],
+"{pending} ta ishtirokchi hali tekshirilmagan.": [
+"apps/moderation/views.py"
+],
+"{len_drafts} ta masala tuzildi — Navbat bo'limida ko'rib chiqing va tasdiqlang.": [
+"apps/moderation/views.py"
+],
+"«{contest_title}» musobaqasida urinishlar bor — o‘chirib bo‘lmaydi.": [
+"apps/moderation/views.py"
+],
+"AI xato: {e}": [
+"apps/moderation/views.py"
+],
+"{problem_title}: {len_ids} ta urinish": [
+"apps/moderation/views.py"
+],
+"Rasmiy reyting qo‘llandi.": [
+"apps/moderation/views.py"
+],
+"Faqat bugun yoki keyingi 365 kun uchun masala tanlash mumkin.": [
+"apps/moderation/views.py"
+],
+"Bugungi masala allaqachon e’lon qilingan va almashtirilmaydi.": [
+"apps/moderation/views.py"
+],
+"Bu masala tanlov ro‘yxatida yo‘q. Sahifani yangilab, variantlardan birini tanlang.": [
+"apps/moderation/views.py"
+],
+"SQL masala uchun jadval, ma'lumot va kutilgan natija kerak.": [
+"apps/moderation/views.py"
+],
+"Faqat tugagan rasmiy musobaqa uchun.": [
+"apps/moderation/views.py"
+],
+"admin hisobini o‘chirib bo‘lmaydi — avval admin huquqini oling": [
+"apps/moderation/views.py"
+],
+"Duellar yopildi: talabalar duel sahifasini ko‘rmaydi.": [
+"apps/moderation/views.py"
+],
+"Sana yoki masala noto‘g‘ri tanlandi.": [
+"apps/moderation/views.py"
+],
+"Bu sana uchun masala boshqa so‘rovda tanlandi. Sahifani yangilang.": [
+"apps/moderation/views.py"
+],
+"Kamida bitta test kerak: qo'lda kiriting yoki ZIP yuklang.": [
+"apps/moderation/views.py"
+],
+"Reyting hisoblanmadi: musobaqa hali tugamagan.": [
+"apps/moderation/views.py"
+],
+"O'zingizni admin huquqidan yoki faollikdan mahrum qila olmaysiz.": [
+"apps/moderation/views.py"
+],
+"Foydalanuvchi saqlandi.": [
+"apps/moderation/views.py"
+],
+"uning masalalari bor — avval boshqasiga o‘tkazing yoki bloklang": [
+"apps/moderation/views.py"
+],
+"Bugungi masala tanlov paytida e’lon qilindi va endi almashtirilmaydi.": [
+"apps/moderation/views.py"
+],
+"Masala saqlandi.": [
+"apps/moderation/views.py"
+],
+"Masala adminlar ko‘rib chiqishi uchun yuborildi. Tasdiqlansa, sizning nomingiz bilan chiqadi.": [
+"apps/moderation/views.py"
+],
+"Reyting hisoblanmoqda: bir necha soniyadan keyin sahifani yangilang.": [
+"apps/moderation/views.py"
+],
+"Easy masala yeching": [
+"apps/problems/quests.py"
+],
+"Beginner yoki Easy darajali bitta masala": [
+"apps/problems/quests.py"
+],
+"Duelda g‘alaba qozoning": [
+"apps/problems/quests.py"
+],
+"Kurs nazariyasini o‘qing": [
+"apps/problems/quests.py"
+],
+"kenglik bo‘yicha qidiruv": [
+"apps/problems/templatetags/tagnames.py"
+],
+"to‘liq saralash": [
+"apps/problems/templatetags/tagnames.py"
+],
+"ma’lumotlar tuzilmalari": [
+"apps/problems/templatetags/tagnames.py"
+],
+"chuqurlik bo‘yicha qidiruv": [
+"apps/problems/templatetags/tagnames.py"
+],
+"bo‘l va hukm qil": [
+"apps/problems/templatetags/tagnames.py"
+],
+"ochko‘z algoritm": [
+"apps/problems/templatetags/tagnames.py"
+],
+"kiritish va chiqarish": [
+"apps/problems/templatetags/tagnames.py"
+],
+"sonlar bilan ishlash": [
+"apps/problems/templatetags/tagnames.py"
+],
+"prefiks yig‘indilar": [
+"apps/problems/templatetags/tagnames.py"
+],
+"eng qisqa yo‘llar": [
+"apps/problems/templatetags/tagnames.py"
+],
+"ichki so‘rov": [
+"apps/problems/templatetags/tagnames.py"
+],
+"ikki ko‘rsatkich": [
+"apps/problems/templatetags/tagnames.py"
+],
+"Bu filtrda yechilmagan masala qolmadi.": [
+"apps/problems/views.py"
+],
+"To‘g‘ri": [
+"apps/submissions/models.py"
+],
+"Noto‘g‘ri javob": [
+"apps/submissions/models.py"
+],
+"Vaqt oshdi": [
+"apps/submissions/models.py"
+],
+"Juda tez yuboryapsiz. Bir daqiqa kuting va qayta yuboring.": [
+"apps/submissions/views.py"
+],
+"Kod bo‘sh yoki juda katta (64 KB gacha).": [
+"apps/submissions/views.py"
+],
+"Bu musobaqaga shu tarmoqdan yuborib bo‘lmaydi.": [
+"apps/submissions/views.py"
+],
+"Bu masala shu raundda bloklangan.": [
+"apps/submissions/views.py"
+],
+"Kod bo‘sh yoki juda katta": [
+"apps/submissions/views.py"
+],
+"Juda tez-tez — bir daqiqadan keyin urinib ko‘ring": [
+"apps/submissions/views.py"
+],
+"Masalada ma‘lumotlar bazasi yo‘q": [
+"apps/submissions/views.py"
+],
+"Bu masalada sinash uchun ro‘yxatdan o‘ting.": [
+"apps/submissions/views.py"
+],
+"Juda tez-tez. Ro‘yxatdan o‘tsangiz, limit ancha keng.": [
+"apps/submissions/views.py"
+],
+"Namunaviy test yo‘q": [
+"apps/submissions/views.py"
+],
+"Namunaviy test yo‘q — o‘z inputingizni kiriting": [
+"apps/submissions/views.py"
 ]
 }

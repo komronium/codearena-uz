@@ -1,0 +1,19 @@
+apps/accounts/onboarding.py:89: f-string
+apps/accounts/onboarding.py:92: f-string
+apps/accounts/telegram.py:261: f-string
+apps/accounts/telegram.py:287: f-string
+apps/classroom/models.py:61: comparison
+apps/classroom/quiz_check.py:55: f-string
+apps/classroom/quiz_check.py:75: f-string
+apps/classroom/quiz_check.py:81: f-string
+apps/classroom/quiz_check.py:64: f-string
+apps/contests/models.py:130: f-string
+apps/learn/views.py:26: dict key
+apps/learn/views.py:27: dict key
+apps/learn/views.py:28: dict key
+apps/moderation/ai.py:58: f-string
+apps/moderation/ai.py:96: f-string
+apps/moderation/ai.py:155: f-string
+apps/moderation/views.py:433: f-string
+apps/moderation/views.py:395: f-string
+apps/moderation/views.py:564: f-string

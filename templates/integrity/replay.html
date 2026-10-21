@@ -83,7 +83,7 @@
     playBtn.addEventListener("click", () => {
       if (timer) return stop();
       if (+range.value >= frames.length - 1) show(0);
-      playBtn.innerHTML = '<i data-lucide="pause" class="lu"></i>'; playBtn.setAttribute("aria-label", "To‘xtatish"); window.caIcons?.();
+      playBtn.innerHTML = '<i data-lucide="pause" class="lu"></i>'; playBtn.setAttribute("aria-label", "{% jt "To‘xtatish" %}"); window.caIcons?.();
       timer = setInterval(() => (+range.value < frames.length - 1 ? show(+range.value + 1) : stop()), 700);
     });
     range.addEventListener("input", () => show(+range.value));

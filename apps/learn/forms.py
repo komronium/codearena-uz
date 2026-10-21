@@ -1,6 +1,7 @@
 from django import forms
 
 from .models import MAX_LISTS, ProblemList
+from django.utils.translation import gettext as _t
 
 
 class ListForm(forms.ModelForm):
@@ -22,7 +23,7 @@ class ListForm(forms.ModelForm):
 
     def clean(self):
         if self.instance.pk is None and ProblemList.objects.filter(owner=self.owner).count() >= MAX_LISTS:
-            raise forms.ValidationError(f"Ko‘pi bilan {MAX_LISTS} ta ro‘yxat.")
+            raise forms.ValidationError(_t("Ko‘pi bilan {max_lists} ta ro‘yxat.").format(max_lists=MAX_LISTS))
         return super().clean()
 
     def save(self, commit=True):

@@ -4,12 +4,13 @@ from apps.submissions.models import Submission
 
 from .models import ContestProblem, Participation, VirtualParticipation
 from .standings import cell, compute_standings, totals
+from django.utils.translation import gettext as _t
 
 
 def start_refusal(user, contest) -> str:
     """Why `user` can't start a virtual run of `contest`; "" when they can."""
     if contest.published_at is None:
-        return "Musobaqa hali ochilmagan — virtual ishtirok nashrdan keyin mumkin."
+        return _t("Musobaqa hali ochilmagan — virtual ishtirok nashrdan keyin mumkin.")
     if Participation.objects.filter(user=user, contest=contest).exists():
         return "Siz bu musobaqada haqiqiy qatnashgansiz."
     if VirtualParticipation.objects.filter(user=user, contest=contest).exists():

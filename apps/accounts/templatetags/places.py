@@ -26,7 +26,7 @@ def flag(who, title=""):
     code = getattr(who, "country", who) or ""
     if code not in COUNTRIES:
         return ""
-    name = COUNTRIES[code]
+    name = str(COUNTRIES[code])
     label = title or ", ".join(p for p in (getattr(who, "location", ""), name) if p)
     return format_html('<img class="ca-flag" src="{}" alt="{}" title="{}" width="18" height="14" loading="lazy">',
                        static(f"flags/{code.lower()}.svg"), label, label)
