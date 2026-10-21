@@ -3817,3 +3817,5 @@ small { font-size: max(12.25px, .8em); }
 .ca7-authors .ca7-u { font-size: 0.9375rem; }
 .ca-band .ca7-authors .ca7-u { padding: .1rem .7rem .1rem .15rem; border-radius: 9999px; background: rgb(255 255 255 / .94); }
 .ca7-ccard-meta .ca7-authors { color: rgb(var(--ca-ink-rgb)); }
+.ca7-authors .ca7-u i { display: none; }  /* authors are names only: no photo or initial */
+.ca-band .ca7-authors .ca7-u { padding: .1rem .7rem; }
