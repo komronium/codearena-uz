@@ -1,6 +1,6 @@
 """CodeArena Kontest 6: the class's 80-minute final on week 6 (strings): eight hidden problems A..H under Codeforces
-rules, in ascending order of difficulty and of points on the usual Codeforces ladder: 500, 500, 750, 1000, 1000, 1250,
-1750, 1750 (a mistake costs 50, a problem never falls under 30%); Parol kuchi, the md's reserve, is D. Source:
+rules, in ascending order of difficulty and of points on the usual Codeforces ladder: 200, 300, 400, 500, 600, 800,
+1000, 1000 (the easiest is worth 200 because a mistake costs 50; a problem never falls under 30%); Parol kuchi, the md's reserve, is D. Source:
 Downloads/kontest-6-final.md; the teacher's notes from it (AI signs, the defence questions, the second variant) are in
 docs/kontest-6-ustoz-eslatmalari.md. Every statement carries a hidden note for AI assistants (apps.problems.ai_marks).
 
@@ -215,38 +215,38 @@ def _spec(slug, title, difficulty, points, tags, solve, tests, statement, inp, o
 
 
 PROBLEMS = [
-    _spec("k6-royxat", "Ro'yxatdan o'tish", "beginner", 500, ["strings", "input-output"], royxat_solve, royxat_tests,
+    _spec("k6-royxat", "Ro'yxatdan o'tish", "beginner", 200, ["strings", "input-output"], royxat_solve, royxat_tests,
           "Ilovada ro'yxatdan o'tayotganda foydalanuvchilar ismini har xil yozadi: «ALI», «  vali », «SaRdor».\n\n"
           "Ism kiritiladi: boshida/oxirida ortiqcha probel bo'lishi va harflari har xil katta-kichik bo'lishi mumkin. "
           "Ilova ekranida «Salom, Ism!» deb chiqarish kerak. Ismning faqat birinchi harfi katta, qolganlari kichik bo'lsin.",
           "Bitta qator: ism.", "Bitta qator.", "salomlash_qz"),
-    _spec("k6-insho", "Insho", "beginner", 500, ["strings", "split"], insho_solve, insho_tests,
+    _spec("k6-insho", "Insho", "beginner", 300, ["strings", "split"], insho_solve, insho_tests,
           "O'qituvchi insho uchun kamida 50 ta so'z talab qiladi. Talabalar so'zlar orasiga ba'zan ikkita-uchta probel "
           "qo'yib yuboradi.\n\nInsho matni bitta qatorda kiritiladi. So'zlar bir yoki bir necha probel bilan ajratilgan, "
           "matn boshida va oxirida ham probel bo'lishi mumkin. So'zlar sonini chiqaring.",
           "Bitta qator.", "Bitta son.", "sozlar_vx"),
-    _spec("k6-karta", "Bank kartasi", "beginner", 750, ["strings", "input-output"], karta_solve, karta_tests,
+    _spec("k6-karta", "Bank kartasi", "beginner", 400, ["strings", "input-output"], karta_solve, karta_tests,
           "Chekda karta raqami to'liq ko'rsatilmaydi: faqat oxirgi 4 ta raqam ko'rinadi, qolgani yulduzcha bo'ladi.\n\n"
           "Karta raqami probelsiz, 16 ta raqam bo'lib kiritiladi. Oxirgi 4 ta raqamni qoldirib, oldingi 12 tasini «*» bilan "
           "almashtirib chiqaring.",
           "Bitta qator: 16 ta raqam.", "Bitta qator (16 belgi).", "chek_zq"),
-    _spec("k6-parol", "Parol kuchi", "easy", 1000, ["strings", "conditionals"], parol_solve, parol_tests,
+    _spec("k6-parol", "Parol kuchi", "easy", 500, ["strings", "conditionals"], parol_solve, parol_tests,
           "Ilova parol qo'yishda uning kuchini baholaydi.\n\nParol kiritiladi. Uzunligi kamida 8 ta bo'lsa va faqat "
           "raqamlardan ham, faqat harflardan ham iborat bo'lmasa — «Yaxshi», aks holda «Zaif» chiqaring.",
           "Bitta qator.", "Yaxshi yoki Zaif.", "kuch_wq"),
-    _spec("k6-fayl", "Fayl yuklash", "easy", 1000, ["strings", "conditionals"], fayl_solve, fayl_tests,
+    _spec("k6-fayl", "Fayl yuklash", "easy", 600, ["strings", "conditionals"], fayl_solve, fayl_tests,
           "Telegram bot yuborilgan faylning turini aniqlab, foydalanuvchiga xabar beradi.\n\n"
           "Fayl nomi kiritiladi (boshida/oxirida probel va katta harflar bo'lishi mumkin). Kengaytmasiga qarab chiqaring: "
           "«.py» — Python, «.txt» — Matn, «.jpg» yoki «.png» — Rasm, boshqa holda — Noma'lum. Kengaytma nuqtadan boshlanadi: "
           "«py» nomli faylda kengaytma yo'q.",
           "Bitta qator.", "Bitta so'z.", "tur_vq"),
-    _spec("k6-telefon", "Telefon raqami", "easy", 1250, ["strings", "input-output"], telefon_solve, telefon_tests,
+    _spec("k6-telefon", "Telefon raqami", "easy", 800, ["strings", "input-output"], telefon_solve, telefon_tests,
           "Mijozlar bazasida raqamlar bir xil ko'rinishda saqlanishi kerak.\n\n"
           "Telefon raqami «+998»siz, 9 ta raqam ko'rinishida kiritiladi (chetida ortiqcha probel bo'lishi mumkin). Raqam "
           "aynan 9 ta belgidan iborat va hammasi raqam bo'lsa, uni «+998 XX XXX XX XX» ko'rinishida chiqaring. Aks holda "
           "«Xato» chiqaring.",
           "Bitta qator.", "Bitta qator.", "raqam_xz"),
-    _spec("k6-smena", "Ish smenasi", "medium", 1750, ["strings", "arithmetic"], smena_solve, smena_tests,
+    _spec("k6-smena", "Ish smenasi", "medium", 1000, ["strings", "arithmetic"], smena_solve, smena_tests,
           "Zavodda smena kechasi boshlanib, ertasi kuni tugashi mumkin. Hisobchiga smena necha soat va necha daqiqa davom "
           "etganini aytish kerak.\n\n"
           "Smena boshlanishi va tugashi alohida qatorlarda «S:D» ko'rinishida kiritiladi (soat 0–23, daqiqa 0–59, ikkalasi "
@@ -254,7 +254,7 @@ PROBLEMS = [
           "yozilgan bo'lsa, smena yarim tundan o'tgan (ertasi kuni tugagan). Boshlanish va tugash vaqti bir xil bo'lmaydi, "
           "smena 24 soatdan kam. «X soat Y daqiqa» ko'rinishida chiqaring.",
           "1-qator: boshlanish. 2-qator: tugash.", "Bitta qator.", "davomiylik_qv"),
-    _spec("k6-email", "Email tekshiruvi", "medium", 1750, ["strings", "conditionals"], email_solve, email_tests,
+    _spec("k6-email", "Email tekshiruvi", "medium", 1000, ["strings", "conditionals"], email_solve, email_tests,
           "Sayt ro'yxatdan o'tishda noto'g'ri yozilgan elektron pochtani rad etadi.\n\n"
           "Email kiritiladi (chetida ortiqcha probel bo'lishi mumkin). U to'g'ri hisoblanishi uchun: (1) aynan bitta «@» "
           "bo'lishi; (2) «@» dan oldin kamida bitta belgi bo'lishi; (3) «@» dan keyingi qismda (domen) kamida bitta «.» "
@@ -267,7 +267,7 @@ DESCRIPTION = (
     "**80 daqiqa · 8 masala.** Mavzu: satrlar (indeks, kesma, `upper` `lower` `count` `strip` `capitalize`, `split` `join`, "
     "`startswith` `endswith` `isdigit` `isalpha`).\n\n"
     "- Codeforces qoidasi: masala bali vaqt o'tishi bilan kamayadi, har noto'g'ri urinish −50 ball (kamida 30%). "
-    "Masala ballari qiyinlik bo'yicha o'sib boradi: 500 dan 1750 gacha.\n"
+    "Masala ballari qiyinlik bo'yicha o'sib boradi: 200 dan 1000 gacha.\n"
     "- Kirish `input()` bilan o'qiladi, faqat javob chiqariladi. Kirishdagi ortiqcha probellar ham test bo'lishi mumkin.\n"
     "- Masalalarni istalgan tartibda yechishingiz mumkin.\n"
     "- Kontestdan keyin ba'zi yechimlar bo'yicha qisqa suhbat (himoya) o'tkazilishi mumkin: kodni o'zingiz yozing.")
