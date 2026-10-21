@@ -110,21 +110,23 @@ def _activity_level(count: int) -> int:
 
 
 def _activity_calendar(user: User) -> dict:
-    """Past-year heatmap: week columns (Mon..Sun) ending today, plus summary stats."""
+    """Past-year heatmap: week columns (Mon..Sun) from this day last year to today, plus summary stats."""
     today = timezone.localdate()
-    first = today - datetime.timedelta(days=364)
-    first -= datetime.timedelta(days=first.weekday())  # align to Monday
+    try:
+        first = today.replace(year=today.year - 1)
+    except ValueError:  # 29 February
+        first = today.replace(year=today.year - 1, day=28)
     counts = dict(
         Submission.objects.filter(user=user, created__date__gte=first)
         .values("created__date")
         .annotate(n=Count("id"))
         .values_list("created__date", "n")
     )
-    weeks, month_labels = [], []
+    weeks, month_labels = [[None] * first.weekday()], []  # the first week starts blank up to the first day
     streak = max_streak = 0
     day = first
     while day <= today:
-        if day.weekday() == 0:
+        if day.weekday() == 0 and day != first:
             weeks.append([])
             if day.day <= 7:
                 # the contest tiles' abbreviations: Iyun and Iyul both cut to "Iyu" otherwise
@@ -135,7 +137,7 @@ def _activity_calendar(user: User) -> dict:
         weeks[-1].append({"date": day, "level": _activity_level(n), "count": n})
         day += datetime.timedelta(days=1)
     return {
-        "weeks": weeks,
+        "weeks": weeks, "first": first, "last": today,
         "month_labels": month_labels,
         "total": sum(counts.values()),
         "active_days": len(counts),

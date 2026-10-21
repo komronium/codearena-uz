@@ -3653,7 +3653,6 @@ select.ca-input, .ca-select { appearance: none; -webkit-appearance: none; min-he
 
 /* a first solve also carries a star, so it is not told from a plain solve by tint alone */
 .ca-standings td.ca-cell-first { position: relative; }
-.ca-standings td.ca-cell-first::after { content: "★"; position: absolute; top: 2px; right: 5px; font-size: .7rem; line-height: 1; color: rgb(var(--ca-ok-rgb)); }
 
 /* tier dots on the dark panels: lighter, so the dark red/green tiers keep 4.5:1 */
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .ca7-ladder-dot { background: color-mix(in srgb, var(--tier) 62%, #fff); } }
@@ -3715,3 +3714,16 @@ small { font-size: max(12.25px, .8em); }
 .ca7-meter-bar { display: block; height: 6px; margin-top: .4rem; overflow: hidden; border-radius: 3px; background: rgb(var(--ca-ink-rgb) / .14); }
 .ca7-meter-bar i { display: block; height: 100%; max-width: 100%; border-radius: inherit; background: var(--vt); }
 .ca7-meter.is-high .ca7-meter-bar i { background: rgb(var(--ca-warn-rgb)); }
+
+/* the activity map starts on the day a year ago: the days before it in the first week are blank */
+.ca7-heat-weeks i.ca-heat-pad { visibility: hidden; }
+/* a profile's topics: small rows in two columns, the next problem in a tooltip */
+.ca7-topics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 2.5rem; }
+.ca7-topics > details, .ca7-topics > .ca7-topics-key { grid-column: 1 / -1; }
+.ca7-topics-more[open] { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 2.5rem; }
+.ca7-topics-more > summary { grid-column: 1 / -1; }
+.ca7-topic { grid-template-columns: minmax(0, 8.5rem) minmax(0, 1fr) 3.6rem; gap: .75rem; padding: .4rem .25rem; font-size: 0.9375rem; }
+.ca7-topic-bar { height: 6px; border-radius: 3px; }
+.ca7-topic-next { display: none; }
+@media (max-width: 767px) { .ca7-topics, .ca7-topics-more[open] { grid-template-columns: minmax(0, 1fr); } .ca7-topic { grid-template-columns: minmax(0, 7rem) minmax(0, 1fr) 3.6rem; } .ca7-topic-bar { grid-column: auto; order: 0; } }
+.ca7-tip { padding: .6rem .9rem; font-size: 0.875rem; margin-bottom: .6rem; }

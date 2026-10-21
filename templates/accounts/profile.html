@@ -152,12 +152,12 @@ Colour carries meaning only: the tier colour is the person, green/red the result
 
 <section aria-labelledby="act-title">
   <div class="ca7-sec-h"><h2 id="act-title">Faollik</h2>
-    <span class="ca7-r text-mute">so‘nggi yilda <b class="tabular text-ink">{{ activity.total }}</b> ta urinish · faol kunlar <b class="tabular text-ink">{{ activity.active_days }}</b> · eng uzun ketma-ket faol kunlar <b class="tabular text-ink">{{ activity.max_streak }}</b></span></div>
+    <span class="ca7-r text-mute">{{ activity.first|date:"d.m.Y" }} – {{ activity.last|date:"d.m.Y" }}: <b class="tabular text-ink">{{ activity.total }}</b> ta urinish · faol kunlar <b class="tabular text-ink">{{ activity.active_days }}</b> · eng uzun ketma-ket faol kunlar <b class="tabular text-ink">{{ activity.max_streak }}</b></span></div>
   {# rtl scroller: a phone shows the latest weeks first; the map itself stays left-to-right #}
   <div class="ca-scroll-end overflow-x-auto" tabindex="0" role="region" aria-label="Faollik xaritasi (yon tomonga suriladi)">
     <div class="ca7-heat" role="img" aria-label="Faollik xaritasi: so‘nggi bir yilda {{ activity.total }} ta urinish, {{ activity.active_days }} faol kun">
       <div class="ca7-heat-weeks" aria-hidden="true">
-        {% for w in activity.weeks %}<div>{% for d in w %}<i class="ca-heat-{{ d.level }}" title="{{ d.date|date:'d.m.Y' }}: {{ d.count }} ta urinish"></i>{% endfor %}</div>{% endfor %}
+        {% for w in activity.weeks %}<div>{% for d in w %}{% if d %}<i class="ca-heat-{{ d.level }}" title="{{ d.date|date:'d.m.Y' }}: {{ d.count }} ta urinish"></i>{% else %}<i class="ca-heat-pad"></i>{% endif %}{% endfor %}</div>{% endfor %}
       </div>
       <div class="ca7-heat-months" aria-hidden="true">
         {% for m in activity.month_labels %}<span style="left: {% widthratio m.week activity.weeks|length 100 %}%">{{ m.name }}</span>{% endfor %}
@@ -181,7 +181,7 @@ Colour carries meaning only: the tier colour is the person, green/red the result
     {% for t in topic_map %}
     {% if forloop.counter == 6 %}<details class="ca7-topics-more"><summary>Barcha mavzular <span class="tabular">({{ topic_map|length }})</span><i data-lucide="chevron-down" class="lu" aria-hidden="true"></i></summary>{% endif %}
     <div class="ca7-topic">
-      <a class="ca-link{% if t.kind == 'sql' %} !text-[rgb(var(--ca-sql-rgb))]{% endif %}" href="{% url 'problems:list' %}?tag={{ t.row.tag.name|urlencode }}">{{ t.row.tag.name|tag_uz }}</a>
+      <a class="ca-link{% if t.kind == 'sql' %} !text-[rgb(var(--ca-sql-rgb))]{% endif %}" href="{% url 'problems:list' %}?tag={{ t.row.tag.name|urlencode }}"{% if t.next %} title="Keyingisi: {{ t.next.title }}"{% endif %}>{{ t.row.tag.name|tag_uz }}</a>
       <span class="ca7-topic-bar" role="img" aria-label="{{ t.total }} tadan {{ t.solved }} tasi yechilgan, {{ t.tried }} tasida urinish bor"><i class="is-solved" style="width: {{ t.pct_solved }}%"></i><i class="is-tried" style="width: {{ t.pct_tried }}%"></i></span>
       <b class="tabular">{{ t.solved }} / {{ t.total }}</b>
       <span class="ca7-topic-next">{% if t.next %}<a class="ca-link" href="{% url 'problems:detail' t.next.slug %}" title="{{ t.next.title }}">Keyingisi: {{ t.next.title }}</a>{% else %}<span class="font-semibold text-ok"><i data-lucide="check" class="lu" aria-hidden="true"></i> hammasi</span>{% endif %}</span>
