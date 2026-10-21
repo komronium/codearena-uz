@@ -183,19 +183,17 @@ def register(request):
             login(request, user)
             onboarding.send_verification(request, user, force=True)
             return redirect(nxt or "home")
-    from . import apple, google
-    return render(request, "registration/register.html", {"form": form, "next": nxt, "google_login": google.configured(),
-                                                          "apple_login": apple.configured()})
+    from . import google
+    return render(request, "registration/register.html", {"form": form, "next": nxt, "google_login": google.configured()})
 
 
 class Login(auth_views.LoginView):
     """The sign-in page, with "Telegram orqali kirish" offered once the bot is set up."""
 
     def get_context_data(self, **kwargs):
-        from . import apple, google
+        from . import google
         from .telegram import bot_configured
-        return super().get_context_data(**kwargs, telegram_login=bot_configured(), google_login=google.configured(),
-                                        apple_login=apple.configured())
+        return super().get_context_data(**kwargs, telegram_login=bot_configured(), google_login=google.configured())
 
     def post(self, request, *args, **kwargs):
         who = (request.POST.get("username") or "").strip().lower()[:150]

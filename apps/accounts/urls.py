@@ -1,15 +1,13 @@
 from django.contrib.auth import views as auth_views
 from django.urls import path, reverse_lazy
 
-from . import apple, clubs, google, views
+from . import clubs, google, views
 from . import telegram_views
 
 urlpatterns = [
     path("login/", views.Login.as_view(), name="login"),
     path("google/login/", google.login_start, name="google_login"),
     path("google/callback/", google.callback, name="google_callback"),
-    path("apple/login/", apple.login_start, name="apple_login"),
-    path("apple/callback/", apple.callback, name="apple_callback"),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
     path("register/", views.register, name="register"),
     path("top/", views.top, name="top"),

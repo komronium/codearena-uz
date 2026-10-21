@@ -25,7 +25,7 @@
     <button type="submit" class="ca-btn ca-btn-primary w-full !py-2.5"><i data-lucide="user-plus" class="lu" aria-hidden="true"></i>{% trans "Hisob yaratish" %}</button>
     <p class="text-center text-xs text-mute">{% trans "Hisob yaratib," %} <a class="ca-link" href="{% url 'honor' %}" target="_blank" rel="noopener">{% trans "halollik qoidalari</a>ga rozilik bildirasiz." %}</p>
   </form>
-  {% if google_login or apple_login %}<div class="space-y-3">{% include "registration/_google_btn.html" %}{% include "registration/_apple_btn.html" %}</div>{% endif %}
+  {% if google_login %}<div>{% include "registration/_google_btn.html" %}</div>{% endif %}
   <p class="mt-4 text-center text-sm text-mute">
     {% trans "Allaqachon hisobingiz bormi?" %} <a class="ca-link font-medium" href="{% url 'login' %}{% if next %}?next={{ next|urlencode }}{% endif %}">{% trans "Kirish" %}</a>
   </p>

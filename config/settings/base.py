@@ -120,12 +120,6 @@ USERNAME_CHANGE_DAYS = 90  # a user may rename themselves once in this many days
 # Unset, the buttons do not appear.
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
 GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "")
-# "Apple bilan kirish": a Services ID (the client id; its return URL is <site>/accounts/apple/callback/), the Team ID, and a
-# "Sign in with Apple" key (its Key ID and the .p8 text, new lines written as \n). Unset, the buttons do not appear.
-APPLE_CLIENT_ID = os.environ.get("APPLE_CLIENT_ID", "")
-APPLE_TEAM_ID = os.environ.get("APPLE_TEAM_ID", "")
-APPLE_KEY_ID = os.environ.get("APPLE_KEY_ID", "")
-APPLE_PRIVATE_KEY = os.environ.get("APPLE_PRIVATE_KEY", "")
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_BOT_USERNAME = os.environ.get("TELEGRAM_BOT_USERNAME", "").lstrip("@")
 TELEGRAM_WEBHOOK_SECRET = os.environ.get("TELEGRAM_WEBHOOK_SECRET", "")

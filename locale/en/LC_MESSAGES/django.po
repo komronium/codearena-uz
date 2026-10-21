@@ -7,28 +7,6 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: apps/accounts/apple.py
-msgid "Xodim hisoblari Apple orqali kira olmaydi. Parol bilan kiring."
-msgstr "Staff accounts can't sign in with Apple. Use your password."
-
-#: apps/accounts/apple.py apps/accounts/apple.py
-msgid ""
-"Apple orqali kirish bekor qilindi yoki eskirdi. Qaytadan urinib ko‘ring."
-msgstr "Sign-in with Apple was cancelled or expired. Try again."
-
-#: apps/accounts/apple.py
-msgid ""
-"Apple emailingizni tasdiqlanmagan deb ko‘rsatdi: boshqa usul bilan kiring."
-msgstr "Apple reports your email as unverified: sign in another way."
-
-#: apps/accounts/apple.py
-msgid "Apple bilan aloqa bo‘lmadi. Birozdan keyin qayta urinib ko‘ring."
-msgstr "Couldn't reach Apple. Try again in a moment."
-
-#: apps/accounts/apple.py apps/accounts/google.py
-msgid "Bu email bir nechta hisobda. Parol bilan kiring."
-msgstr "This email belongs to several accounts. Sign in with a password."
-
 #: apps/accounts/badges.py
 msgid "bronza"
 msgstr "bronze"
@@ -1046,6 +1024,10 @@ msgstr "Google reports your email as unverified: sign in another way."
 #: apps/accounts/google.py
 msgid "Google bilan aloqa bo‘lmadi. Birozdan keyin qayta urinib ko‘ring."
 msgstr "Couldn't reach Google. Try again in a moment."
+
+#: apps/accounts/google.py
+msgid "Bu email bir nechta hisobda. Parol bilan kiring."
+msgstr "This email belongs to several accounts. Sign in with a password."
 
 #: apps/accounts/management/commands/telegram_notifications.py
 msgid ""
@@ -11119,10 +11101,6 @@ msgid ""
 msgstr ""
 "%(plan_progress_done)s / %(plan_progress_total)s<span class=\"sr-only\"> "
 "problems solved</span>"
-
-#: templates/registration/_apple_btn.html
-msgid "Apple bilan davom etish"
-msgstr "Continue with Apple"
 
 #: templates/registration/_auth_brand.html
 msgid "Masala yeching, bellashing, reytingda ko‘tariling"
