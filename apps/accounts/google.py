@@ -5,7 +5,7 @@
                                  account with that (Google-verified) email, else a new one.
 
 Only an address Google says it verified is used, so linking to an existing account by email is as safe as the mail
-link is. Staff accounts do not sign in this way (like Telegram): they use their password."""
+link is. Staff accounts may sign in this way too (Google's own 2-step check protects them); Telegram still excludes them."""
 import json
 import re
 import secrets
@@ -130,8 +130,6 @@ def _user_for(request, info: dict):
         user.save()
     if not user.is_active:
         return None, "Bu hisob yopilgan."
-    if user.is_staff or user.is_superuser:
-        return None, _t("Xodim hisoblari Google orqali kira olmaydi. Parol bilan kiring.")
     _give_avatar(user, info.get("picture", ""))  # only for the people who really sign in
     return user, ""
 

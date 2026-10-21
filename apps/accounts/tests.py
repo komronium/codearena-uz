@@ -977,7 +977,7 @@ def test_google_creates_an_account_signs_in_and_later_finds_it_again(client, goo
 
 
 @pytest.mark.django_db
-def test_google_links_the_account_that_has_that_verified_email_and_refuses_staff(client, google_on, monkeypatch):
+def test_google_links_the_account_that_has_that_verified_email_and_lets_staff_in_too(client, google_on, monkeypatch):
     mine = User.objects.create_user("ali", password="x", email="ali@example.com")
     _google_callback(client, monkeypatch, {"sub": "g-2", "email": "ali@example.com", "email_verified": True})
     mine.refresh_from_db()
@@ -985,7 +985,8 @@ def test_google_links_the_account_that_has_that_verified_email_and_refuses_staff
     client.logout()
     boss = User.objects.create_user("boss", password="x", email="boss@example.com", is_staff=True)
     r = _google_callback(client, monkeypatch, {"sub": "g-3", "email": "boss@example.com", "email_verified": True}, state="s2")
-    assert "_auth_user_id" not in client.session
+    assert client.session["_auth_user_id"] == str(boss.pk)
+    client.logout()
     # an address Google did not verify, or a wrong state, signs nobody in
     _google_callback(client, monkeypatch, {"sub": "g-4", "email": "x@example.com", "email_verified": False}, state="s3")
     assert "_auth_user_id" not in client.session and not User.objects.filter(google_sub="g-4").exists()
