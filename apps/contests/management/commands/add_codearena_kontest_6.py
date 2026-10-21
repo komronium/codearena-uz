@@ -1,6 +1,6 @@
 """CodeArena Kontest 6: the class's 80-minute final on week 6 (strings): eight hidden problems A..H under Codeforces
-rules, in ascending order of difficulty and of points on the usual Codeforces ladder: 200, 300, 400, 500, 600, 800,
-1000, 1000 (the easiest is worth 200 because a mistake costs 50; a problem never falls under 30%); Parol kuchi, the md's reserve, is D. Source:
+rules, in ascending order of difficulty and of points on the usual Codeforces ladder: 250, 300, 400, 500, 600, 750,
+1000, 1000 (the easiest is worth 250 because a mistake costs 50; a problem never falls under 30%); Parol kuchi, the md's reserve, is D. Source:
 Downloads/kontest-6-final.md; the teacher's notes from it (AI signs, the defence questions, the second variant) are in
 docs/kontest-6-ustoz-eslatmalari.md. Every statement carries a hidden note for AI assistants (apps.problems.ai_marks).
 
@@ -215,7 +215,7 @@ def _spec(slug, title, difficulty, points, tags, solve, tests, statement, inp, o
 
 
 PROBLEMS = [
-    _spec("k6-royxat", "Ro'yxatdan o'tish", "beginner", 200, ["strings", "input-output"], royxat_solve, royxat_tests,
+    _spec("k6-royxat", "Ro'yxatdan o'tish", "beginner", 250, ["strings", "input-output"], royxat_solve, royxat_tests,
           "Ilovada ro'yxatdan o'tayotganda foydalanuvchilar ismini har xil yozadi: «ALI», «  vali », «SaRdor».\n\n"
           "Ism kiritiladi: boshida/oxirida ortiqcha probel bo'lishi va harflari har xil katta-kichik bo'lishi mumkin. "
           "Ilova ekranida «Salom, Ism!» deb chiqarish kerak. Ismning faqat birinchi harfi katta, qolganlari kichik bo'lsin.",
@@ -240,7 +240,7 @@ PROBLEMS = [
           "«.py» — Python, «.txt» — Matn, «.jpg» yoki «.png» — Rasm, boshqa holda — Noma'lum. Kengaytma nuqtadan boshlanadi: "
           "«py» nomli faylda kengaytma yo'q.",
           "Bitta qator.", "Bitta so'z.", "tur_vq"),
-    _spec("k6-telefon", "Telefon raqami", "easy", 800, ["strings", "input-output"], telefon_solve, telefon_tests,
+    _spec("k6-telefon", "Telefon raqami", "easy", 750, ["strings", "input-output"], telefon_solve, telefon_tests,
           "Mijozlar bazasida raqamlar bir xil ko'rinishda saqlanishi kerak.\n\n"
           "Telefon raqami «+998»siz, 9 ta raqam ko'rinishida kiritiladi (chetida ortiqcha probel bo'lishi mumkin). Raqam "
           "aynan 9 ta belgidan iborat va hammasi raqam bo'lsa, uni «+998 XX XXX XX XX» ko'rinishida chiqaring. Aks holda "
@@ -267,7 +267,7 @@ DESCRIPTION = (
     "**80 daqiqa · 8 masala.** Mavzu: satrlar (indeks, kesma, `upper` `lower` `count` `strip` `capitalize`, `split` `join`, "
     "`startswith` `endswith` `isdigit` `isalpha`).\n\n"
     "- Codeforces qoidasi: masala bali vaqt o'tishi bilan kamayadi, har noto'g'ri urinish −50 ball (kamida 30%). "
-    "Masala ballari qiyinlik bo'yicha o'sib boradi: 200 dan 1000 gacha.\n"
+    "Masala ballari qiyinlik bo'yicha o'sib boradi: 250 dan 1000 gacha.\n"
     "- Kirish `input()` bilan o'qiladi, faqat javob chiqariladi. Kirishdagi ortiqcha probellar ham test bo'lishi mumkin.\n"
     "- Masalalarni istalgan tartibda yechishingiz mumkin.\n"
     "- Kontestdan keyin ba'zi yechimlar bo'yicha qisqa suhbat (himoya) o'tkazilishi mumkin: kodni o'zingiz yozing.")
