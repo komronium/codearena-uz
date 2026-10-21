@@ -1,5 +1,6 @@
 """/ : what to do next for a signed-in student, what CodeArena is for a guest."""
 from django.conf import settings
+from django.utils.translation import gettext as _t, gettext_lazy as _tl
 from django.core.cache import cache
 from django.contrib.staticfiles import finders
 from django.db.models import Count, Q
@@ -30,8 +31,8 @@ from .context_processors import live_contest_for
 from .templatetags.seo import SITE_DESCRIPTION, SITE_NAME
 
 
-_WEEKDAYS = ["Dushanba", "Seshanba", "Chorshanba", "Payshanba", "Juma", "Shanba", "Yakshanba"]
-_MONTHS = ["yanvar", "fevral", "mart", "aprel", "may", "iyun", "iyul", "avgust", "sentabr", "oktabr", "noyabr", "dekabr"]
+_WEEKDAYS = [_tl("Dushanba"), _tl("Seshanba"), _tl("Chorshanba"), _tl("Payshanba"), _tl("Juma"), _tl("Shanba"), _tl("Yakshanba")]
+_MONTHS = [_tl("yanvar"), _tl("fevral"), _tl("mart"), _tl("aprel"), _tl("may"), _tl("iyun"), _tl("iyul"), _tl("avgust"), _tl("sentabr"), _tl("oktabr"), _tl("noyabr"), _tl("dekabr")]
 
 
 def _rating_card(user) -> dict:
@@ -138,7 +139,7 @@ def home(request):
         "challenges": list(mine.filter(status=Duel.Status.PENDING, opponent=user)[:3]),
         "active_duels": live,
         "running": running, "upcoming": upcoming, "live": _live(user, running),
-        "today_label": f"{_WEEKDAYS[today.weekday()]}, {today.day}-{_MONTHS[today.month - 1]}",
+        "today_label": _t("{weekday}, {day}-{month}").format(weekday=_WEEKDAYS[today.weekday()], day=today.day, month=_MONTHS[today.month - 1]),
         "rating_card": _rating_card(user),
         "spark": _spark(user),
         # a newcomer's first steps show LeetCode's ring of solved problems per level (the problem list has it otherwise)

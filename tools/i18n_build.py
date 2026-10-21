@@ -111,10 +111,11 @@ def main():
             missing += 1
         forms = []  # a template literal is looked up with its % doubled, Python and {% jt %} as written
         kinds = KINDS.get(msgid, {"plain"})
-        if "trans" in kinds and "%" in msgid:
+        if "trans" in kinds:
             forms.append((msgid.replace("%", "%%"), msgstr.replace("%", "%%")))
         if kinds - {"trans"}:
             forms.append((msgid, msgstr))
+        forms = list(dict.fromkeys(forms))
         for mid, mstr in forms:
             po.append(polib.POEntry(msgid=mid, msgstr=mstr, occurrences=[(r, "") for r in refs[:2]]))
     out = ROOT / "locale" / "en" / "LC_MESSAGES"

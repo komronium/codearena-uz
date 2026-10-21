@@ -460,7 +460,7 @@ def test_duel_stats_count_wins_runs_the_best_rating_and_perfect_quiz_runs(bank):
     p1, p2 = _players()
     assert duel_stats(p1) == {"wins": 0, "win_run": 0, "duel_peak": 1200, "perfect": 0, "lightning": 0, "languages": 0}
     duel, _ = challenge(p1, "p2", "python")
-    _play(duel, p1, right=5, secs=2)  # all five in 10 s
+    _play(duel, p1, right=7, secs=2)  # all seven in 14 s
     accept(duel, p2)
     _play(duel, p2, right=1)
     assert duel_stats(p1) == {"wins": 1, "win_run": 1, "duel_peak": 1220, "perfect": 1, "lightning": 1, "languages": 1}
@@ -535,13 +535,13 @@ def test_telegram_tells_of_a_challenge_a_duel_result_and_a_badge(bank, settings,
             duel, _ = challenge(p1, "p2", "python")
         invite = TelegramOutbox.objects.get(link__user=p2, event_key=f"duel:{duel.pk}:challenge")
         assert "p1" in invite.text and "Python" in invite.text
-        _play(duel, p1, right=5, secs=2)
+        _play(duel, p1, right=7, secs=2)
         accept(duel, p2)
         _play(duel, p2, right=1)
         results = {o.link.user.username: o.text for o in TelegramOutbox.objects.filter(event_key=f"duel:{duel.pk}:result")}
-        assert "G‘alaba" in results["p1"] and "10 : 2" in results["p1"] and "Mag‘lubiyat" in results["p2"]
+        assert "G‘alaba" in results["p1"] and "14 : 2" in results["p1"] and "Mag‘lubiyat" in results["p2"]
         badge = TelegramOutbox.objects.filter(link__user=p1, preference="notify_badges").first()
-        assert badge is not None and "Mukammal · Bronza" in badge.text  # 5/5 in a duel
+        assert badge is not None and "Mukammal · Bronza" in badge.text  # every question right in a duel
         link = TelegramLink.objects.get(user=p2)
         link.notify_duels = False
         link.save()

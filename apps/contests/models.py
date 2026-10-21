@@ -11,8 +11,8 @@ from django.utils.translation import gettext as _t, gettext_lazy as _tl
 from apps.translations.mixin import Translatable
 
 
-_UZ_MONTHS_SHORT = "Yan Fev Mar Apr May Iyn Iyl Avg Sen Okt Noy Dek".split()
-_UZ_MONTHS = "Yanvar Fevral Mart Aprel May Iyun Iyul Avgust Sentabr Oktabr Noyabr Dekabr".split()
+_UZ_MONTHS_SHORT = [_tl("Yan"), _tl("Fev"), _tl("Mar"), _tl("Apr"), _tl("May"), _tl("Iyn"), _tl("Iyl"), _tl("Avg"), _tl("Sen"), _tl("Okt"), _tl("Noy"), _tl("Dek")]
+_UZ_MONTHS = [_tl("Yanvar"), _tl("Fevral"), _tl("Mart"), _tl("Aprel"), _tl("May"), _tl("Iyun"), _tl("Iyul"), _tl("Avgust"), _tl("Sentabr"), _tl("Oktabr"), _tl("Noyabr"), _tl("Dekabr")]
 
 # Shown ratings each division rates, [floor, ceiling); None = no bound (info.md, Codeforces' split).
 DIVISION_RANGE = {1: (1900, None), 2: (None, 1900), 3: (None, 1600), 4: (None, 1400)}
@@ -105,7 +105,7 @@ class Contest(Translatable, models.Model):
 
     @property
     def start_month_short(self) -> str:
-        return _UZ_MONTHS_SHORT[timezone.localtime(self.start).month - 1]
+        return str(_UZ_MONTHS_SHORT[timezone.localtime(self.start).month - 1])
 
     @property
     def start_month(self) -> str:
