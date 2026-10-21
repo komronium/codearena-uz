@@ -513,10 +513,10 @@ def test_staff_see_every_duels_result_and_both_players_answers(client, bank):
     page = r.content.decode()
     d = r.context["page"][0]
     assert [(s["user"].username, s["right"], s["won"]) for s in d.sides] == [("p1", 4, True), ("p2", 2, False)]
-    assert "4/5 to‘g‘ri" in page and "+20" in page and r.context["counts"]["finished"] == 1
+    assert "4/7 to‘g‘ri" in page and "+20" in page and r.context["counts"]["finished"] == 1
     assert client.get(reverse("moderation:duels"), {"user": "nobody"}).context["page"].object_list == []
     review = client.get(reverse("classroom:duel", args=[duel.pk])).context["review"]
-    assert len(review) == 5 and [s["label"] for s in review[0]["answers"]] == ["p1", "p2"]
+    assert len(review) == 7 and [s["label"] for s in review[0]["answers"]] == ["p1", "p2"]
 
 
 @pytest.mark.django_db(transaction=True)
@@ -539,7 +539,7 @@ def test_telegram_tells_of_a_challenge_a_duel_result_and_a_badge(bank, settings,
         accept(duel, p2)
         _play(duel, p2, right=1)
         results = {o.link.user.username: o.text for o in TelegramOutbox.objects.filter(event_key=f"duel:{duel.pk}:result")}
-        assert "G‘alaba" in results["p1"] and "5 : 1" in results["p1"] and "Mag‘lubiyat" in results["p2"]
+        assert "G‘alaba" in results["p1"] and "10 : 2" in results["p1"] and "Mag‘lubiyat" in results["p2"]
         badge = TelegramOutbox.objects.filter(link__user=p1, preference="notify_badges").first()
         assert badge is not None and "Mukammal · Bronza" in badge.text  # 5/5 in a duel
         link = TelegramLink.objects.get(user=p2)
@@ -630,7 +630,7 @@ def test_questions_and_right_answers_open_only_when_both_runs_are_over(client, b
     accept(duel, p2)
     _play(duel, p2, right=2)
     page = client.get(reverse("classroom:duel", args=[duel.pk]))
-    assert len(page.context["review"]) == 5 and not page.context["review_waits"]
+    assert len(page.context["review"]) == 7 and not page.context["review_waits"]
 
 
 def test_variants_nudge_numbers_outside_strings_and_work_the_answer_out():
