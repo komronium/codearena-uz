@@ -46,7 +46,10 @@ class RegisterForm(UserCreationForm):
                 self.add_error("password1", error)
 
     def clean_username(self):
-        return validate_public_username(super().clean_username())
+        name = validate_public_username(super().clean_username())
+        if User.objects.filter(username__iexact=name).exists():  # Ali and ali are one handle
+            raise forms.ValidationError("Bu foydalanuvchi nomi band.")
+        return name
 
     def clean_email(self):
         email = self.cleaned_data["email"]
