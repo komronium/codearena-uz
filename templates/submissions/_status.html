@@ -2,21 +2,22 @@
 level) tinted by the verdict, a hint after a failure, the compiler's log, then every test as a row; while it is judged
 the card polls itself every 1.5 s while the tab is visible; below it only the test it stopped on, not a row per test.
 compact=True: the verdict chip only.{% endcomment %}
-<div data-verdict="{{ s.verdict }}" {% if not s.is_terminal %}hx-get="{% url 'submissions:status' s.pk %}{% if compact %}?compact=1{% endif %}" hx-trigger="every 1500ms [!document.hidden]" hx-swap="outerHTML"{% endif %}
+<div data-verdict="{{ s.verdict }}" data-sub="{{ s.pk }}"{% if first_solve %} data-first="1"{% endif %} {% if not s.is_terminal %}hx-get="{% url 'submissions:status' s.pk %}{% if compact %}?compact=1{% endif %}" hx-trigger="every 500ms [!document.hidden]" hx-swap="outerHTML"{% endif %}
      aria-busy="{% if not s.is_terminal %}true{% else %}false{% endif %}">
 {% if s.is_terminal %}{% load verdicts %}<span class="sr-only" role="status">{{ s.verdict|verdict_words }}</span>{% endif %}
 {% if compact %}{% include "submissions/_verdict.html" with v=s.verdict sub=s %}
 {% else %}{% load verdicts %}
 <section class="ca7-vhero is-{% if s.verdict == 'AC' %}ac{% elif s.verdict == 'WA' %}bad{% elif s.verdict == 'RE' %}re{% elif s.verdict == 'TLE' or s.verdict == 'MLE' or s.verdict == 'OLE' %}warn{% elif s.is_terminal %}ce{% else %}run{% endif %}" aria-label="{% trans 'Natija' %}">
   <div class="ca7-vhero-h">
-    <span class="ca7-vhero-ico" aria-hidden="true"><i data-lucide="{% if s.verdict == 'AC' %}check{% elif not s.is_terminal %}loader-circle{% elif s.verdict == 'TLE' %}clock{% elif s.verdict == 'MLE' %}cpu{% elif s.verdict == 'CE' %}code{% else %}x{% endif %}" class="lu{% if not s.is_terminal %} ca-spin{% endif %}"></i></span>
+    <span class="ca7-vhero-ico" aria-hidden="true">{% if s.verdict == 'AC' %}<svg class="ca7-tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 12.5 10 17l8.5-9.5" pathLength="1"/></svg>{% else %}<i data-lucide="{% if not s.is_terminal %}loader-circle{% elif s.verdict == 'TLE' %}clock{% elif s.verdict == 'MLE' %}cpu{% elif s.verdict == 'CE' %}code{% else %}x{% endif %}" class="lu{% if not s.is_terminal %} ca-spin{% endif %}"></i>{% endif %}</span>
     <div>
       <h2>{% if s.is_terminal %}{{ s.verdict|verdict_words }}{% elif s.verdict == "RUNNING" %}{% trans "Tekshirilmoqda…" %}{% else %}{% trans "Navbatda…" %}{% endif %}</h2>
-      <p>{% if s.verdict == "AC" %}{% blocktrans with s_total=s.total %}Barcha {{ s_total }} testdan o‘tdi · <span translate="no">AC</span>{% endblocktrans %}
+      <p>{% if s.verdict == "AC" %}{% blocktrans with s_total=s.total %}<b class="tabular ca7-cnt" data-to="{{ s_total }}">{{ s_total }}</b> / {{ s_total }} test o‘tdi{% endblocktrans %}
         {% elif s.verdict == "CE" %}{% trans "Kod kompilyatsiya bo‘lmadi · <span translate=\"no\">CE</span>" %}
         {% elif s.is_terminal %}{% if s.total %}{% blocktrans with s_passed=s.passed|add:1 s_passed2=s.passed s_total=s.total %}{{ s_passed }}-testda · {{ s_passed2 }}/{{ s_total }} test o‘tdi ·{% endblocktrans %} {% endif %}<span translate="no">{{ s.verdict }}</span>
-        {% elif progress %}{% blocktrans with progress_done=progress.done progress_total=progress.total %}<b class="tabular">{{ progress_done }}</b> / {{ progress_total }} test tekshirildi{% endblocktrans %}{% elif s.is_stale %}{% trans "Tekshiruv odatdagidan uzoq cho‘zildi. Bir necha daqiqadan keyin ham o‘zgarmasa, qayta yuboring yoki adminga yozing." %}{% else %}{% trans "Tez orada boshlanadi" %}{% endif %}</p>
+        {% elif progress %}{% blocktrans with progress_done=progress.done progress_total=progress.total %}<b class="tabular ca7-cnt" data-to="{{ progress_done }}" data-total="{{ progress_total }}">{{ progress_done }}</b> / {{ progress_total }} test tekshirildi{% endblocktrans %}{% elif s.is_stale %}{% trans "Tekshiruv odatdagidan uzoq cho‘zildi. Bir necha daqiqadan keyin ham o‘zgarmasa, qayta yuboring yoki adminga yozing." %}{% else %}{% trans "Tez orada boshlanadi" %}{% endif %}</p>
     </div>
+    {% if s.verdict == 'AC' %}<button type="button" class="ca7-snd" data-sound-toggle aria-label="{% trans 'Ovoz' %}" aria-pressed="true"><span data-snd="on"><i data-lucide="volume-2" class="lu" aria-hidden="true"></i></span><span data-snd="off" hidden><i data-lucide="volume-x" class="lu" aria-hidden="true"></i></span></button>{% endif %}
   </div>
   {% if s.verdict == 'RUNNING' and progress %}<span class="ca7-pg" aria-hidden="true"><i style="width: {{ progress.pct }}%"></i></span>{% endif %}
   {% if s.is_terminal and s.verdict != 'CE' %}

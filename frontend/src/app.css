@@ -2995,7 +2995,7 @@ sparks fly once, then the words; a click outside or the button closes it */
 .ca7-vhero.is-re { --vt: var(--ca-vd-re); --vb: var(--ca-vd-re-bg); }
 .ca7-vhero.is-run { --vt: rgb(var(--ca-accent-rgb)); --vb: rgb(var(--ca-panel-rgb)); }
 .ca7-vhero-h { display: flex; align-items: center; gap: .9rem; }
-.ca7-vhero-ico { display: grid; place-items: center; flex: none; width: 2.6rem; height: 2.6rem; border-radius: 50%; color: #fff; background: var(--vt); }
+.ca7-vhero-ico { display: grid; place-items: center; flex: none; width: 2.6rem; height: 2.6rem; border-radius: 50%; color: rgb(var(--ca-on-fill-rgb)); background: var(--vt); }
 .ca7-vhero.is-run .ca7-vhero-ico { color: rgb(var(--ca-on-fill-rgb)); }
 .ca7-vhero-ico svg.lucide { width: 1.35rem; height: 1.35rem; stroke-width: 2.6; }
 .ca7-vhero h2 { font-size: 1.35rem; font-weight: 700; color: var(--vt); }
@@ -3960,3 +3960,19 @@ small { font-size: max(12.25px, .8em); }
 .ca7-tier-bar i { display: block; height: 100%; min-width: 2px; border-radius: inherit; background: var(--tier); }
 .ca7-tiers li.is-empty .ca7-tier-bar i { min-width: 0; }
 .ca7-tier-c small { margin-left: .2rem; font-size: 0.8125rem; color: rgb(var(--ca-mute-rgb)); }
+
+/* an accepted card: the check draws itself once, a ring leaves the badge; a speaker button mutes the chord; the row
+   under the card puts the next problem first and the full page quietly after it */
+.ca7-vhero-ico svg.ca7-tick { width: 1.5rem; height: 1.5rem; }
+.ca7-vhero.is-ac .ca7-vhero-ico { position: relative; }
+.ca7-tick path { stroke-dasharray: 1; stroke-dashoffset: 1; animation: ca-tick .38s cubic-bezier(.65, 0, .35, 1) .08s forwards; }
+.ca7-vhero.is-ac .ca7-vhero-ico::after { content: ""; position: absolute; inset: 0; border-radius: 50%; box-shadow: 0 0 0 0 var(--vt); opacity: .5; animation: ca-ring .7s ease-out .25s 1 both; }
+@keyframes ca-tick { to { stroke-dashoffset: 0; } }
+@keyframes ca-ring { from { box-shadow: 0 0 0 0 var(--vt); opacity: .5; } to { box-shadow: 0 0 0 .9rem var(--vt); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .ca7-tick path { animation: none; stroke-dashoffset: 0; } .ca7-vhero.is-ac .ca7-vhero-ico::after { animation: none; opacity: 0; } }
+.ca7-snd { margin-left: auto; align-self: flex-start; display: grid; place-items: center; width: 2rem; height: 2rem; border-radius: 8px; color: rgb(var(--ca-ink-rgb) / .6); }
+.ca7-snd:hover { color: rgb(var(--ca-ink-rgb)); background: rgb(var(--ca-ink-rgb) / .08); }
+.ca7-snd:focus-visible { outline: 2px solid rgb(var(--ca-accent-rgb)); outline-offset: 1px; }
+.ca7-snd svg.lucide { width: 1.05rem; height: 1.05rem; }
+.ca-result-go { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .6rem 1rem; margin-top: .85rem; }
+.ca-result-go:not(:has(#sub-next:not([hidden]))) { justify-content: flex-start; }

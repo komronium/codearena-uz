@@ -349,6 +349,9 @@ def _results_ctx(s):
         "strip": strip,
         "slowest": max((r.exec_ms for r in results), default=None),
         "beats": _beats(s) if s.verdict == "AC" else None,
+        # the first accepted attempt at this problem by this person gets the full celebration, later ones a quiet one
+        "first_solve": s.verdict == Submission.Verdict.AC and not Submission.objects.filter(
+            user_id=s.user_id, problem_id=s.problem_id, verdict=Submission.Verdict.AC, pk__lt=s.pk).exists(),
         "progress": _progress(s, len(results), total),
         # the limits this run was held to (Python gets its time multiplier), for the usage bars
         "limits": {"ms": int(s.problem.tl_ms * s.language.tl_multiplier), "mb": s.problem.ml_mb,

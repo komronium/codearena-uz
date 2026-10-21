@@ -821,8 +821,9 @@ resolves their bare imports so @codemirror/state loads once — two copies break
       resultTab?.click();
       document.getElementById("trial-empty")?.setAttribute("hidden", "");
       resultOut.hidden = false;
-      resultOut.innerHTML = '<div id="sub-live"></div><p class="mt-3 flex flex-wrap items-center gap-3 text-sm"><a class="ca-link" href="' + j.url + '">{% jt "To‘liq natija sahifasi" %}</a>' +
-        '{% if next_problem %}<a id="sub-next" class="ca-btn ca-btn-gold !py-1 text-sm" hidden href="{% url 'problems:detail' next_problem.slug %}">{% jt "Keyingi masala" %}</a>{% endif %}</p>';
+      resultOut.innerHTML = '<div id="sub-live"></div><p class="ca-result-go">' +
+        '{% if next_problem %}<a id="sub-next" class="ca-btn ca-btn-gold !py-1.5 text-sm" hidden href="{% url 'problems:detail' next_problem.slug %}">{% jt "Keyingi masala" %}<i data-lucide="arrow-right" class="lu" aria-hidden="true"></i></a>{% endif %}' +
+        '<a class="ca-link text-sm text-mute" href="' + j.url + '">{% jt "To‘liq natija sahifasi" %}</a></p>';
       htmx.ajax("GET", j.status, { target: "#sub-live", swap: "innerHTML" });
       refreshMine();
     } catch (err) {
