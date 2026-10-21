@@ -92,6 +92,8 @@ def login_start(request):
 def _username_from(info: dict) -> str:
     """A free public handle from the address's local part: letters, digits and underscores, at least 3."""
     base = re.sub(r"[^A-Za-z0-9_]", "", info["email"].split("@", 1)[0])[:20] or "user"
+    if not base[:1].isalpha():
+        base = "u" + base
     if len(base) < 3:
         base = (base + "user")[:8]
     name, n = base, 1

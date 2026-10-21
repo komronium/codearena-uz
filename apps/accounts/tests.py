@@ -1007,3 +1007,25 @@ def test_google_gives_a_new_account_its_picture_only_from_googles_own_host(clien
     assert u.avatar and fetched == ["https://lh3.googleusercontent.com/a/abc=s96-c"]
     monkeypatch.undo()
     assert google._fetch_avatar("https://evil.example/x.png") is None and google._fetch_avatar("http://lh3.googleusercontent.com/a") is None
+
+
+@pytest.mark.django_db
+def test_usernames_are_plain_and_an_old_odd_one_is_fixed_at_the_start(client, settings):
+    from .usernames import valid_username
+    assert valid_username("ali_2") and valid_username("Ali") and not any(map(valid_username, ["1ali", "_ali", "al", "a" * 31, "ali.x", "ali-x", "ali@x", "алишер", "...../////", "a b"]))
+    settings.ACCOUNT_GATE = True
+    r = client.post(reverse("register"), {"username": "9lives", "email": "a@example.com", "first_name": "A", "password1": "Sup3r-secret-pw"})
+    assert r.status_code == 200 and not User.objects.filter(username="9lives").exists()
+    # an account from before the rule: every page sends it to the welcome form, the field is asked with no waiting period
+    u = User.objects.create_user("....////", password="x", first_name="A", country="UZ", location="Toshkent", email="d@example.com")
+    from django.utils import timezone
+    User.objects.filter(pk=u.pk).update(email_verified_at=timezone.now(), username_changed_at=timezone.now())
+    client.force_login(User.objects.get(pk=u.pk))
+    r = client.get(reverse("home"), HTTP_ACCEPT="text/html")
+    assert r.status_code == 302 and r.url == reverse("welcome")
+    assert client.get(reverse("welcome")).status_code == 200
+    assert client.post(reverse("welcome"), {"username": "no good", "first_name": "A", "country": "UZ", "location": "Toshkent", "email": "d@example.com"}).status_code == 200
+    r = client.post(reverse("welcome"), {"username": "dilshod_7", "first_name": "A", "country": "UZ", "location": "Toshkent", "email": "d@example.com"})
+    assert r.status_code == 302
+    assert User.objects.get(pk=u.pk).username == "dilshod_7"
+    assert client.get(reverse("home"), HTTP_ACCEPT="text/html").status_code == 200

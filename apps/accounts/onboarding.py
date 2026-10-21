@@ -15,6 +15,8 @@ from django.urls import reverse
 from django.utils.html import escape
 from django.utils import timezone
 
+from .usernames import valid_username
+
 _SALT = "accounts.verify-email"
 MAX_AGE = 3 * 24 * 3600  # a link works for three days
 RESEND_EVERY = 60  # seconds between two mails to one user
@@ -27,9 +29,16 @@ _WALLED_PREFIXES = ("/classroom/",)
 _WALLED_WRITES = ("/contests/",)
 
 
+def bad_name(user) -> bool:
+    """A handle from before the rule (apps.accounts.usernames): its owner is asked for a new one first."""
+    return (getattr(settings, "ACCOUNT_GATE", True) and user.is_authenticated and not user.is_staff
+            and not valid_username(user.username))
+
+
 def missing(user) -> list[str]:
     """Labels of the profile fields still empty."""
-    return [label for field, label in REQUIRED if not (getattr(user, field) or "").strip()]
+    left = [label for field, label in REQUIRED if not (getattr(user, field) or "").strip()]
+    return (["Foydalanuvchi nomi"] if not valid_username(user.username) else []) + left
 
 
 def needs_gate(user) -> bool:
@@ -115,12 +124,22 @@ class OnboardingMiddleware:
 
     def __call__(self, request):
         user = getattr(request, "user", None)
+        if user is not None and self._page_view(request) and bad_name(user) and not self._open(request):
+            request.session["gate_next"] = request.get_full_path()
+            return redirect("welcome")  # every page, not only the walled ones: the handle is fixed at the start
         if user is not None and self._walled(request) and not self._open(request) and (
                 needs_profile(user) if request.path_info.startswith(_WALLED_WRITES) else needs_gate(user)):
             if request.method == "GET":
                 request.session["gate_next"] = request.get_full_path()
             return redirect("welcome")
         return self.get_response(request)
+
+    @staticmethod
+    def _page_view(request) -> bool:
+        """A browser opening a page (not a poll, a fetch or an htmx swap)."""
+        h = request.headers
+        return (request.method == "GET" and "text/html" in h.get("Accept", "") and not h.get("HX-Request")
+                and not h.get("X-Fetch") and not h.get("X-Requested-With"))
 
     @staticmethod
     def _walled(request) -> bool:

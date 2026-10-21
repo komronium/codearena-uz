@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 
 from .countries import COUNTRY_CHOICES
 from .models import TelegramLink, User
+from .usernames import USERNAME_RULE, valid_username
 from .places import OTHER, canon_city, canon_school
 
 _CA_INPUT = {"class": "ca-input"}
@@ -14,6 +15,8 @@ def validate_public_username(username: str) -> str:
     # usernames are shown on standings and in profile URLs; an email there leaks it to everyone
     if "@" in username:
         raise forms.ValidationError("Foydalanuvchi nomida @ bo‘lmasin — u hammaga ko‘rinadi. Email alohida maydonga yoziladi.")
+    if not valid_username(username):
+        raise forms.ValidationError(USERNAME_RULE)
     return username
 
 
@@ -30,6 +33,7 @@ class RegisterForm(UserCreationForm):
         super().__init__(*args, **kwargs)
         # One password field: the eye button lets people check what they typed, and a second box costs sign-ups.
         del self.fields["password2"]
+        self.fields["username"].help_text = ""
 
     def _post_clean(self):
         # Skip the parent's check of password2 (gone) and validate the one password here.
@@ -108,9 +112,27 @@ class _ProfileFields(forms.ModelForm):
 
 
 class WelcomeForm(_ProfileFields):
+    """The gate's form. A handle that breaks the rule (accounts from before it) is asked here too, with no waiting
+    period: it is a fix, not a rename."""
+
     class Meta:
         model = User
-        fields = ("first_name", "last_name", "country", "location", "email")
+        fields = ("username", "first_name", "last_name", "country", "location", "email")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if valid_username(self.instance.username):
+            del self.fields["username"]
+        else:
+            self.fields["username"].help_text = ""
+            self.fields["username"].error_messages["required"] = "Foydalanuvchi nomini yozing."
+
+    def clean_username(self):
+        name = self.cleaned_data["username"]
+        validate_public_username(name)
+        if User.objects.filter(username__iexact=name).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError("Bu foydalanuvchi nomi band.")
+        return name
 
 
 class ProfileEditForm(_ProfileFields):
@@ -127,7 +149,7 @@ class ProfileEditForm(_ProfileFields):
         self.fields["username"].help_text = ""
         self.fields["school"].required = False
         self.next_rename = rename_allowed_from(self.instance)
-        if self.next_rename:
+        if self.next_rename and valid_username(self.instance.username):  # a handle that breaks the rule may always be fixed
             self.fields["username"].disabled = True
 
     def clean(self):
@@ -147,7 +169,7 @@ class ProfileEditForm(_ProfileFields):
 
     def clean_username(self):
         name = self.cleaned_data["username"]
-        if name == self.instance.username:
+        if name == self.instance.username and valid_username(name):
             return name
         validate_public_username(name)
         if User.objects.filter(username__iexact=name).exclude(pk=self.instance.pk).exists():
