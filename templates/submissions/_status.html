@@ -7,27 +7,27 @@ compact=True: the verdict chip only.{% endcomment %}
 {% if s.is_terminal %}{% load verdicts %}<span class="sr-only" role="status">{{ s.verdict|verdict_words }}</span>{% endif %}
 {% if compact %}{% include "submissions/_verdict.html" with v=s.verdict sub=s %}
 {% else %}{% load verdicts %}
-<section class="ca7-vhero is-{% if s.verdict == 'AC' %}ac{% elif s.verdict == 'WA' %}bad{% elif s.verdict == 'RE' %}re{% elif s.verdict == 'TLE' or s.verdict == 'MLE' or s.verdict == 'OLE' %}warn{% elif s.is_terminal %}ce{% else %}run{% endif %}" aria-label="Natija">
+<section class="ca7-vhero is-{% if s.verdict == 'AC' %}ac{% elif s.verdict == 'WA' %}bad{% elif s.verdict == 'RE' %}re{% elif s.verdict == 'TLE' or s.verdict == 'MLE' or s.verdict == 'OLE' %}warn{% elif s.is_terminal %}ce{% else %}run{% endif %}" aria-label="{% trans 'Natija' %}">
   <div class="ca7-vhero-h">
     <span class="ca7-vhero-ico" aria-hidden="true"><i data-lucide="{% if s.verdict == 'AC' %}check{% elif not s.is_terminal %}loader-circle{% elif s.verdict == 'TLE' %}clock{% elif s.verdict == 'MLE' %}cpu{% elif s.verdict == 'CE' %}code{% else %}x{% endif %}" class="lu{% if not s.is_terminal %} ca-spin{% endif %}"></i></span>
     <div>
-      <h2>{% if s.is_terminal %}{{ s.verdict|verdict_words }}{% elif s.verdict == "RUNNING" %}Tekshirilmoqda…{% else %}Navbatda…{% endif %}</h2>
-      <p>{% if s.verdict == "AC" %}Barcha {{ s.total }} testdan o‘tdi · <span translate="no">AC</span>
-        {% elif s.verdict == "CE" %}Kod kompilyatsiya bo‘lmadi · <span translate="no">CE</span>
-        {% elif s.is_terminal %}{% if s.total %}{{ s.passed|add:1 }}-testda · {{ s.passed }}/{{ s.total }} test o‘tdi · {% endif %}<span translate="no">{{ s.verdict }}</span>
-        {% elif progress %}<b class="tabular">{{ progress.done }}</b> / {{ progress.total }} test tekshirildi{% elif s.is_stale %}Tekshiruv odatdagidan uzoq cho‘zildi. Bir necha daqiqadan keyin ham o‘zgarmasa, qayta yuboring yoki adminga yozing.{% else %}Tez orada boshlanadi{% endif %}</p>
+      <h2>{% if s.is_terminal %}{{ s.verdict|verdict_words }}{% elif s.verdict == "RUNNING" %}{% trans "Tekshirilmoqda…" %}{% else %}{% trans "Navbatda…" %}{% endif %}</h2>
+      <p>{% if s.verdict == "AC" %}{% blocktrans with s_total=s.total %}Barcha {{ s_total }} testdan o‘tdi · <span translate="no">AC</span>{% endblocktrans %}
+        {% elif s.verdict == "CE" %}{% trans "Kod kompilyatsiya bo‘lmadi · <span translate=\"no\">CE</span>" %}
+        {% elif s.is_terminal %}{% if s.total %}{% blocktrans with s_passed=s.passed|add:1 s_passed2=s.passed s_total=s.total %}{{ s_passed }}-testda · {{ s_passed2 }}/{{ s_total }} test o‘tdi ·{% endblocktrans %} {% endif %}<span translate="no">{{ s.verdict }}</span>
+        {% elif progress %}{% blocktrans with progress_done=progress.done progress_total=progress.total %}<b class="tabular">{{ progress_done }}</b> / {{ progress_total }} test tekshirildi{% endblocktrans %}{% elif s.is_stale %}{% trans "Tekshiruv odatdagidan uzoq cho‘zildi. Bir necha daqiqadan keyin ham o‘zgarmasa, qayta yuboring yoki adminga yozing." %}{% else %}{% trans "Tez orada boshlanadi" %}{% endif %}</p>
     </div>
   </div>
   {% if s.verdict == 'RUNNING' and progress %}<span class="ca7-pg" aria-hidden="true"><i style="width: {{ progress.pct }}%"></i></span>{% endif %}
   {% if s.is_terminal and s.verdict != 'CE' %}
   <dl class="ca7-meters">
     {% widthratio s.exec_ms limits.ms 100 as t_pct %}{% widthratio s.mem_kb limits.kb 100 as m_pct %}
-    <div class="ca7-meter{% if t_pct|add:0 >= 85 %} is-high{% endif %}" title="Masalaning chegarasi {{ s.problem.tl_ms }} ms, {{ s.language.name }} uchun ×{{ s.language.tl_multiplier|floatformat:"-1" }}"><dt>Vaqt</dt><dd><b class="tabular">{{ s.exec_ms }} ms</b> <small class="tabular">/ {{ limits.ms }} ms</small></dd><span class="ca7-meter-bar" aria-hidden="true"><i style="width: {{ t_pct }}%"></i></span></div>
-    <div class="ca7-meter{% if m_pct|add:0 >= 85 %} is-high{% endif %}"><dt>Xotira</dt><dd><b class="tabular">{% if s.mem_kb %}{% widthratio s.mem_kb 1024 1 %} MB{% else %}—{% endif %}</b> <small class="tabular">/ {{ limits.mb }} MB</small></dd><span class="ca7-meter-bar" aria-hidden="true"><i style="width: {{ m_pct }}%"></i></span></div>
+    <div class="ca7-meter{% if t_pct|add:0 >= 85 %} is-high{% endif %}" title="{% blocktrans with s_problem_tl_ms=s.problem.tl_ms s_language_name=s.language.name s_language_tl_multiplier=s.language.tl_multiplier|floatformat:"-1" %}Masalaning chegarasi {{ s_problem_tl_ms }} ms, {{ s_language_name }} uchun ×{{ s_language_tl_multiplier }}{% endblocktrans %}"><dt>{% trans "Vaqt" %}</dt><dd>{% blocktrans with s_exec_ms=s.exec_ms limits_ms=limits.ms %}<b class="tabular">{{ s_exec_ms }} ms</b> <small class="tabular">/ {{ limits_ms }} ms</small>{% endblocktrans %}</dd><span class="ca7-meter-bar" aria-hidden="true"><i style="width: {{ t_pct }}%"></i></span></div>
+    <div class="ca7-meter{% if m_pct|add:0 >= 85 %} is-high{% endif %}"><dt>{% trans "Xotira" %}</dt><dd><b class="tabular">{% if s.mem_kb %}{% widthratio s.mem_kb 1024 1 %} {% trans "MB" %}{% else %}—{% endif %}</b> <small class="tabular">{% blocktrans with limits_mb=limits.mb %}/ {{ limits_mb }} MB{% endblocktrans %}</small></dd><span class="ca7-meter-bar" aria-hidden="true"><i style="width: {{ m_pct }}%"></i></span></div>
   </dl>
   {% endif %}
   {% if s.is_terminal and s.verdict != 'AC' %}
-  <p class="ca7-vhero-hint"><i data-lucide="lightbulb" class="lu" aria-hidden="true"></i>{% if s.verdict == 'WA' %}Dastur ishladi, lekin javob kutilganidan farq qildi. Chegaraviy holatlarni (0, 1, eng katta qiymat) va chiqish formatini tekshiring.{% elif s.verdict == 'TLE' %}Dastur vaqt chegarasiga sig‘madi. Tezroq algoritm kerak — masalan, ichma-ich sikllarni kamaytiring.{% elif s.verdict == 'MLE' %}Dastur ruxsat etilganidan ko‘p xotira ishlatdi. Katta massivlar va rekursiya chuqurligini tekshiring.{% elif s.verdict == 'OLE' %}Dastur juda ko‘p narsa chiqardi. Ortiqcha yoki sikl ichidagi chiqarishlarni olib tashlang.{% elif s.verdict == 'RE' %}Dastur xato bilan to‘xtadi: nolga bo‘lish, massiv chegarasidan chiqish yoki noto‘g‘ri kiritishni o‘qish bo‘lishi mumkin.{% elif s.verdict == 'CE' %}Kod kompilyatsiya bo‘lmadi. Til to‘g‘ri tanlanganini va sintaksisni tekshiring.{% else %}Tekshiruvda xato yuz berdi. Qayta yuborib ko‘ring.{% endif %}</p>
+  <p class="ca7-vhero-hint"><i data-lucide="lightbulb" class="lu" aria-hidden="true"></i>{% if s.verdict == 'WA' %}{% trans "Dastur ishladi, lekin javob kutilganidan farq qildi. Chegaraviy holatlarni (0, 1, eng katta qiymat) va chiqish formatini tekshiring." %}{% elif s.verdict == 'TLE' %}{% trans "Dastur vaqt chegarasiga sig‘madi. Tezroq algoritm kerak — masalan, ichma-ich sikllarni kamaytiring." %}{% elif s.verdict == 'MLE' %}{% trans "Dastur ruxsat etilganidan ko‘p xotira ishlatdi. Katta massivlar va rekursiya chuqurligini tekshiring." %}{% elif s.verdict == 'OLE' %}{% trans "Dastur juda ko‘p narsa chiqardi. Ortiqcha yoki sikl ichidagi chiqarishlarni olib tashlang." %}{% elif s.verdict == 'RE' %}{% trans "Dastur xato bilan to‘xtadi: nolga bo‘lish, massiv chegarasidan chiqish yoki noto‘g‘ri kiritishni o‘qish bo‘lishi mumkin." %}{% elif s.verdict == 'CE' %}{% trans "Kod kompilyatsiya bo‘lmadi. Til to‘g‘ri tanlanganini va sintaksisni tekshiring." %}{% else %}{% trans "Tekshiruvda xato yuz berdi. Qayta yuborib ko‘ring." %}{% endif %}</p>
   {% endif %}
   {% if s.verdict == 'CE' %}<pre class="ca7-vhero-log">{{ s.compile_log|default:"Kompilyator izoh bermadi. Ko‘pincha til noto‘g‘ri tanlangan yoki qavs/ikki nuqta tushib qolgan bo‘ladi: kodni muharrirda ochib, tilni tekshiring." }}</pre>{% endif %}
 </section>
@@ -35,15 +35,15 @@ compact=True: the verdict chip only.{% endcomment %}
 {% if first_fail and s.is_terminal %}
 {# not a row per test: how many passed is in the card; only the test it stopped on, with its data if it is a sample #}
 <section class="mt-9" aria-labelledby="fail-title">
-  <div class="ca7-sec-h"><h2 id="fail-title">{{ first_fail.index }}-test</h2>
-    <span class="ca7-r flex items-center gap-3 text-sm text-mute">{% include "submissions/_vd.html" with v=first_fail.verdict sub=None %}<span class="tabular">{{ first_fail.exec_ms }} ms{% if first_fail.mem_kb %} · {% widthratio first_fail.mem_kb 1024 1 %} MB{% endif %}</span></span></div>
+  <div class="ca7-sec-h"><h2 id="fail-title">{% blocktrans with first_fail_index=first_fail.index %}{{ first_fail_index }}-test{% endblocktrans %}</h2>
+    <span class="ca7-r flex items-center gap-3 text-sm text-mute">{% include "submissions/_vd.html" with v=first_fail.verdict sub=None %}<span class="tabular">{% blocktrans with first_fail_exec_ms=first_fail.exec_ms %}{{ first_fail_exec_ms }} ms{% endblocktrans %}{% if first_fail.mem_kb %} · {% widthratio first_fail.mem_kb 1024 1 %} {% trans "MB" %}{% endif %}</span></span></div>
   {% if first_fail.testcase.is_sample %}
   <div class="ca7-tfail-io">
-    <div><p>Kirish</p><pre>{{ first_fail.testcase.input }}</pre></div>
-    <div><p>Kutilgan</p><pre>{{ first_fail.testcase.expected }}</pre></div>
-    <div><p>Sizning chiqishingiz</p><pre>{{ first_fail.stdout_excerpt|default:"—" }}</pre></div>
+    <div><p>{% trans "Kirish" %}</p><pre>{{ first_fail.testcase.input }}</pre></div>
+    <div><p>{% trans "Kutilgan" %}</p><pre>{{ first_fail.testcase.expected }}</pre></div>
+    <div><p>{% trans "Sizning chiqishingiz" %}</p><pre>{{ first_fail.stdout_excerpt|default:"—" }}</pre></div>
   </div>
-  {% else %}<p class="text-sm text-mute">Yashirin test: kirish ma’lumotlari ko‘rsatilmaydi.</p>{% endif %}
+  {% else %}<p class="text-sm text-mute">{% trans "Yashirin test: kirish ma’lumotlari ko‘rsatilmaydi." %}</p>{% endif %}
 </section>
 {% endif %}
 {% endif %}

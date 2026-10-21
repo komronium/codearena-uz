@@ -1,18 +1,18 @@
 {% extends "base.html" %}
-{% block title %}Telegram orqali kirish{% endblock %}
+{% block title %}{% trans "Telegram orqali kirish" %}{% endblock %}
 {% block content %}
 <div class="ca-auth">
   {% include "registration/_auth_brand.html" %}
   <div class="ca-panel ca-auth-card space-y-4" aria-live="polite">
     <div>
-      <h1 class="text-xl font-bold">Telegramda tasdiqlang</h1>
-      <p class="mt-1 text-sm text-mute">@{{ bot }} ochilgach, <b>Start</b> tugmasini bosing va bot so‘ragan kodni yozing. Shu oyna o‘zi kirib oladi.</p>
+      <h1 class="text-xl font-bold">{% trans "Telegramda tasdiqlang" %}</h1>
+      <p class="mt-1 text-sm text-mute">{% blocktrans with bot=bot %}@{{ bot }} ochilgach, <b>Start</b> tugmasini bosing va bot so‘ragan kodni yozing. Shu oyna o‘zi kirib oladi.{% endblocktrans %}</p>
     </div>
-    <p class="text-center text-sm text-mute">Botga yoziladigan kod</p>
-    <p class="text-center text-4xl font-bold tabular tracking-widest" aria-label="Kod">{{ code }}</p>
-    <a class="ca-btn ca-btn-primary w-full !py-2.5" href="{{ bot_url }}" target="_blank" rel="noopener"><i data-lucide="send" class="lu" aria-hidden="true"></i>Telegramni ochish</a>
-    <p class="text-center text-sm text-mute" id="tg-state">Kutilmoqda…</p>
-    <p class="text-center text-xs text-mute">Hisob Telegramga ulanmagan bo‘lsa, <a class="ca-link" href="{% url 'login' %}">parol bilan kiring</a>. Kod 5 daqiqa amal qiladi.</p>
+    <p class="text-center text-sm text-mute">{% trans "Botga yoziladigan kod" %}</p>
+    <p class="text-center text-4xl font-bold tabular tracking-widest" aria-label="{% trans 'Kod' %}">{{ code }}</p>
+    <a class="ca-btn ca-btn-primary w-full !py-2.5" href="{{ bot_url }}" target="_blank" rel="noopener"><i data-lucide="send" class="lu" aria-hidden="true"></i>{% trans "Telegramni ochish" %}</a>
+    <p class="text-center text-sm text-mute" id="tg-state">{% trans "Kutilmoqda…" %}</p>
+    <p class="text-center text-xs text-mute">{% trans "Hisob Telegramga ulanmagan bo‘lsa," %} <a class="ca-link" href="{% url 'login' %}">{% trans "parol bilan kiring</a>. Kod 5 daqiqa amal qiladi." %}</p>
   </div>
 </div>
 <script>

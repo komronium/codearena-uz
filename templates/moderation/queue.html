@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Navbat — boshqaruv{% endblock %}
+{% block title %}{% trans "Navbat — boshqaruv" %}{% endblock %}
 {% block content %}
 
 <div class="mb-6">{% include "moderation/_header.html" with title="Navbat" subtitle="Foydalanuvchilar yuborgan va AI tuzgan qoralamalar. Tasdiqlangach masala saytda ko‘rinadi." %}</div>
@@ -9,11 +9,11 @@
 <table class="ca-table">
   <thead>
     <tr>
-      <th scope="col">Sarlavha</th>
-      <th scope="col">Muallif</th>
-      <th scope="col">Qiyinlik</th>
-      <th scope="col">Yuborilgan</th>
-      <th scope="col" class="text-right">Amal</th>
+      <th scope="col">{% trans "Sarlavha" %}</th>
+      <th scope="col">{% trans "Muallif" %}</th>
+      <th scope="col">{% trans "Qiyinlik" %}</th>
+      <th scope="col">{% trans "Yuborilgan" %}</th>
+      <th scope="col" class="text-right">{% trans "Amal" %}</th>
     </tr>
   </thead>
   <tbody>
@@ -27,10 +27,10 @@
     <td class="text-right">
       <div class="flex flex-wrap justify-end gap-2">
         <form method="post" action="{% url 'moderation:approve' p.pk %}">{% csrf_token %}
-          <button type="submit" class="ca-btn ca-btn-success !py-1.5"><i data-lucide="check" class="lu" aria-hidden="true"></i>Tasdiqlash</button>
+          <button type="submit" class="ca-btn ca-btn-success !py-1.5"><i data-lucide="check" class="lu" aria-hidden="true"></i>{% trans "Tasdiqlash" %}</button>
         </form>
-        <form method="post" action="{% url 'moderation:reject' p.pk %}" data-confirm="«{{ p.title }}» masalasini rad etishni tasdiqlaysizmi?">{% csrf_token %}
-          <button type="submit" class="ca-btn ca-btn-ghost !py-1.5 text-bad"><i data-lucide="x" class="lu" aria-hidden="true"></i>Rad etish</button>
+        <form method="post" action="{% url 'moderation:reject' p.pk %}" data-confirm="{% blocktrans with p_title=p.title %}«{{ p_title }}» masalasini rad etishni tasdiqlaysizmi?{% endblocktrans %}">{% csrf_token %}
+          <button type="submit" class="ca-btn ca-btn-ghost !py-1.5 text-bad"><i data-lucide="x" class="lu" aria-hidden="true"></i>{% trans "Rad etish" %}</button>
         </form>
       </div>
     </td>
@@ -40,6 +40,6 @@
 </table>
 </div>
 {% else %}
-<div class="ca-empty"><i data-lucide="circle-check" class="lu mb-2 block text-2xl text-ok" aria-hidden="true"></i>Navbat bo‘sh — hamma masala ko‘rib chiqilgan.</div>
+<div class="ca-empty"><i data-lucide="circle-check" class="lu mb-2 block text-2xl text-ok" aria-hidden="true"></i>{% trans "Navbat bo‘sh — hamma masala ko‘rib chiqilgan." %}</div>
 {% endif %}
 {% endblock %}

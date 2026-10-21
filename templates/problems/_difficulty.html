@@ -1,3 +1,3 @@
 {% comment %}A problem's difficulty as a coloured word (Beginner, Easy, Medium, Hard). The rating behind it stays in the
 tooltip: at it, half of those who try the problem solve it (apps.problems.difficulty). Needs `p`.{% endcomment %}
-<span class="whitespace-nowrap" title="{{ p.get_difficulty_display }}, reyting {{ p.rating }}"><span class="ca-diff ca-diff-{{ p.difficulty }}">{{ p.get_difficulty_display }}</span></span>
+<span class="whitespace-nowrap" title="{% blocktrans with p_get_difficulty_display=p.get_difficulty_display p_rating=p.rating %}{{ p_get_difficulty_display }}, reyting {{ p_rating }}{% endblocktrans %}"><span class="ca-diff ca-diff-{{ p.difficulty }}">{{ p.get_difficulty_display }}</span></span>

@@ -1,19 +1,19 @@
 {% extends "base.html" %}{% load tiers places %}
 {% block title %}{{ club.name }}{% endblock %}
-{% block description %}{{ club.name }}: CodeArena klubi, {{ members|length }} a’zo, jamoa reytingi {{ team }}.{% endblock %}
+{% block description %}{% blocktrans with club_name=club.name members=members|length team=team %}{{ club_name }}: CodeArena klubi, {{ members }} a’zo, jamoa reytingi {{ team }}.{% endblocktrans %}{% endblock %}
 {% block band %}
 <section class="ca-hud" aria-labelledby="club-title">
   <div class="ca-hud-in">
     <div>
-      <p class="ca-hud-lbl"><a class="text-white no-underline hover:underline" href="{% url 'clubs' %}">Klublar</a></p>
+      <p class="ca-hud-lbl"><a class="text-white no-underline hover:underline" href="{% url 'clubs' %}">{% trans "Klublar" %}</a></p>
       <h1 id="club-title">{{ club.name }}</h1>
-      <p class="ca-hud-sub">{{ members|length }} a’zo · jamoa reytingi {{ team }}</p>
+      <p class="ca-hud-sub">{% blocktrans with members=members|length team=team %}{{ members }} a’zo · jamoa reytingi {{ team }}{% endblocktrans %}</p>
     </div>
     {% if user.is_authenticated %}
     {% if mine %}
-    <form method="post" action="{% url 'club_leave' club.slug %}" class="ml-auto" data-confirm="Klubdan chiqasizmi?">{% csrf_token %}<button class="ca7-hbtn is-wide">Klubdan chiqish</button></form>
+    <form method="post" action="{% url 'club_leave' club.slug %}" class="ml-auto" data-confirm="{% trans 'Klubdan chiqasizmi?' %}">{% csrf_token %}<button class="ca7-hbtn is-wide">{% trans "Klubdan chiqish" %}</button></form>
     {% elif code_ok and not user.club_id %}
-    <form method="post" action="{% url 'club_join' club.slug %}" class="ml-auto">{% csrf_token %}<input type="hidden" name="code" value="{{ club.join_code }}"><button class="ca-btn ca-btn-gold">Klubga qo‘shilish</button></form>
+    <form method="post" action="{% url 'club_join' club.slug %}" class="ml-auto">{% csrf_token %}<input type="hidden" name="code" value="{{ club.join_code }}"><button class="ca-btn ca-btn-gold">{% trans "Klubga qo‘shilish" %}</button></form>
     {% endif %}
     {% endif %}
   </div>
@@ -24,15 +24,15 @@
 <div class="ca7">
 <div class="ca7-col">
   <section aria-labelledby="members-title">
-    <div class="ca7-sec-h"><h2 id="members-title">A’zolar</h2></div>
+    <div class="ca7-sec-h"><h2 id="members-title">{% trans "A’zolar" %}</h2></div>
     <div class="overflow-x-auto">
     <table class="ca-table ca-table-flat">
-      <thead><tr><th scope="col" class="w-12 text-center">#</th><th scope="col">Foydalanuvchi</th><th scope="col" class="w-32 text-right">Amaliyot balli</th><th scope="col" class="w-28 text-right">Reyting</th></tr></thead>
+      <thead><tr><th scope="col" class="w-12 text-center">#</th><th scope="col">{% trans "Foydalanuvchi" %}</th><th scope="col" class="w-32 text-right">{% trans "Amaliyot balli" %}</th><th scope="col" class="w-28 text-right">{% trans "Reyting" %}</th></tr></thead>
       <tbody>
       {% for m in members %}
       <tr{% if m == user %} class="ca-row-me"{% endif %}>
         <td class="text-center"><span class="tabular text-mute">{{ forloop.counter }}</span></td>
-        <td>{% include "accounts/_u7.html" with u=m you=False flag=True %}{% if m.pk == club.owner_id %} <span class="text-xs text-mute">yaratuvchi</span>{% endif %}</td>
+        <td>{% include "accounts/_u7.html" with u=m you=False flag=True %}{% if m.pk == club.owner_id %} <span class="text-xs text-mute">{% trans "yaratuvchi" %}</span>{% endif %}</td>
         <td class="text-right tabular">{{ m.practice_points }}</td>
         <td class="text-right tabular font-bold"><span class="ca-tier-ink" style="--tier: {{ m.rating|tier_color }}">{{ m.rating }}</span></td>
       </tr>
@@ -44,14 +44,14 @@
 
   {% if rounds %}
   <section aria-labelledby="rounds-title">
-    <div class="ca7-sec-h"><h2 id="rounds-title">So‘nggi musobaqalar</h2></div>
+    <div class="ca7-sec-h"><h2 id="rounds-title">{% trans "So‘nggi musobaqalar" %}</h2></div>
     <div class="overflow-x-auto">
     <table class="ca-table ca-table-flat">
-      <thead><tr><th scope="col">Musobaqa</th><th scope="col" class="w-28 text-right">Qatnashgan</th><th scope="col" class="w-48">Eng yaxshisi</th></tr></thead>
+      <thead><tr><th scope="col">{% trans "Musobaqa" %}</th><th scope="col" class="w-28 text-right">{% trans "Qatnashgan" %}</th><th scope="col" class="w-48">{% trans "Eng yaxshisi" %}</th></tr></thead>
       <tbody>
       {% for r in rounds %}
       <tr><td><a class="ca-link" href="{% url 'contests:standings' r.contest.pk %}">{{ r.contest.title }}</a></td><td class="text-right tabular">{{ r.n }}</td>
-        <td>{% include "accounts/_u7.html" with u=r.best.user you=False flag=False %} <span class="text-sm text-mute tabular">{{ r.best.rank }}-o‘rin</span></td></tr>
+        <td>{% include "accounts/_u7.html" with u=r.best.user you=False flag=False %} <span class="text-sm text-mute tabular">{% blocktrans with r_best_rank=r.best.rank %}{{ r_best_rank }}-o‘rin{% endblocktrans %}</span></td></tr>
       {% endfor %}
       </tbody>
     </table>
@@ -59,17 +59,17 @@
   </section>
   {% endif %}
 </div>
-<aside class="ca7-aside" aria-label="Havola">
+<aside class="ca7-aside" aria-label="{% trans 'Havola' %}">
   {% if mine %}
   <section class="ca-box" aria-labelledby="invite-title">
-    <div class="ca-box-cap ca-hd"><h2 id="invite-title">Qo‘shilish havolasi</h2></div>
-    <div class="ca7-pad"><p class="text-sm">Havolani do‘stlaringizga yuboring: u orqali kelganlar klubga qo‘shila oladi.</p>
-      <button type="button" class="ca-btn ca-btn-soft mt-3" data-copy-text="{{ invite }}" data-copied="Nusxalandi"><i data-lucide="link" class="lu" aria-hidden="true"></i>Havolani nusxalash</button></div>
+    <div class="ca-box-cap ca-hd"><h2 id="invite-title">{% trans "Qo‘shilish havolasi" %}</h2></div>
+    <div class="ca7-pad"><p class="text-sm">{% trans "Havolani do‘stlaringizga yuboring: u orqali kelganlar klubga qo‘shila oladi." %}</p>
+      <button type="button" class="ca-btn ca-btn-soft mt-3" data-copy-text="{{ invite }}" data-copied="Nusxalandi"><i data-lucide="link" class="lu" aria-hidden="true"></i>{% trans "Havolani nusxalash" %}</button></div>
   </section>
   {% endif %}
   <section class="ca-box" aria-labelledby="about-club">
-    <div class="ca-box-cap ca-hd"><h2 id="about-club">Klub haqida</h2></div>
-    <div class="ca7-pad"><p class="text-sm text-mute">Jamoa reytingi: eng yaxshi 5 a’zoning musobaqa reytingi yig‘indisi. Klubda vazifa yoki o‘qituvchi roli yo‘q: bu a’zolarning ochiq natijalari sahifasi.</p></div>
+    <div class="ca-box-cap ca-hd"><h2 id="about-club">{% trans "Klub haqida" %}</h2></div>
+    <div class="ca7-pad"><p class="text-sm text-mute">{% trans "Jamoa reytingi: eng yaxshi 5 a’zoning musobaqa reytingi yig‘indisi. Klubda vazifa yoki o‘qituvchi roli yo‘q: bu a’zolarning ochiq natijalari sahifasi." %}</p></div>
   </section>
 </aside>
 </div>

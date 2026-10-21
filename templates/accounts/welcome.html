@@ -1,19 +1,19 @@
 {% extends "base.html" %}
-{% block title %}Hisobni yakunlash{% endblock %}
+{% block title %}{% trans "Hisobni yakunlash" %}{% endblock %}
 {% comment %}The account gate (apps.accounts.onboarding), in the sign-in pages' frame: step 1 the profile fields
 still empty, step 2 the link in the mail. ctx: form (WelcomeForm), missing (labels still empty), email_pending.{% endcomment %}
 {% block content %}
 <div class="ca-auth">
   {% include "registration/_auth_brand.html" %}
   <div class="ca-panel ca-auth-card space-y-4">
-    <ol class="ca-steps-mini" aria-label="Qadamlar">
-      <li{% if not email_pending %} aria-current="step"{% else %} class="is-done"{% endif %}>1. Ma’lumotlar</li>
-      <li{% if email_pending %} aria-current="step"{% endif %}>2. Emailni tasdiqlash</li>
+    <ol class="ca-steps-mini" aria-label="{% trans 'Qadamlar' %}">
+      <li{% if not email_pending %} aria-current="step"{% else %} class="is-done"{% endif %}>{% trans "1. Ma’lumotlar" %}</li>
+      <li{% if email_pending %} aria-current="step"{% endif %}>{% trans "2. Emailni tasdiqlash" %}</li>
     </ol>
     {% if not email_pending %}
     <div>
-      <h1 class="text-xl font-bold">Hisobingizni yakunlang</h1>
-      <p class="mt-1 text-sm text-mute">Davom etish uchun quyidagilarni to‘ldiring: {{ missing|join:", "|lower }}.</p>
+      <h1 class="text-xl font-bold">{% trans "Hisobingizni yakunlang" %}</h1>
+      <p class="mt-1 text-sm text-mute">{% blocktrans with missing=missing|join:", "|lower %}Davom etish uchun quyidagilarni to‘ldiring: {{ missing }}.{% endblocktrans %}</p>
     </div>
     <form method="post" novalidate class="space-y-4">{% csrf_token %}
       {% if form.username %}{% include "registration/_auth_field.html" with name="username" label="Foydalanuvchi nomi" type="text" icon="at-sign" autocomplete="username" value=form.username.value errors=form.username.errors hint="Lotin harfi bilan boshlansin; faqat lotin harflari, raqamlar va _ (3–20 belgi)." %}{% endif %}
@@ -23,26 +23,26 @@ still empty, step 2 the link in the mail. ctx: form (WelcomeForm), missing (labe
       </div>
       {% include "accounts/_place_fields.html" %}
       {% include "registration/_auth_field.html" with name="email" label="Email" type="email" icon="mail" autocomplete="email" value=form.email.value errors=form.email.errors hint="Unga tasdiqlash havolasi yuboramiz." %}
-      <button type="submit" class="ca-btn ca-btn-primary w-full !py-2.5">Davom etish<i data-lucide="arrow-right" class="lu" aria-hidden="true"></i></button>
+      <button type="submit" class="ca-btn ca-btn-primary w-full !py-2.5">{% trans "Davom etish" %}<i data-lucide="arrow-right" class="lu" aria-hidden="true"></i></button>
     </form>
     {% else %}
     <div>
-      <h1 class="text-xl font-bold">Emailingizni tasdiqlang</h1>
-      <p class="mt-1 text-sm text-mute"><b class="text-ink">{{ user.email }}</b> manziliga havola yubordik. Xatni ochib, havolani bosing. Spam papkasini ham tekshiring.</p>
+      <h1 class="text-xl font-bold">{% trans "Emailingizni tasdiqlang" %}</h1>
+      <p class="mt-1 text-sm text-mute">{% blocktrans with user_email=user.email %}<b class="text-ink">{{ user_email }}</b> manziliga havola yubordik. Xatni ochib, havolani bosing. Spam papkasini ham tekshiring.{% endblocktrans %}</p>
     </div>
     <form method="post" class="flex flex-wrap items-center gap-2">{% csrf_token %}
-      <button type="submit" name="resend" value="1" class="ca-btn ca-btn-primary"><i data-lucide="send" class="lu" aria-hidden="true"></i>Qayta yuborish</button>
-      <button type="button" class="ca-btn ca-btn-ghost" onclick="document.getElementById('change-email').hidden = false; this.hidden = true">Emailni o‘zgartirish</button>
+      <button type="submit" name="resend" value="1" class="ca-btn ca-btn-primary"><i data-lucide="send" class="lu" aria-hidden="true"></i>{% trans "Qayta yuborish" %}</button>
+      <button type="button" class="ca-btn ca-btn-ghost" onclick="document.getElementById('change-email').hidden = false; this.hidden = true">{% trans "Emailni o‘zgartirish" %}</button>
     </form>
     <form method="post" novalidate id="change-email" class="space-y-3"{% if not form.errors %} hidden{% endif %}>{% csrf_token %}
       {% for f in form %}{% if f.name != "email" %}<input type="hidden" name="{{ f.name }}" value="{{ f.value|default:'' }}">{% endif %}{% endfor %}
       {% include "registration/_auth_field.html" with name="email" label="Yangi email" type="email" icon="mail" autocomplete="email" value=form.email.value errors=form.email.errors %}
-      <button type="submit" class="ca-btn ca-btn-ghost w-full">Saqlash va havola yuborish</button>
+      <button type="submit" class="ca-btn ca-btn-ghost w-full">{% trans "Saqlash va havola yuborish" %}</button>
     </form>
     {% endif %}
   </div>
   <form method="post" action="{% url 'logout' %}" class="mt-5 text-center text-sm text-mute">{% csrf_token %}
-    <button type="submit" class="ca-link">Chiqish</button>
+    <button type="submit" class="ca-link">{% trans "Chiqish" %}</button>
   </form>
 </div>
 {% include "registration/_auth_script.html" %}

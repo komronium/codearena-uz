@@ -1,12 +1,12 @@
 {% extends "base.html" %}{% load tiers places %}
-{% block title %}Amaliyot ballari{% endblock %}
-{% block description %}Amaliyot ballari: musobaqadan tashqari yechilgan masalalar uchun {{ total }} ishtirokchining ballari.{% endblock %}
+{% block title %}{% trans "Amaliyot ballari" %}{% endblock %}
+{% block description %}{% blocktrans with total=total %}Amaliyot ballari: musobaqadan tashqari yechilgan masalalar uchun {{ total }} ishtirokchining ballari.{% endblocktrans %}{% endblock %}
 {% block band %}
 <section class="ca-hud" aria-labelledby="board-title">
   <div class="ca-hud-in">
     <div>
-      <h1 id="board-title">Amaliyot ballari</h1>
-      <p class="ca-hud-sub">{{ total }} ishtirokchi · musobaqadan tashqari yechilgan masalalar ballari</p>
+      <h1 id="board-title">{% trans "Amaliyot ballari" %}</h1>
+      <p class="ca-hud-sub">{% blocktrans with total=total %}{{ total }} ishtirokchi · musobaqadan tashqari yechilgan masalalar ballari{% endblocktrans %}</p>
     </div>
     {% include "accounts/_board_tabs.html" %}
   </div>
@@ -17,7 +17,7 @@
 {% include "accounts/_board_tools.html" %}
 {% if users %}<div class="overflow-x-auto ca7-board">
 <table class="ca-table ca-table-flat">
-  <thead><tr><th scope="col" class="w-16 text-center">#</th><th scope="col">Foydalanuvchi</th><th scope="col" class="w-32 text-right">Yechilgan</th><th scope="col" class="w-28 text-right">Ball</th></tr></thead>
+  <thead><tr><th scope="col" class="w-16 text-center">#</th><th scope="col">{% trans "Foydalanuvchi" %}</th><th scope="col" class="w-32 text-right">{% trans "Yechilgan" %}</th><th scope="col" class="w-28 text-right">{% trans "Ball" %}</th></tr></thead>
   <tbody>
   {% for u in users %}
   <tr{% if u == user %} class="ca-row-me" id="me"{% endif %}>
@@ -30,9 +30,9 @@
   </tbody>
 </table>
 </div>
-{% elif q %}<p class="ca7-empty"><b>Bunday foydalanuvchi yo‘q</b><a class="ca-link" href="{% url 'top' %}">Butun ro‘yxat</a></p>{% endif %}
+{% elif q %}<p class="ca7-empty"><b>{% trans "Bunday foydalanuvchi yo‘q" %}</b><a class="ca-link" href="{% url 'top' %}">{% trans "Butun ro‘yxat" %}</a></p>{% endif %}
 {% else %}
-<p class="ca7-empty"><b>Hali reyting yo‘q</b>Birinchi masala yechilgach, bu yerda paydo bo‘ladi.</p>
+<p class="ca7-empty">{% trans "<b>Hali reyting yo‘q</b>Birinchi masala yechilgach, bu yerda paydo bo‘ladi." %}</p>
 {% endif %}
 {% include "accounts/_leaderboard_nav.html" %}
 {% endblock %}

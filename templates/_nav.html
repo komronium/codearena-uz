@@ -2,72 +2,72 @@
 grouped by what the student is doing. Profile, settings and sign-out live in the account menu.{% endcomment %}
 {% with ns=request.resolver_match.namespace un=request.resolver_match.url_name %}
 <a href="{% url 'home' %}" class="ca-sidebar-link {% if un == 'home' %}is-active{% endif %}"{% if un == 'home' %} aria-current="page"{% endif %}>
-  <i data-lucide="house" class="lu" aria-hidden="true"></i>Bosh sahifa
+  <i data-lucide="house" class="lu" aria-hidden="true"></i>{% trans "Bosh sahifa" %}
 </a>
-<p class="ca-sidebar-heading">Mashq</p>
+<p class="ca-sidebar-heading">{% trans "Mashq" %}</p>
 {% with saved=ns|add:":"|add:un %}<a href="{% url 'problems:list' %}" class="ca-sidebar-link {% if ns == 'problems' and not contest or saved == 'learn:lists' or saved == 'learn:list' %}is-active" aria-current="page{% endif %}">
-  <i data-lucide="list-checks" class="lu" aria-hidden="true"></i>Masalalar
+  <i data-lucide="list-checks" class="lu" aria-hidden="true"></i>{% trans "Masalalar" %}
 </a>
 <a href="{% url 'learn:hub' %}" class="ca-sidebar-link {% if ns == 'learn' and saved != 'learn:lists' and saved != 'learn:list' %}is-active" aria-current="page{% endif %}">
-  <i data-lucide="graduation-cap" class="lu" aria-hidden="true"></i>O‘rganish
+  <i data-lucide="graduation-cap" class="lu" aria-hidden="true"></i>{% trans "O‘rganish" %}
 </a>{% endwith %}
 {% if user.is_authenticated %}
 <a href="{% url 'submissions:mine' %}?mine=1" class="ca-sidebar-link {% if ns == 'submissions' %}is-active{% endif %}"{% if ns == 'submissions' %} aria-current="page"{% endif %}>
-  <i data-lucide="history" class="lu" aria-hidden="true"></i>Urinishlarim
+  <i data-lucide="history" class="lu" aria-hidden="true"></i>{% trans "Urinishlarim" %}
 </a>
 {% endif %}
-<p class="ca-sidebar-heading">Musobaqa</p>
+<p class="ca-sidebar-heading">{% trans "Musobaqa" %}</p>
 <a href="{% url 'contests:list' %}" class="ca-sidebar-link {% if ns == 'contests' or ns == 'problems' and contest %}is-active{% endif %}"{% if ns == 'contests' or ns == 'problems' and contest %} aria-current="page"{% endif %}>
-  <i data-lucide="trophy" class="lu" aria-hidden="true"></i>Musobaqalar
-  {% if nav.live %}<span class="ca-live-badge ml-auto !py-0.5 !text-xs"><span class="ca-live-dot" aria-hidden="true"></span>Jonli</span>{% endif %}
+  <i data-lucide="trophy" class="lu" aria-hidden="true"></i>{% trans "Musobaqalar" %}
+  {% if nav.live %}<span class="ca-live-badge ml-auto !py-0.5 !text-xs">{% trans "<span class=\"ca-live-dot\" aria-hidden=\"true\"></span>Jonli" %}</span>{% endif %}
 </a>
 <a href="{% url 'rating' %}" class="ca-sidebar-link {% if un == 'rating' %}is-active{% endif %}"{% if un == 'rating' %} aria-current="page"{% endif %}>
-  <i data-lucide="chart-column" class="lu" aria-hidden="true"></i>Reyting
+  <i data-lucide="chart-column" class="lu" aria-hidden="true"></i>{% trans "Reyting" %}
 </a>
 {% if user.is_authenticated %}
-<p class="ca-sidebar-heading">Duel</p>
+<p class="ca-sidebar-heading">{% trans "Duel" %}</p>
 <a href="{% url 'classroom:duels' %}" class="ca-sidebar-link {% if ns == 'classroom' and 'duel' in un %}is-active{% endif %}"{% if ns == 'classroom' and 'duel' in un %} aria-current="page"{% endif %}>
-  <i data-lucide="swords" class="lu" aria-hidden="true"></i>Duellar
+  <i data-lucide="swords" class="lu" aria-hidden="true"></i>{% trans "Duellar" %}
 </a>
 {% endif %}
 {% if user.is_staff %}
-<p class="ca-sidebar-heading">Admin</p>
+<p class="ca-sidebar-heading">{% trans "Admin" %}</p>
 <a href="{% url 'moderation:dashboard' %}" class="ca-sidebar-link {% if ns == 'moderation' and un == 'dashboard' %}is-active{% endif %}"{% if ns == 'moderation' and un == 'dashboard' %} aria-current="page"{% endif %}>
-  <i data-lucide="layout-dashboard" class="lu" aria-hidden="true"></i>Boshqaruv
+  <i data-lucide="layout-dashboard" class="lu" aria-hidden="true"></i>{% trans "Boshqaruv" %}
 </a>
 <a href="{% url 'moderation:problems' %}" class="ca-sidebar-link {% if ns == 'moderation' and un in 'problems,submit,problem_edit,ai_generate' %}is-active{% endif %}"{% if ns == 'moderation' and un in 'problems,submit,problem_edit,ai_generate' %} aria-current="page"{% endif %}>
-  <i data-lucide="file-code-2" class="lu" aria-hidden="true"></i>Masalalar
+  <i data-lucide="file-code-2" class="lu" aria-hidden="true"></i>{% trans "Masalalar" %}
 </a>
 <a href="{% url 'moderation:queue' %}" class="ca-sidebar-link {% if ns == 'moderation' and un == 'queue' %}is-active{% endif %}"{% if ns == 'moderation' and un == 'queue' %} aria-current="page"{% endif %}>
-  <i data-lucide="inbox" class="lu" aria-hidden="true"></i>Navbat
+  <i data-lucide="inbox" class="lu" aria-hidden="true"></i>{% trans "Navbat" %}
   {% if nav.staff.queue %}<span class="ca-chip ca-chip-score ml-auto tabular" title="Ko‘rib chiqishni kutmoqda">{{ nav.staff.queue }}</span>{% endif %}
 </a>
 <a href="{% url 'moderation:daily_problem' %}" class="ca-sidebar-link {% if ns == 'moderation' and un in 'daily_problem,daily_problem_choose' %}is-active{% endif %}"{% if ns == 'moderation' and un in 'daily_problem,daily_problem_choose' %} aria-current="page"{% endif %}>
-  <i data-lucide="calendar-check" class="lu" aria-hidden="true"></i>Kun masalasi
+  <i data-lucide="calendar-check" class="lu" aria-hidden="true"></i>{% trans "Kun masalasi" %}
 </a>
 <a href="{% url 'moderation:contests' %}" class="ca-sidebar-link {% if ns == 'moderation' and un in 'contests,contest_new,contest_edit,contest_official' or ns == 'integrity' and un in 'contest_report,replay' %}is-active{% endif %}"{% if ns == 'moderation' and un in 'contests,contest_new,contest_edit,contest_official' or ns == 'integrity' and un in 'contest_report,replay' %} aria-current="page"{% endif %}>
-  <i data-lucide="trophy" class="lu" aria-hidden="true"></i>Musobaqalar
+  <i data-lucide="trophy" class="lu" aria-hidden="true"></i>{% trans "Musobaqalar" %}
 </a>
 <a href="{% url 'moderation:submissions' %}" class="ca-sidebar-link {% if ns == 'moderation' and un == 'submissions' %}is-active{% endif %}"{% if ns == 'moderation' and un == 'submissions' %} aria-current="page"{% endif %}>
-  <i data-lucide="history" class="lu" aria-hidden="true"></i>Barcha urinishlar
+  <i data-lucide="history" class="lu" aria-hidden="true"></i>{% trans "Barcha urinishlar" %}
 </a>
 <a href="{% url 'moderation:duels' %}" class="ca-sidebar-link {% if ns == 'moderation' and un == 'duels' %}is-active{% endif %}"{% if ns == 'moderation' and un == 'duels' %} aria-current="page"{% endif %}>
-  <i data-lucide="swords" class="lu" aria-hidden="true"></i>Duellar
+  <i data-lucide="swords" class="lu" aria-hidden="true"></i>{% trans "Duellar" %}
 </a>
 <a href="{% url 'moderation:users' %}" class="ca-sidebar-link {% if ns == 'moderation' and un in 'users,user_edit' %}is-active{% endif %}"{% if ns == 'moderation' and un in 'users,user_edit' %} aria-current="page"{% endif %}>
-  <i data-lucide="users-round" class="lu" aria-hidden="true"></i>Foydalanuvchilar
+  <i data-lucide="users-round" class="lu" aria-hidden="true"></i>{% trans "Foydalanuvchilar" %}
 </a>
 <a href="{% url 'moderation:plans' %}" class="ca-sidebar-link {% if ns == 'moderation' and un in 'plans,plan_new,plan_edit' %}is-active{% endif %}"{% if ns == 'moderation' and un in 'plans,plan_new,plan_edit' %} aria-current="page"{% endif %}>
-  <i data-lucide="graduation-cap" class="lu" aria-hidden="true"></i>Kurslar
+  <i data-lucide="graduation-cap" class="lu" aria-hidden="true"></i>{% trans "Kurslar" %}
 </a>
 <a href="{% url 'moderation:tags' %}" class="ca-sidebar-link {% if ns == 'moderation' and un in 'tags,tag_edit' %}is-active{% endif %}"{% if ns == 'moderation' and un in 'tags,tag_edit' %} aria-current="page"{% endif %}>
-  <i data-lucide="tags" class="lu" aria-hidden="true"></i>Teglar
+  <i data-lucide="tags" class="lu" aria-hidden="true"></i>{% trans "Teglar" %}
 </a>
 <a href="{% url 'integrity:practice_report' %}" class="ca-sidebar-link {% if ns == 'integrity' and un == 'practice_report' %}is-active{% endif %}"{% if ns == 'integrity' and un == 'practice_report' %} aria-current="page"{% endif %}>
-  <i data-lucide="shield-alert" class="lu" aria-hidden="true"></i>Mashq nazorati
+  <i data-lucide="shield-alert" class="lu" aria-hidden="true"></i>{% trans "Mashq nazorati" %}
 </a>
 <a href="{% url 'integrity:audit' %}" class="ca-sidebar-link {% if ns == 'integrity' and un == 'audit' %}is-active{% endif %}"{% if ns == 'integrity' and un == 'audit' %} aria-current="page"{% endif %}>
-  <i data-lucide="scroll-text" class="lu" aria-hidden="true"></i>Amallar jurnali
+  <i data-lucide="scroll-text" class="lu" aria-hidden="true"></i>{% trans "Amallar jurnali" %}
 </a>
 {% endif %}
 {% endwith %}

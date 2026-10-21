@@ -5,24 +5,24 @@
 <div data-places class="space-y-4">
   <div{% if side %} class="grid grid-cols-2 gap-3"{% else %} class="space-y-4"{% endif %}>
     <div>
-      <label class="ca-label" for="id_country">Davlat</label>
+      <label class="ca-label" for="id_country">{% trans "Davlat" %}</label>
       <select class="ca-input" name="country" id="id_country" autocomplete="country" required{% if form.country.errors %} aria-invalid="true"{% endif %}>
         {% for code, name in form.fields.country.choices %}<option value="{{ code }}"{% if code == form.country.value %} selected{% endif %}>{{ name }}</option>{% endfor %}
       </select>
       {% if form.country.errors %}<p class="mt-1.5 text-sm text-bad">{{ form.country.errors.0 }}</p>{% endif %}
     </div>
     <div>
-      <label class="ca-label" for="id_location">Shahar</label>
+      <label class="ca-label" for="id_location">{% trans "Shahar" %}</label>
       <select class="ca-input" name="location" id="id_location" autocomplete="address-level2" required data-value="{{ form.location.value|default:'' }}"{% if form.location.errors %} aria-invalid="true"{% endif %}></select>
-      <input class="ca-input mt-2" type="text" name="location_other" id="id_location_other" maxlength="100" placeholder="Shahar nomi" autocomplete="off" data-value="{{ form.location_other.value|default:'' }}" hidden>
+      <input class="ca-input mt-2" type="text" name="location_other" id="id_location_other" maxlength="100" placeholder="{% trans 'Shahar nomi' %}" autocomplete="off" data-value="{{ form.location_other.value|default:'' }}" hidden>
       {% if form.location.errors %}<p class="mt-1.5 text-sm text-bad">{{ form.location.errors.0 }}</p>{% endif %}
     </div>
   </div>
   {% if with_school %}
   <div>
-    <label class="ca-label" for="id_school">O‘quv joyi <span class="font-normal text-mute">(ixtiyoriy)</span></label>
+    <label class="ca-label" for="id_school">{% trans "O‘quv joyi <span class=\"font-normal text-mute\">(ixtiyoriy)</span>" %}</label>
     <select class="ca-input" name="school" id="id_school" data-value="{{ form.school.value|default:'' }}"></select>
-    <input class="ca-input mt-2" type="text" name="school_other" id="id_school_other" maxlength="150" placeholder="Maktab, kollej yoki universitet nomi" autocomplete="off" data-value="{{ form.school_other.value|default:'' }}" hidden>
+    <input class="ca-input mt-2" type="text" name="school_other" id="id_school_other" maxlength="150" placeholder="{% trans 'Maktab, kollej yoki universitet nomi' %}" autocomplete="off" data-value="{{ form.school_other.value|default:'' }}" hidden>
     {% if form.school.errors %}<p class="mt-1.5 text-sm text-bad">{{ form.school.errors.0 }}</p>{% endif %}
   </div>
   {% endif %}

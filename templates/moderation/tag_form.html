@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ tag.name }} — teg{% endblock %}
+{% block title %}{% blocktrans with tag_name=tag.name %}{{ tag_name }} — teg{% endblocktrans %}{% endblock %}
 {% block content %}
 <div class="mb-6">
   {% url 'moderation:tags' as back %}{% include "moderation/_header.html" with title=tag.name subtitle="Nazariya kursda yoziladi; teg masalalarni kursga olib kiradi." back_url=back back_label="Teglar" %}
@@ -7,14 +7,14 @@
 <form method="post" novalidate class="grid max-w-3xl gap-6 sm:grid-cols-2 sm:items-start">
   {% csrf_token %}
   <section class="ca-panel space-y-4">
-    <div><label class="ca-label" for="{{ form.name.id_for_label }}">Nomi</label>{{ form.name }}{{ form.name.errors }}</div>
-    <div><label class="ca-label" for="{{ form.kind.id_for_label }}">Turi</label>{{ form.kind }}</div>
-    <button type="submit" class="ca-btn ca-btn-primary w-full"><i data-lucide="check" class="lu" aria-hidden="true"></i>Saqlash</button>
+    <div><label class="ca-label" for="{{ form.name.id_for_label }}">{% trans "Nomi" %}</label>{{ form.name }}{{ form.name.errors }}</div>
+    <div><label class="ca-label" for="{{ form.kind.id_for_label }}">{% trans "Turi" %}</label>{{ form.kind }}</div>
+    <button type="submit" class="ca-btn ca-btn-primary w-full"><i data-lucide="check" class="lu" aria-hidden="true"></i>{% trans "Saqlash" %}</button>
   </section>
   <section class="ca-panel text-sm" aria-labelledby="courses-title">
-    <h2 id="courses-title" class="ca-section-title">Kurslar</h2>
+    <h2 id="courses-title" class="ca-section-title">{% trans "Kurslar" %}</h2>
     {% for c in courses %}<p><a class="ca-link" href="{% url 'moderation:plan_edit' c.pk %}">{{ c.title }}</a></p>
-    {% empty %}<p class="text-warn">Bu teg hech bir kursda yo‘q — masalalari O‘rganish bo‘limida ko‘rinmaydi.</p>{% endfor %}
+    {% empty %}<p class="text-warn">{% trans "Bu teg hech bir kursda yo‘q — masalalari O‘rganish bo‘limida ko‘rinmaydi." %}</p>{% endfor %}
   </section>
 </form>
 {% endblock %}

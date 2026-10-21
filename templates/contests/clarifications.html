@@ -1,58 +1,58 @@
 {% extends "base.html" %}
-{% block title %}{{ contest.title }} — Savollar{% endblock %}
+{% block title %}{% blocktrans with contest_title=contest.title %}{{ contest_title }} — Savollar{% endblocktrans %}{% endblock %}
 {% block band %}{% include "contests/_band.html" with active="questions" %}{% endblock %}
 {% block content %}
 {% comment %}#7 Q&A: every question with its answer (or staff's answer field) as a flat list in the main column; a
 participant asks from the side card; staff answer, they never ask.{% endcomment %}
 <div class="ca7">
 <section class="min-w-0" aria-labelledby="clars-title">
-  <div class="ca7-sec-h"><h2 id="clars-title">Savol-javoblar</h2>{% if clars %}<span class="ca7-r text-mute tabular">{{ clars|length }} ta</span>{% endif %}</div>
+  <div class="ca7-sec-h"><h2 id="clars-title">{% trans "Savol-javoblar" %}</h2>{% if clars %}<span class="ca7-r text-mute tabular">{% blocktrans with clars=clars|length %}{{ clars }} ta{% endblocktrans %}</span>{% endif %}</div>
   {% if clars %}
   <ol class="ca7-qa">
   {% for c in clars %}
     <li>
-      <p class="ca7-qa-meta"><span class="ca7-pill">{% if c.problem %}{{ c.problem.label }} masala{% else %}Umumiy{% endif %}</span>{% include "accounts/_u7.html" with u=c.user you=False %}<span class="tabular">{{ c.created|date:"d.m H:i" }}</span></p>
+      <p class="ca7-qa-meta"><span class="ca7-pill">{% if c.problem %}{% blocktrans with c_problem_label=c.problem.label %}{{ c_problem_label }} masala{% endblocktrans %}{% else %}{% trans "Umumiy" %}{% endif %}</span>{% include "accounts/_u7.html" with u=c.user you=False %}<span class="tabular">{{ c.created|date:"d.m H:i" }}</span></p>
       <p class="whitespace-pre-wrap">{{ c.question }}</p>
       {% if c.is_answered %}
-      <div class="ca7-qa-a"><p><b>Javob</b> · {{ c.answered_by.username }}</p><p class="whitespace-pre-wrap">{{ c.answer }}</p></div>
+      <div class="ca7-qa-a"><p>{% blocktrans with c_answered_by_username=c.answered_by.username %}<b>Javob</b> · {{ c_answered_by_username }}{% endblocktrans %}</p><p class="whitespace-pre-wrap">{{ c.answer }}</p></div>
       {% elif user.is_staff %}
       <form method="post" action="{% url 'contests:answer_clarification' contest.pk c.pk %}" class="clar-answer-form mt-2 flex gap-2">
         {% csrf_token %}
-        <textarea name="answer" required rows="2" class="ca-input flex-1" placeholder="Javob yozing…" aria-label="{{ c.user.username }} savoliga javob"></textarea>
-        <button type="submit" class="ca-btn ca-btn-primary self-end">Javob berish</button>
+        <textarea name="answer" required rows="2" class="ca-input flex-1" placeholder="{% trans 'Javob yozing…' %}" aria-label="{% blocktrans with c_user_username=c.user.username %}{{ c_user_username }} savoliga javob{% endblocktrans %}"></textarea>
+        <button type="submit" class="ca-btn ca-btn-primary self-end">{% trans "Javob berish" %}</button>
       </form>
       {% else %}
-      <p class="mt-1 text-sm text-mute">Hali javob berilmagan.</p>
+      <p class="mt-1 text-sm text-mute">{% trans "Hali javob berilmagan." %}</p>
       {% endif %}
     </li>
   {% endfor %}
   </ol>
   {% else %}
-  <p class="ca7-empty"><b>Hali savol yo‘q</b>Javob berilgan savollar barcha ishtirokchilarga shu yerda ko‘rinadi.</p>
+  <p class="ca7-empty">{% trans "<b>Hali savol yo‘q</b>Javob berilgan savollar barcha ishtirokchilarga shu yerda ko‘rinadi." %}</p>
   {% endif %}
 </section>
 
-<aside class="ca7-aside" aria-label="Savol berish">
+<aside class="ca7-aside" aria-label="{% trans 'Savol berish' %}">
   {% if registered and not contest.has_ended %}
   <section class="ca-box" aria-labelledby="ask-title">
-    <div class="ca-box-cap ca-hd"><h2 id="ask-title">Savol berish</h2></div>
+    <div class="ca-box-cap ca-hd"><h2 id="ask-title">{% trans "Savol berish" %}</h2></div>
     <form method="post" action="{% url 'contests:ask_clarification' contest.pk %}" class="ca7-pad ca7-join" id="ask-clar-form">
       {% csrf_token %}
-      <p>Shart tushunarsiz bo‘lsa, hakamlardan so‘rang. Javob berilgach savol va javob hammaga ko‘rinadi.</p>
-      <label for="clar-problem">Masala</label>
+      <p>{% trans "Shart tushunarsiz bo‘lsa, hakamlardan so‘rang. Javob berilgach savol va javob hammaga ko‘rinadi." %}</p>
+      <label for="clar-problem">{% trans "Masala" %}</label>
       <select id="clar-problem" name="problem_id" class="ca-select w-full">
-        <option value="">Umumiy savol</option>
+        <option value="">{% trans "Umumiy savol" %}</option>
         {% for cp in problems %}<option value="{{ cp.id }}">{{ cp.label }}. {{ cp.problem.title }}</option>{% endfor %}
       </select>
-      <label for="clar-question">Savol</label>
+      <label for="clar-question">{% trans "Savol" %}</label>
       <textarea id="clar-question" name="question" required maxlength="2000" rows="4" class="ca-input w-full"></textarea>
-      <button type="submit" class="ca-btn ca-btn-gold"><i data-lucide="send" class="lu" aria-hidden="true"></i>Yuborish</button>
+      <button type="submit" class="ca-btn ca-btn-gold"><i data-lucide="send" class="lu" aria-hidden="true"></i>{% trans "Yuborish" %}</button>
     </form>
   </section>
   {% endif %}
   <section class="ca-box" aria-labelledby="qa-rules-title">
-    <div class="ca-box-cap ca-hd"><h2 id="qa-rules-title">Nimani so‘rash mumkin</h2></div>
-    <div class="ca7-pad"><p>Shartdagi noaniqlik, chegaralar, kirish formati. Yechim yoki tekshiruvchi haqidagi savollarga javob berilmaydi.</p></div>
+    <div class="ca-box-cap ca-hd"><h2 id="qa-rules-title">{% trans "Nimani so‘rash mumkin" %}</h2></div>
+    <div class="ca7-pad"><p>{% trans "Shartdagi noaniqlik, chegaralar, kirish formati. Yechim yoki tekshiruvchi haqidagi savollarga javob berilmaydi." %}</p></div>
   </section>
 </aside>
 </div>

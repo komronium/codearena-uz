@@ -2,23 +2,23 @@
 lapis), the problem with its level and the way in, your streak and the next streak badge, who solved it today.
 ctx: daily, ds (apps.problems.templatetags.daily.daily_stats), daily_done.{% endcomment %}
 <section class="ca-box" aria-labelledby="daily-title">
-  <div class="ca-box-cap ca-hd"><h2 id="daily-title">Kun masalasi</h2>
-    {% if user.is_authenticated %}<span class="ca-box-tools ca7-streak" title="Olov{% if ds.best %}, eng uzuni {{ ds.best }} kun{% endif %}"><i data-lucide="flame" class="lu" aria-hidden="true"></i><b>{{ ds.streak }}</b> kun</span>
+  <div class="ca-box-cap ca-hd"><h2 id="daily-title">{% trans "Kun masalasi" %}</h2>
+    {% if user.is_authenticated %}<span class="ca-box-tools ca7-streak" title="Olov{% if ds.best %}, eng uzuni {{ ds.best }} kun{% endif %}"><i data-lucide="flame" class="lu" aria-hidden="true"></i>{% blocktrans with ds_streak=ds.streak %}<b>{{ ds_streak }}</b> kun{% endblocktrans %}</span>
     {% else %}<small class="ca-box-tools">{{ daily.date|date:"d.m.Y" }}</small>{% endif %}</div>
   <div class="ca7-pad">
     {% if user.is_authenticated %}{% include "problems/_month.html" with month=ds.month %}{% endif %}
     {% if not compact %}<div class="ca7-dayp">
       <div>
         <a class="ca-link" href="{% url 'problems:detail' daily.problem.slug %}">{{ daily.problem.title }}</a>
-        <small><span class="ca-diff ca-diff-{{ daily.problem.difficulty }}">{{ daily.problem.get_difficulty_display }}</span> · {% if ds.solvers %}bugun <b class="tabular text-ink">{{ ds.solvers }}</b> kishi yechdi{% else %}bugun hali hech kim yechmadi{% endif %}</small>
+        <small><span class="ca-diff ca-diff-{{ daily.problem.difficulty }}">{{ daily.problem.get_difficulty_display }}</span> · {% if ds.solvers %}{% blocktrans with ds_solvers=ds.solvers %}bugun <b class="tabular text-ink">{{ ds_solvers }}</b> kishi yechdi{% endblocktrans %}{% else %}{% trans "bugun hali hech kim yechmadi" %}{% endif %}</small>
       </div>
-      {% if daily_done %}<span class="ca-done"><i data-lucide="check" class="lu" aria-hidden="true"></i>Yechildi</span>{% endif %}
+      {% if daily_done %}<span class="ca-done"><i data-lucide="check" class="lu" aria-hidden="true"></i>{% trans "Yechildi" %}</span>{% endif %}
     </div>{% endif %}
     {% if user.is_authenticated %}
-    <p class="ca7-note"><i data-lucide="flame" class="lu" style="color: #E8590C" aria-hidden="true"></i><span>{% if daily_done %}Bugun yechildi, Olov <b>{{ ds.streak }}</b> kun.{% elif ds.streak %}Bugun yechsangiz, Olov <b>{{ ds.streak|add:1 }}</b> kun bo‘ladi.{% else %}Bugun yechsangiz, Olov yonadi.{% endif %}{% if ds.best > ds.streak %} Eng uzuni <b>{{ ds.best }}</b> kun.{% endif %}</span></p>
-    {% if ds.next_badge %}<p class="ca7-note"><i data-lucide="{{ ds.next_badge.icon }}" class="lu" style="color: var(--ca-lvl-medium)" aria-hidden="true"></i><span>«{{ ds.next_badge.name }}» nishoniga yana <b>{{ ds.next_badge.left }}</b> kun ketma-ket yechish kerak.</span></p>{% endif %}
+    <p class="ca7-note"><i data-lucide="flame" class="lu" style="color: #E8590C" aria-hidden="true"></i><span>{% if daily_done %}{% blocktrans with ds_streak=ds.streak %}Bugun yechildi, Olov <b>{{ ds_streak }}</b> kun.{% endblocktrans %}{% elif ds.streak %}{% blocktrans with ds_streak=ds.streak|add:1 %}Bugun yechsangiz, Olov <b>{{ ds_streak }}</b> kun bo‘ladi.{% endblocktrans %}{% else %}{% trans "Bugun yechsangiz, Olov yonadi." %}{% endif %}{% if ds.best > ds.streak %} {% blocktrans with ds_best=ds.best %}Eng uzuni <b>{{ ds_best }}</b> kun.{% endblocktrans %}{% endif %}</span></p>
+    {% if ds.next_badge %}<p class="ca7-note"><i data-lucide="{{ ds.next_badge.icon }}" class="lu" style="color: var(--ca-lvl-medium)" aria-hidden="true"></i><span>{% blocktrans with ds_next_badge_name=ds.next_badge.name ds_next_badge_left=ds.next_badge.left %}«{{ ds_next_badge_name }}» nishoniga yana <b>{{ ds_next_badge_left }}</b> kun ketma-ket yechish kerak.{% endblocktrans %}</span></p>{% endif %}
     {% endif %}
     {% if ds.recent %}<p class="ca7-note"><i data-lucide="users" class="lu" aria-hidden="true"></i><span>
-      {% for u in ds.recent %}<a class="ca-user-name !inline{{ u.rating|lg }}" style="--tier: {{ u.rating|tier_color }}" href="{% url 'profile' u.username %}" translate="no">{{ u.username }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}{% if ds.solvers > ds.recent|length %} va boshqalar{% endif %}</span></p>{% endif %}
+      {% for u in ds.recent %}<a class="ca-user-name !inline{{ u.rating|lg }}" style="--tier: {{ u.rating|tier_color }}" href="{% url 'profile' u.username %}" translate="no">{{ u.username }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}{% if ds.solvers > ds.recent|length %} {% trans "va boshqalar" %}{% endif %}</span></p>{% endif %}
   </div>
 </section>

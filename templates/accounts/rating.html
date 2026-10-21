@@ -1,6 +1,6 @@
 {% extends "base.html" %}{% load tiers places %}
-{% block title %}Reyting{% endblock %}
-{% block description %}CodeArena musobaqa reytingi: {{ total }} ishtirokchi, Elo bo‘yicha o‘rinlar va darajalar.{% endblock %}
+{% block title %}{% trans "Reyting" %}{% endblock %}
+{% block description %}{% blocktrans with total=total %}CodeArena musobaqa reytingi: {{ total }} ishtirokchi, Elo bo‘yicha o‘rinlar va darajalar.{% endblocktrans %}{% endblock %}
 {% block band %}
 {% comment %}#7 rating, after Codeforces' rating page: the band with the contest / practice switch; the tier ladder across
 the page (each tier's range and head count, yours marked "Siz"); one line on how it works and how far your next tier
@@ -9,8 +9,8 @@ own row marked.{% endcomment %}
 <section class="ca-hud" aria-labelledby="board-title">
   <div class="ca-hud-in">
     <div>
-      <h1 id="board-title">Reyting</h1>
-      <p class="ca-hud-sub">{{ total }} ishtirokchi · reytingli musobaqalar natijasi bo‘yicha (Elo) · <a class="text-white underline" href="{% url 'how_ratings' %}">Qanday hisoblanadi?</a></p>
+      <h1 id="board-title">{% trans "Reyting" %}</h1>
+      <p class="ca-hud-sub">{% blocktrans with total=total %}{{ total }} ishtirokchi · reytingli musobaqalar natijasi bo‘yicha (Elo) ·{% endblocktrans %} <a class="text-white underline" href="{% url 'how_ratings' %}">{% trans "Qanday hisoblanadi?" %}</a></p>
     </div>
     {% include "accounts/_board_tabs.html" %}
   </div>
@@ -19,27 +19,27 @@ own row marked.{% endcomment %}
 {% block content %}
 <div class="ca7">
 <div class="ca7-col">
-<section aria-label="Reyting jadvali">
+<section aria-label="{% trans 'Reyting jadvali' %}">
   <div class="ca7-tools is-board">
     <div class="ca7-trow">
-      <form method="get" class="ca7-search" role="search" aria-label="Foydalanuvchini qidirish">
+      <form method="get" class="ca7-search" role="search" aria-label="{% trans 'Foydalanuvchini qidirish' %}">
         {% for k, v in geo_keep %}{% if k != "q" %}<input type="hidden" name="{{ k }}" value="{{ v }}">{% endif %}{% endfor %}{% if geo.country %}<input type="hidden" name="country" value="{{ geo.country }}">{% endif %}{% if geo.city %}<input type="hidden" name="city" value="{{ geo.city }}">{% endif %}{% if geo.school %}<input type="hidden" name="school" value="{{ geo.school }}">{% endif %}
-        <i data-lucide="search" class="lu" aria-hidden="true"></i><input class="ca7-fld" type="search" name="q" value="{{ q }}" placeholder="Foydalanuvchi…" aria-label="Foydalanuvchi nomi" autocomplete="off" spellcheck="false">
+        <i data-lucide="search" class="lu" aria-hidden="true"></i><input class="ca7-fld" type="search" name="q" value="{{ q }}" placeholder="{% trans 'Foydalanuvchi…' %}" aria-label="{% trans 'Foydalanuvchi nomi' %}" autocomplete="off" spellcheck="false">
       </form>
-      {% if user.is_authenticated and not q %}<a class="ca-btn ca-btn-soft" href="#me"><i data-lucide="crosshair" class="lu" aria-hidden="true"></i>Mening o‘rnim</a>{% endif %}
-      <nav class="ca7-seg ca7-tools-r" aria-label="Saralash">
-        <a href="{% querystring sort=None page=None %}"{% if not sort %} aria-current="true"{% endif %}>Reyting</a>
-        <a href="{% querystring sort='delta' page=None %}"{% if sort == 'delta' %} aria-current="true"{% endif %}>Oxirgi o‘zgarish</a>
-        <a href="{% querystring sort='contests' page=None %}"{% if sort == 'contests' %} aria-current="true"{% endif %}>Musobaqalar soni</a>
+      {% if user.is_authenticated and not q %}<a class="ca-btn ca-btn-soft" href="#me"><i data-lucide="crosshair" class="lu" aria-hidden="true"></i>{% trans "Mening o‘rnim" %}</a>{% endif %}
+      <nav class="ca7-seg ca7-tools-r" aria-label="{% trans 'Saralash' %}">
+        <a href="{% querystring sort=None page=None %}"{% if not sort %} aria-current="true"{% endif %}>{% trans "Reyting" %}</a>
+        <a href="{% querystring sort='delta' page=None %}"{% if sort == 'delta' %} aria-current="true"{% endif %}>{% trans "Oxirgi o‘zgarish" %}</a>
+        <a href="{% querystring sort='contests' page=None %}"{% if sort == 'contests' %} aria-current="true"{% endif %}>{% trans "Musobaqalar soni" %}</a>
       </nav>
     </div>
-    {% if geo.countries %}<div class="ca7-trow">{% include "accounts/_geo_filters.html" %}{% if geo.active %}<a class="ca-link text-sm" href="{% querystring country=None city=None school=None page=None %}">Tozalash</a>{% endif %}</div>{% endif %}
+    {% if geo.countries %}<div class="ca7-trow">{% include "accounts/_geo_filters.html" %}{% if geo.active %}<a class="ca-link text-sm" href="{% querystring country=None city=None school=None page=None %}">{% trans "Tozalash" %}</a>{% endif %}</div>{% endif %}
   </div>
-  {% if q or tier_sel or geo.active %}<p class="ca7-found">{% if geo.country %}{% flag geo.country %} <b>{{ geo.country_name }}{% if geo.city %}, {{ geo.city }}{% endif %}{% if geo.school %}, {{ geo.school }}{% endif %}</b>{% endif %}{% if tier_sel %}<b class="ca-tier-ink" style="--tier: {% for t in tiers %}{% if t.name == tier_sel %}{{ t.color }}{% endif %}{% endfor %}">{{ tier_sel }}</b>{% endif %}{% if q %} «{{ q }}»{% endif %}: {{ users.paginator.count }} ta · <a class="ca-link" href="{% url 'rating' %}">hammasi</a></p>{% endif %}
+  {% if q or tier_sel or geo.active %}<p class="ca7-found">{% if geo.country %}{% flag geo.country %} <b>{{ geo.country_name }}{% if geo.city %}, {{ geo.city }}{% endif %}{% if geo.school %}, {{ geo.school }}{% endif %}</b>{% endif %}{% if tier_sel %}<b class="ca-tier-ink" style="--tier: {% for t in tiers %}{% if t.name == tier_sel %}{{ t.color }}{% endif %}{% endfor %}">{{ tier_sel }}</b>{% endif %}{% if q %} «{{ q }}»{% endif %}{% blocktrans with users_paginator_count=users.paginator.count %}: {{ users_paginator_count }} ta ·{% endblocktrans %} <a class="ca-link" href="{% url 'rating' %}">{% trans "hammasi" %}</a></p>{% endif %}
   {% if users %}
   <div class="overflow-x-auto ca7-board">
   <table class="ca-table ca-table-flat">
-    <thead><tr><th scope="col" class="w-16 text-center">#</th><th scope="col">Foydalanuvchi</th><th scope="col" class="hidden w-32 text-right sm:table-cell">Musobaqalar</th><th scope="col" class="w-28 text-right" title="Oxirgi reytingli musobaqadagi o‘zgarish">Oxirgi ±</th><th scope="col" class="w-28 text-right">Reyting</th></tr></thead>
+    <thead><tr><th scope="col" class="w-16 text-center">#</th><th scope="col">{% trans "Foydalanuvchi" %}</th><th scope="col" class="hidden w-32 text-right sm:table-cell">{% trans "Musobaqalar" %}</th><th scope="col" class="w-28 text-right" title="{% trans 'Oxirgi reytingli musobaqadagi o‘zgarish' %}">{% trans "Oxirgi ±" %}</th><th scope="col" class="w-28 text-right">{% trans "Reyting" %}</th></tr></thead>
     <tbody>
     {% for u in users %}
     <tr{% if u == user %} class="ca-row-me" id="me"{% endif %}>
@@ -54,19 +54,19 @@ own row marked.{% endcomment %}
   </table>
   </div>
   {% else %}
-  <p class="ca7-empty">{% if q %}<b>Bunday foydalanuvchi reytingda yo‘q</b><a class="ca-link" href="{% url 'rating' %}">Butun ro‘yxat</a>{% else %}<b>Hali reyting yo‘q</b>Reytingli musobaqa tugagach, bu yerda paydo bo‘ladi.{% endif %}</p>
+  <p class="ca7-empty">{% if q %}<b>{% trans "Bunday foydalanuvchi reytingda yo‘q" %}</b><a class="ca-link" href="{% url 'rating' %}">{% trans "Butun ro‘yxat" %}</a>{% else %}{% trans "<b>Hali reyting yo‘q</b>Reytingli musobaqa tugagach, bu yerda paydo bo‘ladi." %}{% endif %}</p>
   {% endif %}
   {% include "accounts/_leaderboard_nav.html" %}
 </section>
 </div>
 
-<aside class="ca7-aside" aria-label="Darajalar">
+<aside class="ca7-aside" aria-label="{% trans 'Darajalar' %}">
   <section class="ca-box" aria-labelledby="tiers-title">
-    <div class="ca-box-cap ca-hd"><h2 id="tiers-title">Darajalar</h2>{% if tier_sel %}<a class="ca-box-tools ca-link" href="{% querystring tier=None page=None %}">Hammasi</a>{% endif %}</div>
+    <div class="ca-box-cap ca-hd"><h2 id="tiers-title">{% trans "Darajalar" %}</h2>{% if tier_sel %}<a class="ca-box-tools ca-link" href="{% querystring tier=None page=None %}">{% trans "Hammasi" %}</a>{% endif %}</div>
     {% if me %}{% for t in tiers %}{% if t.here %}
     <div class="ca7-tier-me" style="--tier: {{ t.color }}">
-      <p><b class="tabular">{{ user.rating }}</b>{% if me.next %}<span><b class="ca-tier-ink" style="--tier: {{ me.next.color }}">{{ me.next.name }}</b> gacha <b class="tabular">+{{ me.next.need }}</b></span>{% else %}<span>Eng yuqori daraja</span>{% endif %}</p>
-      <span class="ca7-ladder-pg" role="progressbar" aria-valuenow="{{ t.pct }}" aria-valuemin="0" aria-valuemax="100" aria-label="{{ t.name }} darajasi ichidagi o‘rningiz"><i style="width: {{ t.pct }}%"></i></span>
+      <p><b class="tabular">{{ user.rating }}</b>{% if me.next %}<span><b class="ca-tier-ink" style="--tier: {{ me.next.color }}">{% blocktrans with me_next_name=me.next.name me_next_need=me.next.need %}{{ me_next_name }}</b> gacha <b class="tabular">+{{ me_next_need }}</b>{% endblocktrans %}</span>{% else %}<span>{% trans "Eng yuqori daraja" %}</span>{% endif %}</p>
+      <span class="ca7-ladder-pg" role="progressbar" aria-valuenow="{{ t.pct }}" aria-valuemin="0" aria-valuemax="100" aria-label="{% blocktrans with t_name=t.name %}{{ t_name }} darajasi ichidagi o‘rningiz{% endblocktrans %}"><i style="width: {{ t.pct }}%"></i></span>
     </div>
     {% endif %}{% endfor %}{% endif %}
     <ol class="ca7-tiers">
@@ -74,12 +74,12 @@ own row marked.{% endcomment %}
       <li style="--tier: {{ t.color }}" class="{% if me and t.here %}is-me{% endif %}{% if not t.count %} is-empty{% endif %}{% if tier_sel == t.name %} is-sel{% endif %}"{% if me and t.here %} aria-current="true"{% endif %}>
         <a class="ca7-ladder-go" href="{% if tier_sel == t.name %}{% querystring tier=None page=None %}{% else %}{% querystring tier=t.name page=None %}{% endif %}" aria-label="{{ t.name }}: {% if tier_sel == t.name %}filtrni olib tashlash{% else %}shu darajadagilarni ko‘rsatish{% endif %}"></a>
         <i class="ca7-ladder-dot" aria-hidden="true"></i>
-        <span class="ca7-tier-n"><span><b class="ca-tier-ink{% if not t.ceiling %} ca-lg{% endif %}">{{ t.name }}</b>{% if me and t.here %}<em>Siz</em>{% endif %}</span><small class="tabular">{% if t.floor %}{{ t.floor }}{% else %}0{% endif %}{% if t.ceiling %}–{{ t.ceiling|add:"-1" }}{% else %}+{% endif %}</small></span>
-        <span class="ca7-tier-c tabular"><b>{{ t.count }}</b> kishi</span>
+        <span class="ca7-tier-n"><span><b class="ca-tier-ink{% if not t.ceiling %} ca-lg{% endif %}">{{ t.name }}</b>{% if me and t.here %}<em>{% trans "Siz" %}</em>{% endif %}</span><small class="tabular">{% if t.floor %}{{ t.floor }}{% else %}0{% endif %}{% if t.ceiling %}–{{ t.ceiling|add:"-1" }}{% else %}+{% endif %}</small></span>
+        <span class="ca7-tier-c tabular">{% blocktrans with t_count=t.count %}<b>{{ t_count }}</b> kishi{% endblocktrans %}</span>
       </li>
       {% endfor %}
     </ol>
-    <p class="ca7-tier-note">Reytingli musobaqadan keyin har bir ishtirokchining reytingi Elo usulida qayta hisoblanadi.</p>
+    <p class="ca7-tier-note">{% trans "Reytingli musobaqadan keyin har bir ishtirokchining reytingi Elo usulida qayta hisoblanadi." %}</p>
   </section>
 </aside>
 </div>

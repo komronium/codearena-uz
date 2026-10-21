@@ -1,9 +1,9 @@
 {% extends "base.html" %}
-{% block title %}Kurslar — boshqaruv{% endblock %}
+{% block title %}{% trans "Kurslar — boshqaruv" %}{% endblock %}
 {% block content %}
 <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
   <div>{% include "moderation/_header.html" with title="Kurslar" subtitle="Har kurs — bitta mavzu. Masalalar kursga teglari orqali tushadi." %}</div>
-  <a href="{% url 'moderation:plan_new' %}" class="ca-btn ca-btn-primary"><i data-lucide="plus" class="lu" aria-hidden="true"></i>Kurs qo‘shish</a>
+  <a href="{% url 'moderation:plan_new' %}" class="ca-btn ca-btn-primary"><i data-lucide="plus" class="lu" aria-hidden="true"></i>{% trans "Kurs qo‘shish" %}</a>
 </div>
 {% if plans %}
 <ul class="ca-rows">
@@ -14,24 +14,23 @@
       <div class="ca-row-title">
         <span class="tabular shrink-0 text-xs font-normal text-mute">{{ p.order }}</span>
         <a class="ca-link" href="{% url 'learn:course' p.slug %}">{{ p.title }}</a>
-        {% if not p.is_public %}<span class="ca-chip shrink-0 !bg-ink/5 text-mute">Yashirin</span>{% endif %}
+        {% if not p.is_public %}<span class="ca-chip shrink-0 !bg-ink/5 text-mute">{% trans "Yashirin" %}</span>{% endif %}
       </div>
       <div class="ca-row-meta">
         <span>{{ p.get_stage_display }}</span>
-        <span class="ca-diff ca-diff-{{ p.level }}">{{ p.get_level_display }}</span>
-        <span>{{ p.n_tags }} mavzu · {% if p.n_open %}{{ p.n_open }} masala{% if p.n_open < course_min %} · <span class="text-warn">tayyorlanmoqda: kamida {{ course_min }} ta kerak</span>{% elif p.n_open > course_max %} · <span class="text-mute">kursda {{ course_max }} tasi</span>{% endif %}{% elif p.n_tags %}<span class="text-warn">masala yo‘q</span>{% else %}faqat nazariya{% endif %}</span>
+        <span class="ca-diff ca-diff-{{ p.level }}">{% blocktrans with p_get_level_display=p.get_level_display p_n_tags=p.n_tags %}{{ p_get_level_display }}</span> <span>{{ p_n_tags }} mavzu ·{% endblocktrans %} {% if p.n_open %}{% blocktrans with p_n_open=p.n_open %}{{ p_n_open }} masala{% endblocktrans %}{% if p.n_open < course_min %} {% blocktrans with course_min=course_min %}· <span class="text-warn">tayyorlanmoqda: kamida {{ course_min }} ta kerak</span>{% endblocktrans %}{% elif p.n_open > course_max %} {% blocktrans with course_max=course_max %}· <span class="text-mute">kursda {{ course_max }} tasi</span>{% endblocktrans %}{% endif %}{% elif p.n_tags %}<span class="text-warn">{% trans "masala yo‘q" %}</span>{% else %}{% trans "faqat nazariya" %}{% endif %}</span>
       </div>
     </div>
     <div class="ca-row-side">
-      <a href="{% url 'moderation:plan_edit' p.pk %}" class="ca-btn ca-btn-ghost !px-2 !py-1.5" title="Tahrirlash" aria-label="Tahrirlash: {{ p.title }}"><i data-lucide="pencil" class="lu" aria-hidden="true"></i></a>
-      <form method="post" action="{% url 'moderation:plan_delete' p.pk %}" data-confirm="«{{ p.title }}» kursi o‘chiriladi. Masalalar va teglar o‘chmaydi. Davom etasizmi?">{% csrf_token %}
-        <button class="ca-btn ca-btn-ghost !px-2 !py-1.5 text-bad" title="O‘chirish" aria-label="O‘chirish: {{ p.title }}"><i data-lucide="trash-2" class="lu" aria-hidden="true"></i></button>
+      <a href="{% url 'moderation:plan_edit' p.pk %}" class="ca-btn ca-btn-ghost !px-2 !py-1.5" title="{% trans 'Tahrirlash' %}" aria-label="{% blocktrans with p_title=p.title %}Tahrirlash: {{ p_title }}{% endblocktrans %}"><i data-lucide="pencil" class="lu" aria-hidden="true"></i></a>
+      <form method="post" action="{% url 'moderation:plan_delete' p.pk %}" data-confirm="{% blocktrans with p_title=p.title %}«{{ p_title }}» kursi o‘chiriladi. Masalalar va teglar o‘chmaydi. Davom etasizmi?{% endblocktrans %}">{% csrf_token %}
+        <button class="ca-btn ca-btn-ghost !px-2 !py-1.5 text-bad" title="{% trans 'O‘chirish' %}" aria-label="{% blocktrans with p_title=p.title %}O‘chirish: {{ p_title }}{% endblocktrans %}"><i data-lucide="trash-2" class="lu" aria-hidden="true"></i></button>
       </form>
     </div>
   </li>
   {% endfor %}
 </ul>
 {% else %}
-<div class="ca-empty">Hali kurs yo‘q. <a class="ca-link" href="{% url 'moderation:plan_new' %}">Birinchisini tuzing</a> yoki <code>python manage.py add_courses</code> buyrug‘ini ishga tushiring.</div>
+<div class="ca-empty">{% trans "Hali kurs yo‘q." %} <a class="ca-link" href="{% url 'moderation:plan_new' %}">{% trans "Birinchisini tuzing</a> yoki <code>python manage.py add_courses</code> buyrug‘ini ishga tushiring." %}</div>
 {% endif %}
 {% endblock %}

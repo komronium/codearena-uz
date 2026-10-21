@@ -1,30 +1,30 @@
 {% extends "base.html" %}
-{% block title %}Mening masalalarim{% endblock %}
+{% block title %}{% trans "Mening masalalarim" %}{% endblock %}
 {% block content %}
 <div class="mb-6 flex items-start justify-between gap-3">
   <div>
-    <h1 class="ca-page-title">Mening masalalarim</h1>
-    <p class="mt-1 text-sm text-mute">Yuborgan masalalaringiz adminlar ko‘rib chiqadi. Tasdiqlansa, saytda sizning nomingiz bilan chiqadi.</p>
+    <h1 class="ca-page-title">{% trans "Mening masalalarim" %}</h1>
+    <p class="mt-1 text-sm text-mute">{% trans "Yuborgan masalalaringiz adminlar ko‘rib chiqadi. Tasdiqlansa, saytda sizning nomingiz bilan chiqadi." %}</p>
   </div>
-  <a href="{% url 'moderation:submit' %}" class="ca-btn ca-btn-primary !py-1.5"><i data-lucide="circle-plus" class="lu" aria-hidden="true"></i>Yangi masala</a>
+  <a href="{% url 'moderation:submit' %}" class="ca-btn ca-btn-primary !py-1.5"><i data-lucide="circle-plus" class="lu" aria-hidden="true"></i>{% trans "Yangi masala" %}</a>
 </div>
 {% if problems %}
 <div class="ca-panel !p-0 overflow-x-auto">
 <table class="ca-table">
-  <thead><tr><th scope="col">Sarlavha</th><th scope="col">Qiyinlik</th><th scope="col">Holati</th><th scope="col" class="text-right">Amal</th></tr></thead>
+  <thead><tr><th scope="col">{% trans "Sarlavha" %}</th><th scope="col">{% trans "Qiyinlik" %}</th><th scope="col">{% trans "Holati" %}</th><th scope="col" class="text-right">{% trans "Amal" %}</th></tr></thead>
   <tbody>
   {% for p in problems %}
   <tr>
     <td class="font-medium">{% if p.status == "approved" %}<a class="ca-link" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a>{% else %}{{ p.title }}{% endif %}</td>
     <td><span class="ca-diff ca-diff-{{ p.difficulty }}">{{ p.get_difficulty_display }}</span></td>
-    <td>{% if p.status == "approved" %}<span class="ca-chip ca-chip-ok">Chop etilgan</span>{% elif p.status == "rejected" %}<span class="ca-chip ca-chip-bad">Rad etilgan</span>{% else %}<span class="ca-chip">Ko‘rib chiqilmoqda</span>{% endif %}</td>
-    <td class="text-right">{% if p.status != "approved" %}<a class="ca-btn ca-btn-ghost !py-1.5" href="{% url 'moderation:problem_edit' p.pk %}">{% if p.status == "rejected" %}Tahrirlab qayta yuborish{% else %}Tahrirlash{% endif %}</a>{% endif %}</td>
+    <td>{% if p.status == "approved" %}<span class="ca-chip ca-chip-ok">{% trans "Chop etilgan" %}</span>{% elif p.status == "rejected" %}<span class="ca-chip ca-chip-bad">{% trans "Rad etilgan" %}</span>{% else %}<span class="ca-chip">{% trans "Ko‘rib chiqilmoqda" %}</span>{% endif %}</td>
+    <td class="text-right">{% if p.status != "approved" %}<a class="ca-btn ca-btn-ghost !py-1.5" href="{% url 'moderation:problem_edit' p.pk %}">{% if p.status == "rejected" %}{% trans "Tahrirlab qayta yuborish" %}{% else %}{% trans "Tahrirlash" %}{% endif %}</a>{% endif %}</td>
   </tr>
   {% endfor %}
   </tbody>
 </table>
 </div>
 {% else %}
-<div class="ca-panel text-center text-mute">Hali masala yubormagansiz.</div>
+<div class="ca-panel text-center text-mute">{% trans "Hali masala yubormagansiz." %}</div>
 {% endif %}
 {% endblock %}

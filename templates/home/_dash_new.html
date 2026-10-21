@@ -5,23 +5,23 @@ ctx: the dashboard's, with first_problem, n_courses, joined_any, learning, upcom
 <div class="ca7-col">
   {% with s1=solved_count s2=learning.progress.done s3=joined_any %}
   <section aria-labelledby="start-title">
-    <div class="ca7-sec-h"><h2 id="start-title">Nimadan boshlash</h2>
-      <span class="ca7-r text-mute tabular">{% if s1 and s2 and s3 %}3{% elif s1 and s2 or s1 and s3 or s2 and s3 %}2{% elif s1 or s2 or s3 %}1{% else %}0{% endif %} / 3 bajarildi</span></div>
+    <div class="ca7-sec-h"><h2 id="start-title">{% trans "Nimadan boshlash" %}</h2>
+      <span class="ca7-r text-mute tabular">{% if s1 and s2 and s3 %}3{% elif s1 and s2 or s1 and s3 or s2 and s3 %}2{% elif s1 or s2 or s3 %}1{% else %}0{% endif %} {% trans "/ 3 bajarildi" %}</span></div>
     <ol class="ca7-steps7">
       <li class="{% if s1 %}is-done{% else %}is-cur{% endif %}"><span aria-hidden="true">{% if s1 %}<i data-lucide="check" class="lu"></i>{% else %}1{% endif %}</span>
-        <div><h3>Birinchi masalani yeching</h3><p>{% if first_problem %}{{ first_problem.title }}: kod yozish, yuborish va natijani o‘qishni shu masalada o‘rganasiz.{% else %}Kod yozish, yuborish va natijani o‘qishni birinchi masalada o‘rganasiz.{% endif %}</p></div>
+        <div><h3>{% trans "Birinchi masalani yeching" %}</h3><p>{% if first_problem %}{% blocktrans with first_problem_title=first_problem.title %}{{ first_problem_title }}: kod yozish, yuborish va natijani o‘qishni shu masalada o‘rganasiz.{% endblocktrans %}{% else %}{% trans "Kod yozish, yuborish va natijani o‘qishni birinchi masalada o‘rganasiz." %}{% endif %}</p></div>
         </li>
       <li class="{% if s2 %}is-done{% elif s1 %}is-cur{% endif %}"><span aria-hidden="true">{% if s2 %}<i data-lucide="check" class="lu"></i>{% else %}2{% endif %}</span>
-        <div><h3>Asoslarni o‘rganing</h3><p>O‘rganish bo‘limida {{ n_courses }} ta kurs: qisqa nazariya va har biridan keyin mashq masalalari{% if learning %}, birinchisi «{{ learning.plan.title }}»{% endif %}.</p></div>
-        <a class="ca-btn ca-btn-soft" href="{% url 'learn:hub' %}">Darslarni ko‘rish</a></li>
+        <div><h3>{% trans "Asoslarni o‘rganing" %}</h3><p>{% blocktrans with n_courses=n_courses %}O‘rganish bo‘limida {{ n_courses }} ta kurs: qisqa nazariya va har biridan keyin mashq masalalari{% endblocktrans %}{% if learning %}{% blocktrans with learning_plan_title=learning.plan.title %}, birinchisi «{{ learning_plan_title }}»{% endblocktrans %}{% endif %}.</p></div>
+        <a class="ca-btn ca-btn-soft" href="{% url 'learn:hub' %}">{% trans "Darslarni ko‘rish" %}</a></li>
       {% if upcoming %}
       <li class="{% if s3 %}is-done{% elif s1 and s2 %}is-cur{% endif %}"><span aria-hidden="true">{% if s3 %}<i data-lucide="check" class="lu"></i>{% else %}3{% endif %}</span>
-        <div><h3>Birinchi musobaqaga yoziling</h3><p>{% with c=upcoming.0 %}{{ c.title }}, {{ c.start|ztime:"d.m H:i" }}. Reytingingiz musobaqada boshlanadi{% if not c.is_rated %}; bu raund reytingga ta’sir qilmaydi, mashq uchun{% endif %}.{% endwith %}</p></div>
-        <a class="ca-btn ca-btn-soft" href="{% url 'contests:detail' upcoming.0.pk %}">Ro‘yxatdan o‘tish</a></li>
+        <div><h3>{% trans "Birinchi musobaqaga yoziling" %}</h3><p>{% with c=upcoming.0 %}{% blocktrans with c_title=c.title c_start=c.start|ztime:"d.m H:i" %}{{ c_title }}, {{ c_start }}. Reytingingiz musobaqada boshlanadi{% endblocktrans %}{% if not c.is_rated %}{% trans "; bu raund reytingga ta’sir qilmaydi, mashq uchun" %}{% endif %}.{% endwith %}</p></div>
+        <a class="ca-btn ca-btn-soft" href="{% url 'contests:detail' upcoming.0.pk %}">{% trans "Ro‘yxatdan o‘tish" %}</a></li>
       {% elif not user.is_superuser %}
       <li class="{% if s1 and s2 %}is-cur{% endif %}"><span aria-hidden="true">3</span>
-        <div><h3>Duelda kuchingizni sinang</h3><p>Raqib bilan 7 ta savol, har biriga 20 soniya. Yangi musobaqa e’lon qilinganda shu yerda chiqadi.</p></div>
-        <a class="ca-btn ca-btn-soft" href="{% url 'classroom:duels' %}">Raqib topish</a></li>
+        <div><h3>{% trans "Duelda kuchingizni sinang" %}</h3><p>{% trans "Raqib bilan 7 ta savol, har biriga 20 soniya. Yangi musobaqa e’lon qilinganda shu yerda chiqadi." %}</p></div>
+        <a class="ca-btn ca-btn-soft" href="{% url 'classroom:duels' %}">{% trans "Raqib topish" %}</a></li>
       {% endif %}
     </ol>
   </section>
@@ -29,16 +29,16 @@ ctx: the dashboard's, with first_problem, n_courses, joined_any, learning, upcom
 
 </div>
 
-<aside class="ca7-aside" aria-label="Qo‘shimcha">
+<aside class="ca7-aside" aria-label="{% trans 'Qo‘shimcha' %}">
   {% if daily %}{% load daily %}{% daily_stats daily user as ds %}{% include "problems/_daily_card.html" %}{% endif %}
   {% if ring %}{% url 'problems:list' as problems_url %}{% include "problems/_solved_card.html" with title="Yechilgan masalalar" more_url=problems_url %}{% endif %}
   <section class="ca-box" aria-labelledby="help-title">
-    <div class="ca-box-cap ca-hd"><h2 id="help-title">Natijalar nimani anglatadi</h2></div>
+    <div class="ca-box-cap ca-hd"><h2 id="help-title">{% trans "Natijalar nimani anglatadi" %}</h2></div>
     <dl class="ca7-pad ca7-legend7">
-      <div><dt><span class="ca-vd is-ac"><code translate="no">AC</code>Qabul qilindi</span></dt><dd>Barcha testlardan o‘tdi: masala yechildi.</dd></div>
-      <div><dt><span class="ca-vd is-bad"><code translate="no">WA</code>Noto‘g‘ri javob</span></dt><dd>Dastur ishladi, lekin biror testda javob boshqacha chiqdi.</dd></div>
-      <div><dt><span class="ca-vd is-warn"><code translate="no">TLE</code>Vaqt oshdi</span></dt><dd>Javob vaqt chegarasida chiqmadi. Tezroq algoritm kerak.</dd></div>
-      <div><dt><span class="ca-vd"><code translate="no">CE</code>Kompilyatsiya xatosi</span></dt><dd>Kod ishga tushmadi. Xato matni urinish sahifasida.</dd></div>
+      <div><dt><span class="ca-vd is-ac">{% trans "<code translate=\"no\">AC</code>Qabul qilindi" %}</span></dt><dd>{% trans "Barcha testlardan o‘tdi: masala yechildi." %}</dd></div>
+      <div><dt><span class="ca-vd is-bad">{% trans "<code translate=\"no\">WA</code>Noto‘g‘ri javob" %}</span></dt><dd>{% trans "Dastur ishladi, lekin biror testda javob boshqacha chiqdi." %}</dd></div>
+      <div><dt><span class="ca-vd is-warn">{% trans "<code translate=\"no\">TLE</code>Vaqt oshdi" %}</span></dt><dd>{% trans "Javob vaqt chegarasida chiqmadi. Tezroq algoritm kerak." %}</dd></div>
+      <div><dt><span class="ca-vd">{% trans "<code translate=\"no\">CE</code>Kompilyatsiya xatosi" %}</span></dt><dd>{% trans "Kod ishga tushmadi. Xato matni urinish sahifasida." %}</dd></div>
     </dl>
   </section>
 </aside>

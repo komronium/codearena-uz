@@ -3,30 +3,30 @@ tags, the title, when / how long / how many, then the clock and the one gold act
 ctx: c (from contests.views.contest_list), state ("running" | "upcoming").{% endcomment %}
 <article class="ca7-ccard" aria-labelledby="cc-{{ c.pk }}">
   <p class="ca7-ccard-tags">
-    {% if state == "running" %}<span class="ca7-htag"><span class="ca-live-dot" aria-hidden="true"></span>Jonli</span>{% else %}<span class="ca7-htag">Kelgusi</span>{% endif %}
-    <span class="ca7-htag">{% if c.is_rated %}Reytingli{% else %}Reytingga ta’sir qilmaydi{% endif %}</span>
-    {% if c.division %}<span class="ca7-htag" title="{{ c.get_division_display }}">Div. {{ c.division }}</span>{% endif %}
-    {% if c.me %}<span class="ca7-htag"><i data-lucide="check" class="lu" aria-hidden="true"></i>{% if state == "running" %}Qatnashyapsiz{% else %}Ro‘yxatdasiz{% endif %}</span>{% endif %}
+    {% if state == "running" %}<span class="ca7-htag">{% trans "<span class=\"ca-live-dot\" aria-hidden=\"true\"></span>Jonli" %}</span>{% else %}<span class="ca7-htag">{% trans "Kelgusi" %}</span>{% endif %}
+    <span class="ca7-htag">{% if c.is_rated %}{% trans "Reytingli" %}{% else %}{% trans "Reytingga ta’sir qilmaydi" %}{% endif %}</span>
+    {% if c.division %}<span class="ca7-htag" title="{{ c.get_division_display }}">{% blocktrans with c_division=c.division %}Div. {{ c_division }}{% endblocktrans %}</span>{% endif %}
+    {% if c.me %}<span class="ca7-htag"><i data-lucide="check" class="lu" aria-hidden="true"></i>{% if state == "running" %}{% trans "Qatnashyapsiz" %}{% else %}{% trans "Ro‘yxatdasiz" %}{% endif %}</span>{% endif %}
   </p>
   <h3 id="cc-{{ c.pk }}"><a href="{% url 'contests:detail' c.pk %}">{{ c.title }}</a></h3>
   <ul class="ca7-ccard-meta">
     <li><i data-lucide="calendar" class="lu" aria-hidden="true"></i><span class="tabular">{{ c.start|ztime:"d.m.Y · H:i" }}{% if state == "running" %}–{{ c.end|ztime:"H:i" }}{% endif %}</span></li>
-    <li><i data-lucide="list" class="lu" aria-hidden="true"></i>{{ c.duration_label }} · {{ c.n_problems }} masala · {% if c.type == "cf" %}Codeforces qoidasi{% elif c.type == "icpc" %}ICPC qoidasi{% else %}ball qoidasi{% endif %}</li>
-    <li><i data-lucide="users" class="lu" aria-hidden="true"></i>{% if state == "running" %}{{ c.n_participants }} ishtirokchi{% if c.me and c.my_rank %} · siz {{ c.my_rank }}-o‘rinda{% endif %}{% else %}hozircha {{ c.n_participants }} kishi{% endif %}</li>
+    <li><i data-lucide="list" class="lu" aria-hidden="true"></i>{% blocktrans with c_duration_label=c.duration_label c_n_problems=c.n_problems %}{{ c_duration_label }} · {{ c_n_problems }} masala ·{% endblocktrans %} {% if c.type == "cf" %}{% trans "Codeforces qoidasi" %}{% elif c.type == "icpc" %}{% trans "ICPC qoidasi" %}{% else %}{% trans "ball qoidasi" %}{% endif %}</li>
+    <li><i data-lucide="users" class="lu" aria-hidden="true"></i>{% if state == "running" %}{% blocktrans with c_n_participants=c.n_participants %}{{ c_n_participants }} ishtirokchi{% endblocktrans %}{% if c.me and c.my_rank %} {% blocktrans with c_my_rank=c.my_rank %}· siz {{ c_my_rank }}-o‘rinda{% endblocktrans %}{% endif %}{% else %}{% blocktrans with c_n_participants=c.n_participants %}hozircha {{ c_n_participants }} kishi{% endblocktrans %}{% endif %}</li>
   </ul>
   <div class="ca7-ccard-foot">
     <div>
-      <small>{% if state == "running" %}Tugashiga{% else %}Boshlanishiga{% endif %}</small>
+      <small>{% if state == "running" %}{% trans "Tugashiga" %}{% else %}{% trans "Boshlanishiga" %}{% endif %}</small>
       <b class="tabular" data-countdown="{% if state == 'running' %}{{ c.end|date:'c' }}{% else %}{{ c.start|date:'c' }}{% endif %}" data-label=""{% if state != "running" %} data-ended="Boshlandi"{% endif %}></b>
     </div>
     {% if state == "running" %}
-    <a class="ca-btn ca-btn-gold" href="{% url 'contests:detail' c.pk %}">{% if c.me %}Davom etish{% else %}Qatnashish{% endif %}</a>
+    <a class="ca-btn ca-btn-gold" href="{% url 'contests:detail' c.pk %}">{% if c.me %}{% trans "Davom etish" %}{% else %}{% trans "Qatnashish" %}{% endif %}</a>
     {% else %}
-    <a class="ca7-hbtn is-wide" href="{% google_calendar_url c %}" target="_blank" rel="noopener" title="Google Kalendarga qo‘shish"><i data-lucide="calendar-plus" class="lu" aria-hidden="true"></i>Kalendarga qo‘shish</a>
-    {% if c.me %}<a class="ca7-hbtn is-wide" href="{% url 'contests:detail' c.pk %}">Batafsil</a>
-    {% elif not user.is_authenticated %}<a class="ca-btn ca-btn-gold" href="{% url 'login' %}?next={{ request.path|urlencode }}">Ro‘yxatdan o‘tish</a>
-    {% elif not user.is_staff %}<form method="post" action="{% url 'contests:register' c.pk %}">{% csrf_token %}<button class="ca-btn ca-btn-gold">Ro‘yxatdan o‘tish</button></form>
-    {% else %}<a class="ca7-hbtn is-wide" href="{% url 'contests:detail' c.pk %}">Batafsil</a>{% endif %}
+    <a class="ca7-hbtn is-wide" href="{% google_calendar_url c %}" target="_blank" rel="noopener" title="{% trans 'Google Kalendarga qo‘shish' %}"><i data-lucide="calendar-plus" class="lu" aria-hidden="true"></i>{% trans "Kalendarga qo‘shish" %}</a>
+    {% if c.me %}<a class="ca7-hbtn is-wide" href="{% url 'contests:detail' c.pk %}">{% trans "Batafsil" %}</a>
+    {% elif not user.is_authenticated %}<a class="ca-btn ca-btn-gold" href="{% url 'login' %}?next={{ request.path|urlencode }}">{% trans "Ro‘yxatdan o‘tish" %}</a>
+    {% elif not user.is_staff %}<form method="post" action="{% url 'contests:register' c.pk %}">{% csrf_token %}<button class="ca-btn ca-btn-gold">{% trans "Ro‘yxatdan o‘tish" %}</button></form>
+    {% else %}<a class="ca7-hbtn is-wide" href="{% url 'contests:detail' c.pk %}">{% trans "Batafsil" %}</a>{% endif %}
     {% endif %}
   </div>
 </article>

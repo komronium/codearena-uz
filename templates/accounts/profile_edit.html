@@ -1,18 +1,18 @@
 {% extends "base.html" %}{% load tiers %}
-{% block title %}Sozlamalar{% endblock %}
+{% block title %}{% trans "Sozlamalar" %}{% endblock %}
 
 {% block content %}
 <div class="mx-auto max-w-4xl">
-  <a class="ca-link mb-2 inline-block text-sm text-mute" href="{% url 'profile' user.username %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>Profil</a>
-  <h1 class="ca-page-title mb-6">Sozlamalar</h1>
+  <a class="ca-link mb-2 inline-block text-sm text-mute" href="{% url 'profile' user.username %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>{% trans "Profil" %}</a>
+  <h1 class="ca-page-title mb-6">{% trans "Sozlamalar" %}</h1>
   <div class="grid gap-8 lg:grid-cols-[12rem_minmax(0,1fr)]">
-  <nav class="ca-setnav" aria-label="Sozlamalar bo‘limlari">
-    <a href="#profil"><i data-lucide="user" class="lu" aria-hidden="true"></i>Profil</a>
-    <a href="#xavfsizlik"><i data-lucide="shield-check" class="lu" aria-hidden="true"></i>Xavfsizlik</a>
-    {% if telegram_configured or user.is_staff %}<a href="#bildirishnoma"><i data-lucide="bell" class="lu" aria-hidden="true"></i>Bildirishnomalar</a>{% endif %}
-    <a href="#korinish"><i data-lucide="sun-moon" class="lu" aria-hidden="true"></i>Ko‘rinish</a>
-    <a href="#taklif"><i data-lucide="user-plus" class="lu" aria-hidden="true"></i>Taklif</a>
-    <a href="#malumot"><i data-lucide="download" class="lu" aria-hidden="true"></i>Ma’lumotlarim</a>
+  <nav class="ca-setnav" aria-label="{% trans 'Sozlamalar bo‘limlari' %}">
+    <a href="#profil"><i data-lucide="user" class="lu" aria-hidden="true"></i>{% trans "Profil" %}</a>
+    <a href="#xavfsizlik"><i data-lucide="shield-check" class="lu" aria-hidden="true"></i>{% trans "Xavfsizlik" %}</a>
+    {% if telegram_configured or user.is_staff %}<a href="#bildirishnoma"><i data-lucide="bell" class="lu" aria-hidden="true"></i>{% trans "Bildirishnomalar" %}</a>{% endif %}
+    <a href="#korinish"><i data-lucide="sun-moon" class="lu" aria-hidden="true"></i>{% trans "Ko‘rinish" %}</a>
+    <a href="#taklif"><i data-lucide="user-plus" class="lu" aria-hidden="true"></i>{% trans "Taklif" %}</a>
+    <a href="#malumot"><i data-lucide="download" class="lu" aria-hidden="true"></i>{% trans "Ma’lumotlarim" %}</a>
   </nav>
   <div class="min-w-0 max-w-lg">
   <form method="post" enctype="multipart/form-data" class="ca-panel !p-0 overflow-hidden scroll-mt-20" id="profil">{% csrf_token %}
@@ -28,126 +28,126 @@
         <p class="ca-tier-ink truncate text-lg font-bold{{ user.rating|lg }}" translate="no" style="--tier: {{ user.rating|tier_color }}">{{ user.username }}</p>
         <p class="text-sm text-mute">{{ user.rating|tier_name }} · {{ user.rating }}</p>
         <input class="sr-only" type="file" name="avatar" id="id_avatar" accept="image/*">
-        <label class="ca-btn ca-btn-ghost mt-2 cursor-pointer !py-1.5 text-sm" for="id_avatar"><i data-lucide="camera" class="lu" aria-hidden="true"></i>Rasm tanlash</label>
-        <p class="mt-1 text-xs text-mute">PNG yoki JPG, kvadrat rasm yaxshi ko‘rinadi.</p>
+        <label class="ca-btn ca-btn-ghost mt-2 cursor-pointer !py-1.5 text-sm" for="id_avatar"><i data-lucide="camera" class="lu" aria-hidden="true"></i>{% trans "Rasm tanlash" %}</label>
+        <p class="mt-1 text-xs text-mute">{% trans "PNG yoki JPG, kvadrat rasm yaxshi ko‘rinadi." %}</p>
         {% if form.avatar.errors %}<p class="mt-1 text-sm text-bad">{{ form.avatar.errors.0 }}</p>{% endif %}
       </div>
     </div>
     <div class="space-y-4 px-6 py-5">
       <div>
-        <label class="ca-label" for="id_username">Foydalanuvchi nomi</label>
+        <label class="ca-label" for="id_username">{% trans "Foydalanuvchi nomi" %}</label>
         <input class="ca-input" type="text" name="username" id="id_username" value="{{ form.username.value|default:'' }}" autocomplete="username" spellcheck="false" autocapitalize="none" maxlength="150"{% if form.next_rename %} disabled{% endif %}>
         {% if form.username.errors %}<p class="mt-1 text-sm text-bad">{{ form.username.errors.0 }}</p>{% endif %}
-        <p class="mt-1.5 text-[0.8125rem] text-mute">{% if form.next_rename %}Keyingi o‘zgartirish {{ form.next_rename|date:"d.m.Y" }} dan keyin mumkin.{% else %}90 kunda bir marta o‘zgartirish mumkin. Profil havolangiz ham o‘zgaradi.{% endif %}</p>
+        <p class="mt-1.5 text-[0.8125rem] text-mute">{% if form.next_rename %}{% blocktrans with form_next_rename=form.next_rename|date:"d.m.Y" %}Keyingi o‘zgartirish {{ form_next_rename }} dan keyin mumkin.{% endblocktrans %}{% else %}{% trans "90 kunda bir marta o‘zgartirish mumkin. Profil havolangiz ham o‘zgaradi." %}{% endif %}</p>
       </div>
       <div class="grid grid-cols-2 gap-3">
         <div>
-          <label class="ca-label" for="id_first_name">Ism</label>
+          <label class="ca-label" for="id_first_name">{% trans "Ism" %}</label>
           <input class="ca-input" type="text" name="first_name" id="id_first_name" value="{{ form.first_name.value|default:'' }}" autocomplete="given-name" maxlength="150" required>
           {% if form.first_name.errors %}<p class="mt-1 text-sm text-bad">{{ form.first_name.errors.0 }}</p>{% endif %}
         </div>
         <div>
-          <label class="ca-label" for="id_last_name">Familiya</label>
+          <label class="ca-label" for="id_last_name">{% trans "Familiya" %}</label>
           <input class="ca-input" type="text" name="last_name" id="id_last_name" value="{{ form.last_name.value|default:'' }}" autocomplete="family-name" maxlength="150" required>
           {% if form.last_name.errors %}<p class="mt-1 text-sm text-bad">{{ form.last_name.errors.0 }}</p>{% endif %}
         </div>
       </div>
-      <p class="mt-1.5 text-[0.8125rem] text-mute">Ism va familiya faqat profilingizda ko‘rinadi; reyting jadvalida foydalanuvchi nomingiz chiqadi.</p>
+      <p class="mt-1.5 text-[0.8125rem] text-mute">{% trans "Ism va familiya faqat profilingizda ko‘rinadi; reyting jadvalida foydalanuvchi nomingiz chiqadi." %}</p>
       {% include "accounts/_place_fields.html" with side=True with_school=True %}
       <div>
-        <label class="ca-label" for="id_email">Email {% if user.email_verified_at %}<span class="ml-1 font-normal text-ok"><i data-lucide="circle-check" class="lu" aria-hidden="true"></i> tasdiqlangan</span>{% endif %}</label>
+        <label class="ca-label" for="id_email">{% trans "Email" %} {% if user.email_verified_at %}<span class="ml-1 font-normal text-ok"><i data-lucide="circle-check" class="lu" aria-hidden="true"></i> {% trans "tasdiqlangan" %}</span>{% endif %}</label>
         <input class="ca-input" type="email" name="email" id="id_email" value="{{ form.email.value|default:'' }}" autocomplete="email" spellcheck="false" autocapitalize="none" required>
         {% if form.email.errors %}<p class="mt-1 text-sm text-bad">{{ form.email.errors.0 }}</p>{% endif %}
-        <p class="mt-1.5 text-[0.8125rem] text-mute">Hech kimga ko‘rinmaydi. Yangi emailni havola orqali qayta tasdiqlaysiz.</p>
+        <p class="mt-1.5 text-[0.8125rem] text-mute">{% trans "Hech kimga ko‘rinmaydi. Yangi emailni havola orqali qayta tasdiqlaysiz." %}</p>
       </div>
     </div>
     <div class="flex items-center justify-between gap-3 border-t border-line bg-paper/60 px-6 py-4">
       <span></span>
-      <button type="submit" class="ca-btn ca-btn-gold"><i data-lucide="check" class="lu" aria-hidden="true"></i>Saqlash</button>
+      <button type="submit" class="ca-btn ca-btn-gold"><i data-lucide="check" class="lu" aria-hidden="true"></i>{% trans "Saqlash" %}</button>
     </div>
   </form>
   <section class="ca-panel mt-6 flex scroll-mt-20 flex-wrap items-center justify-between gap-3" id="xavfsizlik" aria-labelledby="security-title">
     <div class="min-w-0">
-      <h2 id="security-title" class="text-[1.0625rem] font-bold"><i data-lucide="key-round" class="lu mr-1.5 text-accent" aria-hidden="true"></i>Xavfsizlik</h2>
-      <p class="mt-1 text-sm text-mute">Parolni almashtirish uchun joriy parol kerak.</p>
+      <h2 id="security-title" class="text-[1.0625rem] font-bold"><i data-lucide="key-round" class="lu mr-1.5 text-accent" aria-hidden="true"></i>{% trans "Xavfsizlik" %}</h2>
+      <p class="mt-1 text-sm text-mute">{% trans "Parolni almashtirish uchun joriy parol kerak." %}</p>
     </div>
-    <a class="ca-btn ca-btn-ghost" href="{% url 'password_change' %}">Parolni almashtirish</a>
+    <a class="ca-btn ca-btn-ghost" href="{% url 'password_change' %}">{% trans "Parolni almashtirish" %}</a>
   </section>
   {% if telegram_configured or user.is_staff %}
   <section class="ca-panel mt-6 scroll-mt-20" id="bildirishnoma" aria-labelledby="telegram-title">
     <div class="flex flex-wrap items-start justify-between gap-3">
       <div class="min-w-0">
-        <h2 id="telegram-title" class="flex items-center gap-2 text-[1.0625rem] font-bold"><i data-lucide="send" class="lu text-accent" aria-hidden="true"></i>Telegram bildirishnomalari</h2>
+        <h2 id="telegram-title" class="flex items-center gap-2 text-[1.0625rem] font-bold"><i data-lucide="send" class="lu text-accent" aria-hidden="true"></i>{% trans "Telegram bildirishnomalari" %}</h2>
         {% if telegram_link and telegram_link.is_active %}
-        <p class="mt-1 text-sm text-ok"><i data-lucide="circle-check" class="lu mr-1" aria-hidden="true"></i>Ulangan{% if telegram_link.username %} · @{{ telegram_link.username }}{% endif %}</p>
-        {% if telegram_link.last_error %}<p class="mt-1 text-sm text-warn">Oxirgi yuborishda xato bo‘ldi. Tizim keyinroq qayta urinadi.</p>{% endif %}
+        <p class="mt-1 text-sm text-ok"><i data-lucide="circle-check" class="lu mr-1" aria-hidden="true"></i>{% trans "Ulangan" %}{% if telegram_link.username %} · @{{ telegram_link.username }}{% endif %}</p>
+        {% if telegram_link.last_error %}<p class="mt-1 text-sm text-warn">{% trans "Oxirgi yuborishda xato bo‘ldi. Tizim keyinroq qayta urinadi." %}</p>{% endif %}
         {% elif telegram_link %}
-        <p class="mt-1 text-sm text-warn">Bot bilan aloqa to‘xtatilgan. Qayta ulang yoki hisobni uzing.</p>
-        {% if telegram_link.last_error %}<p class="mt-1 text-xs text-mute">Botga xabar yetkazilmadi. Telegram’da botni ochib, Start tugmasini bosing, keyin qayta ulang.</p>{% endif %}
+        <p class="mt-1 text-sm text-warn">{% trans "Bot bilan aloqa to‘xtatilgan. Qayta ulang yoki hisobni uzing." %}</p>
+        {% if telegram_link.last_error %}<p class="mt-1 text-xs text-mute">{% trans "Botga xabar yetkazilmadi. Telegram’da botni ochib, Start tugmasini bosing, keyin qayta ulang." %}</p>{% endif %}
         {% else %}
-        <p class="mt-1 max-w-xl text-sm text-mute">Telegram botni ulang: kunlik masala va tavsiya, trenddagi masala, musobaqa eslatmalari va duellar haqida xabar oling.</p>
+        <p class="mt-1 max-w-xl text-sm text-mute">{% trans "Telegram botni ulang: kunlik masala va tavsiya, trenddagi masala, musobaqa eslatmalari va duellar haqida xabar oling." %}</p>
         {% endif %}
       </div>
       {% if telegram_configured %}
         {% if telegram_link and telegram_link.is_active %}
-        <form method="post" action="{% url 'telegram_disconnect' %}" data-confirm="Telegram hisobingizni CodeArena’dan uzasizmi?">{% csrf_token %}<button class="ca-btn ca-btn-ghost !py-1.5 text-sm"><i data-lucide="unlink" class="lu" aria-hidden="true"></i>Uzish</button></form>
+        <form method="post" action="{% url 'telegram_disconnect' %}" data-confirm="{% trans 'Telegram hisobingizni CodeArena’dan uzasizmi?' %}">{% csrf_token %}<button class="ca-btn ca-btn-ghost !py-1.5 text-sm"><i data-lucide="unlink" class="lu" aria-hidden="true"></i>{% trans "Uzish" %}</button></form>
         {% else %}
-        <form method="post" action="{% url 'telegram_connect' %}">{% csrf_token %}<button class="ca-btn ca-btn-primary !py-1.5 text-sm"><i data-lucide="send" class="lu" aria-hidden="true"></i>{% if telegram_link %}Qayta ulash{% else %}Telegramni ulash{% endif %}</button></form>
+        <form method="post" action="{% url 'telegram_connect' %}">{% csrf_token %}<button class="ca-btn ca-btn-primary !py-1.5 text-sm"><i data-lucide="send" class="lu" aria-hidden="true"></i>{% if telegram_link %}{% trans "Qayta ulash" %}{% else %}{% trans "Telegramni ulash" %}{% endif %}</button></form>
         {% endif %}
       {% endif %}
     </div>
     {% if not telegram_configured %}
-    <div class="ca-alert mt-4">{% if user.is_staff %}Telegram bot sozlanmagan: bot tokeni va webhook sozlamalarini qo‘shing.{% else %}Telegram bildirishnomalari hozircha ishlamayapti. Yoqilgach, shu yerdan ulashingiz mumkin.{% endif %}</div>
+    <div class="ca-alert mt-4">{% if user.is_staff %}{% trans "Telegram bot sozlanmagan: bot tokeni va webhook sozlamalarini qo‘shing." %}{% else %}{% trans "Telegram bildirishnomalari hozircha ishlamayapti. Yoqilgach, shu yerdan ulashingiz mumkin." %}{% endif %}</div>
     {% elif not telegram_link or not telegram_link.is_active %}
-    <p class="mt-3 text-xs leading-relaxed text-mute">Ulash tugmasidan keyin Telegram’da <b>Start</b> ni bosing. So‘ng shu sahifaga qaytib, yangilang. Kod 10 daqiqa ichida ishlatilishi va faqat bir marta qo‘llanishi mumkin.</p>
+    <p class="mt-3 text-xs leading-relaxed text-mute">{% trans "Ulash tugmasidan keyin Telegram’da <b>Start</b> ni bosing. So‘ng shu sahifaga qaytib, yangilang. Kod 10 daqiqa ichida ishlatilishi va faqat bir marta qo‘llanishi mumkin." %}</p>
     {% else %}
     <form method="post" action="{% url 'telegram_preferences' %}" class="mt-5 border-t border-line pt-4">{% csrf_token %}
       <fieldset>
-        <legend class="mb-3 text-sm font-semibold">Qaysi xabarlarni yuboraylik?</legend>
+        <legend class="mb-3 text-sm font-semibold">{% trans "Qaysi xabarlarni yuboraylik?" %}</legend>
         <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-          <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-line p-3 text-sm"><input class="mt-0.5" type="checkbox" name="notify_daily_problem"{% if telegram_link.notify_daily_problem %} checked{% endif %}><span><b>📅 Kunlik masala</b><small class="mt-0.5 block text-xs text-mute">Har kuni tanlangan masala</small></span></label>
-          <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-line p-3 text-sm"><input class="mt-0.5" type="checkbox" name="notify_daily_tip"{% if telegram_link.notify_daily_tip %} checked{% endif %}><span><b>💡 Kunlik tavsiya</b><small class="mt-0.5 block text-xs text-mute">Algoritm va yechish bo‘yicha qisqa maslahat</small></span></label>
-          <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-line p-3 text-sm"><input class="mt-0.5" type="checkbox" name="notify_trending_problem"{% if telegram_link.notify_trending_problem %} checked{% endif %}><span><b>🔥 Trenddagi masala</b><small class="mt-0.5 block text-xs text-mute">So‘nggi 7 kunda ommalashgan masala</small></span></label>
-          <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-line p-3 text-sm"><input class="mt-0.5" type="checkbox" name="notify_contests"{% if telegram_link.notify_contests %} checked{% endif %}><span><b>🏆 Musobaqalar</b><small class="mt-0.5 block text-xs text-mute">Ro‘yxatdan o‘tgan musobaqa boshlanishidan 1 soat oldin</small></span></label>
-          <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-line p-3 text-sm"><input class="mt-0.5" type="checkbox" name="notify_duels"{% if telegram_link.notify_duels %} checked{% endif %}><span><b>⚔️ Duellar</b><small class="mt-0.5 block text-xs text-mute">Sizni duelga chaqirishganda va duel natijasi chiqqanda</small></span></label>
-          <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-line p-3 text-sm"><input class="mt-0.5" type="checkbox" name="notify_badges"{% if telegram_link.notify_badges %} checked{% endif %}><span><b>🏅 Nishonlar</b><small class="mt-0.5 block text-xs text-mute">Yangi nishon yoki bosqich olganingizda</small></span></label>
-          <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-line p-3 text-sm"><input class="mt-0.5" type="checkbox" name="notify_streak"{% if telegram_link.notify_streak %} checked{% endif %}><span><b>Olov</b><small class="mt-0.5 block text-xs text-mute">Kechqurun, bugungi masala yechilmagan bo‘lsa, Olov o‘chmasin</small></span></label>
+          <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-line p-3 text-sm"><input class="mt-0.5" type="checkbox" name="notify_daily_problem"{% if telegram_link.notify_daily_problem %} checked{% endif %}><span>{% trans "<b>📅 Kunlik masala</b><small class=\"mt-0.5 block text-xs text-mute\">Har kuni tanlangan masala</small>" %}</span></label>
+          <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-line p-3 text-sm"><input class="mt-0.5" type="checkbox" name="notify_daily_tip"{% if telegram_link.notify_daily_tip %} checked{% endif %}><span>{% trans "<b>💡 Kunlik tavsiya</b><small class=\"mt-0.5 block text-xs text-mute\">Algoritm va yechish bo‘yicha qisqa maslahat</small>" %}</span></label>
+          <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-line p-3 text-sm"><input class="mt-0.5" type="checkbox" name="notify_trending_problem"{% if telegram_link.notify_trending_problem %} checked{% endif %}><span>{% trans "<b>🔥 Trenddagi masala</b><small class=\"mt-0.5 block text-xs text-mute\">So‘nggi 7 kunda ommalashgan masala</small>" %}</span></label>
+          <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-line p-3 text-sm"><input class="mt-0.5" type="checkbox" name="notify_contests"{% if telegram_link.notify_contests %} checked{% endif %}><span>{% trans "<b>🏆 Musobaqalar</b><small class=\"mt-0.5 block text-xs text-mute\">Ro‘yxatdan o‘tgan musobaqa boshlanishidan 1 soat oldin</small>" %}</span></label>
+          <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-line p-3 text-sm"><input class="mt-0.5" type="checkbox" name="notify_duels"{% if telegram_link.notify_duels %} checked{% endif %}><span>{% trans "<b>⚔️ Duellar</b><small class=\"mt-0.5 block text-xs text-mute\">Sizni duelga chaqirishganda va duel natijasi chiqqanda</small>" %}</span></label>
+          <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-line p-3 text-sm"><input class="mt-0.5" type="checkbox" name="notify_badges"{% if telegram_link.notify_badges %} checked{% endif %}><span>{% trans "<b>🏅 Nishonlar</b><small class=\"mt-0.5 block text-xs text-mute\">Yangi nishon yoki bosqich olganingizda</small>" %}</span></label>
+          <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-line p-3 text-sm"><input class="mt-0.5" type="checkbox" name="notify_streak"{% if telegram_link.notify_streak %} checked{% endif %}><span>{% trans "<b>Olov</b><small class=\"mt-0.5 block text-xs text-mute\">Kechqurun, bugungi masala yechilmagan bo‘lsa, Olov o‘chmasin</small>" %}</span></label>
         </div>
       </fieldset>
-      <div class="mt-4 flex justify-end"><button class="ca-btn ca-btn-ghost !py-1.5 text-sm"><i data-lucide="check" class="lu" aria-hidden="true"></i>Sozlamalarni saqlash</button></div>
+      <div class="mt-4 flex justify-end"><button class="ca-btn ca-btn-ghost !py-1.5 text-sm"><i data-lucide="check" class="lu" aria-hidden="true"></i>{% trans "Sozlamalarni saqlash" %}</button></div>
     </form>
     {% endif %}
   </section>
   {% endif %}
   <section class="ca-panel mt-6 scroll-mt-20" id="korinish" aria-labelledby="look-title">
-    <h2 id="look-title" class="text-[1.0625rem] font-bold"><i data-lucide="sun-moon" class="lu mr-1.5 text-accent" aria-hidden="true"></i>Ko‘rinish</h2>
-    <p class="mt-1 text-sm text-mute">Bu qurilmada saqlanadi.</p>
-    <div class="ca-seg ca-seg-sm mt-3 w-fit" role="group" aria-label="Mavzu">
-      <button type="button" data-theme-set="system" aria-pressed="false"><i data-lucide="monitor" class="lu mr-1.5" aria-hidden="true"></i>Tizim</button>
-      <button type="button" data-theme-set="light" aria-pressed="false"><i data-lucide="sun" class="lu mr-1.5" aria-hidden="true"></i>Kunduzgi</button>
-      <button type="button" data-theme-set="dark" aria-pressed="false"><i data-lucide="moon" class="lu mr-1.5" aria-hidden="true"></i>Tungi</button>
+    <h2 id="look-title" class="text-[1.0625rem] font-bold"><i data-lucide="sun-moon" class="lu mr-1.5 text-accent" aria-hidden="true"></i>{% trans "Ko‘rinish" %}</h2>
+    <p class="mt-1 text-sm text-mute">{% trans "Bu qurilmada saqlanadi." %}</p>
+    <div class="ca-seg ca-seg-sm mt-3 w-fit" role="group" aria-label="{% trans 'Mavzu' %}">
+      <button type="button" data-theme-set="system" aria-pressed="false"><i data-lucide="monitor" class="lu mr-1.5" aria-hidden="true"></i>{% trans "Tizim" %}</button>
+      <button type="button" data-theme-set="light" aria-pressed="false"><i data-lucide="sun" class="lu mr-1.5" aria-hidden="true"></i>{% trans "Kunduzgi" %}</button>
+      <button type="button" data-theme-set="dark" aria-pressed="false"><i data-lucide="moon" class="lu mr-1.5" aria-hidden="true"></i>{% trans "Tungi" %}</button>
     </div>
   </section>
   <section class="ca-panel mt-6 scroll-mt-20" id="taklif" aria-labelledby="invite-title">
-    <h2 id="invite-title" class="flex items-center gap-2 text-[1.0625rem] font-bold"><i data-lucide="user-plus" class="lu text-accent" aria-hidden="true"></i>Do‘stlarni taklif qilish</h2>
-    <p class="mt-1 text-sm text-mute">Havolangiz orqali ro‘yxatdan o‘tgan har bir kishi sizning taklifingiz bilan qo‘shilgan hisoblanadi.</p>
+    <h2 id="invite-title" class="flex items-center gap-2 text-[1.0625rem] font-bold"><i data-lucide="user-plus" class="lu text-accent" aria-hidden="true"></i>{% trans "Do‘stlarni taklif qilish" %}</h2>
+    <p class="mt-1 text-sm text-mute">{% trans "Havolangiz orqali ro‘yxatdan o‘tgan har bir kishi sizning taklifingiz bilan qo‘shilgan hisoblanadi." %}</p>
     <div class="mt-3 flex flex-wrap items-center gap-2">
-      <input class="ca-input max-w-sm" id="invite-link" readonly value="{{ request.scheme }}://{{ request.get_host }}/?ref={{ user.username }}" aria-label="Taklif havolasi" onfocus="this.select()">
-      <button type="button" class="ca-btn ca-btn-ghost" data-copy-text="{{ request.scheme }}://{{ request.get_host }}/?ref={{ user.username }}" data-copied="Nusxalandi"><i data-lucide="copy" class="lu" aria-hidden="true"></i>Nusxalash</button>
+      <input class="ca-input max-w-sm" id="invite-link" readonly value="{{ request.scheme }}://{{ request.get_host }}/?ref={{ user.username }}" aria-label="{% trans 'Taklif havolasi' %}" onfocus="this.select()">
+      <button type="button" class="ca-btn ca-btn-ghost" data-copy-text="{{ request.scheme }}://{{ request.get_host }}/?ref={{ user.username }}" data-copied="Nusxalandi"><i data-lucide="copy" class="lu" aria-hidden="true"></i>{% trans "Nusxalash" %}</button>
     </div>
-    {% if invited_count %}<p class="mt-2 text-sm text-mute">Hozirgacha qo‘shilganlar: <b class="tabular text-ink">{{ invited_count }}</b></p>{% endif %}
+    {% if invited_count %}<p class="mt-2 text-sm text-mute">{% blocktrans with invited_count=invited_count %}Hozirgacha qo‘shilganlar: <b class="tabular text-ink">{{ invited_count }}</b>{% endblocktrans %}</p>{% endif %}
   </section>
   <section class="ca-panel mt-6 scroll-mt-20" id="malumot" aria-labelledby="data-title">
-    <h2 id="data-title" class="flex items-center gap-2 text-[1.0625rem] font-bold"><i data-lucide="download" class="lu text-accent" aria-hidden="true"></i>Ma’lumotlarim</h2>
-    <p class="mt-1 text-sm text-mute">Profilingiz, yuborgan kodlaringiz, musobaqa natijalari, duellar va nishonlaringiz bitta JSON faylda.</p>
-    <a class="ca-btn ca-btn-ghost mt-3" href="{% url 'export_data' %}" download><i data-lucide="file-down" class="lu" aria-hidden="true"></i>Yuklab olish</a>
+    <h2 id="data-title" class="flex items-center gap-2 text-[1.0625rem] font-bold"><i data-lucide="download" class="lu text-accent" aria-hidden="true"></i>{% trans "Ma’lumotlarim" %}</h2>
+    <p class="mt-1 text-sm text-mute">{% trans "Profilingiz, yuborgan kodlaringiz, musobaqa natijalari, duellar va nishonlaringiz bitta JSON faylda." %}</p>
+    <a class="ca-btn ca-btn-ghost mt-3" href="{% url 'export_data' %}" download><i data-lucide="file-down" class="lu" aria-hidden="true"></i>{% trans "Yuklab olish" %}</a>
     {% if not user.is_staff %}
-    <form method="post" action="{% url 'delete_account' %}" class="mt-5 border-t border-line pt-4" data-confirm="Hisob o‘chiriladi: ism, email, rasm va Telegram ulanishi olib tashlanadi, qaytarib bo‘lmaydi. Davom etasizmi?">{% csrf_token %}
-      <h3 class="text-sm font-bold text-bad">Hisobni o‘chirish</h3>
-      <p class="mt-1 text-sm text-mute">Shaxsiy ma’lumotlaringiz o‘chadi; musobaqa natijalaringiz «deleted-{{ user.pk }}» nomi ostida qoladi, chunki boshqalarning reytingi ularga tayanadi.</p>
+    <form method="post" action="{% url 'delete_account' %}" class="mt-5 border-t border-line pt-4" data-confirm="{% trans 'Hisob o‘chiriladi: ism, email, rasm va Telegram ulanishi olib tashlanadi, qaytarib bo‘lmaydi. Davom etasizmi?' %}">{% csrf_token %}
+      <h3 class="text-sm font-bold text-bad">{% trans "Hisobni o‘chirish" %}</h3>
+      <p class="mt-1 text-sm text-mute">{% blocktrans with user_pk=user.pk %}Shaxsiy ma’lumotlaringiz o‘chadi; musobaqa natijalaringiz «deleted-{{ user_pk }}» nomi ostida qoladi, chunki boshqalarning reytingi ularga tayanadi.{% endblocktrans %}</p>
       <div class="mt-2 flex flex-wrap items-center gap-2">
-        <input class="ca-input max-w-xs" type="password" name="password" autocomplete="current-password" placeholder="Parolingiz" aria-label="Parolingiz" required>
-        <button class="ca-btn ca-btn-ghost text-bad">O‘chirish</button>
+        <input class="ca-input max-w-xs" type="password" name="password" autocomplete="current-password" placeholder="{% trans 'Parolingiz' %}" aria-label="{% trans 'Parolingiz' %}" required>
+        <button class="ca-btn ca-btn-ghost text-bad">{% trans "O‘chirish" %}</button>
       </div>
     </form>
     {% endif %}

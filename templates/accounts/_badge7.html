@@ -7,7 +7,7 @@ figures, when they differ), kind (optional extra class).{% endcomment %}
   {% if href %}<a class="ca-bt-link" href="{{ href }}">{% endif %}
   <span class="ca-bt-ico" aria-hidden="true"><i data-lucide="{{ icon }}" class="lu"></i></span>
   <div class="ca-bt-main">
-    <p class="ca-bt-head"><b>{{ title }}</b>{% if medal %}<span class="ca-bt-lv">{{ medal }}-o‘rin</span>{% elif of_total %}<span class="ca-bt-lv tabular">{{ of_solved }}/{{ of_total }}</span>{% endif %}</p>
+    <p class="ca-bt-head"><b>{{ title }}</b>{% if medal %}<span class="ca-bt-lv">{% blocktrans with medal=medal %}{{ medal }}-o‘rin{% endblocktrans %}</span>{% elif of_total %}<span class="ca-bt-lv tabular">{{ of_solved }}/{{ of_total }}</span>{% endif %}</p>
     {% if total %}<span class="ca-bt-bar is-one" role="progressbar" aria-valuenow="{{ done }}" aria-valuemin="0" aria-valuemax="{{ total }}" aria-label="{{ title }}: {{ done }} / {{ total }}"><i style="--p: {% widthratio done total 100 %}%"></i></span>{% endif %}
     <small>{{ sub }}{% if total %} · <span class="tabular">{% if shown %}{{ shown }}{% else %}{{ done }} / {{ total }}{% endif %}</span>{% endif %}</small>
   </div>

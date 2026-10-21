@@ -1,12 +1,12 @@
 {% extends "base.html" %}{% load tiers %}
-{% block title %}Duel reytingi{% endblock %}
-{% block description %}Duel reytingi: 1 ga 1 savol duellarida {{ total }} o‘yinchining Elo reytingi.{% endblock %}
+{% block title %}{% trans "Duel reytingi" %}{% endblock %}
+{% block description %}{% blocktrans with total=total %}Duel reytingi: 1 ga 1 savol duellarida {{ total }} o‘yinchining Elo reytingi.{% endblocktrans %}{% endblock %}
 {% block band %}
 <section class="ca-hud" aria-labelledby="board-title">
   <div class="ca-hud-in">
     <div>
-      <h1 id="board-title">Duel reytingi</h1>
-      <p class="ca-hud-sub">{{ total }} o‘yinchi · mavsum {{ season }}, <span class="tabular" data-countdown="{{ season_ends|date:'c' }}" data-label="" data-suffix="1" data-ended="tugadi"></span> dan keyin yangi mavsum</p>
+      <h1 id="board-title">{% trans "Duel reytingi" %}</h1>
+      <p class="ca-hud-sub">{% blocktrans with total=total season=season %}{{ total }} o‘yinchi · mavsum {{ season }},{% endblocktrans %} <span class="tabular" data-countdown="{{ season_ends|date:'c' }}" data-label="" data-suffix="1" data-ended="tugadi"></span> {% trans "dan keyin yangi mavsum" %}</p>
     </div>
     {% include "accounts/_board_tabs.html" %}
   </div>
@@ -15,15 +15,15 @@
 {% block content %}
 {% if users or q or geo.active %}
 {% if podium %}
-<section class="ca-podium" aria-label="O‘tgan mavsum g‘oliblari">
-  <b>{{ podium_season }} mavsumi g‘oliblari</b>
+<section class="ca-podium" aria-label="{% trans 'O‘tgan mavsum g‘oliblari' %}">
+  <b>{% blocktrans with podium_season=podium_season %}{{ podium_season }} mavsumi g‘oliblari{% endblocktrans %}</b>
   {% for m in podium %}<span><span class="ca7-medal m{{ m.rank }}">{{ m.rank }}</span>{% include "accounts/_u7.html" with u=m.user you=False flag=True %}<small class="tabular text-mute">{{ m.rating }}</small></span>{% endfor %}
 </section>
 {% endif %}
 {% include "accounts/_board_tools.html" %}
 <div class="overflow-x-auto ca7-board">
 <table class="ca-table ca-table-flat">
-  <thead><tr><th scope="col" class="w-16 text-center">#</th><th scope="col">Foydalanuvchi</th><th scope="col" class="w-28 text-right" title="Tugagan duellar">Duel</th><th scope="col" class="w-28 text-right">G‘alaba</th><th scope="col" class="w-28 text-right">Reyting</th></tr></thead>
+  <thead><tr><th scope="col" class="w-16 text-center">#</th><th scope="col">{% trans "Foydalanuvchi" %}</th><th scope="col" class="w-28 text-right" title="{% trans 'Tugagan duellar' %}">{% trans "Duel" %}</th><th scope="col" class="w-28 text-right">{% trans "G‘alaba" %}</th><th scope="col" class="w-28 text-right">{% trans "Reyting" %}</th></tr></thead>
   <tbody>
   {% for u in users %}
   <tr{% if u == user %} class="ca-row-me" id="me"{% endif %}>
@@ -38,8 +38,8 @@
 </table>
 </div>
 {% else %}
-<p class="ca7-empty"><b>Hali tugagan duel yo‘q</b>Birinchi duel tugagach, o‘yinchilar shu yerda paydo bo‘ladi. <a class="ca-link" href="{% url 'classroom:duels' %}">Duel boshlash</a></p>
+<p class="ca7-empty">{% trans "<b>Hali tugagan duel yo‘q</b>Birinchi duel tugagach, o‘yinchilar shu yerda paydo bo‘ladi." %} <a class="ca-link" href="{% url 'classroom:duels' %}">{% trans "Duel boshlash" %}</a></p>
 {% endif %}
-<p class="mt-3 max-w-3xl text-sm text-mute">Har oy boshida reyting 1200 ga qarab yarmigacha qaytadi: hamma yangi mavsumni yaqin joydan boshlaydi. Mavsum oxirida kamida {{ min_duels }} ta duel o‘ynaganlar orasidan eng yuqori 3 kishi shu mavsum g‘olibi bo‘ladi.</p>
+<p class="mt-3 max-w-3xl text-sm text-mute">{% blocktrans with min_duels=min_duels %}Har oy boshida reyting 1200 ga qarab yarmigacha qaytadi: hamma yangi mavsumni yaqin joydan boshlaydi. Mavsum oxirida kamida {{ min_duels }} ta duel o‘ynaganlar orasidan eng yuqori 3 kishi shu mavsum g‘olibi bo‘ladi.{% endblocktrans %}</p>
 {% include "accounts/_leaderboard_nav.html" %}
 {% endblock %}

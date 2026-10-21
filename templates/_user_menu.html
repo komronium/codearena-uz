@@ -2,7 +2,7 @@
 and below xl the places the top bar has no room for (a <details> needs no script to open; base.html
 closes it on outside click and Esc).{% endcomment %}
 <details class="ca-dropdown" data-dropdown style="--tier: {{ user.rating|tier_color }}">
-  <summary class="ca-dropdown-trigger" aria-label="Hisob: {{ user.username }}" title="{{ user.username }}" translate="no">
+  <summary class="ca-dropdown-trigger" aria-label="{% blocktrans with user_username=user.username %}Hisob: {{ user_username }}{% endblocktrans %}" title="{{ user.username }}" translate="no">
     <span class="ca-avatar ca-user-avatar h-9 w-9 text-sm{% if not user.avatar %} ca-art-{{ user.rating|tier_slug }}{% endif %}">{% if user.avatar %}<img src="{{ user.avatar.url }}" alt="" width="36" height="36">{% else %}{{ user.username|first }}{% endif %}</span>
     <i data-lucide="chevron-down" class="lu ca-chev" aria-hidden="true"></i>
     {% if nav.duels or nav.staff.total %}<b class="ca-dropdown-dot xl:hidden" aria-hidden="true"></b>{% endif %}
@@ -11,20 +11,19 @@ closes it on outside click and Esc).{% endcomment %}
     <div class="flex items-center gap-3 border-b border-line px-3 pb-3 pt-2">
       <span class="ca-avatar ca-user-avatar h-10 w-10 text-base{% if not user.avatar %} ca-art-{{ user.rating|tier_slug }}{% endif %}">{% if user.avatar %}<img src="{{ user.avatar.url }}" alt="" width="40" height="40">{% else %}{{ user.username|first }}{% endif %}</span>
       <span class="min-w-0">
-        <span class="ca-tier-ink block truncate font-semibold{{ user.rating|lg }}" translate="no">{{ user.get_full_name|default:user.username }}</span>
-        <span class="mt-1 flex items-center gap-2"><span class="ca-tier">{{ user.rating|tier_name }}</span><span class="text-xs text-mute tabular">{{ user.rating }} · {{ user.practice_points }} ball</span></span>
+        <span class="ca-tier-ink block truncate font-semibold{{ user.rating|lg }}" translate="no">{% blocktrans with user_get_full_name=user.get_full_name|default:user.username user_rating=user.rating|tier_name user_rating2=user.rating user_practice_points=user.practice_points %}{{ user_get_full_name }}</span> <span class="mt-1 flex items-center gap-2"><span class="ca-tier">{{ user_rating }}</span><span class="text-xs text-mute tabular">{{ user_rating2 }} · {{ user_practice_points }} ball</span></span>{% endblocktrans %}
       </span>
     </div>
-    <a class="ca-dropdown-item" href="{% url 'profile' user.username %}"><i data-lucide="user" class="lu" aria-hidden="true"></i>Profilim</a>
-    <a class="ca-dropdown-item" href="{% url 'badges' %}"><i data-lucide="award" class="lu" aria-hidden="true"></i>Nishonlarim</a>
-    {% with n=nav.duels %}<a class="ca-dropdown-item xl:hidden" href="{% url 'classroom:duels' %}"><i data-lucide="swords" class="lu" aria-hidden="true"></i>Duellar{% if n %}<span class="ca-chip ca-chip-score ml-auto tabular">{{ n }}</span>{% endif %}</a>{% endwith %}
-    {% if user.is_staff %}<a class="ca-dropdown-item xl:hidden" href="{% url 'moderation:dashboard' %}"><i data-lucide="shield" class="lu" aria-hidden="true"></i>Boshqaruv{% if nav.staff.total %}<span class="ca-chip ca-chip-score ml-auto tabular" title="Ko‘rib chiqishni kutmoqda">{{ nav.staff.total }}</span>{% endif %}</a>{% endif %}
-    {% if user.is_setter and not user.is_staff %}<a class="ca-dropdown-item" href="{% url 'moderation:mine' %}"><i data-lucide="pencil-line" class="lu" aria-hidden="true"></i>Mening masalalarim</a>{% endif %}
-    <a class="ca-dropdown-item" href="{% url 'submissions:mine' %}?mine=1"><i data-lucide="history" class="lu" aria-hidden="true"></i>Urinishlarim</a>
-    <a class="ca-dropdown-item" href="{% url 'feed' %}"><i data-lucide="users" class="lu" aria-hidden="true"></i>Do‘stlar</a>
-    <a class="ca-dropdown-item" href="{% url 'profile_edit' %}"><i data-lucide="settings" class="lu" aria-hidden="true"></i>Sozlamalar</a>
+    <a class="ca-dropdown-item" href="{% url 'profile' user.username %}"><i data-lucide="user" class="lu" aria-hidden="true"></i>{% trans "Profilim" %}</a>
+    <a class="ca-dropdown-item" href="{% url 'badges' %}"><i data-lucide="award" class="lu" aria-hidden="true"></i>{% trans "Nishonlarim" %}</a>
+    {% with n=nav.duels %}<a class="ca-dropdown-item xl:hidden" href="{% url 'classroom:duels' %}"><i data-lucide="swords" class="lu" aria-hidden="true"></i>{% trans "Duellar" %}{% if n %}<span class="ca-chip ca-chip-score ml-auto tabular">{{ n }}</span>{% endif %}</a>{% endwith %}
+    {% if user.is_staff %}<a class="ca-dropdown-item xl:hidden" href="{% url 'moderation:dashboard' %}"><i data-lucide="shield" class="lu" aria-hidden="true"></i>{% trans "Boshqaruv" %}{% if nav.staff.total %}<span class="ca-chip ca-chip-score ml-auto tabular" title="Ko‘rib chiqishni kutmoqda">{{ nav.staff.total }}</span>{% endif %}</a>{% endif %}
+    {% if user.is_setter and not user.is_staff %}<a class="ca-dropdown-item" href="{% url 'moderation:mine' %}"><i data-lucide="pencil-line" class="lu" aria-hidden="true"></i>{% trans "Mening masalalarim" %}</a>{% endif %}
+    <a class="ca-dropdown-item" href="{% url 'submissions:mine' %}?mine=1"><i data-lucide="history" class="lu" aria-hidden="true"></i>{% trans "Urinishlarim" %}</a>
+    <a class="ca-dropdown-item" href="{% url 'feed' %}"><i data-lucide="users" class="lu" aria-hidden="true"></i>{% trans "Do‘stlar" %}</a>
+    <a class="ca-dropdown-item" href="{% url 'profile_edit' %}"><i data-lucide="settings" class="lu" aria-hidden="true"></i>{% trans "Sozlamalar" %}</a>
     <form method="post" action="{% url 'logout' %}" class="border-t border-line pt-1">{% csrf_token %}
-      <button type="submit" class="ca-dropdown-item w-full text-bad"><i data-lucide="log-out" class="lu" aria-hidden="true"></i>Chiqish</button>
+      <button type="submit" class="ca-dropdown-item w-full text-bad"><i data-lucide="log-out" class="lu" aria-hidden="true"></i>{% trans "Chiqish" %}</button>
     </form>
   </div>
 </details>

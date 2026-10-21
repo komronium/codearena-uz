@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load tiers uzdates %}
-{% block title %}Musobaqalar{% endblock %}
-{% block description %}CodeArena musobaqalari: Codeforces va ICPC qoidalari, jonli natijalar jadvali va Elo reyting. Kelgusi va o‘tgan raundlar.{% endblock %}
+{% block title %}{% trans "Musobaqalar" %}{% endblock %}
+{% block description %}{% trans "CodeArena musobaqalari: Codeforces va ICPC qoidalari, jonli natijalar jadvali va Elo reyting. Kelgusi va o‘tgan raundlar." %}{% endblock %}
 {% block band %}
 {% comment %}#7 contests: the band with your rating, place and rounds; the live and coming rounds as lapis cards; the past
 ones grouped by month (your place and rating change), all or only yours; the top of the rating and how it works on
@@ -9,14 +9,14 @@ the right.{% endcomment %}
 <section class="ca-hud" aria-labelledby="contests-title">
   <div class="ca-hud-in">
     <div>
-      <h1 id="contests-title">Musobaqalar</h1>
-      <p class="ca-hud-sub">Jonli raundda masala yeching va reytingingizni oshiring.</p>
+      <h1 id="contests-title">{% trans "Musobaqalar" %}</h1>
+      <p class="ca-hud-sub">{% trans "Jonli raundda masala yeching va reytingingizni oshiring." %}</p>
     </div>
     {% if me %}
     <dl class="ca-hud-stats">
-      <div><dt><small>Reytingingiz</small></dt><dd><b class="tabular">{{ me.rating }}</b></dd></div>
-      {% if me.place %}<div><dt><small>O‘rningiz</small></dt><dd><b class="tabular">{{ me.place }} / {{ me.pool }}</b></dd></div>{% endif %}
-      <div><dt><small>Qatnashgan</small></dt><dd><b class="tabular">{{ me.attended }}</b></dd></div>
+      <div><dt><small>{% trans "Reytingingiz" %}</small></dt><dd><b class="tabular">{{ me.rating }}</b></dd></div>
+      {% if me.place %}<div><dt><small>{% trans "O‘rningiz" %}</small></dt><dd><b class="tabular">{{ me.place }} / {{ me.pool }}</b></dd></div>{% endif %}
+      <div><dt><small>{% trans "Qatnashgan" %}</small></dt><dd><b class="tabular">{{ me.attended }}</b></dd></div>
     </dl>
     {% endif %}
   </div>
@@ -26,31 +26,31 @@ the right.{% endcomment %}
 <div class="ca7">
 <div class="ca7-col">
   {% if running or upcoming %}
-  <section class="ca7-ccards" aria-label="Jonli va kelgusi musobaqalar">
+  <section class="ca7-ccards" aria-label="{% trans 'Jonli va kelgusi musobaqalar' %}">
     {% for c in running %}{% include "contests/_card.html" with state="running" %}{% endfor %}
     {% for c in upcoming %}{% include "contests/_card.html" with state="upcoming" %}{% endfor %}
   </section>
   {% else %}
-  <p class="ca7-quiet">Hozircha rejalashtirilgan musobaqa yo‘q. Yangi raund e’lon qilinganda shu yerda chiqadi.</p>
+  <p class="ca7-quiet">{% trans "Hozircha rejalashtirilgan musobaqa yo‘q. Yangi raund e’lon qilinganda shu yerda chiqadi." %}</p>
   {% endif %}
 
   <section aria-labelledby="end-title">
-    <div class="ca7-sec-h"><h2 id="end-title">O‘tgan musobaqalar</h2>
-      <nav class="ca7-seg ca7-r" aria-label="Qaysi musobaqalar">
-        <a href="{% querystring show=None mine=None page=None %}"{% if not show and not only_mine %} aria-current="true"{% endif %}>Hammasi</a>
-        <a href="{% querystring show='rated' mine=None page=None %}"{% if show == 'rated' %} aria-current="true"{% endif %}>Reytingli</a>
-        <a href="{% querystring show='official' mine=None page=None %}"{% if show == 'official' %} aria-current="true"{% endif %}>Rasmiy</a>
-        <a href="{% querystring show='unrated' mine=None page=None %}"{% if show == 'unrated' %} aria-current="true"{% endif %}>Mashq</a>
-        {% if user.is_authenticated %}<a href="{% querystring mine=1 show=None page=None %}"{% if only_mine %} aria-current="true"{% endif %}>Men qatnashgan</a>{% endif %}
+    <div class="ca7-sec-h"><h2 id="end-title">{% trans "O‘tgan musobaqalar" %}</h2>
+      <nav class="ca7-seg ca7-r" aria-label="{% trans 'Qaysi musobaqalar' %}">
+        <a href="{% querystring show=None mine=None page=None %}"{% if not show and not only_mine %} aria-current="true"{% endif %}>{% trans "Hammasi" %}</a>
+        <a href="{% querystring show='rated' mine=None page=None %}"{% if show == 'rated' %} aria-current="true"{% endif %}>{% trans "Reytingli" %}</a>
+        <a href="{% querystring show='official' mine=None page=None %}"{% if show == 'official' %} aria-current="true"{% endif %}>{% trans "Rasmiy" %}</a>
+        <a href="{% querystring show='unrated' mine=None page=None %}"{% if show == 'unrated' %} aria-current="true"{% endif %}>{% trans "Mashq" %}</a>
+        {% if user.is_authenticated %}<a href="{% querystring mine=1 show=None page=None %}"{% if only_mine %} aria-current="true"{% endif %}>{% trans "Men qatnashgan" %}</a>{% endif %}
       </nav></div>
     {% if ended.paginator.count %}
     <div class="overflow-x-auto">
     <table class="ca-table ca-table-flat ca7-past">
       <thead><tr>
-        <th scope="col" class="w-16">Sana</th>
-        <th scope="col">Musobaqa</th>
-        <th scope="col" class="hidden w-28 text-right md:table-cell">Ishtirokchi</th>
-        {% if user.is_authenticated %}<th scope="col" class="w-24 text-right">O‘rningiz</th><th scope="col" class="w-24 text-right">Reyting</th>{% endif %}
+        <th scope="col" class="w-16">{% trans "Sana" %}</th>
+        <th scope="col">{% trans "Musobaqa" %}</th>
+        <th scope="col" class="hidden w-28 text-right md:table-cell">{% trans "Ishtirokchi" %}</th>
+        {% if user.is_authenticated %}<th scope="col" class="w-24 text-right">{% trans "O‘rningiz" %}</th><th scope="col" class="w-24 text-right">{% trans "Reyting" %}</th>{% endif %}
       </tr></thead>
       {% regroup ended by start_month as months %}
       {% for m in months %}
@@ -59,11 +59,11 @@ the right.{% endcomment %}
       {% for c in m.list %}
       <tr>
         <td><span class="ca7-date" aria-hidden="true" title="{{ c.start|weekday_full }}"><b>{{ c.start|date:"d" }}</b>{{ c.start|month_uz }}</span><span class="sr-only">{{ c.start|weekday_full }}, {{ c.start|date:"d.m.Y" }}</span></td>
-        <td><a class="ca-link" href="{% url 'contests:standings' c.pk %}" title="Natijalar jadvali">{{ c.title }}</a>{% if c.division %} <span class="ca-tag ca-tag-div" title="{{ c.get_division_display }}">Div. {{ c.division }}</span>{% endif %}{% if not c.is_rated %} <span class="ca-tag" title="Natija reytingga ta’sir qilmaydi">Mashq</span>{% endif %}
+        <td><a class="ca-link" href="{% url 'contests:standings' c.pk %}" title="{% trans 'Natijalar jadvali' %}">{{ c.title }}</a>{% if c.division %} <span class="ca-tag ca-tag-div" title="{{ c.get_division_display }}">{% blocktrans with c_division=c.division %}Div. {{ c_division }}{% endblocktrans %}</span>{% endif %}{% if not c.is_rated %} <span class="ca-tag" title="Natija reytingga ta’sir qilmaydi">{% trans "Mashq" %}</span>{% endif %}
           <span class="block text-xs text-mute"><span class="tabular">{{ c.start|ztime:"H:i" }}</span> · {{ c.duration_label }}</span></td>
         <td class="hidden text-right tabular md:table-cell">{{ c.n_participants }}</td>
         {% if user.is_authenticated %}
-        <td class="text-right">{% if c.me and c.me.rank %}<b class="font-semibold tabular">{{ c.me.rank }}</b>{% elif c.me %}<span class="text-mute">qatnashgan</span>{% else %}<span class="text-mute" title="Siz bu raundda qatnashmagansiz">—</span>{% endif %}</td>
+        <td class="text-right">{% if c.me and c.me.rank %}<b class="font-semibold tabular">{{ c.me.rank }}</b>{% elif c.me %}<span class="text-mute">{% trans "qatnashgan" %}</span>{% else %}<span class="text-mute" title="Siz bu raundda qatnashmagansiz">—</span>{% endif %}</td>
         <td class="text-right">{% if c.my_delta is not None %}<b class="font-semibold tabular {% if c.my_delta > 0 %}text-ok{% elif c.my_delta < 0 %}text-bad{% else %}text-mute{% endif %}">{{ c.my_delta|signed }}</b>{% else %}<span class="text-mute">—</span>{% endif %}</td>
         {% endif %}
       </tr>
@@ -73,18 +73,18 @@ the right.{% endcomment %}
     </table>
     </div>
     {% else %}
-    <p class="ca7-empty">{% if show %}<b>Bu turdagi o‘tgan musobaqa yo‘q</b><a class="ca-link" href="{% querystring show=None page=None %}">Hammasini ko‘rsatish</a>{% elif only_mine %}<b>Siz hali musobaqada qatnashmagansiz</b>Kelgusi raundga ro‘yxatdan o‘ting.{% else %}<b>Hali tugagan musobaqa yo‘q</b>Birinchi raund tugagach shu yerda chiqadi.{% endif %}</p>
+    <p class="ca7-empty">{% if show %}<b>{% trans "Bu turdagi o‘tgan musobaqa yo‘q" %}</b><a class="ca-link" href="{% querystring show=None page=None %}">{% trans "Hammasini ko‘rsatish" %}</a>{% elif only_mine %}{% trans "<b>Siz hali musobaqada qatnashmagansiz</b>Kelgusi raundga ro‘yxatdan o‘ting." %}{% else %}{% trans "<b>Hali tugagan musobaqa yo‘q</b>Birinchi raund tugagach shu yerda chiqadi." %}{% endif %}</p>
     {% endif %}
     {% include "_pagination.html" with page=ended %}
   </section>
 </div>
 
-<aside class="ca7-aside" aria-label="Reyting">
+<aside class="ca7-aside" aria-label="{% trans 'Reyting' %}">
   {% if top_rated %}
   <section class="ca-box" aria-labelledby="top-title">
-    <div class="ca-box-cap ca-hd"><h2 id="top-title">Eng yuqori reyting</h2><a class="ca-box-tools ca-link" href="{% url 'rating' %}">Hammasi</a></div>
+    <div class="ca-box-cap ca-hd"><h2 id="top-title">{% trans "Eng yuqori reyting" %}</h2><a class="ca-box-tools ca-link" href="{% url 'rating' %}">{% trans "Hammasi" %}</a></div>
     <table class="ca-table ca7-top">
-      <thead><tr><th scope="col" class="w-10 text-center">#</th><th scope="col">Ishtirokchi</th><th scope="col" class="text-right">Reyting</th></tr></thead>
+      <thead><tr><th scope="col" class="w-10 text-center">#</th><th scope="col">{% trans "Ishtirokchi" %}</th><th scope="col" class="text-right">{% trans "Reyting" %}</th></tr></thead>
       <tbody>
       {% for u in top_rated %}
       <tr{% if u == user %} class="ca-row-me"{% endif %}><td class="text-center">{% if forloop.counter <= 3 %}<span class="ca7-medal m{{ forloop.counter }}">{{ forloop.counter }}</span>{% else %}<span class="tabular text-mute">{{ forloop.counter }}</span>{% endif %}</td><td>{% include "accounts/_u7.html" with u=u you=False %}</td><td class="text-right font-bold tabular">{{ u.rating }}</td></tr>
@@ -95,11 +95,11 @@ the right.{% endcomment %}
   </section>
   {% endif %}
   <section class="ca-box" aria-labelledby="how-title">
-    <div class="ca-box-cap ca-hd"><h2 id="how-title">Qanday ishlaydi</h2></div>
+    <div class="ca-box-cap ca-hd"><h2 id="how-title">{% trans "Qanday ishlaydi" %}</h2></div>
     <ol class="ca7-steps">
-      <li><b>Oldindan ro‘yxatdan o‘ting,</b> keyin boshlanishini kuting.</li>
-      <li><b>Reytingli raundlar</b> natijasi reytingingizni o‘zgartiradi.</li>
-      <li><b>O‘tib ketganini</b> virtual ishlab ko‘ring: musobaqa sahifasida.</li>
+      <li>{% trans "<b>Oldindan ro‘yxatdan o‘ting,</b> keyin boshlanishini kuting." %}</li>
+      <li>{% trans "<b>Reytingli raundlar</b> natijasi reytingingizni o‘zgartiradi." %}</li>
+      <li>{% trans "<b>O‘tib ketganini</b> virtual ishlab ko‘ring: musobaqa sahifasida." %}</li>
     </ol>
   </section>
 </aside>

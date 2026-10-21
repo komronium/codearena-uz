@@ -1,5 +1,5 @@
 {% extends "base.html" %}{% load tagnames %}
-{% block title %}{% if plan %}{{ plan.title }} — tahrirlash{% else %}Yangi kurs{% endif %}{% endblock %}
+{% block title %}{% if plan %}{% blocktrans with plan_title=plan.title %}{{ plan_title }} — tahrirlash{% endblocktrans %}{% else %}{% trans "Yangi kurs" %}{% endif %}{% endblock %}
 {% block content %}
 <div class="mb-6">
   {% url 'moderation:plans' as back %}{% include "moderation/_header.html" with title=plan.title|default:"Yangi kurs" subtitle="Kursga tanlangan teglardagi barcha ochiq masalalar tushadi, osonidan qiyiniga." back_url=back back_label="Kurslar" %}
@@ -11,16 +11,16 @@
   <div class="space-y-6">
     <section class="ca-panel space-y-4">
       <div class="grid gap-4 sm:grid-cols-2">
-        <div><label class="ca-label" for="{{ form.title.id_for_label }}">Nomi</label>{{ form.title }}{{ form.title.errors }}</div>
-        <div><label class="ca-label" for="{{ form.slug.id_for_label }}">Slug (manzil: /learn/&lt;slug&gt;/)</label>{{ form.slug }}{{ form.slug.errors }}</div>
+        <div><label class="ca-label" for="{{ form.title.id_for_label }}">{% trans "Nomi" %}</label>{{ form.title }}{{ form.title.errors }}</div>
+        <div><label class="ca-label" for="{{ form.slug.id_for_label }}">{% trans "Slug (manzil: /learn/&lt;slug&gt;/)" %}</label>{{ form.slug }}{{ form.slug.errors }}</div>
       </div>
-      <div><label class="ca-label" for="{{ form.summary.id_for_label }}">Qisqa tavsif (kartochkada)</label>{{ form.summary }}{{ form.summary.errors }}</div>
-      <div><label class="ca-label" for="{{ form.theory_md.id_for_label }}">Nazariya (Markdown: sarlavha, ro‘yxat, ```kod```)</label>{{ form.theory_md }}{{ form.theory_md.errors }}</div>
-      <div><label class="ca-label" for="{{ form.description_md.id_for_label }}">«Kurs haqida» (Markdown, ixtiyoriy)</label>{{ form.description_md }}</div>
+      <div><label class="ca-label" for="{{ form.summary.id_for_label }}">{% trans "Qisqa tavsif (kartochkada)" %}</label>{{ form.summary }}{{ form.summary.errors }}</div>
+      <div><label class="ca-label" for="{{ form.theory_md.id_for_label }}">{% trans "Nazariya (Markdown: sarlavha, ro‘yxat, ```kod```)" %}</label>{{ form.theory_md }}{{ form.theory_md.errors }}</div>
+      <div><label class="ca-label" for="{{ form.description_md.id_for_label }}">{% trans "«Kurs haqida» (Markdown, ixtiyoriy)" %}</label>{{ form.description_md }}</div>
     </section>
 
     <fieldset class="ca-panel">
-      <legend class="ca-section-title !mb-3">Teglar</legend>
+      <legend class="ca-section-title !mb-3">{% trans "Teglar" %}</legend>
       {{ form.tags.errors }}
       <div class="grid gap-x-4 gap-y-1.5 text-sm sm:grid-cols-2 xl:grid-cols-3">
         {% for cb in form.tags %}<label class="flex items-center gap-2">{{ cb.tag }} {{ cb.choice_label|tag_uz }}</label>{% endfor %}
@@ -30,16 +30,16 @@
 
   <aside class="space-y-6 lg:sticky lg:top-20">
     <section class="ca-panel space-y-4">
-      <h2 class="ca-section-title !mb-0">Sozlamalar</h2>
-      <div><label class="ca-label" for="{{ form.stage.id_for_label }}">Bosqich</label>{{ form.stage }}</div>
+      <h2 class="ca-section-title !mb-0">{% trans "Sozlamalar" %}</h2>
+      <div><label class="ca-label" for="{{ form.stage.id_for_label }}">{% trans "Bosqich" %}</label>{{ form.stage }}</div>
       <div class="grid grid-cols-2 gap-3">
-        <div><label class="ca-label" for="{{ form.level.id_for_label }}">Daraja</label>{{ form.level }}</div>
-        <div><label class="ca-label" for="{{ form.order.id_for_label }}">Tartib</label>{{ form.order }}</div>
+        <div><label class="ca-label" for="{{ form.level.id_for_label }}">{% trans "Daraja" %}</label>{{ form.level }}</div>
+        <div><label class="ca-label" for="{{ form.order.id_for_label }}">{% trans "Tartib" %}</label>{{ form.order }}</div>
       </div>
-      <div><label class="ca-label" for="{{ form.icon.id_for_label }}">Belgi</label>{{ form.icon }}</div>
-      <label class="flex items-center gap-2 text-sm">{{ form.is_public }} Hammaga ko‘rinadi</label>
+      <div><label class="ca-label" for="{{ form.icon.id_for_label }}">{% trans "Belgi" %}</label>{{ form.icon }}</div>
+      <label class="flex items-center gap-2 text-sm">{% blocktrans with form_is_public=form.is_public %}{{ form_is_public }} Hammaga ko‘rinadi{% endblocktrans %}</label>
     </section>
-    <button type="submit" class="ca-btn ca-btn-primary w-full"><i data-lucide="check" class="lu" aria-hidden="true"></i>Saqlash</button>
+    <button type="submit" class="ca-btn ca-btn-primary w-full"><i data-lucide="check" class="lu" aria-hidden="true"></i>{% trans "Saqlash" %}</button>
   </aside>
 </form>
 {% endblock %}

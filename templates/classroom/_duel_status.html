@@ -3,18 +3,18 @@
 <div class="ca-dres is-{{ result.state }}">
   <span class="ca-dres-ico" aria-hidden="true"><i data-lucide="{% if result.state == 'win' %}trophy{% elif result.state == 'loss' %}shield{% else %}handshake{% endif %}" class="lu"></i></span>
   <div class="min-w-0">
-    <p class="ca-dres-title">{% if result.state == "win" %}G‘alaba!{% elif result.state == "loss" %}Mag‘lubiyat{% else %}Durang{% endif %}</p>
-    <p class="ca-dres-sub"><b class="tabular">{{ result.mine }} : {{ result.theirs }}</b>{% if result.other %} — {{ result.other.username }} bilan{% endif %} · duel reytingi <b class="tabular ca-dres-delta" data-delta="{{ result.delta }}">{{ result.delta|signed }}</b></p>
+    <p class="ca-dres-title">{% if result.state == "win" %}{% trans "G‘alaba!" %}{% elif result.state == "loss" %}{% trans "Mag‘lubiyat" %}{% else %}{% trans "Durang" %}{% endif %}</p>
+    <p class="ca-dres-sub"><b class="tabular">{{ result.mine }} : {{ result.theirs }}</b>{% if result.other %} {% blocktrans with result_other_username=result.other.username %}— {{ result_other_username }} bilan{% endblocktrans %}{% endif %} {% trans "· duel reytingi" %} <b class="tabular ca-dres-delta" data-delta="{{ result.delta }}">{{ result.delta|signed }}</b></p>
   </div>
   <div class="ca-dres-go">
-    {% if review %}<a class="ca-btn ca-btn-soft" href="#review-title"><i data-lucide="list-checks" class="lu" aria-hidden="true"></i>Savollarni ko‘rish</a>{% endif %}
-    <button type="button" class="ca-btn ca-btn-ghost" data-copy-text="CodeArena duel: {% if result.state == 'win' %}{{ user.username }} {{ result.other.username }} ustidan {{ result.mine }}:{{ result.theirs }} hisobida g‘alaba qozondi{% elif result.state == 'loss' %}{{ result.other.username }} {{ user.username }} ustidan {{ result.theirs }}:{{ result.mine }} hisobida g‘alaba qozondi{% else %}{{ user.username }} va {{ result.other.username }} durang qildi, {{ result.mine }}:{{ result.theirs }}{% endif %}. Siz ham sinab ko‘ring: {{ request.scheme }}://{{ request.get_host }}{% url 'classroom:duels' %}"><i data-lucide="copy" class="lu" aria-hidden="true"></i><span data-copy-label>Natijani nusxalash</span></button>
+    {% if review %}<a class="ca-btn ca-btn-soft" href="#review-title"><i data-lucide="list-checks" class="lu" aria-hidden="true"></i>{% trans "Savollarni ko‘rish" %}</a>{% endif %}
+    <button type="button" class="ca-btn ca-btn-ghost" data-copy-text="CodeArena duel: {% if result.state == 'win' %}{{ user.username }} {{ result.other.username }} ustidan {{ result.mine }}:{{ result.theirs }} hisobida g‘alaba qozondi{% elif result.state == 'loss' %}{{ result.other.username }} {{ user.username }} ustidan {{ result.theirs }}:{{ result.mine }} hisobida g‘alaba qozondi{% else %}{{ user.username }} va {{ result.other.username }} durang qildi, {{ result.mine }}:{{ result.theirs }}{% endif %}. Siz ham sinab ko‘ring: {{ request.scheme }}://{{ request.get_host }}{% url 'classroom:duels' %}"><i data-lucide="copy" class="lu" aria-hidden="true"></i><span data-copy-label>{% trans "Natijani nusxalash" %}</span></button>
     {% if result.offer %}
-    <form method="post" action="{% url 'classroom:duel_answer' result.offer.pk %}">{% csrf_token %}<input type="hidden" name="accept" value="1"><button class="ca-btn ca-btn-gold"><i data-lucide="swords" class="lu" aria-hidden="true"></i>{{ result.other.username }} revansh so‘radi — qabul qilish</button></form>
+    <form method="post" action="{% url 'classroom:duel_answer' result.offer.pk %}">{% csrf_token %}<input type="hidden" name="accept" value="1"><button class="ca-btn ca-btn-gold"><i data-lucide="swords" class="lu" aria-hidden="true"></i>{% blocktrans with result_other_username=result.other.username %}{{ result_other_username }} revansh so‘radi — qabul qilish{% endblocktrans %}</button></form>
     {% elif result.sent %}
-    <a class="ca-btn ca-btn-soft" href="{% url 'classroom:duel' result.sent.pk %}"><i data-lucide="hourglass" class="lu" aria-hidden="true"></i>Revansh yuborildi</a>
+    <a class="ca-btn ca-btn-soft" href="{% url 'classroom:duel' result.sent.pk %}"><i data-lucide="hourglass" class="lu" aria-hidden="true"></i>{% trans "Revansh yuborildi" %}</a>
     {% elif result.other %}
-    <form method="post" action="{% url 'classroom:duel_rematch' duel.pk %}">{% csrf_token %}<button class="ca-btn ca-btn-gold"><i data-lucide="rotate-ccw" class="lu" aria-hidden="true"></i>Revansh</button></form>
+    <form method="post" action="{% url 'classroom:duel_rematch' duel.pk %}">{% csrf_token %}<button class="ca-btn ca-btn-gold"><i data-lucide="rotate-ccw" class="lu" aria-hidden="true"></i>{% trans "Revansh" %}</button></form>
     {% endif %}
   </div>
 </div>
@@ -26,16 +26,16 @@ per_question, n_questions, expires, user. A coding duel from before the quiz sho
   <div class="ca-duelist{% if p.winner %} is-winner{% endif %}{% if not forloop.first %} sm:order-3{% endif %}">
     <span class="ca-avatar h-11 w-11 shrink-0 text-lg ca-art-{{ p.user.rating|tier_slug }}" style="--tier: {{ p.user.rating|tier_color }}" aria-hidden="true">{{ p.user.username|first }}</span>
     <div class="min-w-0 flex-1">
-      <p class="truncate font-semibold">{{ p.user.username }}{% if p.user == user %} <span class="text-xs font-normal text-mute">(siz)</span>{% endif %}</p>
-      <p class="text-xs text-mute">Duel reytingi <b class="text-ink">{{ p.user.duel_rating }}</b>{% if p.delta is not None %} <span class="font-semibold {% if p.delta > 0 %}text-ok{% elif p.delta < 0 %}text-bad{% endif %}">{{ p.delta|signed }}</span>{% endif %}</p>
+      <p class="truncate font-semibold">{{ p.user.username }}{% if p.user == user %} <span class="text-xs font-normal text-mute">{% trans "(siz)" %}</span>{% endif %}</p>
+      <p class="text-xs text-mute">{% blocktrans with p_user_duel_rating=p.user.duel_rating %}Duel reytingi <b class="text-ink">{{ p_user_duel_rating }}</b>{% endblocktrans %}{% if p.delta is not None %} <span class="font-semibold {% if p.delta > 0 %}text-ok{% elif p.delta < 0 %}text-bad{% endif %}">{{ p.delta|signed }}</span>{% endif %}</p>
       {% if duel.mode == "quiz" %}
       <p class="mt-1.5 text-sm">
-        {% if p.over %}<b class="tabular text-ink">{{ p.right }}/{{ n_questions }}</b> to‘g‘ri · <b class="tabular text-ink">{{ p.points }}</b> ball
-        {% elif p.run %}<span class="font-semibold text-ok">O‘ynamoqda…</span> <span class="tabular text-mute">{{ p.right }} ta to‘g‘ri</span>
-        {% else %}<span class="text-mute">Hali boshlamadi</span>{% endif %}
+        {% if p.over %}{% blocktrans with p_right=p.right n_questions=n_questions p_points=p.points %}<b class="tabular text-ink">{{ p_right }}/{{ n_questions }}</b> to‘g‘ri · <b class="tabular text-ink">{{ p_points }}</b> ball{% endblocktrans %}
+        {% elif p.run %}{% blocktrans with p_right=p.right %}<span class="font-semibold text-ok">O‘ynamoqda…</span> <span class="tabular text-mute">{{ p_right }} ta to‘g‘ri</span>{% endblocktrans %}
+        {% else %}<span class="text-mute">{% trans "Hali boshlamadi" %}</span>{% endif %}
       </p>
-      {% if p.run %}<ol class="ca-quiz-steps mt-2" aria-label="{{ p.user.username }}ning javoblari">
-        {% for c in p.cells %}<li class="{% if c.state %}is-{{ c.state }}{% endif %}" title="{{ forloop.counter }}-savol"><span class="sr-only">{{ forloop.counter }}-savol: {% if c.state == "ok" %}to‘g‘ri{% elif c.state == "bad" %}noto‘g‘ri{% elif c.state == "now" %}javob kutilmoqda{% elif c.state == "skip" %}javob berilmadi{% else %}hali yo‘q{% endif %}</span></li>{% endfor %}
+      {% if p.run %}<ol class="ca-quiz-steps mt-2" aria-label="{% blocktrans with p_user_username=p.user.username %}{{ p_user_username }}ning javoblari{% endblocktrans %}">
+        {% for c in p.cells %}<li class="{% if c.state %}is-{{ c.state }}{% endif %}" title="{% blocktrans with forloop_counter=forloop.counter %}{{ forloop_counter }}-savol{% endblocktrans %}"><span class="sr-only">{% blocktrans with forloop_counter=forloop.counter %}{{ forloop_counter }}-savol:{% endblocktrans %} {% if c.state == "ok" %}{% trans "to‘g‘ri" %}{% elif c.state == "bad" %}{% trans "noto‘g‘ri" %}{% elif c.state == "now" %}{% trans "javob kutilmoqda" %}{% elif c.state == "skip" %}{% trans "javob berilmadi" %}{% else %}{% trans "hali yo‘q" %}{% endif %}</span></li>{% endfor %}
       </ol>{% endif %}
       {% endif %}
     </div>
@@ -44,12 +44,12 @@ per_question, n_questions, expires, user. A coding duel from before the quiz sho
   <div class="ca-duelist is-empty sm:order-3">
     <span class="ca-avatar h-11 w-11 shrink-0 text-lg" aria-hidden="true">?</span>
     <div class="min-w-0">
-      <p class="font-semibold">Raqib kutilmoqda</p>
-      <p class="text-xs text-mute">{{ duel.get_language_display }} tilida duel boshlagan keyingi o‘yinchi</p>
+      <p class="font-semibold">{% trans "Raqib kutilmoqda" %}</p>
+      <p class="text-xs text-mute">{% blocktrans with duel_get_language_display=duel.get_language_display %}{{ duel_get_language_display }} tilida duel boshlagan keyingi o‘yinchi{% endblocktrans %}</p>
     </div>
   </div>
   {% endif %}
-  {% if forloop.first %}<div class="flex items-center justify-center text-sm font-bold tracking-widest text-mute sm:order-2" aria-hidden="true">VS</div>{% endif %}
+  {% if forloop.first %}<div class="flex items-center justify-center text-sm font-bold tracking-widest text-mute sm:order-2" aria-hidden="true">{% trans "VS" %}</div>{% endif %}
   {% endfor %}
 </div>
 
@@ -60,39 +60,39 @@ per_question, n_questions, expires, user. A coding duel from before the quiz sho
 
 {% if my_playing %}
 <div class="mt-4 text-center">
-  <a class="ca-btn ca-btn-gold" href="{% url 'classroom:duel_play' duel.pk %}"><i data-lucide="swords" class="lu" aria-hidden="true"></i>{% if my_started %}Davom etish{% else %}Boshlash{% endif %}</a>
-  <p class="mt-2 text-sm text-mute">{{ n_questions }} ta savol, har biriga {{ per_question }} soniya — vaqti savol ochilganda boshlanadi.</p>
+  <a class="ca-btn ca-btn-gold" href="{% url 'classroom:duel_play' duel.pk %}"><i data-lucide="swords" class="lu" aria-hidden="true"></i>{% if my_started %}{% trans "Davom etish" %}{% else %}{% trans "Boshlash" %}{% endif %}</a>
+  <p class="mt-2 text-sm text-mute">{% blocktrans with n_questions=n_questions per_question=per_question %}{{ n_questions }} ta savol, har biriga {{ per_question }} soniya — vaqti savol ochilganda boshlanadi.{% endblocktrans %}</p>
 </div>
 {% endif %}
 
 {% if duel.status == "pending" %}
   {% if not duel.opponent_id %}
-  <p class="mx-auto mt-3 max-w-md text-center text-sm text-mute">Ochiq duel: shu tilda duel boshlagan keyingi o‘yinchi aynan shu savollarni oladi. Ko‘proq to‘g‘ri javob bergan g‘olib, teng bo‘lsa — durang. Raqib {{ expires|date:"d.m H:i" }} gacha kutiladi.</p>
+  <p class="mx-auto mt-3 max-w-md text-center text-sm text-mute">{% blocktrans with expires=expires|date:"d.m H:i" %}Ochiq duel: shu tilda duel boshlagan keyingi o‘yinchi aynan shu savollarni oladi. Ko‘proq to‘g‘ri javob bergan g‘olib, teng bo‘lsa — durang. Raqib {{ expires }} gacha kutiladi.{% endblocktrans %}</p>
   {% elif duel.opponent_id == user.pk %}
-  <p class="mx-auto mt-3 max-w-md text-center text-sm text-mute"><b class="text-ink">{{ duel.challenger.username }}</b> sizni chaqirdi: {{ duel.get_language_display }}, {{ n_questions }} ta savol. Qabul qilsangiz, birinchi savol ochiladi.</p>
-  {% if rival %}<dl class="ca-rivalrec" aria-label="{{ duel.challenger.username }} haqida">
-    <div><dt>Duel reytingi</dt><dd class="tabular">{{ duel.challenger.duel_rating }}</dd></div>
-    <div><dt>G‘alaba</dt><dd class="tabular text-ok">{{ rival.wins }}</dd></div>
-    <div><dt>Mag‘lubiyat</dt><dd class="tabular text-bad">{{ rival.losses }}</dd></div>
-    <div><dt>Sizning hisobingiz</dt><dd class="tabular">{% if rival.you or rival.them %}{{ rival.you }} : {{ rival.them }}{% else %}hali o‘ynamagansiz{% endif %}</dd></div>
+  <p class="mx-auto mt-3 max-w-md text-center text-sm text-mute">{% blocktrans with duel_challenger_username=duel.challenger.username duel_get_language_display=duel.get_language_display n_questions=n_questions %}<b class="text-ink">{{ duel_challenger_username }}</b> sizni chaqirdi: {{ duel_get_language_display }}, {{ n_questions }} ta savol. Qabul qilsangiz, birinchi savol ochiladi.{% endblocktrans %}</p>
+  {% if rival %}<dl class="ca-rivalrec" aria-label="{% blocktrans with duel_challenger_username=duel.challenger.username %}{{ duel_challenger_username }} haqida{% endblocktrans %}">
+    <div><dt>{% trans "Duel reytingi" %}</dt><dd class="tabular">{{ duel.challenger.duel_rating }}</dd></div>
+    <div><dt>{% trans "G‘alaba" %}</dt><dd class="tabular text-ok">{{ rival.wins }}</dd></div>
+    <div><dt>{% trans "Mag‘lubiyat" %}</dt><dd class="tabular text-bad">{{ rival.losses }}</dd></div>
+    <div><dt>{% trans "Sizning hisobingiz" %}</dt><dd class="tabular">{% if rival.you or rival.them %}{{ rival.you }} : {{ rival.them }}{% else %}{% trans "hali o‘ynamagansiz" %}{% endif %}</dd></div>
   </dl>{% endif %}
   <div class="mt-3 flex justify-center gap-2">
-    <form method="post" action="{% url 'classroom:duel_answer' duel.pk %}">{% csrf_token %}<input type="hidden" name="accept" value="1"><button class="ca-btn ca-btn-primary">Qabul qilish</button></form>
-    <form method="post" action="{% url 'classroom:duel_answer' duel.pk %}">{% csrf_token %}<button class="ca-btn ca-btn-ghost">Rad etish</button></form>
+    <form method="post" action="{% url 'classroom:duel_answer' duel.pk %}">{% csrf_token %}<input type="hidden" name="accept" value="1"><button class="ca-btn ca-btn-primary">{% trans "Qabul qilish" %}</button></form>
+    <form method="post" action="{% url 'classroom:duel_answer' duel.pk %}">{% csrf_token %}<button class="ca-btn ca-btn-ghost">{% trans "Rad etish" %}</button></form>
   </div>
   {% else %}
-  <p class="mx-auto mt-3 max-w-md text-center text-sm text-mute"><b class="text-ink">{{ duel.opponent.username }}</b> qabul qilganda o‘sha savollar unga beriladi. {{ expires|date:"d.m H:i" }} gacha kutiladi.</p>
+  <p class="mx-auto mt-3 max-w-md text-center text-sm text-mute">{% blocktrans with duel_opponent_username=duel.opponent.username expires=expires|date:"d.m H:i" %}<b class="text-ink">{{ duel_opponent_username }}</b> qabul qilganda o‘sha savollar unga beriladi. {{ expires }} gacha kutiladi.{% endblocktrans %}</p>
   {% endif %}
 {% elif duel.status == "active" and my_over %}
-<p class="mx-auto mt-3 max-w-md text-center text-sm text-mute">Siz tugatdingiz. Raqib ham tugatganda natija chiqadi.</p>
+<p class="mx-auto mt-3 max-w-md text-center text-sm text-mute">{% trans "Siz tugatdingiz. Raqib ham tugatganda natija chiqadi." %}</p>
 {% elif duel.status == "finished" and not result %}
-<p class="mt-3 text-center text-lg">{% if duel.winner %}<b>{{ duel.winner.username }}</b> g‘olib!{% else %}Durang.{% endif %}</p>
+<p class="mt-3 text-center text-lg">{% if duel.winner %}{% blocktrans with duel_winner_username=duel.winner.username %}<b>{{ duel_winner_username }}</b> g‘olib!{% endblocktrans %}{% else %}{% trans "Durang." %}{% endif %}</p>
 {% elif duel.status == "expired" or duel.status == "declined" %}
-<p class="mt-3 text-center text-sm text-mute">{% if duel.status == "declined" %}Chaqiriq rad etildi{% elif duel.opponent_id %}Chaqiriq muddati o‘tdi{% else %}Hech kim qo‘shilmadi{% endif %} — duel reytingi o‘zgarmadi.</p>
+<p class="mt-3 text-center text-sm text-mute">{% if duel.status == "declined" %}{% trans "Chaqiriq rad etildi" %}{% elif duel.opponent_id %}{% trans "Chaqiriq muddati o‘tdi" %}{% else %}{% trans "Hech kim qo‘shilmadi" %}{% endif %} {% trans "— duel reytingi o‘zgarmadi." %}</p>
 {% endif %}
 {% if duel.status == "finished" or duel.status == "expired" or duel.status == "declined" %}
 <form method="post" action="{% url 'classroom:duels' %}" class="mt-3 flex justify-center gap-2">{% csrf_token %}
   <input type="hidden" name="language" value="{{ duel.language|default:'python' }}">
-  <button name="find" value="1" class="ca-btn {% if result %}ca-btn-ghost{% else %}ca-btn-primary{% endif %}"><i data-lucide="swords" class="lu" aria-hidden="true"></i>Yangi duel</button>
+  <button name="find" value="1" class="ca-btn {% if result %}ca-btn-ghost{% else %}ca-btn-primary{% endif %}"><i data-lucide="swords" class="lu" aria-hidden="true"></i>{% trans "Yangi duel" %}</button>
 </form>
 {% endif %}

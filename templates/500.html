@@ -1,13 +1,13 @@
 {% load static %}
 {% comment %}Rendered without context or middleware (Django's server_error view): no base.html, no {% url %}, no
 app.css — so the colours are the site's tokens copied in, and the mark's paint is set here.{% endcomment %}
-<!doctype html>
+{% trans "<!doctype html>" %}
 <html lang="uz">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
-  <title>Server xatosi — CodeArena</title>
+  <title>{% trans "Server xatosi — CodeArena" %}</title>
   <style>
     @font-face{font-family:"Lato";font-display:swap;font-style:normal;font-weight:400;unicode-range:u+0100-02ba,u+02bd-02c5,u+02c7-02cc,u+02ce-02d7,u+02dd-02ff,u+0304,u+0308,u+0329,u+1d00-1dbf,u+1e00-1e9f,u+1ef2-1eff,u+2020,u+20a0-20ab,u+20ad-20c0,u+2113,u+2c60-2c7f,u+a720-a7ff;src:url("{% static 'fonts/lato3-400-latin-ext.woff2' %}") format("woff2")}
     @font-face{font-family:"Lato";font-display:swap;font-style:normal;font-weight:400;unicode-range:u+0000-00ff,u+0131,u+0152-0153,u+02bb-02bc,u+02c6,u+02da,u+02dc,u+0304,u+0308,u+0329,u+2000-206f,u+20ac,u+2122,u+2190-2193,u+2212,u+2215,u+2248,u+2260,u+2264-2265,u+feff,u+fffd;src:url("{% static 'fonts/lato3-400-latin.woff2' %}") format("woff2")}
@@ -32,9 +32,9 @@ app.css — so the colours are the site's tokens copied in, and the mark's paint
   <main>
     {% include "_brand_mark.html" %}
     <p class="code" aria-hidden="true">500</p>
-    <h1>Serverda xatolik</h1>
-    <p>Kutilmagan xato yuz berdi. Bir necha soniyadan so‘ng sahifani yangilang.</p>
-    <a href="/">Bosh sahifaga</a>
+    <h1>{% trans "Serverda xatolik" %}</h1>
+    <p>{% trans "Kutilmagan xato yuz berdi. Bir necha soniyadan so‘ng sahifani yangilang." %}</p>
+    <a href="/">{% trans "Bosh sahifaga" %}</a>
   </main>
 </body>
 </html>

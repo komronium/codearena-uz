@@ -1,6 +1,6 @@
 {% comment %}The boards as a switch on the band: the contest rating (the one ladder), the duel rating and the clubs; practice points and the badge board are not ranked any more (their pages stay for old links).{% endcomment %}
-<nav class="ca7-hseg ml-auto" aria-label="Reyting turlari">
-  <a href="{% url 'rating' %}" title="Reytingli musobaqalar natijasi bo‘yicha (Elo)"{% if request.resolver_match.url_name == 'rating' %} aria-current="page"{% endif %}>Musobaqa reytingi</a>
-  <a href="{% url 'duel_board' %}" title="1 ga 1 duellar reytingi: musobaqa reytingiga ta’sir qilmaydi"{% if request.resolver_match.url_name == 'duel_board' %} aria-current="page"{% endif %}>Duel</a>
-  <a href="{% url 'clubs' %}"{% if request.resolver_match.url_name in 'clubs,club' %} aria-current="page"{% endif %} title="Maktab va klublar: a’zolarining eng yaxshi beshtasi reytingi yig‘indisi bo‘yicha">Klublar</a>
+<nav class="ca7-hseg ml-auto" aria-label="{% trans 'Reyting turlari' %}">
+  <a href="{% url 'rating' %}" title="{% trans 'Reytingli musobaqalar natijasi bo‘yicha (Elo)' %}"{% if request.resolver_match.url_name == 'rating' %} aria-current="page"{% endif %}>{% trans "Musobaqa reytingi" %}</a>
+  <a href="{% url 'duel_board' %}" title="{% trans '1 ga 1 duellar reytingi: musobaqa reytingiga ta’sir qilmaydi' %}"{% if request.resolver_match.url_name == 'duel_board' %} aria-current="page"{% endif %}>{% trans "Duel" %}</a>
+  <a href="{% url 'clubs' %}"{% if request.resolver_match.url_name in 'clubs,club' %} aria-current="page"{% endif %} title="{% trans 'Maktab va klublar: a’zolarining eng yaxshi beshtasi reytingi yig‘indisi bo‘yicha' %}">{% trans "Klublar" %}</a>
 </nav>

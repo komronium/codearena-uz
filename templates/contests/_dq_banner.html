@@ -1,14 +1,14 @@
 {% comment %}The participant's own disqualification, with the reason staff gave; ctx: participation.{% endcomment %}
 {% if participation.disqualified %}
 <div class="ca-alert ca-alert-bad mb-6" role="alert">
-  <p class="font-semibold"><i data-lucide="ban" class="lu mr-1.5" aria-hidden="true"></i>Siz ushbu musobaqadan diskvalifikatsiya qilingansiz.</p>
-  <p class="mt-1 text-sm">{% if participation.disqualified_reason %}Sabab: {{ participation.disqualified_reason }}{% else %}Sabab ko‘rsatilmagan.{% endif %} Natijangiz hisobga olinmaydi. Xato deb hisoblasangiz, adminga murojaat qiling.</p>
+  <p class="font-semibold"><i data-lucide="ban" class="lu mr-1.5" aria-hidden="true"></i>{% trans "Siz ushbu musobaqadan diskvalifikatsiya qilingansiz." %}</p>
+  <p class="mt-1 text-sm">{% if participation.disqualified_reason %}{% blocktrans with participation_disqualified_reason=participation.disqualified_reason %}Sabab: {{ participation_disqualified_reason }}{% endblocktrans %}{% else %}{% trans "Sabab ko‘rsatilmagan." %}{% endif %} {% trans "Natijangiz hisobga olinmaydi. Xato deb hisoblasangiz, adminga murojaat qiling." %}</p>
   {% if user.is_authenticated and participation.user_id == user.pk %}
   <form method="post" action="{% url 'integrity:report' %}" class="mt-3 grid max-w-xl gap-2">{% csrf_token %}
     <input type="hidden" name="kind" value="appeal"><input type="hidden" name="contest" value="{{ participation.contest_id }}"><input type="hidden" name="next" value="{{ request.get_full_path }}">
-    <label class="text-sm font-medium" for="appeal-text">Apellyatsiya: nima uchun qaror noto‘g‘ri deb hisoblaysiz?</label>
+    <label class="text-sm font-medium" for="appeal-text">{% trans "Apellyatsiya: nima uchun qaror noto‘g‘ri deb hisoblaysiz?" %}</label>
     <textarea class="ca-input" id="appeal-text" name="text" rows="2" maxlength="600" required minlength="5"></textarea>
-    <button class="ca-btn ca-btn-ghost self-start">Adminlarga yuborish</button>
+    <button class="ca-btn ca-btn-ghost self-start">{% trans "Adminlarga yuborish" %}</button>
   </form>
   {% endif %}
 </div>

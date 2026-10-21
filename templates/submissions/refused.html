@@ -1,12 +1,12 @@
 {% extends "base.html" %}
-{% block title %}Yuborilmadi{% endblock %}
+{% block title %}{% trans "Yuborilmadi" %}{% endblock %}
 {% block content %}
 <div class="mx-auto max-w-md py-10 text-center">
-  <h1 class="ca-page-title">Yechim yuborilmadi</h1>
+  <h1 class="ca-page-title">{% trans "Yechim yuborilmadi" %}</h1>
   <p class="mt-2 text-sm text-mute" role="alert">{{ message }}</p>
-  <p class="mt-1 text-sm text-mute">Kodingiz muharrirda saqlangan: masalaga qaytsangiz, u shu yerda turadi.</p>
+  <p class="mt-1 text-sm text-mute">{% trans "Kodingiz muharrirda saqlangan: masalaga qaytsangiz, u shu yerda turadi." %}</p>
   <div class="mt-6 flex flex-wrap justify-center gap-2">
-    <a class="ca-btn ca-btn-gold" href="{% url 'problems:detail' problem.slug %}">Masalaga qaytish</a>
+    <a class="ca-btn ca-btn-gold" href="{% url 'problems:detail' problem.slug %}">{% trans "Masalaga qaytish" %}</a>
   </div>
 </div>
 {% endblock %}

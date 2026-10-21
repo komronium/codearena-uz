@@ -1,11 +1,11 @@
 {% extends "base.html" %}
-{% block title %}{% if contest %}Musobaqani tahrirlash{% else %}Musobaqa yaratish{% endif %}{% endblock %}
+{% block title %}{% if contest %}{% trans "Musobaqani tahrirlash" %}{% else %}{% trans "Musobaqa yaratish" %}{% endif %}{% endblock %}
 {% block content %}
 
 <div class="mb-6">
-  <a class="ca-link mb-2 inline-block text-sm text-mute" href="{% url 'moderation:contests' %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>Musobaqalar</a>
-  <h1 class="ca-page-title">{% if contest %}{{ contest.title }}{% else %}Yangi musobaqa{% endif %}</h1>
-  <p class="mt-1 text-sm text-mute">Musobaqa masalalarini yashirin qilib qo‘shing — boshlanguncha ular hech kimga ko‘rinmaydi. Tugagach ochish mumkin.</p>
+  <a class="ca-link mb-2 inline-block text-sm text-mute" href="{% url 'moderation:contests' %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>{% trans "Musobaqalar" %}</a>
+  <h1 class="ca-page-title">{% if contest %}{{ contest.title }}{% else %}{% trans "Yangi musobaqa" %}{% endif %}</h1>
+  <p class="mt-1 text-sm text-mute">{% trans "Musobaqa masalalarini yashirin qilib qo‘shing — boshlanguncha ular hech kimga ko‘rinmaydi. Tugagach ochish mumkin." %}</p>
 </div>
 
 {% if form.non_field_errors %}<div class="ca-alert ca-alert-bad mb-4" role="alert">{{ form.non_field_errors }}</div>{% endif %}
@@ -14,29 +14,29 @@
   {% csrf_token %}
   <div class="space-y-6">
     <section class="ca-panel space-y-4">
-      <div><label class="ca-label" for="{{ form.title.id_for_label }}">Nomi</label>{{ form.title }}{{ form.title.errors }}</div>
-      <div><label class="ca-label" for="{{ form.description_md.id_for_label }}">Tavsif (Markdown)</label>{{ form.description_md }}{{ form.description_md.errors }}</div>
+      <div><label class="ca-label" for="{{ form.title.id_for_label }}">{% trans "Nomi" %}</label>{{ form.title }}{{ form.title.errors }}</div>
+      <div><label class="ca-label" for="{{ form.description_md.id_for_label }}">{% trans "Tavsif (Markdown)" %}</label>{{ form.description_md }}{{ form.description_md.errors }}</div>
       <div class="grid gap-4 sm:grid-cols-2">
-        <div><label class="ca-label" for="{{ form.start.id_for_label }}">Boshlanishi</label>{{ form.start }}{{ form.start.errors }}</div>
-        <div><label class="ca-label" for="{{ form.end.id_for_label }}">Tugashi</label>{{ form.end }}{{ form.end.errors }}</div>
+        <div><label class="ca-label" for="{{ form.start.id_for_label }}">{% trans "Boshlanishi" %}</label>{{ form.start }}{{ form.start.errors }}</div>
+        <div><label class="ca-label" for="{{ form.end.id_for_label }}">{% trans "Tugashi" %}</label>{{ form.end }}{{ form.end.errors }}</div>
       </div>
     </section>
 
     <section class="ca-panel space-y-3">
       <div class="flex items-center justify-between">
-        <h2 class="ca-section-title !mb-0">Masalalar</h2>
-        <span class="text-xs text-mute">Yorliq: A, B, C… · Ball — musobaqa balli</span>
+        <h2 class="ca-section-title !mb-0">{% trans "Masalalar" %}</h2>
+        <span class="text-xs text-mute">{% trans "Yorliq: A, B, C… · Ball — musobaqa balli" %}</span>
       </div>
       {{ formset.management_form }}{{ formset.non_form_errors }}
       <div id="cp-forms" class="space-y-2">
         {% for f in formset %}
         <div class="cp-row flex flex-wrap items-end gap-2 rounded-[var(--ca-radius)] border border-line p-2">
           {{ f.id }}
-          <div><label class="ca-label" for="{{ f.label.id_for_label }}">Yorliq</label>{{ f.label }}</div>
-          <div class="min-w-[14rem] flex-1"><label class="ca-label" for="{{ f.problem.id_for_label }}">Masala</label>{{ f.problem }}</div>
-          <div><label class="ca-label" for="{{ f.points.id_for_label }}">Ball</label>{{ f.points }}</div>
-          <div><label class="ca-label" for="{{ f.order.id_for_label }}">Tartib</label>{{ f.order }}</div>
-          {% if f.instance.pk %}<label class="flex items-center gap-1.5 pb-2 text-sm text-bad">{{ f.DELETE }} O‘chirish</label>{% endif %}
+          <div><label class="ca-label" for="{{ f.label.id_for_label }}">{% trans "Yorliq" %}</label>{{ f.label }}</div>
+          <div class="min-w-[14rem] flex-1"><label class="ca-label" for="{{ f.problem.id_for_label }}">{% trans "Masala" %}</label>{{ f.problem }}</div>
+          <div><label class="ca-label" for="{{ f.points.id_for_label }}">{% trans "Ball" %}</label>{{ f.points }}</div>
+          <div><label class="ca-label" for="{{ f.order.id_for_label }}">{% trans "Tartib" %}</label>{{ f.order }}</div>
+          {% if f.instance.pk %}<label class="flex items-center gap-1.5 pb-2 text-sm text-bad">{% blocktrans with f_delete=f.DELETE %}{{ f_delete }} O‘chirish{% endblocktrans %}</label>{% endif %}
           {% if f.errors %}<div class="w-full text-sm text-bad">{{ f.errors }}</div>{% endif %}
         </div>
         {% endfor %}
@@ -44,44 +44,44 @@
       <template id="cp-empty">
         <div class="cp-row flex flex-wrap items-end gap-2 rounded-[var(--ca-radius)] border border-line p-2">
           {{ formset.empty_form.id }}
-          <div><label class="ca-label" for="{{ formset.empty_form.label.id_for_label }}">Yorliq</label>{{ formset.empty_form.label }}</div>
-          <div class="min-w-[14rem] flex-1"><label class="ca-label" for="{{ formset.empty_form.problem.id_for_label }}">Masala</label>{{ formset.empty_form.problem }}</div>
-          <div><label class="ca-label" for="{{ formset.empty_form.points.id_for_label }}">Ball</label>{{ formset.empty_form.points }}</div>
-          <div><label class="ca-label" for="{{ formset.empty_form.order.id_for_label }}">Tartib</label>{{ formset.empty_form.order }}</div>
+          <div><label class="ca-label" for="{{ formset.empty_form.label.id_for_label }}">{% trans "Yorliq" %}</label>{{ formset.empty_form.label }}</div>
+          <div class="min-w-[14rem] flex-1"><label class="ca-label" for="{{ formset.empty_form.problem.id_for_label }}">{% trans "Masala" %}</label>{{ formset.empty_form.problem }}</div>
+          <div><label class="ca-label" for="{{ formset.empty_form.points.id_for_label }}">{% trans "Ball" %}</label>{{ formset.empty_form.points }}</div>
+          <div><label class="ca-label" for="{{ formset.empty_form.order.id_for_label }}">{% trans "Tartib" %}</label>{{ formset.empty_form.order }}</div>
         </div>
       </template>
-      <button type="button" id="cp-add" class="ca-btn ca-btn-ghost"><i data-lucide="plus" class="lu" aria-hidden="true"></i>Yana masala</button>
+      <button type="button" id="cp-add" class="ca-btn ca-btn-ghost"><i data-lucide="plus" class="lu" aria-hidden="true"></i>{% trans "Yana masala" %}</button>
     </section>
   </div>
 
   <aside class="space-y-6 lg:sticky lg:top-20">
     <section class="ca-panel space-y-4">
-      <h2 class="ca-section-title !mb-0">Sozlamalar</h2>
-      <div><label class="ca-label" for="{{ form.type.id_for_label }}">Qoidalar</label>{{ form.type }}
-        <details class="mt-1.5 text-[0.8125rem] text-mute"><summary class="cursor-pointer font-medium text-accent">Qoidalar qanday ishlaydi?</summary>
+      <h2 class="ca-section-title !mb-0">{% trans "Sozlamalar" %}</h2>
+      <div><label class="ca-label" for="{{ form.type.id_for_label }}">{% trans "Qoidalar" %}</label>{{ form.type }}
+        <details class="mt-1.5 text-[0.8125rem] text-mute"><summary class="cursor-pointer font-medium text-accent">{% trans "Qoidalar qanday ishlaydi?" %}</summary>
         <ul class="mt-1.5 space-y-1">
-          <li><b class="text-ink">Codeforces</b>: masala balli oxirigacha 52% ga tushadi, har xato −50, kamida 30%. Ballarni 500, 1000, 1500… qiling.</li>
-          <li><b class="text-ink">ICPC</b>: ko‘p yechgan yutadi, tenglikda jarima = daqiqalar + 10 × xato. Codeforces Div. 3/4 shunday.</li>
-          <li>Ikkalasida kompilyatsiya xatosi va 1-testdagi xato jarimasiz.</li>
+          <li>{% trans "<b class=\"text-ink\">Codeforces</b>: masala balli oxirigacha 52% ga tushadi, har xato −50, kamida 30%. Ballarni 500, 1000, 1500… qiling." %}</li>
+          <li>{% trans "<b class=\"text-ink\">ICPC</b>: ko‘p yechgan yutadi, tenglikda jarima = daqiqalar + 10 × xato. Codeforces Div. 3/4 shunday." %}</li>
+          <li>{% trans "Ikkalasida kompilyatsiya xatosi va 1-testdagi xato jarimasiz." %}</li>
         </ul></details>
-        {% if form.type.field.disabled %}<p class="mt-1 text-xs text-warn">Musobaqa boshlangan: qoidani o‘zgartirib bo‘lmaydi.</p>{% endif %}
+        {% if form.type.field.disabled %}<p class="mt-1 text-xs text-warn">{% trans "Musobaqa boshlangan: qoidani o‘zgartirib bo‘lmaydi." %}</p>{% endif %}
         {% if form.type.errors %}<p class="mt-1 text-sm text-bad">{{ form.type.errors.0 }}</p>{% endif %}</div>
-      <label class="flex items-center gap-2 text-sm">{{ form.is_rated }} Reytingli musobaqa</label>
-      <div><label class="ca-label" for="{{ form.division.id_for_label }}">Divizion</label>{{ form.division }}
-        <p class="mt-1 text-xs text-mute">Diapazondan tashqaridagilar ham qatnashadi, lekin reytingi o‘zgarmaydi.</p>
+      <label class="flex items-center gap-2 text-sm">{% blocktrans with form_is_rated=form.is_rated %}{{ form_is_rated }} Reytingli musobaqa{% endblocktrans %}</label>
+      <div><label class="ca-label" for="{{ form.division.id_for_label }}">{% trans "Divizion" %}</label>{{ form.division }}
+        <p class="mt-1 text-xs text-mute">{% trans "Diapazondan tashqaridagilar ham qatnashadi, lekin reytingi o‘zgarmaydi." %}</p>
         {% if form.division.errors %}<p class="mt-1 text-sm text-bad">{{ form.division.errors.0 }}</p>{% endif %}</div>
-      <div><label class="ca-label" for="{{ form.allowed_ip_prefix.id_for_label }}">IP prefiks (ixtiyoriy)</label>{{ form.allowed_ip_prefix }}
-        <p class="mt-1 text-xs text-mute">Faqat shu prefiksli IP dan yuborish mumkin, masalan sinf tarmog‘i.</p></div>
-      <div><label class="ca-label" for="{{ form.personal_minutes.id_for_label }}">Shaxsiy vaqt (daqiqa)</label>{{ form.personal_minutes }}
-        <p class="mt-1 text-xs text-mute">Marafon uchun: har kim «Boshlash»ni bosgandan keyin shuncha daqiqa oladi (musobaqa tugashidan oshmaydi). 0 — hamma uchun bir soat.</p>
+      <div><label class="ca-label" for="{{ form.allowed_ip_prefix.id_for_label }}">{% trans "IP prefiks (ixtiyoriy)" %}</label>{{ form.allowed_ip_prefix }}
+        <p class="mt-1 text-xs text-mute">{% trans "Faqat shu prefiksli IP dan yuborish mumkin, masalan sinf tarmog‘i." %}</p></div>
+      <div><label class="ca-label" for="{{ form.personal_minutes.id_for_label }}">{% trans "Shaxsiy vaqt (daqiqa)" %}</label>{{ form.personal_minutes }}
+        <p class="mt-1 text-xs text-mute">{% trans "Marafon uchun: har kim «Boshlash»ni bosgandan keyin shuncha daqiqa oladi (musobaqa tugashidan oshmaydi). 0 — hamma uchun bir soat." %}</p>
         {% if form.personal_minutes.errors %}<p class="mt-1 text-sm text-bad">{{ form.personal_minutes.errors.0 }}</p>{% endif %}</div>
-      <div><label class="flex items-center gap-2 text-sm font-medium" for="{{ form.auto_finish.id_for_label }}">{{ form.auto_finish }} Natijani avtomatik e’lon qilish</label>
-        <p class="mt-1 text-xs text-mute">Musobaqa tugagach 12 soat o‘tib, ko‘rilmagan o‘xshashlik belgisi qolmasa, masalalar ochiladi va (reytingli bo‘lsa) reyting hisoblanadi. O‘chiq bo‘lsa, buni o‘zingiz qilasiz.</p></div>
-      <div><label class="ca-label" for="{{ form.badge.id_for_label }}">Nishon (ixtiyoriy)</label>{{ form.badge }}
-        <p class="mt-1 text-xs text-mute">Masalalar ochilgach, kamida bitta masala yechganlar profiliga shu nomli nishon qo‘shiladi; birinchi uchtalikka — medal.</p>
+      <div><label class="flex items-center gap-2 text-sm font-medium" for="{{ form.auto_finish.id_for_label }}">{% blocktrans with form_auto_finish=form.auto_finish %}{{ form_auto_finish }} Natijani avtomatik e’lon qilish{% endblocktrans %}</label>
+        <p class="mt-1 text-xs text-mute">{% trans "Musobaqa tugagach 12 soat o‘tib, ko‘rilmagan o‘xshashlik belgisi qolmasa, masalalar ochiladi va (reytingli bo‘lsa) reyting hisoblanadi. O‘chiq bo‘lsa, buni o‘zingiz qilasiz." %}</p></div>
+      <div><label class="ca-label" for="{{ form.badge.id_for_label }}">{% trans "Nishon (ixtiyoriy)" %}</label>{{ form.badge }}
+        <p class="mt-1 text-xs text-mute">{% trans "Masalalar ochilgach, kamida bitta masala yechganlar profiliga shu nomli nishon qo‘shiladi; birinchi uchtalikka — medal." %}</p>
         {% if form.badge.errors %}<p class="mt-1 text-sm text-bad">{{ form.badge.errors.0 }}</p>{% endif %}</div>
     </section>
-    <button type="submit" class="ca-btn ca-btn-primary w-full"><i data-lucide="check" class="lu" aria-hidden="true"></i>Saqlash</button>
+    <button type="submit" class="ca-btn ca-btn-primary w-full"><i data-lucide="check" class="lu" aria-hidden="true"></i>{% trans "Saqlash" %}</button>
   </aside>
 </form>
 

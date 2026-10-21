@@ -1,5 +1,5 @@
 {% comment %}One homework cell; ctx: c (status, tries, at), deadline.{% endcomment %}
-{% if c.status == "ok" %}<span class="ca-verdict ca-verdict-ac" title="Muddatida yechilgan">✓ {% if label %}Yechildi, {% endif %}{{ c.at|date:"d.m H:i" }}</span>
-{% elif c.status == "late" %}<span class="ca-verdict ca-verdict-warn" title="Muddatdan keyin yechilgan">✓ {% if label %}Kech yechildi{% else %}kech{% endif %}</span>
-{% elif c.status == "tried" %}<span class="ca-verdict ca-verdict-bad" title="Yechilmagan">✗ {% if label %}Xato urinishlar: {% endif %}{{ c.tries }}</span>
-{% else %}<span class="text-mute" title="Urinmagan">{% if label %}Boshlanmagan{% else %}—{% endif %}</span>{% endif %}
+{% if c.status == "ok" %}<span class="ca-verdict ca-verdict-ac" title="Muddatida yechilgan">✓ {% if label %}{% trans "Yechildi," %} {% endif %}{{ c.at|date:"d.m H:i" }}</span>
+{% elif c.status == "late" %}<span class="ca-verdict ca-verdict-warn" title="Muddatdan keyin yechilgan">✓ {% if label %}{% trans "Kech yechildi" %}{% else %}{% trans "kech" %}{% endif %}</span>
+{% elif c.status == "tried" %}<span class="ca-verdict ca-verdict-bad" title="Yechilmagan">✗ {% if label %}{% trans "Xato urinishlar:" %} {% endif %}{{ c.tries }}</span>
+{% else %}<span class="text-mute" title="Urinmagan">{% if label %}{% trans "Boshlanmagan" %}{% else %}—{% endif %}</span>{% endif %}

@@ -1,11 +1,11 @@
 {% extends "base.html" %}{% load tiers uzdates %}
-{% block title %}Do‘stlar{% endblock %}
+{% block title %}{% trans "Do‘stlar" %}{% endblock %}
 {% block band %}
 <section class="ca-hud" aria-labelledby="feed-title">
   <div class="ca-hud-in">
     <div>
-      <h1 id="feed-title">Do‘stlar</h1>
-      <p class="ca-hud-sub">so‘nggi {{ days }} kun · {{ n_circle }} kishi</p>
+      <h1 id="feed-title">{% trans "Do‘stlar" %}</h1>
+      <p class="ca-hud-sub">{% blocktrans with days=days n_circle=n_circle %}so‘nggi {{ days }} kun · {{ n_circle }} kishi{% endblocktrans %}</p>
     </div>
   </div>
 </section>
@@ -13,7 +13,7 @@
 {% block content %}
 <div class="ca7">
 <div class="ca7-col">
-  <p class="mb-3 text-sm text-mute">Kuzatgan odamlaringiz nima qilgani shu yerda. Kimnidir kuzatish uchun uning profilidagi «Kuzatish»ni bosing.</p>
+  <p class="mb-3 text-sm text-mute">{% trans "Kuzatgan odamlaringiz nima qilgani shu yerda. Kimnidir kuzatish uchun uning profilidagi «Kuzatish»ni bosing." %}</p>
   {% if events %}
   <ul class="ca-feed">
     {% for e in events %}
@@ -21,26 +21,26 @@
       <span class="ca-feed-ico" aria-hidden="true"><i data-lucide="{% if e.kind == 'solve' %}circle-check-big{% elif e.kind == 'duel' %}swords{% else %}{{ e.items.0.icon }}{% endif %}" class="lu"></i></span>
       <div class="min-w-0 flex-1">
         <a class="ca-user-name" style="--tier: {{ e.user.rating|tier_color }}" href="{% url 'profile' e.user.username %}" translate="no">{{ e.user.username }}</a>
-        {% if e.kind == "solve" %}{% if e.items|length == 1 %}{% with it=e.items.0 %}<a class="ca-link" href="{% url 'problems:detail' it.problem.slug %}">{{ it.problem.title }}</a> masalasini yechdi <span class="ca-diff ca-diff-{{ it.problem.difficulty }}">{{ it.problem.get_difficulty_display }}</span>{% endwith %}
-        {% else %}<b>{{ e.items|length }} ta</b> masala yechdi: {% for it in e.items|slice:":3" %}<a class="ca-link" href="{% url 'problems:detail' it.problem.slug %}">{{ it.problem.title }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}{% if e.items|length > 3 %} va yana {{ e.items|length|add:"-3" }} ta{% endif %}{% endif %}
-        {% elif e.kind == "duel" %}duelda <a class="ca-user-name" href="{% url 'profile' e.versus.username %}" translate="no">{{ e.versus.username }}</a> ni yutdi
-        {% else %}{% if e.items|length == 1 %}«{{ e.items.0.badge }} · {{ e.items.0.level }}» nishonini oldi{% else %}<b>{{ e.items|length }} ta</b> nishon oldi: {% for it in e.items %}«{{ it.badge }} · {{ it.level }}»{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}{% endif %}
+        {% if e.kind == "solve" %}{% if e.items|length == 1 %}{% with it=e.items.0 %}<a class="ca-link" href="{% url 'problems:detail' it.problem.slug %}">{% blocktrans with it_problem_title=it.problem.title %}{{ it_problem_title }}</a> masalasini yechdi{% endblocktrans %} <span class="ca-diff ca-diff-{{ it.problem.difficulty }}">{{ it.problem.get_difficulty_display }}</span>{% endwith %}
+        {% else %}{% blocktrans with e_items=e.items|length %}<b>{{ e_items }} ta</b> masala yechdi:{% endblocktrans %} {% for it in e.items|slice:":3" %}<a class="ca-link" href="{% url 'problems:detail' it.problem.slug %}">{{ it.problem.title }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}{% if e.items|length > 3 %} {% blocktrans with e_items=e.items|length|add:"-3" %}va yana {{ e_items }} ta{% endblocktrans %}{% endif %}{% endif %}
+        {% elif e.kind == "duel" %}{% trans "duelda" %} <a class="ca-user-name" href="{% url 'profile' e.versus.username %}" translate="no">{% blocktrans with e_versus_username=e.versus.username %}{{ e_versus_username }}</a> ni yutdi{% endblocktrans %}
+        {% else %}{% if e.items|length == 1 %}{% blocktrans with e_items_0_badge=e.items.0.badge e_items_0_level=e.items.0.level %}«{{ e_items_0_badge }} · {{ e_items_0_level }}» nishonini oldi{% endblocktrans %}{% else %}{% blocktrans with e_items=e.items|length %}<b>{{ e_items }} ta</b> nishon oldi:{% endblocktrans %} {% for it in e.items %}«{{ it.badge }} · {{ it.level }}»{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}{% endif %}
       </div>
       <time class="tabular text-xs text-mute" datetime="{{ e.at|date:'c' }}">{{ e.at|ago_uz }}</time>
     </li>
     {% endfor %}
   </ul>
   {% else %}
-  <p class="ca7-empty"><b>Hozircha jim</b>{% if n_circle %}So‘nggi {{ days }} kunda hech narsa bo‘lmadi.{% else %}Hali hech kimni kuzatmayapsiz.{% endif %}</p>
+  <p class="ca7-empty"><b>{% trans "Hozircha jim" %}</b>{% if n_circle %}{% blocktrans with days=days %}So‘nggi {{ days }} kunda hech narsa bo‘lmadi.{% endblocktrans %}{% else %}{% trans "Hali hech kimni kuzatmayapsiz." %}{% endif %}</p>
   {% endif %}
 </div>
-<aside class="ca7-aside" aria-label="Tavsiya">
+<aside class="ca7-aside" aria-label="{% trans 'Tavsiya' %}">
   {% if suggestions %}
   <section class="ca-box" aria-labelledby="sug-title">
-    <div class="ca-box-cap ca-hd"><h2 id="sug-title">Kimni kuzatish mumkin</h2></div>
+    <div class="ca-box-cap ca-hd"><h2 id="sug-title">{% trans "Kimni kuzatish mumkin" %}</h2></div>
     <ul class="ca7-pad space-y-2">
       {% for u in suggestions %}<li class="flex items-center justify-between gap-2">{% include "accounts/_u7.html" with u=u you=False %}
-        <form method="post" action="{% url 'follow' u.username %}">{% csrf_token %}<button class="ca-btn ca-btn-ghost !py-1 text-xs">Kuzatish</button></form></li>{% endfor %}
+        <form method="post" action="{% url 'follow' u.username %}">{% csrf_token %}<button class="ca-btn ca-btn-ghost !py-1 text-xs">{% trans "Kuzatish" %}</button></form></li>{% endfor %}
     </ul>
   </section>
   {% endif %}

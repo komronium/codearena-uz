@@ -1,12 +1,12 @@
 {% extends "base.html" %}{% load tiers %}
-{% block title %}Klublar{% endblock %}
-{% block description %}CodeArena maktab va klublari: a’zolari soni va jamoaviy reyting.{% endblock %}
+{% block title %}{% trans "Klublar" %}{% endblock %}
+{% block description %}{% trans "CodeArena maktab va klublari: a’zolari soni va jamoaviy reyting." %}{% endblock %}
 {% block band %}
 <section class="ca-hud" aria-labelledby="clubs-title">
   <div class="ca-hud-in">
     <div>
-      <h1 id="clubs-title">Klublar</h1>
-      <p class="ca-hud-sub">Maktab yoki to‘garak: a’zolarning eng yaxshi {{ 5 }} tasi reytingi yig‘indisi</p>
+      <h1 id="clubs-title">{% trans "Klublar" %}</h1>
+      <p class="ca-hud-sub">{% blocktrans with v5=5 %}Maktab yoki to‘garak: a’zolarning eng yaxshi {{ v5 }} tasi reytingi yig‘indisi{% endblocktrans %}</p>
     </div>
     {% include "accounts/_board_tabs.html" %}
   </div>
@@ -20,12 +20,12 @@ no assignments, no teacher role.{% endcomment %}
   {% if clubs %}
   <div class="overflow-x-auto">
   <table class="ca-table ca-table-flat">
-    <thead><tr><th scope="col" class="w-16 text-center">#</th><th scope="col">Klub</th><th scope="col" class="w-28 text-right">A’zolar</th><th scope="col" class="w-32 text-right" title="Eng yaxshi 5 a’zoning reytingi yig‘indisi">Jamoa reytingi</th></tr></thead>
+    <thead><tr><th scope="col" class="w-16 text-center">#</th><th scope="col">{% trans "Klub" %}</th><th scope="col" class="w-28 text-right">{% trans "A’zolar" %}</th><th scope="col" class="w-32 text-right" title="{% trans 'Eng yaxshi 5 a’zoning reytingi yig‘indisi' %}">{% trans "Jamoa reytingi" %}</th></tr></thead>
     <tbody>
     {% for c in clubs %}
     <tr{% if user.club_id == c.pk %} class="ca-row-me"{% endif %}>
       <td class="text-center"><span class="tabular text-mute">{{ c.rank }}</span></td>
-      <td><a class="ca-link font-medium" href="{% url 'club' c.slug %}">{{ c.name }}</a>{% if user.club_id == c.pk %} <span class="ca-you">sizniki</span>{% endif %}</td>
+      <td><a class="ca-link font-medium" href="{% url 'club' c.slug %}">{{ c.name }}</a>{% if user.club_id == c.pk %} <span class="ca-you">{% trans "sizniki" %}</span>{% endif %}</td>
       <td class="text-right tabular">{{ c.n }}</td>
       <td class="text-right tabular font-bold">{{ c.team }}</td>
     </tr>
@@ -34,23 +34,23 @@ no assignments, no teacher role.{% endcomment %}
   </table>
   </div>
   {% else %}
-  <p class="ca7-empty"><b>Hali klub yo‘q</b>Birinchi bo‘lib maktabingiz yoki to‘garagingiz uchun klub oching.</p>
+  <p class="ca7-empty">{% trans "<b>Hali klub yo‘q</b>Birinchi bo‘lib maktabingiz yoki to‘garagingiz uchun klub oching." %}</p>
   {% endif %}
 </div>
-<aside class="ca7-aside" aria-label="Klub ochish">
+<aside class="ca7-aside" aria-label="{% trans 'Klub ochish' %}">
   <section class="ca-box" aria-labelledby="new-club">
-    <div class="ca-box-cap ca-hd"><h2 id="new-club">Klub ochish</h2></div>
+    <div class="ca-box-cap ca-hd"><h2 id="new-club">{% trans "Klub ochish" %}</h2></div>
     <div class="ca7-pad">
       {% if not user.is_authenticated %}
-      <p class="text-sm"><a class="ca-link" href="{% url 'login' %}?next={{ request.path|urlencode }}">Kiring</a>, so‘ng klub oching yoki do‘stingiz havolasi bilan qo‘shiling.</p>
+      <p class="text-sm"><a class="ca-link" href="{% url 'login' %}?next={{ request.path|urlencode }}">{% trans "Kiring</a>, so‘ng klub oching yoki do‘stingiz havolasi bilan qo‘shiling." %}</p>
       {% elif user.club %}
-      <p class="text-sm">Siz <a class="ca-link" href="{% url 'club' user.club.slug %}">{{ user.club.name }}</a> klubidasiz. Boshqa klub ochish uchun avval undan chiqing.</p>
+      <p class="text-sm">{% trans "Siz" %} <a class="ca-link" href="{% url 'club' user.club.slug %}">{% blocktrans with user_club_name=user.club.name %}{{ user_club_name }}</a> klubidasiz. Boshqa klub ochish uchun avval undan chiqing.{% endblocktrans %}</p>
       {% else %}
       <form method="post" action="{% url 'club_create' %}" class="grid gap-2">{% csrf_token %}
-        <label class="ca-label" for="club-name">Nomi</label>
-        <input class="ca-input" id="club-name" name="name" maxlength="80" minlength="3" required placeholder="masalan, 12-maktab informatika to‘garagi">
-        <button class="ca-btn ca-btn-gold">Klub ochish</button>
-        <p class="text-xs text-mute">Klub — a’zolar natijalari ochiq sahifa va qo‘shilish havolasi. Vazifa va o‘qituvchi roli yo‘q.</p>
+        <label class="ca-label" for="club-name">{% trans "Nomi" %}</label>
+        <input class="ca-input" id="club-name" name="name" maxlength="80" minlength="3" required placeholder="{% trans 'masalan, 12-maktab informatika to‘garagi' %}">
+        <button class="ca-btn ca-btn-gold">{% trans "Klub ochish" %}</button>
+        <p class="text-xs text-mute">{% trans "Klub — a’zolar natijalari ochiq sahifa va qo‘shilish havolasi. Vazifa va o‘qituvchi roli yo‘q." %}</p>
       </form>
       {% endif %}
     </div>

@@ -1,21 +1,21 @@
 {% load uzdates %}{% comment %}One duel in a list; ctx: d, user.{% endcomment %}
 <li class="ca-row">
   <div class="ca-row-main">
-    <a class="ca-row-title ca-link" href="{% url 'classroom:duel' d.pk %}">{% if d.opponent %}{{ d.challenger.username }} <span class="text-mute">vs</span> {{ d.opponent.username }}{% elif d.challenger_id == user.pk %}Sizning ochiq duelingiz{% else %}Ochiq duel: {{ d.challenger.username }}{% endif %}</a>
+    <a class="ca-row-title ca-link" href="{% url 'classroom:duel' d.pk %}">{% if d.opponent %}{% blocktrans with d_challenger_username=d.challenger.username d_opponent_username=d.opponent.username %}{{ d_challenger_username }} <span class="text-mute">vs</span> {{ d_opponent_username }}{% endblocktrans %}{% elif d.challenger_id == user.pk %}{% trans "Sizning ochiq duelingiz" %}{% else %}{% blocktrans with d_challenger_username=d.challenger.username %}Ochiq duel: {{ d_challenger_username }}{% endblocktrans %}{% endif %}</a>
     <div class="ca-row-meta">
       {% if d.mode == "quiz" %}<span>{{ d.get_language_display }}</span>{% endif %}
-      <span>{{ d.get_status_display }}{% if d.status == "active" and d.questions %} · <b class="tabular text-ink">{{ d.my_done|default:0 }} / {{ d.questions|length }}</b> savol{% endif %}</span>
+      <span>{{ d.get_status_display }}{% if d.status == "active" and d.questions %} {% blocktrans with d_my_done=d.my_done|default:0 d_questions=d.questions|length %}· <b class="tabular text-ink">{{ d_my_done }} / {{ d_questions }}</b> savol{% endblocktrans %}{% endif %}</span>
       <time datetime="{{ d.ended_at|date:'c' }}" title="{{ d.ended_at|date:'d.m.Y H:i' }}">{{ d.ended_at|ago_uz }}</time>
     </div>
   </div>
   <div class="ca-row-side text-sm">
     {% if d.status == "finished" %}
-      {% if d.winner_id == user.pk %}<span class="ca-verdict ca-verdict-ac">G‘alaba</span>
-      {% elif d.winner_id %}<span class="ca-verdict ca-verdict-bad">Mag‘lubiyat</span>
-      {% else %}<span class="ca-verdict ca-verdict-mute">Durang</span>{% endif %}
+      {% if d.winner_id == user.pk %}<span class="ca-verdict ca-verdict-ac">{% trans "G‘alaba" %}</span>
+      {% elif d.winner_id %}<span class="ca-verdict ca-verdict-bad">{% trans "Mag‘lubiyat" %}</span>
+      {% else %}<span class="ca-verdict ca-verdict-mute">{% trans "Durang" %}</span>{% endif %}
       {% if d.challenger_id == user.pk %}<span class="tabular text-mute">{{ d.challenger_delta|signed }}</span>{% else %}<span class="tabular text-mute">{{ d.opponent_delta|signed }}</span>{% endif %}
     {% else %}
-      <a class="ca-btn ca-btn-primary ca-btn-xs" href="{% url 'classroom:duel' d.pk %}">{% if d.status == "active" %}Davom etish{% else %}Ochish{% endif %}<span class="sr-only">: {% if d.opponent %}{{ d.challenger.username }} va {{ d.opponent.username }} dueli{% else %}ochiq duel{% endif %}</span></a>
+      <a class="ca-btn ca-btn-primary ca-btn-xs" href="{% url 'classroom:duel' d.pk %}">{% if d.status == "active" %}{% trans "Davom etish" %}{% else %}{% trans "Ochish" %}{% endif %}<span class="sr-only">: {% if d.opponent %}{% blocktrans with d_challenger_username=d.challenger.username d_opponent_username=d.opponent.username %}{{ d_challenger_username }} va {{ d_opponent_username }} dueli{% endblocktrans %}{% else %}{% trans "ochiq duel" %}{% endif %}</span></a>
     {% endif %}
   </div>
 </li>

@@ -6,11 +6,11 @@ problems. Hovering shows where you stand: the percent of the other solvers you a
 number) overall. Colour is never the only key: every row names its
 level and shows its numbers.
 ctx: ring (apps.problems.progress.solved_ring), attempting (optional: tried, not solved yet), user.{% endcomment %}
-<div class="ca-sr" role="group" aria-label="Yechilgan masalalar: {{ ring.done }} / {{ ring.total }}">
-  <div class="ca-sr-hero"{% if ring.top is not None %} title="Umumiy: yechuvchilarning necha foizidan oldindasiz"{% endif %}>
-    <p class="ca-sr-c is-all"><b class="tabular">{{ ring.done }}<small>/{{ ring.total }}</small></b><span>yechilgan{% if attempting %} · <span class="tabular" title="Urinilgan, hali yechilmagan">{{ attempting }} urinilgan</span>{% endif %}</span></p>
-    {% if ring.top is not None %}<p class="ca-sr-c is-top" aria-hidden="true"><b class="tabular">{{ ring.top }}<small>%</small></b><span>yechuvchilardan oldindasiz</span></p>{% endif %}
-    {% for s in ring.segments %}{% if s.top is not None %}<p class="ca-sr-c is-lv" data-i="{{ s.i }}" style="--lvl: var(--ca-lvl-{{ s.value }}-ink)" aria-hidden="true"><b class="tabular">{{ s.top }}<small>%</small></b><span>yechuvchilardan oldindasiz</span></p>{% endif %}{% endfor %}
+<div class="ca-sr" role="group" aria-label="{% blocktrans with ring_done=ring.done ring_total=ring.total %}Yechilgan masalalar: {{ ring_done }} / {{ ring_total }}{% endblocktrans %}">
+  <div class="ca-sr-hero"{% if ring.top is not None %} title="{% trans 'Umumiy: yechuvchilarning necha foizidan oldindasiz' %}"{% endif %}>
+    <p class="ca-sr-c is-all">{% blocktrans with ring_done=ring.done ring_total=ring.total %}<b class="tabular">{{ ring_done }}<small>/{{ ring_total }}</small></b><span>yechilgan{% endblocktrans %}{% if attempting %} {% blocktrans with attempting=attempting %}· <span class="tabular" title="Urinilgan, hali yechilmagan">{{ attempting }} urinilgan</span>{% endblocktrans %}{% endif %}</span></p>
+    {% if ring.top is not None %}<p class="ca-sr-c is-top" aria-hidden="true">{% blocktrans with ring_top=ring.top %}<b class="tabular">{{ ring_top }}<small>%</small></b><span>yechuvchilardan oldindasiz</span>{% endblocktrans %}</p>{% endif %}
+    {% for s in ring.segments %}{% if s.top is not None %}<p class="ca-sr-c is-lv" data-i="{{ s.i }}" style="--lvl: var(--ca-lvl-{{ s.value }}-ink)" aria-hidden="true">{% blocktrans with s_top=s.top %}<b class="tabular">{{ s_top }}<small>%</small></b><span>yechuvchilardan oldindasiz</span>{% endblocktrans %}</p>{% endif %}{% endfor %}
   </div>
   <div class="ca-sr-meter" aria-hidden="true" style="grid-template-columns: {% for s in ring.segments %}minmax(12px, {{ s.total }}fr) {% endfor %}">
     {% for s in ring.segments %}<i class="ca-sr-hit ca-sr-seg" data-i="{{ s.i }}" style="--lvl: var(--ca-lvl-{{ s.value }}); --p: {{ s.pct }}%"></i>{% endfor %}
@@ -22,7 +22,7 @@ ctx: ring (apps.problems.progress.solved_ring), attempting (optional: tried, not
         <i class="ca-sr-dot" aria-hidden="true"></i>
         <span class="ca-sr-lv">{{ s.label }}</span>
         <b class="tabular"><span class="ca-sr-n">{{ s.done }}<small>/{{ s.total }}</small></span>{% if s.top is not None %}<span class="ca-sr-p" aria-hidden="true">{{ s.top }}<small>%</small></span>{% endif %}</b>
-        {% if s.done >= s.total %}<i data-lucide="check" class="lu" aria-label="hammasi yechilgan"></i>{% else %}<i data-lucide="chevron-right" class="lu" aria-hidden="true"></i>{% endif %}
+        {% if s.done >= s.total %}<i data-lucide="check" class="lu" aria-label="{% trans 'hammasi yechilgan' %}"></i>{% else %}<i data-lucide="chevron-right" class="lu" aria-hidden="true"></i>{% endif %}
       </a>
     </li>
     {% endfor %}

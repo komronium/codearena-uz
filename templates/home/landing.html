@@ -1,5 +1,5 @@
 {% extends "base.html" %}{% load numbers tiers seo %}
-{% block head_title %}CodeArena — dasturlashni musobaqada o‘rganing{% endblock %}
+{% block head_title %}{% trans "CodeArena — dasturlashni musobaqada o‘rganing" %}{% endblock %}
 {# the site name and logo Google shows over the site's results #}
 {% block structured_data %}{% site_jsonld %}{% endblock %}
 
@@ -12,29 +12,27 @@ the next round) and one closing call.{% endcomment %}
     <div class="min-w-0">
       {% if next_round %}{% with c=next_round %}
       <a class="ca7-ann" href="{% url 'contests:detail' c.pk %}">
-        <span class="ca7-htag">{% if c.is_running %}<span class="ca-live-dot" aria-hidden="true"></span>Jonli musobaqa{% else %}Kelgusi musobaqa{% endif %}</span>
+        <span class="ca7-htag">{% if c.is_running %}{% trans "<span class=\"ca-live-dot\" aria-hidden=\"true\"></span>Jonli musobaqa" %}{% else %}{% trans "Kelgusi musobaqa" %}{% endif %}</span>
         <b>{{ c.title }}</b>
-        <span>{% if c.is_running %}tugashiga <span class="tabular" data-countdown="{{ c.end|date:'c' }}" data-label="" data-suffix="1" data-ended="tugadi"></span>{% else %}<span class="tabular" data-countdown="{{ c.start|date:'c' }}" data-label="keyin" data-suffix="1" data-ended="boshlandi"></span>{% endif %}</span>
+        <span>{% if c.is_running %}{% trans "tugashiga" %} <span class="tabular" data-countdown="{{ c.end|date:'c' }}" data-label="" data-suffix="1" data-ended="tugadi"></span>{% else %}<span class="tabular" data-countdown="{{ c.start|date:'c' }}" data-label="{% trans 'keyin' %}" data-suffix="1" data-ended="boshlandi"></span>{% endif %}</span>
       </a>
       {% endwith %}{% endif %}
-      <h1 id="hero-title">Dasturlashni musobaqada o‘rganing</h1>
-      <p class="ca7-lead">Masala yeching, do‘stingiz bilan bellashing, reytingda ko‘tariling. Kodingiz shu zahoti serverda testlanadi, natija halol.</p>
+      <h1 id="hero-title">{% trans "Dasturlashni musobaqada o‘rganing" %}</h1>
+      <p class="ca7-lead">{% trans "Masala yeching, do‘stingiz bilan bellashing, reytingda ko‘tariling. Kodingiz shu zahoti serverda testlanadi, natija halol." %}</p>
       <div class="flex flex-wrap gap-3">
-        <a class="ca-btn ca-btn-gold ca-btn-lg" href="{% url 'register' %}">Bepul boshlash</a>
-        <a class="ca7-hbtn is-wide ca-btn-lg" href="{% url 'problems:list' %}">Masalalarni ko‘rish</a>
+        <a class="ca-btn ca-btn-gold ca-btn-lg" href="{% url 'register' %}">{% trans "Bepul boshlash" %}</a>
+        <a class="ca7-hbtn is-wide ca-btn-lg" href="{% url 'problems:list' %}">{% trans "Masalalarni ko‘rish" %}</a>
       </div>
-      <p class="ca7-facts">Hozir saytda <b>{{ stats.problems|compact }}</b> ta masala, <b>{{ stats.contests|compact }}</b> ta musobaqa va <b>{{ stats.submissions|compact }}</b> ta tekshirilgan yechim bor.</p>
+      <p class="ca7-facts">{% blocktrans with stats_problems=stats.problems|compact stats_contests=stats.contests|compact stats_submissions=stats.submissions|compact %}Hozir saytda <b>{{ stats_problems }}</b> ta masala, <b>{{ stats_contests }}</b> ta musobaqa va <b>{{ stats_submissions }}</b> ta tekshirilgan yechim bor.{% endblocktrans %}</p>
     </div>
     {# what a solve looks like, with the way to try one without an account #}
     <div class="ca7-arena">
       <div class="ca7-term">
-        <div class="ca7-term-h"><i></i><i></i><i></i><span>main.py · namuna</span></div>
-        <pre><span class="ln">1</span>n = <span class="f">int</span>(<span class="f">input</span>())
-<span class="ln">2</span>a = <span class="f">list</span>(<span class="f">map</span>(<span class="f">int</span>, <span class="f">input</span>().split()))
-<span class="ln">3</span><span class="f">print</span>(<span class="f">max</span>(a) - <span class="f">min</span>(a))</pre>
-        <div class="ca7-term-f"><span><i data-lucide="check" class="lu"></i>Qabul qilindi</span><span class="text-white/70">12/12 test</span><span class="ml-auto text-white/60">48 ms</span></div>
+        <div class="ca7-term-h">{% trans "<i></i><i></i><i></i><span>main.py · namuna</span>" %}</div>
+        <pre>{% trans "<span class=\"ln\">1</span>n = <span class=\"f\">int</span>(<span class=\"f\">input</span>()) <span class=\"ln\">2</span>a = <span class=\"f\">list</span>(<span class=\"f\">map</span>(<span class=\"f\">int</span>, <span class=\"f\">input</span>().split())) <span class=\"ln\">3</span><span class=\"f\">print</span>(<span class=\"f\">max</span>(a) - <span class=\"f\">min</span>(a))" %}</pre>
+        <div class="ca7-term-f"><span><i data-lucide="check" class="lu"></i>{% trans "Qabul qilindi</span><span class=\"text-white/70\">12/12 test</span><span class=\"ml-auto text-white/60\">48 ms</span>" %}</div>
       </div>
-      <a class="ca7-try" href="{% url 'problems:list' %}">Shu kabi masalani o‘zingiz yeching: ro‘yxatdan o‘tmasdan ham ochib ko‘rish mumkin<i data-lucide="arrow-right" class="lu" aria-hidden="true"></i></a>
+      <a class="ca7-try" href="{% url 'problems:list' %}">{% trans "Shu kabi masalani o‘zingiz yeching: ro‘yxatdan o‘tmasdan ham ochib ko‘rish mumkin" %}<i data-lucide="arrow-right" class="lu" aria-hidden="true"></i></a>
     </div>
   </div>
 </section>
@@ -42,34 +40,34 @@ the next round) and one closing call.{% endcomment %}
 {% block content %}
 <div class="ca7-col ca7-land">
 <section aria-labelledby="how-title">
-  <div class="ca7-sec-h"><h2 id="how-title">Qanday ishlaydi</h2></div>
+  <div class="ca7-sec-h"><h2 id="how-title">{% trans "Qanday ishlaydi" %}</h2></div>
   <ol class="ca7-how">
-    <li><span aria-hidden="true">1</span><h3>Masala tanlang</h3><p>Boshlang‘ichdan qiyingacha. Kun masalasi va darajangizga mos keyingi masala tavsiya qilinadi.</p></li>
-    <li><span aria-hidden="true">2</span><h3>Kod yozing</h3><p>Brauzerdagi muharrirda, {{ languages|length }} tilda. Yuborishdan oldin misollarda sinab ko‘ring.</p></li>
-    <li><span aria-hidden="true">3</span><h3>Natijani ko‘ring</h3><p>Har bir test alohida: javob, vaqt, xotira. Ball va reyting darhol yangilanadi.</p></li>
+    <li><span aria-hidden="true">1</span><h3>{% trans "Masala tanlang" %}</h3><p>{% trans "Boshlang‘ichdan qiyingacha. Kun masalasi va darajangizga mos keyingi masala tavsiya qilinadi." %}</p></li>
+    <li><span aria-hidden="true">2</span><h3>{% trans "Kod yozing" %}</h3><p>{% blocktrans with languages=languages|length %}Brauzerdagi muharrirda, {{ languages }} tilda. Yuborishdan oldin misollarda sinab ko‘ring.{% endblocktrans %}</p></li>
+    <li><span aria-hidden="true">3</span><h3>{% trans "Natijani ko‘ring" %}</h3><p>{% trans "Har bir test alohida: javob, vaqt, xotira. Ball va reyting darhol yangilanadi." %}</p></li>
   </ol>
 </section>
 
 <section aria-labelledby="features-title">
-  <div class="ca7-sec-h"><h2 id="features-title">Nimasi bilan boshqacha</h2></div>
-  <p class="ca7-sec-sub">Katta platformalarda yo‘q narsalar: duellar, musobaqalar va halollik uchun qurilgan.</p>
+  <div class="ca7-sec-h"><h2 id="features-title">{% trans "Nimasi bilan boshqacha" %}</h2></div>
+  <p class="ca7-sec-sub">{% trans "Katta platformalarda yo‘q narsalar: duellar, musobaqalar va halollik uchun qurilgan." %}</p>
   <ul class="ca7-feats">
-    <li><span class="ca7-fi" aria-hidden="true"><i data-lucide="trophy" class="lu"></i></span><div><h3>Reytingli musobaqalar</h3><p>Jonli natijalar jadvali va Elo reyting. Reytingli raundda faqat hech kim ko‘rmagan masalalar beriladi.</p></div></li>
-    <li><span class="ca7-fi" aria-hidden="true"><i data-lucide="swords" class="lu"></i></span><div><h3>1 ga 1 duellar</h3><p>Do‘stingizni chaqiring: Python, C++, Java yoki JavaScript kodi — nima chiqaradi? 5 ta savol, har biriga 20 soniya.</p></div></li>
-    <li><span class="ca7-fi" aria-hidden="true"><i data-lucide="calendar-check" class="lu"></i></span><div><h3>Kun masalasi</h3><p>Har kuni bitta masala. Kunida yechsangiz Olov o‘sadi va +5 bonus ball olasiz.</p></div></li>
-    <li><span class="ca7-fi" aria-hidden="true"><i data-lucide="code" class="lu"></i></span><div><h3>{{ languages|length }} ta til</h3><p>{{ languages|join:", " }}. Har bir yechim cheklangan muhitda barcha testlarda tekshiriladi.</p></div></li>
-    <li><span class="ca7-fi" aria-hidden="true"><i data-lucide="shield-check" class="lu"></i></span><div><h3>Halol natijalar</h3><p>Musobaqadagi har bir yechim dalillar bilan tekshiriladi. Shubha bo‘lsa, qarorni odam qabul qiladi va u jurnalga yoziladi.</p></div></li>
+    <li><span class="ca7-fi" aria-hidden="true"><i data-lucide="trophy" class="lu"></i></span><div><h3>{% trans "Reytingli musobaqalar" %}</h3><p>{% trans "Jonli natijalar jadvali va Elo reyting. Reytingli raundda faqat hech kim ko‘rmagan masalalar beriladi." %}</p></div></li>
+    <li><span class="ca7-fi" aria-hidden="true"><i data-lucide="swords" class="lu"></i></span><div><h3>{% trans "1 ga 1 duellar" %}</h3><p>{% trans "Do‘stingizni chaqiring: Python, C++, Java yoki JavaScript kodi — nima chiqaradi? 5 ta savol, har biriga 20 soniya." %}</p></div></li>
+    <li><span class="ca7-fi" aria-hidden="true"><i data-lucide="calendar-check" class="lu"></i></span><div><h3>{% trans "Kun masalasi" %}</h3><p>{% trans "Har kuni bitta masala. Kunida yechsangiz Olov o‘sadi va +5 bonus ball olasiz." %}</p></div></li>
+    <li><span class="ca7-fi" aria-hidden="true"><i data-lucide="code" class="lu"></i></span><div><h3>{% blocktrans with languages=languages|length %}{{ languages }} ta til{% endblocktrans %}</h3><p>{% blocktrans with languages=languages|join:", " %}{{ languages }}. Har bir yechim cheklangan muhitda barcha testlarda tekshiriladi.{% endblocktrans %}</p></div></li>
+    <li><span class="ca7-fi" aria-hidden="true"><i data-lucide="shield-check" class="lu"></i></span><div><h3>{% trans "Halol natijalar" %}</h3><p>{% trans "Musobaqadagi har bir yechim dalillar bilan tekshiriladi. Shubha bo‘lsa, qarorni odam qabul qiladi va u jurnalga yoziladi." %}</p></div></li>
   </ul>
 </section>
 
 <section aria-labelledby="now-title">
-  <div class="ca7-sec-h"><h2 id="now-title">Hozir saytda</h2></div>
+  <div class="ca7-sec-h"><h2 id="now-title">{% trans "Hozir saytda" %}</h2></div>
   <div class="ca7-g2">
     <div>
       {% if podium %}
-      <p class="ca7-found !mt-0">So‘nggi reytingli raund, {{ last_rated.end|date:"d.m.Y" }} · <b class="text-ink">{{ last_rated.title }}</b></p>
+      <p class="ca7-found !mt-0">{% blocktrans with last_rated_end=last_rated.end|date:"d.m.Y" last_rated_title=last_rated.title %}So‘nggi reytingli raund, {{ last_rated_end }} · <b class="text-ink">{{ last_rated_title }}</b>{% endblocktrans %}</p>
       <table class="ca-table ca-table-flat">
-        <thead><tr><th scope="col" class="w-12 text-center">#</th><th scope="col">Ishtirokchi</th><th scope="col" class="text-right">{% if last_rated.type == "icpc" %}Masala{% else %}Ball{% endif %}</th></tr></thead>
+        <thead><tr><th scope="col" class="w-12 text-center">#</th><th scope="col">{% trans "Ishtirokchi" %}</th><th scope="col" class="text-right">{% if last_rated.type == "icpc" %}{% trans "Masala" %}{% else %}{% trans "Ball" %}{% endif %}</th></tr></thead>
         <tbody>
         {% for p in podium %}
         <tr><td class="text-center">{% if p.rank <= 3 %}<span class="ca7-medal m{{ p.rank }}">{{ p.rank }}</span>{% else %}<span class="tabular text-mute">{{ p.rank }}</span>{% endif %}</td>
@@ -77,18 +75,18 @@ the next round) and one closing call.{% endcomment %}
         {% endfor %}
         </tbody>
       </table>
-      <p class="ca7-foot-note"><a class="ca-link" href="{% url 'contests:standings' last_rated.pk %}">{{ n_last }} ishtirokchining to‘liq jadvali</a></p>
-      {% else %}<p class="ca7-empty"><b>Hali reytingli raund o‘tmagan</b>Birinchi raund tugagach, g‘oliblar shu yerda chiqadi.</p>{% endif %}
+      <p class="ca7-foot-note"><a class="ca-link" href="{% url 'contests:standings' last_rated.pk %}">{% blocktrans with n_last=n_last %}{{ n_last }} ishtirokchining to‘liq jadvali{% endblocktrans %}</a></p>
+      {% else %}<p class="ca7-empty">{% trans "<b>Hali reytingli raund o‘tmagan</b>Birinchi raund tugagach, g‘oliblar shu yerda chiqadi." %}</p>{% endif %}
     </div>
     <div class="ca7-mis ca7-mis-col">
       {% if daily %}
       <div>
         <span class="ca7-mis-ico is-learn" aria-hidden="true"><i data-lucide="calendar-check" class="lu"></i></span>
         <div class="min-w-0 flex-1">
-          <small>Kun masalasi · {{ daily.date|date:"d.m" }}</small>
+          <small>{% blocktrans with daily_date=daily.date|date:"d.m" %}Kun masalasi · {{ daily_date }}{% endblocktrans %}</small>
           <a class="ca-link ca7-mis-t" href="{% url 'problems:detail' daily.problem.slug %}">{{ daily.problem.title }}</a>
-          <small><span class="ca-diff ca-diff-{{ daily.problem.difficulty }} !text-xs">{{ daily.problem.get_difficulty_display }}</span> · yechish uchun bir necha qator kifoya</small>
-          <div class="ca7-mis-f"><a class="ca-btn ca-btn-soft" href="{% url 'problems:detail' daily.problem.slug %}">Masalani ochish</a></div>
+          <small><span class="ca-diff ca-diff-{{ daily.problem.difficulty }} !text-xs">{% blocktrans with daily_problem_get_difficulty_display=daily.problem.get_difficulty_display %}{{ daily_problem_get_difficulty_display }}</span> · yechish uchun bir necha qator kifoya{% endblocktrans %}</small>
+          <div class="ca7-mis-f"><a class="ca-btn ca-btn-soft" href="{% url 'problems:detail' daily.problem.slug %}">{% trans "Masalani ochish" %}</a></div>
         </div>
       </div>
       {% endif %}
@@ -102,10 +100,10 @@ the next round) and one closing call.{% endcomment %}
 <section class="ca-hud ca7-cta" aria-labelledby="cta-title">
   <div class="ca-hud-in">
     <div>
-      <h2 id="cta-title">Bugun boshlang</h2>
-      <p class="ca-hud-sub">Ro‘yxatdan o‘tish bir daqiqa oladi.</p>
+      <h2 id="cta-title">{% trans "Bugun boshlang" %}</h2>
+      <p class="ca-hud-sub">{% trans "Ro‘yxatdan o‘tish bir daqiqa oladi." %}</p>
     </div>
-    <a class="ca7-hbtn is-wide ca-btn-lg ml-auto" href="{% url 'register' %}">Ro‘yxatdan o‘tish</a>
+    <a class="ca7-hbtn is-wide ca-btn-lg ml-auto" href="{% url 'register' %}">{% trans "Ro‘yxatdan o‘tish" %}</a>
   </div>
 </section>
 {% endblock %}

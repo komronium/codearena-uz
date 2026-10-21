@@ -1,5 +1,5 @@
 {% extends "base.html" %}{% load seo %}
-{% block title %}{{ plan.title }} — kurs{% endblock %}
+{% block title %}{% blocktrans with plan_title=plan.title %}{{ plan_title }} — kurs{% endblocktrans %}{% endblock %}
 {% block description %}{% if plan.summary %}{{ plan.summary }}{% else %}{{ theory_html|plain }}{% endif %}{% endblock %}
 {% block structured_data %}{% url 'learn:hub' as hub_url %}{% breadcrumbs_jsonld "O‘rganish" hub_url plan.title request.path %}{% endblock %}
 {% block band %}
@@ -9,13 +9,13 @@ course note and its badge.{% endcomment %}
 <section class="ca-hud" aria-labelledby="course-title">
   <div class="ca-hud-in">
     <div class="min-w-0">
-      <p class="ca-hud-lbl"><a class="text-white no-underline hover:underline" href="{% url 'learn:hub' %}">O‘rganish</a> / {{ plan.get_stage_display }}</p>
+      <p class="ca-hud-lbl"><a class="text-white no-underline hover:underline" href="{% url 'learn:hub' %}">{% blocktrans with plan_get_stage_display=plan.get_stage_display %}O‘rganish</a> / {{ plan_get_stage_display }}{% endblocktrans %}</p>
       <h1 id="course-title">{{ plan.title }}</h1>
-      <p class="ca-hud-sub">{% if plan.summary %}{{ plan.summary }} · {% endif %}<span class="ca-hud-lv is-{{ plan.level }} !ml-0">{{ plan.get_level_display }}</span>{% if progress.total %} · {{ progress.total }} masala{% endif %}{% if not plan.is_public %} · yashirin{% endif %}
-        {% if user.is_staff %} · <a class="text-white underline" href="{% url 'moderation:plan_edit' plan.pk %}">Tahrirlash</a>{% endif %}</p>
+      <p class="ca-hud-sub">{% if plan.summary %}{{ plan.summary }} · {% endif %}<span class="ca-hud-lv is-{{ plan.level }} !ml-0">{{ plan.get_level_display }}</span>{% if progress.total %} {% blocktrans with progress_total=progress.total %}· {{ progress_total }} masala{% endblocktrans %}{% endif %}{% if not plan.is_public %} {% trans "· yashirin" %}{% endif %}
+        {% if user.is_staff %} · <a class="text-white underline" href="{% url 'moderation:plan_edit' plan.pk %}">{% trans "Tahrirlash" %}</a>{% endif %}</p>
     </div>
-    {% if next_problem %}<a class="ca-btn ca-btn-gold ml-auto" href="{% url 'problems:detail' next_problem.slug %}?plan={{ plan.slug }}">{% if progress.done %}Davom etish{% else %}Boshlash{% endif %}</a>
-    {% elif progress.completed %}<span class="ca-hud-done ml-auto"><i data-lucide="check" class="lu" aria-hidden="true"></i>Kurs tugatildi</span>{% endif %}
+    {% if next_problem %}<a class="ca-btn ca-btn-gold ml-auto" href="{% url 'problems:detail' next_problem.slug %}?plan={{ plan.slug }}">{% if progress.done %}{% trans "Davom etish" %}{% else %}{% trans "Boshlash" %}{% endif %}</a>
+    {% elif progress.completed %}<span class="ca-hud-done ml-auto"><i data-lucide="check" class="lu" aria-hidden="true"></i>{% trans "Kurs tugatildi" %}</span>{% endif %}
   </div>
 </section>
 {% endblock %}
@@ -25,61 +25,61 @@ course note and its badge.{% endcomment %}
     {% if theory_html %}
     {# Open until the first solve: then the problems come first and the theory is one click away. #}
     <details class="ca7-theory"{% if not progress.done %} open{% endif %}>
-      <summary class="ca7-sec-h"><h2>Nazariya</h2><i data-lucide="chevron-down" class="lu ca7-r ca-theory-chevron" aria-hidden="true"></i></summary>
+      <summary class="ca7-sec-h"><h2>{% trans "Nazariya" %}</h2><i data-lucide="chevron-down" class="lu ca7-r ca-theory-chevron" aria-hidden="true"></i></summary>
       <div class="prose max-w-none" id="theory-body">{{ theory_html|safe }}</div>
       <div class="ca-theory-end" id="nazariya-tugadi">
         {% if user.is_authenticated %}
         <form method="post" action="{% url 'learn:course_read' plan.slug %}">{% csrf_token %}
-          {% if progress.read %}<span class="ca-hwbar-state is-ok"><i data-lucide="circle-check-big" class="lu" aria-hidden="true"></i>Nazariya o‘qildi</span> <button class="ca-link text-sm text-mute" name="undo" value="1">Bekor qilish</button>
-          {% else %}<button class="ca-btn ca-btn-soft"><i data-lucide="check" class="lu" aria-hidden="true"></i>Tushundim</button>{% endif %}
+          {% if progress.read %}<span class="ca-hwbar-state is-ok"><i data-lucide="circle-check-big" class="lu" aria-hidden="true"></i>{% trans "Nazariya o‘qildi" %}</span> <button class="ca-link text-sm text-mute" name="undo" value="1">{% trans "Bekor qilish" %}</button>
+          {% else %}<button class="ca-btn ca-btn-soft"><i data-lucide="check" class="lu" aria-hidden="true"></i>{% trans "Tushundim" %}</button>{% endif %}
         </form>
-        {% else %}<a class="ca-btn ca-btn-ghost" href="{% url 'login' %}?next={{ request.path|urlencode }}">Kirib, o‘qilgan deb belgilash</a>{% endif %}
-        {% if next_plan %}<a class="ca-link ml-auto" href="{% url 'learn:course' next_plan.slug %}">Keyingi kurs: {{ next_plan.title }}<i data-lucide="chevron-right" class="lu" aria-hidden="true"></i></a>{% endif %}
+        {% else %}<a class="ca-btn ca-btn-ghost" href="{% url 'login' %}?next={{ request.path|urlencode }}">{% trans "Kirib, o‘qilgan deb belgilash" %}</a>{% endif %}
+        {% if next_plan %}<a class="ca-link ml-auto" href="{% url 'learn:course' next_plan.slug %}">{% blocktrans with next_plan_title=next_plan.title %}Keyingi kurs: {{ next_plan_title }}{% endblocktrans %}<i data-lucide="chevron-right" class="lu" aria-hidden="true"></i></a>{% endif %}
       </div>
     </details>
     {% endif %}
 
     {% for g in groups %}
     <section aria-labelledby="lvl-{{ g.level }}">
-      <div class="ca7-sec-h"><h2 id="lvl-{{ g.level }}"><span>{{ g.label }}</span> masalalar</h2>
+      <div class="ca7-sec-h"><h2 id="lvl-{{ g.level }}">{% blocktrans with g_label=g.label %}<span>{{ g_label }}</span> masalalar{% endblocktrans %}</h2>
         <span class="ca7-r tabular{% if g.done == g.problems|length %} font-semibold text-ok{% else %} text-mute{% endif %}">{% if user.is_authenticated %}{{ g.done }}/{% endif %}{{ g.problems|length }}</span></div>
       {% include "learn/_problem_rows.html" with rows=g.problems %}
     </section>
     {% empty %}
-    <p class="ca7-empty"><b>{% if plan.tags.exists %}Masalalar tayyorlanmoqda{% else %}Bu kurs faqat nazariya{% endif %}</b>{% if plan.tags.exists %}Hozircha nazariyani o‘qing. Shu mavzudagi masalalar umumiy ro‘yxatda ham bor (teg bo‘yicha): {% for tg in plan.tags.all|slice:":3" %}<a class="ca-link" href="{% url 'problems:list' %}?tag={{ tg.name|urlencode }}">{{ tg.name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}.{% endif %}</p>
+    <p class="ca7-empty"><b>{% if plan.tags.exists %}{% trans "Masalalar tayyorlanmoqda" %}{% else %}{% trans "Bu kurs faqat nazariya" %}{% endif %}</b>{% if plan.tags.exists %}{% trans "Hozircha nazariyani o‘qing. Shu mavzudagi masalalar umumiy ro‘yxatda ham bor (teg bo‘yicha):" %} {% for tg in plan.tags.all|slice:":3" %}<a class="ca-link" href="{% url 'problems:list' %}?tag={{ tg.name|urlencode }}">{{ tg.name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}.{% endif %}</p>
     {% endfor %}
   </div>
 
-  <aside class="ca7-aside" aria-label="Kurs haqida">
+  <aside class="ca7-aside" aria-label="{% trans 'Kurs haqida' %}">
     {% if toc|length > 1 %}
     <section class="ca-box" aria-labelledby="toc-title">
-      <div class="ca-box-cap ca-hd"><h2 id="toc-title">Mazmun</h2></div>
+      <div class="ca-box-cap ca-hd"><h2 id="toc-title">{% trans "Mazmun" %}</h2></div>
       <ol class="ca-toc">{% for h in toc %}<li class="is-l{{ h.level }}"><a href="#{{ h.id }}">{{ h.text }}</a></li>{% endfor %}</ol>
     </section>
     {% endif %}
     {% if user.is_authenticated and progress.theory_only %}
     <section class="ca-box" aria-labelledby="progress-title">
-      <div class="ca-box-cap ca-hd"><h2 id="progress-title">Bajarilishi</h2></div>
-      <div class="ca7-pad"><p>{% if progress.read %}<i data-lucide="circle-check-big" class="lu text-ok" aria-hidden="true"></i> Nazariya o‘qilgan, kurs tugatildi.{% else %}Bu kurs faqat nazariya: o‘qib bo‘lgach «Tushundim» ni bosing.{% endif %}</p></div>
+      <div class="ca-box-cap ca-hd"><h2 id="progress-title">{% trans "Bajarilishi" %}</h2></div>
+      <div class="ca7-pad"><p>{% if progress.read %}<i data-lucide="circle-check-big" class="lu text-ok" aria-hidden="true"></i> {% trans "Nazariya o‘qilgan, kurs tugatildi." %}{% else %}{% trans "Bu kurs faqat nazariya: o‘qib bo‘lgach «Tushundim» ni bosing." %}{% endif %}</p></div>
     </section>
     {% elif user.is_authenticated and progress.total %}
     <section class="ca-box" aria-labelledby="progress-title">
-      <div class="ca-box-cap ca-hd"><h2 id="progress-title">Bajarilishi</h2><span class="ca-box-tools tabular">{{ progress.pct }}%</span></div>
+      <div class="ca-box-cap ca-hd"><h2 id="progress-title">{% trans "Bajarilishi" %}</h2><span class="ca-box-tools tabular">{{ progress.pct }}%</span></div>
       <div class="ca7-pad">
-        <p class="!mb-2"><b class="text-2xl font-bold text-ink tabular">{{ progress.done }}</b> / {{ progress.total }} masala {% if progress.completed %}— tugatildi{% else %}yechildi{% endif %}</p>
-        <span class="ca7-pg" role="progressbar" aria-valuenow="{{ progress.pct }}" aria-valuemin="0" aria-valuemax="100" aria-label="Kurs bajarilishi"><i style="width: {{ progress.pct }}%"></i></span>
+        <p class="!mb-2">{% blocktrans with progress_done=progress.done progress_total=progress.total %}<b class="text-2xl font-bold text-ink tabular">{{ progress_done }}</b> / {{ progress_total }} masala{% endblocktrans %} {% if progress.completed %}{% trans "— tugatildi" %}{% else %}{% trans "yechildi" %}{% endif %}</p>
+        <span class="ca7-pg" role="progressbar" aria-valuenow="{{ progress.pct }}" aria-valuemin="0" aria-valuemax="100" aria-label="{% trans 'Kurs bajarilishi' %}"><i style="width: {{ progress.pct }}%"></i></span>
       </div>
     </section>
     {% endif %}
     {% if description_html %}
     <section class="ca-box" aria-labelledby="about-title">
-      <div class="ca-box-cap ca-hd"><h2 id="about-title">Kurs haqida</h2></div>
+      <div class="ca-box-cap ca-hd"><h2 id="about-title">{% trans "Kurs haqida" %}</h2></div>
       <div class="ca7-pad prose max-w-none text-sm">{{ description_html|safe }}</div>
     </section>
     {% endif %}
     {% if progress.total %}
     <section class="ca-box" aria-labelledby="award-title">
-      <div class="ca-box-cap ca-hd"><h2 id="award-title">Nishon</h2></div>
+      <div class="ca-box-cap ca-hd"><h2 id="award-title">{% trans "Nishon" %}</h2></div>
       <ul class="ca7-pad">{% if progress.completed %}{% include "accounts/_badge7.html" with tone="lapis" icon=plan.icon title=plan.title sub="Olingan — profilingizda ko‘rinadi" href=None total=None %}{% else %}{% include "accounts/_badge7.html" with tone="locked" icon=plan.icon title=plan.title sub="Kursni tugatsangiz profilingizga qo‘shiladi" href=None done=progress.done total=progress.total %}{% endif %}</ul>
     </section>
     {% endif %}

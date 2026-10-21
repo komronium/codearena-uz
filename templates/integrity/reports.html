@@ -1,26 +1,26 @@
 {% extends "base.html" %}
-{% block title %}Shikoyatlar{% endblock %}
+{% block title %}{% trans "Shikoyatlar" %}{% endblock %}
 {% comment %}What users sent staff (integrity.Report): reports about people and appeals against a contest result; open first.{% endcomment %}
 {% block content %}
 <div class="mb-6">
-  <h1 class="ca-page-title">Shikoyat va apellyatsiyalar</h1>
-  <p class="mt-1 text-sm text-mute">{{ open_count }} ta ochiq. Ochiqlari tepada.</p>
+  <h1 class="ca-page-title">{% trans "Shikoyat va apellyatsiyalar" %}</h1>
+  <p class="mt-1 text-sm text-mute">{% blocktrans with open_count=open_count %}{{ open_count }} ta ochiq. Ochiqlari tepada.{% endblocktrans %}</p>
 </div>
 {% if reports %}
 <div class="overflow-x-auto">
 <table class="ca-table ca-table-flat">
-  <thead><tr><th scope="col" class="w-28">Tur</th><th scope="col">Xabar</th><th scope="col" class="w-40">Kimdan</th><th scope="col" class="w-40">Kimga / musobaqa</th><th scope="col" class="w-32">Sana</th><th scope="col" class="w-28"><span class="sr-only">Holat</span></th></tr></thead>
+  <thead><tr><th scope="col" class="w-28">{% trans "Tur" %}</th><th scope="col">{% trans "Xabar" %}</th><th scope="col" class="w-40">{% trans "Kimdan" %}</th><th scope="col" class="w-40">{% trans "Kimga / musobaqa" %}</th><th scope="col" class="w-32">{% trans "Sana" %}</th><th scope="col" class="w-28"><span class="sr-only">{% trans "Holat" %}</span></th></tr></thead>
   <tbody>
   {% for r in reports %}
   <tr{% if r.done_at %} class="opacity-60"{% endif %}>
     <td>{{ r.get_kind_display }}</td>
-    <td><p>{{ r.text }}</p>{% if r.link %}<a class="ca-link text-sm" href="{{ r.link }}">Yuborilgan sahifa</a>{% endif %}</td>
+    <td><p>{{ r.text }}</p>{% if r.link %}<a class="ca-link text-sm" href="{{ r.link }}">{% trans "Yuborilgan sahifa" %}</a>{% endif %}</td>
     <td><a class="ca-link" href="{% url 'profile' r.reporter.username %}">{{ r.reporter.username }}</a></td>
     <td>{% if r.target %}<a class="ca-link" href="{% url 'profile' r.target.username %}">{{ r.target.username }}</a>{% elif r.contest %}<a class="ca-link" href="{% url 'integrity:contest_report' r.contest.pk %}">{{ r.contest.title }}</a>{% else %}—{% endif %}</td>
     <td class="tabular text-mute">{{ r.created|date:"d.m.Y H:i" }}</td>
     <td><form method="post" action="{% url 'integrity:report_done' r.pk %}" class="grid gap-1">{% csrf_token %}
-      {% if not r.done_at %}<input class="ca-input !py-1 text-sm" name="outcome" maxlength="400" placeholder="Javob (yuboruvchiga ko‘rinadi)" aria-label="Javob">{% elif r.outcome %}<p class="text-sm text-mute">Javob: {{ r.outcome }}</p>{% endif %}
-      <button class="ca-btn {% if r.done_at %}ca-btn-ghost{% else %}ca-btn-soft{% endif %} !py-1.5 text-sm">{% if r.done_at %}Qayta ochish{% else %}Yopish{% endif %}</button></form></td>
+      {% if not r.done_at %}<input class="ca-input !py-1 text-sm" name="outcome" maxlength="400" placeholder="{% trans 'Javob (yuboruvchiga ko‘rinadi)' %}" aria-label="{% trans 'Javob' %}">{% elif r.outcome %}<p class="text-sm text-mute">{% blocktrans with r_outcome=r.outcome %}Javob: {{ r_outcome }}{% endblocktrans %}</p>{% endif %}
+      <button class="ca-btn {% if r.done_at %}ca-btn-ghost{% else %}ca-btn-soft{% endif %} !py-1.5 text-sm">{% if r.done_at %}{% trans "Qayta ochish" %}{% else %}{% trans "Yopish" %}{% endif %}</button></form></td>
   </tr>
   {% endfor %}
   </tbody>
@@ -28,6 +28,6 @@
 </div>
 {% include "_pagination.html" with page=reports %}
 {% else %}
-<p class="ca7-empty"><b>Hozircha xabar yo‘q</b>Foydalanuvchilar profil yoki natija haqida yozganda shu yerda chiqadi.</p>
+<p class="ca7-empty">{% trans "<b>Hozircha xabar yo‘q</b>Foydalanuvchilar profil yoki natija haqida yozganda shu yerda chiqadi." %}</p>
 {% endif %}
 {% endblock %}

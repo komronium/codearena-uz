@@ -1,12 +1,12 @@
 {% load tagnames %}{# A course's problems of one difficulty (the section head names it) as a flat table, your mark first. Needs `rows` (problems with .solved); `plan` adds ?plan= to links. #}
 <table class="ca-table ca-table-flat">
-  <thead><tr><th scope="col" class="w-8"><span class="sr-only">Holat</span></th><th scope="col" class="w-16">#</th><th scope="col">Masala</th><th scope="col" class="hidden sm:table-cell">Mavzu</th></tr></thead>
+  <thead><tr><th scope="col" class="w-8"><span class="sr-only">{% trans "Holat" %}</span></th><th scope="col" class="w-16">#</th><th scope="col">{% trans "Masala" %}</th><th scope="col" class="hidden sm:table-cell">{% trans "Mavzu" %}</th></tr></thead>
   <tbody>
   {% for p in rows %}
   <tr>
-    <td>{% if p.solved %}<span class="ca-st is-solved" title="Yechilgan"></span><span class="sr-only">Yechilgan</span>{% elif user.is_authenticated %}<span class="ca-st is-new" aria-hidden="true"></span>{% endif %}</td>
+    <td>{% if p.solved %}{% trans "<span class=\"ca-st is-solved\" title=\"Yechilgan\"></span><span class=\"sr-only\">Yechilgan</span>" %}{% elif user.is_authenticated %}<span class="ca-st is-new" aria-hidden="true"></span>{% endif %}</td>
     <td class="ca-pid">{{ p.pk|stringformat:"04d" }}</td>
-    <td><a class="ca-link" href="{% url 'problems:detail' p.slug %}{% if plan %}?plan={{ plan.slug }}{% endif %}">{{ p.title }}</a>{% if p.kind == "sql" %} <span class="ca-kind-sql"><i data-lucide="database" class="lu" aria-hidden="true"></i>SQL</span>{% endif %}</td>
+    <td><a class="ca-link" href="{% url 'problems:detail' p.slug %}{% if plan %}?plan={{ plan.slug }}{% endif %}">{{ p.title }}</a>{% if p.kind == "sql" %} <span class="ca-kind-sql"><i data-lucide="database" class="lu" aria-hidden="true"></i>{% trans "SQL" %}</span>{% endif %}</td>
     <td class="hidden text-sm text-mute sm:table-cell">{% for t in p.tags.all|slice:":3" %}{{ t.name|tag_uz }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
   </tr>
   {% endfor %}

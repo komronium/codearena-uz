@@ -8,7 +8,7 @@
            autocomplete="{{ autocomplete }}" {% if name == 'username' or type == 'email' %}spellcheck="false" autocapitalize="none"{% endif %} {% if not optional %}required{% endif %} {% if autofocus %}autofocus{% endif %}
            {% if errors %}aria-invalid="true" aria-describedby="err_{{ name }}"{% elif hint %}aria-describedby="hint_{{ name }}"{% endif %}>
     {% if type == 'password' %}
-    <button type="button" class="ca-auth-eye" data-toggle-password="id_{{ name }}" aria-label="Parolni ko‘rsatish" aria-pressed="false">
+    <button type="button" class="ca-auth-eye" data-toggle-password="id_{{ name }}" aria-label="{% trans 'Parolni ko‘rsatish' %}" aria-pressed="false">
       <i data-lucide="eye" class="lu" aria-hidden="true"></i>
     </button>
     {% endif %}

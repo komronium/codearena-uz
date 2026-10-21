@@ -1,24 +1,24 @@
 {% extends "base.html" %}
-{% block title %}Duel: {{ duel.challenger.username }} vs {{ duel.opponent.username|default:"?" }}{% endblock %}
+{% block title %}{% blocktrans with duel_challenger_username=duel.challenger.username duel_opponent_username=duel.opponent.username|default:"?" %}Duel: {{ duel_challenger_username }} vs {{ duel_opponent_username }}{% endblocktrans %}{% endblock %}
 {% block content %}
-<a class="ca-link mb-2 inline-block text-sm text-mute" href="{% url 'classroom:duels' %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>Duellar</a>
-<h1 class="ca-page-title mb-6">{{ duel.challenger.username }} <span class="text-mute">vs</span> {% if duel.opponent %}{{ duel.opponent.username }}{% else %}<span class="text-mute">?</span>{% endif %}</h1>
+<a class="ca-link mb-2 inline-block text-sm text-mute" href="{% url 'classroom:duels' %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>{% trans "Duellar" %}</a>
+<h1 class="ca-page-title mb-6">{% blocktrans with duel_challenger_username=duel.challenger.username %}{{ duel_challenger_username }} <span class="text-mute">vs</span>{% endblocktrans %} {% if duel.opponent %}{{ duel.opponent.username }}{% else %}<span class="text-mute">?</span>{% endif %}</h1>
 {% comment %}Polls while open; once someone joins, a run ends or the duel does, the view answers with a full reload.{% endcomment %}
 <div id="duel-status" class="ca-panel"{% if duel.status == "pending" or duel.status == "active" %} hx-get="{% url 'classroom:duel' duel.pk %}?seen={{ state }}" hx-trigger="every 5s" hx-swap="innerHTML"{% endif %}>
   {% include "classroom/_duel_status.html" %}
 </div>
-{% if review_waits %}<p class="mt-6 text-sm text-mute"><i data-lucide="lock" class="lu mr-1" aria-hidden="true"></i>Savollar va to‘g‘ri javoblar raqibingiz ham tugatgach ochiladi.</p>{% endif %}
+{% if review_waits %}<p class="mt-6 text-sm text-mute"><i data-lucide="lock" class="lu mr-1" aria-hidden="true"></i>{% trans "Savollar va to‘g‘ri javoblar raqibingiz ham tugatgach ochiladi." %}</p>{% endif %}
 {% if review %}
 <section class="mt-6" aria-labelledby="review-title">
-  <div class="ca7-sec-h"><h2 id="review-title">Savollar</h2><span class="ca7-r text-mute">{{ duel.get_language_display }}</span></div>
+  <div class="ca7-sec-h"><h2 id="review-title">{% trans "Savollar" %}</h2><span class="ca7-r text-mute">{{ duel.get_language_display }}</span></div>
   <ol class="ca-quiz-review">
     {% for r in review %}
     <li>
       <p class="ca-quiz-ask"><b>{{ r.n }}.</b> {% include "classroom/_quiz_ask.html" with q=r.q %}</p>
       {% include "classroom/_quiz_code.html" with q=r.q %}
       <dl class="ca-quiz-answers">
-        <div><dt>To‘g‘ri javob</dt><dd><code>{{ r.q.answer }}</code></dd></div>
-        {% for s in r.answers %}<div><dt>{{ s.label }}</dt><dd>{% if s.pending %}<span class="text-mute">hali o‘ynamadi</span>{% elif s.unseen and not s.a %}<span class="text-mute">ko‘rilmagan</span>{% else %}{% include "classroom/_quiz_given.html" with a=s.a %}{% endif %}</dd></div>{% endfor %}
+        <div><dt>{% trans "To‘g‘ri javob" %}</dt><dd><code>{{ r.q.answer }}</code></dd></div>
+        {% for s in r.answers %}<div><dt>{{ s.label }}</dt><dd>{% if s.pending %}<span class="text-mute">{% trans "hali o‘ynamadi" %}</span>{% elif s.unseen and not s.a %}<span class="text-mute">{% trans "ko‘rilmagan" %}</span>{% else %}{% include "classroom/_quiz_given.html" with a=s.a %}{% endif %}</dd></div>{% endfor %}
       </dl>
       {% if r.q.explain %}<p class="ca-quiz-explain">{{ r.q.explain }}</p>{% endif %}
     </li>

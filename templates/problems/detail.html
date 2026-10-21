@@ -3,7 +3,7 @@
 {% block description %}{{ statement_html|plain }}{% endblock %}
 {% block structured_data %}{% if not contest %}{% url 'problems:list' as list_url %}{% breadcrumbs_jsonld "Masalalar" list_url problem.title request.path %}{% endif %}{% endblock %}
 
-{% block main_class %}ca-main ca-main-ws{% endblock %}
+{% block main_class %}{% trans "ca-main ca-main-ws" %}{% endblock %}
 {% block content %}
 {% comment %}#7 workspace, after LeetCode's: a work bar (the way back, the problem's number and name, its neighbours,
 saving and rating), then the statement and the editor side by side, each scrolling on its own. The statement has
@@ -14,39 +14,38 @@ the console (samples, your own input, the run's result) and the one gold "Yubori
     {% if contest %}
     <a class="ca-btn ca-btn-soft ca-btn-wb" href="{% url 'contests:detail' contest.pk %}"><i data-lucide="chevron-left" class="lu" aria-hidden="true"></i><span class="max-w-[14rem] truncate">{{ contest.title }}</span></a>
     {% if contest_problems|length > 1 %}
-    <nav class="ca-wbar-letters" aria-label="Musobaqa masalalari">
+    <nav class="ca-wbar-letters" aria-label="{% trans 'Musobaqa masalalari' %}">
       {% for cp in contest_problems %}<a href="{% url 'problems:detail' cp.problem.slug %}" class="ca-letter{% if cp.problem_id == problem.pk %} is-current{% endif %}"{% if cp.problem_id == problem.pk %} aria-current="page"{% endif %} title="{{ cp.label }}. {{ cp.problem.title }}">{{ cp.label }}</a>{% endfor %}
     </nav>
     {% endif %}
     {% elif plan_nav %}{% include "learn/_plan_strip.html" with nav=plan_nav %}
-    {% else %}<a class="ca-btn ca-btn-soft ca-btn-wb" href="{% url 'problems:list' %}"><i data-lucide="chevron-left" class="lu" aria-hidden="true"></i>Masalalar</a>{% endif %}
+    {% else %}<a class="ca-btn ca-btn-soft ca-btn-wb" href="{% url 'problems:list' %}"><i data-lucide="chevron-left" class="lu" aria-hidden="true"></i>{% trans "Masalalar" %}</a>{% endif %}
     {% if not contest %}<span class="ca-pid">{{ problem.id|stringformat:"04d" }}</span>{% endif %}
     <b class="ca-wbar-t">{% if contest_problem %}{{ contest_problem.label }}. {% endif %}{{ problem.title }}</b>
-    {% if is_daily %}<span class="ca-chip">Bugungi masala</span>{% endif %}
+    {% if is_daily %}<span class="ca-chip">{% trans "Bugungi masala" %}</span>{% endif %}
     {% if not contest %}
     <span class="ca-wbar-nav">
     {% if plan_nav %}{% with p=plan_nav.plan %}
-      {% if plan_nav.prev %}<a class="ca-btn ca-btn-soft ca-btn-wb ca-btn-sq" href="{% url 'problems:detail' plan_nav.prev.slug %}?plan={{ p.slug }}" title="{{ plan_nav.prev.title }}" aria-label="Kursdagi oldingi masala"><i data-lucide="chevron-left" class="lu" aria-hidden="true"></i></a>{% endif %}
+      {% if plan_nav.prev %}<a class="ca-btn ca-btn-soft ca-btn-wb ca-btn-sq" href="{% url 'problems:detail' plan_nav.prev.slug %}?plan={{ p.slug }}" title="{{ plan_nav.prev.title }}" aria-label="{% trans 'Kursdagi oldingi masala' %}"><i data-lucide="chevron-left" class="lu" aria-hidden="true"></i></a>{% endif %}
       <span class="tabular text-xs text-mute" title="Kursdagi o‘rni">{{ plan_nav.position }} / {{ plan_nav.total }}</span>
-      {% if plan_nav.next %}<a class="ca-btn ca-btn-soft ca-btn-wb ca-btn-sq" href="{% url 'problems:detail' plan_nav.next.slug %}?plan={{ p.slug }}" title="{{ plan_nav.next.title }}" aria-label="Kursdagi keyingi masala"><i data-lucide="chevron-right" class="lu" aria-hidden="true"></i></a>{% endif %}
+      {% if plan_nav.next %}<a class="ca-btn ca-btn-soft ca-btn-wb ca-btn-sq" href="{% url 'problems:detail' plan_nav.next.slug %}?plan={{ p.slug }}" title="{{ plan_nav.next.title }}" aria-label="{% trans 'Kursdagi keyingi masala' %}"><i data-lucide="chevron-right" class="lu" aria-hidden="true"></i></a>{% endif %}
     {% endwith %}{% else %}
-      {% if prev_problem %}<a class="ca-btn ca-btn-soft ca-btn-wb ca-btn-sq" href="{% url 'problems:detail' prev_problem.slug %}" title="{{ prev_problem.title }}" aria-label="Oldingi masala"><i data-lucide="chevron-left" class="lu" aria-hidden="true"></i></a>{% endif %}
-      {% if next_problem %}<a class="ca-btn ca-btn-soft ca-btn-wb ca-btn-sq" href="{% url 'problems:detail' next_problem.slug %}" title="{{ next_problem.title }}" aria-label="Keyingi masala"><i data-lucide="chevron-right" class="lu" aria-hidden="true"></i></a>{% endif %}
+      {% if prev_problem %}<a class="ca-btn ca-btn-soft ca-btn-wb ca-btn-sq" href="{% url 'problems:detail' prev_problem.slug %}" title="{{ prev_problem.title }}" aria-label="{% trans 'Oldingi masala' %}"><i data-lucide="chevron-left" class="lu" aria-hidden="true"></i></a>{% endif %}
+      {% if next_problem %}<a class="ca-btn ca-btn-soft ca-btn-wb ca-btn-sq" href="{% url 'problems:detail' next_problem.slug %}" title="{{ next_problem.title }}" aria-label="{% trans 'Keyingi masala' %}"><i data-lucide="chevron-right" class="lu" aria-hidden="true"></i></a>{% endif %}
     {% endif %}
     </span>
     {% endif %}
   </div>
   <div class="ca-wbar-r">
     {% if contest %}
-    <span class="ca-wbar-lock"><i data-lucide="lock-keyhole" class="lu" aria-hidden="true"></i><span class="hidden xl:inline">Musobaqa rejimi · sahifadan chiqish qayd etiladi</span>
-      <span data-leaves-wrap class="!hidden font-semibold text-bad">· chiqishlar: <b class="tabular" data-leaves>0</b></span></span>
-    <span class="ca-wbar-clock tabular" data-countdown="{{ contest.end|date:'c' }}" data-label="Tugashiga"></span>
+    <span class="ca-wbar-lock"><i data-lucide="lock-keyhole" class="lu" aria-hidden="true"></i>{% trans "<span class=\"hidden xl:inline\">Musobaqa rejimi · sahifadan chiqish qayd etiladi</span> <span data-leaves-wrap class=\"!hidden font-semibold text-bad\">· chiqishlar: <b class=\"tabular\" data-leaves>0</b></span>" %}</span>
+    <span class="ca-wbar-clock tabular" data-countdown="{{ contest.end|date:'c' }}" data-label="{% trans 'Tugashiga' %}"></span>
     {% else %}
     {% if save_lists is not None %}{% include "learn/_save_menu.html" %}{% endif %}
     {% if show_leaders %}
     <button type="button" class="ca-btn ca-btn-soft ca-btn-wb" data-dialog="rate-dialog" aria-haspopup="dialog">
       <i data-lucide="star" class="lu text-warn {% if problem.n_ratings %}fill-current{% endif %}" aria-hidden="true"></i>
-      {% if problem.n_ratings %}<b class="tabular">{{ problem.avg_stars|floatformat:1 }}</b><span class="tabular font-normal text-mute">({{ problem.n_ratings }})</span>{% else %}Baholash{% endif %}
+      {% if problem.n_ratings %}<b class="tabular">{{ problem.avg_stars|floatformat:1 }}</b><span class="tabular font-normal text-mute">({{ problem.n_ratings }})</span>{% else %}{% trans "Baholash" %}{% endif %}
     </button>
     {% endif %}
     {% endif %}
@@ -54,69 +53,69 @@ the console (samples, your own input, the run's result) and the one gold "Yubori
 </div>
 
 {# phones and tablets: one pane at a time, so the editor isn't a long scroll below the statement #}
-<div class="ca-seg sticky top-[calc(var(--ca-nav-h)+.5rem)] z-30 mx-4 my-3 lg:hidden" role="group" aria-label="Ko‘rinish">
-  <button type="button" data-pane-tab="statement" aria-pressed="true" aria-controls="statement-pane"><i data-lucide="file-text" class="lu mr-1.5" aria-hidden="true"></i>Masala</button>
-  <button type="button" data-pane-tab="solve" aria-pressed="false" aria-controls="solve-pane"><i data-lucide="code" class="lu mr-1.5" aria-hidden="true"></i>Yechim</button>
+<div class="ca-seg sticky top-[calc(var(--ca-nav-h)+.5rem)] z-30 mx-4 my-3 lg:hidden" role="group" aria-label="{% trans 'Ko‘rinish' %}">
+  <button type="button" data-pane-tab="statement" aria-pressed="true" aria-controls="statement-pane"><i data-lucide="file-text" class="lu mr-1.5" aria-hidden="true"></i>{% trans "Masala" %}</button>
+  <button type="button" data-pane-tab="solve" aria-pressed="false" aria-controls="solve-pane"><i data-lucide="code" class="lu mr-1.5" aria-hidden="true"></i>{% trans "Yechim" %}</button>
 </div>
 <div id="panes" data-pane="statement" class="ca-ws">
-  <section class="ca-ws-doc" id="statement-pane" aria-label="Masala matni">
+  <section class="ca-ws-doc" id="statement-pane" aria-label="{% trans 'Masala matni' %}">
     {% if show_leaders or my_subs %}
-    <div class="ca-doc-tabs" role="tablist" aria-label="Masala bo‘limlari">
-      <button type="button" role="tab" id="tab-doc-statement" aria-controls="doc-statement" aria-selected="true" data-doc-tab="statement">Shart</button>
-      {% if hints or editorial_html or problem.editorial_md %}<button type="button" role="tab" id="tab-doc-help" aria-controls="doc-help" aria-selected="false" tabindex="-1" data-doc-tab="help"><i data-lucide="lightbulb" class="lu mr-1" aria-hidden="true"></i>Yordam</button>{% endif %}
-      {% if show_leaders %}<button type="button" role="tab" id="tab-doc-leaders" aria-controls="doc-leaders" aria-selected="false" tabindex="-1" data-doc-tab="leaders">Eng yaxshi yechimlar</button>{% endif %}
-      {% if user.is_authenticated %}<button type="button" role="tab" id="tab-doc-mine" aria-controls="doc-mine" aria-selected="false" tabindex="-1" data-doc-tab="mine">Urinishlarim <em class="tabular" id="mine-count">{{ my_subs_n }}</em></button>{% endif %}
+    <div class="ca-doc-tabs" role="tablist" aria-label="{% trans 'Masala bo‘limlari' %}">
+      <button type="button" role="tab" id="tab-doc-statement" aria-controls="doc-statement" aria-selected="true" data-doc-tab="statement">{% trans "Shart" %}</button>
+      {% if hints or editorial_html or problem.editorial_md %}<button type="button" role="tab" id="tab-doc-help" aria-controls="doc-help" aria-selected="false" tabindex="-1" data-doc-tab="help"><i data-lucide="lightbulb" class="lu mr-1" aria-hidden="true"></i>{% trans "Yordam" %}</button>{% endif %}
+      {% if show_leaders %}<button type="button" role="tab" id="tab-doc-leaders" aria-controls="doc-leaders" aria-selected="false" tabindex="-1" data-doc-tab="leaders">{% trans "Eng yaxshi yechimlar" %}</button>{% endif %}
+      {% if user.is_authenticated %}<button type="button" role="tab" id="tab-doc-mine" aria-controls="doc-mine" aria-selected="false" tabindex="-1" data-doc-tab="mine">{% blocktrans with my_subs_n=my_subs_n %}Urinishlarim <em class="tabular" id="mine-count">{{ my_subs_n }}</em>{% endblocktrans %}</button>{% endif %}
     </div>
     {% endif %}
     <div class="ca-doc" id="doc-statement" role="tabpanel" aria-labelledby="tab-doc-statement">
       {% include "contests/_dq_banner.html" with participation=my_participation %}
       {% if open_contest %}
       <div class="ca-alert mb-4 flex flex-wrap items-center justify-between gap-3" role="status">
-        <span><i data-lucide="trophy" class="lu mr-1.5" aria-hidden="true"></i>Bu masala hozir <strong>«{{ open_contest.title }}»</strong> musobaqasida. Natijalar jadvalida ko‘rinish uchun avval ro‘yxatdan o‘ting — aks holda yechim amaliyot sifatida hisoblanadi.</span>
-        <form method="post" action="{% url 'contests:register' open_contest.pk %}">{% csrf_token %}<button class="ca-btn ca-btn-primary !py-1.5">Musobaqaga qo‘shilish</button></form>
+        <span><i data-lucide="trophy" class="lu mr-1.5" aria-hidden="true"></i>{% blocktrans with open_contest_title=open_contest.title %}Bu masala hozir <strong>«{{ open_contest_title }}»</strong> musobaqasida. Natijalar jadvalida ko‘rinish uchun avval ro‘yxatdan o‘ting — aks holda yechim amaliyot sifatida hisoblanadi.{% endblocktrans %}</span>
+        <form method="post" action="{% url 'contests:register' open_contest.pk %}">{% csrf_token %}<button class="ca-btn ca-btn-primary !py-1.5">{% trans "Musobaqaga qo‘shilish" %}</button></form>
       </div>
       {% endif %}
       {% comment %}AI penalty: staff struck this participant's result on this problem; it counts as a
       wrong try and the problem stays blocked until the round ends{% endcomment %}
       {% if contest_blocked %}
       <div class="ca-alert ca-alert-bad mb-4" role="alert">
-        <p class="font-semibold"><i data-lucide="shield-alert" class="lu mr-1.5" aria-hidden="true"></i>Bu masala siz uchun bloklangan.</p>
-        <p class="mt-1 text-sm">Musobaqadagi yechimingiz bekor qilingan va xato urinish hisoblandi. Musobaqa tugaguncha bu masalaga yechim yuborish mumkin emas. Xato deb hisoblasangiz, adminga murojaat qiling.</p>
+        <p class="font-semibold"><i data-lucide="shield-alert" class="lu mr-1.5" aria-hidden="true"></i>{% trans "Bu masala siz uchun bloklangan." %}</p>
+        <p class="mt-1 text-sm">{% trans "Musobaqadagi yechimingiz bekor qilingan va xato urinish hisoblandi. Musobaqa tugaguncha bu masalaga yechim yuborish mumkin emas. Xato deb hisoblasangiz, adminga murojaat qiling." %}</p>
       </div>
       {% endif %}
       <div class="ca-problem-heading">
         <div class="ca-problem-title-row">
           {% if contest_problem %}<span class="ca-problem-letter" aria-hidden="true">{{ contest_problem.label }}</span>{% endif %}
           <div class="min-w-0">
-            {% if contest_problem %}<p class="ca-problem-eyebrow">{{ contest.title }} · {{ contest_problem.label }} masala</p>{% endif %}
+            {% if contest_problem %}<p class="ca-problem-eyebrow">{% blocktrans with contest_title=contest.title contest_problem_label=contest_problem.label %}{{ contest_title }} · {{ contest_problem_label }} masala{% endblocktrans %}</p>{% endif %}
             <h1 class="ca-page-title">{{ problem.title }}</h1>
           </div>
         </div>
         {# the facts under the title: the level (and rating), what a solve is worth, the limits, the topics #}
         <div class="ca-facts7">
           {% if contest_problem %}
-          {% if contest.type != "icpc" %}<span{% if contest.type == "cf" %} title="Boshlang‘ich ball: vaqt o‘tishi va noto‘g‘ri urinishlar bilan kamayadi"{% endif %}><i data-lucide="coins" class="lu" aria-hidden="true"></i><b class="tabular">{{ contest_problem.points }}</b> ball</span>{% endif %}
+          {% if contest.type != "icpc" %}<span{% if contest.type == "cf" %} title="{% trans 'Boshlang‘ich ball: vaqt o‘tishi va noto‘g‘ri urinishlar bilan kamayadi' %}"{% endif %}><i data-lucide="coins" class="lu" aria-hidden="true"></i>{% blocktrans with contest_problem_points=contest_problem.points %}<b class="tabular">{{ contest_problem_points }}</b> ball{% endblocktrans %}</span>{% endif %}
           {% else %}
-          <span class="ca-diff ca-diff-{{ problem.difficulty }}" title="Masala reytingi {{ problem.rating }}: reytingi shu songa teng o‘quvchi uni taxminan yarim holda yechadi">{{ problem.get_difficulty_display }}</span>
+          <span class="ca-diff ca-diff-{{ problem.difficulty }}" title="{% blocktrans with problem_rating=problem.rating %}Masala reytingi {{ problem_rating }}: reytingi shu songa teng o‘quvchi uni taxminan yarim holda yechadi{% endblocktrans %}">{{ problem.get_difficulty_display }}</span>
           {% if voided == "held" %}
-          <span class="font-medium text-warn" title="Yechim qanday yozilgani shubhali ko‘rindi, shuning uchun ball admin ko‘rib chiqquncha ushlab turilibdi. O‘zingiz yozgan bo‘lsangiz, ball qaytariladi."><i data-lucide="hourglass" class="lu" aria-hidden="true"></i>Ball tekshiruvda</span>
+          <span class="font-medium text-warn" title="Yechim qanday yozilgani shubhali ko‘rindi, shuning uchun ball admin ko‘rib chiqquncha ushlab turilibdi. O‘zingiz yozgan bo‘lsangiz, ball qaytariladi."><i data-lucide="hourglass" class="lu" aria-hidden="true"></i>{% trans "Ball tekshiruvda" %}</span>
           {% elif voided %}
-          <span class="font-medium text-bad" title="Admin bu yechimni ko‘chirilgan deb belgiladi, shuning uchun amaliyot baliga qo‘shilmadi. Savol bo‘lsa, adminga murojaat qiling."><i data-lucide="shield-alert" class="lu" aria-hidden="true"></i>Ball berilmadi</span>
+          <span class="font-medium text-bad" title="Admin bu yechimni ko‘chirilgan deb belgiladi, shuning uchun amaliyot baliga qo‘shilmadi. Savol bo‘lsa, adminga murojaat qiling."><i data-lucide="shield-alert" class="lu" aria-hidden="true"></i>{% trans "Ball berilmadi" %}</span>
           {% else %}
-          <span title="Yechsangiz amaliyot balingizga qo‘shiladi. Ko‘p odam yechgan masala biroz arzonlashadi."><i data-lucide="coins" class="lu" aria-hidden="true"></i><b class="tabular">+{{ problem.points }}</b> ball</span>
+          <span title="Yechsangiz amaliyot balingizga qo‘shiladi. Ko‘p odam yechgan masala biroz arzonlashadi."><i data-lucide="coins" class="lu" aria-hidden="true"></i>{% blocktrans with problem_points=problem.points %}<b class="tabular">+{{ problem_points }}</b> ball{% endblocktrans %}</span>
           {% endif %}
           {% endif %}
-          {% if problem.kind == "sql" %}<span class="ca-kind-sql"><i data-lucide="database" class="lu" aria-hidden="true"></i>SQL</span>{% endif %}
-          <span title="Vaqt chegarasi"><i data-lucide="clock" class="lu" aria-hidden="true"></i><b class="tabular">{{ problem.tl_ms }} ms</b></span>
-          {% if problem.kind != "sql" %}<span title="Xotira chegarasi"><b class="tabular">{{ problem.ml_mb }} MB</b></span>{% endif %}
+          {% if problem.kind == "sql" %}<span class="ca-kind-sql"><i data-lucide="database" class="lu" aria-hidden="true"></i>{% trans "SQL" %}</span>{% endif %}
+          <span title="Vaqt chegarasi"><i data-lucide="clock" class="lu" aria-hidden="true"></i><b class="tabular">{% blocktrans with problem_tl_ms=problem.tl_ms %}{{ problem_tl_ms }} ms{% endblocktrans %}</b></span>
+          {% if problem.kind != "sql" %}<span title="Xotira chegarasi"><b class="tabular">{% blocktrans with problem_ml_mb=problem.ml_mb %}{{ problem_ml_mb }} MB{% endblocktrans %}</b></span>{% endif %}
           {% if not contest and problem.n_ratings %}
-          <button type="button" class="ca-stars-sum" data-dialog="rate-dialog" title="{{ problem.n_ratings }} ta baho"><i data-lucide="star" class="lu" aria-hidden="true"></i><b class="tabular text-ink">{{ problem.avg_stars|floatformat:1 }}</b><span class="sr-only">/5,</span> <span class="tabular text-mute">({{ problem.n_ratings }})</span></button>
+          <button type="button" class="ca-stars-sum" data-dialog="rate-dialog" title="{% blocktrans with problem_n_ratings=problem.n_ratings %}{{ problem_n_ratings }} ta baho{% endblocktrans %}"><i data-lucide="star" class="lu" aria-hidden="true"></i><b class="tabular text-ink">{{ problem.avg_stars|floatformat:1 }}</b><span class="sr-only">/5,</span> <span class="tabular text-mute">({{ problem.n_ratings }})</span></button>
           {% endif %}
           {% if not contest and problem.tags.all %}
-          <span class="ca-tagrow"><span class="text-mute">mavzu:</span> {% for t in problem.tags.all|slice:":6" %}<a class="ca-facts7-tag{% if t.kind == 'sql' %} is-sql{% endif %}" href="{% url 'problems:list' %}?tag={{ t.name|urlencode }}">{{ t.name|tag_uz }}</a>{% endfor %}{% if problem.tags.all|length > 6 %}<span class="text-mute tabular" title="Yana {{ problem.tags.all|length|add:'-6' }} ta mavzu">+{{ problem.tags.all|length|add:"-6" }}</span>{% endif %}</span>
+          <span class="ca-tagrow"><span class="text-mute">{% trans "mavzu:" %}</span> {% for t in problem.tags.all|slice:":6" %}<a class="ca-facts7-tag{% if t.kind == 'sql' %} is-sql{% endif %}" href="{% url 'problems:list' %}?tag={{ t.name|urlencode }}">{{ t.name|tag_uz }}</a>{% endfor %}{% if problem.tags.all|length > 6 %}<span class="text-mute tabular" title="{% blocktrans with problem_tags_all=problem.tags.all|length|add:'-6' %}Yana {{ problem_tags_all }} ta mavzu{% endblocktrans %}">+{{ problem.tags.all|length|add:"-6" }}</span>{% endif %}</span>
           {% endif %}
           {% if not contest %}
-          <span class="text-mute">muallif: <a class="ca-tier-ink font-semibold{{ problem.author.rating|lg }}" href="{% url 'profile' problem.author.username %}" translate="no" style="--tier: {{ problem.author.rating|tier_color }}">{{ problem.author.username }}</a></span>
+          <span class="text-mute">{% trans "muallif:" %} <a class="ca-tier-ink font-semibold{{ problem.author.rating|lg }}" href="{% url 'profile' problem.author.username %}" translate="no" style="--tier: {{ problem.author.rating|tier_color }}">{{ problem.author.username }}</a></span>
           {% endif %}
         </div>
       </div>
@@ -125,92 +124,92 @@ the console (samples, your own input, the run's result) and the one gold "Yubori
         <div class="prose max-w-none">{{ statement_html|safe }}</div>
         {% if problem.statement_image %}
         <div class="mt-4">
-          <img class="max-w-full h-auto rounded-[var(--ca-radius)] border border-line" src="{{ problem.statement_image.url }}" alt="«{{ problem.title }}» masalasining rasmi" loading="lazy">
+          <img class="max-w-full h-auto rounded-[var(--ca-radius)] border border-line" src="{{ problem.statement_image.url }}" alt="{% blocktrans with problem_title=problem.title %}«{{ problem_title }}» masalasining rasmi{% endblocktrans %}" loading="lazy">
         </div>
         {% endif %}
         {% if problem.kind == "sql" %}
         <div>
-          <h2 class="ca-statement-h">Namunaviy ma’lumotlar</h2>
+          <h2 class="ca-statement-h">{% trans "Namunaviy ma’lumotlar" %}</h2>
           {% for t in sql_tables %}
           <figure class="ca-sql-table">
-            <figcaption><i data-lucide="table-2" class="lu" aria-hidden="true"></i><span translate="no">{{ t.name }}</span><span class="text-mute">· {{ t.rows|length }} qator</span></figcaption>
+            <figcaption><i data-lucide="table-2" class="lu" aria-hidden="true"></i>{% blocktrans with t_name=t.name t_rows=t.rows|length %}<span translate="no">{{ t_name }}</span><span class="text-mute">· {{ t_rows }} qator</span>{% endblocktrans %}</figcaption>
             <div class="overflow-x-auto">
               <table class="ca-table">
                 <thead><tr>{% for name, type in t.columns %}<th scope="col" translate="no">{{ name }}{% if type %} <span class="ca-sql-type">{{ type|lower }}</span>{% endif %}</th>{% endfor %}</tr></thead>
-                <tbody>{% for row in t.rows %}<tr>{% for v in row %}<td class="font-mono">{% if v is None %}<span class="text-mute">NULL</span>{% else %}{{ v }}{% endif %}</td>{% endfor %}</tr>{% endfor %}</tbody>
+                <tbody>{% for row in t.rows %}<tr>{% for v in row %}<td class="font-mono">{% if v is None %}<span class="text-mute">{% trans "NULL" %}</span>{% else %}{{ v }}{% endif %}</td>{% endfor %}</tr>{% endfor %}</tbody>
               </table>
             </div>
           </figure>
           {% endfor %}
           <details class="mt-2">
-            <summary class="cursor-pointer text-xs text-mute">Jadval tuzilishi (CREATE TABLE)</summary>
+            <summary class="cursor-pointer text-xs text-mute">{% trans "Jadval tuzilishi (CREATE TABLE)" %}</summary>
             <pre class="ca-pre mt-2 text-xs">{{ sql_dataset.schema_sql }}</pre>
           </details>
         </div>
         {% if output_html %}
         <div>
-          <h2 class="ca-statement-h">Natija</h2>
+          <h2 class="ca-statement-h">{% trans "Natija" %}</h2>
           <div class="prose max-w-none">{{ output_html|safe }}</div>
         </div>
         {% endif %}
         <div>
-          <h2 class="ca-statement-h">Namunaviy ma’lumotlarda kutilgan natija</h2>
+          <h2 class="ca-statement-h">{% trans "Namunaviy ma’lumotlarda kutilgan natija" %}</h2>
           <figure class="ca-sql-table">
             <div class="overflow-x-auto">
               <table class="ca-table">
-                <tbody>{% for row in sql_expected %}<tr>{% for v in row %}<td class="font-mono">{{ v|default:"NULL" }}</td>{% endfor %}</tr>{% empty %}<tr><td class="text-mute">(bo‘sh natija)</td></tr>{% endfor %}</tbody>
+                <tbody>{% for row in sql_expected %}<tr>{% for v in row %}<td class="font-mono">{{ v|default:"NULL" }}</td>{% endfor %}</tr>{% empty %}<tr><td class="text-mute">{% trans "(bo‘sh natija)" %}</td></tr>{% endfor %}</tbody>
               </table>
             </div>
           </figure>
-          <p class="mt-2 text-xs text-mute">{% if sql_dataset.ordered %}Qatorlar aynan shu tartibda bo‘lishi kerak.{% else %}Qatorlar tartibi ahamiyatsiz, ustunlar tartibi muhim.{% endif %}{% if sql_dataset.check_seed_sql %} Yechim yashirin, kattaroq ma’lumotlarda ham tekshiriladi.{% endif %}</p>
+          <p class="mt-2 text-xs text-mute">{% if sql_dataset.ordered %}{% trans "Qatorlar aynan shu tartibda bo‘lishi kerak." %}{% else %}{% trans "Qatorlar tartibi ahamiyatsiz, ustunlar tartibi muhim." %}{% endif %}{% if sql_dataset.check_seed_sql %} {% trans "Yechim yashirin, kattaroq ma’lumotlarda ham tekshiriladi." %}{% endif %}</p>
         </div>
         {% else %}
         {% if input_html %}
         <div>
-          <h2 class="ca-statement-h">Kirish ma’lumotlari</h2>
+          <h2 class="ca-statement-h">{% trans "Kirish ma’lumotlari" %}</h2>
           <div class="prose max-w-none">{{ input_html|safe }}</div>
         </div>
         {% endif %}
         {% if output_html %}
         <div>
-          <h2 class="ca-statement-h">Chiqish ma’lumotlari</h2>
+          <h2 class="ca-statement-h">{% trans "Chiqish ma’lumotlari" %}</h2>
           <div class="prose max-w-none">{{ output_html|safe }}</div>
         </div>
         {% endif %}
         <div class="ca-examples-section">
           <div class="ca-examples-title">
-            <div><h2 class="ca-statement-h">Misollar</h2><p>Namuna qiymatlari va kutilgan natija</p></div>
+            <div><h2 class="ca-statement-h">{% trans "Misollar" %}</h2><p>{% trans "Namuna qiymatlari va kutilgan natija" %}</p></div>
           </div>
           {% for t in problem.samples %}
           <article class="ca-example">
-            <div class="ca-example-head"><span>Misol {{ forloop.counter }}</span><span class="ca-example-hint">Kirish yoki chiqishni alohida nusxalash mumkin</span></div>
+            <div class="ca-example-head">{% blocktrans with forloop_counter=forloop.counter %}<span>Misol {{ forloop_counter }}</span><span class="ca-example-hint">Kirish yoki chiqishni alohida nusxalash mumkin</span>{% endblocktrans %}</div>
             <div class="ca-example-grid">
             <div class="ca-sample">
               <div class="ca-sample-head">
-                <span><i data-lucide="arrow-down-to-line" class="lu" aria-hidden="true"></i>Kirish</span>
-                <button type="button" class="ca-copy-btn" data-copy-target="sample-in-{{ forloop.counter }}" title="Nusxalash" aria-label="Kirishni nusxalash"><i data-lucide="copy" class="lu" aria-hidden="true"></i></button>
+                <span><i data-lucide="arrow-down-to-line" class="lu" aria-hidden="true"></i>{% trans "Kirish" %}</span>
+                <button type="button" class="ca-copy-btn" data-copy-target="sample-in-{{ forloop.counter }}" title="{% trans 'Nusxalash' %}" aria-label="{% trans 'Kirishni nusxalash' %}"><i data-lucide="copy" class="lu" aria-hidden="true"></i></button>
               </div>
               <pre id="sample-in-{{ forloop.counter }}">{{ t.input }}</pre>
             </div>
             <div class="ca-sample">
               <div class="ca-sample-head">
-                <span><i data-lucide="arrow-up-from-line" class="lu" aria-hidden="true"></i>Chiqish</span>
-                <button type="button" class="ca-copy-btn" data-copy-target="sample-out-{{ forloop.counter }}" title="Nusxalash" aria-label="Chiqishni nusxalash"><i data-lucide="copy" class="lu" aria-hidden="true"></i></button>
+                <span><i data-lucide="arrow-up-from-line" class="lu" aria-hidden="true"></i>{% trans "Chiqish" %}</span>
+                <button type="button" class="ca-copy-btn" data-copy-target="sample-out-{{ forloop.counter }}" title="{% trans 'Nusxalash' %}" aria-label="{% trans 'Chiqishni nusxalash' %}"><i data-lucide="copy" class="lu" aria-hidden="true"></i></button>
               </div>
               <pre id="sample-out-{{ forloop.counter }}">{{ t.expected }}</pre>
             </div>
             </div>
           </article>
           {% empty %}
-          <div class="ca-empty text-sm">Misol yo‘q.</div>
+          <div class="ca-empty text-sm">{% trans "Misol yo‘q." %}</div>
           {% endfor %}
         </div>
         {% endif %}
         {% if stats and stats.total %}
-        <dl class="ca-pstats" aria-label="Masala statistikasi">
-          <div><dt>Qabul qilingan</dt><dd class="tabular">{{ stats.accepted }}</dd></div>
-          <div><dt>Urinishlar</dt><dd class="tabular">{{ stats.total }}</dd></div>
-          <div><dt>Qabul darajasi</dt><dd class="tabular">{{ stats.rate|floatformat:1 }}%</dd></div>
+        <dl class="ca-pstats" aria-label="{% trans 'Masala statistikasi' %}">
+          <div><dt>{% trans "Qabul qilingan" %}</dt><dd class="tabular">{{ stats.accepted }}</dd></div>
+          <div><dt>{% trans "Urinishlar" %}</dt><dd class="tabular">{{ stats.total }}</dd></div>
+          <div><dt>{% trans "Qabul darajasi" %}</dt><dd class="tabular">{{ stats.rate|floatformat:1 }}%</dd></div>
         </dl>
         {% endif %}
       </div>
@@ -219,21 +218,21 @@ the console (samples, your own input, the run's result) and the one gold "Yubori
     <div class="ca-doc" id="doc-help" role="tabpanel" aria-labelledby="tab-doc-help" hidden>
     <div class="ca-doc-help space-y-3" id="hints">
       <div class="flex flex-wrap items-center justify-between gap-2">
-        <h2 class="text-sm font-semibold"><i data-lucide="lightbulb" class="lu mr-1.5 text-warn" aria-hidden="true"></i>Yordam</h2>
+        <h2 class="text-sm font-semibold"><i data-lucide="lightbulb" class="lu mr-1.5 text-warn" aria-hidden="true"></i>{% trans "Yordam" %}</h2>
         {% if help_locked %}<span class="text-xs text-mute">{{ help_locked }}</span>
-        {% elif hints and not solved %}<span class="text-xs text-mute">Maslahat ochilsa, yechganingizda ball shuncha kamayadi</span>{% endif %}
+        {% elif hints and not solved %}<span class="text-xs text-mute">{% trans "Maslahat ochilsa, yechganingizda ball shuncha kamayadi" %}</span>{% endif %}
       </div>
       {% for h in hints %}
       <div class="rounded-[var(--ca-radius)] border border-line px-4 py-3" id="hint-{{ h.pk }}">
         {% if h.opened %}
-        <p class="mb-1 text-xs font-semibold text-mute">{{ forloop.counter }}-maslahat</p>
+        <p class="mb-1 text-xs font-semibold text-mute">{% blocktrans with forloop_counter=forloop.counter %}{{ forloop_counter }}-maslahat{% endblocktrans %}</p>
         <div class="prose prose-sm max-w-none">{{ h.html|safe }}</div>
         {% else %}
         <div class="flex flex-wrap items-center justify-between gap-2">
-          <span class="text-sm"><i data-lucide="lock" class="lu mr-1.5 text-mute" aria-hidden="true"></i>{{ forloop.counter }}-maslahat{% if not solved %} · <span class="font-semibold text-warn">−{{ h.cost_pct }}%</span> ball{% else %} · bepul (yechilgan){% endif %}</span>
+          <span class="text-sm"><i data-lucide="lock" class="lu mr-1.5 text-mute" aria-hidden="true"></i>{% blocktrans with forloop_counter=forloop.counter %}{{ forloop_counter }}-maslahat{% endblocktrans %}{% if not solved %} {% blocktrans with h_cost_pct=h.cost_pct %}· <span class="font-semibold text-warn">−{{ h_cost_pct }}%</span> ball{% endblocktrans %}{% else %} {% trans "· bepul (yechilgan)" %}{% endif %}</span>
           {% if h.can_open and user.is_authenticated %}
-          <form method="post" action="{% url 'problems:hint' problem.slug h.pk %}"{% if not solved %} data-confirm="Maslahatni ochasizmi? Masalani yechganingizda ballning {{ h.cost_pct }}% i ayriladi."{% endif %}>{% csrf_token %}
-            <button class="ca-btn ca-btn-ghost !py-1 text-xs">Ochish</button>
+          <form method="post" action="{% url 'problems:hint' problem.slug h.pk %}"{% if not solved %} data-confirm="{% blocktrans with h_cost_pct=h.cost_pct %}Maslahatni ochasizmi? Masalani yechganingizda ballning {{ h_cost_pct }}% i ayriladi.{% endblocktrans %}"{% endif %}>{% csrf_token %}
+            <button class="ca-btn ca-btn-ghost !py-1 text-xs">{% trans "Ochish" %}</button>
           </form>
           {% endif %}
         </div>
@@ -242,7 +241,7 @@ the console (samples, your own input, the run's result) and the one gold "Yubori
       {% endfor %}
       {% if problem.editorial_md %}
       <details class="rounded-[var(--ca-radius)] border border-line px-4 py-3"{% if not editorial_html %} aria-disabled="true"{% endif %}>
-        <summary class="cursor-pointer text-sm font-medium"><i data-lucide="book-open-check" class="lu mr-1.5" aria-hidden="true"></i>Yechim tahlili{% if not editorial_html %} <span class="text-xs font-normal text-mute">· masalani yechgach ochiladi</span>{% endif %}</summary>
+        <summary class="cursor-pointer text-sm font-medium"><i data-lucide="book-open-check" class="lu mr-1.5" aria-hidden="true"></i>{% trans "Yechim tahlili" %}{% if not editorial_html %} <span class="text-xs font-normal text-mute">{% trans "· masalani yechgach ochiladi" %}</span>{% endif %}</summary>
         {% if editorial_html %}<div class="prose prose-sm mt-3 max-w-none">{{ editorial_html|safe }}</div>{% endif %}
       </details>
       {% endif %}
@@ -251,20 +250,20 @@ the console (samples, your own input, the run's result) and the one gold "Yubori
     {% endif %}
     {% if show_leaders %}
     <div class="ca-doc" id="doc-leaders" role="tabpanel" aria-labelledby="tab-doc-leaders" hidden>
-      <h2 class="sr-only">Eng yaxshi yechimlar</h2>
+      <h2 class="sr-only">{% trans "Eng yaxshi yechimlar" %}</h2>
       {% include "problems/_leaders_mini.html" with title="Eng tez" icon="zap" rows=fastest by="time" %}
       {% include "problems/_leaders_mini.html" with title="Eng qisqa" icon="scissors" rows=shortest by="length" %}
     </div>
     {% endif %}
     {% if user.is_authenticated %}
     <div class="ca-doc" id="doc-mine" role="tabpanel" aria-labelledby="tab-doc-mine" hidden>
-      <div class="ca7-sec-h"><h2>Urinishlarim</h2><a class="ca-link" href="{% url 'submissions:mine' %}?mine=1">Barchasi</a></div>
+      <div class="ca7-sec-h"><h2>{% trans "Urinishlarim" %}</h2><a class="ca-link" href="{% url 'submissions:mine' %}?mine=1">{% trans "Barchasi" %}</a></div>
       {% include "problems/_my_subs.html" %}
     </div>
     {% endif %}
   </section>
 
-  <section class="ca-ws-ed" id="solve-pane" aria-label="Yechim yuborish">
+  <section class="ca-ws-ed" id="solve-pane" aria-label="{% trans 'Yechim yuborish' %}">
     {% if user.is_authenticated %}
     <form method="post" action="{% url 'submissions:submit' problem.slug %}" id="submit-form" class="ca-ide">
       {% csrf_token %}
@@ -274,104 +273,104 @@ the console (samples, your own input, the run's result) and the one gold "Yubori
       <input type="hidden" name="next" value="{{ request.path }}#yechim">
     {% endif %}
       <div class="ca-edbar">
-        <label class="ca-edsel"><span class="sr-only">Dasturlash tili</span>
-          <select {% if user.is_authenticated %}name="language" {% endif %}id="language" aria-label="Dasturlash tili">
+        <label class="ca-edsel"><span class="sr-only">{% trans "Dasturlash tili" %}</span>
+          <select {% if user.is_authenticated %}name="language" {% endif %}id="language" aria-label="{% trans 'Dasturlash tili' %}">
             {% for l in languages %}<option value="{{ l.code }}">{{ l.name }}</option>{% endfor %}
           </select><i data-lucide="chevron-down" class="lu" aria-hidden="true"></i>
         </label>
         <span class="ca-edbar-state" id="draft-state" aria-live="polite"></span>
-        <button type="button" id="editor-reset" class="ca-edb ca-edb-sq" title="Tozalash" aria-label="Kodni tozalash"><i data-lucide="undo-2" class="lu" aria-hidden="true"></i></button>
+        <button type="button" id="editor-reset" class="ca-edb ca-edb-sq" title="{% trans 'Tozalash' %}" aria-label="{% trans 'Kodni tozalash' %}"><i data-lucide="undo-2" class="lu" aria-hidden="true"></i></button>
         <details class="ca-edprefs" id="editor-prefs" data-dropdown>
-          <summary class="ca-edb ca-edb-sq" title="Muharrir sozlamalari" aria-label="Muharrir sozlamalari"><i data-lucide="sliders-horizontal" class="lu" aria-hidden="true"></i></summary>
+          <summary class="ca-edb ca-edb-sq" title="{% trans 'Muharrir sozlamalari' %}" aria-label="{% trans 'Muharrir sozlamalari' %}"><i data-lucide="sliders-horizontal" class="lu" aria-hidden="true"></i></summary>
           <div class="ca-prefs">
-            <label class="ca-pref"><span>Shrift</span>
+            <label class="ca-pref"><span>{% trans "Shrift" %}</span>
               <select data-pref="font" class="ca-pref-sel">
-                <option value="anthropic">Anthropic Mono</option><option value="jetbrains">JetBrains Mono</option><option value="lilex">Lilex</option><option value="fira">Fira Code</option><option value="system">Tizim</option>
+                <option value="anthropic">{% trans "Anthropic Mono" %}</option><option value="jetbrains">{% trans "JetBrains Mono" %}</option><option value="lilex">{% trans "Lilex" %}</option><option value="fira">{% trans "Fira Code" %}</option><option value="system">{% trans "Tizim" %}</option>
               </select></label>
-            <label class="ca-pref"><span>Mavzu</span>
+            <label class="ca-pref"><span>{% trans "Mavzu" %}</span>
               <select data-pref="theme" class="ca-pref-sel">
-                <option value="auto">CodeArena</option>
-                <optgroup label="Tungi">
-                  <option value="dark">One Dark</option><option value="vscode-dark">VS Code Dark</option><option value="github-dark">GitHub Dark</option>
-                  <option value="tokyo-night">Tokyo Night</option><option value="tokyo-night-storm">Tokyo Night Storm</option>
-                  <option value="dracula">Dracula</option><option value="monokai">Monokai</option><option value="material-dark">Material</option>
-                  <option value="atomone">Atom One</option><option value="gruvbox-dark">Gruvbox</option><option value="nord">Nord</option>
-                  <option value="xcode-dark">Xcode Dark</option><option value="sublime">Sublime</option><option value="aura">Aura</option>
-                  <option value="copilot">Copilot</option><option value="andromeda">Andromeda</option><option value="solarized-dark">Solarized Dark</option>
+                <option value="auto">{% trans "CodeArena" %}</option>
+                <optgroup label="{% trans 'Tungi' %}">
+                  <option value="dark">{% trans "One Dark" %}</option><option value="vscode-dark">{% trans "VS Code Dark" %}</option><option value="github-dark">{% trans "GitHub Dark" %}</option>
+                  <option value="tokyo-night">{% trans "Tokyo Night" %}</option><option value="tokyo-night-storm">{% trans "Tokyo Night Storm" %}</option>
+                  <option value="dracula">{% trans "Dracula" %}</option><option value="monokai">{% trans "Monokai" %}</option><option value="material-dark">{% trans "Material" %}</option>
+                  <option value="atomone">{% trans "Atom One" %}</option><option value="gruvbox-dark">{% trans "Gruvbox" %}</option><option value="nord">{% trans "Nord" %}</option>
+                  <option value="xcode-dark">{% trans "Xcode Dark" %}</option><option value="sublime">{% trans "Sublime" %}</option><option value="aura">{% trans "Aura" %}</option>
+                  <option value="copilot">{% trans "Copilot" %}</option><option value="andromeda">{% trans "Andromeda" %}</option><option value="solarized-dark">{% trans "Solarized Dark" %}</option>
                 </optgroup>
-                <optgroup label="Kunduzgi">
-                  <option value="light">Oddiy</option><option value="vscode-light">VS Code Light</option><option value="github-light">GitHub Light</option>
-                  <option value="xcode-light">Xcode Light</option><option value="material-light">Material Light</option>
-                  <option value="gruvbox-light">Gruvbox Light</option><option value="solarized-light">Solarized Light</option>
+                <optgroup label="{% trans 'Kunduzgi' %}">
+                  <option value="light">{% trans "Oddiy" %}</option><option value="vscode-light">{% trans "VS Code Light" %}</option><option value="github-light">{% trans "GitHub Light" %}</option>
+                  <option value="xcode-light">{% trans "Xcode Light" %}</option><option value="material-light">{% trans "Material Light" %}</option>
+                  <option value="gruvbox-light">{% trans "Gruvbox Light" %}</option><option value="solarized-light">{% trans "Solarized Light" %}</option>
                 </optgroup>
               </select></label>
-            <div class="ca-pref"><span id="pref-size-label">Shrift o‘lchami</span>
+            <div class="ca-pref"><span id="pref-size-label">{% trans "Shrift o‘lchami" %}</span>
               <span class="ca-stepper" role="group" aria-labelledby="pref-size-label">
-                <button type="button" data-size-step="-1" aria-label="Kichraytirish">−</button>
+                <button type="button" data-size-step="-1" aria-label="{% trans 'Kichraytirish' %}">−</button>
                 <b class="tabular" id="pref-size-val">14</b>
-                <button type="button" data-size-step="1" aria-label="Kattalashtirish">+</button>
+                <button type="button" data-size-step="1" aria-label="{% trans 'Kattalashtirish' %}">+</button>
                 <input type="range" data-pref="size" min="12" max="22" step="1" class="sr-only" tabindex="-1" aria-hidden="true">
               </span></div>
-            <div class="ca-pref"><span id="pref-tab-label">Tab kengligi</span>
+            <div class="ca-pref"><span id="pref-tab-label">{% trans "Tab kengligi" %}</span>
               <div class="ca-edseg" role="radiogroup" aria-labelledby="pref-tab-label">
                 <label><input type="radio" name="pref-tab" value="2" data-pref="tab" class="sr-only"><span>2</span></label>
                 <label><input type="radio" name="pref-tab" value="4" data-pref="tab" class="sr-only"><span>4</span></label>
               </div></div>
-            <label class="ca-pref"><span>Vim klaviaturasi</span><input type="checkbox" role="switch" class="ca-switch" data-pref="vim"></label>
-            <label class="ca-pref"><span>Uzun qatorlarni o‘rash</span><input type="checkbox" role="switch" class="ca-switch" data-pref="wrap"></label>
-            <label class="ca-pref"><span>Til shabloni<small>Muharrir bo‘sh bo‘lsa qo‘yiladi</small></span><input type="checkbox" role="switch" class="ca-switch" data-pref="starter"></label>
+            <label class="ca-pref"><span>{% trans "Vim klaviaturasi" %}</span><input type="checkbox" role="switch" class="ca-switch" data-pref="vim"></label>
+            <label class="ca-pref"><span>{% trans "Uzun qatorlarni o‘rash" %}</span><input type="checkbox" role="switch" class="ca-switch" data-pref="wrap"></label>
+            <label class="ca-pref"><span>{% trans "Til shabloni<small>Muharrir bo‘sh bo‘lsa qo‘yiladi</small>" %}</span><input type="checkbox" role="switch" class="ca-switch" data-pref="starter"></label>
           </div>
         </details>
-        <button type="button" id="editor-full" class="ca-edb ca-edb-sq" title="To‘liq ekran" aria-label="To‘liq ekran" aria-pressed="false"><i data-lucide="maximize" class="lu" aria-hidden="true"></i></button>
+        <button type="button" id="editor-full" class="ca-edb ca-edb-sq" title="{% trans 'To‘liq ekran' %}" aria-label="{% trans 'To‘liq ekran' %}" aria-pressed="false"><i data-lucide="maximize" class="lu" aria-hidden="true"></i></button>
       </div>
       <div id="editor">
         {% if preload %}{{ preload|json_script:"preload-code" }}{% endif %}
-        <textarea {% if user.is_authenticated %}name="source" {% endif %}id="source" class="ca-editor-fallback" spellcheck="false" aria-label="Kod muharriri" placeholder="Kodni shu yerga yozing…"></textarea>
+        <textarea {% if user.is_authenticated %}name="source" {% endif %}id="source" class="ca-editor-fallback" spellcheck="false" aria-label="{% trans 'Kod muharriri' %}" placeholder="{% trans 'Kodni shu yerga yozing…' %}"></textarea>
       </div>
       {# the console: the samples, your own input, the run's result #}
       <div class="ca-con" id="console">
-        <div class="ca-con-tabs" role="tablist" aria-label="Konsol">
+        <div class="ca-con-tabs" role="tablist" aria-label="{% trans 'Konsol' %}">
           {% if problem.kind != "sql" %}
-          <button type="button" role="tab" id="con-tab-samples" aria-controls="con-samples" aria-selected="true" data-con-tab="samples">Misollar</button>
-          {% if user.is_authenticated %}<button type="button" role="tab" id="con-tab-custom" aria-controls="con-custom" aria-selected="false" tabindex="-1" data-con-tab="custom">O‘z kiritishim</button>{% endif %}
+          <button type="button" role="tab" id="con-tab-samples" aria-controls="con-samples" aria-selected="true" data-con-tab="samples">{% trans "Misollar" %}</button>
+          {% if user.is_authenticated %}<button type="button" role="tab" id="con-tab-custom" aria-controls="con-custom" aria-selected="false" tabindex="-1" data-con-tab="custom">{% trans "O‘z kiritishim" %}</button>{% endif %}
           {% endif %}
-          <button type="button" role="tab" id="con-tab-result" aria-controls="con-result" aria-selected="{% if problem.kind == 'sql' %}true{% else %}false{% endif %}"{% if problem.kind != "sql" %} tabindex="-1"{% endif %} data-con-tab="result">Natija</button>
+          <button type="button" role="tab" id="con-tab-result" aria-controls="con-result" aria-selected="{% if problem.kind == 'sql' %}true{% else %}false{% endif %}"{% if problem.kind != "sql" %} tabindex="-1"{% endif %} data-con-tab="result">{% trans "Natija" %}</button>
         </div>
         {% if problem.kind != "sql" %}
         <div class="ca-con-body" id="con-samples" role="tabpanel" aria-labelledby="con-tab-samples">
           {% for t in problem.samples %}
           <div class="ca-con-io">
-            <div><p>Kirish · Misol {{ forloop.counter }}</p><pre>{{ t.input }}</pre></div>
-            <div><p>Kutilgan natija</p><pre>{{ t.expected }}</pre></div>
+            <div><p>{% blocktrans with forloop_counter=forloop.counter %}Kirish · Misol {{ forloop_counter }}{% endblocktrans %}</p><pre>{{ t.input }}</pre></div>
+            <div><p>{% trans "Kutilgan natija" %}</p><pre>{{ t.expected }}</pre></div>
           </div>
-          {% empty %}<p class="ca-con-note">Misol yo‘q.</p>{% endfor %}
+          {% empty %}<p class="ca-con-note">{% trans "Misol yo‘q." %}</p>{% endfor %}
         </div>
         {% if user.is_authenticated %}
         <div class="ca-con-body" id="con-custom" role="tabpanel" aria-labelledby="con-tab-custom" hidden>
-          <textarea id="trial-stdin" rows="4" class="ca-con-in" spellcheck="false" aria-label="Sinov uchun kirish ma’lumoti" placeholder="Kirish ma’lumotini yozing. «Sinab ko‘rish» shu kirish bilan ishga tushiradi."></textarea>
+          <textarea id="trial-stdin" rows="4" class="ca-con-in" spellcheck="false" aria-label="{% trans 'Sinov uchun kirish ma’lumoti' %}" placeholder="{% trans 'Kirish ma’lumotini yozing. «Sinab ko‘rish» shu kirish bilan ishga tushiradi.' %}"></textarea>
         </div>
         {% endif %}
         {% endif %}
         <div class="ca-con-body" id="con-result" role="tabpanel" aria-labelledby="con-tab-result"{% if problem.kind != "sql" %} hidden{% endif %}>
-          <p class="ca-con-note" id="trial-empty">«Sinab ko‘rish» natijasi shu yerda chiqadi. Sinov urinish hisoblanmaydi.{% if not user.is_authenticated %} Ro‘yxatdan o‘tmasdan ham namunaviy testlarda sinab ko‘rishingiz mumkin.{% endif %}</p>
+          <p class="ca-con-note" id="trial-empty">{% trans "«Sinab ko‘rish» natijasi shu yerda chiqadi. Sinov urinish hisoblanmaydi." %}{% if not user.is_authenticated %} {% trans "Ro‘yxatdan o‘tmasdan ham namunaviy testlarda sinab ko‘rishingiz mumkin." %}{% endif %}</p>
           <div id="trial-out" aria-live="polite" hidden></div>
         </div>
       </div>
       <div class="ca-act">
         {% if user.is_authenticated %}
-        <span class="ca-act-keys" title="Ctrl+Enter — yuborish. Ctrl+' — sinab ko‘rish. Esc, keyin Tab — muharrirdan chiqish.{% if not contest %} {% if problem.difficulty == "beginner" or problem.difficulty == "easy" %}Bu masalada uzun kodni qo‘yib bo‘lmaydi.{% endif %} Mashqda kod qanday yozilgani adminlarga ko‘rinadi; ko‘chirilgan yechim uchun ball berilmaydi.{% endif %}"><kbd class="ca-kbd">Ctrl</kbd>+<kbd class="ca-kbd">Enter</kbd> yuborish <i data-lucide="info" class="lu" aria-hidden="true"></i></span>
+        <span class="ca-act-keys" title="Ctrl+Enter — yuborish. Ctrl+' — sinab ko‘rish. Esc, keyin Tab — muharrirdan chiqish.{% if not contest %} {% if problem.difficulty == "beginner" or problem.difficulty == "easy" %}Bu masalada uzun kodni qo‘yib bo‘lmaydi.{% endif %} Mashqda kod qanday yozilgani adminlarga ko‘rinadi; ko‘chirilgan yechim uchun ball berilmaydi.{% endif %}">{% trans "<kbd class=\"ca-kbd\">Ctrl</kbd>+<kbd class=\"ca-kbd\">Enter</kbd> yuborish" %} <i data-lucide="info" class="lu" aria-hidden="true"></i></span>
         {% if contest_blocked %}
-        <button type="button" id="trial-btn" class="ca-edb opacity-50 cursor-not-allowed" disabled title="Masala bloklangan — musobaqa tugaguncha sinab bo‘lmaydi"><i data-lucide="play" class="lu" aria-hidden="true"></i>Sinab ko‘rish</button>
-        <button type="button" id="submit-btn" class="ca-btn ca-btn-gold ca-btn-go opacity-50 cursor-not-allowed" disabled title="Masala bloklangan — musobaqa tugaguncha yechim yuborish mumkin emas"><i data-lucide="send" class="lu" aria-hidden="true"></i>Yuborish</button>
+        <button type="button" id="trial-btn" class="ca-edb opacity-50 cursor-not-allowed" disabled title="{% trans 'Masala bloklangan — musobaqa tugaguncha sinab bo‘lmaydi' %}"><i data-lucide="play" class="lu" aria-hidden="true"></i>{% trans "Sinab ko‘rish" %}</button>
+        <button type="button" id="submit-btn" class="ca-btn ca-btn-gold ca-btn-go opacity-50 cursor-not-allowed" disabled title="{% trans 'Masala bloklangan — musobaqa tugaguncha yechim yuborish mumkin emas' %}"><i data-lucide="send" class="lu" aria-hidden="true"></i>{% trans "Yuborish" %}</button>
         {% else %}
-        <button type="button" id="trial-btn" class="ca-edb" title="{% if problem.kind == 'sql' %}So‘rovni namunaviy ma’lumotlarda ishga tushirish{% else %}Namunaviy testlarda sinash{% endif %} — urinish hisoblanmaydi (Ctrl+')"><i data-lucide="play" class="lu" aria-hidden="true"></i>Sinab ko‘rish</button>
-        <button type="submit" id="submit-btn" class="ca-btn ca-btn-gold ca-btn-go" title="Yuborish (Ctrl+Enter)"><i data-lucide="send" class="lu" aria-hidden="true"></i>Yuborish</button>
+        <button type="button" id="trial-btn" class="ca-edb" title="{% if problem.kind == 'sql' %}So‘rovni namunaviy ma’lumotlarda ishga tushirish{% else %}Namunaviy testlarda sinash{% endif %} — urinish hisoblanmaydi (Ctrl+')"><i data-lucide="play" class="lu" aria-hidden="true"></i>{% trans "Sinab ko‘rish" %}</button>
+        <button type="submit" id="submit-btn" class="ca-btn ca-btn-gold ca-btn-go" title="{% trans 'Yuborish (Ctrl+Enter)' %}"><i data-lucide="send" class="lu" aria-hidden="true"></i>{% trans "Yuborish" %}</button>
         {% endif %}
         {% else %}
-        <span class="ca-act-keys"><i data-lucide="save" class="lu" aria-hidden="true"></i> Kodingiz shu brauzerda saqlanadi</span>
-        {% if problem.kind != "sql" %}<button type="button" id="trial-btn" class="ca-edb" title="Namunaviy testlarda sinash: ro‘yxatdan o‘tish shart emas"><i data-lucide="play" class="lu" aria-hidden="true"></i>Sinab ko‘rish</button>{% endif %}
-        <a class="ca-edb" href="{% url 'login' %}?next={{ request.path|urlencode }}%23yechim"><i data-lucide="log-in" class="lu" aria-hidden="true"></i>Kirish</a>
-        <button type="submit" id="submit-btn" class="ca-btn ca-btn-gold ca-btn-go"><i data-lucide="user-plus" class="lu" aria-hidden="true"></i>Ro‘yxatdan o‘tib yuborish</button>
+        <span class="ca-act-keys"><i data-lucide="save" class="lu" aria-hidden="true"></i> {% trans "Kodingiz shu brauzerda saqlanadi" %}</span>
+        {% if problem.kind != "sql" %}<button type="button" id="trial-btn" class="ca-edb" title="{% trans 'Namunaviy testlarda sinash: ro‘yxatdan o‘tish shart emas' %}"><i data-lucide="play" class="lu" aria-hidden="true"></i>{% trans "Sinab ko‘rish" %}</button>{% endif %}
+        <a class="ca-edb" href="{% url 'login' %}?next={{ request.path|urlencode }}%23yechim"><i data-lucide="log-in" class="lu" aria-hidden="true"></i>{% trans "Kirish" %}</a>
+        <button type="submit" id="submit-btn" class="ca-btn ca-btn-gold ca-btn-go"><i data-lucide="user-plus" class="lu" aria-hidden="true"></i>{% trans "Ro‘yxatdan o‘tib yuborish" %}</button>
         {% endif %}
       </div>
     </form>
@@ -1088,17 +1087,17 @@ resolves their bare imports so @codemirror/state loads once — two copies break
 <dialog id="ca-honor" class="ca-dialog" aria-labelledby="ca-honor-title">
   <form method="dialog" class="px-6 pb-6 pt-6">
     <span class="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-full bg-accent-soft text-accent"><i data-lucide="handshake" class="lu !h-6 !w-6" aria-hidden="true"></i></span>
-    <h2 id="ca-honor-title" class="text-center text-lg font-semibold">Birinchi yechimingiz oldidan</h2>
+    <h2 id="ca-honor-title" class="text-center text-lg font-semibold">{% trans "Birinchi yechimingiz oldidan" %}</h2>
     <ul class="mt-4 list-disc space-y-1.5 pl-5 text-sm text-mute">
-      <li>Kodni <b class="text-ink">o‘zingiz yozasiz</b>. AI'ga masalani berib kod yozdirish yoki birovning yechimini ko‘chirish mumkin emas.</li>
-      <li>Hujjatlar, maslahatlar (hint) va AI'dan mavzuni tushuntirishni so‘rash mumkin.</li>
-      <li>Kod qanday yozilgani qayd etiladi: muharrirdagi kod o‘zgarganda vaqti-vaqti bilan saqlab boriladi, qo‘yilgan matn va boshqa oynada o‘tkazilgan vaqt belgilanadi. Bu adminlarga ko‘rinadi. Ko‘chirilgan yechim uchun ball berilmaydi, musobaqada esa diskvalifikatsiya qilinadi.</li>
+      <li>{% trans "Kodni <b class=\"text-ink\">o‘zingiz yozasiz</b>. AI'ga masalani berib kod yozdirish yoki birovning yechimini ko‘chirish mumkin emas." %}</li>
+      <li>{% trans "Hujjatlar, maslahatlar (hint) va AI'dan mavzuni tushuntirishni so‘rash mumkin." %}</li>
+      <li>{% trans "Kod qanday yozilgani qayd etiladi: muharrirdagi kod o‘zgarganda vaqti-vaqti bilan saqlab boriladi, qo‘yilgan matn va boshqa oynada o‘tkazilgan vaqt belgilanadi. Bu adminlarga ko‘rinadi. Ko‘chirilgan yechim uchun ball berilmaydi, musobaqada esa diskvalifikatsiya qilinadi." %}</li>
     </ul>
-    <a class="ca-link mt-2 inline-block text-sm" href="{% url 'honor' %}" target="_blank" rel="noopener">Batafsil: halollik qoidalari</a>
-    <p class="mt-4 text-sm">«Qabul qilaman» tugmasi bilan siz yechimlarni o‘zingiz yozishga va qoidalarga amal qilishga rozilik bildirasiz.</p>
+    <a class="ca-link mt-2 inline-block text-sm" href="{% url 'honor' %}" target="_blank" rel="noopener">{% trans "Batafsil: halollik qoidalari" %}</a>
+    <p class="mt-4 text-sm">{% trans "«Qabul qilaman» tugmasi bilan siz yechimlarni o‘zingiz yozishga va qoidalarga amal qilishga rozilik bildirasiz." %}</p>
     <div class="mt-5 flex justify-end gap-2">
-      <button value="cancel" class="ca-btn ca-btn-ghost">Bekor qilish</button>
-      <button value="ok" id="ca-honor-go" class="ca-btn ca-btn-primary">Qabul qilaman va yuborish</button>
+      <button value="cancel" class="ca-btn ca-btn-ghost">{% trans "Bekor qilish" %}</button>
+      <button value="ok" id="ca-honor-go" class="ca-btn ca-btn-primary">{% trans "Qabul qilaman va yuborish" %}</button>
     </div>
   </form>
 </dialog>
@@ -1125,28 +1124,28 @@ resolves their bare imports so @codemirror/state loads once — two copies break
 {% if show_leaders %}
 <dialog id="rate-dialog" class="ca-dialog" aria-labelledby="rate-dialog-title">
   <div class="ca-dialog-head">
-    <h2 id="rate-dialog-title">Masala bahosi</h2>
-    <form method="dialog"><button class="ca-dialog-x" aria-label="Yopish"><i data-lucide="x" class="lu" aria-hidden="true"></i></button></form>
+    <h2 id="rate-dialog-title">{% trans "Masala bahosi" %}</h2>
+    <form method="dialog"><button class="ca-dialog-x" aria-label="{% trans 'Yopish' %}"><i data-lucide="x" class="lu" aria-hidden="true"></i></button></form>
   </div>
   <div class="px-6 pb-6 pt-5 text-center">
     {% if problem.n_ratings %}
     <p class="text-4xl font-bold tabular">{{ problem.avg_stars|floatformat:1 }}<span class="text-base font-normal text-mute"> / 5</span></p>
-    <p class="mt-1 text-sm text-mute">{{ problem.n_ratings }} ta baho</p>
+    <p class="mt-1 text-sm text-mute">{% blocktrans with problem_n_ratings=problem.n_ratings %}{{ problem_n_ratings }} ta baho{% endblocktrans %}</p>
     {% else %}
-    <p class="text-sm text-mute">Hali hech kim baholamagan.</p>
+    <p class="text-sm text-mute">{% trans "Hali hech kim baholamagan." %}</p>
     {% endif %}
     <div class="mt-5 border-t border-line pt-5">
       {% if solved %}
-      <p class="mb-2 text-sm font-medium">{% if my_stars %}Sizning bahoyingiz — o‘zgartirish mumkin{% else %}Masala sizga qanday tuyuldi?{% endif %}</p>
-      <form method="post" action="{% url 'problems:rate' problem.slug %}" class="ca-stars ca-stars-lg" role="group" aria-label="Masalani baholang">{% csrf_token %}
+      <p class="mb-2 text-sm font-medium">{% if my_stars %}{% trans "Sizning bahoyingiz — o‘zgartirish mumkin" %}{% else %}{% trans "Masala sizga qanday tuyuldi?" %}{% endif %}</p>
+      <form method="post" action="{% url 'problems:rate' problem.slug %}" class="ca-stars ca-stars-lg" role="group" aria-label="{% trans 'Masalani baholang' %}">{% csrf_token %}
         {% for n in star_range %}
-        <button name="stars" value="{{ n }}" class="{% if my_stars and n <= my_stars %}is-on{% endif %}" aria-label="{{ n }} yulduz" aria-pressed="{% if my_stars == n %}true{% else %}false{% endif %}" title="{{ n }} / 5"><i data-lucide="star" class="lu" aria-hidden="true"></i></button>
+        <button name="stars" value="{{ n }}" class="{% if my_stars and n <= my_stars %}is-on{% endif %}" aria-label="{% blocktrans with n=n %}{{ n }} yulduz{% endblocktrans %}" aria-pressed="{% if my_stars == n %}true{% else %}false{% endif %}" title="{{ n }} / 5"><i data-lucide="star" class="lu" aria-hidden="true"></i></button>
         {% endfor %}
       </form>
       {% elif user.is_authenticated %}
-      <p class="text-sm text-mute"><i data-lucide="lock" class="lu mr-1" aria-hidden="true"></i>Masalani yechgandan so‘ng baholay olasiz.</p>
+      <p class="text-sm text-mute"><i data-lucide="lock" class="lu mr-1" aria-hidden="true"></i>{% trans "Masalani yechgandan so‘ng baholay olasiz." %}</p>
       {% else %}
-      <p class="text-sm text-mute">Baholash uchun <a class="ca-link" href="{% url 'login' %}?next={{ request.path }}">tizimga kiring</a>.</p>
+      <p class="text-sm text-mute">{% trans "Baholash uchun" %} <a class="ca-link" href="{% url 'login' %}?next={{ request.path }}">{% trans "tizimga kiring</a>." %}</p>
       {% endif %}
     </div>
   </div>

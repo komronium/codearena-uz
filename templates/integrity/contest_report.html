@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ contest.title }} — Nazorat hisoboti{% endblock %}
+{% block title %}{% blocktrans with contest_title=contest.title %}{{ contest_title }} — Nazorat hisoboti{% endblocktrans %}{% endblock %}
 
 {% block band %}
 {% comment %}#7 integrity report: the band with the round and the four figures staff act on (pairs not yet reviewed,
@@ -9,23 +9,21 @@ participants by risk, the similar code pairs, the fast solves and the journal.{%
   <div class="ca-band-in">
     <div class="ca-band-top">
       <div class="min-w-0">
-        <p class="ca7-crumb"><a href="{% url 'moderation:dashboard' %}">Boshqaruv</a> / <a href="{% url 'moderation:contests' %}">Musobaqalar</a> / #{{ contest.pk|stringformat:"03d" }}</p>
-        <h1 id="rep-title" class="!text-[1.6rem] font-bold">Nazorat hisoboti</h1>
-        <p class="ca7-bmeta"><span>{{ contest.title }}</span><span class="tabular">{{ contest.start|date:"d.m.Y H:i" }}</span><span>{{ rows|length }} ishtirokchida hodisa</span>
-          <a class="text-white hover:underline" href="{% url 'contests:standings' contest.pk %}">Natijalar</a><a class="text-white hover:underline" href="{% url 'contests:submissions' contest.pk %}">Urinishlar</a></p>
+        <p class="ca7-crumb"><a href="{% url 'moderation:dashboard' %}">{% trans "Boshqaruv</a> /" %} <a href="{% url 'moderation:contests' %}">{% blocktrans with contest_pk=contest.pk|stringformat:"03d" %}Musobaqalar</a> / #{{ contest_pk }}{% endblocktrans %}</p>
+        <h1 id="rep-title" class="!text-[1.6rem] font-bold">{% trans "Nazorat hisoboti" %}</h1>
+        <p class="ca7-bmeta">{% blocktrans with contest_title=contest.title contest_start=contest.start|date:"d.m.Y H:i" rows=rows|length %}<span>{{ contest_title }}</span><span class="tabular">{{ contest_start }}</span><span>{{ rows }} ishtirokchida hodisa</span>{% endblocktrans %}
+          <a class="text-white hover:underline" href="{% url 'contests:standings' contest.pk %}">{% trans "Natijalar" %}</a><a class="text-white hover:underline" href="{% url 'contests:submissions' contest.pk %}">{% trans "Urinishlar" %}</a></p>
       </div>
       <dl class="ca-hud-stats">
-        <div><dt><small>Ko‘rilmagan juftlik</small></dt><dd><b class="tabular{% if open_flags %} text-[#F7CB6B]{% endif %}">{{ open_flags }}</b></dd></div>
-        <div><dt><small>Hodisasi bor</small></dt><dd><b class="tabular">{{ rows|length }}</b></dd></div>
-        <div><dt><small>Shubhali tez yechim</small></dt><dd><b class="tabular">{{ suspicious|length }}</b></dd></div>
-        <div><dt><small>Qaror jurnalda</small></dt><dd><b class="tabular">{{ audit|length }}</b></dd></div>
+        <div><dt><small>{% trans "Ko‘rilmagan juftlik" %}</small></dt><dd><b class="tabular{% if open_flags %} text-[#F7CB6B]{% endif %}">{{ open_flags }}</b></dd></div>
+        <div><dt><small>{% trans "Hodisasi bor" %}</small></dt><dd><b class="tabular">{{ rows|length }}</b></dd></div>
+        <div><dt><small>{% trans "Shubhali tez yechim" %}</small></dt><dd><b class="tabular">{{ suspicious|length }}</b></dd></div>
+        <div><dt><small>{% trans "Qaror jurnalda" %}</small></dt><dd><b class="tabular">{{ audit|length }}</b></dd></div>
       </dl>
     </div>
-    <nav class="ca-band-tabs" aria-label="Hisobot bo‘limlari"><div class="ca-contest-tabs">
-      <a href="#people" aria-current="true">Ishtirokchilar <span>{{ rows|length }}</span></a>
-      <a href="#flags">O‘xshash kodlar{% if open_flags %} <span>{{ open_flags }} yangi</span>{% endif %}</a>
-      <a href="#suspicious">Shubhali yechimlar <span>{{ suspicious|length }}</span></a>
-      <a href="#journal">Amallar jurnali <span>{{ audit|length }}</span></a>
+    <nav class="ca-band-tabs" aria-label="{% trans 'Hisobot bo‘limlari' %}"><div class="ca-contest-tabs">
+      {% blocktrans with rows=rows|length %}<a href="#people" aria-current="true">Ishtirokchilar <span>{{ rows }}</span></a> <a href="#flags">O‘xshash kodlar{% endblocktrans %}{% if open_flags %} <span>{% blocktrans with open_flags=open_flags %}{{ open_flags }} yangi{% endblocktrans %}</span>{% endif %}</a>
+      {% blocktrans with suspicious=suspicious|length audit=audit|length %}<a href="#suspicious">Shubhali yechimlar <span>{{ suspicious }}</span></a> <a href="#journal">Amallar jurnali <span>{{ audit }}</span></a>{% endblocktrans %}
     </div></nav>
   </div>
 </section>
@@ -33,20 +31,20 @@ participants by risk, the similar code pairs, the fast solves and the journal.{%
 {% block content %}
 <section class="mb-10 scroll-mt-20" id="people">
   <div class="mb-3 flex flex-wrap items-end justify-between gap-2">
-    <h2 class="ca7-h">Xavf bo‘yicha saralangan</h2>
-    <p class="text-xs text-mute">Chiqish — musobaqa sahifalaridan tashqariga (boshqa oyna, varaq yoki saytning boshqa sahifasi) · Tashqarida — jami vaqt · Paste — muharrirga qo‘yish urinishi · Tez — g‘ayrioddiy tez matn kiritish · Nusxa — shart matnidan nusxa. Dalillar — serverda tekshirilgani, brauzerda o‘chirib bo‘lmaydi: tracker o‘chiq (×6), muharrirda yozilmagan kod (×8), kod sakrashi (×3), umumiy qurilma (×10), ikki qurilma (×5), o‘xshash kod (×8). Xavf = paste×5 + tez×3 + nusxa×2 + chiqish + tashqarida daqiqa + shubhali yechim×4 + dalillar.</p>
+    <h2 class="ca7-h">{% trans "Xavf bo‘yicha saralangan" %}</h2>
+    <p class="text-xs text-mute">{% trans "Chiqish — musobaqa sahifalaridan tashqariga (boshqa oyna, varaq yoki saytning boshqa sahifasi) · Tashqarida — jami vaqt · Paste — muharrirga qo‘yish urinishi · Tez — g‘ayrioddiy tez matn kiritish · Nusxa — shart matnidan nusxa. Dalillar — serverda tekshirilgani, brauzerda o‘chirib bo‘lmaydi: tracker o‘chiq (×6), muharrirda yozilmagan kod (×8), kod sakrashi (×3), umumiy qurilma (×10), ikki qurilma (×5), o‘xshash kod (×8). Xavf = paste×5 + tez×3 + nusxa×2 + chiqish + tashqarida daqiqa + shubhali yechim×4 + dalillar." %}</p>
   </div>
   <div class="overflow-x-auto">
   <table class="ca-table ca-table-flat">
     <thead>
-      <tr><th scope="col">Ishtirokchi</th><th scope="col" class="text-right">Chiqish</th><th scope="col" class="text-right">Tashqarida</th><th scope="col" class="text-right">Paste</th><th scope="col" class="text-right">Tez</th><th scope="col" class="text-right">Nusxa</th><th scope="col">Dalillar</th><th scope="col" class="text-right">Xavf</th><th scope="col" class="hidden md:table-cell">Oxirgi hodisa</th><th scope="col" class="text-right">Amal</th></tr>
+      <tr><th scope="col">{% trans "Ishtirokchi" %}</th><th scope="col" class="text-right">{% trans "Chiqish" %}</th><th scope="col" class="text-right">{% trans "Tashqarida" %}</th><th scope="col" class="text-right">{% trans "Paste" %}</th><th scope="col" class="text-right">{% trans "Tez" %}</th><th scope="col" class="text-right">{% trans "Nusxa" %}</th><th scope="col">{% trans "Dalillar" %}</th><th scope="col" class="text-right">{% trans "Xavf" %}</th><th scope="col" class="hidden md:table-cell">{% trans "Oxirgi hodisa" %}</th><th scope="col" class="text-right">{% trans "Amal" %}</th></tr>
     </thead>
     <tbody>
     {% for user, c in rows %}
     <tr>
       <td>{% include "accounts/_u7.html" with u=user you=False %}</td>
       <td class="tabular text-right {% if c.blur > 5 %}text-warn font-semibold{% endif %}">{{ c.blur }}</td>
-      <td class="tabular text-right whitespace-nowrap {% if c.away_ms >= 120000 %}text-warn font-semibold{% endif %}">{% if c.away_ms %}{% widthratio c.away_ms 60000 1 %} daq{% else %}—{% endif %}</td>
+      <td class="tabular text-right whitespace-nowrap {% if c.away_ms >= 120000 %}text-warn font-semibold{% endif %}">{% if c.away_ms %}{% widthratio c.away_ms 60000 1 %} {% trans "daq" %}{% else %}—{% endif %}</td>
       <td class="tabular text-right {% if c.paste %}text-bad font-semibold{% endif %}">{{ c.paste }}</td>
       <td class="tabular text-right {% if c.fast %}text-warn font-semibold{% endif %}">{{ c.fast }}</td>
       <td class="tabular text-right {% if c.copy %}text-warn{% endif %}">{{ c.copy }}</td>
@@ -55,25 +53,25 @@ participants by risk, the similar code pairs, the fast solves and the journal.{%
         {# the honor rules' ladder: one problem's evidence voids that problem, more (or the account's own) disqualifies; staff decide #}
         {% if c.participation and not c.participation.disqualified and c.void_choices %}
         <div class="mt-1.5 flex flex-wrap items-center gap-1">
-          {% if c.advice == "dq" %}<span class="mr-1 font-semibold text-bad">Tavsiya: diskvalifikatsiya</span>
-          {% elif c.advice == "void" %}<span class="mr-1 font-semibold text-warn">Tavsiya: {{ c.open_problems|join:", " }} ni bekor qilish</span>{% endif %}
+          {% if c.advice == "dq" %}<span class="mr-1 font-semibold text-bad">{% trans "Tavsiya: diskvalifikatsiya" %}</span>
+          {% elif c.advice == "void" %}<span class="mr-1 font-semibold text-warn">{% blocktrans with c_open_problems=c.open_problems|join:", " %}Tavsiya: {{ c_open_problems }} ni bekor qilish{% endblocktrans %}</span>{% endif %}
           {% for label, is_void in c.void_choices %}
           {% if is_void %}
           <form method="post" action="{% url 'contests:void' contest.pk user.pk %}"{% csrf_token %}
             <input type="hidden" name="label" value="{{ label }}"><input type="hidden" name="voided" value="0">
             <input type="hidden" name="reason" value=""><input type="hidden" name="next" value="{% url 'integrity:contest_report' contest.pk %}">
-            <button class="ca-btn ca-btn-ghost !px-2 !py-0.5 text-xs" title="{{ label }} bekor qilingan — tiklash"><i data-lucide="undo-2" class="lu" aria-hidden="true"></i>{{ label }}</button>
+            <button class="ca-btn ca-btn-ghost !px-2 !py-0.5 text-xs" title="{% blocktrans with label=label %}{{ label }} bekor qilingan — tiklash{% endblocktrans %}"><i data-lucide="undo-2" class="lu" aria-hidden="true"></i>{{ label }}</button>
           </form>
           {% else %}
-          <form method="post" action="{% url 'contests:void' contest.pk user.pk %}" data-confirm="{{ label }} masalasi natijasini bekor qilish. Sabab (ixtiyoriy, faqat adminlar ko‘radi):" data-reason data-reason-default="Nazorat hisoboti: {{ label }}">{% csrf_token %}
+          <form method="post" action="{% url 'contests:void' contest.pk user.pk %}" data-confirm="{% blocktrans with label=label %}{{ label }} masalasi natijasini bekor qilish. Sabab (ixtiyoriy, faqat adminlar ko‘radi):{% endblocktrans %}" data-reason data-reason-default="Nazorat hisoboti: {{ label }}">{% csrf_token %}
             <input type="hidden" name="label" value="{{ label }}"><input type="hidden" name="voided" value="1">
             <input type="hidden" name="reason" value=""><input type="hidden" name="next" value="{% url 'integrity:contest_report' contest.pk %}">
-            <button class="ca-btn ca-btn-ghost !px-2 !py-0.5 text-xs text-bad" title="Faqat {{ label }} masalasi natijasini bekor qilish"><i data-lucide="circle-slash" class="lu" aria-hidden="true"></i>{{ label }}</button>
+            <button class="ca-btn ca-btn-ghost !px-2 !py-0.5 text-xs text-bad" title="{% blocktrans with label=label %}Faqat {{ label }} masalasi natijasini bekor qilish{% endblocktrans %}"><i data-lucide="circle-slash" class="lu" aria-hidden="true"></i>{{ label }}</button>
           </form>
-          <form method="post" action="{% url 'contests:void' contest.pk user.pk %}" data-confirm="{{ label }} masalasi natijasini AI tufayli bekor qilish: xato urinish hisoblanadi va masala bloklanadi. Sabab (ixtiyoriy, faqat adminlar ko‘radi):" data-reason data-reason-default="AI ishlatgan">{% csrf_token %}
+          <form method="post" action="{% url 'contests:void' contest.pk user.pk %}" data-confirm="{% blocktrans with label=label %}{{ label }} masalasi natijasini AI tufayli bekor qilish: xato urinish hisoblanadi va masala bloklanadi. Sabab (ixtiyoriy, faqat adminlar ko‘radi):{% endblocktrans %}" data-reason data-reason-default="AI ishlatgan">{% csrf_token %}
             <input type="hidden" name="label" value="{{ label }}"><input type="hidden" name="voided" value="1"><input type="hidden" name="penalty" value="1">
             <input type="hidden" name="reason" value=""><input type="hidden" name="next" value="{% url 'integrity:contest_report' contest.pk %}">
-            <button class="ca-btn ca-btn-ghost !px-2 !py-0.5 text-xs text-bad" title="AI tufayli: {{ label }} natijasi xato urinish sifatida qaytariladi va masala bloklanadi"><i data-lucide="bot" class="lu" aria-hidden="true"></i>{{ label }}</button>
+            <button class="ca-btn ca-btn-ghost !px-2 !py-0.5 text-xs text-bad" title="{% blocktrans with label=label %}AI tufayli: {{ label }} natijasi xato urinish sifatida qaytariladi va masala bloklanadi{% endblocktrans %}"><i data-lucide="bot" class="lu" aria-hidden="true"></i>{{ label }}</button>
           </form>
           {% endif %}
           {% endfor %}
@@ -85,29 +83,29 @@ participants by risk, the similar code pairs, the fast solves and the journal.{%
       <td class="text-right">
         {% if c.participation %}
         <div class="flex items-center justify-end gap-1">
-        <a class="ca-btn ca-btn-ghost !px-2 !py-1" href="{% url 'contests:submissions' contest.pk %}?user={{ user.username|urlencode }}" title="Urinishlari, masalalar bo‘yicha" aria-label="{{ user.username }}: urinishlari"><i data-lucide="history" class="lu" aria-hidden="true"></i></a>
+        <a class="ca-btn ca-btn-ghost !px-2 !py-1" href="{% url 'contests:submissions' contest.pk %}?user={{ user.username|urlencode }}" title="{% trans 'Urinishlari, masalalar bo‘yicha' %}" aria-label="{% blocktrans with user_username=user.username %}{{ user_username }}: urinishlari{% endblocktrans %}"><i data-lucide="history" class="lu" aria-hidden="true"></i></a>
         <form method="post" action="{% url 'integrity:flag_user' contest.pk user.pk %}">{% csrf_token %}
-          <button class="ca-btn ca-btn-ghost !px-2 !py-1" title="Chuqur tekshirish: barcha urinishlari hammaniki va oldingi yechimlar bilan solishtiriladi" aria-label="{{ user.username }}: chuqur tekshirish"><i data-lucide="scan-search" class="lu" aria-hidden="true"></i></button>
+          <button class="ca-btn ca-btn-ghost !px-2 !py-1" title="{% trans 'Chuqur tekshirish: barcha urinishlari hammaniki va oldingi yechimlar bilan solishtiriladi' %}" aria-label="{% blocktrans with user_username=user.username %}{{ user_username }}: chuqur tekshirish{% endblocktrans %}"><i data-lucide="scan-search" class="lu" aria-hidden="true"></i></button>
         </form>
         {% if c.participation.disqualified or c.advice == "dq" %}
-        <form method="post" action="{% url 'contests:disqualify' contest.pk user.pk %}" {% if not c.participation.disqualified %}data-confirm="Sabab (ixtiyoriy):" data-reason data-reason-default=""{% endif %}>{% csrf_token %}
+        <form method="post" action="{% url 'contests:disqualify' contest.pk user.pk %}" {% if not c.participation.disqualified %}data-confirm="{% trans 'Sabab (ixtiyoriy):' %}" data-reason data-reason-default=""{% endif %}>{% csrf_token %}
           <input type="hidden" name="back" value="report"><input type="hidden" name="reason" value=""><input type="hidden" name="disqualified" value="{% if c.participation.disqualified %}0{% else %}1{% endif %}">
           {% if c.participation.disqualified %}
-          <button class="ca-btn ca-btn-ghost !py-1 text-xs"><i data-lucide="undo-2" class="lu" aria-hidden="true"></i>DQ bekor</button>
+          <button class="ca-btn ca-btn-ghost !py-1 text-xs"><i data-lucide="undo-2" class="lu" aria-hidden="true"></i>{% trans "DQ bekor" %}</button>
           {% else %}
-          <button class="ca-btn ca-btn-ghost !py-1 text-xs text-bad"><i data-lucide="ban" class="lu" aria-hidden="true"></i>Diskvalifikatsiya</button>
+          <button class="ca-btn ca-btn-ghost !py-1 text-xs text-bad"><i data-lucide="ban" class="lu" aria-hidden="true"></i>{% trans "Diskvalifikatsiya" %}</button>
           {% endif %}
         </form>
         {% else %}
         <details class="ca-dropdown" data-dropdown>
-          <summary class="ca-btn ca-btn-ghost !px-2 !py-1" aria-label="{{ user.username }}: boshqa amallar" title="Boshqa amallar"><i data-lucide="ellipsis" class="lu" aria-hidden="true"></i></summary>
+          <summary class="ca-btn ca-btn-ghost !px-2 !py-1" aria-label="{% blocktrans with user_username=user.username %}{{ user_username }}: boshqa amallar{% endblocktrans %}" title="{% trans 'Boshqa amallar' %}"><i data-lucide="ellipsis" class="lu" aria-hidden="true"></i></summary>
           <div class="ca-dropdown-panel !w-60">
-        <form method="post" action="{% url 'contests:disqualify' contest.pk user.pk %}" {% if not c.participation.disqualified %}data-confirm="Sabab (ixtiyoriy):" data-reason data-reason-default=""{% endif %}>{% csrf_token %}
+        <form method="post" action="{% url 'contests:disqualify' contest.pk user.pk %}" {% if not c.participation.disqualified %}data-confirm="{% trans 'Sabab (ixtiyoriy):' %}" data-reason data-reason-default=""{% endif %}>{% csrf_token %}
           <input type="hidden" name="back" value="report"><input type="hidden" name="reason" value=""><input type="hidden" name="disqualified" value="{% if c.participation.disqualified %}0{% else %}1{% endif %}">
           {% if c.participation.disqualified %}
-          <button class="ca-btn ca-btn-ghost !py-1 text-xs"><i data-lucide="undo-2" class="lu" aria-hidden="true"></i>DQ bekor</button>
+          <button class="ca-btn ca-btn-ghost !py-1 text-xs"><i data-lucide="undo-2" class="lu" aria-hidden="true"></i>{% trans "DQ bekor" %}</button>
           {% else %}
-          <button class="ca-dropdown-item w-full text-left text-bad"><i data-lucide="ban" class="lu" aria-hidden="true"></i>Diskvalifikatsiya qilish</button>
+          <button class="ca-dropdown-item w-full text-left text-bad"><i data-lucide="ban" class="lu" aria-hidden="true"></i>{% trans "Diskvalifikatsiya qilish" %}</button>
           {% endif %}
         </form>
           </div>
@@ -118,7 +116,7 @@ participants by risk, the similar code pairs, the fast solves and the journal.{%
       </td>
     </tr>
     {% empty %}
-    <tr><td class="text-mute" colspan="10">Hodisa yo‘q.</td></tr>
+    <tr><td class="text-mute" colspan="10">{% trans "Hodisa yo‘q." %}</td></tr>
     {% endfor %}
     </tbody>
   </table>
@@ -127,8 +125,8 @@ participants by risk, the similar code pairs, the fast solves and the journal.{%
 
 <section class="mb-10 scroll-mt-20" id="suspicious">
   <div class="mb-3 flex flex-wrap items-end justify-between gap-2">
-    <h2 class="ca7-h">Shubhali yechimlar {% if suspicious %}<span class="ca-chip ca-chip-score ml-1">{{ suspicious|length }}</span>{% endif %}</h2>
-    <p class="text-xs text-mute">Juda tez — masala ochilgandan AC gacha: Easy &lt; {{ speed_limits.easy }} s, Medium &lt; {{ speed_limits.medium }} s, Hard &lt; {{ speed_limits.hard }} s. Chiqib-qaytib — {{ min_away_s }}+ s tashqarida bo‘lib, qaytgach {{ quick_after_return_s }} s ichida AC.</p>
+    <h2 class="ca7-h">{% trans "Shubhali yechimlar" %} {% if suspicious %}<span class="ca-chip ca-chip-score ml-1">{{ suspicious|length }}</span>{% endif %}</h2>
+    <p class="text-xs text-mute">{% blocktrans with speed_limits_easy=speed_limits.easy speed_limits_medium=speed_limits.medium speed_limits_hard=speed_limits.hard min_away_s=min_away_s quick_after_return_s=quick_after_return_s %}Juda tez — masala ochilgandan AC gacha: Easy &lt; {{ speed_limits_easy }} s, Medium &lt; {{ speed_limits_medium }} s, Hard &lt; {{ speed_limits_hard }} s. Chiqib-qaytib — {{ min_away_s }}+ s tashqarida bo‘lib, qaytgach {{ quick_after_return_s }} s ichida AC.{% endblocktrans %}</p>
   </div>
   {% if suspicious %}
   <ul class="ca-rows">
@@ -141,38 +139,38 @@ participants by risk, the similar code pairs, the fast solves and the journal.{%
           <span class="ca-diff ca-diff-{{ r.problem.difficulty }} shrink-0">{{ r.problem.get_difficulty_display }}</span>
         </div>
         <div class="ca-row-meta">
-          {% if r.too_fast %}<span class="font-semibold text-bad"><i data-lucide="zap" class="lu" aria-hidden="true"></i>{% if r.has_view %}ochilgandan{% else %}boshlanishdan{% endif %} {{ r.elapsed }} s da AC</span>{% endif %}
-          {% if r.back_and_solve %}<span class="font-semibold text-warn"><i data-lucide="log-in" class="lu" aria-hidden="true"></i>{{ r.away_s }} s tashqarida, qaytgach {{ r.after_return }} s da AC</span>{% endif %}
+          {% if r.too_fast %}<span class="font-semibold text-bad"><i data-lucide="zap" class="lu" aria-hidden="true"></i>{% if r.has_view %}{% trans "ochilgandan" %}{% else %}{% trans "boshlanishdan" %}{% endif %} {% blocktrans with r_elapsed=r.elapsed %}{{ r_elapsed }} s da AC{% endblocktrans %}</span>{% endif %}
+          {% if r.back_and_solve %}<span class="font-semibold text-warn"><i data-lucide="log-in" class="lu" aria-hidden="true"></i>{% blocktrans with r_away_s=r.away_s r_after_return=r.after_return %}{{ r_away_s }} s tashqarida, qaytgach {{ r_after_return }} s da AC{% endblocktrans %}</span>{% endif %}
         </div>
       </div>
       <div class="ca-row-side">
-        <a class="ca-btn ca-btn-primary !py-1.5 text-xs" href="{% url 'integrity:replay' contest.pk r.user.pk r.problem.pk %}"><i data-lucide="history" class="lu" aria-hidden="true"></i>Yozilishini ko‘rish</a>
-        <a class="ca-btn ca-btn-ghost !px-2 !py-1.5" href="{% url 'submissions:detail' r.submission.pk %}" title="Yechim #{{ r.submission.pk }}" aria-label="Yechim #{{ r.submission.pk }}"><i data-lucide="code" class="lu" aria-hidden="true"></i></a>
+        <a class="ca-btn ca-btn-primary !py-1.5 text-xs" href="{% url 'integrity:replay' contest.pk r.user.pk r.problem.pk %}"><i data-lucide="history" class="lu" aria-hidden="true"></i>{% trans "Yozilishini ko‘rish" %}</a>
+        <a class="ca-btn ca-btn-ghost !px-2 !py-1.5" href="{% url 'submissions:detail' r.submission.pk %}" title="{% blocktrans with r_submission_pk=r.submission.pk %}Yechim #{{ r_submission_pk }}{% endblocktrans %}" aria-label="{% blocktrans with r_submission_pk=r.submission.pk %}Yechim #{{ r_submission_pk }}{% endblocktrans %}"><i data-lucide="code" class="lu" aria-hidden="true"></i></a>
       </div>
     </li>
     {% endfor %}
   </ul>
   {% else %}
-  <div class="ca-empty">Shubhali yechim topilmadi.</div>
+  <div class="ca-empty">{% trans "Shubhali yechim topilmadi." %}</div>
   {% endif %}
 </section>
 
 <section id="flags" class="scroll-mt-20">
   <div class="mb-3 flex flex-wrap items-end justify-between gap-2">
-    <h2 class="ca7-h">O‘xshash kodlar {% if open_flags %}<span class="ca-chip ca-chip-score ml-1">{{ open_flags }} ko‘rilmagan</span>{% endif %}</h2>
-    <p class="max-w-2xl text-xs text-mute">Bir masala, bir til, kamida {{ min_lines }} qator kod, o‘xshashlik ≥ {{ threshold }}%. AC yechimlar, AC olmaganlarning oxirgi urinishi, va musobaqadan oldingi yechimlar (amaliyot, oldingi musobaqalar, muallif) solishtiriladi; ishtirokchi qatoridagi <i data-lucide="scan-search" class="lu" aria-hidden="true"></i> chuqur tekshiruv esa uning barcha urinishlarini solishtiradi. O‘zgaruvchi nomlari va izohlar hisobga olinmaydi. <span class="ca-cmp-key"></span> — ikkala kodda ham bor qatorlar.
-      {% if contest.similarity_checked_at and contest.similarity_checked_at > contest.end %}<b class="text-ink">Barcha masalalar avtomatik tekshirildi: {{ contest.similarity_checked_at|date:"d.m H:i" }}.</b>{% elif not contest.similarity_checked_at %}<b class="text-ink">Musobaqa tugaganidan 10 daqiqa o‘tib barcha masalalar avtomatik tekshiriladi.</b>{% endif %}</p>
+    <h2 class="ca7-h">{% trans "O‘xshash kodlar" %} {% if open_flags %}<span class="ca-chip ca-chip-score ml-1">{% blocktrans with open_flags=open_flags %}{{ open_flags }} ko‘rilmagan{% endblocktrans %}</span>{% endif %}</h2>
+    <p class="max-w-2xl text-xs text-mute">{% blocktrans with min_lines=min_lines threshold=threshold %}Bir masala, bir til, kamida {{ min_lines }} qator kod, o‘xshashlik ≥ {{ threshold }}%. AC yechimlar, AC olmaganlarning oxirgi urinishi, va musobaqadan oldingi yechimlar (amaliyot, oldingi musobaqalar, muallif) solishtiriladi; ishtirokchi qatoridagi{% endblocktrans %} <i data-lucide="scan-search" class="lu" aria-hidden="true"></i> {% trans "chuqur tekshiruv esa uning barcha urinishlarini solishtiradi. O‘zgaruvchi nomlari va izohlar hisobga olinmaydi. <span class=\"ca-cmp-key\"></span> — ikkala kodda ham bor qatorlar." %}
+      {% if contest.similarity_checked_at and contest.similarity_checked_at > contest.end %}<b class="text-ink">{% blocktrans with contest_similarity_checked_at=contest.similarity_checked_at|date:"d.m H:i" %}Barcha masalalar avtomatik tekshirildi: {{ contest_similarity_checked_at }}.{% endblocktrans %}</b>{% elif not contest.similarity_checked_at %}<b class="text-ink">{% trans "Musobaqa tugaganidan 10 daqiqa o‘tib barcha masalalar avtomatik tekshiriladi." %}</b>{% endif %}</p>
   </div>
   <form method="post" action="{% url 'integrity:flag_run' contest.pk %}" class="ca-panel mb-4 flex flex-wrap items-center gap-x-4 gap-y-3 !py-3">{% csrf_token %}
     <fieldset class="flex flex-wrap items-center gap-1.5">
-      <legend class="sr-only">Tekshiriladigan masalalar</legend>
-      <span class="mr-1 text-sm text-mute">Qaysi masalalar:</span>
+      <legend class="sr-only">{% trans "Tekshiriladigan masalalar" %}</legend>
+      <span class="mr-1 text-sm text-mute">{% trans "Qaysi masalalar:" %}</span>
       {% for cp in contest_problems %}
       <label class="ca-pick" title="{{ cp.problem.title }}"><input type="checkbox" name="problems" value="{{ cp.label }}"><span>{{ cp.label }}</span></label>
       {% endfor %}
-      <button type="button" class="ca-link ml-1 text-xs" onclick="this.form.querySelectorAll('[name=problems]').forEach((c) => (c.checked = true))">hammasi</button>
+      <button type="button" class="ca-link ml-1 text-xs" onclick="this.form.querySelectorAll('[name=problems]').forEach((c) => (c.checked = true))">{% trans "hammasi" %}</button>
     </fieldset>
-    <button class="ca-btn ca-btn-primary ml-auto !py-1.5"><i data-lucide="scan-search" class="lu" aria-hidden="true"></i>Tanlanganlarni tekshirish</button>
+    <button class="ca-btn ca-btn-primary ml-auto !py-1.5"><i data-lucide="scan-search" class="lu" aria-hidden="true"></i>{% trans "Tanlanganlarni tekshirish" %}</button>
   </form>
   {% if flags %}
   <div class="space-y-4">
@@ -182,55 +180,55 @@ participants by risk, the similar code pairs, the fast solves and the journal.{%
         <span class="text-2xl font-bold tabular text-bad">{% widthratio f.score 1 100 %}%</span>
         <div class="min-w-0 flex-1">
           <p class="truncate font-semibold">{% if f.label %}<span class="text-accent">{{ f.label }}.</span> {% endif %}{{ f.problem.title }}</p>
-          <p class="text-xs text-mute">{{ f.sides.0.sub.language.name }} · {{ f.sides.0.n_hit }} / {{ f.sides.0.n_code }} qator mos · {% if f.prior %}musobaqadan oldingi yechim bilan{% else %}ikkinchi kod {% if f.gap_min %}{{ f.gap_min }} daqiqa{% else %}1 daqiqadan kam{% endif %} keyin yuborilgan{% endif %}</p>
+          <p class="text-xs text-mute">{% blocktrans with f_sides_0_sub_language_name=f.sides.0.sub.language.name f_sides_0_n_hit=f.sides.0.n_hit f_sides_0_n_code=f.sides.0.n_code %}{{ f_sides_0_sub_language_name }} · {{ f_sides_0_n_hit }} / {{ f_sides_0_n_code }} qator mos ·{% endblocktrans %} {% if f.prior %}{% trans "musobaqadan oldingi yechim bilan" %}{% else %}{% trans "ikkinchi kod" %} {% if f.gap_min %}{% blocktrans with f_gap_min=f.gap_min %}{{ f_gap_min }} daqiqa{% endblocktrans %}{% else %}{% trans "1 daqiqadan kam" %}{% endif %} {% trans "keyin yuborilgan" %}{% endif %}</p>
         </div>
-        {% if f.deep %}<span class="ca-chip" title="Bitta ishtirokchining barcha urinishlari solishtirilganda topilgan">Chuqur tekshiruv</span>{% endif %}
-        {% if f.reviewed %}<span class="ca-chip ca-chip-rated"><i data-lucide="check" class="lu mr-1" aria-hidden="true"></i>Ko‘rildi</span>{% else %}<span class="ca-chip ca-chip-score">Ko‘rilmagan</span>{% endif %}
+        {% if f.deep %}<span class="ca-chip" title="Bitta ishtirokchining barcha urinishlari solishtirilganda topilgan">{% trans "Chuqur tekshiruv" %}</span>{% endif %}
+        {% if f.reviewed %}<span class="ca-chip ca-chip-rated"><i data-lucide="check" class="lu mr-1" aria-hidden="true"></i>{% trans "Ko‘rildi" %}</span>{% else %}<span class="ca-chip ca-chip-score">{% trans "Ko‘rilmagan" %}</span>{% endif %}
       </header>
       <details class="ca-cmp border-t border-line"{% if not f.reviewed and forloop.counter <= 3 %} open{% endif %}>
-        <summary class="cursor-pointer px-5 py-2 text-xs font-medium text-mute hover:text-ink">Kodlarni yonma-yon ko‘rish</summary>
+        <summary class="cursor-pointer px-5 py-2 text-xs font-medium text-mute hover:text-ink">{% trans "Kodlarni yonma-yon ko‘rish" %}</summary>
         <div class="grid gap-px bg-line lg:grid-cols-2">
           {% for side in f.sides %}
           <div class="min-w-0 bg-surface">
             <div class="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5">
               <div class="flex min-w-0 items-center gap-2">
                 {% include "accounts/_user.html" with u=side.user tier=False %}
-                {% if side.prior %}<span class="ca-chip ca-chip-score" title="Musobaqa boshlanishidan oldin yuborilgan (amaliyot, oldingi musobaqa yoki muallif)">Musobaqadan oldingi yechim</span>{% elif forloop.first %}<span class="ca-chip" title="Bu kod oldinroq yuborilgan — manba bo‘lishi mumkin">birinchi</span>{% endif %}
+                {% if side.prior %}<span class="ca-chip ca-chip-score" title="Musobaqa boshlanishidan oldin yuborilgan (amaliyot, oldingi musobaqa yoki muallif)">{% trans "Musobaqadan oldingi yechim" %}</span>{% elif forloop.first %}<span class="ca-chip" title="Bu kod oldinroq yuborilgan — manba bo‘lishi mumkin">{% trans "birinchi" %}</span>{% endif %}
               </div>
               <div class="flex items-center gap-3 text-xs text-mute">
                 <a class="ca-link tabular" href="{% url 'submissions:detail' side.sub.pk %}">#{{ side.sub.pk|stringformat:"06d" }}</a>
-                {% if not side.prior %}<a class="ca-link" href="{% url 'integrity:replay' contest.pk side.user.pk f.problem.pk %}"><i data-lucide="history" class="lu mr-0.5" aria-hidden="true"></i>yozilishi</a>{% endif %}
+                {% if not side.prior %}<a class="ca-link" href="{% url 'integrity:replay' contest.pk side.user.pk f.problem.pk %}"><i data-lucide="history" class="lu mr-0.5" aria-hidden="true"></i>{% trans "yozilishi" %}</a>{% endif %}
                 <span class="tabular">{% if side.prior %}{{ side.sub.created|date:"d.m.Y H:i" }}{% else %}{{ side.sub.created|date:"H:i:s" }}{% endif %}</span>
-                {% if side.paste %}<span class="font-semibold text-bad" title="Muharrirga qo‘yish urinishlari">paste {{ side.paste }}</span>{% endif %}
-                {% if side.blur %}<span class="{% if side.blur > 5 %}font-semibold text-warn{% endif %}" title="Boshqa oynaga o‘tishlar">chiqish {{ side.blur }}</span>{% endif %}
+                {% if side.paste %}<span class="font-semibold text-bad" title="Muharrirga qo‘yish urinishlari">{% blocktrans with side_paste=side.paste %}paste {{ side_paste }}{% endblocktrans %}</span>{% endif %}
+                {% if side.blur %}<span class="{% if side.blur > 5 %}font-semibold text-warn{% endif %}" title="{% trans 'Boshqa oynaga o‘tishlar' %}">{% blocktrans with side_blur=side.blur %}chiqish {{ side_blur }}{% endblocktrans %}</span>{% endif %}
               </div>
             </div>
-            <pre class="ca-cmp-code" aria-label="{{ side.user.username }} kodi">{% for n, text, hit in side.lines %}<span class="ca-cmp-line{% if hit %} is-hit{% endif %}"><span class="ca-cmp-n">{{ n }}</span>{{ text }}</span>{% endfor %}</pre>
+            <pre class="ca-cmp-code" aria-label="{% blocktrans with side_user_username=side.user.username %}{{ side_user_username }} kodi{% endblocktrans %}">{% for n, text, hit in side.lines %}<span class="ca-cmp-line{% if hit %} is-hit{% endif %}"><span class="ca-cmp-n">{{ n }}</span>{{ text }}</span>{% endfor %}</pre>
             {% if side.participation %}
-            <form method="post" action="{% url 'contests:disqualify' contest.pk side.user.pk %}" class="border-t border-line px-4 py-2 text-right" {% if not side.participation.disqualified %}data-confirm="Sabab (ixtiyoriy):" data-reason data-reason-default="O‘xshash kod: #{{ f.sides.0.sub.pk }} / #{{ f.sides.1.sub.pk }}"{% endif %}>{% csrf_token %}
+            <form method="post" action="{% url 'contests:disqualify' contest.pk side.user.pk %}" class="border-t border-line px-4 py-2 text-right" {% if not side.participation.disqualified %}data-confirm="{% trans 'Sabab (ixtiyoriy):' %}" data-reason data-reason-default="O‘xshash kod: #{{ f.sides.0.sub.pk }} / #{{ f.sides.1.sub.pk }}"{% endif %}>{% csrf_token %}
               <input type="hidden" name="back" value="report"><input type="hidden" name="reason" value=""><input type="hidden" name="disqualified" value="{% if side.participation.disqualified %}0{% else %}1{% endif %}">
               {% if side.participation.disqualified %}
-              <button class="ca-btn ca-btn-ghost !py-1 text-xs"><i data-lucide="undo-2" class="lu" aria-hidden="true"></i>{{ side.user.username }}: DQ bekor</button>
+              <button class="ca-btn ca-btn-ghost !py-1 text-xs"><i data-lucide="undo-2" class="lu" aria-hidden="true"></i>{% blocktrans with side_user_username=side.user.username %}{{ side_user_username }}: DQ bekor{% endblocktrans %}</button>
               {% else %}
-              <button class="ca-btn ca-btn-ghost !py-1 text-xs text-bad"><i data-lucide="ban" class="lu" aria-hidden="true"></i>{{ side.user.username }}ni diskvalifikatsiya</button>
+              <button class="ca-btn ca-btn-ghost !py-1 text-xs text-bad"><i data-lucide="ban" class="lu" aria-hidden="true"></i>{% blocktrans with side_user_username=side.user.username %}{{ side_user_username }}ni diskvalifikatsiya{% endblocktrans %}</button>
               {% endif %}
             </form>
             {# only this problem: the rest of the participant's round stands; silent for them #}
             {% if f.label %}
             {% if not side.voided %}
-            <form method="post" action="{% url 'contests:void' contest.pk side.user.pk %}" class="border-t border-line px-4 py-2 text-right" data-confirm="{{ f.label }} masalasi natijasini AI tufayli bekor qilish: xato urinish hisoblanadi va masala bloklanadi. Sabab (ixtiyoriy, faqat adminlar ko‘radi):" data-reason data-reason-default="O‘xshash kod: #{{ f.sides.0.sub.pk }} / #{{ f.sides.1.sub.pk }}">{% csrf_token %}
+            <form method="post" action="{% url 'contests:void' contest.pk side.user.pk %}" class="border-t border-line px-4 py-2 text-right" data-confirm="{% blocktrans with f_label=f.label %}{{ f_label }} masalasi natijasini AI tufayli bekor qilish: xato urinish hisoblanadi va masala bloklanadi. Sabab (ixtiyoriy, faqat adminlar ko‘radi):{% endblocktrans %}" data-reason data-reason-default="O‘xshash kod: #{{ f.sides.0.sub.pk }} / #{{ f.sides.1.sub.pk }}">{% csrf_token %}
               <input type="hidden" name="label" value="{{ f.label }}"><input type="hidden" name="voided" value="1"><input type="hidden" name="penalty" value="1">
               <input type="hidden" name="reason" value=""><input type="hidden" name="next" value="{% url 'integrity:contest_report' contest.pk %}#flag-{{ f.pk }}">
-              <button class="ca-btn ca-btn-ghost !py-1 text-xs text-bad"><i data-lucide="bot" class="lu" aria-hidden="true"></i>{{ side.user.username }}: faqat {{ f.label }} ni AI tufayli bekor qilish</button>
+              <button class="ca-btn ca-btn-ghost !py-1 text-xs text-bad"><i data-lucide="bot" class="lu" aria-hidden="true"></i>{% blocktrans with side_user_username=side.user.username f_label=f.label %}{{ side_user_username }}: faqat {{ f_label }} ni AI tufayli bekor qilish{% endblocktrans %}</button>
             </form>
             {% endif %}
-            <form method="post" action="{% url 'contests:void' contest.pk side.user.pk %}" class="border-t border-line px-4 py-2 text-right"{% if not side.voided %} data-confirm="{{ f.label }} masalasi natijasini bekor qilish. Sabab (ixtiyoriy, faqat adminlar ko‘radi):" data-reason data-reason-default="O‘xshash kod: #{{ f.sides.0.sub.pk }} / #{{ f.sides.1.sub.pk }}"{% endif %}>{% csrf_token %}
+            <form method="post" action="{% url 'contests:void' contest.pk side.user.pk %}" class="border-t border-line px-4 py-2 text-right"{% if not side.voided %} data-confirm="{% blocktrans with f_label=f.label %}{{ f_label }} masalasi natijasini bekor qilish. Sabab (ixtiyoriy, faqat adminlar ko‘radi):{% endblocktrans %}" data-reason data-reason-default="O‘xshash kod: #{{ f.sides.0.sub.pk }} / #{{ f.sides.1.sub.pk }}"{% endif %}>{% csrf_token %}
               <input type="hidden" name="label" value="{{ f.label }}"><input type="hidden" name="voided" value="{% if side.voided %}0{% else %}1{% endif %}">
               <input type="hidden" name="reason" value=""><input type="hidden" name="next" value="{% url 'integrity:contest_report' contest.pk %}#flag-{{ f.pk }}">
               {% if side.voided %}
-              <button class="ca-btn ca-btn-ghost !py-1 text-xs"><i data-lucide="undo-2" class="lu" aria-hidden="true"></i>{{ side.user.username }}: {{ f.label }} natijasini tiklash</button>
+              <button class="ca-btn ca-btn-ghost !py-1 text-xs"><i data-lucide="undo-2" class="lu" aria-hidden="true"></i>{% blocktrans with side_user_username=side.user.username f_label=f.label %}{{ side_user_username }}: {{ f_label }} natijasini tiklash{% endblocktrans %}</button>
               {% else %}
-              <button class="ca-btn ca-btn-ghost !py-1 text-xs text-bad"><i data-lucide="circle-slash" class="lu" aria-hidden="true"></i>{{ side.user.username }}: faqat {{ f.label }} ni bekor qilish</button>
+              <button class="ca-btn ca-btn-ghost !py-1 text-xs text-bad"><i data-lucide="circle-slash" class="lu" aria-hidden="true"></i>{% blocktrans with side_user_username=side.user.username f_label=f.label %}{{ side_user_username }}: faqat {{ f_label }} ni bekor qilish{% endblocktrans %}</button>
               {% endif %}
             </form>
             {% endif %}
@@ -240,23 +238,23 @@ participants by risk, the similar code pairs, the fast solves and the journal.{%
         </div>
       </details>
       <form method="post" action="{% url 'integrity:flag_review' f.pk %}" class="flex flex-wrap items-center gap-2 border-t border-line bg-ink/[.025] px-5 py-3">{% csrf_token %}
-        <input name="note" value="{{ f.note }}" placeholder="Izoh: nima uchun ko‘chirma / tasodif…" class="ca-input !py-1.5 min-w-0 flex-1 text-sm" aria-label="Izoh" autocomplete="off">
+        <input name="note" value="{{ f.note }}" placeholder="{% trans 'Izoh: nima uchun ko‘chirma / tasodif…' %}" class="ca-input !py-1.5 min-w-0 flex-1 text-sm" aria-label="{% trans 'Izoh' %}" autocomplete="off">
         <button class="ca-btn {% if f.reviewed %}ca-btn-ghost{% else %}ca-btn-primary{% endif %} !py-1.5 whitespace-nowrap text-xs">
-          {% if f.reviewed %}<i data-lucide="undo-2" class="lu" aria-hidden="true"></i>Qayta ochish{% else %}<i data-lucide="check" class="lu" aria-hidden="true"></i>Ko‘rildi{% endif %}
+          {% if f.reviewed %}<i data-lucide="undo-2" class="lu" aria-hidden="true"></i>{% trans "Qayta ochish" %}{% else %}<i data-lucide="check" class="lu" aria-hidden="true"></i>{% trans "Ko‘rildi" %}{% endif %}
         </button>
       </form>
     </article>
     {% endfor %}
   </div>
   {% else %}
-  <div class="ca-empty">O‘xshash kod topilmadi. Masalalarni tanlab, «Tanlanganlarni tekshirish» ni bosing.</div>
+  <div class="ca-empty">{% trans "O‘xshash kod topilmadi. Masalalarni tanlab, «Tanlanganlarni tekshirish» ni bosing." %}</div>
   {% endif %}
 </section>
 
 <section class="mt-10 scroll-mt-20" id="journal">
   <div class="mb-3 flex flex-wrap items-end justify-between gap-2">
-    <h2 class="ca7-h">Amallar jurnali</h2>
-    <a class="ca-link text-sm" href="{% url 'integrity:audit' %}?contest={{ contest.pk }}">Hammasi »</a>
+    <h2 class="ca7-h">{% trans "Amallar jurnali" %}</h2>
+    <a class="ca-link text-sm" href="{% url 'integrity:audit' %}?contest={{ contest.pk }}">{% trans "Hammasi »" %}</a>
   </div>
   {% include "integrity/_audit_rows.html" with entries=audit %}
 </section>

@@ -1,26 +1,26 @@
 {% extends "base.html" %}
-{% block title %}Kirish{% endblock %}
-{% block description %}CodeArena hisobingizga kiring: masalalar, kurslar, musobaqalar va reytingingiz bir joyda.{% endblock %}
+{% block title %}{% trans "Kirish" %}{% endblock %}
+{% block description %}{% trans "CodeArena hisobingizga kiring: masalalar, kurslar, musobaqalar va reytingingiz bir joyda." %}{% endblock %}
 
 {% block content %}
 <div class="ca-auth">
   {% include "registration/_auth_brand.html" %}
   <form method="post" novalidate class="ca-panel ca-auth-card space-y-4">{% csrf_token %}
     <div>
-      <h1 class="text-xl font-bold">Xush kelibsiz</h1>
-      <p class="mt-1 text-sm text-mute">Hisobingizga kiring va davom eting.</p>
+      <h1 class="text-xl font-bold">{% trans "Xush kelibsiz" %}</h1>
+      <p class="mt-1 text-sm text-mute">{% trans "Hisobingizga kiring va davom eting." %}</p>
     </div>
     {% if throttled %}
-    <div class="ca-alert ca-alert-bad" role="alert">Juda ko‘p urinish. Biroz kutib, qayta urinib ko‘ring.</div>
+    <div class="ca-alert ca-alert-bad" role="alert">{% trans "Juda ko‘p urinish. Biroz kutib, qayta urinib ko‘ring." %}</div>
     {% elif form.non_field_errors %}
-    <div class="ca-alert ca-alert-bad" role="alert">Login yoki parol noto‘g‘ri. Qaytadan urinib ko‘ring.</div>
+    <div class="ca-alert ca-alert-bad" role="alert">{% trans "Login yoki parol noto‘g‘ri. Qaytadan urinib ko‘ring." %}</div>
     {% endif %}
     {% include "registration/_auth_field.html" with name="username" label="Foydalanuvchi nomi yoki email" type="text" icon="at-sign" autocomplete="username" value=form.username.value errors=form.username.errors autofocus=True %}
     <div>
       {% include "registration/_auth_field.html" with name="password" label="Parol" type="password" icon="lock" autocomplete="current-password" errors=form.password.errors %}
-      <div class="mt-1.5 text-right"><a class="ca-link text-xs" href="{% url 'password_reset' %}">Parolni unutdingizmi?</a></div>
+      <div class="mt-1.5 text-right"><a class="ca-link text-xs" href="{% url 'password_reset' %}">{% trans "Parolni unutdingizmi?" %}</a></div>
     </div>
-    <button type="submit" class="ca-btn ca-btn-primary w-full !py-2.5"><i data-lucide="log-in" class="lu" aria-hidden="true"></i>Kirish</button>
+    <button type="submit" class="ca-btn ca-btn-primary w-full !py-2.5"><i data-lucide="log-in" class="lu" aria-hidden="true"></i>{% trans "Kirish" %}</button>
     {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
   </form>
   {# one block for the other ways in (the page's grid pads each direct child, so they share one) #}
@@ -29,13 +29,13 @@
   {% if telegram_login %}
   <form method="post" action="{% url 'telegram_login' %}">{% csrf_token %}
     {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
-    <button class="ca-btn ca-btn-ghost w-full !py-2.5"><i data-lucide="send" class="lu" aria-hidden="true"></i>Telegram orqali kirish</button>
-    <p class="mt-1.5 text-center text-xs text-mute">Telegram profilingizga ulangan bo‘lsa.</p>
+    <button class="ca-btn ca-btn-ghost w-full !py-2.5"><i data-lucide="send" class="lu" aria-hidden="true"></i>{% trans "Telegram orqali kirish" %}</button>
+    <p class="mt-1.5 text-center text-xs text-mute">{% trans "Telegram profilingizga ulangan bo‘lsa." %}</p>
   </form>
   {% endif %}
   </div>{% endif %}
   <p class="mt-5 text-center text-sm text-mute">
-    Hisob yo‘qmi? <a class="ca-link font-medium" href="{% url 'register' %}{% if next %}?next={{ next|urlencode }}{% endif %}">Ro‘yxatdan o‘ting</a>
+    {% trans "Hisob yo‘qmi?" %} <a class="ca-link font-medium" href="{% url 'register' %}{% if next %}?next={{ next|urlencode }}{% endif %}">{% trans "Ro‘yxatdan o‘ting" %}</a>
   </p>
 </div>
 {% include "registration/_auth_script.html" %}

@@ -1,14 +1,14 @@
 {% extends "base.html" %}
-{% block title %}AI bilan masala yaratish{% endblock %}
+{% block title %}{% trans "AI bilan masala yaratish" %}{% endblock %}
 {% block content %}
 <div class="mb-6">{% url "moderation:problems" as back %}{% include "moderation/_header.html" with title="AI bilan masala tuzish" back_url=back back_label="Masalalar" %}</div>
 
 <div class="max-w-2xl">
   <form method="post" class="ca-panel space-y-6" id="ai-form">
-    <p class="text-sm text-mute">AI siz tanlagan darajalar va mavzular bo‘yicha masala tuzadi, har birini kamida 20 ta test bilan. Tuzilganlar «Kutmoqda» holatida bo‘ladi va saytda ko‘rinmaydi: <a class="ca-link" href="{% url 'moderation:queue' %}">Navbat</a> bo‘limida ko‘rib chiqib, kerak bo‘lsa tahrirlab, tasdiqlaysiz yoki rad etasiz.</p>
+    <p class="text-sm text-mute">{% trans "AI siz tanlagan darajalar va mavzular bo‘yicha masala tuzadi, har birini kamida 20 ta test bilan. Tuzilganlar «Kutmoqda» holatida bo‘ladi va saytda ko‘rinmaydi:" %} <a class="ca-link" href="{% url 'moderation:queue' %}">{% trans "Navbat</a> bo‘limida ko‘rib chiqib, kerak bo‘lsa tahrirlab, tasdiqlaysiz yoki rad etasiz." %}</p>
 
     <fieldset>
-      <legend class="ca-label">Qaysi darajadan nechta</legend>
+      <legend class="ca-label">{% trans "Qaysi darajadan nechta" %}</legend>
       <div class="mt-1 grid grid-cols-2 gap-2 sm:grid-cols-4">
         {% for value, field in form.count_fields %}
         <label class="ca-level-count" for="{{ field.id_for_label }}">
@@ -17,28 +17,28 @@
         </label>
         {% endfor %}
       </div>
-      <p class="mt-2 text-xs text-mute" id="ai-total" aria-live="polite">Jami ko‘pi bilan {{ max_count }} ta masala.</p>
+      <p class="mt-2 text-xs text-mute" id="ai-total" aria-live="polite">{% blocktrans with max_count=max_count %}Jami ko‘pi bilan {{ max_count }} ta masala.{% endblocktrans %}</p>
       {% if form.non_field_errors %}<div class="errorlist" role="alert">{{ form.non_field_errors|join:" " }}</div>{% endif %}
     </fieldset>
 
     <fieldset>
-      <legend class="ca-label">Mavzular <span class="font-normal text-mute">— ixtiyoriy; tanlanmasa, AI o‘zi tanlaydi</span></legend>
+      <legend class="ca-label">{% trans "Mavzular <span class=\"font-normal text-mute\">— ixtiyoriy; tanlanmasa, AI o‘zi tanlaydi</span>" %}</legend>
       <div class="mt-1 flex flex-wrap gap-1.5">{% for cb in form.topics %}<label class="ca-pick ca-pick-sm">{{ cb.tag }}<span>{{ cb.choice_label }}</span></label>{% endfor %}</div>
     </fieldset>
 
     <div>
-      <label class="ca-label" for="{{ form.focus.id_for_label }}">Aniq mavzu yoki talab <span class="font-normal text-mute">— ixtiyoriy</span></label>
+      <label class="ca-label" for="{{ form.focus.id_for_label }}">{% trans "Aniq mavzu yoki talab <span class=\"font-normal text-mute\">— ixtiyoriy</span>" %}</label>
       {{ form.focus }}
       {{ form.focus.errors }}
     </div>
 
     <div class="max-w-xs">
-      <label class="ca-label" for="{{ form.model.id_for_label }}">Model</label>
+      <label class="ca-label" for="{{ form.model.id_for_label }}">{% trans "Model" %}</label>
       {{ form.model }}
     </div>
 
     <div class="flex flex-wrap items-center gap-3">
-      <button class="ca-btn ca-btn-primary" id="ai-submit"><i data-lucide="sparkles" class="lu" aria-hidden="true"></i>Masalalarni tuzish</button>
+      <button class="ca-btn ca-btn-primary" id="ai-submit"><i data-lucide="sparkles" class="lu" aria-hidden="true"></i>{% trans "Masalalarni tuzish" %}</button>
       <p class="text-xs text-mute" id="ai-status" role="status" aria-live="polite"></p>
     </div>
     {% csrf_token %}{# last: as the first child, space-y would push the intro down #}

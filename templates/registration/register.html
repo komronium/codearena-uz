@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block title %}Ro‘yxatdan o‘tish{% endblock %}
-{% block description %}CodeArena’da bepul ro‘yxatdan o‘ting: o‘zbek tilidagi masalalarni yeching, kurslarda o‘rganing va reytingli musobaqalarda qatnashing.{% endblock %}
+{% block title %}{% trans "Ro‘yxatdan o‘tish" %}{% endblock %}
+{% block description %}{% trans "CodeArena’da bepul ro‘yxatdan o‘ting: o‘zbek tilidagi masalalarni yeching, kurslarda o‘rganing va reytingli musobaqalarda qatnashing." %}{% endblock %}
 
 {% block content %}
 <div class="ca-auth">
@@ -9,8 +9,8 @@
     {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
     <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" class="sr-only" value="">
     <div>
-      <h1 class="text-xl font-bold">Ro‘yxatdan o‘tish</h1>
-      <p class="mt-1 text-sm text-mute">Bir daqiqa — va masalalar sizniki.</p>
+      <h1 class="text-xl font-bold">{% trans "Ro‘yxatdan o‘tish" %}</h1>
+      <p class="mt-1 text-sm text-mute">{% trans "Bir daqiqa — va masalalar sizniki." %}</p>
     </div>
     {% if form.non_field_errors %}
     <div class="ca-alert ca-alert-bad" role="alert">{{ form.non_field_errors.0 }}</div>
@@ -22,12 +22,12 @@
     </div>
     {% include "registration/_auth_field.html" with name="email" label="Email" type="email" icon="mail" autocomplete="email" value=form.email.value errors=form.email.errors %}
     {% include "registration/_auth_field.html" with name="password1" label="Parol" type="password" icon="lock" autocomplete="new-password" errors=form.password1.errors hint="Kamida 8 ta belgi. Ko‘z tugmasi bilan tekshirib oling." %}
-    <button type="submit" class="ca-btn ca-btn-primary w-full !py-2.5"><i data-lucide="user-plus" class="lu" aria-hidden="true"></i>Hisob yaratish</button>
-    <p class="text-center text-xs text-mute">Hisob yaratib, <a class="ca-link" href="{% url 'honor' %}" target="_blank" rel="noopener">halollik qoidalari</a>ga rozilik bildirasiz.</p>
+    <button type="submit" class="ca-btn ca-btn-primary w-full !py-2.5"><i data-lucide="user-plus" class="lu" aria-hidden="true"></i>{% trans "Hisob yaratish" %}</button>
+    <p class="text-center text-xs text-mute">{% trans "Hisob yaratib," %} <a class="ca-link" href="{% url 'honor' %}" target="_blank" rel="noopener">{% trans "halollik qoidalari</a>ga rozilik bildirasiz." %}</p>
   </form>
   {% if google_login %}<div>{% include "registration/_google_btn.html" %}</div>{% endif %}
   <p class="mt-4 text-center text-sm text-mute">
-    Allaqachon hisobingiz bormi? <a class="ca-link font-medium" href="{% url 'login' %}{% if next %}?next={{ next|urlencode }}{% endif %}">Kirish</a>
+    {% trans "Allaqachon hisobingiz bormi?" %} <a class="ca-link font-medium" href="{% url 'login' %}{% if next %}?next={{ next|urlencode }}{% endif %}">{% trans "Kirish" %}</a>
   </p>
 </div>
 {% include "registration/_auth_script.html" %}

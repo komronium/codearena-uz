@@ -1,8 +1,8 @@
 {% extends "base.html" %}{% load tiers seo tagnames places %}
 {% block title %}{{ profile_user.username }}{% endblock %}
-{% block description %}{{ profile_user.username }} — CodeArena’dagi profili: reyting {{ profile_user.rating }}, {{ solved|length }} ta yechilgan masala, musobaqalar tarixi.{% endblock %}
-{% block robots %}{% if not profile_user.is_active or not solved and not rating_history %}noindex, follow{% else %}{{ block.super }}{% endif %}{% endblock %}
-{% block og_type %}profile{% endblock %}
+{% block description %}{% blocktrans with profile_user_username=profile_user.username profile_user_rating=profile_user.rating solved=solved|length %}{{ profile_user_username }} — CodeArena’dagi profili: reyting {{ profile_user_rating }}, {{ solved }} ta yechilgan masala, musobaqalar tarixi.{% endblocktrans %}{% endblock %}
+{% block robots %}{% if not profile_user.is_active or not solved and not rating_history %}{% trans "noindex, follow" %}{% else %}{{ block.super }}{% endif %}{% endblock %}
+{% block og_type %}{% trans "profile" %}{% endblock %}
 {% block structured_data %}<meta property="profile:username" content="{{ profile_user.username }}">
 {% url 'rating' as rating_url %}{% breadcrumbs_jsonld "Reyting" rating_url profile_user.username request.path %}{% profile_jsonld profile_user page_description %}{% endblock %}
 {% block band %}
@@ -15,30 +15,30 @@ Colour carries meaning only: the tier colour is the person, green/red the result
     <div class="ca7-pwho">
       <span class="ca7-pav{% if not profile_user.avatar %} ca-art-{{ banner.0 }}{% endif %}">{% if profile_user.avatar %}<img src="{{ profile_user.avatar.url }}" alt="" width="96" height="96" decoding="async">{% else %}<span aria-hidden="true">{{ profile_user.username|slice:":1"|upper }}</span>{% endif %}</span>
       <div class="min-w-0">
-        <h1 id="hero-name"><span translate="no">{{ profile_user.username }}</span><span class="ca7-ptier">{% if rating_history %}{{ tier }}{% else %}Reytingsiz{% endif %}</span>{% if profile_user.verified_at %}<span class="ca7-ptier" title="Shaxsi adminlar tomonidan tasdiqlangan: rasmiy reyting faqat tasdiqlanganlar uchun">Tasdiqlangan</span>{% endif %}</h1>
+        <h1 id="hero-name"><span translate="no">{{ profile_user.username }}</span><span class="ca7-ptier">{% if rating_history %}{{ tier }}{% else %}{% trans "Reytingsiz" %}{% endif %}</span>{% if profile_user.verified_at %}<span class="ca7-ptier" title="Shaxsi adminlar tomonidan tasdiqlangan: rasmiy reyting faqat tasdiqlanganlar uchun">{% trans "Tasdiqlangan" %}</span>{% endif %}</h1>
         {% if profile_user.get_full_name %}<p class="ca-hud-sub">{{ profile_user.get_full_name }}</p>{% endif %}
         <p class="ca7-pmeta">
           {% if profile_user.location or profile_user.country %}<span>{% if profile_user.country %}{% flag profile_user.country %}{% else %}<i data-lucide="map-pin" class="lu" aria-hidden="true"></i>{% endif %} {{ profile_user.location }}{% if profile_user.location and profile_user.country %}, {% endif %}{{ profile_user.country_name }}</span>{% endif %}
           {% if profile_user.school %}<span><i data-lucide="school" class="lu" aria-hidden="true"></i>{{ profile_user.school }}</span>{% endif %}
           {% if profile_user.club %}<span><i data-lucide="users" class="lu" aria-hidden="true"></i><a class="text-white underline" href="{% url 'club' profile_user.club.slug %}">{{ profile_user.club.name }}</a></span>{% endif %}
-          <span><i data-lucide="calendar" class="lu" aria-hidden="true"></i>{{ profile_user.date_joined|date:"d.m.Y" }} dan beri</span>
-          {% if profile_user.is_staff %}<span><i data-lucide="shield-check" class="lu" aria-hidden="true"></i>Moderator</span>{% endif %}
+          <span><i data-lucide="calendar" class="lu" aria-hidden="true"></i>{% blocktrans with profile_user_date_joined=profile_user.date_joined|date:"d.m.Y" %}{{ profile_user_date_joined }} dan beri{% endblocktrans %}</span>
+          {% if profile_user.is_staff %}<span><i data-lucide="shield-check" class="lu" aria-hidden="true"></i>{% trans "Moderator" %}</span>{% endif %}
         </p>
-        {% if top_badges %}<a class="ca7-pbadges" href="#badges-title" title="Nishonlar">{% for b in top_badges %}{% include "accounts/_bmini.html" %}{% endfor %}<span><b class="tabular">{{ badges_earned }}</b> nishon · <b class="tabular">{{ levels_earned }}</b> bosqich</span></a>{% endif %}
+        {% if top_badges %}<a class="ca7-pbadges" href="#badges-title" title="Nishonlar">{% for b in top_badges %}{% include "accounts/_bmini.html" %}{% endfor %}<span>{% blocktrans with badges_earned=badges_earned levels_earned=levels_earned %}<b class="tabular">{{ badges_earned }}</b> nishon · <b class="tabular">{{ levels_earned }}</b> bosqich{% endblocktrans %}</span></a>{% endif %}
       </div>
-      {% if user == profile_user %}<a class="ca7-hbtn is-wide ml-auto" href="{% url 'profile_edit' %}"><i data-lucide="settings" class="lu" aria-hidden="true"></i>Sozlamalar</a>
+      {% if user == profile_user %}<a class="ca7-hbtn is-wide ml-auto" href="{% url 'profile_edit' %}"><i data-lucide="settings" class="lu" aria-hidden="true"></i>{% trans "Sozlamalar" %}</a>
       {% elif user.is_authenticated %}<div class="ml-auto flex flex-wrap items-center gap-3">
-        {% if h2h and h2h.you or h2h and h2h.them %}<span class="ca7-h2h" title="Sizning o‘zaro duellaringiz"><small>Duel hisobi</small><b class="tabular">{{ h2h.you }} : {{ h2h.them }}</b></span>{% endif %}
-        <form method="post" action="{% url 'follow' profile_user.username %}">{% csrf_token %}<button class="ca-btn {% if is_following %}ca-btn-soft{% else %}ca-btn-ghost{% endif %}"><i data-lucide="{% if is_following %}user-check{% else %}user-plus{% endif %}" class="lu" aria-hidden="true"></i>{% if is_following %}Kuzatilmoqda{% else %}Kuzatish{% endif %}</button></form>
-        <a class="ca-btn ca-btn-gold" href="{% url 'classroom:duels' %}?opponent={{ profile_user.username|urlencode }}"><i data-lucide="swords" class="lu" aria-hidden="true"></i>Duelga chaqirish</a>
+        {% if h2h and h2h.you or h2h and h2h.them %}<span class="ca7-h2h" title="Sizning o‘zaro duellaringiz">{% blocktrans with h2h_you=h2h.you h2h_them=h2h.them %}<small>Duel hisobi</small><b class="tabular">{{ h2h_you }} : {{ h2h_them }}</b>{% endblocktrans %}</span>{% endif %}
+        <form method="post" action="{% url 'follow' profile_user.username %}">{% csrf_token %}<button class="ca-btn {% if is_following %}ca-btn-soft{% else %}ca-btn-ghost{% endif %}"><i data-lucide="{% if is_following %}user-check{% else %}user-plus{% endif %}" class="lu" aria-hidden="true"></i>{% if is_following %}{% trans "Kuzatilmoqda" %}{% else %}{% trans "Kuzatish" %}{% endif %}</button></form>
+        <a class="ca-btn ca-btn-gold" href="{% url 'classroom:duels' %}?opponent={{ profile_user.username|urlencode }}"><i data-lucide="swords" class="lu" aria-hidden="true"></i>{% trans "Duelga chaqirish" %}</a>
       </div>{% endif %}
     </div>
     <dl class="ca7-pstats">
-      <div><dt>Musobaqa reytingi</dt><dd>{% if rating_history %}<b class="ca7-prt tabular">{{ profile_user.rating }}</b>{% if last_delta %} <span class="ca7-pdelta{% if last_delta < 0 %} is-down{% endif %}">{{ last_delta|signed }}</span>{% endif %}{% else %}<b>—</b>{% endif %}</dd>
-        <dd><small>{% if max_rating %}eng yuqori {{ max_rating }}{% else %}hali reytingli raund yo‘q{% endif %}{% if profile_user.official_rating is not None %} · rasmiy {{ profile_user.official_rating }}{% endif %}</small></dd></div>
-      <div><dt>Reytingdagi o‘rni</dt><dd>{% if rating_rank %}<b class="tabular">{{ rating_rank }}</b> <span class="ca7-of">/ {{ total_rated }}</span>{% else %}<b>—</b>{% endif %}</dd><dd><small>{% if rating_inactive %}nofaol: 90 kundan beri reytingli musobaqa yo‘q{% else %}{{ rating_history|length }} ta reytingli musobaqa{% endif %}</small></dd></div>
-      <div><dt>Yechilgan masalalar</dt><dd><b class="tabular">{{ solved|length }}</b></dd><dd><small>{% if user == profile_user %}amaliyot balingiz {{ profile_user.practice_points }}{% else %}musobaqadan tashqari{% endif %}</small></dd></div>
-      <div><dt>Olov</dt><dd><b class="tabular">{{ streak.0 }}</b> <span class="ca7-of">kun</span></dd><dd><small>{% if streak.1 %}eng uzuni {{ streak.1 }} kun{% else %}kun masalasini yechib boshlang{% endif %}</small></dd></div>
+      <div><dt>{% trans "Musobaqa reytingi" %}</dt><dd>{% if rating_history %}<b class="ca7-prt tabular">{{ profile_user.rating }}</b>{% if last_delta %} <span class="ca7-pdelta{% if last_delta < 0 %} is-down{% endif %}">{{ last_delta|signed }}</span>{% endif %}{% else %}<b>—</b>{% endif %}</dd>
+        <dd><small>{% if max_rating %}{% blocktrans with max_rating=max_rating %}eng yuqori {{ max_rating }}{% endblocktrans %}{% else %}{% trans "hali reytingli raund yo‘q" %}{% endif %}{% if profile_user.official_rating is not None %} {% blocktrans with profile_user_official_rating=profile_user.official_rating %}· rasmiy {{ profile_user_official_rating }}{% endblocktrans %}{% endif %}</small></dd></div>
+      <div><dt>{% trans "Reytingdagi o‘rni" %}</dt><dd>{% if rating_rank %}<b class="tabular">{{ rating_rank }}</b> <span class="ca7-of">/ {{ total_rated }}</span>{% else %}<b>—</b>{% endif %}</dd><dd><small>{% if rating_inactive %}{% trans "nofaol: 90 kundan beri reytingli musobaqa yo‘q" %}{% else %}{% blocktrans with rating_history=rating_history|length %}{{ rating_history }} ta reytingli musobaqa{% endblocktrans %}{% endif %}</small></dd></div>
+      <div><dt>{% trans "Yechilgan masalalar" %}</dt><dd><b class="tabular">{{ solved|length }}</b></dd><dd><small>{% if user == profile_user %}{% blocktrans with profile_user_practice_points=profile_user.practice_points %}amaliyot balingiz {{ profile_user_practice_points }}{% endblocktrans %}{% else %}{% trans "musobaqadan tashqari" %}{% endif %}</small></dd></div>
+      <div><dt>{% trans "Olov" %}</dt><dd>{% blocktrans with streak_0=streak.0 %}<b class="tabular">{{ streak_0 }}</b> <span class="ca7-of">kun</span>{% endblocktrans %}</dd><dd><small>{% if streak.1 %}{% blocktrans with streak_1=streak.1 %}eng uzuni {{ streak_1 }} kun{% endblocktrans %}{% else %}{% trans "kun masalasini yechib boshlang" %}{% endif %}</small></dd></div>
     </dl>
   </div>
 </section>
@@ -47,11 +47,11 @@ Colour carries meaning only: the tier colour is the person, green/red the result
 <div class="ca7-col">
 <div class="ca7-g2">
   <section aria-labelledby="hist-title">
-    <div class="ca7-sec-h"><h2 id="hist-title">Reyting tarixi</h2>{% if rating_history %}<span class="ca7-r text-mute">{{ rating_history|length }} musobaqa</span>{% endif %}</div>
+    <div class="ca7-sec-h"><h2 id="hist-title">{% trans "Reyting tarixi" %}</h2>{% if rating_history %}<span class="ca7-r text-mute">{% blocktrans with rating_history=rating_history|length %}{{ rating_history }} musobaqa{% endblocktrans %}</span>{% endif %}</div>
     {% if rating_history %}
     {% if rating_history|length > 1 %}
     <div class="ca7-chart" id="rchart">
-      <svg viewBox="0 0 {{ rating_chart.w }} {{ rating_chart.h }}" class="w-full" role="img" aria-label="Reyting tarixi grafigi, {{ rating_history|length }} ta musobaqa">
+      <svg viewBox="0 0 {{ rating_chart.w }} {{ rating_chart.h }}" class="w-full" role="img" aria-label="{% blocktrans with rating_history=rating_history|length %}Reyting tarixi grafigi, {{ rating_history }} ta musobaqa{% endblocktrans %}">
         {% for b in rating_chart.bands %}
         <rect x="{{ rating_chart.left }}" y="{{ b.y }}" width="{{ rating_chart.width }}" height="{{ b.h }}" fill="{{ b.color }}" fill-opacity=".1" />
         {% if b.label %}<text x="{{ rating_chart.left|add:8 }}" y="{{ b.y|add:15 }}" fill="currentColor" class="fill-mute" font-size="12.5" font-weight="600">{{ b.label }}</text>{% endif %}
@@ -99,11 +99,11 @@ Colour carries meaning only: the tier colour is the person, green/red the result
     </script>
     {% endif %}
     <table class="ca-table ca-table-flat mt-3">
-      <thead><tr><th scope="col">Musobaqa</th><th scope="col" class="w-24 text-right">O‘rin</th><th scope="col" class="w-16 text-right" title="Reyting o‘zgarishi">±</th><th scope="col" class="w-20 text-right">Reyting</th></tr></thead>
+      <thead><tr><th scope="col">{% trans "Musobaqa" %}</th><th scope="col" class="w-24 text-right">{% trans "O‘rin" %}</th><th scope="col" class="w-16 text-right" title="{% trans 'Reyting o‘zgarishi' %}">±</th><th scope="col" class="w-20 text-right">{% trans "Reyting" %}</th></tr></thead>
       <tbody>
       {% for p in rating_history reversed %}
       <tr{% if p.disqualified %} class="ca-row-dq"{% endif %}>
-        <td><a class="ca-link" href="{% url 'contests:standings' p.contest_id %}">{{ p.contest.title }}</a>{% if p.disqualified %} <span class="ca-tag !text-bad">DQ</span>{% endif %}<span class="block text-xs text-mute tabular">{{ p.contest.end|date:"d.m.Y" }}</span></td>
+        <td><a class="ca-link" href="{% url 'contests:standings' p.contest_id %}">{{ p.contest.title }}</a>{% if p.disqualified %} <span class="ca-tag !text-bad">{% trans "DQ" %}</span>{% endif %}<span class="block text-xs text-mute tabular">{{ p.contest.end|date:"d.m.Y" }}</span></td>
         <td class="text-right tabular">{{ p.rank }}<span class="text-xs text-mute"> / {{ p.n_participants }}</span></td>
         <td class="text-right tabular font-semibold {% if p.delta > 0 %}text-ok{% elif p.delta < 0 %}text-bad{% else %}text-mute{% endif %}">{{ p.delta|signed }}</td>
         <td class="text-right tabular font-semibold"><span class="ca-tier-ink" style="--tier: {{ p.rating_after|tier_color }}">{{ p.rating_after }}</span></td>
@@ -112,32 +112,32 @@ Colour carries meaning only: the tier colour is the person, green/red the result
       </tbody>
     </table>
     {% else %}
-    <p class="ca7-empty"><b>Hali reytingli musobaqa yo‘q</b>{% if user == profile_user %}<a class="ca-link" href="{% url 'contests:list' %}">Kelgusi raundga yoziling</a>: birinchi natijadan keyin grafik chiqadi.{% else %}Birinchi reytingli raunddan keyin grafik chiqadi.{% endif %}</p>
+    <p class="ca7-empty"><b>{% trans "Hali reytingli musobaqa yo‘q" %}</b>{% if user == profile_user %}<a class="ca-link" href="{% url 'contests:list' %}">{% trans "Kelgusi raundga yoziling</a>: birinchi natijadan keyin grafik chiqadi." %}{% else %}{% trans "Birinchi reytingli raunddan keyin grafik chiqadi." %}{% endif %}</p>
     {% endif %}
   </section>
 
   <div class="space-y-9">
   <section aria-labelledby="solved-title">
-    <div class="ca7-sec-h"><h2 id="solved-title">Masalalar</h2><a class="ca-link" href="{% url 'problems:list' %}">Barchasi</a></div>
+    <div class="ca7-sec-h"><h2 id="solved-title">{% trans "Masalalar" %}</h2><a class="ca-link" href="{% url 'problems:list' %}">{% trans "Barchasi" %}</a></div>
     <div class="ca7-psolved mb-4">
-      {% if next_tier and rating_history %}<p class="text-sm text-mute"><span class="ca-tier-ink font-semibold" style="--tier: {{ next_tier.color }}">{{ next_tier.name }}</span> darajasigacha <b class="text-ink tabular">{{ next_tier.need }}</b> reyting</p>{% endif %}
+      {% if next_tier and rating_history %}<p class="text-sm text-mute"><span class="ca-tier-ink font-semibold" style="--tier: {{ next_tier.color }}">{% blocktrans with next_tier_name=next_tier.name next_tier_need=next_tier.need %}{{ next_tier_name }}</span> darajasigacha <b class="text-ink tabular">{{ next_tier_need }}</b> reyting{% endblocktrans %}</p>{% endif %}
     </div>
     {% if ring %}{% include "problems/_solved_ring.html" with attempting=attempting %}{% endif %}
     {% if solved_hidden > 0 %}<p class="ca7-foot-note">
-      {% if solved_hidden > 0 %}Yana <b class="tabular text-ink">{{ solved_hidden }}</b> ta yechilgan masala hozir kelgusi musobaqada, shuning uchun yashirin.{% endif %}
+      {% if solved_hidden > 0 %}{% blocktrans with solved_hidden=solved_hidden %}Yana <b class="tabular text-ink">{{ solved_hidden }}</b> ta yechilgan masala hozir kelgusi musobaqada, shuning uchun yashirin.{% endblocktrans %}{% endif %}
     </p>{% endif %}
   </section>
 {% if held_badges or contest_badges or badge_owner %}
 <section aria-labelledby="badges-title">
-  <div class="ca7-sec-h"><h2 id="badges-title">Nishonlar</h2><span class="ca7-r text-mute"><span class="tabular">{{ badges_earned }} / {{ badges_total }}</span>{% if badge_owner %} · <a class="ca-link" href="{% url 'badges' %}">Barcha nishonlar</a>{% endif %}</span></div>
+  <div class="ca7-sec-h"><h2 id="badges-title">{% trans "Nishonlar" %}</h2><span class="ca7-r text-mute"><span class="tabular">{{ badges_earned }} / {{ badges_total }}</span>{% if badge_owner %} · <a class="ca-link" href="{% url 'badges' %}">{% trans "Barcha nishonlar" %}</a>{% endif %}</span></div>
   {% comment %}Only the badges held, the highest level first; the rest and the way to them are on the badges page.
   Round badges (Contest.badge) follow.{% endcomment %}
   <div class="ca-bt-wrap">
   {% if held_badges %}<ul class="ca-bts">{% for b in held_badges %}{% include "accounts/_tbadge.html" with owner=badge_owner %}{% endfor %}</ul>
-  {% elif badge_owner %}<p class="ca7-empty"><b>Hali nishon yo‘q</b><a class="ca-link" href="{% url 'badges' %}">Qanday olinadi?</a></p>{% endif %}
+  {% elif badge_owner %}<p class="ca7-empty"><b>{% trans "Hali nishon yo‘q" %}</b><a class="ca-link" href="{% url 'badges' %}">{% trans "Qanday olinadi?" %}</a></p>{% endif %}
   {% if contest_badges %}
   <div class="ca-tb-group">
-    <h3>Musobaqa nishonlari</h3>
+    <h3>{% trans "Musobaqa nishonlari" %}</h3>
     <ul class="ca-bts">
       {% for b in contest_badges %}{% url 'contests:standings' b.contest.pk as round_url %}{% if b.medal %}{% include "accounts/_badge7.html" with tone="medal" icon="medal" title=b.name sub=b.contest.title medal=b.medal href=round_url done=None total=None %}{% else %}{% include "accounts/_badge7.html" with tone="lapis" icon="flag" title=b.name sub=b.contest.title of_solved=b.solved of_total=b.total medal=None href=round_url done=None total=None %}{% endif %}{% endfor %}
     </ul>
@@ -151,56 +151,56 @@ Colour carries meaning only: the tier colour is the person, green/red the result
 
 
 <section aria-labelledby="act-title">
-  <div class="ca7-sec-h"><h2 id="act-title">Faollik</h2>
-    <span class="ca7-r text-mute">{{ activity.first|date:"d.m.Y" }} – {{ activity.last|date:"d.m.Y" }}: <b class="tabular text-ink">{{ activity.total }}</b> ta urinish · faol kunlar <b class="tabular text-ink">{{ activity.active_days }}</b> · eng uzun ketma-ket faol kunlar <b class="tabular text-ink">{{ activity.max_streak }}</b></span></div>
+  <div class="ca7-sec-h"><h2 id="act-title">{% trans "Faollik" %}</h2>
+    <span class="ca7-r text-mute">{% blocktrans with activity_first=activity.first|date:"d.m.Y" activity_last=activity.last|date:"d.m.Y" activity_total=activity.total activity_active_days=activity.active_days activity_max_streak=activity.max_streak %}{{ activity_first }} – {{ activity_last }}: <b class="tabular text-ink">{{ activity_total }}</b> ta urinish · faol kunlar <b class="tabular text-ink">{{ activity_active_days }}</b> · eng uzun ketma-ket faol kunlar <b class="tabular text-ink">{{ activity_max_streak }}</b>{% endblocktrans %}</span></div>
   {# rtl scroller: a phone shows the latest weeks first; the map itself stays left-to-right #}
-  <div class="ca-scroll-end overflow-x-auto" tabindex="0" role="region" aria-label="Faollik xaritasi (yon tomonga suriladi)">
-    <div class="ca7-heat" role="img" aria-label="Faollik xaritasi: so‘nggi bir yilda {{ activity.total }} ta urinish, {{ activity.active_days }} faol kun">
+  <div class="ca-scroll-end overflow-x-auto" tabindex="0" role="region" aria-label="{% trans 'Faollik xaritasi (yon tomonga suriladi)' %}">
+    <div class="ca7-heat" role="img" aria-label="{% blocktrans with activity_total=activity.total activity_active_days=activity.active_days %}Faollik xaritasi: so‘nggi bir yilda {{ activity_total }} ta urinish, {{ activity_active_days }} faol kun{% endblocktrans %}">
       <div class="ca7-heat-weeks" aria-hidden="true">
-        {% for w in activity.weeks %}<div>{% for d in w %}{% if d %}<i class="ca-heat-{{ d.level }}" title="{{ d.date|date:'d.m.Y' }}: {{ d.count }} ta urinish"></i>{% else %}<i class="ca-heat-pad"></i>{% endif %}{% endfor %}</div>{% endfor %}
+        {% for w in activity.weeks %}<div>{% for d in w %}{% if d %}<i class="ca-heat-{{ d.level }}" title="{% blocktrans with d_date=d.date|date:'d.m.Y' d_count=d.count %}{{ d_date }}: {{ d_count }} ta urinish{% endblocktrans %}"></i>{% else %}<i class="ca-heat-pad"></i>{% endif %}{% endfor %}</div>{% endfor %}
       </div>
       <div class="ca7-heat-months" aria-hidden="true">
         {% for m in activity.month_labels %}<span style="left: {% widthratio m.week activity.weeks|length 100 %}%">{{ m.name }}</span>{% endfor %}
       </div>
     </div>
   </div>
-  <p class="ca7-heat-legend" aria-hidden="true">Kam <i class="ca-heat-0"></i><i class="ca-heat-1"></i><i class="ca-heat-2"></i><i class="ca-heat-4"></i> Ko‘p</p>
+  <p class="ca7-heat-legend" aria-hidden="true">{% trans "Kam <i class=\"ca-heat-0\"></i><i class=\"ca-heat-1\"></i><i class=\"ca-heat-2\"></i><i class=\"ca-heat-4\"></i> Ko‘p" %}</p>
 </section>
 
 {% if topic_map %}
 <section aria-labelledby="skills-title">
-  <div class="ca7-sec-h"><h2 id="skills-title">Mavzular bo‘yicha</h2><a class="ca-link" href="{% url 'problems:list' %}">Barcha masalalar</a></div>
+  <div class="ca7-sec-h"><h2 id="skills-title">{% trans "Mavzular bo‘yicha" %}</h2><a class="ca-link" href="{% url 'problems:list' %}">{% trans "Barcha masalalar" %}</a></div>
   {% if weakest and user == profile_user %}
   <div class="ca7-tip">
     <span class="ca7-tip-ico" aria-hidden="true"><i data-lucide="target" class="lu"></i></span>
-    <p><b>Eng zaif mavzu: {{ weakest.row.tag.name|tag_uz }}</b> · {{ weakest.total }} tadan {{ weakest.solved }} tasi yechilgan{% if weakest.tried %}, {{ weakest.tried }} tasida urinish bor{% endif %}.
-      {% if weakest.easiest %}<br>Osonidan boshlang: <a class="ca-link" href="{% url 'problems:detail' weakest.easiest.slug %}"><span class="ca-pid">{{ weakest.easiest.pk|stringformat:"04d" }}</span> {{ weakest.easiest.title }}</a> <span class="ca-diff ca-diff-{{ weakest.easiest.difficulty }}">{{ weakest.easiest.get_difficulty_display }}</span>{% endif %}</p>
+    <p>{% blocktrans with weakest_row_tag_name=weakest.row.tag.name|tag_uz weakest_total=weakest.total weakest_solved=weakest.solved %}<b>Eng zaif mavzu: {{ weakest_row_tag_name }}</b> · {{ weakest_total }} tadan {{ weakest_solved }} tasi yechilgan{% endblocktrans %}{% if weakest.tried %}{% blocktrans with weakest_tried=weakest.tried %}, {{ weakest_tried }} tasida urinish bor{% endblocktrans %}{% endif %}.
+      {% if weakest.easiest %}{% trans "<br>Osonidan boshlang:" %} <a class="ca-link" href="{% url 'problems:detail' weakest.easiest.slug %}"><span class="ca-pid">{{ weakest.easiest.pk|stringformat:"04d" }}</span> {{ weakest.easiest.title }}</a> <span class="ca-diff ca-diff-{{ weakest.easiest.difficulty }}">{{ weakest.easiest.get_difficulty_display }}</span>{% endif %}</p>
   </div>
   {% endif %}
-  <div class="ca7-topics" aria-label="Mavzular: yechilgan, urinilgan, qolgan">
+  <div class="ca7-topics" aria-label="{% trans 'Mavzular: yechilgan, urinilgan, qolgan' %}">
     {% for t in topic_map %}
-    {% if forloop.counter == 6 %}<details class="ca7-topics-more"><summary>Barcha mavzular <span class="tabular">({{ topic_map|length }})</span><i data-lucide="chevron-down" class="lu" aria-hidden="true"></i></summary>{% endif %}
+    {% if forloop.counter == 6 %}<details class="ca7-topics-more"><summary>{% blocktrans with topic_map=topic_map|length %}Barcha mavzular <span class="tabular">({{ topic_map }})</span>{% endblocktrans %}<i data-lucide="chevron-down" class="lu" aria-hidden="true"></i></summary>{% endif %}
     <div class="ca7-topic">
-      <a class="ca-link{% if t.kind == 'sql' %} !text-[rgb(var(--ca-sql-rgb))]{% endif %}" href="{% url 'problems:list' %}?tag={{ t.row.tag.name|urlencode }}"{% if t.next %} title="Keyingisi: {{ t.next.title }}"{% endif %}>{{ t.row.tag.name|tag_uz }}</a>
-      <span class="ca7-topic-bar" role="img" aria-label="{{ t.total }} tadan {{ t.solved }} tasi yechilgan, {{ t.tried }} tasida urinish bor"><i class="is-solved" style="width: {{ t.pct_solved }}%"></i><i class="is-tried" style="width: {{ t.pct_tried }}%"></i></span>
+      <a class="ca-link{% if t.kind == 'sql' %} !text-[rgb(var(--ca-sql-rgb))]{% endif %}" href="{% url 'problems:list' %}?tag={{ t.row.tag.name|urlencode }}"{% if t.next %} title="{% blocktrans with t_next_title=t.next.title %}Keyingisi: {{ t_next_title }}{% endblocktrans %}"{% endif %}>{{ t.row.tag.name|tag_uz }}</a>
+      <span class="ca7-topic-bar" role="img" aria-label="{% blocktrans with t_total=t.total t_solved=t.solved t_tried=t.tried %}{{ t_total }} tadan {{ t_solved }} tasi yechilgan, {{ t_tried }} tasida urinish bor{% endblocktrans %}"><i class="is-solved" style="width: {{ t.pct_solved }}%"></i><i class="is-tried" style="width: {{ t.pct_tried }}%"></i></span>
       <b class="tabular">{{ t.solved }} / {{ t.total }}</b>
-      <span class="ca7-topic-next">{% if t.next %}<a class="ca-link" href="{% url 'problems:detail' t.next.slug %}" title="{{ t.next.title }}">Keyingisi: {{ t.next.title }}</a>{% else %}<span class="font-semibold text-ok"><i data-lucide="check" class="lu" aria-hidden="true"></i> hammasi</span>{% endif %}</span>
+      <span class="ca7-topic-next">{% if t.next %}<a class="ca-link" href="{% url 'problems:detail' t.next.slug %}" title="{{ t.next.title }}">{% blocktrans with t_next_title=t.next.title %}Keyingisi: {{ t_next_title }}{% endblocktrans %}</a>{% else %}<span class="font-semibold text-ok"><i data-lucide="check" class="lu" aria-hidden="true"></i> {% trans "hammasi" %}</span>{% endif %}</span>
     </div>
     {% if forloop.last and forloop.counter > 5 %}</details>{% endif %}
     {% endfor %}
-    <p class="ca7-topics-key" aria-hidden="true"><i class="is-solved"></i>yechilgan <i class="is-tried"></i>urinilgan <i></i>qolgan</p>
+    <p class="ca7-topics-key" aria-hidden="true">{% trans "<i class=\"is-solved\"></i>yechilgan <i class=\"is-tried\"></i>urinilgan <i></i>qolgan" %}</p>
   </div>
 </section>
 {% endif %}
 
 {% if user.is_authenticated and user != profile_user %}
 <details class="ca7-report">
-  <summary class="ca-link">Bu foydalanuvchi haqida shikoyat qilish</summary>
+  <summary class="ca-link">{% trans "Bu foydalanuvchi haqida shikoyat qilish" %}</summary>
   <form method="post" action="{% url 'integrity:report' %}" class="mt-2 grid max-w-xl gap-2">{% csrf_token %}
     <input type="hidden" name="kind" value="user"><input type="hidden" name="target" value="{{ profile_user.username }}"><input type="hidden" name="next" value="{{ request.get_full_path }}">
-    <label class="text-sm font-medium" for="report-text">Nima bo‘ldi?</label>
+    <label class="text-sm font-medium" for="report-text">{% trans "Nima bo‘ldi?" %}</label>
     <textarea class="ca-input" id="report-text" name="text" rows="3" maxlength="600" required minlength="5"></textarea>
-    <button class="ca-btn ca-btn-ghost self-start">Adminlarga yuborish</button>
+    <button class="ca-btn ca-btn-ghost self-start">{% trans "Adminlarga yuborish" %}</button>
   </form>
 </details>
 {% endif %}

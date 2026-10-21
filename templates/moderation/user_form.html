@@ -1,15 +1,15 @@
 {% extends "base.html" %}
-{% block title %}{{ obj.username }} — tahrirlash{% endblock %}
+{% block title %}{% blocktrans with obj_username=obj.username %}{{ obj_username }} — tahrirlash{% endblocktrans %}{% endblock %}
 {% block content %}
 
 <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
   <div>
-    <a class="ca-link mb-2 inline-block text-sm text-mute" href="{% url 'moderation:users' %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>Foydalanuvchilar</a>
+    <a class="ca-link mb-2 inline-block text-sm text-mute" href="{% url 'moderation:users' %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>{% trans "Foydalanuvchilar" %}</a>
     <h1 class="ca-page-title" translate="no">{{ obj.username }}</h1>
   </div>
   <div class="flex gap-2">
-    <a href="{% url 'moderation:submissions' %}?user={{ obj.username|urlencode }}" class="ca-btn ca-btn-ghost"><i data-lucide="history" class="lu" aria-hidden="true"></i>Urinishlari</a>
-    <a href="{% url 'profile' obj.username %}" class="ca-btn ca-btn-ghost"><i data-lucide="user" class="lu" aria-hidden="true"></i>Profil</a>
+    <a href="{% url 'moderation:submissions' %}?user={{ obj.username|urlencode }}" class="ca-btn ca-btn-ghost"><i data-lucide="history" class="lu" aria-hidden="true"></i>{% trans "Urinishlari" %}</a>
+    <a href="{% url 'profile' obj.username %}" class="ca-btn ca-btn-ghost"><i data-lucide="user" class="lu" aria-hidden="true"></i>{% trans "Profil" %}</a>
   </div>
 </div>
 
@@ -19,35 +19,35 @@
   {% csrf_token %}
   <section class="ca-panel space-y-4">
     <div class="grid gap-4 sm:grid-cols-2">
-      <div><label class="ca-label" for="{{ form.username.id_for_label }}">Login</label>{{ form.username }}{{ form.username.errors }}</div>
-      <div><label class="ca-label" for="{{ form.email.id_for_label }}">Email</label>{{ form.email }}{{ form.email.errors }}</div>
-      <div><label class="ca-label" for="{{ form.first_name.id_for_label }}">Ism</label>{{ form.first_name }}</div>
-      <div><label class="ca-label" for="{{ form.last_name.id_for_label }}">Familiya</label>{{ form.last_name }}</div>
-      <div><label class="ca-label" for="{{ form.school.id_for_label }}">O‘quv joyi</label>{{ form.school }}</div>
-      <div><label class="ca-label" for="{{ form.country.id_for_label }}">Davlat</label>{{ form.country }}</div>
-      <div><label class="ca-label" for="{{ form.location.id_for_label }}">Shahar</label>{{ form.location }}</div>
+      <div><label class="ca-label" for="{{ form.username.id_for_label }}">{% trans "Login" %}</label>{{ form.username }}{{ form.username.errors }}</div>
+      <div><label class="ca-label" for="{{ form.email.id_for_label }}">{% trans "Email" %}</label>{{ form.email }}{{ form.email.errors }}</div>
+      <div><label class="ca-label" for="{{ form.first_name.id_for_label }}">{% trans "Ism" %}</label>{{ form.first_name }}</div>
+      <div><label class="ca-label" for="{{ form.last_name.id_for_label }}">{% trans "Familiya" %}</label>{{ form.last_name }}</div>
+      <div><label class="ca-label" for="{{ form.school.id_for_label }}">{% trans "O‘quv joyi" %}</label>{{ form.school }}</div>
+      <div><label class="ca-label" for="{{ form.country.id_for_label }}">{% trans "Davlat" %}</label>{{ form.country }}</div>
+      <div><label class="ca-label" for="{{ form.location.id_for_label }}">{% trans "Shahar" %}</label>{{ form.location }}</div>
     </div>
     <div class="grid gap-4 sm:grid-cols-2">
-      <div><label class="ca-label" for="{{ form.rating.id_for_label }}">Reyting</label>{{ form.rating }}{{ form.rating.errors }}</div>
-      <div><p class="ca-label">Amaliyot ball</p><p class="tabular py-2 text-sm">{{ form.instance.practice_points }} <span class="text-mute">· yechilgan masalalardan hisoblanadi</span></p></div>
+      <div><label class="ca-label" for="{{ form.rating.id_for_label }}">{% trans "Reyting" %}</label>{{ form.rating }}{{ form.rating.errors }}</div>
+      <div><p class="ca-label">{% trans "Amaliyot ball" %}</p><p class="tabular py-2 text-sm">{% blocktrans with form_instance_practice_points=form.instance.practice_points %}{{ form_instance_practice_points }} <span class="text-mute">· yechilgan masalalardan hisoblanadi</span>{% endblocktrans %}</p></div>
     </div>
-    <p class="text-xs text-mute">Parolni faqat foydalanuvchining o‘zi <a class="ca-link" href="{% url 'password_reset' %}">tiklash havolasi</a> orqali o‘zgartiradi.</p>
+    <p class="text-xs text-mute">{% trans "Parolni faqat foydalanuvchining o‘zi" %} <a class="ca-link" href="{% url 'password_reset' %}">{% trans "tiklash havolasi</a> orqali o‘zgartiradi." %}</p>
   </section>
   <aside class="space-y-6 lg:sticky lg:top-20">
     <section class="ca-panel space-y-4">
-      <h2 class="ca-section-title !mb-0">Huquqlar</h2>
-      <div><label class="ca-label" for="{{ form.role.id_for_label }}">Rol</label>{{ form.role }}</div>
-      <label class="flex items-center gap-2 text-sm">{{ form.is_staff }} Admin (boshqaruvga kirish)</label>
-      <label class="flex items-center gap-2 text-sm">{{ form.is_setter }} Muallif (masala yozadi; admin tasdiqlaydi)</label>
-      <label class="flex items-center gap-2 text-sm">{{ form.is_active }} Faol (o‘chirilsa — kira olmaydi)</label>
+      <h2 class="ca-section-title !mb-0">{% trans "Huquqlar" %}</h2>
+      <div><label class="ca-label" for="{{ form.role.id_for_label }}">{% trans "Rol" %}</label>{{ form.role }}</div>
+      <label class="flex items-center gap-2 text-sm">{% blocktrans with form_is_staff=form.is_staff %}{{ form_is_staff }} Admin (boshqaruvga kirish){% endblocktrans %}</label>
+      <label class="flex items-center gap-2 text-sm">{% blocktrans with form_is_setter=form.is_setter %}{{ form_is_setter }} Muallif (masala yozadi; admin tasdiqlaydi){% endblocktrans %}</label>
+      <label class="flex items-center gap-2 text-sm">{% blocktrans with form_is_active=form.is_active %}{{ form_is_active }} Faol (o‘chirilsa — kira olmaydi){% endblocktrans %}</label>
     </section>
-    <button type="submit" class="ca-btn ca-btn-primary w-full"><i data-lucide="check" class="lu" aria-hidden="true"></i>Saqlash</button>
+    <button type="submit" class="ca-btn ca-btn-primary w-full"><i data-lucide="check" class="lu" aria-hidden="true"></i>{% trans "Saqlash" %}</button>
     {% if obj != request.user and not obj.is_staff %}
-    <button type="submit" form="user-delete" class="ca-btn ca-btn-ghost w-full text-bad"><i data-lucide="trash-2" class="lu" aria-hidden="true"></i>Butunlay o‘chirish</button>
+    <button type="submit" form="user-delete" class="ca-btn ca-btn-ghost w-full text-bad"><i data-lucide="trash-2" class="lu" aria-hidden="true"></i>{% trans "Butunlay o‘chirish" %}</button>
     {% endif %}
   </aside>
 </form>
 {% if obj != request.user and not obj.is_staff %}
-<form id="user-delete" method="post" action="{% url 'moderation:user_delete' obj.pk %}" data-confirm="«{{ obj.username }}» va uning barcha urinishlari, natijalari butunlay o‘chiriladi. Qaytarib bo‘lmaydi. Davom etasizmi?">{% csrf_token %}</form>
+<form id="user-delete" method="post" action="{% url 'moderation:user_delete' obj.pk %}" data-confirm="{% blocktrans with obj_username=obj.username %}«{{ obj_username }}» va uning barcha urinishlari, natijalari butunlay o‘chiriladi. Qaytarib bo‘lmaydi. Davom etasizmi?{% endblocktrans %}">{% csrf_token %}</form>
 {% endif %}
 {% endblock %}

@@ -1,17 +1,17 @@
 {% extends "base.html" %}
-{% block title %}{{ participant.username }} · {{ cp.label }} — yozilish tarixi{% endblock %}
+{% block title %}{% blocktrans with participant_username=participant.username cp_label=cp.label %}{{ participant_username }} · {{ cp_label }} — yozilish tarixi{% endblocktrans %}{% endblock %}
 
 {% block content %}
-<a class="ca-link mb-4 inline-flex text-sm text-mute" href="{% url 'integrity:contest_report' contest.pk %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>Nazorat hisoboti</a>
+<a class="ca-link mb-4 inline-flex text-sm text-mute" href="{% url 'integrity:contest_report' contest.pk %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>{% trans "Nazorat hisoboti" %}</a>
 <div class="mb-5 flex flex-wrap items-end justify-between gap-3">
   <div class="min-w-0">
-    <h1 class="ca-page-title">Kod qanday yozilgan</h1>
+    <h1 class="ca-page-title">{% trans "Kod qanday yozilgan" %}</h1>
     <p class="mt-1 flex flex-wrap items-center gap-2 text-sm text-mute">
       {% include "accounts/_user.html" with u=participant tier=False %}
       <span>· <span class="text-accent font-semibold">{{ cp.label }}.</span> {{ cp.problem.title }}</span>
     </p>
   </div>
-  <nav class="flex flex-wrap gap-1.5" aria-label="Boshqa masalalar">
+  <nav class="flex flex-wrap gap-1.5" aria-label="{% trans 'Boshqa masalalar' %}">
     {% for o in others %}
     <a class="ca-filter {% if o.problem_id == cp.problem_id %}is-active{% endif %}" href="{% url 'integrity:replay' contest.pk participant.pk o.problem_id %}"{% if o.problem_id == cp.problem_id %} aria-current="page"{% endif %}>{{ o.label }}</a>
     {% endfor %}
@@ -20,38 +20,38 @@
 
 {% if frames %}
 <div class="grid gap-5 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start">
-  <section class="ca-panel !p-0 overflow-hidden" aria-label="Kod ijrosi">
+  <section class="ca-panel !p-0 overflow-hidden" aria-label="{% trans 'Kod ijrosi' %}">
     <div class="flex flex-wrap items-center gap-3 border-b border-line px-4 py-3">
       <div class="flex items-center gap-1">
-        <button type="button" class="ca-btn ca-btn-ghost !px-2 !py-1.5" id="rp-prev" aria-label="Oldingi holat"><i data-lucide="step-back" class="lu" aria-hidden="true"></i></button>
-        <button type="button" class="ca-btn ca-btn-primary !px-2.5 !py-1.5" id="rp-play" aria-label="Ijro"><i data-lucide="play" class="lu" aria-hidden="true"></i></button>
-        <button type="button" class="ca-btn ca-btn-ghost !px-2 !py-1.5" id="rp-next" aria-label="Keyingi holat"><i data-lucide="step-forward" class="lu" aria-hidden="true"></i></button>
+        <button type="button" class="ca-btn ca-btn-ghost !px-2 !py-1.5" id="rp-prev" aria-label="{% trans 'Oldingi holat' %}"><i data-lucide="step-back" class="lu" aria-hidden="true"></i></button>
+        <button type="button" class="ca-btn ca-btn-primary !px-2.5 !py-1.5" id="rp-play" aria-label="{% trans 'Ijro' %}"><i data-lucide="play" class="lu" aria-hidden="true"></i></button>
+        <button type="button" class="ca-btn ca-btn-ghost !px-2 !py-1.5" id="rp-next" aria-label="{% trans 'Keyingi holat' %}"><i data-lucide="step-forward" class="lu" aria-hidden="true"></i></button>
       </div>
-      <input type="range" id="rp-range" min="0" max="{{ frames|length|add:'-1' }}" value="0" class="min-w-[8rem] flex-1 accent-[rgb(var(--ca-accent-rgb))]" aria-label="Vaqt bo‘yicha surish">
+      <input type="range" id="rp-range" min="0" max="{{ frames|length|add:'-1' }}" value="0" class="min-w-[8rem] flex-1 accent-[rgb(var(--ca-accent-rgb))]" aria-label="{% trans 'Vaqt bo‘yicha surish' %}">
       <p class="tabular text-sm"><b id="rp-time"></b> <span class="text-mute" id="rp-meta"></span></p>
     </div>
     <pre class="ca-cmp-code !max-h-[34rem] !bg-transparent" id="rp-code" aria-live="off"></pre>
-    <p class="border-t border-line px-4 py-2 text-xs text-mute"><span class="ca-rp-key"></span> — oldingi holatdan keyin paydo bo‘lgan qatorlar. Har ~10 soniyada saqlanadi, faqat kod o‘zgarganda.</p>
+    <p class="border-t border-line px-4 py-2 text-xs text-mute">{% trans "<span class=\"ca-rp-key\"></span> — oldingi holatdan keyin paydo bo‘lgan qatorlar. Har ~10 soniyada saqlanadi, faqat kod o‘zgarganda." %}</p>
   </section>
 
-  <aside aria-label="Vaqt chizig‘i">
+  <aside aria-label="{% trans 'Vaqt chizig‘i' %}">
     {% if jumps %}
     <div class="ca-alert ca-alert-bad mb-3 text-sm">
-      <b>{{ jumps|length }} ta keskin sakrash</b> — 10 soniya atrofida {{ jumps.0.chars }}+ belgi paydo bo‘lgan. Qo‘lda yozilgan kodda bu kam uchraydi.
+      {% blocktrans with jumps=jumps|length jumps_0_chars=jumps.0.chars %}<b>{{ jumps }} ta keskin sakrash</b> — 10 soniya atrofida {{ jumps_0_chars }}+ belgi paydo bo‘lgan. Qo‘lda yozilgan kodda bu kam uchraydi.{% endblocktrans %}
     </div>
     {% endif %}
     <ol class="ca-rows max-h-[36rem] overflow-y-auto text-sm">
       {% for it in timeline %}
       <li><button type="button" class="ca-rp-item" data-t="{{ it.at|date:'c' }}">{# "(boshqa sahifa)" marks the rest; dimming them broke contrast #}
         <span class="tabular w-16 shrink-0 text-xs text-mute">{{ it.at|date:"H:i:s" }}</span>
-        {% if it.kind == "submit" %}{% include "submissions/_verdict.html" with v=it.sub.verdict sub=it.sub brief=True %}<span>yuborildi</span>
-        {% elif it.kind == "jump" %}<span class="font-semibold text-bad"><i data-lucide="zap" class="lu mr-1" aria-hidden="true"></i>+{{ it.chars }} belgi {{ it.secs }} s ichida</span>
-        {% elif it.kind == "blur" %}<span class="text-warn"><i data-lucide="log-out" class="lu mr-1" aria-hidden="true"></i>Sahifadan chiqdi</span>
-        {% elif it.kind == "focus" %}<span class="{% if it.away_s >= 20 %}font-semibold text-warn{% endif %}"><i data-lucide="log-in" class="lu mr-1" aria-hidden="true"></i>Qaytdi · {{ it.away_s }} s tashqarida</span>
-        {% elif it.kind == "paste" %}<span class="font-semibold text-bad"><i data-lucide="clipboard" class="lu mr-1" aria-hidden="true"></i>Paste urinishi</span>
-        {% elif it.kind == "fast" %}<span class="text-warn"><i data-lucide="gauge" class="lu mr-1" aria-hidden="true"></i>Juda tez yozish</span>
-        {% elif it.kind == "view" %}<span class="text-mute"><i data-lucide="eye" class="lu mr-1" aria-hidden="true"></i>Masalani ochdi</span>{% endif %}
-        {% if not it.here %}<span class="text-xs text-mute">(boshqa sahifa)</span>{% endif %}
+        {% if it.kind == "submit" %}{% include "submissions/_verdict.html" with v=it.sub.verdict sub=it.sub brief=True %}<span>{% trans "yuborildi" %}</span>
+        {% elif it.kind == "jump" %}<span class="font-semibold text-bad"><i data-lucide="zap" class="lu mr-1" aria-hidden="true"></i>{% blocktrans with it_chars=it.chars it_secs=it.secs %}+{{ it_chars }} belgi {{ it_secs }} s ichida{% endblocktrans %}</span>
+        {% elif it.kind == "blur" %}<span class="text-warn"><i data-lucide="log-out" class="lu mr-1" aria-hidden="true"></i>{% trans "Sahifadan chiqdi" %}</span>
+        {% elif it.kind == "focus" %}<span class="{% if it.away_s >= 20 %}font-semibold text-warn{% endif %}"><i data-lucide="log-in" class="lu mr-1" aria-hidden="true"></i>{% blocktrans with it_away_s=it.away_s %}Qaytdi · {{ it_away_s }} s tashqarida{% endblocktrans %}</span>
+        {% elif it.kind == "paste" %}<span class="font-semibold text-bad"><i data-lucide="clipboard" class="lu mr-1" aria-hidden="true"></i>{% trans "Paste urinishi" %}</span>
+        {% elif it.kind == "fast" %}<span class="text-warn"><i data-lucide="gauge" class="lu mr-1" aria-hidden="true"></i>{% trans "Juda tez yozish" %}</span>
+        {% elif it.kind == "view" %}<span class="text-mute"><i data-lucide="eye" class="lu mr-1" aria-hidden="true"></i>{% trans "Masalani ochdi" %}</span>{% endif %}
+        {% if not it.here %}<span class="text-xs text-mute">{% trans "(boshqa sahifa)" %}</span>{% endif %}
       </button></li>
       {% endfor %}
     </ol>
@@ -100,6 +100,6 @@
   })();
 </script>
 {% else %}
-<div class="ca-empty">Bu masala uchun saqlangan kod holati yo‘q. Ishtirokchi masalani ochmagan yoki bu musobaqa yozilish tarixi qo‘shilishidan oldin o‘tgan.</div>
+<div class="ca-empty">{% trans "Bu masala uchun saqlangan kod holati yo‘q. Ishtirokchi masalani ochmagan yoki bu musobaqa yozilish tarixi qo‘shilishidan oldin o‘tgan." %}</div>
 {% endif %}
 {% endblock %}

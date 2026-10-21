@@ -1,25 +1,25 @@
 {% extends "base.html" %}{% load tiers %}
-{% block title %}Foydalanuvchilar — boshqaruv{% endblock %}
+{% block title %}{% trans "Foydalanuvchilar — boshqaruv" %}{% endblock %}
 {% block content %}
 <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
   <div>{% include "moderation/_header.html" with title="Foydalanuvchilar" subtitle="Rol, huquq va profil ma’lumotlari" %}</div>
   <form method="get" class="relative w-full max-w-xs" role="search">
     <i data-lucide="search" class="lu pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-mute" aria-hidden="true"></i>
-    <input type="search" name="q" value="{{ q }}" placeholder="Login, email, ism, o‘quv joyi…" class="ca-input !py-1.5 pl-8 text-sm" aria-label="Foydalanuvchi qidirish">
+    <input type="search" name="q" value="{{ q }}" placeholder="{% trans 'Login, email, ism, o‘quv joyi…' %}" class="ca-input !py-1.5 pl-8 text-sm" aria-label="{% trans 'Foydalanuvchi qidirish' %}">
   </form>
 </div>
 
 <div class="mb-4 flex flex-wrap items-center gap-3">
-  <nav class="ca7-seg" aria-label="Rol">
-    <a href="{% querystring role=None page=None %}"{% if not role %} aria-current="true"{% endif %}>Hammasi</a>
-    <a href="{% querystring role='student' page=None %}"{% if role == 'student' %} aria-current="true"{% endif %}>Foydalanuvchilar</a>
-    <a href="{% querystring role='staff' page=None %}"{% if role == 'staff' %} aria-current="true"{% endif %}>Adminlar</a>
+  <nav class="ca7-seg" aria-label="{% trans 'Rol' %}">
+    <a href="{% querystring role=None page=None %}"{% if not role %} aria-current="true"{% endif %}>{% trans "Hammasi" %}</a>
+    <a href="{% querystring role='student' page=None %}"{% if role == 'student' %} aria-current="true"{% endif %}>{% trans "Foydalanuvchilar" %}</a>
+    <a href="{% querystring role='staff' page=None %}"{% if role == 'staff' %} aria-current="true"{% endif %}>{% trans "Adminlar" %}</a>
   </nav>
-  <nav class="ca7-seg ml-auto" aria-label="Saralash">
-    <a href="{% querystring sort=None page=None %}"{% if not sort %} aria-current="true"{% endif %}>Yangi</a>
-    <a href="{% querystring sort='login' page=None %}"{% if sort == 'login' %} aria-current="true"{% endif %}>Oxirgi kirish</a>
-    <a href="{% querystring sort='rating' page=None %}"{% if sort == 'rating' %} aria-current="true"{% endif %}>Reyting</a>
-    <a href="{% querystring sort='subs' page=None %}"{% if sort == 'subs' %} aria-current="true"{% endif %}>Urinishlar</a>
+  <nav class="ca7-seg ml-auto" aria-label="{% trans 'Saralash' %}">
+    <a href="{% querystring sort=None page=None %}"{% if not sort %} aria-current="true"{% endif %}>{% trans "Yangi" %}</a>
+    <a href="{% querystring sort='login' page=None %}"{% if sort == 'login' %} aria-current="true"{% endif %}>{% trans "Oxirgi kirish" %}</a>
+    <a href="{% querystring sort='rating' page=None %}"{% if sort == 'rating' %} aria-current="true"{% endif %}>{% trans "Reyting" %}</a>
+    <a href="{% querystring sort='subs' page=None %}"{% if sort == 'subs' %} aria-current="true"{% endif %}>{% trans "Urinishlar" %}</a>
   </nav>
 </div>
 
@@ -30,27 +30,27 @@
     <div class="ca-row-main">
       <div class="ca-row-title">
         {% include "accounts/_user.html" with tier=False %}
-        {% if u.is_staff %}<span class="ca-chip shrink-0"><i data-lucide="shield" class="lu mr-1" aria-hidden="true"></i>Admin</span>{% else %}<span class="ca-chip shrink-0 !bg-ink/5 text-mute">O‘quvchi</span>{% endif %}
-        {% if not u.is_active %}<span class="ca-chip shrink-0 text-bad">Bloklangan</span>{% endif %}
+        {% if u.is_staff %}<span class="ca-chip shrink-0"><i data-lucide="shield" class="lu mr-1" aria-hidden="true"></i>{% trans "Admin" %}</span>{% else %}<span class="ca-chip shrink-0 !bg-ink/5 text-mute">{% trans "O‘quvchi" %}</span>{% endif %}
+        {% if not u.is_active %}<span class="ca-chip shrink-0 text-bad">{% trans "Bloklangan" %}</span>{% endif %}
       </div>
       <div class="ca-row-meta pl-9">
         <span class="truncate" translate="no">{{ u.email|default:"email yo‘q" }}</span>
         {% if u.school %}<span class="truncate"><i data-lucide="graduation-cap" class="lu" aria-hidden="true"></i>{{ u.school }}</span>{% endif %}
         <span class="tabular"><i data-lucide="calendar" class="lu" aria-hidden="true"></i>{{ u.date_joined|date:"d.m.Y" }}</span>
-        <span class="tabular" title="Oxirgi kirish"><i data-lucide="log-in" class="lu" aria-hidden="true"></i>{% if u.last_login %}{{ u.last_login|date:"d.m.Y H:i" }}{% else %}kirmagan{% endif %}</span>
+        <span class="tabular" title="Oxirgi kirish"><i data-lucide="log-in" class="lu" aria-hidden="true"></i>{% if u.last_login %}{{ u.last_login|date:"d.m.Y H:i" }}{% else %}{% trans "kirmagan" %}{% endif %}</span>
       </div>
     </div>
     <div class="ca-row-side">
-      <div class="ca-row-stat"><b style="--tier: {{ u.rating|tier_color }}" class="ca-tier-ink">{{ u.rating }}</b>reyting</div>
-      <div class="ca-row-stat"><b>{{ u.n_subs }}</b>urinish</div>
-      <a href="{% url 'moderation:submissions' %}?user={{ u.username|urlencode }}" class="ca-btn ca-btn-ghost !p-1.5" title="Urinishlari" aria-label="Urinishlari: {{ u.username }}"><i data-lucide="history" class="lu" aria-hidden="true"></i></a>
-      <a href="{% url 'moderation:user_edit' u.pk %}" class="ca-btn ca-btn-ghost !py-1.5 text-xs" aria-label="Tahrirlash: {{ u.username }}"><i data-lucide="pencil" class="lu" aria-hidden="true"></i>Tahrirlash</a>
+      <div class="ca-row-stat"><b style="--tier: {{ u.rating|tier_color }}" class="ca-tier-ink">{% blocktrans with u_rating=u.rating %}{{ u_rating }}</b>reyting{% endblocktrans %}</div>
+      <div class="ca-row-stat">{% blocktrans with u_n_subs=u.n_subs %}<b>{{ u_n_subs }}</b>urinish{% endblocktrans %}</div>
+      <a href="{% url 'moderation:submissions' %}?user={{ u.username|urlencode }}" class="ca-btn ca-btn-ghost !p-1.5" title="{% trans 'Urinishlari' %}" aria-label="{% blocktrans with u_username=u.username %}Urinishlari: {{ u_username }}{% endblocktrans %}"><i data-lucide="history" class="lu" aria-hidden="true"></i></a>
+      <a href="{% url 'moderation:user_edit' u.pk %}" class="ca-btn ca-btn-ghost !py-1.5 text-xs" aria-label="{% blocktrans with u_username=u.username %}Tahrirlash: {{ u_username }}{% endblocktrans %}"><i data-lucide="pencil" class="lu" aria-hidden="true"></i>{% trans "Tahrirlash" %}</a>
     </div>
   </li>
   {% endfor %}
 </ul>
 {% include "_pagination.html" with page=page %}
 {% else %}
-<div class="ca-empty">Foydalanuvchi topilmadi.</div>
+<div class="ca-empty">{% trans "Foydalanuvchi topilmadi." %}</div>
 {% endif %}
 {% endblock %}

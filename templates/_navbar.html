@@ -4,20 +4,20 @@ show from 1360px up (app.css); narrower screens reach them from the account menu
 menu sheet (base.html). Badges: a pulsing dot while a contest runs, waiting duel calls, the staff queue; the bell (_bell.html) lists what happened.{% endcomment %}
 {% with ns=request.resolver_match.namespace un=request.resolver_match.url_name %}
 <div class="ca-nav-in">
-  <a href="{% url 'home' %}" class="ca-nav-brand" aria-label="CodeArena bosh sahifa">{% include "_brand_mark.html" %}<span>CodeArena</span></a>
-  <nav class="ca-nav-links" aria-label="Asosiy menyu">
-    <a href="{% url 'problems:list' %}" class="ca-nav-link{% if ns == 'problems' and not contest or ns == 'learn' and un == 'lists' or ns == 'learn' and un == 'list' %} is-active{% endif %}"{% if ns == 'problems' and not contest or ns == 'learn' and un == 'lists' or ns == 'learn' and un == 'list' %} aria-current="page"{% endif %}>Masalalar</a>
-    <a href="{% url 'learn:hub' %}" class="ca-nav-link{% if ns == 'learn' and un != 'lists' and un != 'list' %} is-active{% endif %}"{% if ns == 'learn' and un != 'lists' and un != 'list' %} aria-current="page"{% endif %}>O‘rganish</a>
-    <a href="{% url 'contests:list' %}" class="ca-nav-link{% if ns == 'contests' or ns == 'problems' and contest %} is-active{% endif %}"{% if ns == 'contests' or ns == 'problems' and contest %} aria-current="page"{% endif %}{% if nav.live %} title="Jonli: {{ nav.live.title }}"{% endif %}>Musobaqalar{% if nav.live %}<b class="ca-badge-live"><span class="sr-only">, jonli musobaqa bor</span></b>{% endif %}</a>
-    <a href="{% url 'rating' %}" class="ca-nav-link{% if un == 'rating' or un == 'top' %} is-active{% endif %}"{% if un == 'rating' or un == 'top' %} aria-current="page"{% endif %}>Reyting</a>
+  <a href="{% url 'home' %}" class="ca-nav-brand" aria-label="{% trans 'CodeArena bosh sahifa' %}">{% include "_brand_mark.html" %}<span>{% trans "CodeArena" %}</span></a>
+  <nav class="ca-nav-links" aria-label="{% trans 'Asosiy menyu' %}">
+    <a href="{% url 'problems:list' %}" class="ca-nav-link{% if ns == 'problems' and not contest or ns == 'learn' and un == 'lists' or ns == 'learn' and un == 'list' %} is-active{% endif %}"{% if ns == 'problems' and not contest or ns == 'learn' and un == 'lists' or ns == 'learn' and un == 'list' %} aria-current="page"{% endif %}>{% trans "Masalalar" %}</a>
+    <a href="{% url 'learn:hub' %}" class="ca-nav-link{% if ns == 'learn' and un != 'lists' and un != 'list' %} is-active{% endif %}"{% if ns == 'learn' and un != 'lists' and un != 'list' %} aria-current="page"{% endif %}>{% trans "O‘rganish" %}</a>
+    <a href="{% url 'contests:list' %}" class="ca-nav-link{% if ns == 'contests' or ns == 'problems' and contest %} is-active{% endif %}"{% if ns == 'contests' or ns == 'problems' and contest %} aria-current="page"{% endif %}{% if nav.live %} title="{% blocktrans with nav_live_title=nav.live.title %}Jonli: {{ nav_live_title }}{% endblocktrans %}"{% endif %}>{% trans "Musobaqalar" %}{% if nav.live %}<b class="ca-badge-live"><span class="sr-only">{% trans ", jonli musobaqa bor" %}</span></b>{% endif %}</a>
+    <a href="{% url 'rating' %}" class="ca-nav-link{% if un == 'rating' or un == 'top' %} is-active{% endif %}"{% if un == 'rating' or un == 'top' %} aria-current="page"{% endif %}>{% trans "Reyting" %}</a>
     {% if user.is_authenticated %}
     <span class="ca-nav-sep" aria-hidden="true"></span>
     {% with n=nav.duels %}
-    <a href="{% url 'classroom:duels' %}" class="ca-nav-link is-more{% if ns == 'classroom' %} is-active{% endif %}"{% if ns == 'classroom' %} aria-current="page"{% endif %}{% if n %} title="Duel chaqiruvi: {{ n }}"{% endif %}>Duel{% if n %}<b class="ca-badge-n is-warn">{{ n }}<span class="sr-only"> ta duel kutmoqda</span></b>{% endif %}</a>
+    <a href="{% url 'classroom:duels' %}" class="ca-nav-link is-more{% if ns == 'classroom' %} is-active{% endif %}"{% if ns == 'classroom' %} aria-current="page"{% endif %}{% if n %} title="{% blocktrans with n=n %}Duel chaqiruvi: {{ n }}{% endblocktrans %}"{% endif %}>{% trans "Duel" %}{% if n %}<b class="ca-badge-n is-warn">{% blocktrans with n=n %}{{ n }}<span class="sr-only"> ta duel kutmoqda</span>{% endblocktrans %}</b>{% endif %}</a>
     {% endwith %}
     {% endif %}
     {% if user.is_staff %}
-    <a href="{% url 'moderation:dashboard' %}" class="ca-nav-link is-more{% if ns == 'moderation' or ns == 'integrity' %} is-active{% endif %}"{% if ns == 'moderation' or ns == 'integrity' %} aria-current="page"{% endif %}{% if nav.staff.total %} title="{{ nav.staff.total }} ta ish ko‘rib chiqishni kutmoqda"{% endif %}>Admin{% if nav.staff.total %}<b class="ca-badge-n is-warn">{{ nav.staff.total }}<span class="sr-only"> ta ish kutmoqda</span></b>{% endif %}</a>
+    <a href="{% url 'moderation:dashboard' %}" class="ca-nav-link is-more{% if ns == 'moderation' or ns == 'integrity' %} is-active{% endif %}"{% if ns == 'moderation' or ns == 'integrity' %} aria-current="page"{% endif %}{% if nav.staff.total %} title="{% blocktrans with nav_staff_total=nav.staff.total %}{{ nav_staff_total }} ta ish ko‘rib chiqishni kutmoqda{% endblocktrans %}"{% endif %}>{% trans "Admin" %}{% if nav.staff.total %}<b class="ca-badge-n is-warn">{% blocktrans with nav_staff_total=nav.staff.total %}{{ nav_staff_total }}<span class="sr-only"> ta ish kutmoqda</span>{% endblocktrans %}</b>{% endif %}</a>
     {% endif %}
   </nav>
   <div class="ca-nav-tools">
@@ -25,30 +25,30 @@ menu sheet (base.html). Badges: a pulsing dot while a contest runs, waiting duel
     {# a contest is running: its clock and a way in, from every page #}
     <a href="{% url 'contests:detail' live.pk %}" class="ca-live-pill" data-live-pill title="{{ live.title }}{% if live.count > 1 %} (+{{ live.count|add:'-1' }} ta boshqa jonli){% endif %}">
       <span class="ca-live-dot" aria-hidden="true"></span>
-      <span class="ca-live-label sr-only">{% if live.joined %}Musobaqangiz davom etmoqda{% else %}Jonli musobaqa{% endif %}</span>
+      <span class="ca-live-label sr-only">{% if live.joined %}{% trans "Musobaqangiz davom etmoqda" %}{% else %}{% trans "Jonli musobaqa" %}{% endif %}</span>
       <span class="tabular" data-countdown="{{ live.end|date:'c' }}" data-label="" data-suffix="1" data-ended="Tugadi"></span>
       <span class="sr-only">— {{ live.title }}</span>
     </a>
     {% endif %}{% endwith %}
     <button type="button" class="ca-search-btn hidden lg:flex" data-palette-open aria-keyshortcuts="Control+K Meta+K /">
-      <i data-lucide="search" class="lu" aria-hidden="true"></i><span>Qidirish…</span><kbd class="ca-kbd" aria-hidden="true">Ctrl K</kbd>
+      <i data-lucide="search" class="lu" aria-hidden="true"></i>{% trans "<span>Qidirish…</span><kbd class=\"ca-kbd\" aria-hidden=\"true\">Ctrl K</kbd>" %}
     </button>
-    <button type="button" class="ca-icon-btn lg:hidden" data-palette-open aria-label="Qidirish"><i data-lucide="search" class="lu" aria-hidden="true"></i></button>
+    <button type="button" class="ca-icon-btn lg:hidden" data-palette-open aria-label="{% trans 'Qidirish' %}"><i data-lucide="search" class="lu" aria-hidden="true"></i></button>
     <span class="hidden md:block">{% include "_theme_menu.html" %}</span>
     {% if user.is_authenticated %}
     {% include "_bell.html" %}
     {% with s=streak_pill %}{% if s.daily %}
     <a href="{% url 'problems:detail' s.daily.problem.slug %}" class="ca-streak{% if s.done %} is-done{% elif s.current %} is-risk{% endif %}"
        title="{% if s.done %}Olov {{ s.current }} kun: bugungi masala yechildi{% elif s.current %}Olov {{ s.current }} kun: bugun kun masalasini yeching, aks holda uziladi{% else %}Olovni boshlang: bugungi kun masalasini yeching{% endif %}">
-      <i data-lucide="flame" class="lu" aria-hidden="true"></i>{% if s.current %}<span class="tabular">{{ s.current }}</span>{% else %}<span class="ca-streak-lbl" aria-hidden="true">Kun masalasi</span>{% endif %}
-      <span class="sr-only">Olov{% if s.current %} {{ s.current }} kun{% endif %}{% if s.done %}, bugungi masala yechilgan{% else %}, bugungi masala hali yechilmagan{% endif %}</span>
+      <i data-lucide="flame" class="lu" aria-hidden="true"></i>{% if s.current %}<span class="tabular">{{ s.current }}</span>{% else %}<span class="ca-streak-lbl" aria-hidden="true">{% trans "Kun masalasi" %}</span>{% endif %}
+      <span class="sr-only">{% trans "Olov" %}{% if s.current %} {% blocktrans with s_current=s.current %}{{ s_current }} kun{% endblocktrans %}{% endif %}{% if s.done %}{% trans ", bugungi masala yechilgan" %}{% else %}{% trans ", bugungi masala hali yechilmagan" %}{% endif %}</span>
     </a>
     {% endif %}{% endwith %}
     <span class="hidden md:block">{% include "_user_menu.html" %}</span>
     {% else %}
     {% with un=request.resolver_match.url_name %}
-    {% if un != "login" %}<a href="{% url 'login' %}" class="ca-btn ca-btn-ghost !py-1.5">Kirish</a>{% endif %}
-    {% if un != "register" and un != "home" %}<a href="{% url 'register' %}" class="ca-btn ca-btn-primary hidden !py-1.5 sm:inline-flex">Ro‘yxatdan o‘tish</a>{% endif %}
+    {% if un != "login" %}<a href="{% url 'login' %}" class="ca-btn ca-btn-ghost !py-1.5">{% trans "Kirish" %}</a>{% endif %}
+    {% if un != "register" and un != "home" %}<a href="{% url 'register' %}" class="ca-btn ca-btn-primary hidden !py-1.5 sm:inline-flex">{% trans "Ro‘yxatdan o‘tish" %}</a>{% endif %}
     {% endwith %}
     {% endif %}
   </div>

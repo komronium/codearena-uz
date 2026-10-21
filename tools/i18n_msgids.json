@@ -1,0 +1,5740 @@
+{
+"Ruxsat yo‘q": [
+"templates/403.html"
+],
+"Bu sahifa faqat adminlar uchun. Siz tizimga kirgansiz, lekin hisobingizda bunga ruxsat yo‘q. Xato deb o‘ylasangiz, adminga yozing.": [
+"templates/403.html"
+],
+"Bosh sahifa": [
+"templates/403.html",
+"templates/_nav.html",
+"templates/base.html",
+"templates/home/dashboard.html"
+],
+"Masalalar": [
+"templates/403.html",
+"templates/_mod_tabs.html",
+"templates/_nav.html",
+"templates/_navbar.html",
+"templates/accounts/profile.html",
+"templates/base.html",
+"templates/classroom/closed.html",
+"templates/contests/_band.html",
+"templates/contests/detail.html",
+"templates/home/dashboard.html",
+"templates/learn/list.html",
+"templates/learn/lists.html",
+"templates/moderation/contest_form.html",
+"templates/moderation/dashboard.html",
+"templates/moderation/tags.html",
+"templates/problems/detail.html",
+"templates/problems/list.html"
+],
+"Sahifa topilmadi": [
+"templates/404.html"
+],
+"Havola noto‘g‘ri yoki sahifa o‘chirilgan. Masala yashirin yoki musobaqa hali boshlanmagan bo‘lishi ham mumkin.": [
+"templates/404.html"
+],
+"Masalalarga o‘tish": [
+"templates/404.html"
+],
+"Musobaqalar": [
+"templates/404.html",
+"templates/_mod_tabs.html",
+"templates/_nav.html",
+"templates/_navbar.html",
+"templates/accounts/rating.html",
+"templates/base.html",
+"templates/contests/list.html",
+"templates/moderation/contest_form.html",
+"templates/moderation/contest_official.html",
+"templates/moderation/dashboard.html"
+],
+"<!doctype html>": [
+"templates/500.html",
+"templates/base.html"
+],
+"Server xatosi — CodeArena": [
+"templates/500.html"
+],
+"Serverda xatolik": [
+"templates/500.html"
+],
+"Kutilmagan xato yuz berdi. Bir necha soniyadan so‘ng sahifani yangilang.": [
+"templates/500.html"
+],
+"Bosh sahifaga": [
+"templates/500.html"
+],
+"Bildirishnomalar": [
+"templates/_bell.html",
+"templates/accounts/profile_edit.html"
+],
+"Hammasi o‘qildi": [
+"templates/_bell.html"
+],
+"Hozircha xabar yo‘q. Duel chaqiruvlari va nishonlar shu yerda chiqadi.": [
+"templates/_bell.html"
+],
+"Boshqaruv bo‘limlari": [
+"templates/_mod_tabs.html"
+],
+"Boshqaruv": [
+"templates/_mod_tabs.html",
+"templates/_nav.html",
+"templates/_user_menu.html",
+"templates/base.html",
+"templates/moderation/dashboard.html"
+],
+"Kontent": [
+"templates/_mod_tabs.html"
+],
+"Navbat": [
+"templates/_mod_tabs.html",
+"templates/_nav.html"
+],
+"Kun masalasi": [
+"templates/_mod_tabs.html",
+"templates/_nav.html",
+"templates/_navbar.html",
+"templates/home/landing.html",
+"templates/moderation/dashboard.html",
+"templates/problems/_daily_card.html",
+"templates/problems/list.html"
+],
+"Kurslar": [
+"templates/_mod_tabs.html",
+"templates/_nav.html",
+"templates/moderation/tag_form.html"
+],
+"Teglar": [
+"templates/_mod_tabs.html",
+"templates/_nav.html",
+"templates/moderation/plan_form.html"
+],
+"Musobaqa": [
+"templates/_mod_tabs.html",
+"templates/_nav.html",
+"templates/accounts/club.html",
+"templates/accounts/profile.html",
+"templates/base.html",
+"templates/contests/list.html",
+"templates/integrity/_audit_rows.html",
+"templates/moderation/submissions.html"
+],
+"Urinishlar": [
+"templates/_mod_tabs.html",
+"templates/contests/_band.html",
+"templates/integrity/contest_report.html",
+"templates/moderation/dashboard.html",
+"templates/moderation/users.html",
+"templates/problems/detail.html",
+"templates/submissions/list.html"
+],
+"Duellar": [
+"templates/_mod_tabs.html",
+"templates/_nav.html",
+"templates/_user_menu.html",
+"templates/base.html",
+"templates/classroom/duel.html",
+"templates/classroom/duels.html",
+"templates/home/dashboard.html"
+],
+"Odamlar": [
+"templates/_mod_tabs.html"
+],
+"Foydalanuvchilar": [
+"templates/_mod_tabs.html",
+"templates/_nav.html",
+"templates/moderation/dashboard.html",
+"templates/moderation/user_form.html",
+"templates/moderation/users.html"
+],
+"Halollik": [
+"templates/_mod_tabs.html",
+"templates/moderation/contests.html"
+],
+"Mashq nazorati": [
+"templates/_mod_tabs.html",
+"templates/_nav.html",
+"templates/integrity/practice_report.html"
+],
+"Shikoyatlar": [
+"templates/_mod_tabs.html",
+"templates/integrity/reports.html"
+],
+"Jurnal": [
+"templates/_mod_tabs.html"
+],
+"Mashq": [
+"templates/_nav.html",
+"templates/contests/list.html"
+],
+"O‘rganish": [
+"templates/_nav.html",
+"templates/_navbar.html",
+"templates/base.html",
+"templates/learn/hub.html",
+"templates/problems/list.html"
+],
+"Urinishlarim": [
+"templates/_nav.html",
+"templates/_user_menu.html",
+"templates/base.html",
+"templates/contests/_band.html",
+"templates/problems/detail.html",
+"templates/submissions/detail.html",
+"templates/submissions/list.html"
+],
+"<span class=\"ca-live-dot\" aria-hidden=\"true\"></span>Jonli": [
+"templates/_nav.html",
+"templates/contests/_band.html",
+"templates/contests/_card.html",
+"templates/contests/standings.html",
+"templates/home/dashboard.html",
+"templates/moderation/contests.html"
+],
+"Reyting": [
+"templates/_nav.html",
+"templates/_navbar.html",
+"templates/accounts/club.html",
+"templates/accounts/duel_board.html",
+"templates/accounts/profile.html",
+"templates/accounts/rating.html",
+"templates/base.html",
+"templates/classroom/duels.html",
+"templates/contests/_band.html",
+"templates/contests/_standings_live.html",
+"templates/contests/detail.html",
+"templates/contests/list.html",
+"templates/moderation/user_form.html",
+"templates/moderation/users.html"
+],
+"Duel": [
+"templates/_nav.html",
+"templates/_navbar.html",
+"templates/accounts/_board_tabs.html",
+"templates/accounts/duel_board.html",
+"templates/base.html",
+"templates/classroom/duels.html",
+"templates/home/dashboard.html",
+"templates/moderation/duels.html"
+],
+"Admin": [
+"templates/_nav.html",
+"templates/_navbar.html",
+"templates/moderation/users.html"
+],
+"Barcha urinishlar": [
+"templates/_nav.html",
+"templates/home/dashboard.html",
+"templates/submissions/detail.html"
+],
+"Amallar jurnali": [
+"templates/_nav.html",
+"templates/integrity/audit.html",
+"templates/integrity/contest_report.html"
+],
+"CodeArena bosh sahifa": [
+"templates/_navbar.html",
+"templates/registration/_auth_brand.html"
+],
+"CodeArena": [
+"templates/_navbar.html",
+"templates/base.html",
+"templates/problems/detail.html"
+],
+"Asosiy menyu": [
+"templates/_navbar.html"
+],
+"Jonli: %(nav_live_title)s": [
+"templates/_navbar.html"
+],
+", jonli musobaqa bor": [
+"templates/_navbar.html",
+"templates/base.html"
+],
+"Duel chaqiruvi: %(n)s": [
+"templates/_navbar.html"
+],
+"%(n)s<span class=\"sr-only\"> ta duel kutmoqda</span>": [
+"templates/_navbar.html"
+],
+"%(nav_staff_total)s ta ish ko‘rib chiqishni kutmoqda": [
+"templates/_navbar.html"
+],
+"%(nav_staff_total)s<span class=\"sr-only\"> ta ish kutmoqda</span>": [
+"templates/_navbar.html"
+],
+"Musobaqangiz davom etmoqda": [
+"templates/_navbar.html"
+],
+"Jonli musobaqa": [
+"templates/_navbar.html",
+"templates/home/_land_round.html"
+],
+"<span>Qidirish…</span><kbd class=\"ca-kbd\" aria-hidden=\"true\">Ctrl K</kbd>": [
+"templates/_navbar.html"
+],
+"Qidirish": [
+"templates/_navbar.html"
+],
+"Olov": [
+"templates/_navbar.html",
+"templates/accounts/profile.html"
+],
+"%(s_current)s kun": [
+"templates/_navbar.html"
+],
+", bugungi masala yechilgan": [
+"templates/_navbar.html"
+],
+", bugungi masala hali yechilmagan": [
+"templates/_navbar.html"
+],
+"Kirish": [
+"templates/_navbar.html",
+"templates/base.html",
+"templates/moderation/submit.html",
+"templates/problems/detail.html",
+"templates/registration/login.html",
+"templates/registration/password_reset_complete.html",
+"templates/registration/password_reset_form.html",
+"templates/registration/register.html",
+"templates/submissions/_status.html"
+],
+"Ro‘yxatdan o‘tish": [
+"templates/_navbar.html",
+"templates/base.html",
+"templates/contests/_card.html",
+"templates/home/_dash_new.html",
+"templates/home/dashboard.html",
+"templates/home/landing.html",
+"templates/registration/register.html"
+],
+"Sahifalar": [
+"templates/_pagination.html",
+"templates/accounts/_leaderboard_nav.html",
+"templates/accounts/badge_board.html"
+],
+"Oldingi": [
+"templates/_pagination.html",
+"templates/accounts/_leaderboard_nav.html",
+"templates/accounts/badge_board.html",
+"templates/submissions/detail.html"
+],
+"Keyingi": [
+"templates/_pagination.html",
+"templates/accounts/_leaderboard_nav.html",
+"templates/accounts/badge_board.html",
+"templates/submissions/detail.html"
+],
+"Ko‘rinish: tizim, kunduzgi yoki tungi": [
+"templates/_theme_menu.html"
+],
+"Ko‘rinish": [
+"templates/_theme_menu.html",
+"templates/accounts/profile_edit.html",
+"templates/base.html",
+"templates/problems/detail.html"
+],
+"Tizim bo‘yicha<small>qurilma sozlamasiga ergashadi</small>": [
+"templates/_theme_menu.html"
+],
+"Kunduzgi": [
+"templates/_theme_menu.html",
+"templates/accounts/profile_edit.html",
+"templates/base.html",
+"templates/problems/detail.html"
+],
+"Tungi": [
+"templates/_theme_menu.html",
+"templates/accounts/profile_edit.html",
+"templates/base.html",
+"templates/problems/detail.html"
+],
+"Hisob: %(user_username)s": [
+"templates/_user_menu.html"
+],
+"%(user_get_full_name)s</span> <span class=\"mt-1 flex items-center gap-2\"><span class=\"ca-tier\">%(user_rating)s</span><span class=\"text-xs text-mute tabular\">%(user_rating2)s · %(user_practice_points)s ball</span></span>": [
+"templates/_user_menu.html"
+],
+"Profilim": [
+"templates/_user_menu.html",
+"templates/base.html"
+],
+"Nishonlarim": [
+"templates/_user_menu.html",
+"templates/accounts/_badge_award.html"
+],
+"Mening masalalarim": [
+"templates/_user_menu.html",
+"templates/moderation/mine.html"
+],
+"Do‘stlar": [
+"templates/_user_menu.html",
+"templates/accounts/feed.html"
+],
+"Sozlamalar": [
+"templates/_user_menu.html",
+"templates/accounts/profile.html",
+"templates/accounts/profile_edit.html",
+"templates/learn/list.html",
+"templates/moderation/contest_form.html",
+"templates/moderation/plan_form.html",
+"templates/moderation/submit.html",
+"templates/registration/password_change_form.html"
+],
+"Chiqish": [
+"templates/_user_menu.html",
+"templates/accounts/welcome.html",
+"templates/base.html",
+"templates/integrity/contest_report.html",
+"templates/problems/detail.html"
+],
+"%(medal)s-o‘rin": [
+"templates/accounts/_badge7.html"
+],
+"Bosqich oshdi!": [
+"templates/accounts/_badge_award.html"
+],
+"Nishonni qo‘lga kiritdingiz!": [
+"templates/accounts/_badge_award.html"
+],
+"Kamyob:": [
+"templates/accounts/_badge_award.html"
+],
+"o‘yinchilarning %(b_pct)s%% ida bor": [
+"templates/accounts/_badge_award.html"
+],
+"Keyingisi — %(b_next)s": [
+"templates/accounts/_badge_award.html"
+],
+"Ajoyib!": [
+"templates/accounts/_badge_award.html"
+],
+"Reyting turlari": [
+"templates/accounts/_board_tabs.html"
+],
+"Reytingli musobaqalar natijasi bo‘yicha (Elo)": [
+"templates/accounts/_board_tabs.html"
+],
+"Musobaqa reytingi": [
+"templates/accounts/_board_tabs.html",
+"templates/accounts/how_ratings.html",
+"templates/accounts/profile.html"
+],
+"1 ga 1 duellar reytingi: musobaqa reytingiga ta’sir qilmaydi": [
+"templates/accounts/_board_tabs.html"
+],
+"Maktab va klublar: a’zolarining eng yaxshi beshtasi reytingi yig‘indisi bo‘yicha": [
+"templates/accounts/_board_tabs.html"
+],
+"Klublar": [
+"templates/accounts/_board_tabs.html",
+"templates/accounts/club.html",
+"templates/accounts/clubs.html"
+],
+"Foydalanuvchini qidirish": [
+"templates/accounts/_board_tools.html",
+"templates/accounts/rating.html"
+],
+"Foydalanuvchi…": [
+"templates/accounts/_board_tools.html",
+"templates/accounts/rating.html"
+],
+"Foydalanuvchi nomi": [
+"templates/accounts/_board_tools.html",
+"templates/accounts/profile_edit.html",
+"templates/accounts/rating.html"
+],
+"Mening o‘rnim": [
+"templates/accounts/_board_tools.html",
+"templates/accounts/rating.html",
+"templates/contests/standings.html"
+],
+"Tozalash": [
+"templates/accounts/_board_tools.html",
+"templates/accounts/rating.html",
+"templates/contests/submissions.html",
+"templates/moderation/duels.html",
+"templates/moderation/submissions.html",
+"templates/problems/detail.html"
+],
+": %(total)s ta ·": [
+"templates/accounts/_board_tools.html"
+],
+"hammasi": [
+"templates/accounts/_board_tools.html",
+"templates/accounts/profile.html",
+"templates/accounts/rating.html",
+"templates/integrity/contest_report.html"
+],
+"«%(q)s»: %(found)s ta topildi ·": [
+"templates/accounts/_board_tools.html"
+],
+"Davlat": [
+"templates/accounts/_geo_filters.html",
+"templates/accounts/_place_fields.html",
+"templates/moderation/user_form.html"
+],
+"Barcha davlatlar": [
+"templates/accounts/_geo_filters.html"
+],
+"Shahar": [
+"templates/accounts/_geo_filters.html",
+"templates/accounts/_place_fields.html",
+"templates/moderation/user_form.html"
+],
+"Barcha shaharlar": [
+"templates/accounts/_geo_filters.html"
+],
+"O‘quv joyi": [
+"templates/accounts/_geo_filters.html",
+"templates/moderation/user_form.html"
+],
+"Barcha o‘quv joylari": [
+"templates/accounts/_geo_filters.html"
+],
+"Shahar nomi": [
+"templates/accounts/_place_fields.html"
+],
+"O‘quv joyi <span class=\"font-normal text-mute\">(ixtiyoriy)</span>": [
+"templates/accounts/_place_fields.html"
+],
+"Maktab, kollej yoki universitet nomi": [
+"templates/accounts/_place_fields.html"
+],
+"%(rank)s-o‘rin": [
+"templates/accounts/_rank.html"
+],
+"%(b_level_name)s · %(b_earned_at)sda olingan": [
+"templates/accounts/_tbadge.html"
+],
+"Hali olinmagan": [
+"templates/accounts/_tbadge.html"
+],
+"%(b_tier)s / %(b_max)s daraja": [
+"templates/accounts/_tbadge.html"
+],
+"Eng yuqori daraja olingan": [
+"templates/accounts/_tbadge.html"
+],
+"siz": [
+"templates/accounts/_u7.html"
+],
+"Nishonlar reytingi": [
+"templates/accounts/badge_board.html",
+"templates/accounts/badges.html"
+],
+"Nishonlar bo‘yicha reyting: %(total)s o‘yinchi, olingan bosqichlar soni bo‘yicha.": [
+"templates/accounts/badge_board.html"
+],
+"%(total)s o‘yinchi · har bir nishonning har bir bosqichi bitta ball": [
+"templates/accounts/badge_board.html"
+],
+"Har bir nishon 5 bosqichdan iborat: bronza, kumush, oltin, platina, olmos. Bosqich qancha ko‘p bo‘lsa, o‘rin shuncha yuqori.": [
+"templates/accounts/badge_board.html"
+],
+"Siz <b class=\"text-ink\">%(me_rank)s</b>-o‘rindasiz": [
+"templates/accounts/badge_board.html"
+],
+"jadvalda": [
+"templates/accounts/badge_board.html"
+],
+"Barcha nishonlar": [
+"templates/accounts/badge_board.html",
+"templates/accounts/profile.html"
+],
+"Foydalanuvchi": [
+"templates/accounts/badge_board.html",
+"templates/accounts/club.html",
+"templates/accounts/duel_board.html",
+"templates/accounts/rating.html",
+"templates/accounts/top.html",
+"templates/classroom/duels.html",
+"templates/moderation/duels.html",
+"templates/moderation/submissions.html",
+"templates/problems/leaders.html"
+],
+"Nishonlar": [
+"templates/accounts/badge_board.html",
+"templates/accounts/badges.html",
+"templates/accounts/profile.html"
+],
+"Nishon": [
+"templates/accounts/badge_board.html",
+"templates/contests/detail.html",
+"templates/learn/course.html"
+],
+"Olingan bosqichlar, %(max_levels)s tadan": [
+"templates/accounts/badge_board.html"
+],
+"Bosqich": [
+"templates/accounts/badge_board.html",
+"templates/moderation/plan_form.html"
+],
+"<b>Hali nishon olgan yo‘q</b>Masala yeching, duel o‘ynang — birinchi nishonlar shu yerda chiqadi.": [
+"templates/accounts/badge_board.html"
+],
+"CodeArena nishonlari: har biri 5 bosqichli — bronza, kumush, oltin, platina, olmos. Har bosqich nimani talab qilishi va qanchalik kamyobligi.": [
+"templates/accounts/badges.html"
+],
+"%(n_families)s ta nishon, har biri 5 bosqichli: bronza, kumush, oltin, platina, olmos ·": [
+"templates/accounts/badges.html"
+],
+"Bosqichlar": [
+"templates/accounts/badges.html"
+],
+"O‘rin": [
+"templates/accounts/badges.html",
+"templates/accounts/profile.html",
+"templates/classroom/duels.html",
+"templates/contests/detail.html"
+],
+"%(club_name)s: CodeArena klubi, %(members)s a’zo, jamoa reytingi %(team)s.": [
+"templates/accounts/club.html"
+],
+"%(members)s a’zo · jamoa reytingi %(team)s": [
+"templates/accounts/club.html"
+],
+"Klubdan chiqasizmi?": [
+"templates/accounts/club.html"
+],
+"Klubdan chiqish": [
+"templates/accounts/club.html"
+],
+"Klubga qo‘shilish": [
+"templates/accounts/club.html"
+],
+"A’zolar": [
+"templates/accounts/club.html",
+"templates/accounts/clubs.html"
+],
+"Amaliyot balli": [
+"templates/accounts/club.html",
+"templates/accounts/how_ratings.html"
+],
+"yaratuvchi": [
+"templates/accounts/club.html"
+],
+"So‘nggi musobaqalar": [
+"templates/accounts/club.html"
+],
+"Qatnashgan": [
+"templates/accounts/club.html",
+"templates/contests/list.html"
+],
+"Eng yaxshisi": [
+"templates/accounts/club.html"
+],
+"%(r_best_rank)s-o‘rin": [
+"templates/accounts/club.html"
+],
+"Havola": [
+"templates/accounts/club.html"
+],
+"Qo‘shilish havolasi": [
+"templates/accounts/club.html"
+],
+"Havolani do‘stlaringizga yuboring: u orqali kelganlar klubga qo‘shila oladi.": [
+"templates/accounts/club.html"
+],
+"Havolani nusxalash": [
+"templates/accounts/club.html",
+"templates/home/dashboard.html",
+"templates/learn/list.html"
+],
+"Klub haqida": [
+"templates/accounts/club.html"
+],
+"Jamoa reytingi: eng yaxshi 5 a’zoning musobaqa reytingi yig‘indisi. Klubda vazifa yoki o‘qituvchi roli yo‘q: bu a’zolarning ochiq natijalari sahifasi.": [
+"templates/accounts/club.html"
+],
+"CodeArena maktab va klublari: a’zolari soni va jamoaviy reyting.": [
+"templates/accounts/clubs.html"
+],
+"Maktab yoki to‘garak: a’zolarning eng yaxshi %(v5)s tasi reytingi yig‘indisi": [
+"templates/accounts/clubs.html"
+],
+"Klub": [
+"templates/accounts/clubs.html"
+],
+"Eng yaxshi 5 a’zoning reytingi yig‘indisi": [
+"templates/accounts/clubs.html"
+],
+"Jamoa reytingi": [
+"templates/accounts/clubs.html"
+],
+"sizniki": [
+"templates/accounts/clubs.html"
+],
+"<b>Hali klub yo‘q</b>Birinchi bo‘lib maktabingiz yoki to‘garagingiz uchun klub oching.": [
+"templates/accounts/clubs.html"
+],
+"Klub ochish": [
+"templates/accounts/clubs.html"
+],
+"Kiring</a>, so‘ng klub oching yoki do‘stingiz havolasi bilan qo‘shiling.": [
+"templates/accounts/clubs.html"
+],
+"Siz": [
+"templates/accounts/clubs.html",
+"templates/accounts/rating.html",
+"templates/classroom/duel_play.html",
+"templates/contests/_standings_live.html",
+"templates/contests/detail.html"
+],
+"%(user_club_name)s</a> klubidasiz. Boshqa klub ochish uchun avval undan chiqing.": [
+"templates/accounts/clubs.html"
+],
+"Nomi": [
+"templates/accounts/clubs.html",
+"templates/learn/list.html",
+"templates/learn/lists.html",
+"templates/moderation/contest_form.html",
+"templates/moderation/plan_form.html",
+"templates/moderation/tag_form.html"
+],
+"masalan, 12-maktab informatika to‘garagi": [
+"templates/accounts/clubs.html"
+],
+"Klub — a’zolar natijalari ochiq sahifa va qo‘shilish havolasi. Vazifa va o‘qituvchi roli yo‘q.": [
+"templates/accounts/clubs.html"
+],
+"Duel reytingi": [
+"templates/accounts/duel_board.html",
+"templates/accounts/how_ratings.html",
+"templates/classroom/_duel_status.html",
+"templates/classroom/duels.html"
+],
+"Duel reytingi: 1 ga 1 savol duellarida %(total)s o‘yinchining Elo reytingi.": [
+"templates/accounts/duel_board.html"
+],
+"%(total)s o‘yinchi · mavsum %(season)s,": [
+"templates/accounts/duel_board.html"
+],
+"dan keyin yangi mavsum": [
+"templates/accounts/duel_board.html"
+],
+"O‘tgan mavsum g‘oliblari": [
+"templates/accounts/duel_board.html"
+],
+"%(podium_season)s mavsumi g‘oliblari": [
+"templates/accounts/duel_board.html"
+],
+"Tugagan duellar": [
+"templates/accounts/duel_board.html",
+"templates/classroom/duels.html"
+],
+"G‘alaba": [
+"templates/accounts/duel_board.html",
+"templates/classroom/_duel_row.html",
+"templates/classroom/_duel_status.html",
+"templates/classroom/duels.html"
+],
+"<b>Hali tugagan duel yo‘q</b>Birinchi duel tugagach, o‘yinchilar shu yerda paydo bo‘ladi.": [
+"templates/accounts/duel_board.html"
+],
+"Duel boshlash": [
+"templates/accounts/duel_board.html"
+],
+"Har oy boshida reyting 1200 ga qarab yarmigacha qaytadi: hamma yangi mavsumni yaqin joydan boshlaydi. Mavsum oxirida kamida %(min_duels)s ta duel o‘ynaganlar orasidan eng yuqori 3 kishi shu mavsum g‘olibi bo‘ladi.": [
+"templates/accounts/duel_board.html"
+],
+"so‘nggi %(days)s kun · %(n_circle)s kishi": [
+"templates/accounts/feed.html"
+],
+"Kuzatgan odamlaringiz nima qilgani shu yerda. Kimnidir kuzatish uchun uning profilidagi «Kuzatish»ni bosing.": [
+"templates/accounts/feed.html"
+],
+"%(it_problem_title)s</a> masalasini yechdi": [
+"templates/accounts/feed.html"
+],
+"<b>%(e_items)s ta</b> masala yechdi:": [
+"templates/accounts/feed.html"
+],
+"va yana %(e_items)s ta": [
+"templates/accounts/feed.html"
+],
+"duelda": [
+"templates/accounts/feed.html"
+],
+"%(e_versus_username)s</a> ni yutdi": [
+"templates/accounts/feed.html"
+],
+"«%(e_items_0_badge)s · %(e_items_0_level)s» nishonini oldi": [
+"templates/accounts/feed.html"
+],
+"<b>%(e_items)s ta</b> nishon oldi:": [
+"templates/accounts/feed.html"
+],
+"Hozircha jim": [
+"templates/accounts/feed.html"
+],
+"So‘nggi %(days)s kunda hech narsa bo‘lmadi.": [
+"templates/accounts/feed.html"
+],
+"Hali hech kimni kuzatmayapsiz.": [
+"templates/accounts/feed.html"
+],
+"Tavsiya": [
+"templates/accounts/feed.html"
+],
+"Kimni kuzatish mumkin": [
+"templates/accounts/feed.html"
+],
+"Kuzatish": [
+"templates/accounts/feed.html",
+"templates/accounts/profile.html"
+],
+"Halollik qoidalari": [
+"templates/accounts/honor.html",
+"templates/accounts/how_ratings.html",
+"templates/base.html",
+"templates/contests/detail.html"
+],
+"CodeArena halollik qoidalari: nima mumkin, nima mumkin emas, nima kuzatiladi va qoidabuzarlik oqibati.": [
+"templates/accounts/honor.html"
+],
+"CodeArena'dagi har bir ball va har bir o‘rin — egasining o‘z mehnati. Shu qoidalar buni kafolatlaydi.": [
+"templates/accounts/honor.html"
+],
+"Mumkin": [
+"templates/accounts/honor.html"
+],
+"Dars materiallari, kitob, dasturlash tilining hujjatlari (docs).": [
+"templates/accounts/honor.html"
+],
+"Sintaksisni qidirish: «Pythonda ro‘yxat qanday saralanadi?»": [
+"templates/accounts/honor.html"
+],
+"Masaladagi maslahatlar (hint) — ular ballning bir qismini oladi.": [
+"templates/accounts/honor.html"
+],
+"O‘qituvchidan yoki do‘stdan <b>g‘oyani</b> so‘rash (kodni emas).": [
+"templates/accounts/honor.html"
+],
+"AI'dan mavzuni tushuntirib berishni so‘rash — masalaning o‘zini emas.": [
+"templates/accounts/honor.html"
+],
+"O‘rta va qiyin masalalarda kodni o‘z muharriringizda yozib, keyin qo‘yish.": [
+"templates/accounts/honor.html"
+],
+"Mumkin emas": [
+"templates/accounts/honor.html"
+],
+"Masala shartini AI'ga (ChatGPT, Gemini, Copilot va boshqalar) berib, kod yozdirish.": [
+"templates/accounts/honor.html"
+],
+"Boshqa odamning yoki internetdagi tayyor yechimni ko‘chirish, «biroz o‘zgartirib» bo‘lsa ham.": [
+"templates/accounts/honor.html"
+],
+"O‘z yechimingizni boshqalarga berish.": [
+"templates/accounts/honor.html"
+],
+"Birovning akkauntidan yoki birov bilan bitta akkauntdan ishlash.": [
+"templates/accounts/honor.html"
+],
+"Musobaqada: har qanday tashqi yordam — AI, boshqa oyna, telefon, maslahatchi.": [
+"templates/accounts/honor.html"
+],
+"Nima kuzatiladi": [
+"templates/accounts/honor.html"
+],
+"Mashq va musobaqada muharrir kod qanday yozilganini qayd etadi: uzun kod qo‘yish, boshqa oynaga o‘tish, kodning har 10 soniyadagi holati. Server qabul qilingan kodni shu yozuvlar bilan solishtiradi, talabalar yechimlarini bir-biri bilan ham solishtiradi. Bularni hakamlar va adminlar ko‘radi, boshqa hech kim emas.": [
+"templates/accounts/honor.html"
+],
+"Oqibati": [
+"templates/accounts/honor.html"
+],
+"<b class=\"text-ink\">Mashqda</b> — ko‘chirilgan deb topilgan yechim uchun amaliyot bali berilmaydi.": [
+"templates/accounts/honor.html"
+],
+"<b class=\"text-ink\">Musobaqada, bitta masalada</b> — o‘sha masala natijasi bekor qilinadi: unga ball berilmaydi, qolgan masalalaringiz natijasi saqlanadi.": [
+"templates/accounts/honor.html"
+],
+"<b class=\"text-ink\">Bir nechta masalada</b>, birovning o‘rniga ishlash yoki bitta qurilmada ikki kishi qatnashsa — diskvalifikatsiya: natija oxirgi o‘ringa tushadi, reyting pasayadi.": [
+"templates/accounts/honor.html"
+],
+"<b class=\"text-ink\">Takrorlansa</b> — hisob bloklanishi mumkin.": [
+"templates/accounts/honor.html"
+],
+"Adolat": [
+"templates/accounts/honor.html"
+],
+"Tizim hech kimni o‘zi jazolamaydi: belgilar faqat shubha. Qarorni admin yoki hakam kodni ko‘rib chiqib qabul qiladi. E’tirozingiz bo‘lsa, musobaqa tugaganidan keyin 48 soat ichida unga murojaat qiling: qaror bekor qilinishi mumkin.": [
+"templates/accounts/honor.html"
+],
+"Siz bu qoidalarni %(user_honor_pledged_at)s da qabul qilgansiz.": [
+"templates/accounts/honor.html"
+],
+"Men yechimlarimni o‘zim yozaman va bu qoidalarga amal qilaman.": [
+"templates/accounts/honor.html"
+],
+"Qabul qilaman": [
+"templates/accounts/honor.html"
+],
+"Reyting qanday ishlaydi": [
+"templates/accounts/how_ratings.html"
+],
+"CodeArena'da musobaqa reytingi, rasmiy reyting, amaliyot balli, duel reytingi va nishonlar qanday hisoblanadi.": [
+"templates/accounts/how_ratings.html"
+],
+"CodeArena'da to‘rt xil raqam bor. Ularning har biri o‘z ishi uchun va bir-biriga ta’sir qilmaydi.": [
+"templates/accounts/how_ratings.html"
+],
+"Reytingli musobaqadan keyin o‘zgaradi: o‘rningiz o‘z darajangizdagi o‘yinchilardan kutilganidan yaxshi bo‘lsa, ko‘tariladi, yomon bo‘lsa, tushadi (Codeforces/Elo usuli). Birinchi 6 ta musobaqada yangilarga qo‘shimcha «ramp» beriladi. Bu raqam jadvaldagi o‘rin va darajani belgilaydi.": [
+"templates/accounts/how_ratings.html"
+],
+"Reyting faqat <b>reytingli</b> raundlarda o‘zgaradi: «Mashq» raundlari ta’sir qilmaydi.": [
+"templates/accounts/how_ratings.html"
+],
+"Hech narsa yubormagan ishtirokchi «qatnashmagan» hisoblanadi va reytingi o‘zgarmaydi.": [
+"templates/accounts/how_ratings.html"
+],
+"Emailingiz tasdiqlanmagan bo‘lsa, raundga yozila olasiz, lekin reytingga hisoblanmaysiz.": [
+"templates/accounts/how_ratings.html"
+],
+"So‘nggi 90 kunda reytingli musobaqada qatnashmagan odam jadvaldan yashiriladi; reytingi saqlanadi va yangi raunddan keyin qaytadi.": [
+"templates/accounts/how_ratings.html"
+],
+"Diskvalifikatsiya qilingan ishtirokchi oxirgi o‘ringa tushadi, reyting faqat pasayadi. Bunday qaror kech chiqsa, shu raunddan keyingi raundlar ham qayta hisoblanadi.": [
+"templates/accounts/how_ratings.html"
+],
+"Rasmiy reyting va «Tasdiqlangan» belgisi": [
+"templates/accounts/how_ratings.html"
+],
+"Shaxsi adminlar tomonidan tasdiqlangan o‘yinchilar uchun, <b>rasmiy</b> deb belgilangan musobaqalardan alohida hisoblanadi. Maktab va tashkilotlar shunga tayanadi. Profilda ochiq reyting yonida «rasmiy» raqami ko‘rinadi.": [
+"templates/accounts/how_ratings.html"
+],
+"Faqat sizga ko‘rinadigan shaxsiy hisob (jadvalda o‘rin yo‘q): masala yechganingiz uchun beriladi, qiyinroq va kamroq odam yechgan masala ko‘proq ball beradi. Ball masala yechilgan paytdagi narxda <b>muzlatiladi</b>: keyin boshqalar yechgani yoki xato qilgani sizning ballingizni o‘zgartirmaydi. Faqat birinchi mos qabul qilingan yechim hisoblanadi. Musobaqa masalalari raund e’lon qilingandan keyin hisobga o‘tadi. Ko‘chirilgan deb topilgan yechimga ball berilmaydi.": [
+"templates/accounts/how_ratings.html"
+],
+"Faqat 1 ga 1 duellar uchun (hamma 1200 dan boshlaydi) va musobaqa reytingiga ta’sir qilmaydi. Bir juftlik kuniga cheklangan miqdorda duel o‘ynashi mumkin; raqib deyarli o‘ynamagan duel g‘alaba sifatida nishon va kunlik vazifaga sanalmaydi.": [
+"templates/accounts/how_ratings.html"
+],
+"Halollik va apellyatsiya": [
+"templates/accounts/how_ratings.html"
+],
+"Tizim hech kimni o‘zi jazolamaydi: belgilar faqat shubha, qarorni admin kodni ko‘rib chiqib qabul qiladi. Qaror noto‘g‘ri deb hisoblasangiz, musobaqa sahifasidagi «Apellyatsiya» orqali yozing: javob bildirishnomangizda chiqadi.": [
+"templates/accounts/how_ratings.html"
+],
+"%(profile_user_username)s — CodeArena’dagi profili: reyting %(profile_user_rating)s, %(solved)s ta yechilgan masala, musobaqalar tarixi.": [
+"templates/accounts/profile.html"
+],
+"noindex, follow": [
+"templates/accounts/profile.html",
+"templates/learn/list.html",
+"templates/problems/leaders.html"
+],
+"profile": [
+"templates/accounts/profile.html"
+],
+"Reytingsiz": [
+"templates/accounts/profile.html"
+],
+"Tasdiqlangan": [
+"templates/accounts/profile.html"
+],
+"%(profile_user_date_joined)s dan beri": [
+"templates/accounts/profile.html"
+],
+"Moderator": [
+"templates/accounts/profile.html"
+],
+"<b class=\"tabular\">%(badges_earned)s</b> nishon · <b class=\"tabular\">%(levels_earned)s</b> bosqich": [
+"templates/accounts/profile.html"
+],
+"<small>Duel hisobi</small><b class=\"tabular\">%(h2h_you)s : %(h2h_them)s</b>": [
+"templates/accounts/profile.html"
+],
+"Kuzatilmoqda": [
+"templates/accounts/profile.html"
+],
+"Duelga chaqirish": [
+"templates/accounts/profile.html"
+],
+"eng yuqori %(max_rating)s": [
+"templates/accounts/profile.html"
+],
+"hali reytingli raund yo‘q": [
+"templates/accounts/profile.html"
+],
+"· rasmiy %(profile_user_official_rating)s": [
+"templates/accounts/profile.html"
+],
+"Reytingdagi o‘rni": [
+"templates/accounts/profile.html"
+],
+"nofaol: 90 kundan beri reytingli musobaqa yo‘q": [
+"templates/accounts/profile.html"
+],
+"%(rating_history)s ta reytingli musobaqa": [
+"templates/accounts/profile.html"
+],
+"Yechilgan masalalar": [
+"templates/accounts/profile.html"
+],
+"amaliyot balingiz %(profile_user_practice_points)s": [
+"templates/accounts/profile.html"
+],
+"musobaqadan tashqari": [
+"templates/accounts/profile.html"
+],
+"<b class=\"tabular\">%(streak_0)s</b> <span class=\"ca7-of\">kun</span>": [
+"templates/accounts/profile.html"
+],
+"eng uzuni %(streak_1)s kun": [
+"templates/accounts/profile.html"
+],
+"kun masalasini yechib boshlang": [
+"templates/accounts/profile.html"
+],
+"Reyting tarixi": [
+"templates/accounts/profile.html"
+],
+"%(rating_history)s musobaqa": [
+"templates/accounts/profile.html"
+],
+"Reyting tarixi grafigi, %(rating_history)s ta musobaqa": [
+"templates/accounts/profile.html"
+],
+"Reyting o‘zgarishi": [
+"templates/accounts/profile.html",
+"templates/contests/_standings_live.html"
+],
+"DQ": [
+"templates/accounts/profile.html",
+"templates/contests/_standings_live.html",
+"templates/contests/submissions.html"
+],
+"Hali reytingli musobaqa yo‘q": [
+"templates/accounts/profile.html"
+],
+"Kelgusi raundga yoziling</a>: birinchi natijadan keyin grafik chiqadi.": [
+"templates/accounts/profile.html"
+],
+"Birinchi reytingli raunddan keyin grafik chiqadi.": [
+"templates/accounts/profile.html"
+],
+"Barchasi": [
+"templates/accounts/profile.html",
+"templates/problems/_leaders_mini.html",
+"templates/problems/detail.html"
+],
+"%(next_tier_name)s</span> darajasigacha <b class=\"text-ink tabular\">%(next_tier_need)s</b> reyting": [
+"templates/accounts/profile.html"
+],
+"Yana <b class=\"tabular text-ink\">%(solved_hidden)s</b> ta yechilgan masala hozir kelgusi musobaqada, shuning uchun yashirin.": [
+"templates/accounts/profile.html"
+],
+"Hali nishon yo‘q": [
+"templates/accounts/profile.html"
+],
+"Qanday olinadi?": [
+"templates/accounts/profile.html"
+],
+"Musobaqa nishonlari": [
+"templates/accounts/profile.html"
+],
+"Faollik": [
+"templates/accounts/profile.html"
+],
+"%(activity_first)s – %(activity_last)s: <b class=\"tabular text-ink\">%(activity_total)s</b> ta urinish · faol kunlar <b class=\"tabular text-ink\">%(activity_active_days)s</b> · eng uzun ketma-ket faol kunlar <b class=\"tabular text-ink\">%(activity_max_streak)s</b>": [
+"templates/accounts/profile.html"
+],
+"Faollik xaritasi (yon tomonga suriladi)": [
+"templates/accounts/profile.html"
+],
+"Faollik xaritasi: so‘nggi bir yilda %(activity_total)s ta urinish, %(activity_active_days)s faol kun": [
+"templates/accounts/profile.html"
+],
+"%(d_date)s: %(d_count)s ta urinish": [
+"templates/accounts/profile.html"
+],
+"Kam <i class=\"ca-heat-0\"></i><i class=\"ca-heat-1\"></i><i class=\"ca-heat-2\"></i><i class=\"ca-heat-4\"></i> Ko‘p": [
+"templates/accounts/profile.html"
+],
+"Mavzular bo‘yicha": [
+"templates/accounts/profile.html"
+],
+"Barcha masalalar": [
+"templates/accounts/profile.html",
+"templates/moderation/submit.html"
+],
+"<b>Eng zaif mavzu: %(weakest_row_tag_name)s</b> · %(weakest_total)s tadan %(weakest_solved)s tasi yechilgan": [
+"templates/accounts/profile.html"
+],
+", %(weakest_tried)s tasida urinish bor": [
+"templates/accounts/profile.html"
+],
+"<br>Osonidan boshlang:": [
+"templates/accounts/profile.html"
+],
+"Mavzular: yechilgan, urinilgan, qolgan": [
+"templates/accounts/profile.html"
+],
+"Barcha mavzular <span class=\"tabular\">(%(topic_map)s)</span>": [
+"templates/accounts/profile.html"
+],
+"Keyingisi: %(t_next_title)s": [
+"templates/accounts/profile.html"
+],
+"%(t_total)s tadan %(t_solved)s tasi yechilgan, %(t_tried)s tasida urinish bor": [
+"templates/accounts/profile.html"
+],
+"<i class=\"is-solved\"></i>yechilgan <i class=\"is-tried\"></i>urinilgan <i></i>qolgan": [
+"templates/accounts/profile.html"
+],
+"Bu foydalanuvchi haqida shikoyat qilish": [
+"templates/accounts/profile.html"
+],
+"Nima bo‘ldi?": [
+"templates/accounts/profile.html"
+],
+"Adminlarga yuborish": [
+"templates/accounts/profile.html",
+"templates/contests/_dq_banner.html"
+],
+"Profil": [
+"templates/accounts/profile_edit.html",
+"templates/moderation/user_form.html"
+],
+"Sozlamalar bo‘limlari": [
+"templates/accounts/profile_edit.html"
+],
+"Xavfsizlik": [
+"templates/accounts/profile_edit.html"
+],
+"Taklif": [
+"templates/accounts/profile_edit.html"
+],
+"Ma’lumotlarim": [
+"templates/accounts/profile_edit.html"
+],
+"Rasm tanlash": [
+"templates/accounts/profile_edit.html",
+"templates/moderation/submit.html"
+],
+"PNG yoki JPG, kvadrat rasm yaxshi ko‘rinadi.": [
+"templates/accounts/profile_edit.html"
+],
+"Keyingi o‘zgartirish %(form_next_rename)s dan keyin mumkin.": [
+"templates/accounts/profile_edit.html"
+],
+"90 kunda bir marta o‘zgartirish mumkin. Profil havolangiz ham o‘zgaradi.": [
+"templates/accounts/profile_edit.html"
+],
+"Ism": [
+"templates/accounts/profile_edit.html",
+"templates/moderation/user_form.html"
+],
+"Familiya": [
+"templates/accounts/profile_edit.html",
+"templates/moderation/user_form.html"
+],
+"Ism va familiya faqat profilingizda ko‘rinadi; reyting jadvalida foydalanuvchi nomingiz chiqadi.": [
+"templates/accounts/profile_edit.html"
+],
+"Email": [
+"templates/accounts/profile_edit.html",
+"templates/moderation/user_form.html"
+],
+"tasdiqlangan": [
+"templates/accounts/profile_edit.html"
+],
+"Hech kimga ko‘rinmaydi. Yangi emailni havola orqali qayta tasdiqlaysiz.": [
+"templates/accounts/profile_edit.html"
+],
+"Saqlash": [
+"templates/accounts/profile_edit.html",
+"templates/learn/list.html",
+"templates/moderation/contest_form.html",
+"templates/moderation/plan_form.html",
+"templates/moderation/tag_form.html",
+"templates/moderation/user_form.html"
+],
+"Parolni almashtirish uchun joriy parol kerak.": [
+"templates/accounts/profile_edit.html"
+],
+"Parolni almashtirish": [
+"templates/accounts/profile_edit.html",
+"templates/registration/password_change_form.html"
+],
+"Telegram bildirishnomalari": [
+"templates/accounts/profile_edit.html"
+],
+"Ulangan": [
+"templates/accounts/profile_edit.html"
+],
+"Oxirgi yuborishda xato bo‘ldi. Tizim keyinroq qayta urinadi.": [
+"templates/accounts/profile_edit.html"
+],
+"Bot bilan aloqa to‘xtatilgan. Qayta ulang yoki hisobni uzing.": [
+"templates/accounts/profile_edit.html"
+],
+"Botga xabar yetkazilmadi. Telegram’da botni ochib, Start tugmasini bosing, keyin qayta ulang.": [
+"templates/accounts/profile_edit.html"
+],
+"Telegram botni ulang: kunlik masala va tavsiya, trenddagi masala, musobaqa eslatmalari va duellar haqida xabar oling.": [
+"templates/accounts/profile_edit.html"
+],
+"Telegram hisobingizni CodeArena’dan uzasizmi?": [
+"templates/accounts/profile_edit.html"
+],
+"Uzish": [
+"templates/accounts/profile_edit.html"
+],
+"Qayta ulash": [
+"templates/accounts/profile_edit.html"
+],
+"Telegramni ulash": [
+"templates/accounts/profile_edit.html"
+],
+"Telegram bot sozlanmagan: bot tokeni va webhook sozlamalarini qo‘shing.": [
+"templates/accounts/profile_edit.html"
+],
+"Telegram bildirishnomalari hozircha ishlamayapti. Yoqilgach, shu yerdan ulashingiz mumkin.": [
+"templates/accounts/profile_edit.html"
+],
+"Ulash tugmasidan keyin Telegram’da <b>Start</b> ni bosing. So‘ng shu sahifaga qaytib, yangilang. Kod 10 daqiqa ichida ishlatilishi va faqat bir marta qo‘llanishi mumkin.": [
+"templates/accounts/profile_edit.html"
+],
+"Qaysi xabarlarni yuboraylik?": [
+"templates/accounts/profile_edit.html"
+],
+"<b>📅 Kunlik masala</b><small class=\"mt-0.5 block text-xs text-mute\">Har kuni tanlangan masala</small>": [
+"templates/accounts/profile_edit.html"
+],
+"<b>💡 Kunlik tavsiya</b><small class=\"mt-0.5 block text-xs text-mute\">Algoritm va yechish bo‘yicha qisqa maslahat</small>": [
+"templates/accounts/profile_edit.html"
+],
+"<b>🔥 Trenddagi masala</b><small class=\"mt-0.5 block text-xs text-mute\">So‘nggi 7 kunda ommalashgan masala</small>": [
+"templates/accounts/profile_edit.html"
+],
+"<b>🏆 Musobaqalar</b><small class=\"mt-0.5 block text-xs text-mute\">Ro‘yxatdan o‘tgan musobaqa boshlanishidan 1 soat oldin</small>": [
+"templates/accounts/profile_edit.html"
+],
+"<b>⚔️ Duellar</b><small class=\"mt-0.5 block text-xs text-mute\">Sizni duelga chaqirishganda va duel natijasi chiqqanda</small>": [
+"templates/accounts/profile_edit.html"
+],
+"<b>🏅 Nishonlar</b><small class=\"mt-0.5 block text-xs text-mute\">Yangi nishon yoki bosqich olganingizda</small>": [
+"templates/accounts/profile_edit.html"
+],
+"<b>Olov</b><small class=\"mt-0.5 block text-xs text-mute\">Kechqurun, bugungi masala yechilmagan bo‘lsa, Olov o‘chmasin</small>": [
+"templates/accounts/profile_edit.html"
+],
+"Sozlamalarni saqlash": [
+"templates/accounts/profile_edit.html"
+],
+"Bu qurilmada saqlanadi.": [
+"templates/accounts/profile_edit.html"
+],
+"Mavzu": [
+"templates/accounts/profile_edit.html",
+"templates/home/dashboard.html",
+"templates/learn/_problem_rows.html",
+"templates/problems/detail.html",
+"templates/problems/list.html"
+],
+"Tizim": [
+"templates/accounts/profile_edit.html",
+"templates/problems/detail.html"
+],
+"Do‘stlarni taklif qilish": [
+"templates/accounts/profile_edit.html"
+],
+"Havolangiz orqali ro‘yxatdan o‘tgan har bir kishi sizning taklifingiz bilan qo‘shilgan hisoblanadi.": [
+"templates/accounts/profile_edit.html"
+],
+"Taklif havolasi": [
+"templates/accounts/profile_edit.html"
+],
+"Nusxalash": [
+"templates/accounts/profile_edit.html",
+"templates/problems/detail.html",
+"templates/submissions/detail.html"
+],
+"Hozirgacha qo‘shilganlar: <b class=\"tabular text-ink\">%(invited_count)s</b>": [
+"templates/accounts/profile_edit.html"
+],
+"Profilingiz, yuborgan kodlaringiz, musobaqa natijalari, duellar va nishonlaringiz bitta JSON faylda.": [
+"templates/accounts/profile_edit.html"
+],
+"Yuklab olish": [
+"templates/accounts/profile_edit.html"
+],
+"Hisob o‘chiriladi: ism, email, rasm va Telegram ulanishi olib tashlanadi, qaytarib bo‘lmaydi. Davom etasizmi?": [
+"templates/accounts/profile_edit.html"
+],
+"Hisobni o‘chirish": [
+"templates/accounts/profile_edit.html"
+],
+"Shaxsiy ma’lumotlaringiz o‘chadi; musobaqa natijalaringiz «deleted-%(user_pk)s» nomi ostida qoladi, chunki boshqalarning reytingi ularga tayanadi.": [
+"templates/accounts/profile_edit.html"
+],
+"Parolingiz": [
+"templates/accounts/profile_edit.html"
+],
+"O‘chirish": [
+"templates/accounts/profile_edit.html",
+"templates/moderation/contests.html",
+"templates/moderation/plans.html",
+"templates/moderation/problems.html",
+"templates/moderation/tags.html"
+],
+"CodeArena musobaqa reytingi: %(total)s ishtirokchi, Elo bo‘yicha o‘rinlar va darajalar.": [
+"templates/accounts/rating.html"
+],
+"%(total)s ishtirokchi · reytingli musobaqalar natijasi bo‘yicha (Elo) ·": [
+"templates/accounts/rating.html"
+],
+"Qanday hisoblanadi?": [
+"templates/accounts/rating.html"
+],
+"Reyting jadvali": [
+"templates/accounts/rating.html"
+],
+"Saralash": [
+"templates/accounts/rating.html",
+"templates/moderation/users.html",
+"templates/problems/leaders.html"
+],
+"Oxirgi o‘zgarish": [
+"templates/accounts/rating.html"
+],
+"Musobaqalar soni": [
+"templates/accounts/rating.html"
+],
+": %(users_paginator_count)s ta ·": [
+"templates/accounts/rating.html"
+],
+"Oxirgi reytingli musobaqadagi o‘zgarish": [
+"templates/accounts/rating.html"
+],
+"Oxirgi ±": [
+"templates/accounts/rating.html"
+],
+"Bunday foydalanuvchi reytingda yo‘q": [
+"templates/accounts/rating.html"
+],
+"Butun ro‘yxat": [
+"templates/accounts/rating.html",
+"templates/accounts/top.html"
+],
+"<b>Hali reyting yo‘q</b>Reytingli musobaqa tugagach, bu yerda paydo bo‘ladi.": [
+"templates/accounts/rating.html"
+],
+"Darajalar": [
+"templates/accounts/rating.html"
+],
+"Hammasi": [
+"templates/accounts/rating.html",
+"templates/classroom/duels.html",
+"templates/contests/detail.html",
+"templates/contests/list.html",
+"templates/contests/submissions.html",
+"templates/home/dashboard.html",
+"templates/integrity/audit.html",
+"templates/moderation/duels.html",
+"templates/moderation/problems.html",
+"templates/moderation/submissions.html",
+"templates/moderation/users.html",
+"templates/problems/list.html",
+"templates/submissions/list.html"
+],
+"%(me_next_name)s</b> gacha <b class=\"tabular\">+%(me_next_need)s</b>": [
+"templates/accounts/rating.html"
+],
+"Eng yuqori daraja": [
+"templates/accounts/rating.html"
+],
+"%(t_name)s darajasi ichidagi o‘rningiz": [
+"templates/accounts/rating.html"
+],
+"<b>%(t_count)s</b> kishi": [
+"templates/accounts/rating.html"
+],
+"Reytingli musobaqadan keyin har bir ishtirokchining reytingi Elo usulida qayta hisoblanadi.": [
+"templates/accounts/rating.html"
+],
+"Amaliyot ballari": [
+"templates/accounts/top.html"
+],
+"Amaliyot ballari: musobaqadan tashqari yechilgan masalalar uchun %(total)s ishtirokchining ballari.": [
+"templates/accounts/top.html"
+],
+"%(total)s ishtirokchi · musobaqadan tashqari yechilgan masalalar ballari": [
+"templates/accounts/top.html"
+],
+"Yechilgan": [
+"templates/accounts/top.html",
+"templates/contests/detail.html",
+"templates/integrity/practice_report.html",
+"templates/learn/list.html"
+],
+"Ball": [
+"templates/accounts/top.html",
+"templates/contests/_standings_live.html",
+"templates/contests/detail.html",
+"templates/home/landing.html",
+"templates/moderation/contest_form.html"
+],
+"Bunday foydalanuvchi yo‘q": [
+"templates/accounts/top.html"
+],
+"<b>Hali reyting yo‘q</b>Birinchi masala yechilgach, bu yerda paydo bo‘ladi.": [
+"templates/accounts/top.html"
+],
+"Hisobni yakunlash": [
+"templates/accounts/welcome.html"
+],
+"Qadamlar": [
+"templates/accounts/welcome.html"
+],
+"1. Ma’lumotlar": [
+"templates/accounts/welcome.html"
+],
+"2. Emailni tasdiqlash": [
+"templates/accounts/welcome.html"
+],
+"Hisobingizni yakunlang": [
+"templates/accounts/welcome.html"
+],
+"Davom etish uchun quyidagilarni to‘ldiring: %(missing)s.": [
+"templates/accounts/welcome.html"
+],
+"Davom etish": [
+"templates/accounts/welcome.html",
+"templates/classroom/_duel_row.html",
+"templates/classroom/_duel_status.html",
+"templates/contests/_card.html",
+"templates/home/dashboard.html",
+"templates/learn/course.html",
+"templates/learn/hub.html"
+],
+"Emailingizni tasdiqlang": [
+"templates/accounts/welcome.html"
+],
+"<b class=\"text-ink\">%(user_email)s</b> manziliga havola yubordik. Xatni ochib, havolani bosing. Spam papkasini ham tekshiring.": [
+"templates/accounts/welcome.html"
+],
+"Qayta yuborish": [
+"templates/accounts/welcome.html"
+],
+"Emailni o‘zgartirish": [
+"templates/accounts/welcome.html"
+],
+"Saqlash va havola yuborish": [
+"templates/accounts/welcome.html"
+],
+"— CodeArena": [
+"templates/base.html"
+],
+"Asosiy tarkibga o‘tish": [
+"templates/base.html"
+],
+"Emailingizni tasdiqlang: tasdiqlanmaguncha musobaqada reytingga hisoblanmaysiz va duel ochilmaydi.": [
+"templates/base.html"
+],
+"Musobaqa va duellar uchun to‘ldiring: %(gate_nudge_missing)s.": [
+"templates/base.html"
+],
+"Tasdiqlash": [
+"templates/base.html",
+"templates/moderation/dashboard.html",
+"templates/moderation/queue.html"
+],
+"To‘ldirish": [
+"templates/base.html"
+],
+"Sayt bo‘limlari": [
+"templates/base.html"
+],
+"CodeArena · o‘zbek tilida dasturlash": [
+"templates/base.html"
+],
+"Mobil menyu": [
+"templates/base.html"
+],
+"%(nav_duels)s<span class=\"sr-only\"> ta duel chaqiruvi</span>": [
+"templates/base.html"
+],
+"Men": [
+"templates/base.html"
+],
+"Menyu": [
+"templates/base.html"
+],
+"Hisob va menyu": [
+"templates/base.html"
+],
+"Yopish": [
+"templates/base.html",
+"templates/integrity/reports.html",
+"templates/problems/detail.html"
+],
+"%(user_get_full_name)s</span><span class=\"block text-xs text-mute tabular\">%(user_rating)s · %(user_rating2)s · %(user_practice_points)s ball</span>": [
+"templates/base.html"
+],
+"Barcha sahifalar": [
+"templates/base.html"
+],
+"Tizim bo‘yicha": [
+"templates/base.html"
+],
+"Qidirish va buyruqlar": [
+"templates/base.html"
+],
+"Masala, sahifa yoki buyruq qidirish": [
+"templates/base.html"
+],
+"Masala, sahifa yoki buyruq…": [
+"templates/base.html"
+],
+"Esc": [
+"templates/base.html"
+],
+"Natijalar": [
+"templates/base.html",
+"templates/contests/_band.html",
+"templates/contests/_row.html",
+"templates/contests/detail.html",
+"templates/contests/standings.html",
+"templates/integrity/contest_report.html",
+"templates/moderation/contests.html"
+],
+"<span><kbd class=\"ca-kbd\">↑</kbd><kbd class=\"ca-kbd\">↓</kbd> tanlash</span><span><kbd class=\"ca-kbd\">Enter</kbd> ochish</span><span><kbd class=\"ca-kbd\">?</kbd> yorliqlar</span>": [
+"templates/base.html"
+],
+"Klaviatura yorliqlari": [
+"templates/base.html"
+],
+"<kbd class=\"ca-kbd\">Ctrl</kbd> <kbd class=\"ca-kbd\">K</kbd> yoki <kbd class=\"ca-kbd\">/</kbd>": [
+"templates/base.html"
+],
+"<kbd class=\"ca-kbd\">g</kbd> <kbd class=\"ca-kbd\">h</kbd>": [
+"templates/base.html"
+],
+"<kbd class=\"ca-kbd\">g</kbd> <kbd class=\"ca-kbd\">p</kbd>": [
+"templates/base.html"
+],
+"<kbd class=\"ca-kbd\">g</kbd> <kbd class=\"ca-kbd\">c</kbd>": [
+"templates/base.html"
+],
+"<kbd class=\"ca-kbd\">g</kbd> <kbd class=\"ca-kbd\">r</kbd>": [
+"templates/base.html"
+],
+"<kbd class=\"ca-kbd\">g</kbd> <kbd class=\"ca-kbd\">d</kbd>": [
+"templates/base.html"
+],
+"<kbd class=\"ca-kbd\">g</kbd> <kbd class=\"ca-kbd\">u</kbd>": [
+"templates/base.html"
+],
+"<kbd class=\"ca-kbd\">g</kbd> <kbd class=\"ca-kbd\">m</kbd>": [
+"templates/base.html"
+],
+"<kbd class=\"ca-kbd\">g</kbd> <kbd class=\"ca-kbd\">a</kbd>": [
+"templates/base.html"
+],
+"<kbd class=\"ca-kbd\">Ctrl</kbd> <kbd class=\"ca-kbd\">Enter</kbd>": [
+"templates/base.html"
+],
+"Masala sahifasida — yechimni yuborish": [
+"templates/base.html"
+],
+"Shu oyna": [
+"templates/base.html"
+],
+"Tabriklaymiz! Siz endi %(tier_up_name)s": [
+"templates/base.html"
+],
+"Yangi banneringiz — «%(tier_up_picture)s». Profilingizda va avataringizda ko‘rinadi.": [
+"templates/base.html"
+],
+"Profilni ko‘rish": [
+"templates/base.html"
+],
+"%(d_challenger_username)s <span class=\"text-mute\">vs</span> %(d_opponent_username)s": [
+"templates/classroom/_duel_row.html"
+],
+"Sizning ochiq duelingiz": [
+"templates/classroom/_duel_row.html"
+],
+"Ochiq duel: %(d_challenger_username)s": [
+"templates/classroom/_duel_row.html"
+],
+"· <b class=\"tabular text-ink\">%(d_my_done)s / %(d_questions)s</b> savol": [
+"templates/classroom/_duel_row.html"
+],
+"Mag‘lubiyat": [
+"templates/classroom/_duel_row.html",
+"templates/classroom/_duel_status.html",
+"templates/classroom/duels.html"
+],
+"Durang": [
+"templates/classroom/_duel_row.html",
+"templates/classroom/_duel_status.html",
+"templates/classroom/duels.html",
+"templates/moderation/duels.html"
+],
+"Ochish": [
+"templates/classroom/_duel_row.html",
+"templates/moderation/_duel_switch.html",
+"templates/problems/detail.html"
+],
+"%(d_challenger_username)s va %(d_opponent_username)s dueli": [
+"templates/classroom/_duel_row.html"
+],
+"ochiq duel": [
+"templates/classroom/_duel_row.html"
+],
+"G‘alaba!": [
+"templates/classroom/_duel_status.html"
+],
+"— %(result_other_username)s bilan": [
+"templates/classroom/_duel_status.html"
+],
+"· duel reytingi": [
+"templates/classroom/_duel_status.html"
+],
+"Savollarni ko‘rish": [
+"templates/classroom/_duel_status.html"
+],
+"Natijani nusxalash": [
+"templates/classroom/_duel_status.html"
+],
+"%(result_other_username)s revansh so‘radi — qabul qilish": [
+"templates/classroom/_duel_status.html"
+],
+"Revansh yuborildi": [
+"templates/classroom/_duel_status.html"
+],
+"Revansh": [
+"templates/classroom/_duel_status.html"
+],
+"(siz)": [
+"templates/classroom/_duel_status.html"
+],
+"Duel reytingi <b class=\"text-ink\">%(p_user_duel_rating)s</b>": [
+"templates/classroom/_duel_status.html"
+],
+"<b class=\"tabular text-ink\">%(p_right)s/%(n_questions)s</b> to‘g‘ri · <b class=\"tabular text-ink\">%(p_points)s</b> ball": [
+"templates/classroom/_duel_status.html"
+],
+"<span class=\"font-semibold text-ok\">O‘ynamoqda…</span> <span class=\"tabular text-mute\">%(p_right)s ta to‘g‘ri</span>": [
+"templates/classroom/_duel_status.html"
+],
+"Hali boshlamadi": [
+"templates/classroom/_duel_status.html"
+],
+"%(p_user_username)sning javoblari": [
+"templates/classroom/_duel_status.html"
+],
+"%(forloop_counter)s-savol": [
+"templates/classroom/_duel_status.html"
+],
+"%(forloop_counter)s-savol:": [
+"templates/classroom/_duel_status.html",
+"templates/classroom/duel_play.html"
+],
+"to‘g‘ri": [
+"templates/classroom/_duel_status.html",
+"templates/classroom/_quiz_given.html",
+"templates/classroom/duel_play.html"
+],
+"noto‘g‘ri": [
+"templates/classroom/_duel_status.html",
+"templates/classroom/duel_play.html"
+],
+"javob kutilmoqda": [
+"templates/classroom/_duel_status.html"
+],
+"javob berilmadi": [
+"templates/classroom/_duel_status.html"
+],
+"hali yo‘q": [
+"templates/classroom/_duel_status.html",
+"templates/classroom/duel_play.html"
+],
+"Raqib kutilmoqda": [
+"templates/classroom/_duel_status.html"
+],
+"%(duel_get_language_display)s tilida duel boshlagan keyingi o‘yinchi": [
+"templates/classroom/_duel_status.html"
+],
+"VS": [
+"templates/classroom/_duel_status.html"
+],
+"Boshlash": [
+"templates/classroom/_duel_status.html",
+"templates/contests/detail.html",
+"templates/learn/course.html",
+"templates/learn/hub.html",
+"templates/learn/list.html"
+],
+"%(n_questions)s ta savol, har biriga %(per_question)s soniya — vaqti savol ochilganda boshlanadi.": [
+"templates/classroom/_duel_status.html"
+],
+"Ochiq duel: shu tilda duel boshlagan keyingi o‘yinchi aynan shu savollarni oladi. Ko‘proq to‘g‘ri javob bergan g‘olib, teng bo‘lsa — durang. Raqib %(expires)s gacha kutiladi.": [
+"templates/classroom/_duel_status.html"
+],
+"<b class=\"text-ink\">%(duel_challenger_username)s</b> sizni chaqirdi: %(duel_get_language_display)s, %(n_questions)s ta savol. Qabul qilsangiz, birinchi savol ochiladi.": [
+"templates/classroom/_duel_status.html"
+],
+"%(duel_challenger_username)s haqida": [
+"templates/classroom/_duel_status.html"
+],
+"Sizning hisobingiz": [
+"templates/classroom/_duel_status.html"
+],
+"hali o‘ynamagansiz": [
+"templates/classroom/_duel_status.html"
+],
+"Qabul qilish": [
+"templates/classroom/_duel_status.html",
+"templates/classroom/duels.html",
+"templates/home/dashboard.html"
+],
+"Rad etish": [
+"templates/classroom/_duel_status.html",
+"templates/classroom/duels.html",
+"templates/home/dashboard.html",
+"templates/moderation/dashboard.html",
+"templates/moderation/queue.html"
+],
+"<b class=\"text-ink\">%(duel_opponent_username)s</b> qabul qilganda o‘sha savollar unga beriladi. %(expires)s gacha kutiladi.": [
+"templates/classroom/_duel_status.html"
+],
+"Siz tugatdingiz. Raqib ham tugatganda natija chiqadi.": [
+"templates/classroom/_duel_status.html"
+],
+"<b>%(duel_winner_username)s</b> g‘olib!": [
+"templates/classroom/_duel_status.html"
+],
+"Durang.": [
+"templates/classroom/_duel_status.html"
+],
+"Chaqiriq rad etildi": [
+"templates/classroom/_duel_status.html"
+],
+"Chaqiriq muddati o‘tdi": [
+"templates/classroom/_duel_status.html"
+],
+"Hech kim qo‘shilmadi": [
+"templates/classroom/_duel_status.html"
+],
+"— duel reytingi o‘zgarmadi.": [
+"templates/classroom/_duel_status.html"
+],
+"Yangi duel": [
+"templates/classroom/_duel_status.html"
+],
+"Kod <code class=\"ca-quiz-want\">%(q_expect)s</code> chiqarishi uchun <mark class=\"ca-quiz-blank\">___</mark> o‘rniga nima yoziladi?": [
+"templates/classroom/_quiz_ask.html"
+],
+"Bu kod nima chiqaradi?": [
+"templates/classroom/_quiz_ask.html"
+],
+"vaqt tugadi": [
+"templates/classroom/_quiz_given.html"
+],
+"ko‘rilmadi": [
+"templates/classroom/_quiz_given.html"
+],
+"Yechildi,": [
+"templates/classroom/_status.html"
+],
+"Kech yechildi": [
+"templates/classroom/_status.html"
+],
+"kech": [
+"templates/classroom/_status.html"
+],
+"Xato urinishlar:": [
+"templates/classroom/_status.html"
+],
+"Boshlanmagan": [
+"templates/classroom/_status.html"
+],
+"Duellar yopiq": [
+"templates/classroom/closed.html",
+"templates/moderation/_duel_switch.html"
+],
+"Duellar hozir yopiq": [
+"templates/classroom/closed.html"
+],
+"Dars tugagach, soat <b class=\"text-ink tabular\">%(until)s</b> da ochiladi.": [
+"templates/classroom/closed.html"
+],
+"Dars payti chalg‘imaslik uchun vaqtincha yopilgan. Ustoz ochgach qaytib keling.": [
+"templates/classroom/closed.html"
+],
+"Duel: %(duel_challenger_username)s vs %(duel_opponent_username)s": [
+"templates/classroom/duel.html"
+],
+"%(duel_challenger_username)s <span class=\"text-mute\">vs</span>": [
+"templates/classroom/duel.html"
+],
+"Savollar va to‘g‘ri javoblar raqibingiz ham tugatgach ochiladi.": [
+"templates/classroom/duel.html"
+],
+"Savollar": [
+"templates/classroom/duel.html"
+],
+"To‘g‘ri javob": [
+"templates/classroom/duel.html"
+],
+"hali o‘ynamadi": [
+"templates/classroom/duel.html"
+],
+"ko‘rilmagan": [
+"templates/classroom/duel.html"
+],
+"Duel · %(n)s/%(n_questions)s-savol": [
+"templates/classroom/duel_play.html"
+],
+"Duel, %(n)s-savol, %(n_questions)s tadan": [
+"templates/classroom/duel_play.html"
+],
+"%(duel_challenger_username)s vs %(duel_opponent_username)s</a> <span class=\"ca-quiz-meta\"><b>%(language)s</b></span>": [
+"templates/classroom/duel_play.html"
+],
+"Hisob": [
+"templates/classroom/duel_play.html",
+"templates/moderation/duels.html"
+],
+"Sizning javoblaringiz": [
+"templates/classroom/duel_play.html"
+],
+"hozirgi": [
+"templates/classroom/duel_play.html"
+],
+"To‘g‘ri!": [
+"templates/classroom/duel_play.html"
+],
+"Vaqt tugadi": [
+"templates/classroom/duel_play.html"
+],
+"Noto‘g‘ri": [
+"templates/classroom/duel_play.html"
+],
+"Natijaga o‘tish": [
+"templates/classroom/duel_play.html"
+],
+"Keyingi savol": [
+"templates/classroom/duel_play.html"
+],
+"%(n)s-savol, %(n_questions)s tadan": [
+"templates/classroom/duel_play.html"
+],
+"<code>main()</code> ichidagi kod": [
+"templates/classroom/duel_play.html"
+],
+", <code>bits/stdc++.h</code> va <code>using namespace std</code> bilan": [
+"templates/classroom/duel_play.html"
+],
+", <code>java.util.*</code> bilan": [
+"templates/classroom/duel_play.html"
+],
+"«Xato» — dastur xato bilan to‘xtaydi yoki kompilyatsiya qilinmaydi.": [
+"templates/classroom/duel_play.html"
+],
+"Javob": [
+"templates/classroom/duel_play.html",
+"templates/integrity/reports.html"
+],
+"Javobni yozing": [
+"templates/classroom/duel_play.html"
+],
+"Javob berish": [
+"templates/classroom/duel_play.html",
+"templates/contests/clarifications.html"
+],
+"Bo‘sh joylar hisobga olinmaydi; katta-kichik harf hisobga olinadi.": [
+"templates/classroom/duel_play.html"
+],
+"%(n_questions)s ta savol, har biriga %(per_question)s soniya. Ko‘proq ball yig‘gan g‘olib: to‘g‘ri javob 1, 2 yoki 3 ball (savol qiyinligiga qarab).": [
+"templates/classroom/duels.html"
+],
+"Sizni duelga chaqirishdi": [
+"templates/classroom/duels.html"
+],
+"Sizni %(incoming)s ta duelga chaqirishdi": [
+"templates/classroom/duels.html"
+],
+"duel %(d_challenger_duel_rating)s": [
+"templates/classroom/duels.html"
+],
+"%(d_get_language_display)s · %(d_questions)s ta savol · %(d_created)s. Qabul qilsangiz, birinchi savol ochiladi.": [
+"templates/classroom/duels.html"
+],
+"Admin akkaunti duelda qatnashmaydi: duel ochish va chaqiriq yuborish o‘chirilgan.": [
+"templates/classroom/duels.html"
+],
+"Tezkor duel": [
+"templates/classroom/duels.html"
+],
+"Mos raqib avtomatik topiladi. Kod beriladi: nima chiqarishini yoki bo‘sh joyga nima yozilishini toping.": [
+"templates/classroom/duels.html"
+],
+"Til": [
+"templates/classroom/duels.html",
+"templates/contests/_submissions_live.html",
+"templates/home/dashboard.html",
+"templates/moderation/duels.html",
+"templates/problems/_my_subs.html",
+"templates/problems/leaders.html",
+"templates/submissions/list.html"
+],
+"Raqam shu tilda kutayotgan ochiq duellar soni. Ochiq duel bo‘lmasa, o‘zingiz boshlaysiz, keyingi raqib o‘sha savollarni oladi.": [
+"templates/classroom/duels.html"
+],
+"Raqib topish": [
+"templates/classroom/duels.html",
+"templates/home/_dash_new.html",
+"templates/home/dashboard.html"
+],
+"Do‘stni chaqirish": [
+"templates/classroom/duels.html"
+],
+"Savollarni hoziroq yechasiz. Do‘stingiz 3 kun ichida qabul qilsa, o‘sha savollarni oladi.": [
+"templates/classroom/duels.html"
+],
+"Raqib": [
+"templates/classroom/duels.html",
+"templates/moderation/duels.html"
+],
+"Login bo‘yicha qidiring…": [
+"templates/classroom/duels.html"
+],
+"Yozing yoki ro‘yxatdan tanlang; pastga strelka ro‘yxatga o‘tadi.": [
+"templates/classroom/duels.html"
+],
+"Topilgan foydalanuvchilar": [
+"templates/classroom/duels.html"
+],
+"Chaqiruv yuborish": [
+"templates/classroom/duels.html"
+],
+"Ochiq duellar": [
+"templates/classroom/duels.html"
+],
+"%(open)s ta": [
+"templates/classroom/duels.html"
+],
+"Tarix": [
+"templates/classroom/duels.html"
+],
+"%(history)s ta duel": [
+"templates/classroom/duels.html"
+],
+"Natija": [
+"templates/classroom/duels.html",
+"templates/contests/_submissions_live.html",
+"templates/contests/submissions.html",
+"templates/home/dashboard.html",
+"templates/problems/_my_subs.html",
+"templates/problems/detail.html",
+"templates/submissions/_status.html",
+"templates/submissions/list.html"
+],
+"Tugagan": [
+"templates/classroom/duels.html",
+"templates/contests/_band.html",
+"templates/moderation/contests.html",
+"templates/moderation/duels.html"
+],
+"Duel reytingi o‘zgarishi": [
+"templates/classroom/duels.html"
+],
+"<b>Hali duel bo‘lmagan</b>«Raqib topish»ni bosing: birinchi savol darhol ochiladi.": [
+"templates/classroom/duels.html"
+],
+"Duel reytingingiz": [
+"templates/classroom/duels.html"
+],
+"boshlang‘ich": [
+"templates/classroom/duels.html"
+],
+"Duel reytingi musobaqa reytingiga ta’sir qilmaydi. Hamma 1200 dan boshlaydi; dastlabki 30 duelda tezroq o‘zgaradi, keyin sekinroq.": [
+"templates/classroom/duels.html"
+],
+"Duel nishonlari": [
+"templates/classroom/duels.html"
+],
+"Hali tugagan duel yo‘q. Birinchi bo‘ling.": [
+"templates/classroom/duels.html"
+],
+"Musobaqalar</a> / #%(contest_pk)s": [
+"templates/contests/_band.html",
+"templates/integrity/contest_report.html"
+],
+"Kelgusi": [
+"templates/contests/_band.html",
+"templates/contests/_card.html"
+],
+"Codeforces qoidasi": [
+"templates/contests/_band.html",
+"templates/contests/_card.html"
+],
+"ICPC qoidasi": [
+"templates/contests/_band.html",
+"templates/contests/_card.html"
+],
+"Ball qoidasi": [
+"templates/contests/_band.html"
+],
+"Div. %(contest_division)s": [
+"templates/contests/_band.html"
+],
+"Reytingli": [
+"templates/contests/_band.html",
+"templates/contests/_card.html",
+"templates/contests/_row.html",
+"templates/contests/_tags.html",
+"templates/contests/list.html",
+"templates/moderation/contests.html"
+],
+"Reytingga ta’sir qilmaydi": [
+"templates/contests/_band.html",
+"templates/contests/_card.html"
+],
+"Qatnashgansiz": [
+"templates/contests/_band.html"
+],
+"Qatnashyapsiz": [
+"templates/contests/_band.html",
+"templates/contests/_card.html"
+],
+"Ro‘yxatdasiz": [
+"templates/contests/_band.html",
+"templates/contests/_card.html",
+"templates/home/dashboard.html"
+],
+"%(problems)s masala": [
+"templates/contests/_band.html"
+],
+"%(n_participants)s ishtirokchi": [
+"templates/contests/_band.html"
+],
+"O‘rningiz": [
+"templates/contests/_band.html",
+"templates/contests/list.html"
+],
+"Sizning vaqtingiz tugashiga": [
+"templates/contests/_band.html"
+],
+"Boshlaganingizdan beri o‘tgan vaqt / sizga berilgan vaqt": [
+"templates/contests/_band.html"
+],
+"Raund tugashiga": [
+"templates/contests/_band.html"
+],
+"Boshlanishiga": [
+"templates/contests/_band.html",
+"templates/contests/_card.html"
+],
+"Raundning o‘tgan vaqti / umumiy davomiyligi": [
+"templates/contests/_band.html"
+],
+"Virtual qatnashish": [
+"templates/contests/_band.html"
+],
+"Kirib qatnashish": [
+"templates/contests/_band.html"
+],
+"Qatnashish uchun yozilish": [
+"templates/contests/_band.html"
+],
+"Masalalarni yechish": [
+"templates/contests/_band.html"
+],
+"Google Kalendarga qo‘shish": [
+"templates/contests/_band.html",
+"templates/contests/_card.html"
+],
+"Sahifadan chiqishlar: <b class=\"tabular\" data-leaves>0</b>": [
+"templates/contests/_band.html"
+],
+"Musobaqa bo‘limlari": [
+"templates/contests/_band.html"
+],
+"Umumiy": [
+"templates/contests/_band.html",
+"templates/contests/clarifications.html",
+"templates/contests/detail.html"
+],
+"Savol-javoblar": [
+"templates/contests/_band.html",
+"templates/contests/clarifications.html",
+"templates/contests/detail.html"
+],
+"Div. %(c_division)s": [
+"templates/contests/_card.html",
+"templates/contests/_tags.html",
+"templates/contests/list.html"
+],
+"%(c_duration_label)s · %(c_n_problems)s masala ·": [
+"templates/contests/_card.html"
+],
+"ball qoidasi": [
+"templates/contests/_card.html"
+],
+"%(c_n_participants)s ishtirokchi": [
+"templates/contests/_card.html",
+"templates/contests/_row.html",
+"templates/moderation/contests.html"
+],
+"· siz %(c_my_rank)s-o‘rinda": [
+"templates/contests/_card.html"
+],
+"hozircha %(c_n_participants)s kishi": [
+"templates/contests/_card.html"
+],
+"Tugashiga": [
+"templates/contests/_card.html",
+"templates/home/dashboard.html",
+"templates/problems/detail.html"
+],
+"Qatnashish": [
+"templates/contests/_card.html",
+"templates/home/dashboard.html"
+],
+"Kalendarga qo‘shish": [
+"templates/contests/_card.html"
+],
+"Batafsil": [
+"templates/contests/_card.html"
+],
+"Siz ushbu musobaqadan diskvalifikatsiya qilingansiz.": [
+"templates/contests/_dq_banner.html"
+],
+"Sabab: %(participation_disqualified_reason)s": [
+"templates/contests/_dq_banner.html"
+],
+"Sabab ko‘rsatilmagan.": [
+"templates/contests/_dq_banner.html"
+],
+"Natijangiz hisobga olinmaydi. Xato deb hisoblasangiz, adminga murojaat qiling.": [
+"templates/contests/_dq_banner.html"
+],
+"Apellyatsiya: nima uchun qaror noto‘g‘ri deb hisoblaysiz?": [
+"templates/contests/_dq_banner.html"
+],
+"Ro‘yxatdan o‘tgansiz": [
+"templates/contests/_row.html"
+],
+"qoldi": [
+"templates/contests/_row.html"
+],
+"boshlanishiga": [
+"templates/contests/_row.html"
+],
+"%(c_my_delta)s</b>reyting": [
+"templates/contests/_row.html"
+],
+"Qatnashdingiz": [
+"templates/contests/_row.html"
+],
+"Siz diskvalifikatsiya qilindingiz": [
+"templates/contests/_standings_live.html"
+],
+"<b class=\"tabular\">%(my_row_rank)s-o‘rin</b> <span class=\"text-mute tabular\">/ %(rows)s</span>": [
+"templates/contests/_standings_live.html"
+],
+"<b class=\"tabular\">%(my_row_solved)s</b> ta masala": [
+"templates/contests/_standings_live.html"
+],
+"<b class=\"tabular\">%(my_row_score)s</b> ball": [
+"templates/contests/_standings_live.html"
+],
+"· jarima <b class=\"tabular\">%(my_row_penalty)s</b>": [
+"templates/contests/_standings_live.html"
+],
+"<b>%(cp_label)s</b> yechildi <span class=\"text-mute tabular\">%(cell_time)s</span>": [
+"templates/contests/_standings_live.html"
+],
+"<b>%(cp_label)s</b> masalada %(cell_wrong)s ta noto‘g‘ri urinish": [
+"templates/contests/_standings_live.html"
+],
+"Natijalar jadvali (gorizontal suriladi)": [
+"templates/contests/_standings_live.html"
+],
+"Ishtirokchi": [
+"templates/contests/_standings_live.html",
+"templates/contests/_submissions_live.html",
+"templates/contests/detail.html",
+"templates/contests/list.html",
+"templates/contests/submissions.html",
+"templates/home/landing.html",
+"templates/integrity/contest_report.html"
+],
+"Yechildi": [
+"templates/contests/_standings_live.html",
+"templates/contests/detail.html",
+"templates/home/_hud_today.html",
+"templates/problems/_daily_card.html"
+],
+"AC daqiqasi + %(contest_wrong_try_minutes)s × noto‘g‘ri urinish (yechilgan masalalar bo‘yicha)": [
+"templates/contests/_standings_live.html"
+],
+"Jarima": [
+"templates/contests/_standings_live.html",
+"templates/contests/detail.html"
+],
+"Reyting ±": [
+"templates/contests/_standings_live.html"
+],
+"Amal": [
+"templates/contests/_standings_live.html",
+"templates/integrity/_audit_rows.html",
+"templates/integrity/contest_report.html",
+"templates/moderation/mine.html",
+"templates/moderation/queue.html",
+"templates/moderation/tags.html"
+],
+"%(contest_get_division_display)s: natija reytingga ta’sir qilmaydi": [
+"templates/contests/_standings_live.html"
+],
+"tashqarida": [
+"templates/contests/_standings_live.html"
+],
+"%(r_user_username)s, %(cp_label)s: urinishlar": [
+"templates/contests/_standings_live.html"
+],
+"AI jarimasi: natija bekor qilingan, xato urinish hisoblandi, masala bloklangan": [
+"templates/contests/_standings_live.html"
+],
+"Bekor qilingan": [
+"templates/contests/_standings_live.html",
+"templates/contests/submissions.html"
+],
+"birinchi bo‘lib yechdi,": [
+"templates/contests/_standings_live.html"
+],
+"urinish yo‘q": [
+"templates/contests/_standings_live.html",
+"templates/contests/submissions.html"
+],
+"Diskvalifikatsiya sababi (ixtiyoriy):": [
+"templates/contests/_standings_live.html"
+],
+"Yechganlar / urinib ko‘rganlar": [
+"templates/contests/_standings_live.html"
+],
+"Yechdi / urindi": [
+"templates/contests/_standings_live.html",
+"templates/contests/detail.html"
+],
+"%(cp_n_solved)s kishi yechdi, %(cp_n_tried)s kishi urindi": [
+"templates/contests/_standings_live.html"
+],
+"Belgilar izohi": [
+"templates/contests/_standings_live.html"
+],
+"<b class=\"ca-cf-ac !inline\">488</b> — yechildi: olingan ball (vaqt o‘tishi va har xato −50 bilan kamayadi, kamida 30%), ostida vaqt": [
+"templates/contests/_standings_live.html"
+],
+"<b class=\"ca-cf-ac !inline\">+1</b> — yechildi, oldin 1 noto‘g‘ri urinish; ostida vaqt (soat:daqiqa)": [
+"templates/contests/_standings_live.html"
+],
+"<b class=\"ca-cf-ac !inline\">300</b> — yechildi: masala balli, ostida vaqt (soat:daqiqa)": [
+"templates/contests/_standings_live.html"
+],
+"<span><b class=\"ca-cf-wa\">−1</b> — 1 noto‘g‘ri urinish, hali yechilmagan</span> <span><span class=\"ca-cf-first-key\" aria-hidden=\"true\"></span> birinchi yechgan</span>": [
+"templates/contests/_standings_live.html"
+],
+"<b class=\"text-ink\">Jarima</b> = yechish daqiqalari + %(contest_wrong_try_minutes)s × noto‘g‘ri urinish": [
+"templates/contests/_standings_live.html"
+],
+"<span class=\"ca-tag ca-tag-out\">tashqarida</span> — divizion diapazonidan tashqarida, reytingsiz": [
+"templates/contests/_standings_live.html"
+],
+"Yangilandi:": [
+"templates/contests/_standings_live.html"
+],
+"Urinishlar <small>%(page_paginator_count)s</small>": [
+"templates/contests/_submissions_live.html"
+],
+"Musobaqa boshlanganidan beri (soat:daqiqa)": [
+"templates/contests/_submissions_live.html"
+],
+"Qachon": [
+"templates/contests/_submissions_live.html"
+],
+"Masala": [
+"templates/contests/_submissions_live.html",
+"templates/contests/clarifications.html",
+"templates/contests/detail.html",
+"templates/contests/submissions.html",
+"templates/home/dashboard.html",
+"templates/home/landing.html",
+"templates/integrity/practice_report.html",
+"templates/learn/_problem_rows.html",
+"templates/learn/list.html",
+"templates/learn/lists.html",
+"templates/moderation/contest_form.html",
+"templates/moderation/dashboard.html",
+"templates/moderation/duels.html",
+"templates/problems/detail.html",
+"templates/submissions/list.html"
+],
+"Vaqt": [
+"templates/contests/_submissions_live.html",
+"templates/home/dashboard.html",
+"templates/integrity/_audit_rows.html",
+"templates/problems/_my_subs.html",
+"templates/problems/leaders.html",
+"templates/submissions/_status.html",
+"templates/submissions/list.html"
+],
+"Kod va yozilishi": [
+"templates/contests/_submissions_live.html"
+],
+"Kodni ko‘rish": [
+"templates/contests/_submissions_live.html",
+"templates/moderation/submissions.html",
+"templates/problems/leaders.html",
+"templates/submissions/list.html"
+],
+"Urinish #%(s_pk)s kodi": [
+"templates/contests/_submissions_live.html",
+"templates/submissions/list.html"
+],
+"Faqat %(s_user_username)s urinishlari": [
+"templates/contests/_submissions_live.html"
+],
+"%(s_problem_title)s: faqat shu masala": [
+"templates/contests/_submissions_live.html"
+],
+"%(s_exec_ms)s ms": [
+"templates/contests/_submissions_live.html",
+"templates/problems/_leaders_mini.html",
+"templates/problems/leaders.html"
+],
+"Kodni ko‘rish: #%(s_pk)s": [
+"templates/contests/_submissions_live.html",
+"templates/moderation/submissions.html"
+],
+"Yozilishini ko‘rish": [
+"templates/contests/_submissions_live.html",
+"templates/contests/submissions.html",
+"templates/integrity/contest_report.html"
+],
+"Yozilishini ko‘rish: %(s_user_username)s, %(s_label)s": [
+"templates/contests/_submissions_live.html"
+],
+"Bu filtr bo‘yicha urinish yo‘q.": [
+"templates/contests/_submissions_live.html",
+"templates/moderation/submissions.html"
+],
+"Hali urinish yo‘q.": [
+"templates/contests/_submissions_live.html"
+],
+"%(contest_title)s — Savollar": [
+"templates/contests/clarifications.html"
+],
+"%(clars)s ta": [
+"templates/contests/clarifications.html"
+],
+"%(c_problem_label)s masala": [
+"templates/contests/clarifications.html",
+"templates/contests/detail.html"
+],
+"<b>Javob</b> · %(c_answered_by_username)s": [
+"templates/contests/clarifications.html",
+"templates/contests/detail.html"
+],
+"Javob yozing…": [
+"templates/contests/clarifications.html"
+],
+"%(c_user_username)s savoliga javob": [
+"templates/contests/clarifications.html"
+],
+"Hali javob berilmagan.": [
+"templates/contests/clarifications.html"
+],
+"<b>Hali savol yo‘q</b>Javob berilgan savollar barcha ishtirokchilarga shu yerda ko‘rinadi.": [
+"templates/contests/clarifications.html"
+],
+"Savol berish": [
+"templates/contests/clarifications.html",
+"templates/contests/detail.html"
+],
+"Shart tushunarsiz bo‘lsa, hakamlardan so‘rang. Javob berilgach savol va javob hammaga ko‘rinadi.": [
+"templates/contests/clarifications.html"
+],
+"Umumiy savol": [
+"templates/contests/clarifications.html"
+],
+"Savol": [
+"templates/contests/clarifications.html"
+],
+"Yuborish": [
+"templates/contests/clarifications.html",
+"templates/problems/detail.html"
+],
+"Nimani so‘rash mumkin": [
+"templates/contests/clarifications.html"
+],
+"Shartdagi noaniqlik, chegaralar, kirish formati. Yechim yoki tekshiruvchi haqidagi savollarga javob berilmaydi.": [
+"templates/contests/clarifications.html"
+],
+"reytingli": [
+"templates/contests/detail.html",
+"templates/home/dashboard.html"
+],
+"dasturlash musobaqasi: %(contest_start)s, %(contest_duration_label)s": [
+"templates/contests/detail.html"
+],
+", %(problems)s ta masala": [
+"templates/contests/detail.html"
+],
+". Masalalar, natijalar va qoidalar.": [
+"templates/contests/detail.html"
+],
+"Yakuniy natijalar": [
+"templates/contests/detail.html",
+"templates/contests/standings.html"
+],
+"To‘liq jadval": [
+"templates/contests/detail.html"
+],
+"<b>Bu raundda hech kim masala yechmadi</b>Ball hech kimda yo‘q. Masalalarni o‘zingiz sinab ko‘rishingiz mumkin.": [
+"templates/contests/detail.html"
+],
+"Masalalarni sinab ko‘rish": [
+"templates/contests/detail.html"
+],
+"Musobaqa haqida": [
+"templates/contests/detail.html"
+],
+"Muhim qoidalar": [
+"templates/contests/detail.html"
+],
+"Kod o‘zingizniki bo‘lsin": [
+"templates/contests/detail.html"
+],
+"Musobaqada har qanday tashqi yordam taqiqlanadi: AI, boshqa oyna, telefon, maslahatchi.": [
+"templates/contests/detail.html"
+],
+"Savollar «Savol-javoblar» orqali": [
+"templates/contests/detail.html"
+],
+"Shart tushunarsiz bo‘lsa, hakamlardan so‘rang.": [
+"templates/contests/detail.html"
+],
+"Masalalar boshlanganda ochiladi": [
+"templates/contests/detail.html"
+],
+"Ungacha faqat harfi": [
+"templates/contests/detail.html"
+],
+"va bali": [
+"templates/contests/detail.html"
+],
+"ko‘rinadi.": [
+"templates/contests/detail.html"
+],
+"Sizning vaqtingiz: %(personal_minutes)s daqiqa": [
+"templates/contests/detail.html"
+],
+"Qolgan vaqt": [
+"templates/contests/detail.html"
+],
+"Vaqt tugagach yuborish yopiladi. Natijalar jadvali musobaqa tugagach ochiladi.": [
+"templates/contests/detail.html"
+],
+"Musobaqa %(contest_end)s gacha ochiq, lekin <b>sizga %(personal_minutes)s daqiqa</b> beriladi: «Boshlash»ni bosgan paytdan hisoblanadi. Masalalar shundan keyin ochiladi. Soatni to‘xtatib yoki qayta boshlab bo‘lmaydi.": [
+"templates/contests/detail.html"
+],
+"%(personal_minutes)s daqiqalik vaqtingiz hozir boshlanadi va to‘xtamaydi. Boshlaymizmi?": [
+"templates/contests/detail.html"
+],
+"<b>Vaqtingiz tugadi.</b> Natijangiz musobaqa tugagach reytingga qo‘shiladi.": [
+"templates/contests/detail.html"
+],
+"Qatnashish uchun avval yoziling, keyin «Boshlash» tugmasi chiqadi. Sizga %(personal_minutes)s daqiqa beriladi.": [
+"templates/contests/detail.html"
+],
+"Musobaqa %(contest_start)s da ochiladi. Har bir ishtirokchiga %(personal_minutes)s daqiqa beriladi: istalgan paytda boshlaysiz, oxirigacha %(contest_end)s.": [
+"templates/contests/detail.html"
+],
+"Baho vaqt o‘tishi bilan kamayadi, xato urinish −50": [
+"templates/contests/detail.html"
+],
+"Boshqaruvda tahrirlash": [
+"templates/contests/detail.html"
+],
+"%(cp_points)s ball": [
+"templates/contests/detail.html"
+],
+"Musobaqa boshlanganda ochiladi.": [
+"templates/contests/detail.html"
+],
+"Qatnashish uchun oldindan «Qatnashish» tugmasini bosing.": [
+"templates/contests/detail.html"
+],
+"<b>%(n_problems)s ta masala</b>Boshlaganingizdan keyin ochiladi.": [
+"templates/contests/detail.html"
+],
+"Harf": [
+"templates/contests/detail.html"
+],
+"Qiyinlik": [
+"templates/contests/detail.html",
+"templates/home/dashboard.html",
+"templates/learn/list.html",
+"templates/moderation/dashboard.html",
+"templates/moderation/mine.html",
+"templates/moderation/problems.html",
+"templates/moderation/queue.html",
+"templates/moderation/submit.html",
+"templates/problems/list.html"
+],
+"Cheklov": [
+"templates/contests/detail.html"
+],
+"To‘liq baho; vaqt o‘tishi bilan kamayadi": [
+"templates/contests/detail.html"
+],
+"Yechganlar": [
+"templates/contests/detail.html"
+],
+"Holatingiz": [
+"templates/contests/detail.html",
+"templates/home/dashboard.html"
+],
+"Qatnashgach ko‘rinadi": [
+"templates/contests/detail.html"
+],
+"%(cp_problem_tl_ms)s ms": [
+"templates/contests/detail.html"
+],
+"· %(cp_problem_ml_mb)s MB": [
+"templates/contests/detail.html"
+],
+"hozir %(cp_now_points)s": [
+"templates/contests/detail.html"
+],
+"%(cp_my_cell_wrong)s ta noto‘g‘ri urinish": [
+"templates/contests/detail.html"
+],
+"<span class=\"text-mute\" aria-hidden=\"true\">—</span><span class=\"sr-only\">urinish yo‘q</span>": [
+"templates/contests/detail.html"
+],
+"<b>Masalalar hali qo‘shilmagan</b>Hakamlar masalalarni qo‘shgach, shu yerda chiqadi.": [
+"templates/contests/detail.html"
+],
+"<b>Hali javob berilgan savol yo‘q</b>Shart tushunarsiz bo‘lsa, hakamlardan so‘rang: javob hammaga ko‘rinadi.": [
+"templates/contests/detail.html"
+],
+"Sizning holatingiz": [
+"templates/contests/detail.html"
+],
+"Jadvalda": [
+"templates/contests/detail.html"
+],
+"Masalalar bo‘yicha": [
+"templates/contests/detail.html"
+],
+"Reyting <b class=\"text-ink\">%(my_participation_rating_before)s</b> dan <b class=\"text-ink\">%(my_participation_rating_after)s</b> ga": [
+"templates/contests/detail.html"
+],
+"chiqdi": [
+"templates/contests/detail.html"
+],
+"tushdi": [
+"templates/contests/detail.html"
+],
+"<b>%(contest_badge)s</b><span>Masalalar ochilgach, kamida bitta masala yechganlar profiliga qo‘shiladi. Birinchi uchtalikka medal bilan.</span>": [
+"templates/contests/detail.html"
+],
+"Ro‘yxatdan o‘tganlar<small class=\"ca-box-tools\">%(n_participants)s</small>": [
+"templates/contests/detail.html"
+],
+"«Google Kalendarga qo‘shish» bilan saqlasangiz, Google Kalendar sizning odatdagi eslatmangiz bilan eslatadi.": [
+"templates/contests/detail.html"
+],
+"Virtual ishtirok": [
+"templates/contests/detail.html"
+],
+"tugagan": [
+"templates/contests/detail.html"
+],
+"Vaqt siz boshlagan paytdan hisoblanadi. Hozirgi natija bilan siz": [
+"templates/contests/detail.html"
+],
+"<b>%(virtual_rank)s-o‘rin</b>da bo‘lardingiz (%(virtual_field)s ishtirokchidan):": [
+"templates/contests/detail.html"
+],
+"<b class=\"tabular\">%(virtual_solved)s</b> ta masala": [
+"templates/contests/detail.html"
+],
+"ball <b class=\"tabular\">%(virtual_score)s</b>": [
+"templates/contests/detail.html"
+],
+", jarima <b class=\"tabular\">%(virtual_penalty)s</b>": [
+"templates/contests/detail.html"
+],
+"Reytingga ta’sir qilmaydi.": [
+"templates/contests/detail.html"
+],
+"Virtual ishtirok hozir boshlanadi va %(contest_duration_label)s davom etadi. Boshlaysizmi?": [
+"templates/contests/detail.html"
+],
+"Musobaqani o‘z vaqtingizda, xuddi jonli kabi ishlang va haqiqiy ishtirokchilar orasida qaysi o‘rinda bo‘lishingizni ko‘ring. Reytingga ta’sir qilmaydi.": [
+"templates/contests/detail.html"
+],
+"Qanday hisoblanadi": [
+"templates/contests/detail.html"
+],
+"G‘olib": [
+"templates/contests/detail.html"
+],
+"Eng ko‘p ball": [
+"templates/contests/detail.html"
+],
+"Ball teng bo‘lsa": [
+"templates/contests/detail.html"
+],
+"O‘rin ham teng": [
+"templates/contests/detail.html"
+],
+"Masala bahosi": [
+"templates/contests/detail.html",
+"templates/problems/detail.html"
+],
+"Oxirida 52% qoladi": [
+"templates/contests/detail.html"
+],
+"Xato urinish": [
+"templates/contests/detail.html"
+],
+"−50, eng kami 30%": [
+"templates/contests/detail.html"
+],
+"Ko‘p masala yechgan": [
+"templates/contests/detail.html"
+],
+"Teng bo‘lsa": [
+"templates/contests/detail.html"
+],
+"Jarimasi kam": [
+"templates/contests/detail.html"
+],
+"Daqiqalar + 10 × xato": [
+"templates/contests/detail.html"
+],
+"Daqiqalar + 20 × xato": [
+"templates/contests/detail.html"
+],
+"O‘zgaradi": [
+"templates/contests/detail.html"
+],
+"O‘zgarmaydi": [
+"templates/contests/detail.html"
+],
+"Kompilyatsiya xatosi va 1-testda (misolda) yiqilgan urinish hisobga olinmaydi.": [
+"templates/contests/detail.html"
+],
+"%(contest_get_division_display)s: diapazondan tashqaridagilar ham qatnashadi, lekin reytingi o‘zgarmaydi.": [
+"templates/contests/detail.html"
+],
+"CodeArena musobaqalari: Codeforces va ICPC qoidalari, jonli natijalar jadvali va Elo reyting. Kelgusi va o‘tgan raundlar.": [
+"templates/contests/list.html"
+],
+"Jonli raundda masala yeching va reytingingizni oshiring.": [
+"templates/contests/list.html"
+],
+"Reytingingiz": [
+"templates/contests/list.html"
+],
+"Jonli va kelgusi musobaqalar": [
+"templates/contests/list.html"
+],
+"Hozircha rejalashtirilgan musobaqa yo‘q. Yangi raund e’lon qilinganda shu yerda chiqadi.": [
+"templates/contests/list.html"
+],
+"O‘tgan musobaqalar": [
+"templates/contests/list.html"
+],
+"Qaysi musobaqalar": [
+"templates/contests/list.html"
+],
+"Rasmiy": [
+"templates/contests/list.html"
+],
+"Men qatnashgan": [
+"templates/contests/list.html"
+],
+"Sana": [
+"templates/contests/list.html",
+"templates/integrity/reports.html",
+"templates/moderation/daily_problem.html"
+],
+"Natijalar jadvali": [
+"templates/contests/list.html"
+],
+"qatnashgan": [
+"templates/contests/list.html"
+],
+"Bu turdagi o‘tgan musobaqa yo‘q": [
+"templates/contests/list.html"
+],
+"Hammasini ko‘rsatish": [
+"templates/contests/list.html"
+],
+"<b>Siz hali musobaqada qatnashmagansiz</b>Kelgusi raundga ro‘yxatdan o‘ting.": [
+"templates/contests/list.html"
+],
+"<b>Hali tugagan musobaqa yo‘q</b>Birinchi raund tugagach shu yerda chiqadi.": [
+"templates/contests/list.html"
+],
+"Eng yuqori reyting": [
+"templates/contests/list.html"
+],
+"Qanday ishlaydi": [
+"templates/contests/list.html",
+"templates/home/landing.html"
+],
+"<b>Oldindan ro‘yxatdan o‘ting,</b> keyin boshlanishini kuting.": [
+"templates/contests/list.html"
+],
+"<b>Reytingli raundlar</b> natijasi reytingingizni o‘zgartiradi.": [
+"templates/contests/list.html"
+],
+"<b>O‘tib ketganini</b> virtual ishlab ko‘ring: musobaqa sahifasida.": [
+"templates/contests/list.html"
+],
+"%(contest_title)s — Natijalar": [
+"templates/contests/standings.html"
+],
+"%(contest_title)s natijalari: o‘rinlar, ballar va har bir masala bo‘yicha urinishlar.": [
+"templates/contests/standings.html"
+],
+"Natijalar jadvali musobaqa tugagach ochiladi: hamma o‘z vaqtida boshlaydi, shuning uchun boshqalarning natijasi hozir ko‘rinmaydi. Quyida faqat o‘zingizning natijangiz.": [
+"templates/contests/standings.html"
+],
+"%(rows)s ishtirokchi": [
+"templates/contests/standings.html"
+],
+"· har 20 soniyada yangilanadi": [
+"templates/contests/standings.html"
+],
+"Jadvalni yonga suring": [
+"templates/contests/standings.html"
+],
+"Ishtirokchini qidirish": [
+"templates/contests/standings.html"
+],
+"Ism yoki login…": [
+"templates/contests/standings.html"
+],
+"CSV": [
+"templates/contests/standings.html"
+],
+"<b>Hali ishtirokchi yo‘q</b>Ro‘yxatdan o‘tganlar musobaqa boshlangach shu yerda chiqadi.": [
+"templates/contests/standings.html"
+],
+"%(contest_title)s — Urinishlar": [
+"templates/contests/submissions.html"
+],
+"login…": [
+"templates/contests/submissions.html",
+"templates/moderation/duels.html",
+"templates/moderation/submissions.html"
+],
+"Holat": [
+"templates/contests/submissions.html",
+"templates/integrity/reports.html",
+"templates/learn/_problem_rows.html",
+"templates/learn/list.html",
+"templates/moderation/duels.html",
+"templates/moderation/problems.html",
+"templates/moderation/submissions.html",
+"templates/problems/list.html"
+],
+"Filtrlash": [
+"templates/contests/submissions.html",
+"templates/moderation/duels.html",
+"templates/moderation/submissions.html"
+],
+"<span translate=\"no\">%(p_user_username)s</span> — masalalar bo‘yicha": [
+"templates/contests/submissions.html"
+],
+"Nazorat hisoboti »": [
+"templates/contests/submissions.html"
+],
+"Amallar": [
+"templates/contests/submissions.html"
+],
+"AI jarimasi": [
+"templates/contests/submissions.html"
+],
+"· xato urinish hisoblandi, masala bloklangan": [
+"templates/contests/submissions.html"
+],
+"· %(x_cell_wrong)s ta noto‘g‘ri urinishdan keyin": [
+"templates/contests/submissions.html"
+],
+"%(x_cell_wrong)s ta noto‘g‘ri urinish": [
+"templates/contests/submissions.html"
+],
+"Yozilishini ko‘rish: %(x_cp_label)s": [
+"templates/contests/submissions.html"
+],
+"%(x_cp_label)s masalasi natijasini bekor qilish. Sabab (ixtiyoriy, faqat adminlar ko‘radi):": [
+"templates/contests/submissions.html"
+],
+"Tiklash": [
+"templates/contests/submissions.html"
+],
+"Bekor qilish": [
+"templates/contests/submissions.html",
+"templates/integrity/practice_report.html",
+"templates/learn/course.html",
+"templates/moderation/contest_official.html",
+"templates/problems/detail.html"
+],
+"%(x_cp_label)s masalasi natijasini AI tufayli bekor qilish: xato urinish hisoblanadi va masala bloklanadi. Sabab (ixtiyoriy, faqat adminlar ko‘radi):": [
+"templates/contests/submissions.html"
+],
+"AI tufayli: natija xato urinish sifatida qaytariladi va masala bloklanadi": [
+"templates/contests/submissions.html"
+],
+"AI": [
+"templates/contests/submissions.html"
+],
+"Nimadan boshlash": [
+"templates/home/_dash_new.html"
+],
+"/ 3 bajarildi": [
+"templates/home/_dash_new.html"
+],
+"Birinchi masalani yeching": [
+"templates/home/_dash_new.html"
+],
+"%(first_problem_title)s: kod yozish, yuborish va natijani o‘qishni shu masalada o‘rganasiz.": [
+"templates/home/_dash_new.html"
+],
+"Kod yozish, yuborish va natijani o‘qishni birinchi masalada o‘rganasiz.": [
+"templates/home/_dash_new.html"
+],
+"Asoslarni o‘rganing": [
+"templates/home/_dash_new.html"
+],
+"O‘rganish bo‘limida %(n_courses)s ta kurs: qisqa nazariya va har biridan keyin mashq masalalari": [
+"templates/home/_dash_new.html"
+],
+", birinchisi «%(learning_plan_title)s»": [
+"templates/home/_dash_new.html"
+],
+"Darslarni ko‘rish": [
+"templates/home/_dash_new.html"
+],
+"Birinchi musobaqaga yoziling": [
+"templates/home/_dash_new.html"
+],
+"%(c_title)s, %(c_start)s. Reytingingiz musobaqada boshlanadi": [
+"templates/home/_dash_new.html"
+],
+"; bu raund reytingga ta’sir qilmaydi, mashq uchun": [
+"templates/home/_dash_new.html"
+],
+"Duelda kuchingizni sinang": [
+"templates/home/_dash_new.html"
+],
+"Raqib bilan 7 ta savol, har biriga 20 soniya. Yangi musobaqa e’lon qilinganda shu yerda chiqadi.": [
+"templates/home/_dash_new.html"
+],
+"Qo‘shimcha": [
+"templates/home/_dash_new.html",
+"templates/home/dashboard.html",
+"templates/submissions/detail.html"
+],
+"Natijalar nimani anglatadi": [
+"templates/home/_dash_new.html"
+],
+"<code translate=\"no\">AC</code>Qabul qilindi": [
+"templates/home/_dash_new.html"
+],
+"Barcha testlardan o‘tdi: masala yechildi.": [
+"templates/home/_dash_new.html"
+],
+"<code translate=\"no\">WA</code>Noto‘g‘ri javob": [
+"templates/home/_dash_new.html"
+],
+"Dastur ishladi, lekin biror testda javob boshqacha chiqdi.": [
+"templates/home/_dash_new.html"
+],
+"<code translate=\"no\">TLE</code>Vaqt oshdi": [
+"templates/home/_dash_new.html"
+],
+"Javob vaqt chegarasida chiqmadi. Tezroq algoritm kerak.": [
+"templates/home/_dash_new.html"
+],
+"<code translate=\"no\">CE</code>Kompilyatsiya xatosi": [
+"templates/home/_dash_new.html"
+],
+"Kod ishga tushmadi. Xato matni urinish sahifasida.": [
+"templates/home/_dash_new.html"
+],
+"Bugungi masala": [
+"templates/home/_hud_today.html",
+"templates/problems/detail.html"
+],
+"Yechish": [
+"templates/home/_hud_today.html",
+"templates/home/dashboard.html"
+],
+"Kelgusi musobaqa": [
+"templates/home/_land_round.html",
+"templates/home/dashboard.html",
+"templates/home/landing.html"
+],
+"%(c_title)s</a> <small class=\"tabular\">%(c_start)s · %(c_duration_label)s · %(c_n_participants)s ishtirokchi</small>": [
+"templates/home/_land_round.html"
+],
+"Kunlik maqsadlar": [
+"templates/home/_quests.html"
+],
+"<b>%(q_title)s</b><small>Bajarildi</small>": [
+"templates/home/_quests.html"
+],
+"Har 7 kunlik Olov uchun bitta muzlatish olasiz (ko‘pi bilan 2 ta).": [
+"templates/home/_quests.html"
+],
+"Bugungi Olov saqlandi.": [
+"templates/home/_quests.html"
+],
+"Bittasini bajarsangiz ham Olov o‘chmaydi.": [
+"templates/home/_quests.html"
+],
+"<b>%(freezes)s</b> ta muzlatish bor: bir kunlik tanaffus Olovni o‘chirmaydi.": [
+"templates/home/_quests.html"
+],
+"Bu hafta": [
+"templates/home/_week.html"
+],
+": yechilgan": [
+"templates/home/_week.html"
+],
+": bugun": [
+"templates/home/_week.html"
+],
+"Xush kelibsiz, %(user_first_name)s": [
+"templates/home/dashboard.html"
+],
+"Reytingingiz birinchi musobaqadan keyin paydo bo‘ladi. Hozircha masala yechib mashq qiling.": [
+"templates/home/dashboard.html"
+],
+"Birinchi qadam": [
+"templates/home/dashboard.html"
+],
+"Salom, %(user_first_name)s": [
+"templates/home/dashboard.html"
+],
+"Musobaqa reytingi · <span class=\"ca-hud-tier\">%(user_rating)s</span>": [
+"templates/home/dashboard.html"
+],
+"%(rating_card_next_name)s darajasigacha": [
+"templates/home/dashboard.html"
+],
+"<span class=\"font-semibold text-white\">%(rating_card_next_name)s</span> darajasigacha %(rating_card_next_need)s ball": [
+"templates/home/dashboard.html"
+],
+"Siz <b>%(live_rank)s-o‘rin</b>dasiz, %(live_n_problems)s masaladan %(live_solved)s tasi yechilgan.": [
+"templates/home/dashboard.html"
+],
+"%(live_n_problems)s ta masala. Hali qatnashmagansiz.": [
+"templates/home/dashboard.html"
+],
+"Keyingi qadamlar": [
+"templates/home/dashboard.html"
+],
+"reytingga ta’sir qilmaydi": [
+"templates/home/dashboard.html"
+],
+"O‘rganishda davom etish": [
+"templates/home/dashboard.html"
+],
+"Kurs bajarilishi": [
+"templates/home/dashboard.html",
+"templates/learn/course.html"
+],
+"%(learning_progress_done)s / %(learning_progress_total)s masala": [
+"templates/home/dashboard.html"
+],
+"· keyingisi: %(learning_next_title)s": [
+"templates/home/dashboard.html"
+],
+"So‘nggi urinishlar": [
+"templates/home/dashboard.html"
+],
+"Yuborilgan": [
+"templates/home/dashboard.html",
+"templates/moderation/dashboard.html",
+"templates/moderation/queue.html",
+"templates/problems/_my_subs.html",
+"templates/submissions/list.html"
+],
+"%(s_exec_ms)s&nbsp;ms": [
+"templates/home/dashboard.html",
+"templates/problems/_my_subs.html",
+"templates/submissions/list.html"
+],
+"Hali urinish yo‘q": [
+"templates/home/dashboard.html",
+"templates/submissions/list.html"
+],
+"Birinchi masalani tanlang</a>: kodingiz darhol tekshiriladi.": [
+"templates/home/dashboard.html"
+],
+"Siz uchun": [
+"templates/home/dashboard.html",
+"templates/problems/list.html"
+],
+"Eng kam yechgan mavzuingiz <b class=\"text-ink\">%(picks_reason)s</b>. Shu masalalar aynan shu mavzuni mashq qildiradi.": [
+"templates/home/dashboard.html"
+],
+"Siz ko‘p yechadigan qiyinlikdagi, hali yechilmagan masalalar.": [
+"templates/home/dashboard.html"
+],
+"%(d_challenger_username)s vs %(d_opponent_username)s": [
+"templates/home/dashboard.html"
+],
+"Ochiq duel, raqib kutilmoqda": [
+"templates/home/dashboard.html"
+],
+"<b>%(d_challenger_username)s</b> <span class=\"text-mute\">sizni chaqirdi, %(d_get_language_display)s</span>": [
+"templates/home/dashboard.html"
+],
+"7 ta savol, har biriga 20 soniya: raqib bilan 1 ga 1. Natija duel reytingiga ta’sir qiladi.": [
+"templates/home/dashboard.html"
+],
+"Keyingi musobaqa": [
+"templates/home/dashboard.html"
+],
+"Do‘stlarni taklif qiling": [
+"templates/home/dashboard.html"
+],
+"Birga mashq qilish va duelda bellashish qiziqroq. Havolangiz orqali kelganlar sizning taklifingiz bilan qo‘shiladi.": [
+"templates/home/dashboard.html"
+],
+"CodeArena — dasturlashni musobaqada o‘rganing": [
+"templates/home/landing.html"
+],
+"<span class=\"ca-live-dot\" aria-hidden=\"true\"></span>Jonli musobaqa": [
+"templates/home/landing.html"
+],
+"tugashiga": [
+"templates/home/landing.html"
+],
+"keyin": [
+"templates/home/landing.html"
+],
+"Dasturlashni musobaqada o‘rganing": [
+"templates/home/landing.html"
+],
+"Masala yeching, do‘stingiz bilan bellashing, reytingda ko‘tariling. Kodingiz shu zahoti serverda testlanadi, natija halol.": [
+"templates/home/landing.html"
+],
+"Bepul boshlash": [
+"templates/home/landing.html"
+],
+"Masalalarni ko‘rish": [
+"templates/home/landing.html"
+],
+"Hozir saytda <b>%(stats_problems)s</b> ta masala, <b>%(stats_contests)s</b> ta musobaqa va <b>%(stats_submissions)s</b> ta tekshirilgan yechim bor.": [
+"templates/home/landing.html"
+],
+"<i></i><i></i><i></i><span>main.py · namuna</span>": [
+"templates/home/landing.html"
+],
+"<span class=\"ln\">1</span>n = <span class=\"f\">int</span>(<span class=\"f\">input</span>()) <span class=\"ln\">2</span>a = <span class=\"f\">list</span>(<span class=\"f\">map</span>(<span class=\"f\">int</span>, <span class=\"f\">input</span>().split())) <span class=\"ln\">3</span><span class=\"f\">print</span>(<span class=\"f\">max</span>(a) - <span class=\"f\">min</span>(a))": [
+"templates/home/landing.html"
+],
+"Qabul qilindi</span><span class=\"text-white/70\">12/12 test</span><span class=\"ml-auto text-white/60\">48 ms</span>": [
+"templates/home/landing.html"
+],
+"Shu kabi masalani o‘zingiz yeching: ro‘yxatdan o‘tmasdan ham ochib ko‘rish mumkin": [
+"templates/home/landing.html"
+],
+"Masala tanlang": [
+"templates/home/landing.html"
+],
+"Boshlang‘ichdan qiyingacha. Kun masalasi va darajangizga mos keyingi masala tavsiya qilinadi.": [
+"templates/home/landing.html"
+],
+"Kod yozing": [
+"templates/home/landing.html"
+],
+"Brauzerdagi muharrirda, %(languages)s tilda. Yuborishdan oldin misollarda sinab ko‘ring.": [
+"templates/home/landing.html"
+],
+"Natijani ko‘ring": [
+"templates/home/landing.html"
+],
+"Har bir test alohida: javob, vaqt, xotira. Ball va reyting darhol yangilanadi.": [
+"templates/home/landing.html"
+],
+"Nimasi bilan boshqacha": [
+"templates/home/landing.html"
+],
+"Katta platformalarda yo‘q narsalar: duellar, musobaqalar va halollik uchun qurilgan.": [
+"templates/home/landing.html"
+],
+"Reytingli musobaqalar": [
+"templates/home/landing.html"
+],
+"Jonli natijalar jadvali va Elo reyting. Reytingli raundda faqat hech kim ko‘rmagan masalalar beriladi.": [
+"templates/home/landing.html"
+],
+"1 ga 1 duellar": [
+"templates/home/landing.html"
+],
+"Do‘stingizni chaqiring: Python, C++, Java yoki JavaScript kodi — nima chiqaradi? 5 ta savol, har biriga 20 soniya.": [
+"templates/home/landing.html"
+],
+"Har kuni bitta masala. Kunida yechsangiz Olov o‘sadi va +5 bonus ball olasiz.": [
+"templates/home/landing.html"
+],
+"%(languages)s ta til": [
+"templates/home/landing.html"
+],
+"%(languages)s. Har bir yechim cheklangan muhitda barcha testlarda tekshiriladi.": [
+"templates/home/landing.html"
+],
+"Halol natijalar": [
+"templates/home/landing.html"
+],
+"Musobaqadagi har bir yechim dalillar bilan tekshiriladi. Shubha bo‘lsa, qarorni odam qabul qiladi va u jurnalga yoziladi.": [
+"templates/home/landing.html"
+],
+"Hozir saytda": [
+"templates/home/landing.html"
+],
+"So‘nggi reytingli raund, %(last_rated_end)s · <b class=\"text-ink\">%(last_rated_title)s</b>": [
+"templates/home/landing.html"
+],
+"%(n_last)s ishtirokchining to‘liq jadvali": [
+"templates/home/landing.html"
+],
+"<b>Hali reytingli raund o‘tmagan</b>Birinchi raund tugagach, g‘oliblar shu yerda chiqadi.": [
+"templates/home/landing.html"
+],
+"Kun masalasi · %(daily_date)s": [
+"templates/home/landing.html"
+],
+"%(daily_problem_get_difficulty_display)s</span> · yechish uchun bir necha qator kifoya": [
+"templates/home/landing.html"
+],
+"Masalani ochish": [
+"templates/home/landing.html"
+],
+"Bugun boshlang": [
+"templates/home/landing.html"
+],
+"Ro‘yxatdan o‘tish bir daqiqa oladi.": [
+"templates/home/landing.html"
+],
+"Kim": [
+"templates/integrity/_audit_rows.html"
+],
+"Kimga": [
+"templates/integrity/_audit_rows.html"
+],
+"Izoh": [
+"templates/integrity/_audit_rows.html",
+"templates/integrity/contest_report.html"
+],
+"Hali amal yo‘q.": [
+"templates/integrity/_audit_rows.html"
+],
+"Musobaqa sahifasidan chiqdingiz": [
+"templates/integrity/_tracker.html"
+],
+"<span id=\"ca-away-n\" class=\"font-semibold text-ink\"></span>-marta, <span id=\"ca-away-t\" class=\"font-semibold text-ink\"></span> tashqarida bo‘ldingiz.": [
+"templates/integrity/_tracker.html"
+],
+"Har bir chiqish vaqti bilan qayd etiladi va hakamlarga ko‘rinadi. Boshqa oyna, AI yordamchisi yoki boshqa sahifadan foydalanish diskvalifikatsiyaga olib kelishi mumkin.": [
+"templates/integrity/_tracker.html"
+],
+"Tushundim": [
+"templates/integrity/_tracker.html",
+"templates/learn/course.html"
+],
+"Natijaga ta’sir qiluvchi har bir xodim amali: kim, qachon, nima uchun.": [
+"templates/integrity/audit.html"
+],
+"%(contest_title)s — Nazorat hisoboti": [
+"templates/integrity/contest_report.html"
+],
+"Boshqaruv</a> /": [
+"templates/integrity/contest_report.html"
+],
+"Nazorat hisoboti": [
+"templates/integrity/contest_report.html",
+"templates/integrity/replay.html"
+],
+"<span>%(contest_title)s</span><span class=\"tabular\">%(contest_start)s</span><span>%(rows)s ishtirokchida hodisa</span>": [
+"templates/integrity/contest_report.html"
+],
+"Ko‘rilmagan juftlik": [
+"templates/integrity/contest_report.html"
+],
+"Hodisasi bor": [
+"templates/integrity/contest_report.html"
+],
+"Shubhali tez yechim": [
+"templates/integrity/contest_report.html"
+],
+"Qaror jurnalda": [
+"templates/integrity/contest_report.html"
+],
+"Hisobot bo‘limlari": [
+"templates/integrity/contest_report.html"
+],
+"<a href=\"#people\" aria-current=\"true\">Ishtirokchilar <span>%(rows)s</span></a> <a href=\"#flags\">O‘xshash kodlar": [
+"templates/integrity/contest_report.html"
+],
+"%(open_flags)s yangi": [
+"templates/integrity/contest_report.html"
+],
+"<a href=\"#suspicious\">Shubhali yechimlar <span>%(suspicious)s</span></a> <a href=\"#journal\">Amallar jurnali <span>%(audit)s</span></a>": [
+"templates/integrity/contest_report.html"
+],
+"Xavf bo‘yicha saralangan": [
+"templates/integrity/contest_report.html"
+],
+"Chiqish — musobaqa sahifalaridan tashqariga (boshqa oyna, varaq yoki saytning boshqa sahifasi) · Tashqarida — jami vaqt · Paste — muharrirga qo‘yish urinishi · Tez — g‘ayrioddiy tez matn kiritish · Nusxa — shart matnidan nusxa. Dalillar — serverda tekshirilgani, brauzerda o‘chirib bo‘lmaydi: tracker o‘chiq (×6), muharrirda yozilmagan kod (×8), kod sakrashi (×3), umumiy qurilma (×10), ikki qurilma (×5), o‘xshash kod (×8). Xavf = paste×5 + tez×3 + nusxa×2 + chiqish + tashqarida daqiqa + shubhali yechim×4 + dalillar.": [
+"templates/integrity/contest_report.html"
+],
+"Tashqarida": [
+"templates/integrity/contest_report.html"
+],
+"Paste": [
+"templates/integrity/contest_report.html"
+],
+"Tez": [
+"templates/integrity/contest_report.html"
+],
+"Nusxa": [
+"templates/integrity/contest_report.html"
+],
+"Dalillar": [
+"templates/integrity/contest_report.html"
+],
+"Xavf": [
+"templates/integrity/contest_report.html",
+"templates/integrity/practice_report.html"
+],
+"Oxirgi hodisa": [
+"templates/integrity/contest_report.html"
+],
+"daq": [
+"templates/integrity/contest_report.html"
+],
+"Tavsiya: diskvalifikatsiya": [
+"templates/integrity/contest_report.html"
+],
+"Tavsiya: %(c_open_problems)s ni bekor qilish": [
+"templates/integrity/contest_report.html"
+],
+"%(label)s bekor qilingan — tiklash": [
+"templates/integrity/contest_report.html"
+],
+"%(label)s masalasi natijasini bekor qilish. Sabab (ixtiyoriy, faqat adminlar ko‘radi):": [
+"templates/integrity/contest_report.html"
+],
+"Faqat %(label)s masalasi natijasini bekor qilish": [
+"templates/integrity/contest_report.html"
+],
+"%(label)s masalasi natijasini AI tufayli bekor qilish: xato urinish hisoblanadi va masala bloklanadi. Sabab (ixtiyoriy, faqat adminlar ko‘radi):": [
+"templates/integrity/contest_report.html"
+],
+"AI tufayli: %(label)s natijasi xato urinish sifatida qaytariladi va masala bloklanadi": [
+"templates/integrity/contest_report.html"
+],
+"Urinishlari, masalalar bo‘yicha": [
+"templates/integrity/contest_report.html"
+],
+"%(user_username)s: urinishlari": [
+"templates/integrity/contest_report.html"
+],
+"Chuqur tekshirish: barcha urinishlari hammaniki va oldingi yechimlar bilan solishtiriladi": [
+"templates/integrity/contest_report.html"
+],
+"%(user_username)s: chuqur tekshirish": [
+"templates/integrity/contest_report.html"
+],
+"Sabab (ixtiyoriy):": [
+"templates/integrity/contest_report.html"
+],
+"DQ bekor": [
+"templates/integrity/contest_report.html"
+],
+"Diskvalifikatsiya": [
+"templates/integrity/contest_report.html",
+"templates/moderation/contest_official.html"
+],
+"%(user_username)s: boshqa amallar": [
+"templates/integrity/contest_report.html"
+],
+"Boshqa amallar": [
+"templates/integrity/contest_report.html",
+"templates/moderation/contests.html",
+"templates/moderation/problems.html"
+],
+"Diskvalifikatsiya qilish": [
+"templates/integrity/contest_report.html"
+],
+"Hodisa yo‘q.": [
+"templates/integrity/contest_report.html"
+],
+"Shubhali yechimlar": [
+"templates/integrity/contest_report.html"
+],
+"Juda tez — masala ochilgandan AC gacha: Easy &lt; %(speed_limits_easy)s s, Medium &lt; %(speed_limits_medium)s s, Hard &lt; %(speed_limits_hard)s s. Chiqib-qaytib — %(min_away_s)s+ s tashqarida bo‘lib, qaytgach %(quick_after_return_s)s s ichida AC.": [
+"templates/integrity/contest_report.html"
+],
+"ochilgandan": [
+"templates/integrity/contest_report.html"
+],
+"boshlanishdan": [
+"templates/integrity/contest_report.html"
+],
+"%(r_elapsed)s s da AC": [
+"templates/integrity/contest_report.html"
+],
+"%(r_away_s)s s tashqarida, qaytgach %(r_after_return)s s da AC": [
+"templates/integrity/contest_report.html"
+],
+"Yechim #%(r_submission_pk)s": [
+"templates/integrity/contest_report.html"
+],
+"Shubhali yechim topilmadi.": [
+"templates/integrity/contest_report.html"
+],
+"O‘xshash kodlar": [
+"templates/integrity/contest_report.html"
+],
+"%(open_flags)s ko‘rilmagan": [
+"templates/integrity/contest_report.html"
+],
+"Bir masala, bir til, kamida %(min_lines)s qator kod, o‘xshashlik ≥ %(threshold)s%%. AC yechimlar, AC olmaganlarning oxirgi urinishi, va musobaqadan oldingi yechimlar (amaliyot, oldingi musobaqalar, muallif) solishtiriladi; ishtirokchi qatoridagi": [
+"templates/integrity/contest_report.html"
+],
+"chuqur tekshiruv esa uning barcha urinishlarini solishtiradi. O‘zgaruvchi nomlari va izohlar hisobga olinmaydi. <span class=\"ca-cmp-key\"></span> — ikkala kodda ham bor qatorlar.": [
+"templates/integrity/contest_report.html"
+],
+"Barcha masalalar avtomatik tekshirildi: %(contest_similarity_checked_at)s.": [
+"templates/integrity/contest_report.html"
+],
+"Musobaqa tugaganidan 10 daqiqa o‘tib barcha masalalar avtomatik tekshiriladi.": [
+"templates/integrity/contest_report.html"
+],
+"Tekshiriladigan masalalar": [
+"templates/integrity/contest_report.html"
+],
+"Qaysi masalalar:": [
+"templates/integrity/contest_report.html"
+],
+"Tanlanganlarni tekshirish": [
+"templates/integrity/contest_report.html"
+],
+"%(f_sides_0_sub_language_name)s · %(f_sides_0_n_hit)s / %(f_sides_0_n_code)s qator mos ·": [
+"templates/integrity/contest_report.html"
+],
+"musobaqadan oldingi yechim bilan": [
+"templates/integrity/contest_report.html"
+],
+"ikkinchi kod": [
+"templates/integrity/contest_report.html"
+],
+"%(f_gap_min)s daqiqa": [
+"templates/integrity/contest_report.html"
+],
+"1 daqiqadan kam": [
+"templates/integrity/contest_report.html"
+],
+"keyin yuborilgan": [
+"templates/integrity/contest_report.html"
+],
+"Chuqur tekshiruv": [
+"templates/integrity/contest_report.html"
+],
+"Ko‘rildi": [
+"templates/integrity/contest_report.html"
+],
+"Ko‘rilmagan": [
+"templates/integrity/contest_report.html"
+],
+"Kodlarni yonma-yon ko‘rish": [
+"templates/integrity/contest_report.html"
+],
+"Musobaqadan oldingi yechim": [
+"templates/integrity/contest_report.html"
+],
+"birinchi": [
+"templates/integrity/contest_report.html"
+],
+"yozilishi": [
+"templates/integrity/contest_report.html"
+],
+"paste %(side_paste)s": [
+"templates/integrity/contest_report.html"
+],
+"Boshqa oynaga o‘tishlar": [
+"templates/integrity/contest_report.html"
+],
+"chiqish %(side_blur)s": [
+"templates/integrity/contest_report.html"
+],
+"%(side_user_username)s kodi": [
+"templates/integrity/contest_report.html"
+],
+"%(side_user_username)s: DQ bekor": [
+"templates/integrity/contest_report.html"
+],
+"%(side_user_username)sni diskvalifikatsiya": [
+"templates/integrity/contest_report.html"
+],
+"%(f_label)s masalasi natijasini AI tufayli bekor qilish: xato urinish hisoblanadi va masala bloklanadi. Sabab (ixtiyoriy, faqat adminlar ko‘radi):": [
+"templates/integrity/contest_report.html"
+],
+"%(side_user_username)s: faqat %(f_label)s ni AI tufayli bekor qilish": [
+"templates/integrity/contest_report.html"
+],
+"%(f_label)s masalasi natijasini bekor qilish. Sabab (ixtiyoriy, faqat adminlar ko‘radi):": [
+"templates/integrity/contest_report.html"
+],
+"%(side_user_username)s: %(f_label)s natijasini tiklash": [
+"templates/integrity/contest_report.html"
+],
+"%(side_user_username)s: faqat %(f_label)s ni bekor qilish": [
+"templates/integrity/contest_report.html"
+],
+"Izoh: nima uchun ko‘chirma / tasodif…": [
+"templates/integrity/contest_report.html"
+],
+"Qayta ochish": [
+"templates/integrity/contest_report.html",
+"templates/integrity/reports.html"
+],
+"O‘xshash kod topilmadi. Masalalarni tanlab, «Tanlanganlarni tekshirish» ni bosing.": [
+"templates/integrity/contest_report.html"
+],
+"Hammasi »": [
+"templates/integrity/contest_report.html"
+],
+"AI yoki boshqa joydan ko‘chirilganga o‘xshagan mashq yechimlari. Bu dalil emas — kodni ochib ko‘ring va o‘zingiz qaror qiling. Tasdiqlangan yechim uchun amaliyot bali berilmaydi; qarorni istalgan payt bekor qilish mumkin. Belgilari juda kuchli yechimlarning bali siz ko‘rib chiqquningizcha avtomatik ushlab turiladi.": [
+"templates/integrity/practice_report.html"
+],
+"Davr": [
+"templates/integrity/practice_report.html"
+],
+"Oxirgi 7 kun": [
+"templates/integrity/practice_report.html"
+],
+"Oxirgi 30 kun": [
+"templates/integrity/practice_report.html"
+],
+"Oxirgi 90 kun": [
+"templates/integrity/practice_report.html"
+],
+"Ko‘rsatish": [
+"templates/integrity/practice_report.html"
+],
+"Belgilar: uzun kod qo‘yishga urinish · kod bir zumda paydo bo‘lishi · 20 soniyadan ko‘p boshqa oynada bo‘lib, qaytgach 3 daqiqa ichida yechish · sahifa ochilgach juda tez yechish (Easy 1,5 daq, Medium 4 daq, Hard 7 daq).": [
+"templates/integrity/practice_report.html"
+],
+"<b class=\"tabular\">%(rows)s</b> ta shubhali yechim": [
+"templates/integrity/practice_report.html"
+],
+", <b class=\"tabular text-warn\">%(open)s</b> tasi ko‘rib chiqilmagan": [
+"templates/integrity/practice_report.html"
+],
+"Talaba": [
+"templates/integrity/practice_report.html"
+],
+"Nima ko‘rindi": [
+"templates/integrity/practice_report.html"
+],
+"Qaror": [
+"templates/integrity/practice_report.html",
+"templates/moderation/dashboard.html"
+],
+"Kodni ko‘rish »": [
+"templates/integrity/practice_report.html"
+],
+"Tasdiqlangan · ball yo‘q": [
+"templates/integrity/practice_report.html"
+],
+"Shubha yo‘q": [
+"templates/integrity/practice_report.html"
+],
+"Avtomatik: ball ushlab turilibdi": [
+"templates/integrity/practice_report.html"
+],
+"Yechim talabaning o‘z ishi emas: amaliyot bali olib tashlanadi": [
+"templates/integrity/practice_report.html"
+],
+"Ko‘chirilgan": [
+"templates/integrity/practice_report.html"
+],
+"Bu davrda shubhali mashq yechimi topilmadi.": [
+"templates/integrity/practice_report.html"
+],
+"%(participant_username)s · %(cp_label)s — yozilish tarixi": [
+"templates/integrity/replay.html"
+],
+"Kod qanday yozilgan": [
+"templates/integrity/replay.html"
+],
+"Boshqa masalalar": [
+"templates/integrity/replay.html"
+],
+"Kod ijrosi": [
+"templates/integrity/replay.html"
+],
+"Oldingi holat": [
+"templates/integrity/replay.html"
+],
+"Ijro": [
+"templates/integrity/replay.html"
+],
+"Keyingi holat": [
+"templates/integrity/replay.html"
+],
+"Vaqt bo‘yicha surish": [
+"templates/integrity/replay.html"
+],
+"<span class=\"ca-rp-key\"></span> — oldingi holatdan keyin paydo bo‘lgan qatorlar. Har ~10 soniyada saqlanadi, faqat kod o‘zgarganda.": [
+"templates/integrity/replay.html"
+],
+"Vaqt chizig‘i": [
+"templates/integrity/replay.html"
+],
+"<b>%(jumps)s ta keskin sakrash</b> — 10 soniya atrofida %(jumps_0_chars)s+ belgi paydo bo‘lgan. Qo‘lda yozilgan kodda bu kam uchraydi.": [
+"templates/integrity/replay.html"
+],
+"yuborildi": [
+"templates/integrity/replay.html"
+],
+"+%(it_chars)s belgi %(it_secs)s s ichida": [
+"templates/integrity/replay.html"
+],
+"Sahifadan chiqdi": [
+"templates/integrity/replay.html"
+],
+"Qaytdi · %(it_away_s)s s tashqarida": [
+"templates/integrity/replay.html"
+],
+"Paste urinishi": [
+"templates/integrity/replay.html"
+],
+"Juda tez yozish": [
+"templates/integrity/replay.html"
+],
+"Masalani ochdi": [
+"templates/integrity/replay.html"
+],
+"(boshqa sahifa)": [
+"templates/integrity/replay.html"
+],
+"Bu masala uchun saqlangan kod holati yo‘q. Ishtirokchi masalani ochmagan yoki bu musobaqa yozilish tarixi qo‘shilishidan oldin o‘tgan.": [
+"templates/integrity/replay.html"
+],
+"Shikoyat va apellyatsiyalar": [
+"templates/integrity/reports.html"
+],
+"%(open_count)s ta ochiq. Ochiqlari tepada.": [
+"templates/integrity/reports.html"
+],
+"Tur": [
+"templates/integrity/reports.html"
+],
+"Xabar": [
+"templates/integrity/reports.html"
+],
+"Kimdan": [
+"templates/integrity/reports.html"
+],
+"Kimga / musobaqa": [
+"templates/integrity/reports.html"
+],
+"Yuborilgan sahifa": [
+"templates/integrity/reports.html"
+],
+"Javob (yuboruvchiga ko‘rinadi)": [
+"templates/integrity/reports.html"
+],
+"Javob: %(r_outcome)s": [
+"templates/integrity/reports.html"
+],
+"<b>Hozircha xabar yo‘q</b>Foydalanuvchilar profil yoki natija haqida yozganda shu yerda chiqadi.": [
+"templates/integrity/reports.html"
+],
+"<span class=\"sr-only\">Kurs: </span>%(nav_plan_title)s": [
+"templates/learn/_plan_strip.html"
+],
+"<span class=\"ca-st is-solved\" title=\"Yechilgan\"></span><span class=\"sr-only\">Yechilgan</span>": [
+"templates/learn/_problem_rows.html",
+"templates/problems/list.html"
+],
+"SQL": [
+"templates/learn/_problem_rows.html",
+"templates/moderation/tags.html",
+"templates/problems/detail.html",
+"templates/problems/list.html"
+],
+"Ro‘yxatga saqlash": [
+"templates/learn/_save_menu.html"
+],
+"<span class=\"hidden sm:inline\">Saqlash</span><span class=\"sr-only sm:hidden\">Saqlash</span>": [
+"templates/learn/_save_menu.html"
+],
+"Yangi ro‘yxat nomi": [
+"templates/learn/_save_menu.html"
+],
+"Yangi ro‘yxatga saqlash": [
+"templates/learn/_save_menu.html"
+],
+"Barcha ro‘yxatlar": [
+"templates/learn/_save_menu.html"
+],
+"%(plan_title)s — kurs": [
+"templates/learn/course.html"
+],
+"O‘rganish</a> / %(plan_get_stage_display)s": [
+"templates/learn/course.html"
+],
+"· %(progress_total)s masala": [
+"templates/learn/course.html"
+],
+"· yashirin": [
+"templates/learn/course.html"
+],
+"Tahrirlash": [
+"templates/learn/course.html",
+"templates/moderation/contests.html",
+"templates/moderation/mine.html",
+"templates/moderation/plans.html",
+"templates/moderation/problems.html",
+"templates/moderation/tags.html",
+"templates/moderation/users.html"
+],
+"Kurs tugatildi": [
+"templates/learn/course.html"
+],
+"Nazariya": [
+"templates/learn/course.html",
+"templates/learn/hub.html"
+],
+"Nazariya o‘qildi": [
+"templates/learn/course.html"
+],
+"Kirib, o‘qilgan deb belgilash": [
+"templates/learn/course.html"
+],
+"Keyingi kurs: %(next_plan_title)s": [
+"templates/learn/course.html"
+],
+"<span>%(g_label)s</span> masalalar": [
+"templates/learn/course.html"
+],
+"Masalalar tayyorlanmoqda": [
+"templates/learn/course.html"
+],
+"Bu kurs faqat nazariya": [
+"templates/learn/course.html"
+],
+"Hozircha nazariyani o‘qing. Shu mavzudagi masalalar umumiy ro‘yxatda ham bor (teg bo‘yicha):": [
+"templates/learn/course.html"
+],
+"Kurs haqida": [
+"templates/learn/course.html"
+],
+"Mazmun": [
+"templates/learn/course.html"
+],
+"Bajarilishi": [
+"templates/learn/course.html"
+],
+"Nazariya o‘qilgan, kurs tugatildi.": [
+"templates/learn/course.html"
+],
+"Bu kurs faqat nazariya: o‘qib bo‘lgach «Tushundim» ni bosing.": [
+"templates/learn/course.html"
+],
+"<b class=\"text-2xl font-bold text-ink tabular\">%(progress_done)s</b> / %(progress_total)s masala": [
+"templates/learn/course.html"
+],
+"— tugatildi": [
+"templates/learn/course.html"
+],
+"yechildi": [
+"templates/learn/course.html"
+],
+"Kurslar — O‘rganish": [
+"templates/learn/hub.html"
+],
+"Dasturlashni mavzulab o‘rganing: har kursda qisqa nazariya va osonidan qiyiniga masalalar, o‘zbek tilida.": [
+"templates/learn/hub.html"
+],
+"Har kurs bitta mavzu: qisqa nazariya, keyin osonidan qiyinga masalalar.": [
+"templates/learn/hub.html"
+],
+"Yana %(soon)s ta kurs tayyorlanmoqda.": [
+"templates/learn/hub.html"
+],
+"Kurslarni filtrlash": [
+"templates/learn/hub.html"
+],
+"Kurs yoki mavzu…": [
+"templates/learn/hub.html"
+],
+"Bo‘limlar": [
+"templates/learn/hub.html"
+],
+"Yo‘l bosqichlari": [
+"templates/learn/hub.html"
+],
+"Tez orada <span class=\"tabular\">%(soon)s</span>": [
+"templates/learn/hub.html"
+],
+"Yutuqlaringiz saqlansin": [
+"templates/learn/hub.html"
+],
+"Ro‘yxatdan o‘ting</a>: yutuqlaringiz saqlanadi va har kurs uchun nishon olasiz.": [
+"templates/learn/hub.html"
+],
+"Davom ettirish": [
+"templates/learn/hub.html"
+],
+"Shu yerdan boshlang": [
+"templates/learn/hub.html"
+],
+"· %(current_progress_done)s / %(current_progress_total)s masala": [
+"templates/learn/hub.html"
+],
+"Keyingi masala: %(next_problem_title)s ·": [
+"templates/learn/hub.html"
+],
+"%(s_courses)s kurs": [
+"templates/learn/hub.html"
+],
+"Yashirin": [
+"templates/learn/hub.html",
+"templates/moderation/plans.html",
+"templates/moderation/problems.html"
+],
+"Siz shu yerdasiz": [
+"templates/learn/hub.html"
+],
+"tugatildi": [
+"templates/learn/hub.html"
+],
+"Tayyorlanmoqda": [
+"templates/learn/hub.html"
+],
+"%(p_progress_done)s / %(p_progress_total)s yechilgan": [
+"templates/learn/hub.html"
+],
+"%(p_progress_total)s masala": [
+"templates/learn/hub.html"
+],
+"Hali kurs yo‘q": [
+"templates/learn/hub.html"
+],
+"Birinchisini tuzing</a>.": [
+"templates/learn/hub.html"
+],
+"<b>Tez orada</b><span class=\"text-mute\">%(soon)s ta kurs tayyorlanmoqda — kursda 10 ta masala bo‘lganda ochiladi</span>": [
+"templates/learn/hub.html"
+],
+"Tayyorlik": [
+"templates/learn/hub.html"
+],
+"%(p_ready)s/10 masala": [
+"templates/learn/hub.html"
+],
+"<b>Bunday kurs topilmadi</b>Boshqa so‘z bilan qidirib ko‘ring.": [
+"templates/learn/hub.html"
+],
+"%(lst_name)s — ro‘yxat": [
+"templates/learn/list.html"
+],
+"«%(lst_name)s» — %(lst_owner_username)s tuzgan %(rows)s ta masalalik ro‘yxat.": [
+"templates/learn/list.html"
+],
+"Ro‘yxatlarim": [
+"templates/learn/list.html",
+"templates/learn/lists.html"
+],
+"%(rows)s ta masala": [
+"templates/learn/list.html"
+],
+"· %(n_hidden)s ta masala hozir yopiq": [
+"templates/learn/list.html"
+],
+"Ochiq havola": [
+"templates/learn/list.html"
+],
+"<b class=\"tabular text-ink\">%(n_solved)s / %(rows)s</b> yechilgan": [
+"templates/learn/list.html"
+],
+"Olish": [
+"templates/learn/list.html"
+],
+"Ro‘yxatdan olish": [
+"templates/learn/list.html"
+],
+"Ro‘yxatdan olish: %(p_title)s": [
+"templates/learn/list.html"
+],
+"Ro‘yxat bo‘sh.": [
+"templates/learn/list.html"
+],
+"Masala sahifasida <b>Saqlash</b> tugmasini bosing.": [
+"templates/learn/list.html"
+],
+"%(form_is_public)s Havola orqali hamma ko‘ra oladi": [
+"templates/learn/list.html",
+"templates/learn/lists.html"
+],
+"«%(lst_name)s» ro‘yxati o‘chiriladi. Davom etasizmi?": [
+"templates/learn/list.html"
+],
+"Ro‘yxatni o‘chirish": [
+"templates/learn/list.html"
+],
+"Keyinroq yechish uchun saqlangan masalalar": [
+"templates/learn/lists.html"
+],
+"Ro‘yxatlar": [
+"templates/learn/lists.html"
+],
+"Yaratilgan": [
+"templates/learn/lists.html"
+],
+"Ochiq": [
+"templates/learn/lists.html",
+"templates/moderation/problems.html"
+],
+"<b>Hali ro‘yxat yo‘q</b>Masala sahifasidagi Saqlash tugmasi bilan yoki shu yerda yarating.": [
+"templates/learn/lists.html"
+],
+"Yangi ro‘yxat": [
+"templates/learn/lists.html"
+],
+"Yaratish": [
+"templates/learn/lists.html"
+],
+"· %(duel_switch_1)s gacha": [
+"templates/moderation/_duel_switch.html"
+],
+"Duellar ochiq. Dars uchun yoping:": [
+"templates/moderation/_duel_switch.html"
+],
+"45 daqiqa": [
+"templates/moderation/_duel_switch.html"
+],
+"90 daqiqa": [
+"templates/moderation/_duel_switch.html"
+],
+"Men ochgunimcha": [
+"templates/moderation/_duel_switch.html"
+],
+"AI bilan masala yaratish": [
+"templates/moderation/ai_generate.html"
+],
+"AI siz tanlagan darajalar va mavzular bo‘yicha masala tuzadi, har birini kamida 20 ta test bilan. Tuzilganlar «Kutmoqda» holatida bo‘ladi va saytda ko‘rinmaydi:": [
+"templates/moderation/ai_generate.html"
+],
+"Navbat</a> bo‘limida ko‘rib chiqib, kerak bo‘lsa tahrirlab, tasdiqlaysiz yoki rad etasiz.": [
+"templates/moderation/ai_generate.html"
+],
+"Qaysi darajadan nechta": [
+"templates/moderation/ai_generate.html"
+],
+"Jami ko‘pi bilan %(max_count)s ta masala.": [
+"templates/moderation/ai_generate.html"
+],
+"Mavzular <span class=\"font-normal text-mute\">— ixtiyoriy; tanlanmasa, AI o‘zi tanlaydi</span>": [
+"templates/moderation/ai_generate.html"
+],
+"Aniq mavzu yoki talab <span class=\"font-normal text-mute\">— ixtiyoriy</span>": [
+"templates/moderation/ai_generate.html"
+],
+"Model": [
+"templates/moderation/ai_generate.html"
+],
+"Masalalarni tuzish": [
+"templates/moderation/ai_generate.html"
+],
+"Musobaqani tahrirlash": [
+"templates/moderation/contest_form.html"
+],
+"Musobaqa yaratish": [
+"templates/moderation/contest_form.html",
+"templates/moderation/contests.html",
+"templates/moderation/dashboard.html"
+],
+"Yangi musobaqa": [
+"templates/moderation/contest_form.html"
+],
+"Musobaqa masalalarini yashirin qilib qo‘shing — boshlanguncha ular hech kimga ko‘rinmaydi. Tugagach ochish mumkin.": [
+"templates/moderation/contest_form.html"
+],
+"Tavsif (Markdown)": [
+"templates/moderation/contest_form.html"
+],
+"Boshlanishi": [
+"templates/moderation/contest_form.html"
+],
+"Tugashi": [
+"templates/moderation/contest_form.html"
+],
+"Yorliq: A, B, C… · Ball — musobaqa balli": [
+"templates/moderation/contest_form.html"
+],
+"Yorliq": [
+"templates/moderation/contest_form.html"
+],
+"Tartib": [
+"templates/moderation/contest_form.html",
+"templates/moderation/plan_form.html",
+"templates/moderation/submit.html"
+],
+"%(f_delete)s O‘chirish": [
+"templates/moderation/contest_form.html",
+"templates/moderation/submit.html"
+],
+"Yana masala": [
+"templates/moderation/contest_form.html"
+],
+"Qoidalar": [
+"templates/moderation/contest_form.html"
+],
+"Qoidalar qanday ishlaydi?": [
+"templates/moderation/contest_form.html"
+],
+"<b class=\"text-ink\">Codeforces</b>: masala balli oxirigacha 52% ga tushadi, har xato −50, kamida 30%. Ballarni 500, 1000, 1500… qiling.": [
+"templates/moderation/contest_form.html"
+],
+"<b class=\"text-ink\">ICPC</b>: ko‘p yechgan yutadi, tenglikda jarima = daqiqalar + 10 × xato. Codeforces Div. 3/4 shunday.": [
+"templates/moderation/contest_form.html"
+],
+"Ikkalasida kompilyatsiya xatosi va 1-testdagi xato jarimasiz.": [
+"templates/moderation/contest_form.html"
+],
+"Musobaqa boshlangan: qoidani o‘zgartirib bo‘lmaydi.": [
+"templates/moderation/contest_form.html"
+],
+"%(form_is_rated)s Reytingli musobaqa": [
+"templates/moderation/contest_form.html"
+],
+"Divizion": [
+"templates/moderation/contest_form.html"
+],
+"Diapazondan tashqaridagilar ham qatnashadi, lekin reytingi o‘zgarmaydi.": [
+"templates/moderation/contest_form.html"
+],
+"IP prefiks (ixtiyoriy)": [
+"templates/moderation/contest_form.html"
+],
+"Faqat shu prefiksli IP dan yuborish mumkin, masalan sinf tarmog‘i.": [
+"templates/moderation/contest_form.html"
+],
+"Shaxsiy vaqt (daqiqa)": [
+"templates/moderation/contest_form.html"
+],
+"Marafon uchun: har kim «Boshlash»ni bosgandan keyin shuncha daqiqa oladi (musobaqa tugashidan oshmaydi). 0 — hamma uchun bir soat.": [
+"templates/moderation/contest_form.html"
+],
+"%(form_auto_finish)s Natijani avtomatik e’lon qilish": [
+"templates/moderation/contest_form.html"
+],
+"Musobaqa tugagach 12 soat o‘tib, ko‘rilmagan o‘xshashlik belgisi qolmasa, masalalar ochiladi va (reytingli bo‘lsa) reyting hisoblanadi. O‘chiq bo‘lsa, buni o‘zingiz qilasiz.": [
+"templates/moderation/contest_form.html"
+],
+"Nishon (ixtiyoriy)": [
+"templates/moderation/contest_form.html"
+],
+"Masalalar ochilgach, kamida bitta masala yechganlar profiliga shu nomli nishon qo‘shiladi; birinchi uchtalikka — medal.": [
+"templates/moderation/contest_form.html"
+],
+"%(contest_title)s — rasmiy reyting": [
+"templates/moderation/contest_official.html"
+],
+"Bu musobaqa rasmiy emas. Rasmiy reyting faqat tasdiqlangan ishtirokchilar uchun alohida hisoblanadi va kod tekshiruvini talab qiladi.": [
+"templates/moderation/contest_official.html"
+],
+"Musobaqa rasmiy deb belgilanadi. Davom etasizmi?": [
+"templates/moderation/contest_official.html"
+],
+"Rasmiy qilish": [
+"templates/moderation/contest_official.html"
+],
+"Auditoriya musobaqasi (IP %(contest_allowed_ip_prefix)s…): kod tekshiruvi shart emas. Cheaterlarni diskvalifikatsiya qilib, reytingni qo‘llang.": [
+"templates/moderation/contest_official.html"
+],
+"Kod tekshiruvi o‘chirilgan (top-N = 0).": [
+"templates/moderation/contest_official.html"
+],
+"Tasdiqlangan ishtirokchilardan eng yuqori %(contest_review_top_n)s tasi o‘z kodini tushuntirishi kerak. Tushuntira olmasa — diskvalifikatsiya, keyingisi ro‘yxatga kiradi.": [
+"templates/moderation/contest_official.html"
+],
+"%(r_solved)s ta masala": [
+"templates/moderation/contest_official.html"
+],
+"%(r_score)s ball": [
+"templates/moderation/contest_official.html"
+],
+"Kodlari": [
+"templates/moderation/contest_official.html"
+],
+"Tushuntirdi · %(r_participation_reviewed_at)s": [
+"templates/moderation/contest_official.html"
+],
+"Tekshirilmagan": [
+"templates/moderation/contest_official.html"
+],
+"Tushuntirdi": [
+"templates/moderation/contest_official.html"
+],
+"%(r_user_username)s diskvalifikatsiya qilinadi. Davom etasizmi?": [
+"templates/moderation/contest_official.html"
+],
+"Rasmiy hisobga kiradigan (tasdiqlangan) ishtirokchi yo‘q.": [
+"templates/moderation/contest_official.html"
+],
+"Qayta hisoblash": [
+"templates/moderation/contest_official.html"
+],
+"Rasmiy reytingni qo‘llash": [
+"templates/moderation/contest_official.html"
+],
+"Musobaqa hali tugamagan.": [
+"templates/moderation/contest_official.html"
+],
+"%(pending)s ta ishtirokchi hali tekshirilmagan.": [
+"templates/moderation/contest_official.html"
+],
+"Qo‘llangan: %(contest_official_applied_at)s": [
+"templates/moderation/contest_official.html"
+],
+"Musobaqalar — boshqaruv": [
+"templates/moderation/contests.html"
+],
+"Kutilmoqda": [
+"templates/moderation/contests.html"
+],
+"%(c_n_problems)s masala": [
+"templates/moderation/contests.html"
+],
+"· %(c_n_hidden)s yashirin": [
+"templates/moderation/contests.html"
+],
+"· hisoblangan": [
+"templates/moderation/contests.html"
+],
+"· hisoblanmagan": [
+"templates/moderation/contests.html"
+],
+"Masalalar ochiladi va ishtirokchilarning AC yechimlari amaliyot balliga o‘tadi. Davom etasizmi?": [
+"templates/moderation/contests.html"
+],
+"Masalalarni ochish": [
+"templates/moderation/contests.html"
+],
+"Reytingdan oldin ko‘rib chiqing": [
+"templates/moderation/contests.html"
+],
+"%(c_n_open_flags)s ta o‘xshashlik ko‘rilmagan": [
+"templates/moderation/contests.html"
+],
+"Reytingni hisoblash": [
+"templates/moderation/contests.html"
+],
+"Boshqa amallar: %(c_title)s": [
+"templates/moderation/contests.html"
+],
+"Rasmiy reyting": [
+"templates/moderation/contests.html"
+],
+"«%(c_title)s» musobaqasi va natijalari o‘chiriladi. Davom etasizmi?": [
+"templates/moderation/contests.html"
+],
+"Hali musobaqa yo‘q.": [
+"templates/moderation/contests.html"
+],
+"Birinchisini yarating": [
+"templates/moderation/contests.html"
+],
+"Kun masalasi — boshqaruv": [
+"templates/moderation/daily_problem.html"
+],
+"Sana bugun bilan keyingi 365 kun oralig‘ida bo‘lishi kerak. Yaqin sanani tanlang.": [
+"templates/moderation/daily_problem.html"
+],
+"Rejalashtirish": [
+"templates/moderation/daily_problem.html"
+],
+"Qaysi kun uchun?": [
+"templates/moderation/daily_problem.html"
+],
+"Bugungi masala allaqachon e’lon qilingan bo‘lsa, uni almashtirib bo‘lmaydi. Ertangi yoki keyingi kunni tanlab, variantlarni oldindan belgilang.": [
+"templates/moderation/daily_problem.html"
+],
+"Variantlarni ko‘rish": [
+"templates/moderation/daily_problem.html"
+],
+"%(day)s uchun tanlangan masala": [
+"templates/moderation/daily_problem.html"
+],
+"Admin tanladi": [
+"templates/moderation/daily_problem.html"
+],
+"Avtomatik tanlangan": [
+"templates/moderation/daily_problem.html"
+],
+"Bugungi tanlov yopiq": [
+"templates/moderation/daily_problem.html"
+],
+"Bugungi masala foydalanuvchilarga ko‘rinib bo‘lgan. Streak va bonuslar o‘zgarmasligi uchun bugungi tanlovni qulfladik.": [
+"templates/moderation/daily_problem.html"
+],
+"%(candidates)s ta variant": [
+"templates/moderation/daily_problem.html"
+],
+"Avval haftaning kuniga mos qiyinlik, keyin boshqa darajalar. Yaqinda kunlik bo‘lgan masalalar chetlatiladi.": [
+"templates/moderation/daily_problem.html"
+],
+"Algoritm tavsiyasi": [
+"templates/moderation/daily_problem.html"
+],
+"Variant %(forloop_counter)s": [
+"templates/moderation/daily_problem.html"
+],
+"Tanlangan": [
+"templates/moderation/daily_problem.html"
+],
+"%(p_rating)s rating": [
+"templates/moderation/daily_problem.html"
+],
+"%(day)s uchun tanlangan masala ‘%(assignment_problem_title)s’ o‘rniga ‘%(p_title)s’ bo‘ladi. Davom etasizmi?": [
+"templates/moderation/daily_problem.html"
+],
+"Hozir tanlangan": [
+"templates/moderation/daily_problem.html"
+],
+"Shu masalani tanlash": [
+"templates/moderation/daily_problem.html"
+],
+"Hozircha mos ochiq masala topilmadi. Ochiq masalalar qo‘shilgach, variantlar shu yerda chiqadi.": [
+"templates/moderation/daily_problem.html"
+],
+"Yaqin kunlar": [
+"templates/moderation/daily_problem.html"
+],
+"15 kun": [
+"templates/moderation/daily_problem.html"
+],
+"Tanlangan va avtomatik rejalangan masalalar.": [
+"templates/moderation/daily_problem.html"
+],
+"· Bugun": [
+"templates/moderation/daily_problem.html"
+],
+"Admin tanlagan": [
+"templates/moderation/daily_problem.html"
+],
+"Avtomatik": [
+"templates/moderation/daily_problem.html"
+],
+"Hali yaqin kunlar uchun reja yo‘q.": [
+"templates/moderation/daily_problem.html"
+],
+"Tanlov bo‘lmasa, sayt birinchi murojaatda masalani avtomatik belgilaydi. Admin tanlovi esa sanaga saqlanib, hamma foydalanuvchiga bir xil ko‘rinadi.": [
+"templates/moderation/daily_problem.html"
+],
+"Avval kutayotgan ishlar, keyin sayt holati": [
+"templates/moderation/dashboard.html"
+],
+"AI bilan tuzish": [
+"templates/moderation/dashboard.html",
+"templates/moderation/problems.html"
+],
+"Masala qo‘shish": [
+"templates/moderation/dashboard.html",
+"templates/moderation/problems.html",
+"templates/moderation/submit.html",
+"templates/problems/list.html"
+],
+"Duellarni yopish": [
+"templates/moderation/dashboard.html"
+],
+"Tasdiq kutayotgan masalalar": [
+"templates/moderation/dashboard.html"
+],
+"Navbatni ochish": [
+"templates/moderation/dashboard.html"
+],
+"Muallif": [
+"templates/moderation/dashboard.html",
+"templates/moderation/queue.html",
+"templates/submissions/list.html"
+],
+"«%(p_title)s» masalasini rad etishni tasdiqlaysizmi?": [
+"templates/moderation/dashboard.html",
+"templates/moderation/queue.html"
+],
+"«Rad etish» avval tasdiq so‘raydi, tasodifiy bosish bilan rad etilmaydi. Tasdiqlangan masala saytda darhol ko‘rinadi.": [
+"templates/moderation/dashboard.html"
+],
+"<b>Navbat bo‘sh</b>Yangi masala yuborilganda shu yerda chiqadi.": [
+"templates/moderation/dashboard.html"
+],
+"Kutayotgan ishlar": [
+"templates/moderation/dashboard.html"
+],
+"<b class=\"ca7-mis-t\">Halollik</b><small>Mashq va musobaqadagi shubhali holatlar</small>": [
+"templates/moderation/dashboard.html"
+],
+"Hisobotni ochish": [
+"templates/moderation/dashboard.html"
+],
+"Bugun: %(daily_problem_title)s · %(daily_problem_get_difficulty_display)s": [
+"templates/moderation/dashboard.html"
+],
+"Bugun tanlanmagan": [
+"templates/moderation/dashboard.html"
+],
+"Boshqasini tanlash": [
+"templates/moderation/dashboard.html"
+],
+"Tanlash": [
+"templates/moderation/dashboard.html"
+],
+"So‘nggi 14 kun": [
+"templates/moderation/dashboard.html"
+],
+"<b class=\"tabular text-ink\">%(activity_subs)s</b> urinish · <b class=\"tabular text-ink\">%(activity_users)s</b> yangi foydalanuvchi": [
+"templates/moderation/dashboard.html"
+],
+"Kunlik urinishlar soni": [
+"templates/moderation/dashboard.html"
+],
+"%(r_day)s: %(r_subs)s urinish, %(r_users)s yangi foydalanuvchi": [
+"templates/moderation/dashboard.html"
+],
+"Tekshiruvchi: %(judge_stuck)s ta urinish 2 daqiqadan beri kutmoqda.": [
+"templates/moderation/dashboard.html"
+],
+"Tekshiruvchi sog‘lom: kutayotgan urinish yo‘q.": [
+"templates/moderation/dashboard.html"
+],
+"So‘nggi natija: %(judge_last)s.": [
+"templates/moderation/dashboard.html"
+],
+"Sayt holati": [
+"templates/moderation/dashboard.html"
+],
+"Mavzular": [
+"templates/moderation/dashboard.html",
+"templates/moderation/submit.html"
+],
+"Duellar — boshqaruv": [
+"templates/moderation/duels.html"
+],
+"Jami duel": [
+"templates/moderation/duels.html"
+],
+"Davom etmoqda": [
+"templates/moderation/duels.html"
+],
+"Raqib kutmoqda": [
+"templates/moderation/duels.html"
+],
+"Bugun": [
+"templates/moderation/duels.html",
+"templates/submissions/list.html"
+],
+"O‘yinchilar": [
+"templates/moderation/duels.html"
+],
+"Chaqirgan": [
+"templates/moderation/duels.html"
+],
+"masala": [
+"templates/moderation/duels.html",
+"templates/registration/_auth_brand.html"
+],
+"g‘olib": [
+"templates/moderation/duels.html"
+],
+"%(s_right)s/%(n_questions)s to‘g‘ri · %(s_spent)s s": [
+"templates/moderation/duels.html"
+],
+"o‘ynamoqda · %(s_seen)s/%(n_questions)s": [
+"templates/moderation/duels.html"
+],
+"qabul qilmagan": [
+"templates/moderation/duels.html"
+],
+"raqib kutilmoqda": [
+"templates/moderation/duels.html"
+],
+"Kutmoqda": [
+"templates/moderation/duels.html",
+"templates/moderation/problems.html"
+],
+"Bu filtr bo‘yicha duel yo‘q.": [
+"templates/moderation/duels.html"
+],
+"Yuborgan masalalaringiz adminlar ko‘rib chiqadi. Tasdiqlansa, saytda sizning nomingiz bilan chiqadi.": [
+"templates/moderation/mine.html"
+],
+"Yangi masala": [
+"templates/moderation/mine.html"
+],
+"Sarlavha": [
+"templates/moderation/mine.html",
+"templates/moderation/queue.html",
+"templates/moderation/submit.html"
+],
+"Holati": [
+"templates/moderation/mine.html"
+],
+"Chop etilgan": [
+"templates/moderation/mine.html"
+],
+"Rad etilgan": [
+"templates/moderation/mine.html",
+"templates/moderation/problems.html"
+],
+"Ko‘rib chiqilmoqda": [
+"templates/moderation/mine.html"
+],
+"Tahrirlab qayta yuborish": [
+"templates/moderation/mine.html"
+],
+"Hali masala yubormagansiz.": [
+"templates/moderation/mine.html"
+],
+"%(plan_title)s — tahrirlash": [
+"templates/moderation/plan_form.html"
+],
+"Yangi kurs": [
+"templates/moderation/plan_form.html"
+],
+"Slug (manzil: /learn/&lt;slug&gt;/)": [
+"templates/moderation/plan_form.html"
+],
+"Qisqa tavsif (kartochkada)": [
+"templates/moderation/plan_form.html"
+],
+"Nazariya (Markdown: sarlavha, ro‘yxat, ```kod```)": [
+"templates/moderation/plan_form.html"
+],
+"«Kurs haqida» (Markdown, ixtiyoriy)": [
+"templates/moderation/plan_form.html"
+],
+"Daraja": [
+"templates/moderation/plan_form.html"
+],
+"Belgi": [
+"templates/moderation/plan_form.html"
+],
+"%(form_is_public)s Hammaga ko‘rinadi": [
+"templates/moderation/plan_form.html"
+],
+"Kurslar — boshqaruv": [
+"templates/moderation/plans.html"
+],
+"Kurs qo‘shish": [
+"templates/moderation/plans.html"
+],
+"%(p_get_level_display)s</span> <span>%(p_n_tags)s mavzu ·": [
+"templates/moderation/plans.html"
+],
+"%(p_n_open)s masala": [
+"templates/moderation/plans.html"
+],
+"· <span class=\"text-warn\">tayyorlanmoqda: kamida %(course_min)s ta kerak</span>": [
+"templates/moderation/plans.html"
+],
+"· <span class=\"text-mute\">kursda %(course_max)s tasi</span>": [
+"templates/moderation/plans.html"
+],
+"masala yo‘q": [
+"templates/moderation/plans.html"
+],
+"faqat nazariya": [
+"templates/moderation/plans.html"
+],
+"Tahrirlash: %(p_title)s": [
+"templates/moderation/plans.html",
+"templates/moderation/problems.html"
+],
+"«%(p_title)s» kursi o‘chiriladi. Masalalar va teglar o‘chmaydi. Davom etasizmi?": [
+"templates/moderation/plans.html"
+],
+"O‘chirish: %(p_title)s": [
+"templates/moderation/plans.html"
+],
+"Hali kurs yo‘q.": [
+"templates/moderation/plans.html"
+],
+"Birinchisini tuzing</a> yoki <code>python manage.py add_courses</code> buyrug‘ini ishga tushiring.": [
+"templates/moderation/plans.html"
+],
+"Masalalar — boshqaruv": [
+"templates/moderation/problems.html"
+],
+"Sarlavha yoki slug…": [
+"templates/moderation/problems.html"
+],
+"Masala qidirish": [
+"templates/moderation/problems.html",
+"templates/problems/list.html"
+],
+"Testsiz": [
+"templates/moderation/problems.html"
+],
+"Barcha darajalar": [
+"templates/moderation/problems.html"
+],
+"Testsiz — yechimlar tekshirilmaydi": [
+"templates/moderation/problems.html"
+],
+"%(p_n_tests)s test": [
+"templates/moderation/problems.html"
+],
+"Boshqa amallar: %(p_title)s": [
+"templates/moderation/problems.html"
+],
+"Urinishlarni ko‘rish": [
+"templates/moderation/problems.html"
+],
+"«%(p_title)s»: %(p_n_subs)s ta urinish qayta tekshiriladi. Davom etasizmi?": [
+"templates/moderation/problems.html"
+],
+"Qayta tekshirish": [
+"templates/moderation/problems.html"
+],
+"Yashirish": [
+"templates/moderation/problems.html"
+],
+"Ochiq qilish": [
+"templates/moderation/problems.html"
+],
+"«%(p_title)s» va barcha urinishlari o‘chiriladi. Davom etasizmi?": [
+"templates/moderation/problems.html"
+],
+"Masala topilmadi.": [
+"templates/moderation/problems.html"
+],
+"Navbat — boshqaruv": [
+"templates/moderation/queue.html"
+],
+"Navbat bo‘sh — hamma masala ko‘rib chiqilgan.": [
+"templates/moderation/queue.html"
+],
+"Urinishlar — boshqaruv": [
+"templates/moderation/submissions.html"
+],
+"Masala (slug)": [
+"templates/moderation/submissions.html"
+],
+"a-plus-b…": [
+"templates/moderation/submissions.html"
+],
+"%(s_passed)s/%(s_total)s · %(s_exec_ms)s ms": [
+"templates/moderation/submissions.html"
+],
+"MB": [
+"templates/moderation/submissions.html",
+"templates/submissions/_status.html"
+],
+"Masalani tahrirlash": [
+"templates/moderation/submit.html"
+],
+"Yangi masala yopiq holda saqlanadi. Amaliyot uchun bo‘lsa «Ochiq»ni belgilang; musobaqa masalasini yopiq qoldirib, musobaqaga ulang.": [
+"templates/moderation/submit.html"
+],
+"Forma bo‘limlari": [
+"templates/moderation/submit.html"
+],
+"<a href=\"#sec-shart\">Shart</a><a href=\"#sec-testlar\" data-kind-only=\"code\">Testlar</a><a href=\"#sec-yordam\">Maslahatlar</a><a href=\"#sec-sozlama\">Sozlamalar</a>": [
+"templates/moderation/submit.html"
+],
+"Shart": [
+"templates/moderation/submit.html",
+"templates/problems/detail.html"
+],
+"Masala matni": [
+"templates/moderation/submit.html",
+"templates/problems/detail.html"
+],
+"Markdown va LaTeX ($n \\le 10^5$) qo‘llanadi. Matn ichiga rasm joylash uchun rasmni sudrab tashlang (drag & drop), vaqtincha xotiradan qo‘ying (Ctrl+V) yoki muharrirdagi rasm tugmasini bosing.": [
+"templates/moderation/submit.html"
+],
+"Masala rasmi <span class=\"font-normal text-mute\">(ixtiyoriy — shart ostidagi asosiy illyustratsiya)</span>": [
+"templates/moderation/submit.html"
+],
+"Masala rasmi": [
+"templates/moderation/submit.html"
+],
+"Joriy yuklangan rasm:": [
+"templates/moderation/submit.html"
+],
+"Rasmni o‘chirish": [
+"templates/moderation/submit.html"
+],
+"Rasmni almashtirish": [
+"templates/moderation/submit.html"
+],
+"Fayl tanlanmagan": [
+"templates/moderation/submit.html"
+],
+"Tanlangan yangi rasm:": [
+"templates/moderation/submit.html"
+],
+"Ko‘rish": [
+"templates/moderation/submit.html"
+],
+"PNG, JPG, GIF yoki WebP (maksimal 10 MB). Masala sharti tagida alohida illyustratsiya sifatida ko‘rinadi.": [
+"templates/moderation/submit.html"
+],
+"Kirish ma’lumotlari": [
+"templates/moderation/submit.html",
+"templates/problems/detail.html"
+],
+"Chiqish ma’lumotlari": [
+"templates/moderation/submit.html",
+"templates/problems/detail.html"
+],
+"SQL ma’lumotlar bazasi": [
+"templates/moderation/submit.html"
+],
+"Jadval tuzilishi (CREATE TABLE …)": [
+"templates/moderation/submit.html"
+],
+"Ma’lumotlar (INSERT …)": [
+"templates/moderation/submit.html"
+],
+"Kutilgan natija": [
+"templates/moderation/submit.html",
+"templates/problems/detail.html"
+],
+"Har qator — bitta natija qatori, ustunlar TAB bilan ajratilgan, sarlavhasiz. Namunaviy ma’lumot va shu natija masala sahifasida jadval bo‘lib ko‘rinadi.": [
+"templates/moderation/submit.html"
+],
+"%(sql_form_ordered)s Qatorlar tartibi muhim (shart ORDER BY talab qiladi)": [
+"templates/moderation/submit.html"
+],
+"Yashirin ma’lumotlar (INSERT …, ixtiyoriy)": [
+"templates/moderation/submit.html"
+],
+"Talabaga ko‘rinmaydi. So‘rov bu ma’lumotlarda ham tekshiriladi — ko‘rsatilgan javobni qo‘lda yozib qo‘yish o‘tmaydi.": [
+"templates/moderation/submit.html"
+],
+"Yashirin ma’lumotlarda kutilgan natija": [
+"templates/moderation/submit.html"
+],
+"Testlar": [
+"templates/moderation/submit.html"
+],
+"Namuna testlar masala sahifasida ko‘rinadi": [
+"templates/moderation/submit.html"
+],
+"ZIP orqali ko‘plab test yuklash": [
+"templates/moderation/submit.html"
+],
+"Fayllar juftlik bo‘lib nomlanadi: <code>01.in</code> + <code>01.out</code> (yoki <code>.ans</code>), yoxud <code>input/01.txt</code> + <code>output/01.txt</code>. Tartib — nom bo‘yicha. Yuzlab test uchun shu usul.": [
+"templates/moderation/submit.html"
+],
+"Kutilgan chiqish": [
+"templates/moderation/submit.html"
+],
+"%(f_is_sample)s Namuna": [
+"templates/moderation/submit.html"
+],
+"Tartib %(f_order)s": [
+"templates/moderation/submit.html"
+],
+"%(formset_empty_form_is_sample)s Namuna": [
+"templates/moderation/submit.html"
+],
+"Tartib %(formset_empty_form_order)s": [
+"templates/moderation/submit.html"
+],
+"Yana test": [
+"templates/moderation/submit.html"
+],
+"Maslahatlar va tahlil": [
+"templates/moderation/submit.html"
+],
+"Maslahat narxi — masala ballining foizi (yechishdan oldin ochilsa). Jami ko‘pi bilan 90%.": [
+"templates/moderation/submit.html"
+],
+"Maslahat (Markdown)": [
+"templates/moderation/submit.html"
+],
+"Narx, %": [
+"templates/moderation/submit.html"
+],
+"Yana maslahat qo‘shish uchun saqlang — bo‘sh qator qo‘shiladi.": [
+"templates/moderation/submit.html"
+],
+"Yechim tahlili (Markdown) — masalani yechganlarga ko‘rinadi": [
+"templates/moderation/submit.html"
+],
+"Masalani saqlash": [
+"templates/moderation/submit.html"
+],
+"Turi": [
+"templates/moderation/submit.html",
+"templates/moderation/tag_form.html",
+"templates/moderation/tags.html"
+],
+"Taxminiy reyting": [
+"templates/moderation/submit.html"
+],
+"Qaysi reytingdagi o‘quvchi masalani taxminan yarim holda yechadi, deb o‘ylaysiz? Bo‘sh qolsa, darajadan boshlanadi (Beginner 500, Easy 700, Medium 1000, Hard 1300); keyin kim urinib, kim yechganiga qarab o‘zi to‘g‘rilanadi.": [
+"templates/moderation/submit.html"
+],
+"Vaqt (ms)": [
+"templates/moderation/submit.html"
+],
+"Xotira (MB)": [
+"templates/moderation/submit.html"
+],
+"Amaliyot bali qiyinlikka qarab avtomatik qo‘yiladi (Beginner 50, Easy 100, Medium 250, Hard 500) va ko‘p odam yechgani sari biroz kamayadi.": [
+"templates/moderation/submit.html"
+],
+"%(form_is_public)s Ochiq (masalalar ro‘yxatida ko‘rinadi)": [
+"templates/moderation/submit.html"
+],
+"Masala adminlar tasdiqlagach saytda chiqadi.": [
+"templates/moderation/submit.html"
+],
+"Mavzuni qidiring (uzbekcha yoki inglizcha)": [
+"templates/moderation/submit.html"
+],
+"Mavzularni qidirish": [
+"templates/moderation/submit.html"
+],
+"<b class=\"tabular\" id=\"tag-n\">0</b> ta tanlangan": [
+"templates/moderation/submit.html"
+],
+"%(tag_name)s — teg": [
+"templates/moderation/tag_form.html"
+],
+"Bu teg hech bir kursda yo‘q — masalalari O‘rganish bo‘limida ko‘rinmaydi.": [
+"templates/moderation/tag_form.html"
+],
+"Teglar — boshqaruv": [
+"templates/moderation/tags.html"
+],
+"Teg": [
+"templates/moderation/tags.html"
+],
+"Kurs": [
+"templates/moderation/tags.html"
+],
+"kursda yo‘q": [
+"templates/moderation/tags.html"
+],
+"Tahrirlash: %(t_name)s": [
+"templates/moderation/tags.html"
+],
+"«%(t_name)s» tegini o‘chirasizmi? Masalalar o‘chmaydi, kurslardan ham chiqadi.": [
+"templates/moderation/tags.html"
+],
+"O‘chirish: %(t_name)s": [
+"templates/moderation/tags.html"
+],
+"Teg yo‘q.": [
+"templates/moderation/tags.html"
+],
+"Yangi teg": [
+"templates/moderation/tags.html"
+],
+"Qo‘shish": [
+"templates/moderation/tags.html"
+],
+"%(obj_username)s — tahrirlash": [
+"templates/moderation/user_form.html"
+],
+"Urinishlari": [
+"templates/moderation/user_form.html",
+"templates/moderation/users.html"
+],
+"Login": [
+"templates/moderation/user_form.html"
+],
+"Amaliyot ball": [
+"templates/moderation/user_form.html"
+],
+"%(form_instance_practice_points)s <span class=\"text-mute\">· yechilgan masalalardan hisoblanadi</span>": [
+"templates/moderation/user_form.html"
+],
+"Parolni faqat foydalanuvchining o‘zi": [
+"templates/moderation/user_form.html"
+],
+"tiklash havolasi</a> orqali o‘zgartiradi.": [
+"templates/moderation/user_form.html"
+],
+"Huquqlar": [
+"templates/moderation/user_form.html"
+],
+"Rol": [
+"templates/moderation/user_form.html",
+"templates/moderation/users.html"
+],
+"%(form_is_staff)s Admin (boshqaruvga kirish)": [
+"templates/moderation/user_form.html"
+],
+"%(form_is_setter)s Muallif (masala yozadi; admin tasdiqlaydi)": [
+"templates/moderation/user_form.html"
+],
+"%(form_is_active)s Faol (o‘chirilsa — kira olmaydi)": [
+"templates/moderation/user_form.html"
+],
+"Butunlay o‘chirish": [
+"templates/moderation/user_form.html"
+],
+"«%(obj_username)s» va uning barcha urinishlari, natijalari butunlay o‘chiriladi. Qaytarib bo‘lmaydi. Davom etasizmi?": [
+"templates/moderation/user_form.html"
+],
+"Foydalanuvchilar — boshqaruv": [
+"templates/moderation/users.html"
+],
+"Login, email, ism, o‘quv joyi…": [
+"templates/moderation/users.html"
+],
+"Foydalanuvchi qidirish": [
+"templates/moderation/users.html"
+],
+"Adminlar": [
+"templates/moderation/users.html"
+],
+"Yangi": [
+"templates/moderation/users.html"
+],
+"Oxirgi kirish": [
+"templates/moderation/users.html"
+],
+"O‘quvchi": [
+"templates/moderation/users.html"
+],
+"Bloklangan": [
+"templates/moderation/users.html"
+],
+"kirmagan": [
+"templates/moderation/users.html"
+],
+"%(u_rating)s</b>reyting": [
+"templates/moderation/users.html"
+],
+"<b>%(u_n_subs)s</b>urinish": [
+"templates/moderation/users.html"
+],
+"Urinishlari: %(u_username)s": [
+"templates/moderation/users.html"
+],
+"Tahrirlash: %(u_username)s": [
+"templates/moderation/users.html"
+],
+"Foydalanuvchi topilmadi.": [
+"templates/moderation/users.html"
+],
+"<b>%(ds_streak)s</b> kun": [
+"templates/problems/_daily_card.html"
+],
+"bugun <b class=\"tabular text-ink\">%(ds_solvers)s</b> kishi yechdi": [
+"templates/problems/_daily_card.html"
+],
+"bugun hali hech kim yechmadi": [
+"templates/problems/_daily_card.html"
+],
+"Bugun yechildi, Olov <b>%(ds_streak)s</b> kun.": [
+"templates/problems/_daily_card.html"
+],
+"Bugun yechsangiz, Olov <b>%(ds_streak)s</b> kun bo‘ladi.": [
+"templates/problems/_daily_card.html"
+],
+"Bugun yechsangiz, Olov yonadi.": [
+"templates/problems/_daily_card.html"
+],
+"Eng uzuni <b>%(ds_best)s</b> kun.": [
+"templates/problems/_daily_card.html"
+],
+"«%(ds_next_badge_name)s» nishoniga yana <b>%(ds_next_badge_left)s</b> kun ketma-ket yechish kerak.": [
+"templates/problems/_daily_card.html"
+],
+"va boshqalar": [
+"templates/problems/_daily_card.html"
+],
+"%(p_get_difficulty_display)s, reyting %(p_rating)s": [
+"templates/problems/_difficulty.html"
+],
+"%(s_code_len)s belgi": [
+"templates/problems/_leaders_mini.html",
+"templates/problems/leaders.html"
+],
+"Hali qabul qilingan yechim yo‘q — birinchi bo‘ling.": [
+"templates/problems/_leaders_mini.html"
+],
+"Kun masalasi, %(month_label)s": [
+"templates/problems/_month.html"
+],
+", yechilgan": [
+"templates/problems/_month.html"
+],
+", bugun": [
+"templates/problems/_month.html"
+],
+"Bu masalaga hali urinish yubormagansiz.": [
+"templates/problems/_my_subs.html"
+],
+"Yechilgan masalalar: %(ring_done)s / %(ring_total)s": [
+"templates/problems/_solved_ring.html"
+],
+"Umumiy: yechuvchilarning necha foizidan oldindasiz": [
+"templates/problems/_solved_ring.html"
+],
+"<b class=\"tabular\">%(ring_done)s<small>/%(ring_total)s</small></b><span>yechilgan": [
+"templates/problems/_solved_ring.html"
+],
+"· <span class=\"tabular\" title=\"Urinilgan, hali yechilmagan\">%(attempting)s urinilgan</span>": [
+"templates/problems/_solved_ring.html"
+],
+"<b class=\"tabular\">%(ring_top)s<small>%%</small></b><span>yechuvchilardan oldindasiz</span>": [
+"templates/problems/_solved_ring.html"
+],
+"<b class=\"tabular\">%(s_top)s<small>%%</small></b><span>yechuvchilardan oldindasiz</span>": [
+"templates/problems/_solved_ring.html"
+],
+"hammasi yechilgan": [
+"templates/problems/_solved_ring.html"
+],
+"o‘sish": [
+"templates/problems/_sort_th.html"
+],
+"kamayish": [
+"templates/problems/_sort_th.html"
+],
+"tartibida saralangan)": [
+"templates/problems/_sort_th.html"
+],
+"ca-main ca-main-ws": [
+"templates/problems/detail.html"
+],
+"Musobaqa masalalari": [
+"templates/problems/detail.html"
+],
+"Kursdagi oldingi masala": [
+"templates/problems/detail.html"
+],
+"Kursdagi keyingi masala": [
+"templates/problems/detail.html"
+],
+"Oldingi masala": [
+"templates/problems/detail.html"
+],
+"Keyingi masala": [
+"templates/problems/detail.html"
+],
+"<span class=\"hidden xl:inline\">Musobaqa rejimi · sahifadan chiqish qayd etiladi</span> <span data-leaves-wrap class=\"!hidden font-semibold text-bad\">· chiqishlar: <b class=\"tabular\" data-leaves>0</b></span>": [
+"templates/problems/detail.html"
+],
+"Baholash": [
+"templates/problems/detail.html"
+],
+"Yechim": [
+"templates/problems/detail.html"
+],
+"Masala bo‘limlari": [
+"templates/problems/detail.html"
+],
+"Yordam": [
+"templates/problems/detail.html"
+],
+"Eng yaxshi yechimlar": [
+"templates/problems/detail.html",
+"templates/problems/leaders.html",
+"templates/submissions/detail.html"
+],
+"Urinishlarim <em class=\"tabular\" id=\"mine-count\">%(my_subs_n)s</em>": [
+"templates/problems/detail.html"
+],
+"Bu masala hozir <strong>«%(open_contest_title)s»</strong> musobaqasida. Natijalar jadvalida ko‘rinish uchun avval ro‘yxatdan o‘ting — aks holda yechim amaliyot sifatida hisoblanadi.": [
+"templates/problems/detail.html"
+],
+"Musobaqaga qo‘shilish": [
+"templates/problems/detail.html"
+],
+"Bu masala siz uchun bloklangan.": [
+"templates/problems/detail.html"
+],
+"Musobaqadagi yechimingiz bekor qilingan va xato urinish hisoblandi. Musobaqa tugaguncha bu masalaga yechim yuborish mumkin emas. Xato deb hisoblasangiz, adminga murojaat qiling.": [
+"templates/problems/detail.html"
+],
+"%(contest_title)s · %(contest_problem_label)s masala": [
+"templates/problems/detail.html"
+],
+"Boshlang‘ich ball: vaqt o‘tishi va noto‘g‘ri urinishlar bilan kamayadi": [
+"templates/problems/detail.html"
+],
+"<b class=\"tabular\">%(contest_problem_points)s</b> ball": [
+"templates/problems/detail.html"
+],
+"Masala reytingi %(problem_rating)s: reytingi shu songa teng o‘quvchi uni taxminan yarim holda yechadi": [
+"templates/problems/detail.html"
+],
+"Ball tekshiruvda": [
+"templates/problems/detail.html"
+],
+"Ball berilmadi": [
+"templates/problems/detail.html"
+],
+"<b class=\"tabular\">+%(problem_points)s</b> ball": [
+"templates/problems/detail.html"
+],
+"%(problem_tl_ms)s ms": [
+"templates/problems/detail.html"
+],
+"%(problem_ml_mb)s MB": [
+"templates/problems/detail.html"
+],
+"%(problem_n_ratings)s ta baho": [
+"templates/problems/detail.html"
+],
+"mavzu:": [
+"templates/problems/detail.html"
+],
+"Yana %(problem_tags_all)s ta mavzu": [
+"templates/problems/detail.html"
+],
+"muallif:": [
+"templates/problems/detail.html"
+],
+"«%(problem_title)s» masalasining rasmi": [
+"templates/problems/detail.html"
+],
+"Namunaviy ma’lumotlar": [
+"templates/problems/detail.html"
+],
+"<span translate=\"no\">%(t_name)s</span><span class=\"text-mute\">· %(t_rows)s qator</span>": [
+"templates/problems/detail.html"
+],
+"NULL": [
+"templates/problems/detail.html"
+],
+"Jadval tuzilishi (CREATE TABLE)": [
+"templates/problems/detail.html"
+],
+"Namunaviy ma’lumotlarda kutilgan natija": [
+"templates/problems/detail.html"
+],
+"(bo‘sh natija)": [
+"templates/problems/detail.html"
+],
+"Qatorlar aynan shu tartibda bo‘lishi kerak.": [
+"templates/problems/detail.html"
+],
+"Qatorlar tartibi ahamiyatsiz, ustunlar tartibi muhim.": [
+"templates/problems/detail.html"
+],
+"Yechim yashirin, kattaroq ma’lumotlarda ham tekshiriladi.": [
+"templates/problems/detail.html"
+],
+"Misollar": [
+"templates/problems/detail.html"
+],
+"Namuna qiymatlari va kutilgan natija": [
+"templates/problems/detail.html"
+],
+"<span>Misol %(forloop_counter)s</span><span class=\"ca-example-hint\">Kirish yoki chiqishni alohida nusxalash mumkin</span>": [
+"templates/problems/detail.html"
+],
+"Kirishni nusxalash": [
+"templates/problems/detail.html"
+],
+"Chiqishni nusxalash": [
+"templates/problems/detail.html"
+],
+"Misol yo‘q.": [
+"templates/problems/detail.html"
+],
+"Masala statistikasi": [
+"templates/problems/detail.html"
+],
+"Qabul qilingan": [
+"templates/problems/detail.html",
+"templates/submissions/list.html"
+],
+"Qabul darajasi": [
+"templates/problems/detail.html"
+],
+"Maslahat ochilsa, yechganingizda ball shuncha kamayadi": [
+"templates/problems/detail.html"
+],
+"%(forloop_counter)s-maslahat": [
+"templates/problems/detail.html"
+],
+"· <span class=\"font-semibold text-warn\">−%(h_cost_pct)s%%</span> ball": [
+"templates/problems/detail.html"
+],
+"· bepul (yechilgan)": [
+"templates/problems/detail.html"
+],
+"Maslahatni ochasizmi? Masalani yechganingizda ballning %(h_cost_pct)s%% i ayriladi.": [
+"templates/problems/detail.html"
+],
+"Yechim tahlili": [
+"templates/problems/detail.html"
+],
+"· masalani yechgach ochiladi": [
+"templates/problems/detail.html"
+],
+"Yechim yuborish": [
+"templates/problems/detail.html"
+],
+"Dasturlash tili": [
+"templates/problems/detail.html"
+],
+"Kodni tozalash": [
+"templates/problems/detail.html"
+],
+"Muharrir sozlamalari": [
+"templates/problems/detail.html"
+],
+"Shrift": [
+"templates/problems/detail.html"
+],
+"Anthropic Mono": [
+"templates/problems/detail.html"
+],
+"JetBrains Mono": [
+"templates/problems/detail.html"
+],
+"Lilex": [
+"templates/problems/detail.html"
+],
+"Fira Code": [
+"templates/problems/detail.html"
+],
+"One Dark": [
+"templates/problems/detail.html"
+],
+"VS Code Dark": [
+"templates/problems/detail.html"
+],
+"GitHub Dark": [
+"templates/problems/detail.html"
+],
+"Tokyo Night": [
+"templates/problems/detail.html"
+],
+"Tokyo Night Storm": [
+"templates/problems/detail.html"
+],
+"Dracula": [
+"templates/problems/detail.html"
+],
+"Monokai": [
+"templates/problems/detail.html"
+],
+"Material": [
+"templates/problems/detail.html"
+],
+"Atom One": [
+"templates/problems/detail.html"
+],
+"Gruvbox": [
+"templates/problems/detail.html"
+],
+"Nord": [
+"templates/problems/detail.html"
+],
+"Xcode Dark": [
+"templates/problems/detail.html"
+],
+"Sublime": [
+"templates/problems/detail.html"
+],
+"Aura": [
+"templates/problems/detail.html"
+],
+"Copilot": [
+"templates/problems/detail.html"
+],
+"Andromeda": [
+"templates/problems/detail.html"
+],
+"Solarized Dark": [
+"templates/problems/detail.html"
+],
+"Oddiy": [
+"templates/problems/detail.html"
+],
+"VS Code Light": [
+"templates/problems/detail.html"
+],
+"GitHub Light": [
+"templates/problems/detail.html"
+],
+"Xcode Light": [
+"templates/problems/detail.html"
+],
+"Material Light": [
+"templates/problems/detail.html"
+],
+"Gruvbox Light": [
+"templates/problems/detail.html"
+],
+"Solarized Light": [
+"templates/problems/detail.html"
+],
+"Shrift o‘lchami": [
+"templates/problems/detail.html"
+],
+"Kichraytirish": [
+"templates/problems/detail.html"
+],
+"Kattalashtirish": [
+"templates/problems/detail.html"
+],
+"Tab kengligi": [
+"templates/problems/detail.html"
+],
+"Vim klaviaturasi": [
+"templates/problems/detail.html"
+],
+"Uzun qatorlarni o‘rash": [
+"templates/problems/detail.html"
+],
+"Til shabloni<small>Muharrir bo‘sh bo‘lsa qo‘yiladi</small>": [
+"templates/problems/detail.html"
+],
+"To‘liq ekran": [
+"templates/problems/detail.html"
+],
+"Kod muharriri": [
+"templates/problems/detail.html"
+],
+"Kodni shu yerga yozing…": [
+"templates/problems/detail.html"
+],
+"Konsol": [
+"templates/problems/detail.html"
+],
+"O‘z kiritishim": [
+"templates/problems/detail.html"
+],
+"Kirish · Misol %(forloop_counter)s": [
+"templates/problems/detail.html"
+],
+"Sinov uchun kirish ma’lumoti": [
+"templates/problems/detail.html"
+],
+"Kirish ma’lumotini yozing. «Sinab ko‘rish» shu kirish bilan ishga tushiradi.": [
+"templates/problems/detail.html"
+],
+"«Sinab ko‘rish» natijasi shu yerda chiqadi. Sinov urinish hisoblanmaydi.": [
+"templates/problems/detail.html"
+],
+"Ro‘yxatdan o‘tmasdan ham namunaviy testlarda sinab ko‘rishingiz mumkin.": [
+"templates/problems/detail.html"
+],
+"<kbd class=\"ca-kbd\">Ctrl</kbd>+<kbd class=\"ca-kbd\">Enter</kbd> yuborish": [
+"templates/problems/detail.html"
+],
+"Masala bloklangan — musobaqa tugaguncha sinab bo‘lmaydi": [
+"templates/problems/detail.html"
+],
+"Sinab ko‘rish": [
+"templates/problems/detail.html"
+],
+"Masala bloklangan — musobaqa tugaguncha yechim yuborish mumkin emas": [
+"templates/problems/detail.html"
+],
+"Yuborish (Ctrl+Enter)": [
+"templates/problems/detail.html"
+],
+"Kodingiz shu brauzerda saqlanadi": [
+"templates/problems/detail.html"
+],
+"Namunaviy testlarda sinash: ro‘yxatdan o‘tish shart emas": [
+"templates/problems/detail.html"
+],
+"Ro‘yxatdan o‘tib yuborish": [
+"templates/problems/detail.html"
+],
+"Birinchi yechimingiz oldidan": [
+"templates/problems/detail.html"
+],
+"Kodni <b class=\"text-ink\">o‘zingiz yozasiz</b>. AI'ga masalani berib kod yozdirish yoki birovning yechimini ko‘chirish mumkin emas.": [
+"templates/problems/detail.html"
+],
+"Hujjatlar, maslahatlar (hint) va AI'dan mavzuni tushuntirishni so‘rash mumkin.": [
+"templates/problems/detail.html"
+],
+"Kod qanday yozilgani qayd etiladi: muharrirdagi kod o‘zgarganda vaqti-vaqti bilan saqlab boriladi, qo‘yilgan matn va boshqa oynada o‘tkazilgan vaqt belgilanadi. Bu adminlarga ko‘rinadi. Ko‘chirilgan yechim uchun ball berilmaydi, musobaqada esa diskvalifikatsiya qilinadi.": [
+"templates/problems/detail.html"
+],
+"Batafsil: halollik qoidalari": [
+"templates/problems/detail.html"
+],
+"«Qabul qilaman» tugmasi bilan siz yechimlarni o‘zingiz yozishga va qoidalarga amal qilishga rozilik bildirasiz.": [
+"templates/problems/detail.html"
+],
+"Qabul qilaman va yuborish": [
+"templates/problems/detail.html"
+],
+"Hali hech kim baholamagan.": [
+"templates/problems/detail.html"
+],
+"Sizning bahoyingiz — o‘zgartirish mumkin": [
+"templates/problems/detail.html"
+],
+"Masala sizga qanday tuyuldi?": [
+"templates/problems/detail.html"
+],
+"Masalani baholang": [
+"templates/problems/detail.html"
+],
+"%(n)s yulduz": [
+"templates/problems/detail.html"
+],
+"Masalani yechgandan so‘ng baholay olasiz.": [
+"templates/problems/detail.html"
+],
+"Baholash uchun": [
+"templates/problems/detail.html"
+],
+"tizimga kiring</a>.": [
+"templates/problems/detail.html"
+],
+"%(problem_title)s — eng yaxshi yechimlar": [
+"templates/problems/leaders.html"
+],
+"«%(problem_title)s» masalasining eng tez va eng qisqa yechimlari.": [
+"templates/problems/leaders.html"
+],
+"Har bir foydalanuvchining eng yaxshi qabul qilingan yechimi. Teng bo‘lsa — kim oldin yuborgan.": [
+"templates/problems/leaders.html"
+],
+"Eng tez": [
+"templates/problems/leaders.html"
+],
+"Eng qisqa": [
+"templates/problems/leaders.html"
+],
+"yechimlar": [
+"templates/problems/leaders.html"
+],
+"Barcha tillar": [
+"templates/problems/leaders.html"
+],
+"Kod uzunligini bir til ichida solishtirish adolatliroq: tilni tanlang.": [
+"templates/problems/leaders.html"
+],
+"Hajm": [
+"templates/problems/leaders.html"
+],
+"Kod": [
+"templates/problems/leaders.html",
+"templates/registration/telegram_login.html",
+"templates/submissions/detail.html"
+],
+"%(s_user_username)s kodini ko‘rish": [
+"templates/problems/leaders.html"
+],
+"Boshqalarning kodini ko‘rish uchun avval masalani o‘zingiz yeching.": [
+"templates/problems/leaders.html"
+],
+"Hali qabul qilingan yechim yo‘q": [
+"templates/problems/leaders.html"
+],
+"bu tilda": [
+"templates/problems/leaders.html"
+],
+"Birinchi bo‘lib yeching: eng tez va eng qisqa yechimlar jadvalining tepasi sizniki bo‘ladi.": [
+"templates/problems/leaders.html"
+],
+"Masalani yechish": [
+"templates/problems/leaders.html"
+],
+"%(total)s ta dasturlash masalasi: boshlang‘ichdan qiyingacha, mavzular bo‘yicha. Yeching — kodingiz serverda shu zahoti testlanadi.": [
+"templates/problems/list.html"
+],
+"Oson masaladan boshlang, qiyinlari reytingga tayyorlaydi.": [
+"templates/problems/list.html"
+],
+"%(total)s ta ochiq masala: boshlang‘ichdan qiyingacha, mavzular bo‘yicha.": [
+"templates/problems/list.html"
+],
+"Masalalar ro‘yxati": [
+"templates/problems/list.html"
+],
+"Masala qidirish…": [
+"templates/problems/list.html"
+],
+"Masala nomi bo‘yicha qidirish": [
+"templates/problems/list.html"
+],
+"Hammasi <em>%(level_total)s</em>": [
+"templates/problems/list.html"
+],
+"Masala turi": [
+"templates/problems/list.html"
+],
+"Mavzu qidirish…": [
+"templates/problems/list.html"
+],
+"Mavzu qidirish": [
+"templates/problems/list.html"
+],
+"Mavzuni tozalash": [
+"templates/problems/list.html"
+],
+"Jadvalda teglarni ko‘rsatish": [
+"templates/problems/list.html"
+],
+"Tasodifiy": [
+"templates/problems/list.html"
+],
+"Saqlanganlar: keyinroq yechish uchun saqlangan masalalar": [
+"templates/problems/list.html"
+],
+"Saqlanganlar": [
+"templates/problems/list.html"
+],
+"«%(q)s» bo‘yicha:": [
+"templates/problems/list.html"
+],
+"%(problems_paginator_count)s ta masala ·": [
+"templates/problems/list.html"
+],
+"Filtrni tozalash": [
+"templates/problems/list.html",
+"templates/submissions/list.html"
+],
+"Masala reytingi, Codeforces’dagidek: reytingi shu songa teng o‘quvchi uni taxminan yarim holda yechadi.": [
+"templates/problems/list.html"
+],
+"Yuborilgan yechimlarning necha foizi qabul qilingan": [
+"templates/problems/list.html"
+],
+"Qabul %": [
+"templates/problems/list.html"
+],
+"<span class=\"ca-st is-tried\" title=\"Urinilgan, hali yechilmagan\"></span><span class=\"sr-only\">Urinilgan</span>": [
+"templates/problems/list.html"
+],
+"<span class=\"ca-st is-new\" title=\"Hali urinilmagan\"></span><span class=\"sr-only\">Yangi</span>": [
+"templates/problems/list.html"
+],
+"%(p_solvers)s kishi yechgan, %(p_ac_count)s / %(p_attempts)s urinish qabul qilingan": [
+"templates/problems/list.html"
+],
+"<b>Bu filtr bo‘yicha masala topilmadi</b>Boshqa mavzu yoki qiyinlikni tanlang yoki": [
+"templates/problems/list.html"
+],
+"filtrni tozalang</a>.": [
+"templates/problems/list.html"
+],
+"Hali ochiq masala yo‘q": [
+"templates/problems/list.html"
+],
+"Birinchi masalani qo‘shing</a>.": [
+"templates/problems/list.html"
+],
+"Tavsiyalar": [
+"templates/problems/list.html"
+],
+"Eng kam yechgan mavzuingiz": [
+"templates/problems/list.html"
+],
+"Boshlovchilar uchun": [
+"templates/problems/list.html"
+],
+"Masala qiyin tuyulsa, avval O‘rganish bo‘limidagi mavzulardan o‘ting.": [
+"templates/problems/list.html"
+],
+"%(plan_progress_done)s / %(plan_progress_total)s<span class=\"sr-only\"> masala yechilgan</span>": [
+"templates/problems/list.html"
+],
+"Masala yeching, bellashing, reytingda ko‘tariling": [
+"templates/registration/_auth_brand.html"
+],
+"Kod serverda darhol testlanadi: javob, vaqt, xotira": [
+"templates/registration/_auth_brand.html"
+],
+"Reytingli musobaqalar va 1 ga 1 duellar": [
+"templates/registration/_auth_brand.html"
+],
+"Kunlik masala, Olov va nishonlar": [
+"templates/registration/_auth_brand.html"
+],
+"musobaqa": [
+"templates/registration/_auth_brand.html"
+],
+"tekshirilgan yechim": [
+"templates/registration/_auth_brand.html"
+],
+"Parolni ko‘rsatish": [
+"templates/registration/_auth_field.html"
+],
+"Google bilan davom etish": [
+"templates/registration/_google_btn.html"
+],
+"CodeArena hisobingizga kiring: masalalar, kurslar, musobaqalar va reytingingiz bir joyda.": [
+"templates/registration/login.html"
+],
+"Xush kelibsiz": [
+"templates/registration/login.html"
+],
+"Hisobingizga kiring va davom eting.": [
+"templates/registration/login.html"
+],
+"Juda ko‘p urinish. Biroz kutib, qayta urinib ko‘ring.": [
+"templates/registration/login.html"
+],
+"Login yoki parol noto‘g‘ri. Qaytadan urinib ko‘ring.": [
+"templates/registration/login.html"
+],
+"Parolni unutdingizmi?": [
+"templates/registration/login.html"
+],
+"Telegram orqali kirish": [
+"templates/registration/login.html",
+"templates/registration/telegram_login.html"
+],
+"Telegram profilingizga ulangan bo‘lsa.": [
+"templates/registration/login.html"
+],
+"Hisob yo‘qmi?": [
+"templates/registration/login.html"
+],
+"Ro‘yxatdan o‘ting": [
+"templates/registration/login.html"
+],
+"Joriy parolni, keyin yangisini ikki marta kiriting.": [
+"templates/registration/password_change_form.html"
+],
+"Parolni saqlash": [
+"templates/registration/password_change_form.html",
+"templates/registration/password_reset_confirm.html"
+],
+"Joriy parolni unutdingizmi?": [
+"templates/registration/password_change_form.html"
+],
+"Email orqali tiklash": [
+"templates/registration/password_change_form.html"
+],
+"Parol yangilandi": [
+"templates/registration/password_reset_complete.html"
+],
+"Endi yangi parolingiz bilan kiring.": [
+"templates/registration/password_reset_complete.html"
+],
+"Yangi parol": [
+"templates/registration/password_reset_confirm.html"
+],
+"Yangi parolni ikki marta kiriting.": [
+"templates/registration/password_reset_confirm.html"
+],
+"Havola yaroqsiz": [
+"templates/registration/password_reset_confirm.html"
+],
+"Havola allaqachon ishlatilgan yoki muddati o‘tgan. Yangi havola so‘rang.": [
+"templates/registration/password_reset_confirm.html"
+],
+"Yangi havola so‘rash": [
+"templates/registration/password_reset_confirm.html"
+],
+"Havola yuborildi": [
+"templates/registration/password_reset_done.html"
+],
+"Pochtangizni tekshiring": [
+"templates/registration/password_reset_done.html"
+],
+"Bu email ro‘yxatdan o‘tgan bo‘lsa, unga parolni tiklash havolasi yuborildi. Xat kelmasa, «Spam» papkasini ham ko‘ring.": [
+"templates/registration/password_reset_done.html"
+],
+"Kirishga qaytish": [
+"templates/registration/password_reset_done.html"
+],
+"Salom %(user_username)s, CodeArena hisobingiz uchun parolni tiklash so‘rovi keldi. Davom etish uchun quyidagi havolani oching: %(protocol)s://%(domain)s": [
+"templates/registration/password_reset_email.html"
+],
+"Agar bu so‘rovni siz yubormagan bo‘lsangiz, bu xabarni e’tiborsiz qoldiring — parolingiz o‘zgarmaydi.": [
+"templates/registration/password_reset_email.html"
+],
+"Parolni tiklash": [
+"templates/registration/password_reset_form.html"
+],
+"Hisobingiz emailini kiriting — tiklash havolasini yuboramiz.": [
+"templates/registration/password_reset_form.html"
+],
+"Havola yuborish": [
+"templates/registration/password_reset_form.html"
+],
+"Parolni esladingizmi?": [
+"templates/registration/password_reset_form.html"
+],
+"CodeArena’da bepul ro‘yxatdan o‘ting: o‘zbek tilidagi masalalarni yeching, kurslarda o‘rganing va reytingli musobaqalarda qatnashing.": [
+"templates/registration/register.html"
+],
+"Bir daqiqa — va masalalar sizniki.": [
+"templates/registration/register.html"
+],
+"Hisob yaratish": [
+"templates/registration/register.html"
+],
+"Hisob yaratib,": [
+"templates/registration/register.html"
+],
+"halollik qoidalari</a>ga rozilik bildirasiz.": [
+"templates/registration/register.html"
+],
+"Allaqachon hisobingiz bormi?": [
+"templates/registration/register.html"
+],
+"Telegramda tasdiqlang": [
+"templates/registration/telegram_login.html"
+],
+"@%(bot)s ochilgach, <b>Start</b> tugmasini bosing va bot so‘ragan kodni yozing. Shu oyna o‘zi kirib oladi.": [
+"templates/registration/telegram_login.html"
+],
+"Botga yoziladigan kod": [
+"templates/registration/telegram_login.html"
+],
+"Telegramni ochish": [
+"templates/registration/telegram_login.html"
+],
+"Kutilmoqda…": [
+"templates/registration/telegram_login.html"
+],
+"Hisob Telegramga ulanmagan bo‘lsa,": [
+"templates/registration/telegram_login.html"
+],
+"parol bilan kiring</a>. Kod 5 daqiqa amal qiladi.": [
+"templates/registration/telegram_login.html"
+],
+"Tekshirilmoqda…": [
+"templates/submissions/_status.html"
+],
+"Navbatda…": [
+"templates/submissions/_status.html"
+],
+"Barcha %(s_total)s testdan o‘tdi · <span translate=\"no\">AC</span>": [
+"templates/submissions/_status.html"
+],
+"Kod kompilyatsiya bo‘lmadi · <span translate=\"no\">CE</span>": [
+"templates/submissions/_status.html"
+],
+"%(s_passed)s-testda · %(s_passed2)s/%(s_total)s test o‘tdi ·": [
+"templates/submissions/_status.html"
+],
+"<b class=\"tabular\">%(progress_done)s</b> / %(progress_total)s test tekshirildi": [
+"templates/submissions/_status.html"
+],
+"Tekshiruv odatdagidan uzoq cho‘zildi. Bir necha daqiqadan keyin ham o‘zgarmasa, qayta yuboring yoki adminga yozing.": [
+"templates/submissions/_status.html"
+],
+"Tez orada boshlanadi": [
+"templates/submissions/_status.html"
+],
+"Masalaning chegarasi %(s_problem_tl_ms)s ms, %(s_language_name)s uchun ×%(s_language_tl_multiplier)s": [
+"templates/submissions/_status.html"
+],
+"<b class=\"tabular\">%(s_exec_ms)s ms</b> <small class=\"tabular\">/ %(limits_ms)s ms</small>": [
+"templates/submissions/_status.html"
+],
+"Xotira": [
+"templates/submissions/_status.html",
+"templates/submissions/list.html"
+],
+"/ %(limits_mb)s MB": [
+"templates/submissions/_status.html"
+],
+"Dastur ishladi, lekin javob kutilganidan farq qildi. Chegaraviy holatlarni (0, 1, eng katta qiymat) va chiqish formatini tekshiring.": [
+"templates/submissions/_status.html"
+],
+"Dastur vaqt chegarasiga sig‘madi. Tezroq algoritm kerak — masalan, ichma-ich sikllarni kamaytiring.": [
+"templates/submissions/_status.html"
+],
+"Dastur ruxsat etilganidan ko‘p xotira ishlatdi. Katta massivlar va rekursiya chuqurligini tekshiring.": [
+"templates/submissions/_status.html"
+],
+"Dastur juda ko‘p narsa chiqardi. Ortiqcha yoki sikl ichidagi chiqarishlarni olib tashlang.": [
+"templates/submissions/_status.html"
+],
+"Dastur xato bilan to‘xtadi: nolga bo‘lish, massiv chegarasidan chiqish yoki noto‘g‘ri kiritishni o‘qish bo‘lishi mumkin.": [
+"templates/submissions/_status.html"
+],
+"Kod kompilyatsiya bo‘lmadi. Til to‘g‘ri tanlanganini va sintaksisni tekshiring.": [
+"templates/submissions/_status.html"
+],
+"Tekshiruvda xato yuz berdi. Qayta yuborib ko‘ring.": [
+"templates/submissions/_status.html"
+],
+"%(first_fail_index)s-test": [
+"templates/submissions/_status.html"
+],
+"%(first_fail_exec_ms)s ms": [
+"templates/submissions/_status.html"
+],
+"Kutilgan": [
+"templates/submissions/_status.html"
+],
+"Sizning chiqishingiz": [
+"templates/submissions/_status.html"
+],
+"Yashirin test: kirish ma’lumotlari ko‘rsatilmaydi.": [
+"templates/submissions/_status.html"
+],
+"Tekshirilmoqda": [
+"templates/submissions/_vd.html",
+"templates/submissions/_verdict.html"
+],
+"Navbatda": [
+"templates/submissions/_vd.html",
+"templates/submissions/_verdict.html"
+],
+"%(sub_passed)s-testda": [
+"templates/submissions/_vd.html"
+],
+"%(n)s-testda": [
+"templates/submissions/_verdict.html"
+],
+"Urinish #%(s_pk)s": [
+"templates/submissions/detail.html"
+],
+"Urinish <span class=\"tabular\">#%(s_pk)s</span>": [
+"templates/submissions/detail.html"
+],
+"mashq": [
+"templates/submissions/detail.html"
+],
+"Muharrirda ochish": [
+"templates/submissions/detail.html"
+],
+"Masalaga qaytish": [
+"templates/submissions/detail.html",
+"templates/submissions/refused.html"
+],
+"Oldingi urinish #%(prev_sub_pk)s": [
+"templates/submissions/detail.html"
+],
+"Keyingi urinish #%(next_sub_pk)s": [
+"templates/submissions/detail.html"
+],
+"%(s_language_name)s · %(s_source)s belgi": [
+"templates/submissions/detail.html"
+],
+"Tezlik": [
+"templates/submissions/detail.html"
+],
+"Qabul qilingan %(beats_n)s ta yechimning ishlash vaqti taqsimoti; sizniki %(s_exec_ms)s ms": [
+"templates/submissions/detail.html"
+],
+"Siz <b class=\"text-ink tabular\">%(s_exec_ms)s ms</b>: %(s_language_name)s dagi %(beats_n)s ta qabul qilingan yechimning <b class=\"text-ink tabular\">%(beats_time)s%%</b> idan tezroq.": [
+"templates/submissions/detail.html"
+],
+"Xotira %(beats_mem)s%% idan kam.": [
+"templates/submissions/detail.html"
+],
+"Keyingi qadam": [
+"templates/submissions/detail.html"
+],
+"Shu mavzudagi keyingi masala (%(next_pick_1)s):": [
+"templates/submissions/detail.html"
+],
+"Darajangizga mos keyingi masala:": [
+"templates/submissions/detail.html"
+],
+"Qabul qilindi.": [
+"templates/submissions/detail.html"
+],
+"Masalalar ro‘yxatiga</a> qayting.": [
+"templates/submissions/detail.html"
+],
+"Yechim tekshirilmoqda, odatda bir necha soniya. Sahifa o‘zi yangilanadi.": [
+"templates/submissions/detail.html"
+],
+"Xato topilgan testni qayta ko‘ring, keyin": [
+"templates/submissions/detail.html"
+],
+"masalada</a> tuzatib qayta yuboring.": [
+"templates/submissions/detail.html"
+],
+"Yuborgan yechimlaringiz": [
+"templates/submissions/list.html"
+],
+"Saytdagi barcha yechimlar": [
+"templates/submissions/list.html"
+],
+", eng yangisi tepada": [
+"templates/submissions/list.html"
+],
+"Jami": [
+"templates/submissions/list.html"
+],
+"Kimning urinishlari": [
+"templates/submissions/list.html"
+],
+"Mening": [
+"templates/submissions/list.html"
+],
+"Hamma": [
+"templates/submissions/list.html"
+],
+"Natija bo‘yicha": [
+"templates/submissions/list.html"
+],
+"Urinishlarni qidirish": [
+"templates/submissions/list.html"
+],
+"Til: hammasi": [
+"templates/submissions/list.html"
+],
+"%(subs_paginator_count)s ta urinish ·": [
+"templates/submissions/list.html"
+],
+"Qidiruvni tozalash": [
+"templates/submissions/list.html"
+],
+"&nbsp;MB": [
+"templates/submissions/list.html"
+],
+"Bu filtr bo‘yicha urinish yo‘q": [
+"templates/submissions/list.html"
+],
+"Masalalarga o‘tish</a>: kodingiz darhol tekshiriladi.": [
+"templates/submissions/list.html"
+],
+"Yuborilmadi": [
+"templates/submissions/refused.html"
+],
+"Yechim yuborilmadi": [
+"templates/submissions/refused.html"
+],
+"Kodingiz muharrirda saqlangan: masalaga qaytsangiz, u shu yerda turadi.": [
+"templates/submissions/refused.html"
+]
+}

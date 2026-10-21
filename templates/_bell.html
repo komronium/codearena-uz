@@ -2,11 +2,11 @@
 few, the unread ones marked; a line opens its page and is read from then on.{% endcomment %}
 {% with n=bell.unread %}
 <details class="ca-dropdown ca-bell" data-dropdown>
-  <summary class="ca-icon-btn" aria-label="Bildirishnomalar{% if n %}: {{ n }} ta yangi{% endif %}" title="Bildirishnomalar">
+  <summary class="ca-icon-btn" aria-label="Bildirishnomalar{% if n %}: {{ n }} ta yangi{% endif %}" title="{% trans 'Bildirishnomalar' %}">
     <i data-lucide="bell" class="lu" aria-hidden="true"></i>{% if n %}<b class="ca-bell-n tabular" aria-hidden="true">{% if n > 9 %}9+{% else %}{{ n }}{% endif %}</b>{% endif %}
   </summary>
   <div class="ca-dropdown-panel ca-bell-panel">
-    <div class="ca-bell-head"><b>Bildirishnomalar</b>{% if n %}<form method="post" action="{% url 'notifications_read' %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="ca-link text-sm">Hammasi o‘qildi</button></form>{% endif %}</div>
+    <div class="ca-bell-head"><b>{% trans "Bildirishnomalar" %}</b>{% if n %}<form method="post" action="{% url 'notifications_read' %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="ca-link text-sm">{% trans "Hammasi o‘qildi" %}</button></form>{% endif %}</div>
     {% with rows=bell.latest %}
     {% if rows %}
     <ul class="ca-bell-list">
@@ -18,7 +18,7 @@ few, the unread ones marked; a line opens its page and is read from then on.{% e
       {% endfor %}
     </ul>
     {% else %}
-    <p class="ca-bell-empty">Hozircha xabar yo‘q. Duel chaqiruvlari va nishonlar shu yerda chiqadi.</p>
+    <p class="ca-bell-empty">{% trans "Hozircha xabar yo‘q. Duel chaqiruvlari va nishonlar shu yerda chiqadi." %}</p>
     {% endif %}
     {% endwith %}
   </div>

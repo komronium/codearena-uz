@@ -2,13 +2,13 @@
 country / city / school filters. ctx: q, geo (accounts.geo.board_geo), and the board's own hidden params in geo_keep.{% endcomment %}
 <div class="ca7-tools is-board">
   <div class="ca7-trow">
-    <form method="get" class="ca7-search" role="search" aria-label="Foydalanuvchini qidirish">
+    <form method="get" class="ca7-search" role="search" aria-label="{% trans 'Foydalanuvchini qidirish' %}">
       {% if geo.country %}<input type="hidden" name="country" value="{{ geo.country }}">{% endif %}{% if geo.city %}<input type="hidden" name="city" value="{{ geo.city }}">{% endif %}{% if geo.school %}<input type="hidden" name="school" value="{{ geo.school }}">{% endif %}
-      <i data-lucide="search" class="lu" aria-hidden="true"></i><input class="ca7-fld" type="search" name="q" value="{{ q }}" placeholder="Foydalanuvchi…" aria-label="Foydalanuvchi nomi" autocomplete="off" spellcheck="false">
+      <i data-lucide="search" class="lu" aria-hidden="true"></i><input class="ca7-fld" type="search" name="q" value="{{ q }}" placeholder="{% trans 'Foydalanuvchi…' %}" aria-label="{% trans 'Foydalanuvchi nomi' %}" autocomplete="off" spellcheck="false">
     </form>
-    {% if user.is_authenticated and not q %}<a class="ca-btn ca-btn-soft ml-auto" href="#me"><i data-lucide="crosshair" class="lu" aria-hidden="true"></i>Mening o‘rnim</a>{% endif %}
+    {% if user.is_authenticated and not q %}<a class="ca-btn ca-btn-soft ml-auto" href="#me"><i data-lucide="crosshair" class="lu" aria-hidden="true"></i>{% trans "Mening o‘rnim" %}</a>{% endif %}
   </div>
-  {% if geo.countries %}<div class="ca7-trow">{% include "accounts/_geo_filters.html" %}{% if geo.active %}<a class="ca-link text-sm" href="{% querystring country=None city=None school=None page=None %}">Tozalash</a>{% endif %}</div>{% endif %}
+  {% if geo.countries %}<div class="ca7-trow">{% include "accounts/_geo_filters.html" %}{% if geo.active %}<a class="ca-link text-sm" href="{% querystring country=None city=None school=None page=None %}">{% trans "Tozalash" %}</a>{% endif %}</div>{% endif %}
 </div>
-{% if geo.country %}<p class="ca7-found">{% flag geo.country %} <b>{{ geo.country_name }}{% if geo.city %}, {{ geo.city }}{% endif %}{% if geo.school %}, {{ geo.school }}{% endif %}</b>: {{ total }} ta · <a class="ca-link" href="{% querystring country=None city=None school=None page=None %}">hammasi</a></p>{% endif %}
-{% if q %}<p class="ca7-found">«{{ q }}»: {{ found }} ta topildi · <a class="ca-link" href="{% querystring q=None page=None %}">hammasi</a></p>{% endif %}
+{% if geo.country %}<p class="ca7-found">{% flag geo.country %} <b>{{ geo.country_name }}{% if geo.city %}, {{ geo.city }}{% endif %}{% if geo.school %}, {{ geo.school }}{% endif %}</b>{% blocktrans with total=total %}: {{ total }} ta ·{% endblocktrans %} <a class="ca-link" href="{% querystring country=None city=None school=None page=None %}">{% trans "hammasi" %}</a></p>{% endif %}
+{% if q %}<p class="ca7-found">{% blocktrans with q=q found=found %}«{{ q }}»: {{ found }} ta topildi ·{% endblocktrans %} <a class="ca-link" href="{% querystring q=None page=None %}">{% trans "hammasi" %}</a></p>{% endif %}

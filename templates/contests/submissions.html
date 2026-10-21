@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ contest.title }} — Urinishlar{% endblock %}
+{% block title %}{% blocktrans with contest_title=contest.title %}{{ contest_title }} — Urinishlar{% endblocktrans %}{% endblock %}
 {% block band %}{% include "contests/_band.html" with active="submissions" %}{% endblock %}
 {% block content %}
 {% comment %}Staff only: the round's submissions, newest first, during the round too (the public status page hides
@@ -7,61 +7,61 @@ them). The filters narrow it to a problem, a participant or a verdict; a standin
 one problem here, and a row's handle or letter narrows the list to it.{% endcomment %}
 <form method="get" class="ca7-filters mb-5 flex flex-wrap items-end gap-3">
   <div>
-    <label class="ca-label" for="f-problem">Masala</label>
+    <label class="ca-label" for="f-problem">{% trans "Masala" %}</label>
     <select id="f-problem" name="problem" class="ca-select !w-auto max-w-[16rem] !py-1.5 text-sm">
-      <option value="">Hammasi</option>
+      <option value="">{% trans "Hammasi" %}</option>
       {% for cp in problems %}<option value="{{ cp.label }}"{% if cp.label == f.problem %} selected{% endif %}>{{ cp.label }}. {{ cp.problem.title }}</option>{% endfor %}
     </select>
   </div>
   <div class="w-full max-w-[12rem]">
-    <label class="ca-label" for="f-user">Ishtirokchi</label>
-    <input id="f-user" name="user" value="{{ f.user }}" class="ca-input !py-1.5 text-sm" placeholder="login…" autocomplete="off" spellcheck="false">
+    <label class="ca-label" for="f-user">{% trans "Ishtirokchi" %}</label>
+    <input id="f-user" name="user" value="{{ f.user }}" class="ca-input !py-1.5 text-sm" placeholder="{% trans 'login…' %}" autocomplete="off" spellcheck="false">
   </div>
   <div>
-    <label class="ca-label" for="f-verdict">Holat</label>
+    <label class="ca-label" for="f-verdict">{% trans "Holat" %}</label>
     <select id="f-verdict" name="verdict" class="ca-select !w-auto !py-1.5 text-sm">
-      <option value="">Hammasi</option>
+      <option value="">{% trans "Hammasi" %}</option>
       {% for v, label in verdicts %}<option value="{{ v }}"{% if v == f.verdict %} selected{% endif %}>{{ label }}</option>{% endfor %}
     </select>
   </div>
-  <button class="ca-btn ca-btn-primary"><i data-lucide="list-filter" class="lu" aria-hidden="true"></i>Filtrlash</button>
-  {% if f.problem or f.user or f.verdict %}<a class="ca-link text-sm" href="{% url 'contests:submissions' contest.pk %}">Tozalash</a>{% endif %}
+  <button class="ca-btn ca-btn-primary"><i data-lucide="list-filter" class="lu" aria-hidden="true"></i>{% trans "Filtrlash" %}</button>
+  {% if f.problem or f.user or f.verdict %}<a class="ca-link text-sm" href="{% url 'contests:submissions' contest.pk %}">{% trans "Tozalash" %}</a>{% endif %}
 </form>
 {% if participant %}{% with p=participant.participation %}
 {# one participant's round problem by problem; a struck problem counts as untried, and only staff see that it was struck #}
 <section class="ca-box mb-4" aria-labelledby="who-title">
   <div class="ca-box-cap">
-    <h2 id="who-title"><span translate="no">{{ p.user.username }}</span> — masalalar bo‘yicha{% if p.disqualified %} <span class="ca-tag ml-1 !text-bad" title="{{ p.disqualified_reason|default:'Diskvalifikatsiya' }}">DQ</span>{% endif %}</h2>
-    <a class="ca-box-tools ca-link" href="{% url 'integrity:contest_report' contest.pk %}">Nazorat hisoboti »</a>
+    <h2 id="who-title">{% blocktrans with p_user_username=p.user.username %}<span translate="no">{{ p_user_username }}</span> — masalalar bo‘yicha{% endblocktrans %}{% if p.disqualified %} <span class="ca-tag ml-1 !text-bad" title="{{ p.disqualified_reason|default:'Diskvalifikatsiya' }}">{% trans "DQ" %}</span>{% endif %}</h2>
+    <a class="ca-box-tools ca-link" href="{% url 'integrity:contest_report' contest.pk %}">{% trans "Nazorat hisoboti »" %}</a>
   </div>
   <div class="ca-box-body">
   <table class="ca-table">
-    <thead><tr><th scope="col" class="w-14 text-center">Masala</th><th scope="col">Natija</th><th scope="col" class="w-48"><span class="sr-only">Amallar</span></th></tr></thead>
+    <thead><tr><th scope="col" class="w-14 text-center">{% trans "Masala" %}</th><th scope="col">{% trans "Natija" %}</th><th scope="col" class="w-48"><span class="sr-only">{% trans "Amallar" %}</span></th></tr></thead>
     <tbody>
     {% for x in participant.results %}
     <tr>
       <td class="text-center font-semibold{% if x.cp.label == f.problem %} text-accent{% endif %}" title="{{ x.cp.problem.title }}">{{ x.cp.label }}</td>
       <td>
-        {% if x.void %}{% if x.void.penalty %}<span class="font-semibold text-bad">AI jarimasi</span>{% if x.void.reason %} <span class="text-mute">· {{ x.void.reason }}</span>{% endif %} <span class="text-mute">· xato urinish hisoblandi, masala bloklangan</span>
-        {% else %}<span class="font-semibold text-bad">Bekor qilingan</span>{% if x.void.reason %} <span class="text-mute">· {{ x.void.reason }}</span>{% endif %}{% endif %}
-        {% elif x.cell.solved %}<b class="ca-cf-ac !inline">{{ x.cell.mark }}</b> <span class="tabular text-mute">{{ x.cell.time }}{% if x.cell.wrong %} · {{ x.cell.wrong }} ta noto‘g‘ri urinishdan keyin{% endif %}</span>
-        {% elif x.cell.wrong %}<span class="text-mute">{{ x.cell.wrong }} ta noto‘g‘ri urinish</span>
-        {% else %}<span class="text-mute">urinish yo‘q</span>{% endif %}
+        {% if x.void %}{% if x.void.penalty %}<span class="font-semibold text-bad">{% trans "AI jarimasi" %}</span>{% if x.void.reason %} <span class="text-mute">· {{ x.void.reason }}</span>{% endif %} <span class="text-mute">{% trans "· xato urinish hisoblandi, masala bloklangan" %}</span>
+        {% else %}<span class="font-semibold text-bad">{% trans "Bekor qilingan" %}</span>{% if x.void.reason %} <span class="text-mute">· {{ x.void.reason }}</span>{% endif %}{% endif %}
+        {% elif x.cell.solved %}<b class="ca-cf-ac !inline">{{ x.cell.mark }}</b> <span class="tabular text-mute">{{ x.cell.time }}{% if x.cell.wrong %} {% blocktrans with x_cell_wrong=x.cell.wrong %}· {{ x_cell_wrong }} ta noto‘g‘ri urinishdan keyin{% endblocktrans %}{% endif %}</span>
+        {% elif x.cell.wrong %}<span class="text-mute">{% blocktrans with x_cell_wrong=x.cell.wrong %}{{ x_cell_wrong }} ta noto‘g‘ri urinish{% endblocktrans %}</span>
+        {% else %}<span class="text-mute">{% trans "urinish yo‘q" %}</span>{% endif %}
       </td>
       <td class="whitespace-nowrap text-right">
-        <a class="ca-btn ca-btn-ghost !px-2 !py-1" href="{% url 'integrity:replay' contest.pk p.user_id x.cp.problem_id %}" title="Yozilishini ko‘rish" aria-label="Yozilishini ko‘rish: {{ x.cp.label }}"><i data-lucide="history" class="lu" aria-hidden="true"></i></a>
+        <a class="ca-btn ca-btn-ghost !px-2 !py-1" href="{% url 'integrity:replay' contest.pk p.user_id x.cp.problem_id %}" title="{% trans 'Yozilishini ko‘rish' %}" aria-label="{% blocktrans with x_cp_label=x.cp.label %}Yozilishini ko‘rish: {{ x_cp_label }}{% endblocktrans %}"><i data-lucide="history" class="lu" aria-hidden="true"></i></a>
         {% if x.void or x.cell.solved or x.cell.wrong %}
-        <form method="post" action="{% url 'contests:void' contest.pk p.user_id %}" class="inline"{% if not x.void %} data-confirm="{{ x.cp.label }} masalasi natijasini bekor qilish. Sabab (ixtiyoriy, faqat adminlar ko‘radi):" data-reason data-reason-default=""{% endif %}>{% csrf_token %}
+        <form method="post" action="{% url 'contests:void' contest.pk p.user_id %}" class="inline"{% if not x.void %} data-confirm="{% blocktrans with x_cp_label=x.cp.label %}{{ x_cp_label }} masalasi natijasini bekor qilish. Sabab (ixtiyoriy, faqat adminlar ko‘radi):{% endblocktrans %}" data-reason data-reason-default=""{% endif %}>{% csrf_token %}
           <input type="hidden" name="label" value="{{ x.cp.label }}"><input type="hidden" name="voided" value="{% if x.void %}0{% else %}1{% endif %}">
           <input type="hidden" name="reason" value=""><input type="hidden" name="next" value="{{ request.get_full_path }}">
-          {% if x.void %}<button class="ca-btn ca-btn-ghost !py-1 text-xs"><i data-lucide="undo-2" class="lu" aria-hidden="true"></i>Tiklash</button>
-          {% else %}<button class="ca-btn ca-btn-ghost !py-1 text-xs text-bad"><i data-lucide="ban" class="lu" aria-hidden="true"></i>Bekor qilish</button>{% endif %}
+          {% if x.void %}<button class="ca-btn ca-btn-ghost !py-1 text-xs"><i data-lucide="undo-2" class="lu" aria-hidden="true"></i>{% trans "Tiklash" %}</button>
+          {% else %}<button class="ca-btn ca-btn-ghost !py-1 text-xs text-bad"><i data-lucide="ban" class="lu" aria-hidden="true"></i>{% trans "Bekor qilish" %}</button>{% endif %}
         </form>
         {% if not x.void %}
-        <form method="post" action="{% url 'contests:void' contest.pk p.user_id %}" class="inline" data-confirm="{{ x.cp.label }} masalasi natijasini AI tufayli bekor qilish: xato urinish hisoblanadi va masala bloklanadi. Sabab (ixtiyoriy, faqat adminlar ko‘radi):" data-reason data-reason-default="AI ishlatgan">{% csrf_token %}
+        <form method="post" action="{% url 'contests:void' contest.pk p.user_id %}" class="inline" data-confirm="{% blocktrans with x_cp_label=x.cp.label %}{{ x_cp_label }} masalasi natijasini AI tufayli bekor qilish: xato urinish hisoblanadi va masala bloklanadi. Sabab (ixtiyoriy, faqat adminlar ko‘radi):{% endblocktrans %}" data-reason data-reason-default="AI ishlatgan">{% csrf_token %}
           <input type="hidden" name="label" value="{{ x.cp.label }}"><input type="hidden" name="voided" value="1"><input type="hidden" name="penalty" value="1">
           <input type="hidden" name="reason" value=""><input type="hidden" name="next" value="{{ request.get_full_path }}">
-          <button class="ca-btn ca-btn-ghost !py-1 text-xs text-bad" title="AI tufayli: natija xato urinish sifatida qaytariladi va masala bloklanadi"><i data-lucide="bot" class="lu" aria-hidden="true"></i>AI</button>
+          <button class="ca-btn ca-btn-ghost !py-1 text-xs text-bad" title="{% trans 'AI tufayli: natija xato urinish sifatida qaytariladi va masala bloklanadi' %}"><i data-lucide="bot" class="lu" aria-hidden="true"></i>{% trans "AI" %}</button>
         </form>
         {% endif %}
         {% endif %}

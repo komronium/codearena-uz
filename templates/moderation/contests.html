@@ -1,9 +1,9 @@
 {% extends "base.html" %}
-{% block title %}Musobaqalar — boshqaruv{% endblock %}
+{% block title %}{% trans "Musobaqalar — boshqaruv" %}{% endblock %}
 {% block content %}
 <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
   <div>{% include "moderation/_header.html" with title="Musobaqalar" subtitle="Yaratish, tahrirlash, natijalar va halollik hisoboti" %}</div>
-  <a href="{% url 'moderation:contest_new' %}" class="ca-btn ca-btn-primary"><i data-lucide="plus" class="lu" aria-hidden="true"></i>Musobaqa yaratish</a>
+  <a href="{% url 'moderation:contest_new' %}" class="ca-btn ca-btn-primary"><i data-lucide="plus" class="lu" aria-hidden="true"></i>{% trans "Musobaqa yaratish" %}</a>
 </div>
 
 {% if contests %}
@@ -14,39 +14,39 @@
       <div class="ca-row-title">
         <span class="tabular shrink-0 text-xs font-normal text-mute">{{ c.pk|stringformat:"03d" }}</span>
         <a class="ca-link" href="{% url 'contests:detail' c.pk %}">{{ c.title }}</a>
-        {% if c.is_running %}<span class="ca-diff ca-diff-easy shrink-0"><span class="ca-live-dot" aria-hidden="true"></span>Jonli</span>
-        {% elif c.has_ended %}<span class="ca-chip shrink-0 !bg-ink/5 text-mute">Tugagan</span>
-        {% else %}<span class="ca-chip ca-chip-score shrink-0">Kutilmoqda</span>{% endif %}
+        {% if c.is_running %}<span class="ca-diff ca-diff-easy shrink-0">{% trans "<span class=\"ca-live-dot\" aria-hidden=\"true\"></span>Jonli" %}</span>
+        {% elif c.has_ended %}<span class="ca-chip shrink-0 !bg-ink/5 text-mute">{% trans "Tugagan" %}</span>
+        {% else %}<span class="ca-chip ca-chip-score shrink-0">{% trans "Kutilmoqda" %}</span>{% endif %}
       </div>
       <div class="ca-row-meta">
         <span class="tabular"><i data-lucide="calendar" class="lu" aria-hidden="true"></i>{{ c.start|date:"d.m.Y H:i" }} – {% if c.start|date:"Ymd" == c.end|date:"Ymd" %}{{ c.end|date:"H:i" }}{% else %}{{ c.end|date:"d.m.Y H:i" }}{% endif %}</span>
-        <span><i data-lucide="list-checks" class="lu" aria-hidden="true"></i>{{ c.n_problems }} masala{% if c.n_hidden %} · {{ c.n_hidden }} yashirin{% endif %}</span>
-        <span><i data-lucide="users" class="lu" aria-hidden="true"></i>{{ c.n_participants }} ishtirokchi</span>
-        {% if c.is_rated %}<span class="{% if c.has_ended and not c.rating_applied %}text-warn{% else %}text-ok{% endif %}"><i data-lucide="trending-up" class="lu" aria-hidden="true"></i>Reytingli{% if c.has_ended %}{% if c.rating_applied %} · hisoblangan{% else %} · hisoblanmagan{% endif %}{% endif %}</span>{% endif %}
+        <span><i data-lucide="list-checks" class="lu" aria-hidden="true"></i>{% blocktrans with c_n_problems=c.n_problems %}{{ c_n_problems }} masala{% endblocktrans %}{% if c.n_hidden %} {% blocktrans with c_n_hidden=c.n_hidden %}· {{ c_n_hidden }} yashirin{% endblocktrans %}{% endif %}</span>
+        <span><i data-lucide="users" class="lu" aria-hidden="true"></i>{% blocktrans with c_n_participants=c.n_participants %}{{ c_n_participants }} ishtirokchi{% endblocktrans %}</span>
+        {% if c.is_rated %}<span class="{% if c.has_ended and not c.rating_applied %}text-warn{% else %}text-ok{% endif %}"><i data-lucide="trending-up" class="lu" aria-hidden="true"></i>{% trans "Reytingli" %}{% if c.has_ended %}{% if c.rating_applied %} {% trans "· hisoblangan" %}{% else %} {% trans "· hisoblanmagan" %}{% endif %}{% endif %}</span>{% endif %}
       </div>
     </div>
     <div class="ca-row-side">
       {% if c.has_ended and not c.published_at %}
-      <form method="post" action="{% url 'moderation:contest_publish' c.pk %}" data-confirm="Masalalar ochiladi va ishtirokchilarning AC yechimlari amaliyot balliga o‘tadi. Davom etasizmi?">{% csrf_token %}
-        <button class="ca-btn ca-btn-ghost !py-1.5 text-xs"><i data-lucide="eye" class="lu" aria-hidden="true"></i>Masalalarni ochish</button>
+      <form method="post" action="{% url 'moderation:contest_publish' c.pk %}" data-confirm="{% trans 'Masalalar ochiladi va ishtirokchilarning AC yechimlari amaliyot balliga o‘tadi. Davom etasizmi?' %}">{% csrf_token %}
+        <button class="ca-btn ca-btn-ghost !py-1.5 text-xs"><i data-lucide="eye" class="lu" aria-hidden="true"></i>{% trans "Masalalarni ochish" %}</button>
       </form>
       {% endif %}
       {% if c.is_rated and c.has_ended and not c.rating_applied %}
-      {% if c.n_open_flags %}<a class="ca-chip ca-chip-score shrink-0" href="{% url 'integrity:contest_report' c.pk %}#flags" title="Reytingdan oldin ko‘rib chiqing">{{ c.n_open_flags }} ta o‘xshashlik ko‘rilmagan</a>{% endif %}
+      {% if c.n_open_flags %}<a class="ca-chip ca-chip-score shrink-0" href="{% url 'integrity:contest_report' c.pk %}#flags" title="{% trans 'Reytingdan oldin ko‘rib chiqing' %}">{% blocktrans with c_n_open_flags=c.n_open_flags %}{{ c_n_open_flags }} ta o‘xshashlik ko‘rilmagan{% endblocktrans %}</a>{% endif %}
       <form method="post" action="{% url 'moderation:contest_apply_rating' c.pk %}" data-confirm="{% if c.n_open_flags %}{{ c.n_open_flags }} ta o‘xshashlik hali ko‘rib chiqilmagan! {% endif %}Reyting bir marta hisoblanadi va qaytarib bo‘lmaydi. Shubhali natijalar bekor qilinganmi?">{% csrf_token %}
-        <button class="ca-btn ca-btn-primary !py-1.5 text-xs"><i data-lucide="trending-up" class="lu" aria-hidden="true"></i>Reytingni hisoblash</button>
+        <button class="ca-btn ca-btn-primary !py-1.5 text-xs"><i data-lucide="trending-up" class="lu" aria-hidden="true"></i>{% trans "Reytingni hisoblash" %}</button>
       </form>
       {% endif %}
-      <a href="{% url 'contests:standings' c.pk %}" class="ca-btn ca-btn-ghost !py-1.5 text-xs"><i data-lucide="medal" class="lu" aria-hidden="true"></i>Natijalar</a>
-      <a href="{% url 'integrity:contest_report' c.pk %}" class="ca-btn ca-btn-ghost !py-1.5 text-xs"><i data-lucide="shield-alert" class="lu" aria-hidden="true"></i>Halollik</a>
-      <a href="{% url 'moderation:contest_edit' c.pk %}" class="ca-btn ca-btn-ghost !py-1.5 text-xs"><i data-lucide="pencil" class="lu" aria-hidden="true"></i>Tahrirlash</a>
+      <a href="{% url 'contests:standings' c.pk %}" class="ca-btn ca-btn-ghost !py-1.5 text-xs"><i data-lucide="medal" class="lu" aria-hidden="true"></i>{% trans "Natijalar" %}</a>
+      <a href="{% url 'integrity:contest_report' c.pk %}" class="ca-btn ca-btn-ghost !py-1.5 text-xs"><i data-lucide="shield-alert" class="lu" aria-hidden="true"></i>{% trans "Halollik" %}</a>
+      <a href="{% url 'moderation:contest_edit' c.pk %}" class="ca-btn ca-btn-ghost !py-1.5 text-xs"><i data-lucide="pencil" class="lu" aria-hidden="true"></i>{% trans "Tahrirlash" %}</a>
       <details class="ca-dropdown" data-dropdown>
-        <summary class="ca-btn ca-btn-ghost !px-2 !py-1.5" aria-label="Boshqa amallar: {{ c.title }}" title="Boshqa amallar"><i data-lucide="ellipsis" class="lu" aria-hidden="true"></i></summary>
+        <summary class="ca-btn ca-btn-ghost !px-2 !py-1.5" aria-label="{% blocktrans with c_title=c.title %}Boshqa amallar: {{ c_title }}{% endblocktrans %}" title="{% trans 'Boshqa amallar' %}"><i data-lucide="ellipsis" class="lu" aria-hidden="true"></i></summary>
         <div class="ca-dropdown-panel !w-56">
-          <a class="ca-dropdown-item" href="{% url 'moderation:contest_official' c.pk %}"><i data-lucide="award" class="lu" aria-hidden="true"></i>Rasmiy reyting</a>
+          <a class="ca-dropdown-item" href="{% url 'moderation:contest_official' c.pk %}"><i data-lucide="award" class="lu" aria-hidden="true"></i>{% trans "Rasmiy reyting" %}</a>
           <hr class="my-1 border-line">
-          <form method="post" action="{% url 'moderation:contest_delete' c.pk %}" data-confirm="«{{ c.title }}» musobaqasi va natijalari o‘chiriladi. Davom etasizmi?">{% csrf_token %}
-            <button class="ca-dropdown-item w-full text-left text-bad"><i data-lucide="trash-2" class="lu" aria-hidden="true"></i>O‘chirish</button>
+          <form method="post" action="{% url 'moderation:contest_delete' c.pk %}" data-confirm="{% blocktrans with c_title=c.title %}«{{ c_title }}» musobaqasi va natijalari o‘chiriladi. Davom etasizmi?{% endblocktrans %}">{% csrf_token %}
+            <button class="ca-dropdown-item w-full text-left text-bad"><i data-lucide="trash-2" class="lu" aria-hidden="true"></i>{% trans "O‘chirish" %}</button>
           </form>
         </div>
       </details>
@@ -55,6 +55,6 @@
   {% endfor %}
 </ul>
 {% else %}
-<div class="ca-empty">Hali musobaqa yo‘q. <a class="ca-link" href="{% url 'moderation:contest_new' %}">Birinchisini yarating</a></div>
+<div class="ca-empty">{% trans "Hali musobaqa yo‘q." %} <a class="ca-link" href="{% url 'moderation:contest_new' %}">{% trans "Birinchisini yarating" %}</a></div>
 {% endif %}
 {% endblock %}

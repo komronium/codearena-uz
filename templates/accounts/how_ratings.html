@@ -1,42 +1,42 @@
 {% extends "base.html" %}
-{% block title %}Reyting qanday ishlaydi{% endblock %}
-{% block description %}CodeArena'da musobaqa reytingi, rasmiy reyting, amaliyot balli, duel reytingi va nishonlar qanday hisoblanadi.{% endblock %}
+{% block title %}{% trans "Reyting qanday ishlaydi" %}{% endblock %}
+{% block description %}{% trans "CodeArena'da musobaqa reytingi, rasmiy reyting, amaliyot balli, duel reytingi va nishonlar qanday hisoblanadi." %}{% endblock %}
 {% comment %}One page for the numbers a person sees: what each is, what moves it, what does not. Linked from the rating page.{% endcomment %}
 {% block content %}
 <div class="mx-auto max-w-3xl">
-  <h1 class="ca-page-title">Reyting qanday ishlaydi</h1>
-  <p class="mt-2 text-mute">CodeArena'da to‘rt xil raqam bor. Ularning har biri o‘z ishi uchun va bir-biriga ta’sir qilmaydi.</p>
+  <h1 class="ca-page-title">{% trans "Reyting qanday ishlaydi" %}</h1>
+  <p class="mt-2 text-mute">{% trans "CodeArena'da to‘rt xil raqam bor. Ularning har biri o‘z ishi uchun va bir-biriga ta’sir qilmaydi." %}</p>
 
   <section class="ca-panel mt-6" aria-labelledby="r1">
-    <h2 id="r1" class="text-[1.125rem] font-bold">Musobaqa reytingi</h2>
-    <p class="mt-2 text-sm">Reytingli musobaqadan keyin o‘zgaradi: o‘rningiz o‘z darajangizdagi o‘yinchilardan kutilganidan yaxshi bo‘lsa, ko‘tariladi, yomon bo‘lsa, tushadi (Codeforces/Elo usuli). Birinchi 6 ta musobaqada yangilarga qo‘shimcha «ramp» beriladi. Bu raqam jadvaldagi o‘rin va darajani belgilaydi.</p>
+    <h2 id="r1" class="text-[1.125rem] font-bold">{% trans "Musobaqa reytingi" %}</h2>
+    <p class="mt-2 text-sm">{% trans "Reytingli musobaqadan keyin o‘zgaradi: o‘rningiz o‘z darajangizdagi o‘yinchilardan kutilganidan yaxshi bo‘lsa, ko‘tariladi, yomon bo‘lsa, tushadi (Codeforces/Elo usuli). Birinchi 6 ta musobaqada yangilarga qo‘shimcha «ramp» beriladi. Bu raqam jadvaldagi o‘rin va darajani belgilaydi." %}</p>
     <ul class="mt-2 list-disc space-y-1 pl-5 text-sm text-mute">
-      <li>Reyting faqat <b>reytingli</b> raundlarda o‘zgaradi: «Mashq» raundlari ta’sir qilmaydi.</li>
-      <li>Hech narsa yubormagan ishtirokchi «qatnashmagan» hisoblanadi va reytingi o‘zgarmaydi.</li>
-      <li>Emailingiz tasdiqlanmagan bo‘lsa, raundga yozila olasiz, lekin reytingga hisoblanmaysiz.</li>
-      <li>So‘nggi 90 kunda reytingli musobaqada qatnashmagan odam jadvaldan yashiriladi; reytingi saqlanadi va yangi raunddan keyin qaytadi.</li>
-      <li>Diskvalifikatsiya qilingan ishtirokchi oxirgi o‘ringa tushadi, reyting faqat pasayadi. Bunday qaror kech chiqsa, shu raunddan keyingi raundlar ham qayta hisoblanadi.</li>
+      <li>{% trans "Reyting faqat <b>reytingli</b> raundlarda o‘zgaradi: «Mashq» raundlari ta’sir qilmaydi." %}</li>
+      <li>{% trans "Hech narsa yubormagan ishtirokchi «qatnashmagan» hisoblanadi va reytingi o‘zgarmaydi." %}</li>
+      <li>{% trans "Emailingiz tasdiqlanmagan bo‘lsa, raundga yozila olasiz, lekin reytingga hisoblanmaysiz." %}</li>
+      <li>{% trans "So‘nggi 90 kunda reytingli musobaqada qatnashmagan odam jadvaldan yashiriladi; reytingi saqlanadi va yangi raunddan keyin qaytadi." %}</li>
+      <li>{% trans "Diskvalifikatsiya qilingan ishtirokchi oxirgi o‘ringa tushadi, reyting faqat pasayadi. Bunday qaror kech chiqsa, shu raunddan keyingi raundlar ham qayta hisoblanadi." %}</li>
     </ul>
   </section>
 
   <section class="ca-panel mt-4" aria-labelledby="r2">
-    <h2 id="r2" class="text-[1.125rem] font-bold">Rasmiy reyting va «Tasdiqlangan» belgisi</h2>
-    <p class="mt-2 text-sm">Shaxsi adminlar tomonidan tasdiqlangan o‘yinchilar uchun, <b>rasmiy</b> deb belgilangan musobaqalardan alohida hisoblanadi. Maktab va tashkilotlar shunga tayanadi. Profilda ochiq reyting yonida «rasmiy» raqami ko‘rinadi.</p>
+    <h2 id="r2" class="text-[1.125rem] font-bold">{% trans "Rasmiy reyting va «Tasdiqlangan» belgisi" %}</h2>
+    <p class="mt-2 text-sm">{% trans "Shaxsi adminlar tomonidan tasdiqlangan o‘yinchilar uchun, <b>rasmiy</b> deb belgilangan musobaqalardan alohida hisoblanadi. Maktab va tashkilotlar shunga tayanadi. Profilda ochiq reyting yonida «rasmiy» raqami ko‘rinadi." %}</p>
   </section>
 
   <section class="ca-panel mt-4" aria-labelledby="r3">
-    <h2 id="r3" class="text-[1.125rem] font-bold">Amaliyot balli</h2>
-    <p class="mt-2 text-sm">Faqat sizga ko‘rinadigan shaxsiy hisob (jadvalda o‘rin yo‘q): masala yechganingiz uchun beriladi, qiyinroq va kamroq odam yechgan masala ko‘proq ball beradi. Ball masala yechilgan paytdagi narxda <b>muzlatiladi</b>: keyin boshqalar yechgani yoki xato qilgani sizning ballingizni o‘zgartirmaydi. Faqat birinchi mos qabul qilingan yechim hisoblanadi. Musobaqa masalalari raund e’lon qilingandan keyin hisobga o‘tadi. Ko‘chirilgan deb topilgan yechimga ball berilmaydi.</p>
+    <h2 id="r3" class="text-[1.125rem] font-bold">{% trans "Amaliyot balli" %}</h2>
+    <p class="mt-2 text-sm">{% trans "Faqat sizga ko‘rinadigan shaxsiy hisob (jadvalda o‘rin yo‘q): masala yechganingiz uchun beriladi, qiyinroq va kamroq odam yechgan masala ko‘proq ball beradi. Ball masala yechilgan paytdagi narxda <b>muzlatiladi</b>: keyin boshqalar yechgani yoki xato qilgani sizning ballingizni o‘zgartirmaydi. Faqat birinchi mos qabul qilingan yechim hisoblanadi. Musobaqa masalalari raund e’lon qilingandan keyin hisobga o‘tadi. Ko‘chirilgan deb topilgan yechimga ball berilmaydi." %}</p>
   </section>
 
   <section class="ca-panel mt-4" aria-labelledby="r4">
-    <h2 id="r4" class="text-[1.125rem] font-bold">Duel reytingi</h2>
-    <p class="mt-2 text-sm">Faqat 1 ga 1 duellar uchun (hamma 1200 dan boshlaydi) va musobaqa reytingiga ta’sir qilmaydi. Bir juftlik kuniga cheklangan miqdorda duel o‘ynashi mumkin; raqib deyarli o‘ynamagan duel g‘alaba sifatida nishon va kunlik vazifaga sanalmaydi.</p>
+    <h2 id="r4" class="text-[1.125rem] font-bold">{% trans "Duel reytingi" %}</h2>
+    <p class="mt-2 text-sm">{% trans "Faqat 1 ga 1 duellar uchun (hamma 1200 dan boshlaydi) va musobaqa reytingiga ta’sir qilmaydi. Bir juftlik kuniga cheklangan miqdorda duel o‘ynashi mumkin; raqib deyarli o‘ynamagan duel g‘alaba sifatida nishon va kunlik vazifaga sanalmaydi." %}</p>
   </section>
 
   <section class="ca-panel mt-4" aria-labelledby="r5">
-    <h2 id="r5" class="text-[1.125rem] font-bold">Halollik va apellyatsiya</h2>
-    <p class="mt-2 text-sm">Tizim hech kimni o‘zi jazolamaydi: belgilar faqat shubha, qarorni admin kodni ko‘rib chiqib qabul qiladi. Qaror noto‘g‘ri deb hisoblasangiz, musobaqa sahifasidagi «Apellyatsiya» orqali yozing: javob bildirishnomangizda chiqadi. <a class="ca-link" href="{% url 'honor' %}">Halollik qoidalari</a></p>
+    <h2 id="r5" class="text-[1.125rem] font-bold">{% trans "Halollik va apellyatsiya" %}</h2>
+    <p class="mt-2 text-sm">{% trans "Tizim hech kimni o‘zi jazolamaydi: belgilar faqat shubha, qarorni admin kodni ko‘rib chiqib qabul qiladi. Qaror noto‘g‘ri deb hisoblasangiz, musobaqa sahifasidagi «Apellyatsiya» orqali yozing: javob bildirishnomangizda chiqadi." %} <a class="ca-link" href="{% url 'honor' %}">{% trans "Halollik qoidalari" %}</a></p>
   </section>
 </div>
 {% endblock %}

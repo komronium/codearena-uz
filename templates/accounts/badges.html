@@ -1,18 +1,18 @@
 {% extends "base.html" %}
-{% block title %}Nishonlar{% endblock %}
-{% block description %}CodeArena nishonlari: har biri 5 bosqichli — bronza, kumush, oltin, platina, olmos. Har bosqich nimani talab qilishi va qanchalik kamyobligi.{% endblock %}
+{% block title %}{% trans "Nishonlar" %}{% endblock %}
+{% block description %}{% trans "CodeArena nishonlari: har biri 5 bosqichli — bronza, kumush, oltin, platina, olmos. Har bosqich nimani talab qilishi va qanchalik kamyobligi." %}{% endblock %}
 {% block band %}
 <section class="ca-hud" aria-labelledby="badges-title">
   <div class="ca-hud-in">
     <div>
-      <h1 id="badges-title">Nishonlar</h1>
-      <p class="ca-hud-sub">{{ n_families }} ta nishon, har biri 5 bosqichli: bronza, kumush, oltin, platina, olmos · <a class="text-white underline underline-offset-2" href="{% url 'badge_board' %}">Nishonlar reytingi</a></p>
+      <h1 id="badges-title">{% trans "Nishonlar" %}</h1>
+      <p class="ca-hud-sub">{% blocktrans with n_families=n_families %}{{ n_families }} ta nishon, har biri 5 bosqichli: bronza, kumush, oltin, platina, olmos ·{% endblocktrans %} <a class="text-white underline underline-offset-2" href="{% url 'badge_board' %}">{% trans "Nishonlar reytingi" %}</a></p>
     </div>
     {% if me %}
     <dl class="ca-hud-stats">
-      <div><dt><small>Nishonlar</small></dt><dd><b class="tabular">{{ me.count }}</b><small> / {{ n_families }}</small></dd></div>
-      <div><dt><small>Bosqichlar</small></dt><dd><b class="tabular">{{ me.levels }}</b><small> / {{ me.max_levels }}</small></dd></div>
-      <div><dt><small>O‘rin</small></dt><dd><b class="tabular">{% if me.rank %}{{ me.rank }}{% else %}—{% endif %}</b></dd></div>
+      <div><dt><small>{% trans "Nishonlar" %}</small></dt><dd><b class="tabular">{{ me.count }}</b><small> / {{ n_families }}</small></dd></div>
+      <div><dt><small>{% trans "Bosqichlar" %}</small></dt><dd><b class="tabular">{{ me.levels }}</b><small> / {{ me.max_levels }}</small></dd></div>
+      <div><dt><small>{% trans "O‘rin" %}</small></dt><dd><b class="tabular">{% if me.rank %}{{ me.rank }}{% else %}—{% endif %}</b></dd></div>
     </dl>
     {% endif %}
   </div>

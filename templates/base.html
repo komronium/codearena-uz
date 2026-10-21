@@ -1,5 +1,5 @@
 {% load static tiers seo %}
-<!doctype html>
+{% trans "<!doctype html>" %}
 <html lang="uz" class="h-full">
 <head>
   <meta charset="utf-8">
@@ -13,7 +13,7 @@
   <link rel="icon" href="{% static 'img/favicon-96x96.png' %}" type="image/png" sizes="96x96">
   <link rel="apple-touch-icon" href="{% static 'img/apple-touch-icon.png' %}">
   <link rel="manifest" href="{% url 'manifest' %}">
-  {% capture page_title %}{% block head_title %}{% block title %}CodeArena{% endblock %}{% page_suffix %} — CodeArena{% endblock %}{% endcapture %}
+  {% capture page_title %}{% block head_title %}{% block title %}{% trans "CodeArena" %}{% endblock %}{% page_suffix %} {% trans "— CodeArena" %}{% endblock %}{% endcapture %}
   <title>{{ page_title }}</title>
   {# search results and link previews (Telegram, Facebook, X) #}
   {% capture page_description %}{% block description %}{% site_description %}{% endblock %}{% endcapture %}
@@ -59,15 +59,15 @@
   {% block head %}{% endblock %}
 </head>
 <body class="min-h-full bg-paper text-ink antialiased" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
-<a class="ca-skip" href="#main">Asosiy tarkibga o‘tish</a>
+<a class="ca-skip" href="#main">{% trans "Asosiy tarkibga o‘tish" %}</a>
 <header class="ca-nav">{% include "_navbar.html" %}</header>
 {% block band %}{% endblock %}
 <main id="main" class="{% block main_class %}ca-main{% endblock %}">
   {% if user.is_staff and request.resolver_match.namespace == "moderation" or user.is_staff and request.resolver_match.namespace == "integrity" %}<div class="ca7-admin">{% include "_mod_tabs.html" %}<div class="min-w-0">{% endif %}
   {% if gate_nudge and request.resolver_match.url_name != "welcome" %}
   <div class="ca-nudge" role="note">
-    <span>{% if gate_nudge.email_pending %}Emailingizni tasdiqlang: tasdiqlanmaguncha musobaqada reytingga hisoblanmaysiz va duel ochilmaydi.{% else %}Musobaqa va duellar uchun to‘ldiring: {{ gate_nudge.missing|join:", "|lower }}.{% endif %}</span>
-    <a class="ca-btn ca-btn-soft" href="{% url 'welcome' %}">{% if gate_nudge.email_pending %}Tasdiqlash{% else %}To‘ldirish{% endif %}</a>
+    <span>{% if gate_nudge.email_pending %}{% trans "Emailingizni tasdiqlang: tasdiqlanmaguncha musobaqada reytingga hisoblanmaysiz va duel ochilmaydi." %}{% else %}{% blocktrans with gate_nudge_missing=gate_nudge.missing|join:", "|lower %}Musobaqa va duellar uchun to‘ldiring: {{ gate_nudge_missing }}.{% endblocktrans %}{% endif %}</span>
+    <a class="ca-btn ca-btn-soft" href="{% url 'welcome' %}">{% if gate_nudge.email_pending %}{% trans "Tasdiqlash" %}{% else %}{% trans "To‘ldirish" %}{% endif %}</a>
   </div>
   {% endif %}
   {% if messages %}
@@ -85,63 +85,63 @@
 {# the public places once more, as plain links: for the end of a long page, and for crawlers #}
 <footer class="ca-footer">
   <div class="ca-footer-in">
-    <a href="{% url 'home' %}" class="ca-footer-brand">{% include "_brand_mark.html" %}<span>CodeArena</span></a>
-    <nav class="ca-footer-links" aria-label="Sayt bo‘limlari">
-      <a href="{% url 'problems:list' %}">Masalalar</a>
-      <a href="{% url 'learn:hub' %}">O‘rganish</a>
-      <a href="{% url 'contests:list' %}">Musobaqalar</a>
-      <a href="{% url 'rating' %}">Reyting</a>
-      <a href="{% url 'honor' %}">Halollik qoidalari</a>
+    <a href="{% url 'home' %}" class="ca-footer-brand">{% include "_brand_mark.html" %}<span>{% trans "CodeArena" %}</span></a>
+    <nav class="ca-footer-links" aria-label="{% trans 'Sayt bo‘limlari' %}">
+      <a href="{% url 'problems:list' %}">{% trans "Masalalar" %}</a>
+      <a href="{% url 'learn:hub' %}">{% trans "O‘rganish" %}</a>
+      <a href="{% url 'contests:list' %}">{% trans "Musobaqalar" %}</a>
+      <a href="{% url 'rating' %}">{% trans "Reyting" %}</a>
+      <a href="{% url 'honor' %}">{% trans "Halollik qoidalari" %}</a>
     </nav>
-    <p class="ca-footer-note">© {% now "Y" %} CodeArena · o‘zbek tilida dasturlash</p>
+    <p class="ca-footer-note">© {% now "Y" %} {% trans "CodeArena · o‘zbek tilida dasturlash" %}</p>
   </div>
 </footer>
-<nav class="ca-bottom-nav md:hidden" aria-label="Mobil menyu">
+<nav class="ca-bottom-nav md:hidden" aria-label="{% trans 'Mobil menyu' %}">
   {% with ns=request.resolver_match.namespace un=request.resolver_match.url_name %}
-  <a href="{% url 'home' %}"{% if un == 'home' %} class="is-active" aria-current="page"{% endif %}><span class="ca-bn-icon"><i data-lucide="house" class="lu" aria-hidden="true"></i></span><span>Bosh sahifa</span></a>
-  <a href="{% url 'problems:list' %}"{% if ns == 'problems' and not contest or ns == 'learn' and un == 'lists' or ns == 'learn' and un == 'list' %} class="is-active" aria-current="page"{% endif %}><span class="ca-bn-icon"><i data-lucide="list-checks" class="lu" aria-hidden="true"></i></span><span>Masalalar</span></a>
-  <a href="{% url 'learn:hub' %}"{% if ns == 'learn' and un != 'lists' and un != 'list' %} class="is-active" aria-current="page"{% endif %}><span class="ca-bn-icon"><i data-lucide="graduation-cap" class="lu" aria-hidden="true"></i></span><span>O‘rganish</span></a>
-  <a href="{% url 'contests:list' %}"{% if ns == 'contests' or ns == 'problems' and contest %} class="is-active" aria-current="page"{% endif %}><span class="ca-bn-icon"><i data-lucide="trophy" class="lu" aria-hidden="true"></i>{% if nav.live %}<b class="ca-badge-live"><span class="sr-only">, jonli musobaqa bor</span></b>{% endif %}</span><span>Musobaqa</span></a>
+  <a href="{% url 'home' %}"{% if un == 'home' %} class="is-active" aria-current="page"{% endif %}><span class="ca-bn-icon"><i data-lucide="house" class="lu" aria-hidden="true"></i></span><span>{% trans "Bosh sahifa" %}</span></a>
+  <a href="{% url 'problems:list' %}"{% if ns == 'problems' and not contest or ns == 'learn' and un == 'lists' or ns == 'learn' and un == 'list' %} class="is-active" aria-current="page"{% endif %}><span class="ca-bn-icon"><i data-lucide="list-checks" class="lu" aria-hidden="true"></i></span><span>{% trans "Masalalar" %}</span></a>
+  <a href="{% url 'learn:hub' %}"{% if ns == 'learn' and un != 'lists' and un != 'list' %} class="is-active" aria-current="page"{% endif %}><span class="ca-bn-icon"><i data-lucide="graduation-cap" class="lu" aria-hidden="true"></i></span><span>{% trans "O‘rganish" %}</span></a>
+  <a href="{% url 'contests:list' %}"{% if ns == 'contests' or ns == 'problems' and contest %} class="is-active" aria-current="page"{% endif %}><span class="ca-bn-icon"><i data-lucide="trophy" class="lu" aria-hidden="true"></i>{% if nav.live %}<b class="ca-badge-live"><span class="sr-only">{% trans ", jonli musobaqa bor" %}</span></b>{% endif %}</span><span>{% trans "Musobaqa" %}</span></a>
   {# signed in, the fifth tab is the duels (played mostly on phones; the rating sits in the menu); a guest's is the rating #}
-  {% if user.is_authenticated %}<a href="{% url 'classroom:duels' %}"{% if ns == 'classroom' and 'duel' in un %} class="is-active" aria-current="page"{% endif %}><span class="ca-bn-icon"><i data-lucide="swords" class="lu" aria-hidden="true"></i>{% if nav.duels %}<b class="ca-badge-n ca-bn-badge">{{ nav.duels }}<span class="sr-only"> ta duel chaqiruvi</span></b>{% endif %}</span><span>Duel</span></a>
-  {% else %}<a href="{% url 'rating' %}"{% if un == 'rating' or un == 'top' %} class="is-active" aria-current="page"{% endif %}><span class="ca-bn-icon"><i data-lucide="chart-column" class="lu" aria-hidden="true"></i></span><span>Reyting</span></a>{% endif %}
-  <button type="button" data-menu-open aria-haspopup="dialog" aria-controls="ca-menu"><span class="ca-bn-icon">{% if user.is_authenticated %}<i data-lucide="user" class="lu" aria-hidden="true"></i>{% else %}<i data-lucide="menu" class="lu" aria-hidden="true"></i>{% endif %}</span><span>{% if user.is_authenticated %}Men{% else %}Menyu{% endif %}</span></button>
+  {% if user.is_authenticated %}<a href="{% url 'classroom:duels' %}"{% if ns == 'classroom' and 'duel' in un %} class="is-active" aria-current="page"{% endif %}><span class="ca-bn-icon"><i data-lucide="swords" class="lu" aria-hidden="true"></i>{% if nav.duels %}<b class="ca-badge-n ca-bn-badge">{% blocktrans with nav_duels=nav.duels %}{{ nav_duels }}<span class="sr-only"> ta duel chaqiruvi</span>{% endblocktrans %}</b>{% endif %}</span><span>{% trans "Duel" %}</span></a>
+  {% else %}<a href="{% url 'rating' %}"{% if un == 'rating' or un == 'top' %} class="is-active" aria-current="page"{% endif %}><span class="ca-bn-icon"><i data-lucide="chart-column" class="lu" aria-hidden="true"></i></span><span>{% trans "Reyting" %}</span></a>{% endif %}
+  <button type="button" data-menu-open aria-haspopup="dialog" aria-controls="ca-menu"><span class="ca-bn-icon">{% if user.is_authenticated %}<i data-lucide="user" class="lu" aria-hidden="true"></i>{% else %}<i data-lucide="menu" class="lu" aria-hidden="true"></i>{% endif %}</span><span>{% if user.is_authenticated %}{% trans "Men" %}{% else %}{% trans "Menyu" %}{% endif %}</span></button>
   {% endwith %}
 </nav>
 {% comment %}The phone menu: the account, every destination (staff pages included) and the theme.
 A native dialog gives focus trapping and Esc for free.{% endcomment %}
 <dialog id="ca-menu" class="ca-sheet md:hidden" aria-labelledby="ca-menu-title">
   <div class="ca-dialog-head">
-    <h2 id="ca-menu-title">{% if user.is_authenticated %}Hisob va menyu{% else %}Menyu{% endif %}</h2>
-    <button type="button" class="ca-dialog-x" data-menu-close aria-label="Yopish"><i data-lucide="x" class="lu" aria-hidden="true"></i></button>
+    <h2 id="ca-menu-title">{% if user.is_authenticated %}{% trans "Hisob va menyu" %}{% else %}{% trans "Menyu" %}{% endif %}</h2>
+    <button type="button" class="ca-dialog-x" data-menu-close aria-label="{% trans 'Yopish' %}"><i data-lucide="x" class="lu" aria-hidden="true"></i></button>
   </div>
   <div class="overflow-y-auto p-3">
     {% if user.is_authenticated %}
     <a href="{% url 'profile' user.username %}" class="mb-2 flex items-center gap-3 rounded-[var(--ca-radius-sm)] bg-sunk px-3 py-3" style="--tier: {{ user.rating|tier_color }}" translate="no">
       <span class="ca-avatar ca-user-avatar h-10 w-10 text-base{% if not user.avatar %} ca-art-{{ user.rating|tier_slug }}{% endif %}">{% if user.avatar %}<img src="{{ user.avatar.url }}" alt="" width="40" height="40">{% else %}{{ user.username|first }}{% endif %}</span>
-      <span class="min-w-0"><span class="ca-tier-ink block truncate font-semibold{{ user.rating|lg }}">{{ user.get_full_name|default:user.username }}</span><span class="block text-xs text-mute tabular">{{ user.rating|tier_name }} · {{ user.rating }} · {{ user.practice_points }} ball</span></span>
+      <span class="min-w-0"><span class="ca-tier-ink block truncate font-semibold{{ user.rating|lg }}">{% blocktrans with user_get_full_name=user.get_full_name|default:user.username user_rating=user.rating|tier_name user_rating2=user.rating user_practice_points=user.practice_points %}{{ user_get_full_name }}</span><span class="block text-xs text-mute tabular">{{ user_rating }} · {{ user_rating2 }} · {{ user_practice_points }} ball</span>{% endblocktrans %}</span>
       <i data-lucide="chevron-right" class="lu ml-auto text-mute" aria-hidden="true"></i>
     </a>
     {% endif %}
-    <nav class="grid grid-cols-2 gap-1" aria-label="Barcha sahifalar">
+    <nav class="grid grid-cols-2 gap-1" aria-label="{% trans 'Barcha sahifalar' %}">
       {% include "_nav.html" %}
     </nav>
     <div class="mt-3 flex items-center justify-between gap-3 border-t border-line px-1 pt-3">
-      <span id="sheet-theme-label" class="text-sm font-medium text-mute">Ko‘rinish</span>
+      <span id="sheet-theme-label" class="text-sm font-medium text-mute">{% trans "Ko‘rinish" %}</span>
       <div class="ca-seg ca-seg-sm" role="group" aria-labelledby="sheet-theme-label">
-        <button type="button" data-theme-set="system" aria-pressed="false" aria-label="Tizim bo‘yicha"><i data-lucide="monitor" class="lu" aria-hidden="true"></i></button>
-        <button type="button" data-theme-set="light" aria-pressed="false" aria-label="Kunduzgi"><i data-lucide="sun" class="lu" aria-hidden="true"></i></button>
-        <button type="button" data-theme-set="dark" aria-pressed="false" aria-label="Tungi"><i data-lucide="moon" class="lu" aria-hidden="true"></i></button>
+        <button type="button" data-theme-set="system" aria-pressed="false" aria-label="{% trans 'Tizim bo‘yicha' %}"><i data-lucide="monitor" class="lu" aria-hidden="true"></i></button>
+        <button type="button" data-theme-set="light" aria-pressed="false" aria-label="{% trans 'Kunduzgi' %}"><i data-lucide="sun" class="lu" aria-hidden="true"></i></button>
+        <button type="button" data-theme-set="dark" aria-pressed="false" aria-label="{% trans 'Tungi' %}"><i data-lucide="moon" class="lu" aria-hidden="true"></i></button>
       </div>
     </div>
     {% if user.is_authenticated %}
     <form method="post" action="{% url 'logout' %}" class="mt-3 border-t border-line pt-2">{% csrf_token %}
-      <button type="submit" class="ca-sidebar-link w-full !text-bad"><i data-lucide="log-out" class="lu" aria-hidden="true"></i>Chiqish</button>
+      <button type="submit" class="ca-sidebar-link w-full !text-bad"><i data-lucide="log-out" class="lu" aria-hidden="true"></i>{% trans "Chiqish" %}</button>
     </form>
     {% else %}
     <div class="mt-3 grid grid-cols-2 gap-2 border-t border-line pt-3">
-      <a href="{% url 'login' %}" class="ca-btn ca-btn-ghost">Kirish</a>
-      <a href="{% url 'register' %}" class="ca-btn ca-btn-primary">Ro‘yxatdan o‘tish</a>
+      <a href="{% url 'login' %}" class="ca-btn ca-btn-ghost">{% trans "Kirish" %}</a>
+      <a href="{% url 'register' %}" class="ca-btn ca-btn-primary">{% trans "Ro‘yxatdan o‘tish" %}</a>
     </div>
     {% endif %}
   </div>
@@ -266,16 +266,16 @@ A native dialog gives focus trapping and Esc for free.{% endcomment %}
 </script>
 {% comment %}Command palette (static/js/palette.js): pages and actions for who is signed in, problems
 from /problems/suggest/. "go" is the second key of a "g <key>" shortcut.{% endcomment %}
-<dialog id="ca-palette" class="ca-palette" aria-label="Qidirish va buyruqlar">
+<dialog id="ca-palette" class="ca-palette" aria-label="{% trans 'Qidirish va buyruqlar' %}">
   <div class="ca-palette-head">
     <i data-lucide="search" class="lu" aria-hidden="true"></i>
     <input id="ca-palette-q" type="text" role="combobox" aria-expanded="true" aria-controls="ca-palette-list" aria-autocomplete="list"
-           aria-label="Masala, sahifa yoki buyruq qidirish" placeholder="Masala, sahifa yoki buyruq…" autocomplete="off" spellcheck="false">
-    <kbd class="ca-kbd" aria-hidden="true">Esc</kbd>
+           aria-label="{% trans 'Masala, sahifa yoki buyruq qidirish' %}" placeholder="{% trans 'Masala, sahifa yoki buyruq…' %}" autocomplete="off" spellcheck="false">
+    <kbd class="ca-kbd" aria-hidden="true">{% trans "Esc" %}</kbd>
   </div>
-  <div id="ca-palette-list" class="ca-palette-list" role="listbox" aria-label="Natijalar"></div>
+  <div id="ca-palette-list" class="ca-palette-list" role="listbox" aria-label="{% trans 'Natijalar' %}"></div>
   <div class="ca-palette-foot" aria-hidden="true">
-    <span><kbd class="ca-kbd">↑</kbd><kbd class="ca-kbd">↓</kbd> tanlash</span><span><kbd class="ca-kbd">Enter</kbd> ochish</span><span><kbd class="ca-kbd">?</kbd> yorliqlar</span>
+    {% trans "<span><kbd class=\"ca-kbd\">↑</kbd><kbd class=\"ca-kbd\">↓</kbd> tanlash</span><span><kbd class=\"ca-kbd\">Enter</kbd> ochish</span><span><kbd class=\"ca-kbd\">?</kbd> yorliqlar</span>" %}
   </div>
 </dialog>
 <script type="application/json" id="ca-palette-data">{"suggest": "{% url 'problems:suggest' %}", "courses": "{% url 'learn:search' %}", "all": "{% url 'problems:list' %}", "items": [
@@ -312,23 +312,23 @@ from /problems/suggest/. "go" is the second key of a "g <key>" shortcut.{% endco
 ]}</script>
 <dialog id="ca-keys" class="ca-dialog" aria-labelledby="ca-keys-title">
   <div class="ca-dialog-head">
-    <h2 id="ca-keys-title">Klaviatura yorliqlari</h2>
-    <form method="dialog"><button class="ca-dialog-x" aria-label="Yopish"><i data-lucide="x" class="lu" aria-hidden="true"></i></button></form>
+    <h2 id="ca-keys-title">{% trans "Klaviatura yorliqlari" %}</h2>
+    <form method="dialog"><button class="ca-dialog-x" aria-label="{% trans 'Yopish' %}"><i data-lucide="x" class="lu" aria-hidden="true"></i></button></form>
   </div>
   <dl class="ca-keys">
-    <dt><kbd class="ca-kbd">Ctrl</kbd> <kbd class="ca-kbd">K</kbd> yoki <kbd class="ca-kbd">/</kbd></dt><dd>Qidirish va buyruqlar</dd>
-    <dt><kbd class="ca-kbd">g</kbd> <kbd class="ca-kbd">h</kbd></dt><dd>Bosh sahifa</dd>
-    <dt><kbd class="ca-kbd">g</kbd> <kbd class="ca-kbd">p</kbd></dt><dd>Masalalar</dd>
-    <dt><kbd class="ca-kbd">g</kbd> <kbd class="ca-kbd">c</kbd></dt><dd>Musobaqalar</dd>
-    <dt><kbd class="ca-kbd">g</kbd> <kbd class="ca-kbd">r</kbd></dt><dd>Reyting</dd>
+    <dt>{% trans "<kbd class=\"ca-kbd\">Ctrl</kbd> <kbd class=\"ca-kbd\">K</kbd> yoki <kbd class=\"ca-kbd\">/</kbd>" %}</dt><dd>{% trans "Qidirish va buyruqlar" %}</dd>
+    <dt>{% trans "<kbd class=\"ca-kbd\">g</kbd> <kbd class=\"ca-kbd\">h</kbd>" %}</dt><dd>{% trans "Bosh sahifa" %}</dd>
+    <dt>{% trans "<kbd class=\"ca-kbd\">g</kbd> <kbd class=\"ca-kbd\">p</kbd>" %}</dt><dd>{% trans "Masalalar" %}</dd>
+    <dt>{% trans "<kbd class=\"ca-kbd\">g</kbd> <kbd class=\"ca-kbd\">c</kbd>" %}</dt><dd>{% trans "Musobaqalar" %}</dd>
+    <dt>{% trans "<kbd class=\"ca-kbd\">g</kbd> <kbd class=\"ca-kbd\">r</kbd>" %}</dt><dd>{% trans "Reyting" %}</dd>
     {% if user.is_authenticated %}
-    <dt><kbd class="ca-kbd">g</kbd> <kbd class="ca-kbd">d</kbd></dt><dd>Duellar</dd>
-    <dt><kbd class="ca-kbd">g</kbd> <kbd class="ca-kbd">u</kbd></dt><dd>Urinishlarim</dd>
-    <dt><kbd class="ca-kbd">g</kbd> <kbd class="ca-kbd">m</kbd></dt><dd>Profilim</dd>
+    <dt>{% trans "<kbd class=\"ca-kbd\">g</kbd> <kbd class=\"ca-kbd\">d</kbd>" %}</dt><dd>{% trans "Duellar" %}</dd>
+    <dt>{% trans "<kbd class=\"ca-kbd\">g</kbd> <kbd class=\"ca-kbd\">u</kbd>" %}</dt><dd>{% trans "Urinishlarim" %}</dd>
+    <dt>{% trans "<kbd class=\"ca-kbd\">g</kbd> <kbd class=\"ca-kbd\">m</kbd>" %}</dt><dd>{% trans "Profilim" %}</dd>
     {% endif %}
-    {% if user.is_staff %}<dt><kbd class="ca-kbd">g</kbd> <kbd class="ca-kbd">a</kbd></dt><dd>Boshqaruv</dd>{% endif %}
-    <dt><kbd class="ca-kbd">Ctrl</kbd> <kbd class="ca-kbd">Enter</kbd></dt><dd>Masala sahifasida — yechimni yuborish</dd>
-    <dt><kbd class="ca-kbd">?</kbd></dt><dd>Shu oyna</dd>
+    {% if user.is_staff %}<dt>{% trans "<kbd class=\"ca-kbd\">g</kbd> <kbd class=\"ca-kbd\">a</kbd>" %}</dt><dd>{% trans "Boshqaruv" %}</dd>{% endif %}
+    <dt>{% trans "<kbd class=\"ca-kbd\">Ctrl</kbd> <kbd class=\"ca-kbd\">Enter</kbd>" %}</dt><dd>{% trans "Masala sahifasida — yechimni yuborish" %}</dd>
+    <dt><kbd class="ca-kbd">?</kbd></dt><dd>{% trans "Shu oyna" %}</dd>
   </dl>
 </dialog>
 <script src="{% static 'js/palette.js' %}" defer></script>
@@ -339,11 +339,11 @@ from /problems/suggest/. "go" is the second key of a "g <key>" shortcut.{% endco
   <div class="ca-banner ca-banner-{{ tier_up.slug }}"><span class="ca-banner-tag">{{ tier_up.name }} · {{ tier_up.picture }}</span></div>
   <div class="px-6 pb-6 pt-5 text-center">
     <p class="text-sm text-mute">{{ tier_up.was }} → {{ tier_up.name }}</p>
-    <h2 id="ca-tier-up-title" class="mt-1 text-xl font-bold">Tabriklaymiz! Siz endi {{ tier_up.name }}</h2>
-    <p class="mt-2 text-sm text-mute">Yangi banneringiz — «{{ tier_up.picture }}». Profilingizda va avataringizda ko‘rinadi.</p>
+    <h2 id="ca-tier-up-title" class="mt-1 text-xl font-bold">{% blocktrans with tier_up_name=tier_up.name %}Tabriklaymiz! Siz endi {{ tier_up_name }}{% endblocktrans %}</h2>
+    <p class="mt-2 text-sm text-mute">{% blocktrans with tier_up_picture=tier_up.picture %}Yangi banneringiz — «{{ tier_up_picture }}». Profilingizda va avataringizda ko‘rinadi.{% endblocktrans %}</p>
     <div class="mt-5 flex justify-center gap-2">
-      <form method="dialog"><button class="ca-btn ca-btn-ghost">Yopish</button></form>
-      <a class="ca-btn ca-btn-primary" href="{% url 'profile' user.username %}"><i data-lucide="user" class="lu" aria-hidden="true"></i>Profilni ko‘rish</a>
+      <form method="dialog"><button class="ca-btn ca-btn-ghost">{% trans "Yopish" %}</button></form>
+      <a class="ca-btn ca-btn-primary" href="{% url 'profile' user.username %}"><i data-lucide="user" class="lu" aria-hidden="true"></i>{% trans "Profilni ko‘rish" %}</a>
     </div>
   </div>
 </dialog>

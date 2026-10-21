@@ -1,31 +1,31 @@
 {% extends "base.html" %}
-{% block title %}Boshqaruv{% endblock %}
+{% block title %}{% trans "Boshqaruv" %}{% endblock %}
 {% block band %}
 {% comment %}#7 staff home: the decisions waiting first (the problem queue, today's problem), then the
 site's figures; the side column has every staff section.{% endcomment %}
 <section class="ca-hud" aria-labelledby="mod-title">
   <div class="ca-hud-in">
     <div>
-      <h1 id="mod-title">Boshqaruv</h1>
-      <p class="ca-hud-sub">Avval kutayotgan ishlar, keyin sayt holati</p>
+      <h1 id="mod-title">{% trans "Boshqaruv" %}</h1>
+      <p class="ca-hud-sub">{% trans "Avval kutayotgan ishlar, keyin sayt holati" %}</p>
     </div>
     <div class="ml-auto flex flex-wrap gap-2">
-      <a href="{% url 'moderation:ai_generate' %}" class="ca7-hbtn is-wide"><i data-lucide="sparkles" class="lu" aria-hidden="true"></i>AI bilan tuzish</a>
-      <a href="{% url 'moderation:contest_new' %}" class="ca7-hbtn is-wide"><i data-lucide="trophy" class="lu" aria-hidden="true"></i>Musobaqa yaratish</a>
-      <a href="{% url 'moderation:submit' %}" class="ca-btn ca-btn-gold"><i data-lucide="plus" class="lu" aria-hidden="true"></i>Masala qo‘shish</a>
+      <a href="{% url 'moderation:ai_generate' %}" class="ca7-hbtn is-wide"><i data-lucide="sparkles" class="lu" aria-hidden="true"></i>{% trans "AI bilan tuzish" %}</a>
+      <a href="{% url 'moderation:contest_new' %}" class="ca7-hbtn is-wide"><i data-lucide="trophy" class="lu" aria-hidden="true"></i>{% trans "Musobaqa yaratish" %}</a>
+      <a href="{% url 'moderation:submit' %}" class="ca-btn ca-btn-gold"><i data-lucide="plus" class="lu" aria-hidden="true"></i>{% trans "Masala qo‘shish" %}</a>
     </div>
   </div>
 </section>
 {% endblock %}
 {% block content %}
 <div class="ca7-col">
-  <section class="mb-4" aria-label="Duellarni yopish">{% include "moderation/_duel_switch.html" %}</section>
+  <section class="mb-4" aria-label="{% trans 'Duellarni yopish' %}">{% include "moderation/_duel_switch.html" %}</section>
   <section aria-labelledby="queue-title">
-    <div class="ca7-sec-h"><h2 id="queue-title">Tasdiq kutayotgan masalalar</h2>{% if counts.pending %}<span class="ca7-pill is-warn tabular">{{ counts.pending }}</span>{% endif %}<a class="ca-link" href="{% url 'moderation:queue' %}">Navbatni ochish</a></div>
+    <div class="ca7-sec-h"><h2 id="queue-title">{% trans "Tasdiq kutayotgan masalalar" %}</h2>{% if counts.pending %}<span class="ca7-pill is-warn tabular">{{ counts.pending }}</span>{% endif %}<a class="ca-link" href="{% url 'moderation:queue' %}">{% trans "Navbatni ochish" %}</a></div>
     {% if pending %}
     <div class="overflow-x-auto">
     <table class="ca-table ca-table-flat">
-      <thead><tr><th scope="col">Masala</th><th scope="col">Muallif</th><th scope="col">Qiyinlik</th><th scope="col">Yuborilgan</th><th scope="col" class="text-right">Qaror</th></tr></thead>
+      <thead><tr><th scope="col">{% trans "Masala" %}</th><th scope="col">{% trans "Muallif" %}</th><th scope="col">{% trans "Qiyinlik" %}</th><th scope="col">{% trans "Yuborilgan" %}</th><th scope="col" class="text-right">{% trans "Qaror" %}</th></tr></thead>
       <tbody>
       {% for p in pending %}
       <tr>
@@ -34,52 +34,52 @@ site's figures; the side column has every staff section.{% endcomment %}
         <td><span class="ca-diff ca-diff-{{ p.difficulty }}">{{ p.get_difficulty_display }}</span></td>
         <td class="tabular text-mute">{{ p.created|date:"d.m H:i" }}</td>
         <td class="text-right"><div class="flex justify-end gap-2 whitespace-nowrap">
-          <form method="post" action="{% url 'moderation:reject' p.pk %}" data-confirm="«{{ p.title }}» masalasini rad etishni tasdiqlaysizmi?">{% csrf_token %}<button class="ca-btn ca-btn-soft ca-btn-wb">Rad etish</button></form>
-          <form method="post" action="{% url 'moderation:approve' p.pk %}">{% csrf_token %}<button class="ca-btn ca-btn-gold ca-btn-wb">Tasdiqlash</button></form>
+          <form method="post" action="{% url 'moderation:reject' p.pk %}" data-confirm="{% blocktrans with p_title=p.title %}«{{ p_title }}» masalasini rad etishni tasdiqlaysizmi?{% endblocktrans %}">{% csrf_token %}<button class="ca-btn ca-btn-soft ca-btn-wb">{% trans "Rad etish" %}</button></form>
+          <form method="post" action="{% url 'moderation:approve' p.pk %}">{% csrf_token %}<button class="ca-btn ca-btn-gold ca-btn-wb">{% trans "Tasdiqlash" %}</button></form>
         </div></td>
       </tr>
       {% endfor %}
       </tbody>
     </table>
     </div>
-    <p class="ca7-foot-note">«Rad etish» avval tasdiq so‘raydi, tasodifiy bosish bilan rad etilmaydi. Tasdiqlangan masala saytda darhol ko‘rinadi.</p>
-    {% else %}<p class="ca7-empty"><b>Navbat bo‘sh</b>Yangi masala yuborilganda shu yerda chiqadi.</p>{% endif %}
+    <p class="ca7-foot-note">{% trans "«Rad etish» avval tasdiq so‘raydi, tasodifiy bosish bilan rad etilmaydi. Tasdiqlangan masala saytda darhol ko‘rinadi." %}</p>
+    {% else %}<p class="ca7-empty">{% trans "<b>Navbat bo‘sh</b>Yangi masala yuborilganda shu yerda chiqadi." %}</p>{% endif %}
   </section>
 
-  <section class="ca7-mis ca7-mis-3" aria-label="Kutayotgan ishlar">
+  <section class="ca7-mis ca7-mis-3" aria-label="{% trans 'Kutayotgan ishlar' %}">
     <div>
       <span class="ca7-mis-ico" aria-hidden="true"><i data-lucide="shield" class="lu"></i></span>
-      <div class="min-w-0 flex-1"><b class="ca7-mis-t">Halollik</b><small>Mashq va musobaqadagi shubhali holatlar</small>
-        <div class="ca7-mis-f"><a class="ca-btn ca-btn-soft ca-btn-wb" href="{% url 'integrity:practice_report' %}">Hisobotni ochish</a></div></div>
+      <div class="min-w-0 flex-1">{% trans "<b class=\"ca7-mis-t\">Halollik</b><small>Mashq va musobaqadagi shubhali holatlar</small>" %}
+        <div class="ca7-mis-f"><a class="ca-btn ca-btn-soft ca-btn-wb" href="{% url 'integrity:practice_report' %}">{% trans "Hisobotni ochish" %}</a></div></div>
     </div>
     <div>
       <span class="ca7-mis-ico is-learn" aria-hidden="true"><i data-lucide="calendar" class="lu"></i></span>
-      <div class="min-w-0 flex-1"><b class="ca7-mis-t">Kun masalasi</b><small>{% if daily %}Bugun: {{ daily.problem.title }} · {{ daily.problem.get_difficulty_display }}{% else %}Bugun tanlanmagan{% endif %}</small>
-        <div class="ca7-mis-f"><a class="ca-btn ca-btn-soft ca-btn-wb" href="{% url 'moderation:daily_problem' %}">{% if daily %}Boshqasini tanlash{% else %}Tanlash{% endif %}</a></div></div>
+      <div class="min-w-0 flex-1"><b class="ca7-mis-t">{% trans "Kun masalasi" %}</b><small>{% if daily %}{% blocktrans with daily_problem_title=daily.problem.title daily_problem_get_difficulty_display=daily.problem.get_difficulty_display %}Bugun: {{ daily_problem_title }} · {{ daily_problem_get_difficulty_display }}{% endblocktrans %}{% else %}{% trans "Bugun tanlanmagan" %}{% endif %}</small>
+        <div class="ca7-mis-f"><a class="ca-btn ca-btn-soft ca-btn-wb" href="{% url 'moderation:daily_problem' %}">{% if daily %}{% trans "Boshqasini tanlash" %}{% else %}{% trans "Tanlash" %}{% endif %}</a></div></div>
     </div>
   </section>
 
   <section aria-labelledby="activity-title">
-    <div class="ca7-sec-h"><h2 id="activity-title">So‘nggi 14 kun</h2>
-      <span class="ca7-r text-mute"><b class="tabular text-ink">{{ activity.subs }}</b> urinish · <b class="tabular text-ink">{{ activity.users }}</b> yangi foydalanuvchi</span></div>
-    <div class="ca-actbars" role="img" aria-label="Kunlik urinishlar soni">
-      {% for r in activity.rows %}<span title="{{ r.day|date:'d.m' }}: {{ r.subs }} urinish, {{ r.users }} yangi foydalanuvchi"><i style="height: {{ r.pct }}%"></i><small>{{ r.day|date:"d" }}</small><small class="ca-actn tabular">{% if r.subs %}{{ r.subs }}{% else %}·{% endif %}</small></span>{% endfor %}
+    <div class="ca7-sec-h"><h2 id="activity-title">{% trans "So‘nggi 14 kun" %}</h2>
+      <span class="ca7-r text-mute">{% blocktrans with activity_subs=activity.subs activity_users=activity.users %}<b class="tabular text-ink">{{ activity_subs }}</b> urinish · <b class="tabular text-ink">{{ activity_users }}</b> yangi foydalanuvchi{% endblocktrans %}</span></div>
+    <div class="ca-actbars" role="img" aria-label="{% trans 'Kunlik urinishlar soni' %}">
+      {% for r in activity.rows %}<span title="{% blocktrans with r_day=r.day|date:'d.m' r_subs=r.subs r_users=r.users %}{{ r_day }}: {{ r_subs }} urinish, {{ r_users }} yangi foydalanuvchi{% endblocktrans %}"><i style="height: {{ r.pct }}%"></i><small>{{ r.day|date:"d" }}</small><small class="ca-actn tabular">{% if r.subs %}{{ r.subs }}{% else %}·{% endif %}</small></span>{% endfor %}
     </div>
     <p class="mt-3 text-sm {% if judge.stuck %}text-bad{% else %}text-mute{% endif %}">
       <i data-lucide="{% if judge.stuck %}triangle-alert{% else %}circle-check-big{% endif %}" class="lu mr-1" aria-hidden="true"></i>
-      {% if judge.stuck %}Tekshiruvchi: {{ judge.stuck }} ta urinish 2 daqiqadan beri kutmoqda.{% else %}Tekshiruvchi sog‘lom: kutayotgan urinish yo‘q.{% endif %}
-      {% if judge.last %} So‘nggi natija: {{ judge.last|date:"d.m H:i" }}.{% endif %}
+      {% if judge.stuck %}{% blocktrans with judge_stuck=judge.stuck %}Tekshiruvchi: {{ judge_stuck }} ta urinish 2 daqiqadan beri kutmoqda.{% endblocktrans %}{% else %}{% trans "Tekshiruvchi sog‘lom: kutayotgan urinish yo‘q." %}{% endif %}
+      {% if judge.last %} {% blocktrans with judge_last=judge.last|date:"d.m H:i" %}So‘nggi natija: {{ judge_last }}.{% endblocktrans %}{% endif %}
     </p>
   </section>
 
   <section aria-labelledby="site-title">
-    <div class="ca7-sec-h"><h2 id="site-title">Sayt holati</h2></div>
+    <div class="ca7-sec-h"><h2 id="site-title">{% trans "Sayt holati" %}</h2></div>
     <dl class="ca7-nums">
-      <a href="{% url 'moderation:problems' %}"><dd class="tabular">{{ counts.problems }}</dd><dt>Masalalar</dt></a>
-      <a href="{% url 'moderation:contests' %}"><dd class="tabular">{{ counts.contests }}</dd><dt>Musobaqalar</dt></a>
-      <a href="{% url 'moderation:users' %}"><dd class="tabular">{{ counts.users }}</dd><dt>Foydalanuvchilar</dt></a>
-      <a href="{% url 'moderation:submissions' %}"><dd class="tabular">{{ counts.submissions }}</dd><dt>Urinishlar</dt></a>
-      <a href="{% url 'moderation:tags' %}"><dd class="tabular">{{ counts.tags }}</dd><dt>Mavzular</dt></a>
+      <a href="{% url 'moderation:problems' %}"><dd class="tabular">{{ counts.problems }}</dd><dt>{% trans "Masalalar" %}</dt></a>
+      <a href="{% url 'moderation:contests' %}"><dd class="tabular">{{ counts.contests }}</dd><dt>{% trans "Musobaqalar" %}</dt></a>
+      <a href="{% url 'moderation:users' %}"><dd class="tabular">{{ counts.users }}</dd><dt>{% trans "Foydalanuvchilar" %}</dt></a>
+      <a href="{% url 'moderation:submissions' %}"><dd class="tabular">{{ counts.submissions }}</dd><dt>{% trans "Urinishlar" %}</dt></a>
+      <a href="{% url 'moderation:tags' %}"><dd class="tabular">{{ counts.tags }}</dd><dt>{% trans "Mavzular" %}</dt></a>
     </dl>
   </section>
 </div>

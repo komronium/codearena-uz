@@ -1,22 +1,22 @@
 {% extends "base.html" %}{% load tiers seo %}
-{% block title %}{{ contest.title }} — Natijalar{% endblock %}
-{% block description %}{{ contest.title }} natijalari: o‘rinlar, ballar va har bir masala bo‘yicha urinishlar.{% endblock %}
+{% block title %}{% blocktrans with contest_title=contest.title %}{{ contest_title }} — Natijalar{% endblocktrans %}{% endblock %}
+{% block description %}{% blocktrans with contest_title=contest.title %}{{ contest_title }} natijalari: o‘rinlar, ballar va har bir masala bo‘yicha urinishlar.{% endblocktrans %}{% endblock %}
 {% block structured_data %}{% url 'contests:list' as list_url %}{% url 'contests:detail' contest.pk as contest_url %}{% breadcrumbs_jsonld "Musobaqalar" list_url contest.title contest_url "Natijalar" request.path %}{% endblock %}
 
 {% block band %}{% include "contests/_band.html" with active="scoreboard" n_participants=rows|length %}{% endblock %}
 {% block content %}
 {# problem titles are secret until the start, even for registered users #}
-{% if board_shut %}<p class="ca-alert mb-4">Natijalar jadvali musobaqa tugagach ochiladi: hamma o‘z vaqtida boshlaydi, shuning uchun boshqalarning natijasi hozir ko‘rinmaydi. Quyida faqat o‘zingizning natijangiz.</p>{% endif %}
+{% if board_shut %}<p class="ca-alert mb-4">{% trans "Natijalar jadvali musobaqa tugagach ochiladi: hamma o‘z vaqtida boshlaydi, shuning uchun boshqalarning natijasi hozir ko‘rinmaydi. Quyida faqat o‘zingizning natijangiz." %}</p>{% endif %}
 {% if rows %}
 <section aria-labelledby="st-title">
   <div class="ca7-sec-h ca7-st-h">
-    <h2 id="st-title">{% if contest.has_ended %}Yakuniy natijalar{% else %}Natijalar{% endif %}</h2><span class="text-sm text-mute">{{ rows|length }} ishtirokchi{% if contest.is_running %} · har 20 soniyada yangilanadi{% endif %}</span>
+    <h2 id="st-title">{% if contest.has_ended %}{% trans "Yakuniy natijalar" %}{% else %}{% trans "Natijalar" %}{% endif %}</h2><span class="text-sm text-mute">{% blocktrans with rows=rows|length %}{{ rows }} ishtirokchi{% endblocktrans %}{% if contest.is_running %} {% trans "· har 20 soniyada yangilanadi" %}{% endif %}</span>
     <div class="ca7-r flex flex-wrap items-center gap-2">
-      {% if contest.is_running %}<span class="ca-tag ca-tag-live"><span class="ca-live-dot" aria-hidden="true"></span>Jonli</span>{% endif %}
-      <span class="hidden text-xs text-mute" id="st-scroll-hint"><i data-lucide="move-horizontal" class="lu mr-1" aria-hidden="true"></i>Jadvalni yonga suring</span>
-      <label class="ca7-search !w-64"><span class="sr-only">Ishtirokchini qidirish</span><i data-lucide="search" class="lu" aria-hidden="true"></i><input class="ca7-fld" type="search" id="st-search" placeholder="Ism yoki login…" autocomplete="off"></label>
-      {% if my_row %}<button type="button" class="ca-btn ca-btn-soft" data-goto-me>Mening o‘rnim</button>{% endif %}
-      <a class="ca-btn ca-btn-soft" href="?format=csv" download><i data-lucide="download" class="lu" aria-hidden="true"></i>CSV</a>
+      {% if contest.is_running %}<span class="ca-tag ca-tag-live">{% trans "<span class=\"ca-live-dot\" aria-hidden=\"true\"></span>Jonli" %}</span>{% endif %}
+      <span class="hidden text-xs text-mute" id="st-scroll-hint"><i data-lucide="move-horizontal" class="lu mr-1" aria-hidden="true"></i>{% trans "Jadvalni yonga suring" %}</span>
+      <label class="ca7-search !w-64"><span class="sr-only">{% trans "Ishtirokchini qidirish" %}</span><i data-lucide="search" class="lu" aria-hidden="true"></i><input class="ca7-fld" type="search" id="st-search" placeholder="{% trans 'Ism yoki login…' %}" autocomplete="off"></label>
+      {% if my_row %}<button type="button" class="ca-btn ca-btn-soft" data-goto-me>{% trans "Mening o‘rnim" %}</button>{% endif %}
+      <a class="ca-btn ca-btn-soft" href="?format=csv" download><i data-lucide="download" class="lu" aria-hidden="true"></i>{% trans "CSV" %}</a>
     </div>
   </div>
   <div>
@@ -60,6 +60,6 @@
   })();
 </script>
 {% else %}
-<p class="ca7-empty"><b>Hali ishtirokchi yo‘q</b>Ro‘yxatdan o‘tganlar musobaqa boshlangach shu yerda chiqadi.</p>
+<p class="ca7-empty">{% trans "<b>Hali ishtirokchi yo‘q</b>Ro‘yxatdan o‘tganlar musobaqa boshlangach shu yerda chiqadi." %}</p>
 {% endif %}
 {% endblock %}

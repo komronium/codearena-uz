@@ -1,5 +1,5 @@
 {% extends "base.html" %}{% load static %}
-{% block title %}Urinish #{{ s.pk|stringformat:"06d" }}{% endblock %}
+{% block title %}{% blocktrans with s_pk=s.pk|stringformat:"06d" %}Urinish #{{ s_pk }}{% endblocktrans %}{% endblock %}
 {% block band %}
 {% comment %}#7 submission: the band names it (problem, language, when, practice or the round) with the way back; the
 verdict card and the tests on the left, then the code with its line numbers and the review; on the right how fast it
@@ -7,19 +7,19 @@ is among the accepted ones and the next step.{% endcomment %}
 <section class="ca-hud" aria-labelledby="sub-title">
   <div class="ca-hud-in">
     <div class="min-w-0">
-      <p class="ca7-crumb">{% if s.user_id == user.pk %}<a href="{% url 'submissions:mine' %}?mine=1">Urinishlarim</a>{% elif user.is_staff %}<a href="{% url 'moderation:submissions' %}">Barcha urinishlar</a>{% else %}<a href="{% url 'problems:leaders' s.problem.slug %}">Eng yaxshi yechimlar</a>{% endif %} / #{{ s.pk|stringformat:"06d" }}</p>
-      <h1 id="sub-title">Urinish <span class="tabular">#{{ s.pk|stringformat:"06d" }}</span></h1>
+      <p class="ca7-crumb">{% if s.user_id == user.pk %}<a href="{% url 'submissions:mine' %}?mine=1">{% trans "Urinishlarim" %}</a>{% elif user.is_staff %}<a href="{% url 'moderation:submissions' %}">{% trans "Barcha urinishlar" %}</a>{% else %}<a href="{% url 'problems:leaders' s.problem.slug %}">{% trans "Eng yaxshi yechimlar" %}</a>{% endif %} / #{{ s.pk|stringformat:"06d" }}</p>
+      <h1 id="sub-title">{% blocktrans with s_pk=s.pk|stringformat:"06d" %}Urinish <span class="tabular">#{{ s_pk }}</span>{% endblocktrans %}</h1>
       <p class="ca7-bmeta">
         {% if s.user_id != user.pk %}<span>{{ s.user.username }}</span>{% endif %}
         <a class="text-white hover:underline" href="{% url 'problems:detail' s.problem.slug %}">{{ s.problem.title }}</a>
         <span>{{ s.language.name }}</span>
         <time class="tabular" datetime="{{ s.created|date:'c' }}">{{ s.created|date:"d.m.Y H:i" }}</time>
-        {% if s.contest %}<a class="text-white hover:underline" href="{% url 'contests:standings' s.contest.pk %}">{{ s.contest.title }}</a>{% else %}<span>mashq</span>{% endif %}
+        {% if s.contest %}<a class="text-white hover:underline" href="{% url 'contests:standings' s.contest.pk %}">{{ s.contest.title }}</a>{% else %}<span>{% trans "mashq" %}</span>{% endif %}
       </p>
     </div>
     {% if s.user_id == user.pk %}<div class="ml-auto flex flex-wrap gap-2">
-      {% if s.contest_id is None or s.contest.has_ended %}<a class="ca-btn {% if s.verdict != 'AC' %}ca-btn-gold{% else %}ca-btn-ghost{% endif %}" href="{% url 'problems:detail' s.problem.slug %}?from={{ s.pk }}"><i data-lucide="code" class="lu" aria-hidden="true"></i>Muharrirda ochish</a>{% endif %}
-      <a class="ca-btn {% if s.verdict == 'AC' %}ca-btn-gold{% else %}ca-btn-ghost{% endif %}" href="{% url 'problems:detail' s.problem.slug %}">Masalaga qaytish</a></div>{% endif %}
+      {% if s.contest_id is None or s.contest.has_ended %}<a class="ca-btn {% if s.verdict != 'AC' %}ca-btn-gold{% else %}ca-btn-ghost{% endif %}" href="{% url 'problems:detail' s.problem.slug %}?from={{ s.pk }}"><i data-lucide="code" class="lu" aria-hidden="true"></i>{% trans "Muharrirda ochish" %}</a>{% endif %}
+      <a class="ca-btn {% if s.verdict == 'AC' %}ca-btn-gold{% else %}ca-btn-ghost{% endif %}" href="{% url 'problems:detail' s.problem.slug %}">{% trans "Masalaga qaytish" %}</a></div>{% endif %}
   </div>
 </section>
 {% endblock %}
@@ -31,14 +31,14 @@ is among the accepted ones and the next step.{% endcomment %}
   </div>
 
   <section class="mt-9" aria-labelledby="code-title">
-    <div class="ca7-sec-h"><h2 id="code-title">Kod</h2>
+    <div class="ca7-sec-h"><h2 id="code-title">{% trans "Kod" %}</h2>
       <span class="ca7-r flex items-center gap-3 text-sm text-mute">
         {% if prev_sub or next_sub %}<span class="ca7-hop" aria-label="Shu masaladagi boshqa urinishlar">
-          {% if prev_sub %}<a href="{% url 'submissions:detail' prev_sub.pk %}" title="Oldingi urinish #{{ prev_sub.pk|stringformat:'06d' }}"><i data-lucide="chevron-left" class="lu" aria-hidden="true"></i>Oldingi</a>{% endif %}
-          {% if next_sub %}<a href="{% url 'submissions:detail' next_sub.pk %}" title="Keyingi urinish #{{ next_sub.pk|stringformat:'06d' }}">Keyingi<i data-lucide="chevron-right" class="lu" aria-hidden="true"></i></a>{% endif %}
+          {% if prev_sub %}<a href="{% url 'submissions:detail' prev_sub.pk %}" title="{% blocktrans with prev_sub_pk=prev_sub.pk|stringformat:'06d' %}Oldingi urinish #{{ prev_sub_pk }}{% endblocktrans %}"><i data-lucide="chevron-left" class="lu" aria-hidden="true"></i>{% trans "Oldingi" %}</a>{% endif %}
+          {% if next_sub %}<a href="{% url 'submissions:detail' next_sub.pk %}" title="{% blocktrans with next_sub_pk=next_sub.pk|stringformat:'06d' %}Keyingi urinish #{{ next_sub_pk }}{% endblocktrans %}">{% trans "Keyingi" %}<i data-lucide="chevron-right" class="lu" aria-hidden="true"></i></a>{% endif %}
         </span>{% endif %}
-        {{ s.language.name }} · {{ s.source|length }} belgi
-        <button type="button" class="ca-btn ca-btn-soft ca-btn-wb" data-copy-code><i data-lucide="copy" class="lu" aria-hidden="true"></i>Nusxalash</button></span></div>
+        {% blocktrans with s_language_name=s.language.name s_source=s.source|length %}{{ s_language_name }} · {{ s_source }} belgi{% endblocktrans %}
+        <button type="button" class="ca-btn ca-btn-soft ca-btn-wb" data-copy-code><i data-lucide="copy" class="lu" aria-hidden="true"></i>{% trans "Nusxalash" %}</button></span></div>
     <div class="ca7-code" translate="no">
       <pre class="ca7-code-ln" aria-hidden="true">{% for n in line_numbers %}{{ n }}
 {% endfor %}</pre>
@@ -48,27 +48,27 @@ is among the accepted ones and the next step.{% endcomment %}
 
 </div>
 
-<aside class="ca7-aside" aria-label="Qo‘shimcha">
+<aside class="ca7-aside" aria-label="{% trans 'Qo‘shimcha' %}">
   {% if beats %}
   <section class="ca-box" aria-labelledby="speed-title">
-    <div class="ca-box-cap ca-hd"><h2 id="speed-title">Tezlik</h2></div>
+    <div class="ca-box-cap ca-hd"><h2 id="speed-title">{% trans "Tezlik" %}</h2></div>
     <div class="ca7-pad">
-      <svg class="ca-hist" viewBox="-6 -30 {{ beats.vb_w }} {{ beats.vb_h }}" role="img" aria-label="Qabul qilingan {{ beats.n }} ta yechimning ishlash vaqti taqsimoti; sizniki {{ s.exec_ms }} ms">
+      <svg class="ca-hist" viewBox="-6 -30 {{ beats.vb_w }} {{ beats.vb_h }}" role="img" aria-label="{% blocktrans with beats_n=beats.n s_exec_ms=s.exec_ms %}Qabul qilingan {{ beats_n }} ta yechimning ishlash vaqti taqsimoti; sizniki {{ s_exec_ms }} ms{% endblocktrans %}">
         {% for b in beats.bars %}<rect x="{{ b.x }}" y="{{ b.y }}" width="{{ beats.bw }}" height="{{ b.h }}" rx="3"{% if b.me %} class="is-me"{% endif %}/>{% endfor %}
       </svg>
-      <p class="mt-2">Siz <b class="text-ink tabular">{{ s.exec_ms }} ms</b>: {{ s.language.name }} dagi {{ beats.n }} ta qabul qilingan yechimning <b class="text-ink tabular">{{ beats.time|floatformat:0 }}%</b> idan tezroq.{% if beats.mem is not None %} Xotira {{ beats.mem|floatformat:0 }}% idan kam.{% endif %}</p>
+      <p class="mt-2">{% blocktrans with s_exec_ms=s.exec_ms s_language_name=s.language.name beats_n=beats.n beats_time=beats.time|floatformat:0 %}Siz <b class="text-ink tabular">{{ s_exec_ms }} ms</b>: {{ s_language_name }} dagi {{ beats_n }} ta qabul qilingan yechimning <b class="text-ink tabular">{{ beats_time }}%</b> idan tezroq.{% endblocktrans %}{% if beats.mem is not None %} {% blocktrans with beats_mem=beats.mem|floatformat:0 %}Xotira {{ beats_mem }}% idan kam.{% endblocktrans %}{% endif %}</p>
     </div>
   </section>
   {% endif %}
   <section class="ca-box" aria-labelledby="next-title">
-    <div class="ca-box-cap ca-hd"><h2 id="next-title">Keyingi qadam</h2></div>
+    <div class="ca-box-cap ca-hd"><h2 id="next-title">{% trans "Keyingi qadam" %}</h2></div>
     <div class="ca7-pad">
       {% if next_pick %}{% with p=next_pick.0 %}
-      <p>{% if next_pick.1 %}Shu mavzudagi keyingi masala ({{ next_pick.1 }}):{% else %}Darajangizga mos keyingi masala:{% endif %}</p>
+      <p>{% if next_pick.1 %}{% blocktrans with next_pick_1=next_pick.1 %}Shu mavzudagi keyingi masala ({{ next_pick_1 }}):{% endblocktrans %}{% else %}{% trans "Darajangizga mos keyingi masala:" %}{% endif %}</p>
       <a class="ca-link font-medium" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a> <span class="ca-diff ca-diff-{{ p.difficulty }} !text-xs">{{ p.get_difficulty_display }}</span>
-      {% endwith %}{% elif s.verdict == "AC" %}<p>Qabul qilindi. <a class="ca-link" href="{% url 'problems:list' %}">Masalalar ro‘yxatiga</a> qayting.</p>
-      {% elif s.verdict == "PENDING" or s.verdict == "RUNNING" %}<p>Yechim tekshirilmoqda, odatda bir necha soniya. Sahifa o‘zi yangilanadi.</p>
-      {% else %}<p>Xato topilgan testni qayta ko‘ring, keyin <a class="ca-link" href="{% url 'problems:detail' s.problem.slug %}">masalada</a> tuzatib qayta yuboring.</p>{% endif %}
+      {% endwith %}{% elif s.verdict == "AC" %}<p>{% trans "Qabul qilindi." %} <a class="ca-link" href="{% url 'problems:list' %}">{% trans "Masalalar ro‘yxatiga</a> qayting." %}</p>
+      {% elif s.verdict == "PENDING" or s.verdict == "RUNNING" %}<p>{% trans "Yechim tekshirilmoqda, odatda bir necha soniya. Sahifa o‘zi yangilanadi." %}</p>
+      {% else %}<p>{% trans "Xato topilgan testni qayta ko‘ring, keyin" %} <a class="ca-link" href="{% url 'problems:detail' s.problem.slug %}">{% trans "masalada</a> tuzatib qayta yuboring." %}</p>{% endif %}
     </div>
   </section>
 </aside>

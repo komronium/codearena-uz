@@ -3,12 +3,12 @@ the level's metal (I bronze … V diamond, grey before level I), its name and le
 five segments — the full ones are the levels held, the part-filled one the way to the next — and what the next
 level asks. A visitor sees what the level took instead. ctx: b (a board() entry), owner (bool),
 ticks (optional: the levels' thresholds under the bar, for the badges page).{% endcomment %}
-<li class="ca-bt ca-t{{ b.tier }}{% if not b.tier %} is-locked{% endif %}"{% if b.earned_at %} title="{{ b.level_name }} · {{ b.earned_at|date:'d.m.Y' }}da olingan"{% endif %}>
+<li class="ca-bt ca-t{{ b.tier }}{% if not b.tier %} is-locked{% endif %}"{% if b.earned_at %} title="{% blocktrans with b_level_name=b.level_name b_earned_at=b.earned_at|date:'d.m.Y' %}{{ b_level_name }} · {{ b_earned_at }}da olingan{% endblocktrans %}"{% endif %}>
   <span class="ca-bt-ico" aria-hidden="true"><i data-lucide="{{ b.icon }}" class="lu"></i></span>
   <div class="ca-bt-main">
-    <p class="ca-bt-head"><b>{{ b.name }}</b><span class="ca-bt-lv">{% if b.tier %}{{ b.level_name }}{% else %}Hali olinmagan{% endif %}</span></p>
-    <span class="ca-bt-bar" role="img" aria-label="{{ b.tier }} / {{ b.max }} daraja">{% for p in b.segs %}<i style="--p: {{ p }}%"></i>{% endfor %}</span>
+    <p class="ca-bt-head"><b>{{ b.name }}</b><span class="ca-bt-lv">{% if b.tier %}{{ b.level_name }}{% else %}{% trans "Hali olinmagan" %}{% endif %}</span></p>
+    <span class="ca-bt-bar" role="img" aria-label="{% blocktrans with b_tier=b.tier b_max=b.max %}{{ b_tier }} / {{ b_max }} daraja{% endblocktrans %}">{% for p in b.segs %}<i style="--p: {{ p }}%"></i>{% endfor %}</span>
     {% if ticks %}<span class="ca-bt-ticks" aria-hidden="true">{% for l in ticks %}<span title="{{ l.metal|capfirst }}{% if l.pct %} · o‘yinchilarning {{ l.pct }}% ida bor{% endif %}">{{ l.at }}</span>{% endfor %}</span>{% endif %}
-    <small>{% if owner and b.next %}{{ b.next.text }}{% elif owner and b.tier %}Eng yuqori daraja olingan{% elif b.tier %}{{ b.sub }}{% else %}{{ b.next.text }}{% endif %}</small>
+    <small>{% if owner and b.next %}{{ b.next.text }}{% elif owner and b.tier %}{% trans "Eng yuqori daraja olingan" %}{% elif b.tier %}{{ b.sub }}{% else %}{{ b.next.text }}{% endif %}</small>
   </div>
 </li>
