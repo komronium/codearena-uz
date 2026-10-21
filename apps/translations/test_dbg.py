@@ -19,3 +19,11 @@ def test_dbg(client):
     print("B", re.search(r"<title>(.*?)</title>", t, re.S).group(1).strip()[:60])
     t = client.get(reverse("problems:list")).content.decode()
     print("C", "Sum" in t, "Yig" in t)
+
+    from django.template import Context, Template
+    from django.utils import translation
+    from apps.translations import mixin
+    p = Problem.objects.get(pk=p.pk)
+    with translation.override("en"):
+        print("D", Template("{{ p.title }}").render(Context({"p": p})), mixin.confirmed_text(p, "title", "en"), mixin._state.__dict__)
+        print("E", type(p).TRANSLATABLE, type(p).SHORT, type(p).__mro__[:3], Template._render if False else "")
