@@ -5,7 +5,7 @@
   <div class="ca-hud-in">
     <div>
       <h1 id="duels-title">{% trans "Duellar" %}</h1>
-      <p class="ca-hud-sub">{% blocktrans with n_questions=n_questions per_question=per_question %}{{ n_questions }} ta savol, har biriga {{ per_question }} soniya. Ko‘proq ball yig‘gan g‘olib: to‘g‘ri javob 1, 2 yoki 3 ball (savol qiyinligiga qarab).{% endblocktrans %}</p>
+      <p class="ca-hud-sub">{% blocktrans with n_questions=n_questions per_question=per_question %}{{ n_questions }} ta savol, har biriga {{ per_question }} soniya. Ko‘proq to‘g‘ri javob bergan g‘olib: har bir to‘g‘ri javob 1 ball. Teng bo‘lsa — durang, reytingdan hech kim ayrilmaydi.{% endblocktrans %}</p>
     </div>
     <dl class="ca-hud-stats">
       <div><dt><small>{% trans "Duel reytingi" %}</small></dt><dd><b class="tabular">{{ user.duel_rating }}</b></dd></div>

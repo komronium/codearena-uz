@@ -30,7 +30,7 @@ per_question, n_questions, expires, user. A coding duel from before the quiz sho
       <p class="text-xs text-mute">{% blocktrans with p_user_duel_rating=p.user.duel_rating %}Duel reytingi <b class="text-ink">{{ p_user_duel_rating }}</b>{% endblocktrans %}{% if p.delta is not None %} <span class="font-semibold {% if p.delta > 0 %}text-ok{% elif p.delta < 0 %}text-bad{% endif %}">{{ p.delta|signed }}</span>{% endif %}</p>
       {% if duel.mode == "quiz" %}
       <p class="mt-1.5 text-sm">
-        {% if p.over %}{% blocktrans with p_right=p.right n_questions=n_questions p_points=p.points %}<b class="tabular text-ink">{{ p_right }}/{{ n_questions }}</b> to‘g‘ri · <b class="tabular text-ink">{{ p_points }}</b> ball{% endblocktrans %}
+        {% if p.over %}{% blocktrans with p_right=p.right n_questions=n_questions %}<b class="tabular text-ink">{{ p_right }}/{{ n_questions }}</b> to‘g‘ri{% endblocktrans %}
         {% elif p.run %}{% blocktrans with p_right=p.right %}<span class="font-semibold text-ok">O‘ynamoqda…</span> <span class="tabular text-mute">{{ p_right }} ta to‘g‘ri</span>{% endblocktrans %}
         {% else %}<span class="text-mute">{% trans "Hali boshlamadi" %}</span>{% endif %}
       </p>

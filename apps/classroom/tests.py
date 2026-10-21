@@ -207,7 +207,7 @@ def test_more_right_answers_win_and_equal_is_a_draw_whatever_the_time(bank):
     duel.refresh_from_db()
     p1.refresh_from_db()
     p2.refresh_from_db()
-    assert duel.status == "finished" and duel.winner == p2
+    assert duel.status == "finished" and duel.winner == p1
     assert (duel.challenger_delta, duel.opponent_delta) == (-20, 20)  # K 40 for both newcomers
     assert (p1.duel_rating, p2.duel_rating) == (1180, 1220)
     settle(Duel.objects.get(pk=duel.pk))  # settling again changes nothing
@@ -264,7 +264,9 @@ def test_k_is_high_for_newcomers_and_low_at_the_top():
     assert k_factor(1999, 30) == 20 and k_factor(2000, 30) == 10
     assert elo(1200, 1200, 1.0, 40, 40) == (20, -20)
     assert elo(1200, 1200, 1.0, 40, 10) == (20, -5)  # each pays by their own K
-    assert elo(1000, 1400, 0.5, 20, 20) == (8, -8)  # a draw lifts the lower one
+    assert elo(1000, 1400, 0.5, 20, 20) == (8, 0)  # a draw lifts the lower one and costs the higher one nothing
+    assert elo(1400, 1000, 0.5, 20, 20) == (0, 8)
+    assert elo(1200, 1200, 0.5, 20, 20) == (0, 0)
 
 
 @pytest.mark.django_db
@@ -732,11 +734,11 @@ def test_unanswered_questions_of_a_finished_run_are_skipped_not_wrong(client, ba
 
 
 @pytest.mark.django_db
-def test_a_harder_right_answer_counts_more_and_a_five_question_duel_still_runs():
+def test_every_right_answer_is_one_point_and_a_five_question_duel_still_runs():
     from .duels import QUESTIONS, WEIGHT, answer, current, settle
     from .models import Duel
 
-    assert QUESTIONS == 7 and WEIGHT == {"beginner": 1, "easy": 2, "medium": 3}
+    assert QUESTIONS == 7 and WEIGHT == {"beginner": 1, "easy": 1, "medium": 1}
     qs = [_q("b0", level="beginner"), _q("b1", level="beginner"), _q("e0"), _q("e1"), _q("m0", level="medium")]
     p1, p2 = _players()
     now = timezone.now()
@@ -750,12 +752,12 @@ def test_a_harder_right_answer_counts_more_and_a_five_question_duel_still_runs()
             a = current(d, user)
             answer(d, user, a.index, a.question.answer if a.question.key in right_keys else "nope", now=a.shown_at + timezone.timedelta(seconds=3))
 
-    play(p1, {"b0", "b1", "e0", "e1"})  # four right: 1 + 1 + 2 + 2 = 6
-    play(p2, {"m0", "e0", "e1"})  # three right: 3 + 2 + 2 = 7, fewer answers but harder ones
+    play(p1, {"b0", "b1", "e0", "e1"})  # four right: 4 points
+    play(p2, {"m0", "e0", "e1"})  # three right: 3 points, harder questions count the same
     duel.refresh_from_db()
-    assert duel.status == "finished" and duel.winner == p2
+    assert duel.status == "finished" and duel.winner == p1
     from .duels import run
-    assert (run(duel, p1.pk).right, run(duel, p1.pk).points) == (4, 6) and (run(duel, p2.pk).right, run(duel, p2.pk).points) == (3, 7)
+    assert (run(duel, p1.pk).right, run(duel, p1.pk).points) == (4, 4) and (run(duel, p2.pk).right, run(duel, p2.pk).points) == (3, 3)
     assert run(duel, p1.pk).total == 5
 
 

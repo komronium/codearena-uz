@@ -5098,12 +5098,8 @@ msgid "Duel reytingi <b class=\"text-ink\">%(p_user_duel_rating)s</b>"
 msgstr "Duel rating <b class=\"text-ink\">%(p_user_duel_rating)s</b>"
 
 #: templates/classroom/_duel_status.html
-msgid ""
-"<b class=\"tabular text-ink\">%(p_right)s/%(n_questions)s</b> to‘g‘ri · <b "
-"class=\"tabular text-ink\">%(p_points)s</b> ball"
-msgstr ""
-"<b class=\"tabular text-ink\">%(p_right)s/%(n_questions)s</b> correct · <b "
-"class=\"tabular text-ink\">%(p_points)s</b> points"
+msgid "<b class=\"tabular text-ink\">%(p_right)s/%(n_questions)s</b> to‘g‘ri"
+msgstr "<b class=\"tabular text-ink\">%(p_right)s/%(n_questions)s</b> correct"
 
 #: templates/classroom/_duel_status.html
 msgid ""
@@ -5479,12 +5475,13 @@ msgstr "No such user found"
 
 #: templates/classroom/duels.html
 msgid ""
-"%(n_questions)s ta savol, har biriga %(per_question)s soniya. Ko‘proq ball "
-"yig‘gan g‘olib: to‘g‘ri javob 1, 2 yoki 3 ball (savol qiyinligiga qarab)."
+"%(n_questions)s ta savol, har biriga %(per_question)s soniya. Ko‘proq "
+"to‘g‘ri javob bergan g‘olib: har bir to‘g‘ri javob 1 ball. Teng bo‘lsa — "
+"durang, reytingdan hech kim ayrilmaydi."
 msgstr ""
 "%(n_questions)s questions, %(per_question)s seconds each. The one with more "
-"points wins: a right answer is worth 1, 2 or 3 points (by the question's "
-"difficulty)."
+"right answers wins: every right answer is 1 point. A draw takes no rating "
+"from anyone."
 
 #: templates/classroom/duels.html
 msgid "Sizni %(incoming)s ta duelga chaqirishdi"

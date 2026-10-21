@@ -2,7 +2,7 @@
 questions in one language, so nobody has to wait for anyone; the opponent gets the same
 questions and their own run when they join. Each question has PER_QUESTION from the moment it is first
 shown; a run left half-way ends RUN_LIMIT after its start, unseen questions counting as wrong. More points
-(a right answer is worth 1, 2 or 3 by the question's level) wins; equal is a draw (time is only the 20 seconds a question gets, never a tie-break). Duel Elo moves once both runs
+(every right answer is worth 1, whatever the question's level) wins; equal is a draw (time is only the 20 seconds a question gets, never a tie-break). Duel Elo moves once both runs
 are over, by each player's own K (k_factor), as in chess: high for a newcomer, low at the top.
 
 A duel names its opponent (a friend, who has WAIT_FOR to accept) or leaves the seat open: find_opponent
@@ -26,7 +26,7 @@ from .quiz_check import norm
 from django.utils.translation import gettext as _t, gettext_lazy as _tl
 
 QUESTIONS = 7  # of a new duel; a duel keeps the number it was made with (len(duel.questions))
-WEIGHT = {"beginner": 1, "easy": 2, "medium": 3}  # points of a right answer by the question's level
+WEIGHT = {"beginner": 1, "easy": 1, "medium": 1}  # every right answer is one point; levels only shape the mix of a duel
 PER_QUESTION = timedelta(seconds=20)
 GRACE = timedelta(seconds=2)  # an answer's trip to the server at the last second
 RUN_LIMIT = timedelta(minutes=5)
@@ -52,9 +52,11 @@ def k_factor(rating: int, played: int) -> int:
 
 
 def elo(a: int, b: int, score: float, ka: int, kb: int) -> tuple[int, int]:
-    """Rating changes of a and b for a's score (1 win, 0.5 draw, 0 loss)."""
+    """Rating changes of a and b for a's score (1 win, 0.5 draw, 0 loss). A draw takes nothing from the stronger
+    player: the lower one gains, the higher one stays where they are."""
     expected = 1 / (1 + 10 ** ((b - a) / 400))
-    return round(ka * (score - expected)), round(kb * ((1 - score) - (1 - expected)))
+    da, db = round(ka * (score - expected)), round(kb * ((1 - score) - (1 - expected)))
+    return (max(da, 0), max(db, 0)) if score == 0.5 else (da, db)
 
 
 PAIR_WINDOW = timedelta(hours=24)
@@ -191,9 +193,8 @@ class Run(NamedTuple):
 
     @property
     def points(self) -> int:
-        """What the right answers are worth: a harder question counts more, so a duel is not decided by who got
-        the easy ones right (a question of an unknown level counts as an easy one)."""
-        return sum(WEIGHT.get(a.question.level, 2) for a in self.answers if a.correct)
+        """What the right answers are worth: one point each, so a duel is decided by who got more of them right."""
+        return sum(WEIGHT.get(a.question.level, 1) for a in self.answers if a.correct)
 
     def spent(self, now) -> timedelta:
         """Time on the questions: an answered one as taken, any other its full PER_QUESTION."""
