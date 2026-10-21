@@ -28,17 +28,20 @@ def tier_up(request):
     return {"tier_up": SimpleLazyObject(lambda: _claim_tier_up(user))}
 
 
+CONTEST_HOLD = {"detail", "submissions", "begin", "virtual", "clarifications"}
+
+
 def new_badges(request):
     """{"new_badges": [...]}: badge levels the user reached and hasn't been shown, for the award window in
     base.html; lazy, so only a page that draws it pays. The events that lift a badge store it at once
     (badges.award); a full recount here, at most every SYNC_EVERY seconds, catches anything else. A duel
-    question's page never shows it: the award waits for the result page."""
+    question's page never shows it: the award waits for the result page; nor do the pages a contest is solved on."""
     user = getattr(request, "user", None)
     if not (user and user.is_authenticated) or request.headers.get("HX-Request"):
         return {}
     match = getattr(request, "resolver_match", None)
-    if match is not None and match.url_name == "duel_play":
-        return {}
+    if match is not None and (match.url_name == "duel_play" or (match.namespace == "contests" and match.url_name in CONTEST_HOLD)):
+        return {}  # (the award waits for a calm page: not in a duel question, not while a contest is being solved)
 
     def claim():
         from django.core.cache import cache

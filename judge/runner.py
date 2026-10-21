@@ -68,7 +68,9 @@ def run_submission(submission_id: int) -> None:
     sub.refresh_from_db(fields=["verdict"])
     if sub.verdict == Submission.Verdict.AC:  # a solve can lift a badge: store it now, so it shows at once
         from apps.accounts.badges import award
-        award(sub.user, {"problems", "learn"})
+        from apps.learn.progress import touches_a_course
+        # the courses are counted again only when this problem can move one (that count walks every course)
+        award(sub.user, {"problems", "learn"} if touches_a_course(sub.problem) else {"problems"})
 def _run_code_submission(sub: Submission) -> None:
     lang = sub.language
     problem = sub.problem

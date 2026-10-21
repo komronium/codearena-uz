@@ -7,7 +7,7 @@
     {% for l in save_lists %}
     <form method="post" action="{% url 'learn:save' problem.slug %}">{% csrf_token %}
       <input type="hidden" name="list" value="{{ l.pk }}"><input type="hidden" name="next" value="{{ request.get_full_path }}">
-      <button class="ca-save-row" aria-pressed="{% if l.has %}true{% else %}false{% endif %}"><i data-lucide="{% if l.has %}square-check{% else %}square{% endif %}" class="lu" aria-hidden="true"></i><span class="truncate">{{ l.name }}</span></button>
+      <button class="ca-save-row" aria-pressed="{% if l.has %}true{% else %}false{% endif %}"><i data-lucide="square" class="lu ic-off" aria-hidden="true"></i><i data-lucide="square-check" class="lu ic-on" aria-hidden="true"></i><span class="truncate">{{ l.name }}</span></button>
     </form>
     {% endfor %}
     <form method="post" action="{% url 'learn:save' problem.slug %}" class="flex gap-1.5 border-t border-line pt-2{% if not save_lists %} border-t-0 pt-0{% endif %}">{% csrf_token %}
@@ -15,6 +15,29 @@
       <input name="name" maxlength="80" required class="ca-input !py-1 text-sm" placeholder="{% if save_lists %}{% trans 'Yangi ro‘yxat' %}{% else %}{% trans 'Keyinroq yechaman' %}{% endif %}" aria-label="{% trans 'Yangi ro‘yxat nomi' %}" value="{% if not save_lists %}Keyinroq yechaman{% endif %}">
       <button class="ca-btn ca-btn-primary !px-2.5 !py-1" aria-label="{% trans 'Yangi ro‘yxatga saqlash' %}"><i data-lucide="plus" class="lu" aria-hidden="true"></i></button>
     </form>
+    <p class="pt-1 text-xs text-ok" data-save-say role="status" aria-live="polite"></p>
     <a class="ca-link block pt-1 text-xs text-mute" href="{% url 'learn:lists' %}">{% trans "Barcha ro‘yxatlar" %}</a>
   </div>
 </details>
+<script>
+  // a tick in the menu saves or removes the problem in place: no reload, so the code typed in the editor stays
+  (() => {
+    const menu = document.querySelector(".ca-save-menu");
+    if (!menu) return;
+    const say = menu.querySelector("[data-save-say]");
+    menu.addEventListener("submit", async (e) => {
+      const form = e.target.closest("form");
+      if (!form || form.querySelector("[name=list]").value === "new") return;  // a new list is still made with a reload
+      e.preventDefault();
+      try {
+        const r = await fetch(form.action, {method: "POST", body: new FormData(form), headers: {"X-Requested-With": "fetch"}, credentials: "same-origin"});
+        if (!r.ok) throw new Error(r.status);
+        const d = await r.json();
+        form.querySelector("button").setAttribute("aria-pressed", String(d.has));
+        menu.querySelector("summary > svg, summary > i").classList.toggle("fill-current", d.any);
+        menu.querySelector("summary > svg, summary > i").classList.toggle("text-warn", d.any);
+        say.textContent = d.text;
+      } catch (err) { form.submit(); }
+    });
+  })();
+</script>

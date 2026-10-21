@@ -10,6 +10,18 @@ msgstr ""
 msgid "kumush"
 msgstr "kumuş"
 
+msgid "Masalalarga o‘tish"
+msgstr "Masalalarga ötiş"
+
+msgid "Kurslarga o‘tish"
+msgstr "Kurslarga ötiş"
+
+msgid "Musobaqalarga o‘tish"
+msgstr "Musobaqalarga ötiş"
+
+msgid "Duelga o‘tish"
+msgstr "Duelga ötiş"
+
 msgid "Yechuvchi"
 msgstr "Yeçuvçi"
 
@@ -19,8 +31,14 @@ msgstr "{n} ta masala yeçildi"
 msgid "Cho‘qqi"
 msgstr "Çöqqi"
 
+msgid "O‘rganuvchi"
+msgstr "Örganuvçi"
+
 msgid "Musobaqachi"
 msgstr "Musobaqaçi"
+
+msgid "{n} marta top-3 (kamida 10 ishtirokchida)"
+msgstr "{n} marta top-3 (kamida 10 iştirokçida)"
 
 msgid "Duelchi"
 msgstr "Duelçi"
@@ -34,11 +52,11 @@ msgstr "{n} ta ğalaba ketma-ket"
 msgid "Chaqmoq"
 msgstr "Çaqmoq"
 
-msgid "{n} marta xatosiz va tez (savolga o‘rtacha 6 soniyadan kam)"
-msgstr "{n} marta xatosiz va tez (savolga örtaça 6 soniyadan kam)"
-
 msgid "{n} ta tilda g‘alaba"
 msgstr "{n} ta tilda ğalaba"
+
+msgid "Duelda hamma savolga to‘g‘ri javob va o‘rtacha 6 soniyadan kam."
+msgstr "Duelda hamma savolga töğri javob va örtaça 6 soniyadan kam."
 
 msgid "Yangi nishon: {title}"
 msgstr "Yangi nişon: {title}"
@@ -624,6 +642,16 @@ msgstr "röyxatidan olindi"
 msgid "ro‘yxatiga saqlandi"
 msgstr "röyxatiga saqlandi"
 
+msgid "Nazariya o‘qildi deb belgilandi."
+msgstr "Nazariya öqildi deb belgilandi."
+
+msgid ""
+"Nazariya o‘qildi: kurs tugatildi. Nishon bosqichi faqat masalali kurslar "
+"bilan oshadi."
+msgstr ""
+"Nazariya öqildi: kurs tugatildi. Nişon bosqiçi faqat masalali kurslar bilan "
+"oşadi."
+
 msgid "«{lst_name}» o‘chirildi."
 msgstr "«{lst_name}» öçirildi."
 
@@ -942,9 +970,6 @@ msgstr ""
 "Havola notöğri yoki sahifa öçirilgan. Masala yaşirin yoki musobaqa hali "
 "boşlanmagan bölişi ham mumkin."
 
-msgid "Masalalarga o‘tish"
-msgstr "Masalalarga ötiş"
-
 msgid ""
 "Kutilmagan xato yuz berdi. Bir necha soniyadan so‘ng sahifani yangilang."
 msgstr ""
@@ -1163,15 +1188,21 @@ msgstr ""
 "CodeArena nişonlari: har biri 5 bosqiçli — bronza, kumuş, oltin, platina, "
 "olmos. Har bosqiç nimani talab qilişi va qançalik kamyobligi."
 
+msgid "Bosqichlar saqlanib qoladi: bir marta olingan nishon yo‘qolmaydi."
+msgstr "Bosqiçlar saqlanib qoladi: bir marta olingan nişon yöqolmaydi."
+
 msgid "Bosqichlar"
 msgstr "Bosqiçlar"
 
+msgid "keyingi bosqichga eng oz qolgan nishonlar"
+msgstr "keyingi bosqiçga eng oz qolgan nişonlar"
+
 msgid ""
 "%(n_families)s ta nishon, har biri 5 bosqichli: bronza, kumush, oltin, "
-"platina, olmos ·"
+"platina, olmos."
 msgstr ""
 "%(n_families)s ta nişon, har biri 5 bosqiçli: bronza, kumuş, oltin, platina,"
-" olmos ·"
+" olmos."
 
 msgid "Klubdan chiqasizmi?"
 msgstr "Klubdan çiqasizmi?"
@@ -3763,6 +3794,15 @@ msgstr ""
 msgid "%(open_count)s ta ochiq. Ochiqlari tepada."
 msgstr "%(open_count)s ta oçiq. Oçiqlari tepada."
 
+msgid "Boshqa mavzular"
+msgstr "Boşqa mavzular"
+
+msgid "Shu masalani yechganlar soni"
+msgstr "Şu masalani yeçganlar soni"
+
+msgid "Yechgan"
+msgstr "Yeçgan"
+
 msgid ""
 "<span class=\"ca-st is-solved\" title=\"Yechilgan\"></span><span class=\"sr-"
 "only\">Yechilgan</span>"
@@ -3801,6 +3841,15 @@ msgstr "· yaşirin"
 msgid "Tahrirlash"
 msgstr "Tahrirlaş"
 
+msgid "Nazariya o‘qilgan."
+msgstr "Nazariya öqilgan."
+
+msgid "Barcha kurslar"
+msgstr "Barça kurslar"
+
+msgid "Yashirish"
+msgstr "Yaşiriş"
+
 msgid "Nazariya o‘qildi"
 msgstr "Nazariya öqildi"
 
@@ -3826,17 +3875,34 @@ msgstr "Bu kurs faqat nazariya: öqib bölgaç «Tuşundim» ni bosing."
 msgid "yechildi"
 msgstr "yeçildi"
 
-msgid "Olingan — profilingizda ko‘rinadi"
-msgstr "Olingan — profilingizda körinadi"
+msgid "Bu kurs faqat nazariya: u nishon bosqichini oshirmaydi."
+msgstr "Bu kurs faqat nazariya: u nişon bosqiçini oşirmaydi."
 
-msgid "Kursni tugatsangiz profilingizga qo‘shiladi"
-msgstr "Kursni tugatsangiz profilingizga qöşiladi"
+msgid ""
+"Bu kurs hisobingizga yozilgan: keyin masala qo‘shilsa ham tugatilgan bo‘lib "
+"qoladi."
+msgstr ""
+"Bu kurs hisobingizga yozilgan: keyin masala qöşilsa ham tugatilgan bölib "
+"qoladi."
 
 msgid "Kodni nusxalash"
 msgstr "Kodni nusxalaş"
 
 msgid "O‘rganish</a> / %(plan_get_stage_display)s"
 msgstr "Örganiş</a> / %(plan_get_stage_display)s"
+
+msgid "%(progress_done)s / %(progress_total)s masala yechilgan."
+msgstr "%(progress_done)s / %(progress_total)s masala yeçilgan."
+
+msgid ""
+"Kurs to‘ldirilmoqda: hozircha %(partial)s ta masala bor. %(course_min)s ta "
+"bo‘lganda uni tugatish mumkin bo‘ladi va nishonga hisoblanadi."
+msgstr ""
+"Kurs töldirilmoqda: hozirça %(partial)s ta masala bor. %(course_min)s ta "
+"bölganda uni tugatiş mumkin böladi va nişonga hisoblanadi."
+
+msgid "Kursni tugatsangiz «%(learner_name)s» nishoni bosqichi oshadi."
+msgstr "Kursni tugatsangiz «%(learner_name)s» nişoni bosqiçi oşadi."
 
 msgid "Kurslar — O‘rganish"
 msgstr "Kurslar — Örganiş"
@@ -3847,6 +3913,12 @@ msgid ""
 msgstr ""
 "Dasturlaşni mavzulab örganing: har kursda qisqa nazariya va osonidan "
 "qiyiniga masalalar, özbek tilida."
+
+msgid "Yo‘l"
+msgstr "Yöl"
+
+msgid "Yo‘l bo‘yicha"
+msgstr "Yöl böyiça"
 
 msgid "Kurslarni filtrlash"
 msgstr "Kurslarni filtrlaş"
@@ -3881,6 +3953,9 @@ msgstr "Hali kurs yöq"
 msgid "Birinchisini tuzing</a>."
 msgstr "Birinçisini tuzing</a>."
 
+msgid "Kurs 10 ta masala bo‘lganda to‘liq ochiladi"
+msgstr "Kurs 10 ta masala bölganda töliq oçiladi"
+
 msgid "<b>Bunday kurs topilmadi</b>Boshqa so‘z bilan qidirib ko‘ring."
 msgstr "<b>Bunday kurs topilmadi</b>Boşqa söz bilan qidirib köring."
 
@@ -3889,16 +3964,13 @@ msgstr "%(p_progress_done)s / %(p_progress_total)s yeçilgan"
 
 msgid ""
 "<b>Tez orada</b><span class=\"text-mute\">%(soon)s ta kurs tayyorlanmoqda — "
-"kursda 10 ta masala bo‘lganda ochiladi</span>"
+"masala qo‘shilishi bilan ochiladi</span>"
 msgstr ""
 "<b>Tez orada</b><span class=\"text-mute\">%(soon)s ta kurs tayyorlanmoqda — "
-"kursda 10 ta masala bölganda oçiladi</span>"
+"masala qöşilişi bilan oçiladi</span>"
 
 msgid "Ro‘yxatlarim"
 msgstr "Röyxatlarim"
-
-msgid "Ochiq havola"
-msgstr "Oçiq havola"
 
 msgid "Olish"
 msgstr "Oliş"
@@ -3941,6 +4013,9 @@ msgstr "Keyinroq yeçiş uçun saqlangan masalalar"
 
 msgid "Ro‘yxatlar"
 msgstr "Röyxatlar"
+
+msgid "O‘zgargan"
+msgstr "Özgargan"
 
 msgid "Ochiq"
 msgstr "Oçiq"
@@ -4452,9 +4527,6 @@ msgstr "Urinişlarni köriş"
 
 msgid "Qayta tekshirish"
 msgstr "Qayta tekşiriş"
-
-msgid "Yashirish"
-msgstr "Yaşiriş"
 
 msgid "Ochiq qilish"
 msgstr "Oçiq qiliş"

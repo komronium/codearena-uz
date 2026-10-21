@@ -1,14 +1,16 @@
 {% comment %}One badge family at its level, the same everywhere (apps.accounts.badges): the family's icon on a tile in
-the level's metal (I bronze … V diamond, grey before level I), its name and level in words, then one bar of
-five segments — the full ones are the levels held, the part-filled one the way to the next — and what the next
-level asks. A visitor sees what the level took instead. ctx: b (a board() entry), owner (bool),
-ticks (optional: the levels' thresholds under the bar, for the badges page).{% endcomment %}
-<li class="ca-bt ca-t{{ b.tier }}{% if not b.tier %} is-locked{% endif %}"{% if b.earned_at %} title="{% blocktrans with b_level_name=b.level_name b_earned_at=b.earned_at|date:'d.m.Y' %}{{ b_level_name }} · {{ b_earned_at }}da olingan{% endblocktrans %}"{% endif %}>
-  <span class="ca-bt-ico" aria-hidden="true"><i data-lucide="{{ b.icon }}" class="lu"></i></span>
+the level's metal (I bronze … V diamond; before level I a faint bronze preview), five pips for the levels on the tile's
+foot, its name and level in words (a lock before level I), then one bar of five segments — the full ones are the levels
+held, the part-filled one the way to the next — and what the next level asks. A visitor sees what the level took
+instead. ctx: b (a board() entry), owner (bool), ticks (optional: the levels' thresholds under the bar, each with its
+metal's dot, for the badges page), cta (optional: a link to where the badge is earned).{% endcomment %}
+<li class="ca-bt {% if b.tier %}ca-t{{ b.tier }}{% else %}is-locked ca-t1{% endif %}"{% if b.earned_at %} title="{% blocktrans with b_level_name=b.level_name b_earned_at=b.earned_at|date:'d.m.Y' %}{{ b_level_name }} · {{ b_earned_at }}da olingan{% endblocktrans %}"{% endif %}>
+  <span class="ca-bt-ico" aria-hidden="true"><i data-lucide="{{ b.icon }}" class="lu"></i>{% if b.pips %}<span class="ca-bt-pips">{% for on in b.pips %}<i{% if on %} class="on"{% endif %}></i>{% endfor %}</span>{% endif %}</span>
   <div class="ca-bt-main">
-    <p class="ca-bt-head"><b>{{ b.name }}</b><span class="ca-bt-lv">{% if b.tier %}{{ b.level_name }}{% else %}{% trans "Hali olinmagan" %}{% endif %}</span></p>
+    <p class="ca-bt-head"><b>{{ b.name }}</b>{% if b.tier %}<span class="ca-bt-lv">{{ b.level_name }}</span>{% else %}<span class="ca-bt-lock" title="{% trans 'Hali olinmagan' %}"><i data-lucide="lock" class="lu" aria-hidden="true"></i><span class="sr-only">{% trans "Hali olinmagan" %}</span></span>{% endif %}</p>
     <span class="ca-bt-bar" role="img" aria-label="{% blocktrans with b_tier=b.tier b_max=b.max %}{{ b_tier }} / {{ b_max }} daraja{% endblocktrans %}">{% for p in b.segs %}<i style="--p: {{ p }}%"></i>{% endfor %}</span>
-    {% if ticks %}<span class="ca-bt-ticks" aria-hidden="true">{% for l in ticks %}<span title="{{ l.metal|capfirst }}{% if l.pct %} {% trans '· o‘yinchilarning' %} {{ l.pct }}{% trans '% ida bor' %}{% endif %}">{{ l.at }}</span>{% endfor %}</span>{% endif %}
-    <small>{% if owner and b.next %}{{ b.next.text }}{% elif owner and b.tier %}{% trans "Eng yuqori daraja olingan" %}{% elif b.tier %}{{ b.sub }}{% else %}{{ b.next.text }}{% endif %}</small>
+    {% if ticks %}<span class="ca-bt-ticks" aria-hidden="true">{% for l in ticks %}<span class="ca-t{{ l.tier }}" title="{{ l.metal|capfirst }}{% if l.pct %} {% trans '· o‘yinchilarning' %} {{ l.pct }}{% trans '% ida bor' %}{% endif %}">{{ l.at }}</span>{% endfor %}</span>{% endif %}
+    <small{% if b.hint %} title="{{ b.hint }}"{% endif %}>{% if owner and b.next %}{{ b.next.text }}{% elif owner and b.tier %}{% trans "Eng yuqori daraja olingan" %}{% elif b.tier %}{{ b.sub }}{% else %}{{ b.next.text }}{% endif %}</small>
+    {% if cta and b.url %}<a class="ca-bt-go" href="{{ b.url }}">{{ b.cta }}<i data-lucide="chevron-right" class="lu" aria-hidden="true"></i></a>{% endif %}
   </div>
 </li>

@@ -1,24 +1,30 @@
 {% extends "base.html" %}
 {% block title %}{% trans "Ro‘yxatlarim" %}{% endblock %}
+{% block band %}
+<section class="ca-hud" aria-labelledby="lists-page-title">
+  <div class="ca-hud-in">
+    <div>
+      <p class="ca-hud-lbl"><a class="text-white no-underline hover:underline" href="{% url 'problems:list' %}">{% trans "Masalalar" %}</a></p>
+      <h1 id="lists-page-title">{% trans "Ro‘yxatlarim" %}</h1>
+      <p class="ca-hud-sub">{% trans "Keyinroq yechish uchun saqlangan masalalar" %}</p>
+    </div>
+  </div>
+</section>
+{% endblock %}
 {% block content %}
-{% comment %}Your saved problem lists in a flat table; a new list is made in the box on the side.{% endcomment %}
-<header class="mb-5">
-  <a class="ca-link mb-3 inline-block text-sm text-mute" href="{% url 'problems:list' %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>{% trans "Masalalar" %}</a>
-  <h1 class="ca-page-title">{% trans "Ro‘yxatlarim" %}</h1>
-  <p class="mt-2 text-sm text-mute">{% trans "Keyinroq yechish uchun saqlangan masalalar" %}</p>
-</header>
+{% comment %}Your saved problem lists in a flat table with how far each is solved; a new list is made in the box on the side.{% endcomment %}
 <div class="ca-cols">
   <section class="min-w-0" aria-labelledby="lists-title">
     <div class="ca7-sec-h"><h2 id="lists-title">{% trans "Ro‘yxatlar" %}{% if lists %} <small class="tabular text-mute">{{ lists|length }}</small>{% endif %}</h2></div>
     {% if lists %}
     <table class="ca-table ca-table-flat">
-      <thead><tr><th scope="col">{% trans "Nomi" %}</th><th scope="col" class="w-24 text-center">{% trans "Masala" %}</th><th scope="col" class="hidden w-32 text-center sm:table-cell">{% trans "Yaratilgan" %}</th></tr></thead>
+      <thead><tr><th scope="col">{% trans "Nomi" %}</th><th scope="col" class="w-36 text-center">{% trans "Yechilgan" %}</th><th scope="col" class="hidden w-32 text-center sm:table-cell">{% trans "O‘zgargan" %}</th></tr></thead>
       <tbody>
       {% for l in lists %}
       <tr>
         <td><a class="ca-link font-medium" href="{% url 'learn:list' l.pk %}">{{ l.name }}</a>{% if l.is_public %} <span class="ca-tag ml-1 align-middle"><i data-lucide="globe" class="lu" aria-hidden="true"></i>{% trans "Ochiq" %}</span>{% endif %}</td>
-        <td class="text-center tabular">{{ l.n }}</td>
-        <td class="hidden text-center tabular sm:table-cell">{{ l.created|date:"d.m.Y" }}</td>
+        <td class="text-center tabular">{% if l.n %}<span class="ca7-cprog justify-center"><span class="ca7-pg"><i style="width: {% widthratio l.n_solved l.n 100 %}%"></i></span><b>{{ l.n_solved }}/{{ l.n }}</b></span>{% else %}<span class="text-mute">0</span>{% endif %}</td>
+        <td class="hidden text-center tabular text-mute sm:table-cell">{{ l.changed|default:l.created|date:"d.m.Y" }}</td>
       </tr>
       {% endfor %}
       </tbody>

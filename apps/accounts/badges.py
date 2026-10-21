@@ -8,7 +8,7 @@ each family at its level, with how far the next one is."""
 from dataclasses import dataclass
 
 from django.db import IntegrityError
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.utils.translation import gettext_lazy as _tl
 
 ROMAN = ["", "I", "II", "III", "IV", "V"]
@@ -29,21 +29,30 @@ class Family:
     unit: str  # what a level asks for, with {n}
     levels: tuple[int, ...]
     base: int = 0  # where the progress to level I starts (a rating starts at 1200, not 0)
+    hint: str = ""  # the rule in full, when the unit line has to stay short
 
 
 GROUPS = {"problems": _tl("Masalalar"), "learn": _tl("Kurslar"), "contests": _tl("Musobaqalar"), "duels": _tl("Duellar")}
+# where each group is earned (the badge page's link on a tile), and the two sections the page draws: 4 and 8 tiles, so a
+# row of 4 (or 2 on a narrow screen) never ends with a lone tile
+GROUP_URL = {"problems": "problems:list", "learn": "learn:hub", "contests": "contests:list", "duels": "classroom:duels"}
+GROUP_CTA = {"problems": _tl("Masalalarga o‘tish"), "learn": _tl("Kurslarga o‘tish"), "contests": _tl("Musobaqalarga o‘tish"),
+             "duels": _tl("Duelga o‘tish")}
+SECTION_OF = {"problems": 0, "learn": 0, "contests": 1, "duels": 1}
+SECTIONS = [_tl("Masalalar va kurslar"), _tl("Musobaqalar va duellar")]
 FAMILIES = [
     Family("yechuvchi", _tl("Yechuvchi"), "circle-check-big", "problems", _tl("{n} ta masala yechildi"), (10, 25, 50, 100, 250)),
     Family("choqqi", _tl("Cho‘qqi"), "mountain", "problems", _tl("{n} ta Hard masala"), (1, 5, 10, 25, 50)),
     Family("olov", _tl("Olov"), "flame", "problems", _tl("{n} kun ketma-ket"), (3, 7, 30, 100, 365)),
-    Family("bilimdon", _tl("Bilimdon"), "graduation-cap", "learn", _tl("{n} ta kurs tugatildi"), (1, 3, 5, 10, 20)),
+    # (named "Bilimdon" before; that is also the Expert rating tier's name, so the badge is called O‘rganuvchi now)
+    Family("bilimdon", _tl("O‘rganuvchi"), "graduation-cap", "learn", _tl("{n} ta kurs tugatildi"), (1, 3, 5, 10, 20)),
     Family("musobaqachi", _tl("Musobaqachi"), "flag", "contests", _tl("{n} ta reytingli musobaqa"), (1, 5, 10, 25, 50)),
-    Family("sovrindor", _tl("Sovrindor"), "medal", "contests", _tl("{n} marta top-3"), (1, 3, 5, 10, 25)),
+    Family("sovrindor", _tl("Sovrindor"), "medal", "contests", _tl("{n} marta top-3 (kamida 10 ishtirokchida)"), (1, 3, 5, 10, 25)),
     Family("duelchi", _tl("Duelchi"), "swords", "duels", _tl("{n} ta g‘alaba"), (5, 10, 50, 100, 250)),
     Family("yengilmas", _tl("Yengilmas"), "shield-check", "duels", _tl("{n} ta g‘alaba ketma-ket"), (3, 5, 7, 10, 15)),
     Family("duel_ustasi", _tl("Duel ustasi"), "trophy", "duels", _tl("Duel reytingi {n}"), (1300, 1400, 1500, 1700, 2000), base=1200),
     Family("mukammal", _tl("Mukammal"), "target", "duels", _tl("{n} marta xatosiz duel"), (1, 5, 10, 25, 50)),
-    Family("chaqmoq", _tl("Chaqmoq"), "zap", "duels", _tl("{n} marta xatosiz va tez (savolga o‘rtacha 6 soniyadan kam)"), (1, 3, 10, 25, 50)),
+    Family("chaqmoq", _tl("Chaqmoq"), "zap", "duels", _tl("{n} marta xatosiz va tez"), (1, 3, 10, 25, 50), hint=_tl("Duelda hamma savolga to‘g‘ri javob va o‘rtacha 6 soniyadan kam.")),
     Family("poliglot", _tl("Poliglot"), "languages", "duels", _tl("{n} ta tilda g‘alaba"), (2, 3, 4)),
 ]
 BY_KEY = {f.key: f for f in FAMILIES}
@@ -53,12 +62,16 @@ METRIC = {"yechuvchi": "solved", "choqqi": "hard", "olov": "streak", "bilimdon":
           "mukammal": "perfect", "chaqmoq": "lightning", "poliglot": "languages"}
 
 
-def metrics(user, only: set[str] | None = None) -> dict[str, int]:
-    """What each family counts for `user` right now; `only` limits it to some groups."""
+PODIUM_MIN = 10  # a top-3 counts in a round with at least this many rated entrants (two entrants all place top 3)
+
+
+def metrics(user, only: set[str] | None = None, record: bool = False) -> dict[str, int]:
+    """What each family counts for `user` right now; `only` limits it to some groups. `record` keeps the courses
+    finished now finished for good (learn.PlanDone), for the award paths."""
     from apps.classroom.duel_badges import duel_stats
     from apps.contests.models import Participation
-    from apps.learn.models import StudyPlan
-    from apps.learn.progress import plan_progress
+    from apps.learn.models import PlanDone, StudyPlan
+    from apps.learn.progress import plan_progress, record_done
     from apps.problems.daily import streaks
     from apps.problems.models import Problem
 
@@ -69,11 +82,18 @@ def metrics(user, only: set[str] | None = None) -> dict[str, int]:
         out.update(solved=solved.count(), hard=solved.filter(difficulty=Problem.Difficulty.HARD).count(),
                    streak=streaks(user)[1])
     if "learn" in want:
+        # a theory-only course is finished by one click ("Tushundim"), so it doesn't count towards the badge
         plans = list(StudyPlan.objects.filter(is_public=True))
-        out["courses"] = sum(1 for p in plan_progress(user, plans).values() if p["completed"])
+        done = {pid for pid, p in plan_progress(user, plans).items() if p["completed"] and not p["theory_only"]}
+        if record:
+            record_done(user, done)
+        kept = set(PlanDone.objects.filter(user=user, plan__in=plans).values_list("plan_id", flat=True))
+        out["courses"] = len(done | kept)
     if "contests" in want:
-        rated = Participation.objects.filter(user=user, rating_after__isnull=False, disqualified=False)
-        out.update(rated=rated.count(), podium=rated.filter(rank__lte=3).count())
+        rated = Participation.objects.filter(user=user, rating_after__isnull=False, disqualified=False, score__gt=0)
+        big = (Participation.objects.filter(rating_after__isnull=False, disqualified=False).values("contest")
+               .annotate(n=Count("id")).filter(n__gte=PODIUM_MIN).values("contest"))
+        out.update(rated=rated.count(), podium=rated.filter(rank__lte=3, contest__in=big).count())
     if "duels" in want:
         out.update(duel_stats(user))
     return out
@@ -100,10 +120,14 @@ def sync(user, values: dict[str, int] | None = None) -> list[tuple[str, int]]:
     return [(b.family, b.tier) for b in new]
 
 
-def board(user, groups: set[str] | None = None, store: bool = True) -> list[dict]:
+def board(user, groups: set[str] | None = None, store: bool = False) -> list[dict]:
     """Each family (of `groups`) as a page draws it: its level (the stored one, or higher if just reached),
     title ("Duelchi III"), what the level took, pips for the levels, the date it was earned and the next
-    level's progress. A family not reached yet is level 0, shown locked to its owner only."""
+    level's progress. A family not reached yet is level 0, shown locked to its owner only. Reading a page stores
+    nothing (`store` is for callers that mean to): levels are stored where they are earned (award) and by the
+    recount in the context processor."""
+    from django.urls import reverse
+
     from .models import UserBadge
 
     values = metrics(user, groups)
@@ -128,7 +152,7 @@ def board(user, groups: set[str] | None = None, store: bool = True) -> list[dict
                    # "Kumush: 4 / 5 ta Hard masala": the next level's metal and the count towards it
                    "text": f"{METALS[tier + 1].capitalize()}: {f.unit.format(n=f'{min(value, at)} / {at}')}"}
         out.append({
-            "key": f.key, "name": f.name, "icon": f.icon, "group": f.group, "group_label": GROUPS[f.group],
+            "key": f.key, "name": f.name, "hint": f.hint, "url": reverse(GROUP_URL[f.group]), "cta": GROUP_CTA[f.group], "icon": f.icon, "group": f.group, "group_label": GROUPS[f.group],
             "tier": tier, "roman": ROMAN[tier], "metal": METALS[tier], "max": len(f.levels),
             "title": titled(f.name, tier),
             "sub": f.unit.format(n=f.levels[max(tier, 1) - 1]),
@@ -194,7 +218,7 @@ def award(user, groups: set[str]) -> None:
     """Store the levels of some groups right after what can change them (an accept, a finished duel, a rated
     round), so the award shows on the very next page. Never lets a badge error break the caller."""
     try:
-        added = sync(user, metrics(user, groups))
+        added = sync(user, metrics(user, groups, record=True))
         if added:  # and say so in the bell and on Telegram too, for whoever turned that on
             from django.db import transaction
 
@@ -212,18 +236,45 @@ def award(user, groups: set[str]) -> None:
         logging.getLogger(__name__).exception("badge award failed for user %s", getattr(user, "pk", user))
 
 
+ACTIVE_DAYS = 90  # the rating board's rule too: someone who did nothing for this long is not a player
+RARITY_CACHE = 600
+
+
 def rarity(pairs=None) -> dict[tuple[str, int], int]:
-    """(family, level) -> the percent of active players (anyone who sent code or holds a badge) holding it,
-    at least 1 when anyone does."""
-    from django.db.models import Count
+    """(family, level) -> the percent of active players (sent code or earned a badge in the last ACTIVE_DAYS days)
+    holding it, at least 1 when anyone does. Kept for ten minutes."""
+    from django.core.cache import cache
+    from django.utils import timezone
 
     from .models import User, UserBadge
 
-    players = max(1, User.objects.filter(is_active=True).filter(Q(submissions__isnull=False) | Q(badges__isnull=False))
-                  .distinct().count())
-    rows = UserBadge.objects.filter(user__is_active=True).values("family", "tier").annotate(n=Count("user", distinct=True))
-    out = {(r["family"], r["tier"]): max(1, round(100 * r["n"] / players)) for r in rows}
+    out = cache.get("badge-rarity")
+    if out is None:
+        since = timezone.now() - timezone.timedelta(days=ACTIVE_DAYS)
+        active = User.objects.filter(is_active=True).filter(Q(submissions__created__gte=since) | Q(badges__earned_at__gte=since))
+        players = max(1, active.distinct().count())
+        rows = (UserBadge.objects.filter(user__in=active.values("pk")).values("family", "tier")
+                .annotate(n=Count("user", distinct=True)))
+        out = {(r["family"], r["tier"]): max(1, min(100, round(100 * r["n"] / players))) for r in rows}
+        cache.set("badge-rarity", out, RARITY_CACHE)
     return {p: out.get(p, 0) for p in pairs} if pairs is not None else out
+
+
+def backfill() -> int:
+    """Store the levels everyone has reached without a word: no award window, no bell, no Telegram. For after a
+    recalculation (rating, duel rating) that moves what a badge counts. Returns how many levels it stored."""
+    from .models import User, UserBadge
+
+    stored = 0
+    for user in User.objects.filter(is_active=True).iterator():
+        added = sync(user)
+        if added:
+            cond = Q()
+            for fam, tier in added:
+                cond |= Q(family=fam, tier=tier)
+            UserBadge.objects.filter(user=user, seen=False).filter(cond).update(seen=True)
+            stored += len(added)
+    return stored
 
 
 def summaries(user_ids) -> dict[int, dict]:
@@ -247,6 +298,8 @@ def summaries(user_ids) -> dict[int, dict]:
 def ladders(user=None) -> list[dict]:
     """The badges page: every family with all its levels (what each takes, how rare it is, reached or not),
     and for a signed-in user where they stand."""
+    from django.urls import reverse
+
     mine = {b["key"]: b for b in board(user)} if user is not None and user.is_authenticated else {}
     rare = rarity()
     out = []
@@ -256,7 +309,9 @@ def ladders(user=None) -> list[dict]:
             "key": f.key, "name": f.name, "icon": f.icon, "tier": 0, "max": len(f.levels), "level_name": "",
             "segs": [0] * len(f.levels), "sub": f.unit.format(n=f.levels[0]), "earned_at": None,
             "next": {"text": f"{METALS[1].capitalize()}: {f.unit.format(n=f.levels[0])}"}}
-        out.append({**b, "group_label": GROUPS[f.group], "mine": mine.get(f.key),
+        out.append({**b, "group_label": GROUPS[f.group], "mine": mine.get(f.key), "section": SECTION_OF[f.group],
+                    "hint": f.hint, "url": reverse(GROUP_URL[f.group]), "cta": GROUP_CTA[f.group],
+                    "pips": b.get("pips") or [False] * len(f.levels),
                     "levels": [{"tier": i, "metal": METALS[i], "at": at, "pct": rare.get((f.key, i), 0)}
                                for i, at in enumerate(f.levels, start=1)]})
     return out

@@ -3734,3 +3734,79 @@ small { font-size: max(12.25px, .8em); }
 .ca-lang-btn:hover { background: rgb(var(--ca-ink-rgb) / .08); }
 .ca-lang-btn svg.lucide { width: 1rem; height: 1rem; }
 .ca-footer .ca-lang-btn { color: rgb(var(--ca-mute-rgb)); }
+
+/* ===== Badges and learn audit (2026-10-21) ================================================================
+   Badge page: two sections of 4 and 8 tiles on a grid that never ends a row with a lone tile; a locked tile previews
+   its bronze; five pips on the tile's foot count the levels; each threshold carries its metal's dot. Learn hub: the
+   courses as numbered cards with their icon; the course page's finish card and "Qisman" note. */
+.ca-bts-4, .ca-bts-3 { grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 640px) { .ca-bts-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } .ca-bts-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 1100px) { .ca-bts-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.ca-bt.is-locked .ca-bt-ico { color: var(--bg1); background: color-mix(in srgb, var(--bg1) 13%, rgb(var(--ca-surface-rgb))); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--bg1) 38%, transparent); }
+.ca-bt.is-locked .ca-bt-bar i { background: linear-gradient(90deg, color-mix(in srgb, var(--bg1) 70%, transparent) var(--p), rgb(var(--ca-ink-rgb) / .1) var(--p)); }
+.ca-bt-ico { position: relative; }
+.ca-bt-pips { position: absolute; left: 50%; bottom: 3px; display: flex; gap: 2px; transform: translateX(-50%); }
+.ca-bt-pips i { width: 3px; height: 3px; border-radius: 50%; background: rgb(255 255 255 / .35); }
+.ca-bt-pips i.on { background: #fff; }
+.ca-bt.is-locked .ca-bt-pips i { background: color-mix(in srgb, var(--bg1) 30%, transparent); }
+.ca-bt-ico svg.lucide:first-child { margin-top: -3px; }
+.ca-bt.ca-t4 .ca-bt-ico { box-shadow: inset 0 -2px 0 rgb(0 0 0 / .14), 0 0 0 2px rgb(var(--ca-surface-rgb)), 0 0 0 3px var(--bg1); }
+.ca-bt.ca-t5 .ca-bt-ico { box-shadow: inset 0 -2px 0 rgb(0 0 0 / .14), 0 0 0 2px rgb(var(--ca-surface-rgb)), 0 0 0 3px var(--bg1), 0 0 12px color-mix(in srgb, var(--bg1) 55%, transparent); }
+.ca-bt-lock { flex: none; color: rgb(var(--ca-mute-rgb)); }
+.ca-bt-lock svg.lucide { width: .95rem; height: .95rem; }
+.ca-bt-ticks span { display: inline-flex; align-items: center; justify-content: flex-end; gap: .25rem; }
+.ca-bt-ticks span::before { content: ""; flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--bg1); }
+.ca-bt-go { display: inline-flex; align-items: center; gap: .15rem; justify-self: start; font-size: 0.8125rem; font-weight: 600; color: rgb(var(--ca-accent-rgb)); text-decoration: none; }
+.ca-bt-go:hover { text-decoration: underline; text-underline-offset: 3px; }
+.ca-bt-go svg.lucide { width: .9rem; height: .9rem; }
+.ca-bt-legend { display: flex; flex-wrap: wrap; gap: .25rem 1.1rem; margin: 0 0 1.1rem; font-size: 0.875rem; color: rgb(var(--ca-mute-rgb)); }
+.ca-bt-legend span { display: inline-flex; align-items: center; gap: .4rem; text-transform: capitalize; }
+.ca-bt-legend i { width: 9px; height: 9px; border-radius: 50%; background: var(--bg1); }
+.ca-box .ca-bt-pips { display: none; }
+
+/* learn hub: numbered course cards */
+.lc-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: .75rem; margin: 0; padding: 0; list-style: none; }
+@media (min-width: 900px) { .lc-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.lc-card { position: relative; display: flex; gap: .85rem; align-items: flex-start; padding: .9rem 1rem; border: 1px solid rgb(var(--ca-line-rgb)); border-radius: var(--ca-radius); background: rgb(var(--ca-surface-rgb)); }
+.lc-card:hover { background: var(--ca-hover); }
+.lc-card.is-here { border-color: rgb(var(--ca-accent-rgb) / .55); box-shadow: 0 0 0 1px rgb(var(--ca-accent-rgb) / .25); }
+.lc-ico { flex: none; display: grid; place-items: center; width: 2.5rem; height: 2.5rem; border-radius: 10px; color: rgb(var(--ca-accent-rgb)); background: rgb(var(--ca-accent-rgb) / .1); }
+.lc-ico svg.lucide { width: 1.25rem; height: 1.25rem; }
+.lc-card.is-done .lc-ico { color: #fff; background: rgb(var(--ca-ok-fill-rgb)); }
+.lc-main { display: grid; flex: 1; gap: .3rem; min-width: 0; }
+.lc-main small { font-size: 0.875rem; line-height: 1.4; color: rgb(var(--ca-mute-rgb)); }
+.lc-title { display: flex; flex-wrap: wrap; align-items: baseline; gap: .25rem .5rem; margin: 0; font-size: 1.0625rem; font-weight: 600; line-height: 1.3; }
+.lc-num { flex: none; min-width: 1.4rem; font-size: 0.875rem; font-weight: 600; color: rgb(var(--ca-mute-rgb)); }
+.lc-link { color: rgb(var(--ca-ink-rgb)); text-decoration: none; }
+.lc-link::after { content: ""; position: absolute; inset: 0; border-radius: var(--ca-radius); }
+.lc-link:hover { color: rgb(var(--ca-accent-rgb)); }
+.lc-link:focus-visible { outline: none; }
+.lc-link:focus-visible::after { outline: 2px solid rgb(var(--ca-accent-rgb)); outline-offset: 2px; }
+.lc-meta { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem .75rem; margin: .15rem 0 0; }
+.lc-meta .ca7-cstate { display: inline-flex; flex-wrap: wrap; align-items: center; gap: .25rem .65rem; justify-self: auto; text-align: left; }
+.ca7-side-soon { margin-top: .35rem; border-top: 1px solid rgb(var(--ca-line-rgb)); padding-top: .55rem; color: rgb(var(--ca-mute-rgb)); }
+
+/* course page: the finish, the "Qisman" note, the table, the theory's fold */
+.lc-done { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1rem; margin-bottom: 1.25rem; padding: 1rem 1.15rem; border-radius: var(--ca-radius);
+  border: 1px solid rgb(var(--ca-ok-rgb) / .4); background: rgb(var(--ca-ok-rgb) / .08); }
+.lc-done h2 { margin: 0; font-size: 1.15rem; font-weight: 700; }
+.lc-done p { margin: .15rem 0 0; font-size: 0.9375rem; color: rgb(var(--ca-mute-rgb)); }
+.lc-done-ico { flex: none; display: grid; place-items: center; width: 2.75rem; height: 2.75rem; border-radius: 12px; color: #fff; background: rgb(var(--ca-ok-fill-rgb)); }
+.lc-done-ico svg.lucide { width: 1.5rem; height: 1.5rem; }
+.lc-partial { display: flex; align-items: center; gap: .6rem; margin: 0 0 1.25rem; padding: .7rem .9rem; border-radius: var(--ca-radius-sm); font-size: 0.9375rem; color: rgb(var(--ca-mute-rgb)); background: var(--ca-soft); }
+.lc-partial svg.lucide { flex: none; width: 1.1rem; height: 1.1rem; }
+.lc-table { table-layout: fixed; }
+.lc-table .c-st { width: 2.25rem; } .lc-table .c-id { width: 4.5rem; } .lc-table .c-tags { width: 15rem; } .lc-table .c-n { width: 5.5rem; }
+.lc-table td, .lc-table th { overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 639px) { .lc-table .c-tags { display: none; } }
+.ca7-theory .prose { max-width: 48rem; }
+.ca7-theory > summary { justify-content: flex-start; gap: .5rem; }
+.ca-theory-chevron { flex: none; transition: transform .15s; }
+.ca7-theory[open] .ca-theory-chevron { transform: rotate(180deg); }
+.ca-theory-toggle { font-size: 0.875rem; color: rgb(var(--ca-mute-rgb)); }
+.ca-theory-show { display: inline; } .ca-theory-hide { display: none; }
+.ca7-theory[open] .ca-theory-show { display: none; } .ca7-theory[open] .ca-theory-hide { display: inline; }
+@media (prefers-reduced-motion: reduce) { .ca-theory-chevron { transition: none; } }
+
+/* save menu: both icons are drawn, the row's state shows one (so a tick can change in place) */
+.ca-save-row[aria-pressed="true"] .ic-off, .ca-save-row[aria-pressed="false"] .ic-on { display: none; }

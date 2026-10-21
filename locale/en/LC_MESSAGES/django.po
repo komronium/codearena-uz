@@ -43,6 +43,30 @@ msgstr "Contests"
 msgid "Duellar"
 msgstr "Duels"
 
+#: apps/accounts/badges.py templates/404.html
+msgid "Masalalarga o‘tish"
+msgstr "Go to problems"
+
+#: apps/accounts/badges.py
+msgid "Kurslarga o‘tish"
+msgstr "Go to problems"
+
+#: apps/accounts/badges.py
+msgid "Musobaqalarga o‘tish"
+msgstr "Go to contests"
+
+#: apps/accounts/badges.py
+msgid "Duelga o‘tish"
+msgstr "Go to duels"
+
+#: apps/accounts/badges.py
+msgid "Masalalar va kurslar"
+msgstr "Problems and courses"
+
+#: apps/accounts/badges.py
+msgid "Musobaqalar va duellar"
+msgstr "Contests and duels"
+
 #: apps/accounts/badges.py
 msgid "Yechuvchi"
 msgstr "Solver"
@@ -68,8 +92,8 @@ msgid "{n} kun ketma-ket"
 msgstr "{n} days in a row"
 
 #: apps/accounts/badges.py
-msgid "Bilimdon"
-msgstr "Scholar"
+msgid "O‘rganuvchi"
+msgstr "Learner"
 
 #: apps/accounts/badges.py
 msgid "{n} ta kurs tugatildi"
@@ -88,8 +112,8 @@ msgid "Sovrindor"
 msgstr "Podium"
 
 #: apps/accounts/badges.py
-msgid "{n} marta top-3"
-msgstr "{n} times in the top 3"
+msgid "{n} marta top-3 (kamida 10 ishtirokchida)"
+msgstr "{n} top-3 finishes (in rounds with at least 10 entrants)"
 
 #: apps/accounts/badges.py
 msgid "Duelchi"
@@ -128,8 +152,8 @@ msgid "Chaqmoq"
 msgstr "Lightning"
 
 #: apps/accounts/badges.py
-msgid "{n} marta xatosiz va tez (savolga o‘rtacha 6 soniyadan kam)"
-msgstr "{n} flawless fast duels (under 6 seconds a question on average)"
+msgid "{n} marta xatosiz va tez"
+msgstr "{n} flawless and fast duels"
 
 #: apps/accounts/badges.py
 msgid "Poliglot"
@@ -138,6 +162,11 @@ msgstr "Polyglot"
 #: apps/accounts/badges.py
 msgid "{n} ta tilda g‘alaba"
 msgstr "Wins in {n} languages"
+
+#: apps/accounts/badges.py
+msgid "Duelda hamma savolga to‘g‘ri javob va o‘rtacha 6 soniyadan kam."
+msgstr ""
+"In a duel, every question right and under 6 seconds per question on average."
 
 #: apps/accounts/badges.py
 msgid "Yangi nishon: {title}"
@@ -1964,13 +1993,25 @@ msgstr "Graphs"
 msgid "Ilg‘or"
 msgstr "Advanced"
 
-#: apps/learn/views.py
+#: apps/learn/views.py apps/learn/views.py
 msgid "ro‘yxatidan olindi"
 msgstr "removed from the list"
 
-#: apps/learn/views.py
+#: apps/learn/views.py apps/learn/views.py
 msgid "ro‘yxatiga saqlandi"
 msgstr "saved to the list"
+
+#: apps/learn/views.py
+msgid "Nazariya o‘qildi deb belgilandi."
+msgstr "The theory is marked as read."
+
+#: apps/learn/views.py
+msgid ""
+"Nazariya o‘qildi: kurs tugatildi. Nishon bosqichi faqat masalali kurslar "
+"bilan oshadi."
+msgstr ""
+"Theory read: the course is finished. A badge level only rises with courses "
+"that have problems."
 
 #: apps/learn/views.py
 msgid "«{lst_name}» o‘chirildi."
@@ -2679,10 +2720,6 @@ msgstr ""
 "The link is wrong or the page was deleted. The problem may be hidden or the "
 "contest may not have started yet."
 
-#: templates/404.html
-msgid "Masalalarga o‘tish"
-msgstr "Go to problems"
-
 #: templates/500.html templates/base.html
 msgid "<!doctype html>"
 msgstr "<!doctype html>"
@@ -3114,7 +3151,7 @@ msgstr "Name of a school, college or university"
 msgid "%(rank)s-o‘rin"
 msgstr "rank %(rank)s"
 
-#: templates/accounts/_tbadge.html
+#: templates/accounts/_tbadge.html templates/accounts/_tbadge.html
 msgid "Hali olinmagan"
 msgstr "Not earned yet"
 
@@ -3209,16 +3246,28 @@ msgstr ""
 "diamond. What each level asks for and how rare it is."
 
 #: templates/accounts/badges.html
+msgid "Bosqichlar saqlanib qoladi: bir marta olingan nishon yo‘qolmaydi."
+msgstr "Levels are kept: a badge you have earned stays."
+
+#: templates/accounts/badges.html templates/accounts/badges.html
 msgid "Bosqichlar"
 msgstr "Levels"
 
 #: templates/accounts/badges.html
+msgid "Eng yaqin"
+msgstr "Closest"
+
+#: templates/accounts/badges.html
+msgid "keyingi bosqichga eng oz qolgan nishonlar"
+msgstr "the badges nearest to their next level"
+
+#: templates/accounts/badges.html
 msgid ""
 "%(n_families)s ta nishon, har biri 5 bosqichli: bronza, kumush, oltin, "
-"platina, olmos ·"
+"platina, olmos."
 msgstr ""
 "%(n_families)s badges, each with 5 levels: bronze, silver, gold, platinum, "
-"diamond ·"
+"diamond."
 
 #: templates/accounts/club.html
 msgid "Klubdan chiqasizmi?"
@@ -7736,7 +7785,7 @@ msgstr "Last 30 days"
 msgid "Oxirgi 90 kun"
 msgstr "Last 90 days"
 
-#: templates/integrity/practice_report.html
+#: templates/integrity/practice_report.html templates/learn/course.html
 msgid "Ko‘rsatish"
 msgstr "Show"
 
@@ -7955,6 +8004,18 @@ msgstr "Reply: %(r_outcome)s"
 msgid "<span class=\"sr-only\">Kurs: </span>%(nav_plan_title)s"
 msgstr "<span class=\"sr-only\">Course: </span>%(nav_plan_title)s"
 
+#: templates/learn/_problem_rows.html
+msgid "Boshqa mavzular"
+msgstr "Other topics"
+
+#: templates/learn/_problem_rows.html
+msgid "Shu masalani yechganlar soni"
+msgstr "How many people solved this problem"
+
+#: templates/learn/_problem_rows.html
+msgid "Yechgan"
+msgstr "Solved by"
+
 #: templates/learn/_problem_rows.html templates/problems/list.html
 msgid ""
 "<span class=\"ca-st is-solved\" title=\"Yechilgan\"></span><span class=\"sr-"
@@ -8007,13 +8068,25 @@ msgstr "· hidden"
 msgid "Tahrirlash"
 msgstr "Edit"
 
-#: templates/learn/course.html
+#: templates/learn/course.html templates/learn/course.html
 msgid "Kurs tugatildi"
 msgstr "Course completed"
+
+#: templates/learn/course.html
+msgid "Nazariya o‘qilgan."
+msgstr "Theory read."
+
+#: templates/learn/course.html
+msgid "Barcha kurslar"
+msgstr "All courses"
 
 #: templates/learn/course.html templates/learn/hub.html
 msgid "Nazariya"
 msgstr "Theory"
+
+#: templates/learn/course.html templates/moderation/problems.html
+msgid "Yashirish"
+msgstr "Hide"
 
 #: templates/learn/course.html
 msgid "Nazariya o‘qildi"
@@ -8068,12 +8141,16 @@ msgid "yechildi"
 msgstr "solved"
 
 #: templates/learn/course.html
-msgid "Olingan — profilingizda ko‘rinadi"
-msgstr "Earned — shown on your profile"
+msgid "Bu kurs faqat nazariya: u nishon bosqichini oshirmaydi."
+msgstr "This course is theory only: it does not raise a badge level."
 
 #: templates/learn/course.html
-msgid "Kursni tugatsangiz profilingizga qo‘shiladi"
-msgstr "Added to your profile when you complete the course"
+msgid ""
+"Bu kurs hisobingizga yozilgan: keyin masala qo‘shilsa ham tugatilgan bo‘lib "
+"qoladi."
+msgstr ""
+"This course is recorded on your account: it stays finished even if problems "
+"are added later."
 
 #: templates/learn/course.html
 msgid "Kodni nusxalash"
@@ -8092,8 +8169,24 @@ msgid "· %(progress_total)s masala"
 msgstr "· %(progress_total)s problems"
 
 #: templates/learn/course.html
+msgid "· Qisman: %(partial)s masala"
+msgstr "· Partial: %(partial)s problems"
+
+#: templates/learn/course.html
+msgid "%(progress_done)s / %(progress_total)s masala yechilgan."
+msgstr "%(progress_done)s / %(progress_total)s problems solved."
+
+#: templates/learn/course.html templates/learn/course.html
 msgid "Keyingi kurs: %(next_plan_title)s"
 msgstr "Next course: %(next_plan_title)s"
+
+#: templates/learn/course.html
+msgid ""
+"Kurs to‘ldirilmoqda: hozircha %(partial)s ta masala bor. %(course_min)s ta "
+"bo‘lganda uni tugatish mumkin bo‘ladi va nishonga hisoblanadi."
+msgstr ""
+"This course is being filled: it has %(partial)s problems so far. At "
+"%(course_min)s you can finish it and it counts towards a badge."
 
 #: templates/learn/course.html
 msgid "<span>%(g_label)s</span> masalalar"
@@ -8106,6 +8199,10 @@ msgid ""
 msgstr ""
 "<b class=\"text-2xl font-bold text-ink tabular\">%(progress_done)s</b> / "
 "%(progress_total)s problems"
+
+#: templates/learn/course.html
+msgid "Kursni tugatsangiz «%(learner_name)s» nishoni bosqichi oshadi."
+msgstr "Finishing the course raises your “%(learner_name)s” badge level."
 
 #: templates/learn/hub.html
 msgid "Kurslar — O‘rganish"
@@ -8124,6 +8221,18 @@ msgid ""
 "Har kurs bitta mavzu: qisqa nazariya, keyin osonidan qiyinga masalalar."
 msgstr ""
 "Each course is one topic: short theory, then problems from easy to hard."
+
+#: templates/learn/hub.html templates/learn/hub.html
+msgid "tugatildi"
+msgstr "completed"
+
+#: templates/learn/hub.html
+msgid "Yo‘l"
+msgstr "Path"
+
+#: templates/learn/hub.html
+msgid "Yo‘l bo‘yicha"
+msgstr "Along the path"
 
 #: templates/learn/hub.html
 msgid "Kurslarni filtrlash"
@@ -8169,12 +8278,12 @@ msgid "Siz shu yerdasiz"
 msgstr "You are here"
 
 #: templates/learn/hub.html
-msgid "tugatildi"
-msgstr "completed"
+msgid "Qisman"
+msgstr "Partial"
 
 #: templates/learn/hub.html
-msgid "Tayyorlanmoqda"
-msgstr "Being prepared"
+msgid "Taxminiy vaqt"
+msgstr "Rough time"
 
 #: templates/learn/hub.html
 msgid "Hali kurs yo‘q"
@@ -8183,6 +8292,10 @@ msgstr "No courses yet"
 #: templates/learn/hub.html
 msgid "Birinchisini tuzing</a>."
 msgstr "Create the first one</a>."
+
+#: templates/learn/hub.html
+msgid "Kurs 10 ta masala bo‘lganda to‘liq ochiladi"
+msgstr "The course opens in full at 10 problems"
 
 #: templates/learn/hub.html
 msgid "Tayyorlik"
@@ -8212,6 +8325,10 @@ msgstr "Next problem: %(next_problem_title)s ·"
 msgid "%(s_courses)s kurs"
 msgstr "%(s_courses)s courses"
 
+#: templates/learn/hub.html templates/learn/hub.html
+msgid "%(p_ready)s/10 masala"
+msgstr "%(p_ready)s/10 problems"
+
 #: templates/learn/hub.html
 msgid "%(p_progress_done)s / %(p_progress_total)s yechilgan"
 msgstr "%(p_progress_done)s / %(p_progress_total)s solved"
@@ -8221,24 +8338,20 @@ msgid "%(p_progress_total)s masala"
 msgstr "%(p_progress_total)s problems"
 
 #: templates/learn/hub.html
-msgid ""
-"<b>Tez orada</b><span class=\"text-mute\">%(soon)s ta kurs tayyorlanmoqda — "
-"kursda 10 ta masala bo‘lganda ochiladi</span>"
-msgstr ""
-"<b>Coming soon</b><span class=\"text-mute\">%(soon)s courses are being "
-"prepared — a course opens when it has 10 problems</span>"
+msgid "≈ %(p_hours)s soat"
+msgstr "≈ %(p_hours)s h"
 
 #: templates/learn/hub.html
-msgid "%(p_ready)s/10 masala"
-msgstr "%(p_ready)s/10 problems"
+msgid ""
+"<b>Tez orada</b><span class=\"text-mute\">%(soon)s ta kurs tayyorlanmoqda — "
+"masala qo‘shilishi bilan ochiladi</span>"
+msgstr ""
+"<b>Coming soon</b><span class=\"text-mute\">%(soon)s courses are being "
+"prepared — each opens as soon as it has a problem</span>"
 
 #: templates/learn/list.html templates/learn/lists.html
 msgid "Ro‘yxatlarim"
 msgstr "My lists"
-
-#: templates/learn/list.html
-msgid "Ochiq havola"
-msgstr "Public link"
 
 #: templates/learn/list.html
 msgid "Olish"
@@ -8304,8 +8417,8 @@ msgid "Ro‘yxatlar"
 msgstr "Lists"
 
 #: templates/learn/lists.html
-msgid "Yaratilgan"
-msgstr "Created"
+msgid "O‘zgargan"
+msgstr "Changed"
 
 #: templates/learn/lists.html templates/moderation/problems.html
 msgid "Ochiq"
@@ -9239,10 +9352,6 @@ msgstr "View submissions"
 #: templates/moderation/problems.html
 msgid "Qayta tekshirish"
 msgstr "Recheck"
-
-#: templates/moderation/problems.html
-msgid "Yashirish"
-msgstr "Hide"
 
 #: templates/moderation/problems.html
 msgid "Ochiq qilish"

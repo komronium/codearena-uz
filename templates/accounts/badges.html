@@ -6,7 +6,7 @@
   <div class="ca-hud-in">
     <div>
       <h1 id="badges-title">{% trans "Nishonlar" %}</h1>
-      <p class="ca-hud-sub">{% blocktrans with n_families=n_families %}{{ n_families }} ta nishon, har biri 5 bosqichli: bronza, kumush, oltin, platina, olmos ·{% endblocktrans %} <a class="text-white underline underline-offset-2" href="{% url 'badge_board' %}">{% trans "Nishonlar reytingi" %}</a></p>
+      <p class="ca-hud-sub">{% blocktrans with n_families=n_families %}{{ n_families }} ta nishon, har biri 5 bosqichli: bronza, kumush, oltin, platina, olmos.{% endblocktrans %} {% trans "Bosqichlar saqlanib qoladi: bir marta olingan nishon yo‘qolmaydi." %}</p>
     </div>
     {% if me %}
     <dl class="ca-hud-stats">
@@ -15,17 +15,28 @@
       <div><dt><small>{% trans "O‘rin" %}</small></dt><dd><b class="tabular">{% if me.rank %}{{ me.rank }}{% else %}—{% endif %}</b></dd></div>
     </dl>
     {% endif %}
+    <a class="ca-btn ca-btn-primary{% if not me %} ml-auto{% endif %}" href="{% url 'badge_board' %}"><i data-lucide="list-ordered" class="lu" aria-hidden="true"></i>{% trans "Nishonlar reytingi" %}</a>
   </div>
 </section>
 {% endblock %}
 {% block content %}
-{% comment %}Every badge as one tile (accounts/_tbadge.html): your level and the way to the next on a five-part bar,
-each level's threshold under its part (its metal and rarity on hover). Grouped as the profile groups them.{% endcomment %}
+{% comment %}Every badge as one tile (accounts/_tbadge.html): your level and the way to the next on a five-part bar, each
+level's threshold under its part with its metal's dot, and a link to where it is earned. Two sections of 4 and 8 tiles,
+so a row never ends with a lone tile. A signed-in user first sees the three badges closest to a new level.{% endcomment %}
+<p class="ca-bt-legend" aria-label="{% trans 'Bosqichlar' %}">{% for m in metals %}<span class="ca-t{{ forloop.counter }}"><i aria-hidden="true"></i>{{ m }}</span>{% endfor %}</p>
+{% if near %}
+<section class="mb-7" aria-labelledby="near-title">
+  <div class="ca7-sec-h"><h2 id="near-title">{% trans "Eng yaqin" %}</h2><span class="ca7-r text-mute">{% trans "keyingi bosqichga eng oz qolgan nishonlar" %}</span></div>
+  <ul class="ca-bts ca-bts-3">
+    {% for f in near %}{% include "accounts/_tbadge.html" with b=f.mine owner=True cta=True %}{% endfor %}
+  </ul>
+</section>
+{% endif %}
 {% for g in groups %}
 <section class="mb-7" aria-labelledby="g-{{ forloop.counter }}">
   <div class="ca7-sec-h"><h2 id="g-{{ forloop.counter }}">{{ g.label }}</h2></div>
-  <ul class="ca-bts">
-    {% for f in g.families %}{% include "accounts/_tbadge.html" with b=f owner=user.is_authenticated ticks=f.levels %}{% endfor %}
+  <ul class="ca-bts ca-bts-4">
+    {% for f in g.families %}{% include "accounts/_tbadge.html" with b=f owner=user.is_authenticated ticks=f.levels cta=True %}{% endfor %}
   </ul>
 </section>
 {% endfor %}

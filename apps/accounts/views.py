@@ -485,21 +485,21 @@ def rating(request):
 
 
 def badges_page(request):
-    """Nishonlar: every badge with all its levels, what each takes and how rare it is; for a signed-in user
-    where they stand and their place on the badge board."""
+    """Nishonlar: every badge with all its levels, what each takes and how rare it is, in two sections; for a
+    signed-in user where they stand, their place on the badge board and the three badges closest to a new level."""
     families = badge_system.ladders(request.user)
-    groups = []
-    for f in families:
-        if not groups or groups[-1]["label"] != f["group_label"]:
-            groups.append({"label": f["group_label"], "families": []})
-        groups[-1]["families"].append(f)
-    me = None
+    groups = [{"label": label, "families": [f for f in families if f["section"] == i]}
+              for i, label in enumerate(badge_system.SECTIONS)]
+    me, near = None, []
     if request.user.is_authenticated:
         mine = badge_system.summaries([request.user.pk]).get(request.user.pk, {"count": 0, "levels": 0})
         board = _badge_ranking()
         me = {**mine, "rank": next((r["rank"] for r in board if r["user"] == request.user.pk), None),
               "max_levels": sum(len(f.levels) for f in badge_system.FAMILIES)}
-    return render(request, "accounts/badges.html", {"groups": groups, "me": me, "n_families": len(families)})
+        near = sorted((f for f in families if f["mine"] and f["mine"]["next"] and f["mine"]["next"]["done"] > 0),
+                      key=lambda f: -f["mine"]["next"]["done"] / f["mine"]["next"]["total"])[:3]
+    return render(request, "accounts/badges.html", {"groups": groups, "me": me, "near": near,
+                                                     "n_families": len(families), "metals": badge_system.METALS[1:]})
 
 
 def _badge_ranking() -> list[dict]:

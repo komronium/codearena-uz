@@ -5,7 +5,7 @@ from apps.problems.models import Problem
 from apps.problems.skills import open_problems
 from apps.submissions.models import UserProblemSolved
 
-from .models import PlanRead, ProblemListItem, StudyPlan
+from .models import PlanDone, PlanRead, ProblemListItem, StudyPlan
 
 LEVELS = Problem.Difficulty.values  # easiest first
 # A course is 10-15 problems: under COURSE_MIN open it is still being prepared (it shows none, so it
@@ -13,9 +13,10 @@ LEVELS = Problem.Difficulty.values  # easiest first
 COURSE_MIN, COURSE_MAX = 10, 15
 
 
-def _trim(rows: list[tuple[int, str]]) -> list[tuple[int, str]]:
-    """COURSE_MAX of `rows` (easiest first): each level keeps its share (largest remainder, at least one),
-    the oldest problems of a level first, so a new problem rarely changes the course."""
+def _trim(rows: list[tuple[int, str]], solved: frozenset | set = frozenset()) -> list[tuple[int, str]]:
+    """COURSE_MAX of `rows` (easiest first): each level keeps its share (largest remainder, at least one). Inside a
+    level the reader's own solved problems come first, then the oldest, so a problem with the course's topic that
+    they solved always counts towards it and a new problem rarely changes the course."""
     by_level: dict[str, list[int]] = {}
     for problem_id, level in rows:
         by_level.setdefault(level, []).append(problem_id)
@@ -29,13 +30,14 @@ def _trim(rows: list[tuple[int, str]]) -> list[tuple[int, str]]:
             quota[lv] += 1
     while sum(quota.values()) > COURSE_MAX:  # the at-least-one rule overshot: take from the biggest
         quota[max(quota, key=quota.get)] -= 1
-    keep = {i for lv, ids in by_level.items() for i in sorted(ids)[:quota[lv]]}
+    keep = {i for lv, ids in by_level.items() for i in sorted(ids, key=lambda i: (i not in solved, i))[:quota[lv]]}
     return [r for r in rows if r[0] in keep]
 
 
-def course_rows(plans, raw: bool = False) -> dict[int, list[tuple[int, str]]]:
+def course_rows(plans, raw: bool = False, user=None) -> dict[int, list[tuple[int, str]]]:
     """Course id -> (problem id, difficulty) of its open problems: any of the course's tags,
-    easiest first, then oldest first, cut to COURSE_MIN..COURSE_MAX (none below it) unless `raw`.
+    easiest first, then oldest first, cut to COURSE_MIN..COURSE_MAX (none below it) unless `raw`;
+    with a `user`, what they have solved is kept in the cut first (see _trim).
     A problem may sit in several courses."""
     courses_of: dict[int, list[int]] = {}
     for plan_id, tag_id in (StudyPlan.tags.through.objects.filter(studyplan__in=[p.pk for p in plans])
@@ -52,13 +54,14 @@ def course_rows(plans, raw: bool = False) -> dict[int, list[tuple[int, str]]]:
            for plan_id, rows in found.items()}
     if raw:
         return out
-    return {plan_id: [] if len(rows) < COURSE_MIN else _trim(rows) if len(rows) > COURSE_MAX else rows
+    solved = solved_ids(user, {i for rows in out.values() if len(rows) > COURSE_MAX for i, _ in rows}) if user is not None else set()
+    return {plan_id: [] if len(rows) < COURSE_MIN else _trim(rows, solved) if len(rows) > COURSE_MAX else rows
             for plan_id, rows in out.items()}
 
 
-def plan_problem_ids(plans, raw: bool = False) -> dict[int, list[int]]:
+def plan_problem_ids(plans, raw: bool = False, user=None) -> dict[int, list[int]]:
     """Course id -> its open problems' ids, in course order (`raw`: all of them, uncut)."""
-    return {plan_id: [i for i, _ in rows] for plan_id, rows in course_rows(plans, raw).items()}
+    return {plan_id: [i for i, _ in rows] for plan_id, rows in course_rows(plans, raw, user).items()}
 
 
 def solved_ids(user, ids) -> set[int]:
@@ -70,20 +73,23 @@ def solved_ids(user, ids) -> set[int]:
 
 def plan_progress(user, plans) -> dict[int, dict]:
     """Course id -> {"done", "total", "pct", "completed", "read", "theory_only"}. A course with problems is completed
-    when all of them are solved; a theory-only course (no tags, so no problems) is completed by "Tushundim"; a course
-    that is merely still being prepared (tags, but under COURSE_MIN open problems) is never completed."""
-    ids = plan_problem_ids(plans)
+    when all of them are solved, and stays completed once it was (PlanDone) whatever happens to its problems later; a
+    theory-only course (no tags, so no problems) is completed by "Tushundim"; a course that is merely still being
+    prepared (tags, but under COURSE_MIN open problems) is not completed unless it was."""
+    ids = plan_problem_ids(plans, user=user)
     solved = solved_ids(user, {i for v in ids.values() for i in v})
     plan_pks = list(ids)
     tagged = set(StudyPlan.tags.through.objects.filter(studyplan__in=plan_pks).values_list("studyplan_id", flat=True))
     read = set(PlanRead.objects.filter(user=user, plan__in=plan_pks).values_list("plan_id", flat=True)) \
+        if user.is_authenticated else set()
+    finished = set(PlanDone.objects.filter(user=user, plan__in=plan_pks).values_list("plan_id", flat=True)) \
         if user.is_authenticated else set()
     out = {}
     for plan_id, pids in ids.items():
         done, total = len(solved.intersection(pids)), len(pids)
         theory_only = plan_id not in tagged
         out[plan_id] = {"done": done, "total": total, "pct": round(100 * done / total) if total else 0,
-                        "completed": (total > 0 and done == total) or (theory_only and plan_id in read),
+                        "completed": (total > 0 and done == total) or (theory_only and plan_id in read) or plan_id in finished,
                         "read": plan_id in read, "theory_only": theory_only}
     return out
 
@@ -93,7 +99,7 @@ def plan_sections(user, plans) -> dict[int, dict]:
     """Course id -> {"sections": one {"level", "label", "done", "total", "complete"} per
     difficulty that has open problems, easiest first; "next_id": the first unsolved problem
     or None}. Drives the course card's dots and the "Keyingi" button."""
-    rows = course_rows(plans)
+    rows = course_rows(plans, user=user)
     solved = solved_ids(user, {i for r in rows.values() for i, _ in r})
     labels = dict(Problem.Difficulty.choices)
     out = {}
@@ -123,7 +129,7 @@ def plan_nav(user, plan_slug: str, problem_id: int) -> dict | None:
     plan = plans.filter(slug=plan_slug).first()
     if plan is None:
         return None
-    ids = plan_problem_ids([plan])[plan.pk]
+    ids = plan_problem_ids([plan], user=user)[plan.pk]
     if problem_id not in ids:
         return None
     i = ids.index(problem_id)
@@ -145,3 +151,14 @@ def save_menu(user, problem) -> list | None:
     for lst in rows:
         lst.has = lst.pk in has
     return rows
+
+
+def record_done(user, plan_ids) -> None:
+    """Keep these courses finished for this user from now on (see PlanDone)."""
+    have = set(PlanDone.objects.filter(user=user, plan_id__in=list(plan_ids)).values_list("plan_id", flat=True))
+    PlanDone.objects.bulk_create([PlanDone(user=user, plan_id=i) for i in plan_ids if i not in have], ignore_conflicts=True)
+
+
+def touches_a_course(problem) -> bool:
+    """Whether solving this problem can move a course: it carries a tag some course follows."""
+    return StudyPlan.tags.through.objects.filter(tag__in=problem.tags.all()).exists()

@@ -3,7 +3,7 @@ from urllib.parse import urlencode
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count, Q
+from django.db.models import Count, Max, Q
 from apps.translations.mixin import localized
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -60,7 +60,7 @@ def continue_course(user) -> dict | None:
     stage_rank = {v: i for i, v in enumerate(StudyPlan.Stage.values)}
     plans = sorted(_plans_for(user), key=lambda p: (stage_rank.get(p.stage, len(stage_rank)), p.order, p.pk))
     progress = plan_progress(user, plans)
-    ids = {plan_id: [i for i, _ in rows] for plan_id, rows in course_rows(plans).items()}
+    ids = {plan_id: [i for i, _ in rows] for plan_id, rows in course_rows(plans, user=user).items()}
     for number, p in enumerate(plans, 1):
         p.number, p.progress, p.problem_ids = number, progress[p.pk], ids[p.pk]
     current = _current(user, plans)
@@ -80,7 +80,7 @@ def hub(request):
                    key=lambda p: (stage_rank.get(p.stage, len(stage_rank)), p.order, p.pk))
     progress = plan_progress(request.user, plans)
     details = plan_sections(request.user, plans)
-    ids = {plan_id: [i for i, _ in rows] for plan_id, rows in course_rows(plans).items()}
+    ids = {plan_id: [i for i, _ in rows] for plan_id, rows in course_rows(plans, user=request.user).items()}
     for number, p in enumerate(plans, 1):
         p.number, p.progress, p.problem_ids = number, progress[p.pk], ids[p.pk]
         p.dots = details[p.pk]["sections"]
@@ -96,45 +96,76 @@ def hub(request):
         next_problem = up_next[0] if up_next else None
     labels = dict(StudyPlan.Stage.choices)
     raw = course_rows(plans, raw=True)
-    stages, soon = [], []
+    stages, soon, step = [], [], 0
     for p in plans:
-        # a course still short of problems (it has topics but under 10 open problems) waits in "Tez orada",
-        # so the open ones stand out; a theory-only course (no topics) reads now and stays
-        if p.n_tags and not p.progress["total"] and not p.progress["completed"]:
-            p.ready = min(len(raw[p.pk]), COURSE_MIN)  # how close it is to opening
+        # a course with topics but under 10 open problems is "Qisman": it opens as soon as it has any problem (the theory
+        # reads now, the problems it has can be solved, and it counts towards a badge at 10); one with none yet waits in
+        # "Tez orada". A theory-only course (no topics) reads now and stays.
+        p.partial = bool(p.n_tags and not p.progress["total"] and not p.progress["completed"])
+        if p.partial:
+            p.ready = min(len(raw[p.pk]), COURSE_MIN)  # how close it is to opening in full
             p.ready_pct = round(100 * p.ready / COURSE_MIN)
-            soon.append(p)
-            continue
+            if not p.ready:
+                soon.append(p)
+                continue
+        step += 1
+        p.step = step
+        # a rough time: ten minutes of theory and about twelve a problem
+        p.hours = max(1, round((10 + 12 * (p.progress["total"] or (p.ready if p.partial else 0))) / 60))
         if not stages or stages[-1]["stage"] != p.stage:
             stages.append({"stage": p.stage, "label": labels.get(p.stage, p.stage), "courses": []})
         stages[-1]["courses"].append(p)
+    for st in stages:
+        st["done"] = sum(1 for c in st["courses"] if c.progress["completed"])
+    path = {"done": sum(st["done"] for st in stages), "total": step}
+    path["pct"] = round(100 * path["done"] / path["total"]) if path["total"] else 0
     return render(request, "learn/hub.html", {
-        "stages": stages, "soon": soon, "current": current, "next_problem": next_problem, "up_next": up_next,
+        "stages": stages, "soon": soon, "current": current, "next_problem": next_problem, "up_next": up_next, "path": path,
         "here": current if request.user.is_authenticated else None})
+
+
+def _next_course(user, plan):
+    """The course after `plan` on the path that can be opened and isn't finished yet (None at the end of the path)."""
+    stage_rank = {v: i for i, v in enumerate(StudyPlan.Stage.values)}
+    path = sorted(_plans_for(user), key=lambda p: (stage_rank.get(p.stage, len(stage_rank)), p.order, p.pk))
+    rest = path[[p.pk for p in path].index(plan.pk) + 1:]
+    progress = plan_progress(user, rest)
+    return next((p for p in rest if not progress[p.pk]["completed"] and (progress[p.pk]["total"] or progress[p.pk]["theory_only"])), None)
 
 
 def course_detail(request, slug):
     """A course: its theory, then its open problems grouped by difficulty."""
     plan = get_object_or_404(_plans_for(request.user), slug=slug)
-    rows = course_rows([plan])[plan.pk]
-    problems = Problem.objects.filter(pk__in=[i for i, _ in rows]).prefetch_related("tags").in_bulk()
+    rows = course_rows([plan], user=request.user)[plan.pk]
+    ready = partial = 0
+    if not rows:  # still short of problems: list the few it has, they can be solved already
+        rows = course_rows([plan], raw=True)[plan.pk]
+        ready = partial = len(rows)
+    tag_ids = set(plan.tags.values_list("pk", flat=True))
+    problems = (Problem.objects.filter(pk__in=[i for i, _ in rows]).annotate(n_solved=Count("userproblemsolved"))
+                .prefetch_related("tags").in_bulk())
     solved = solved_ids(request.user, problems)
     labels = dict(Problem.Difficulty.choices)
     groups: list[dict] = []
     for problem_id, level in rows:
         p = problems[problem_id]
         p.solved = p.pk in solved
+        p.other_tags = [t for t in p.tags.all() if t.pk not in tag_ids][:3]  # the course's own topic is no news in its list
         if not groups or groups[-1]["level"] != level:
             groups.append({"level": level, "label": labels.get(level, level), "problems": [], "done": 0})
         groups[-1]["problems"].append(p)
         groups[-1]["done"] += p.solved
     progress = plan_progress(request.user, [plan])[plan.pk]
+    show_tags = any(p.other_tags for g in groups for p in g["problems"])  # a column of nothing is not drawn
     next_id = next((i for i, _ in rows if i not in solved), None)
     theory_html, toc = _with_toc(_render_statement(localized(plan, "theory_md")))
-    following = _plans_for(request.user).filter(order__gt=plan.order).order_by("order", "id").first()
+    following = _next_course(request.user, plan)
+    from apps.accounts import badges
+    learner = next(f for f in badges.ladders(request.user) if f["key"] == "bilimdon")
     return render(request, "learn/course.html", {
         "plan": plan, "groups": groups, "progress": progress, "next_problem": problems.get(next_id),
-        "theory_html": theory_html, "toc": toc, "next_plan": following,
+        "theory_html": theory_html, "toc": toc, "next_plan": following, "learner": learner, "partial": partial,
+        "ready": ready, "course_min": COURSE_MIN, "show_tags": show_tags,
         "description_html": _render_statement(localized(plan, "description_md")),
     })
 
@@ -169,10 +200,9 @@ def course_read(request, slug):
     if request.POST.get("undo"):
         PlanRead.objects.filter(user=request.user, plan=plan).delete()
     else:
-        PlanRead.objects.get_or_create(user=request.user, plan=plan)
-        if not plan.tags.exists():  # a theory-only course is finished by it: a badge may follow
-            from apps.accounts import badges
-            badges.award(request.user, {"learn"})
+        PlanRead.objects.get_or_create(user=request.user, plan=plan)  # (a theory-only course earns no badge level)
+        messages.success(request, _t("Nazariya o‘qildi deb belgilandi.") if plan.tags.exists()
+                         else _t("Nazariya o‘qildi: kurs tugatildi. Nishon bosqichi faqat masalali kurslar bilan oshadi."))
     return redirect(reverse("learn:course", args=[slug]) + "#nazariya-tugadi")
 
 
@@ -225,8 +255,12 @@ def lists(request):
     if request.method == "POST" and form.is_valid():
         lst = form.save()
         return redirect("learn:list", lst.pk)
+    open_ = open_problems()
     rows = (request.user.problem_lists
-            .annotate(n=Count("items", filter=Q(items__problem__in=open_problems()), distinct=True)))
+            .annotate(n=Count("items", filter=Q(items__problem__in=open_), distinct=True),
+                      n_solved=Count("items", filter=Q(items__problem__in=open_, items__problem__userproblemsolved__user=request.user),
+                                     distinct=True),
+                      changed=Max("items__added")))
     return render(request, "learn/lists.html", {"lists": rows, "form": form})
 
 
@@ -242,7 +276,7 @@ def list_detail(request, pk):
     for p in rows:
         p.solved = p.pk in solved
     return render(request, "learn/list.html", {
-        "lst": lst, "rows": rows, "n_hidden": len(ids) - len(rows), "is_owner": is_owner,
+        "lst": lst, "rows": rows, "n_hidden": len(ids) - len(rows) if is_owner else 0, "is_owner": is_owner,
         "n_solved": sum(1 for p in rows if p.solved), "next_row": next((p for p in rows if not p.solved), None),
         "form": ListForm(instance=lst, owner=request.user) if is_owner else None,
     })
@@ -290,6 +324,10 @@ def save(request, slug):
     removed, _ = ProblemListItem.objects.filter(list=lst, problem=problem).delete()
     if not removed:
         ProblemListItem.objects.get_or_create(list=lst, problem=problem)
+    if request.headers.get("X-Requested-With") == "fetch":  # the menu on the problem page: no reload, it updates itself
+        saved = set(ProblemListItem.objects.filter(list__owner=request.user, problem=problem).values_list("list_id", flat=True))
+        return JsonResponse({"has": not removed, "list": lst.pk, "any": bool(saved),
+                             "text": f"«{lst.name}» " + (_t("ro‘yxatidan olindi") if removed else _t("ro‘yxatiga saqlandi"))})
     done = _t("ro‘yxatidan olindi") if removed else _t("ro‘yxatiga saqlandi")
     messages.success(request, f"«{problem.title}» — «{lst.name}» {done}.")
     return _back(request, problem)

@@ -385,9 +385,11 @@ def status(request, pk):
     if s.user_id == request.user.pk and s.verdict == Submission.Verdict.AC:
         # the accept may have lifted a badge: say so here and now, with the verdict, not on some later page
         from apps.accounts import badges
+        from apps.learn.progress import touches_a_course
 
-        badges.award(request.user, {"problems", "learn"})
-        ctx["new_badges"] = badges.unseen(request.user)
+        badges.award(request.user, {"problems", "learn"} if touches_a_course(s.problem) else {"problems"})
+        if s.contest_id is None:  # in a contest the award waits for a calmer page
+            ctx["new_badges"] = badges.unseen(request.user)
     return render(request, "submissions/_status.html", ctx)
 
 

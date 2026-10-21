@@ -28,6 +28,9 @@ class Command(BaseCommand):
         changed = sum(1 for u, r in before.items() if after.get(u) != r)
         self.stdout.write(f"Replayed {finished} finished duels; {changed} user(s) changed rating")
 
+        from apps.accounts import badges
+        self.stdout.write(f"Stored {badges.backfill()} badge level(s) the new ratings reach, quietly (no award window, no message)")
+
         if not options["no_seasons"]:
             # the podiums are derived from the duels: drop the stored ones and work them out again
             DuelSeasonResult.objects.all().delete()

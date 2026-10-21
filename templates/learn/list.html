@@ -2,22 +2,26 @@
 {% block title %}{% blocktrans with lst_name=lst.name %}{{ lst_name }} — ro‘yxat{% endblocktrans %}{% endblock %}
 {% block description %}{% blocktrans with lst_name=lst.name lst_owner_username=lst.owner.username rows=rows|length %}«{{ lst_name }}» — {{ lst_owner_username }} tuzgan {{ rows }} ta masalalik ro‘yxat.{% endblocktrans %}{% endblock %}
 {% block robots %}{% trans "noindex, follow" %}{% endblock %}
+{% block band %}
+<section class="ca-hud" aria-labelledby="list-page-title">
+  <div class="ca-hud-in">
+    <div class="min-w-0">
+      {% if is_owner %}<p class="ca-hud-lbl"><a class="text-white no-underline hover:underline" href="{% url 'learn:lists' %}">{% trans "Ro‘yxatlarim" %}</a></p>{% endif %}
+      <h1 id="list-page-title">{{ lst.name }}</h1>
+      <p class="ca-hud-sub">{% blocktrans with rows=rows|length %}{{ rows }} ta masala{% endblocktrans %}{% if n_hidden %} {% blocktrans with n_hidden=n_hidden %}· {{ n_hidden }} ta masala hozir yopiq{% endblocktrans %}{% endif %}{% if not is_owner %} <span translate="no">· {{ lst.owner.username }}</span>{% endif %}</p>
+    </div>
+    {% if rows %}<dl class="ca-hud-stats"><div><dt><small>{% trans "Yechilgan" %}</small></dt><dd><b class="tabular">{{ n_solved }}</b><small> / {{ rows|length }}</small></dd></div></dl>{% endif %}
+    {% if next_row %}<a class="ca-btn ca-btn-primary" href="{% url 'problems:detail' next_row.slug %}"><i data-lucide="play" class="lu" aria-hidden="true"></i>{% trans "Boshlash" %}</a>{% endif %}
+    {% if lst.is_public %}<button type="button" class="ca-btn ca-btn-ghost" data-copy-text="url"><i data-lucide="copy" class="lu" aria-hidden="true"></i><span data-copy-label>{% trans "Havolani nusxalash" %}</span></button>{% endif %}
+  </div>
+</section>
+{% endblock %}
 {% block content %}
-{% comment %}One saved list: its problems in a flat table with a solved mark and progress; the owner renames, shares or
-deletes it from the box on the side.{% endcomment %}
-<header class="mb-5">
-  {% if is_owner %}<a class="ca-link mb-3 inline-block text-sm text-mute" href="{% url 'learn:lists' %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>{% trans "Ro‘yxatlarim" %}</a>{% endif %}
-  <h1 class="ca-page-title">{{ lst.name }}</h1>
-  <p class="mt-2 flex flex-wrap items-center gap-3 text-sm text-mute">
-    <span>{% blocktrans with rows=rows|length %}{{ rows }} ta masala{% endblocktrans %}{% if n_hidden %} {% blocktrans with n_hidden=n_hidden %}· {{ n_hidden }} ta masala hozir yopiq{% endblocktrans %}{% endif %}</span>
-    {% if not is_owner %}<span translate="no">· {{ lst.owner.username }}</span>{% endif %}
-    {% if lst.is_public %}<span class="ca-tag"><i data-lucide="globe" class="lu" aria-hidden="true"></i>{% trans "Ochiq havola" %}</span><button type="button" class="ca-btn ca-btn-ghost !py-1 text-sm" data-copy-text="url"><i data-lucide="copy" class="lu" aria-hidden="true"></i><span data-copy-label>{% trans "Havolani nusxalash" %}</span></button>{% endif %}
-  </p>
-</header>
+{% comment %}One saved list: its problems in a flat table with a solved mark; the owner renames, shares or deletes it from the box on the side.{% endcomment %}
 <div class="ca-cols">
   <section class="min-w-0" aria-labelledby="list-title">
     <div class="ca7-sec-h"><h2 id="list-title">{% trans "Masalalar" %}</h2>
-      {% if rows %}<span class="ca7-r flex items-center gap-3 text-mute">{% blocktrans with n_solved=n_solved rows=rows|length %}<b class="tabular text-ink">{{ n_solved }} / {{ rows }}</b> yechilgan{% endblocktrans %}{% if next_row %}<a class="ca-btn ca-btn-primary !py-1" href="{% url 'problems:detail' next_row.slug %}"><i data-lucide="play" class="lu" aria-hidden="true"></i>{% trans "Boshlash" %}</a>{% endif %}</span>{% endif %}</div>
+</div>
     {% if rows %}
     <table class="ca-table ca-table-flat">
       <thead><tr><th scope="col" class="w-12 text-center"><span class="sr-only">{% trans "Holat" %}</span></th><th scope="col">{% trans "Masala" %}</th><th scope="col" class="w-32 text-center">{% trans "Qiyinlik" %}</th>{% if is_owner %}<th scope="col" class="w-14 text-center"><span class="sr-only">{% trans "Olish" %}</span></th>{% endif %}</tr></thead>

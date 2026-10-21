@@ -23,6 +23,8 @@ class Command(BaseCommand):
             n = replay()
             recalc_official()  # same maths
             self.stdout.write(self.style.SUCCESS(f"replayed {n} rated contests and the official rating"))
+            from apps.accounts import badges
+            self.stdout.write(f"stored {badges.backfill()} badge level(s) quietly")
             return
         if opts["contest_id"] is not None:
             try:

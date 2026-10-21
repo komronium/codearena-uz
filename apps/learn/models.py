@@ -114,6 +114,17 @@ class ProblemListItem(models.Model):
         unique_together = ("list", "problem")
 
 
+class PlanDone(models.Model):
+    """The first time a user finished a course with problems. A course is finished against the problems open that day;
+    this row keeps it finished when problems are later added, hidden or retagged (apps.learn.progress.record_done)."""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="plan_dones")
+    plan = models.ForeignKey(StudyPlan, on_delete=models.CASCADE, related_name="dones")
+    done_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("user", "plan")
+
+
 class PlanRead(models.Model):
     """"Tushundim": a user marked a course's theory as read. A course without problems is finished by it."""
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="plan_reads")
