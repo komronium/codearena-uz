@@ -215,34 +215,34 @@ def _spec(slug, title, difficulty, points, tags, solve, tests, statement, inp, o
 
 
 PROBLEMS = [
-    _spec("k6-royxat", "Ro'yxatdan o'tish", "beginner", 10, ["strings", "input-output"], royxat_solve, royxat_tests,
+    _spec("k6-royxat", "Ro'yxatdan o'tish", "beginner", 200, ["strings", "input-output"], royxat_solve, royxat_tests,
           "Ilovada ro'yxatdan o'tayotganda foydalanuvchilar ismini har xil yozadi: «ALI», «  vali », «SaRdor».\n\n"
           "Ism kiritiladi: boshida/oxirida ortiqcha probel bo'lishi va harflari har xil katta-kichik bo'lishi mumkin. "
           "Ilova ekranida «Salom, Ism!» deb chiqarish kerak. Ismning faqat birinchi harfi katta, qolganlari kichik bo'lsin.",
           "Bitta qator: ism.", "Bitta qator.", "salomlash_qz"),
-    _spec("k6-insho", "Insho", "beginner", 10, ["strings", "split"], insho_solve, insho_tests,
+    _spec("k6-insho", "Insho", "beginner", 200, ["strings", "split"], insho_solve, insho_tests,
           "O'qituvchi insho uchun kamida 50 ta so'z talab qiladi. Talabalar so'zlar orasiga ba'zan ikkita-uchta probel "
           "qo'yib yuboradi.\n\nInsho matni bitta qatorda kiritiladi. So'zlar bir yoki bir necha probel bilan ajratilgan, "
           "matn boshida va oxirida ham probel bo'lishi mumkin. So'zlar sonini chiqaring.",
           "Bitta qator.", "Bitta son.", "sozlar_vx"),
-    _spec("k6-karta", "Bank kartasi", "beginner", 10, ["strings", "input-output"], karta_solve, karta_tests,
+    _spec("k6-karta", "Bank kartasi", "beginner", 200, ["strings", "input-output"], karta_solve, karta_tests,
           "Chekda karta raqami to'liq ko'rsatilmaydi: faqat oxirgi 4 ta raqam ko'rinadi, qolgani yulduzcha bo'ladi.\n\n"
           "Karta raqami probelsiz, 16 ta raqam bo'lib kiritiladi. Oxirgi 4 ta raqamni qoldirib, oldingi 12 tasini «*» bilan "
           "almashtirib chiqaring.",
           "Bitta qator: 16 ta raqam.", "Bitta qator (16 belgi).", "chek_zq"),
-    _spec("k6-fayl", "Fayl yuklash", "easy", 15, ["strings", "conditionals"], fayl_solve, fayl_tests,
+    _spec("k6-fayl", "Fayl yuklash", "easy", 300, ["strings", "conditionals"], fayl_solve, fayl_tests,
           "Telegram bot yuborilgan faylning turini aniqlab, foydalanuvchiga xabar beradi.\n\n"
           "Fayl nomi kiritiladi (boshida/oxirida probel va katta harflar bo'lishi mumkin). Kengaytmasiga qarab chiqaring: "
           "«.py» — Python, «.txt» — Matn, «.jpg» yoki «.png» — Rasm, boshqa holda — Noma'lum. Kengaytma nuqtadan boshlanadi: "
           "«py» nomli faylda kengaytma yo'q.",
           "Bitta qator.", "Bitta so'z.", "tur_vq"),
-    _spec("k6-telefon", "Telefon raqami", "easy", 15, ["strings", "input-output"], telefon_solve, telefon_tests,
+    _spec("k6-telefon", "Telefon raqami", "easy", 300, ["strings", "input-output"], telefon_solve, telefon_tests,
           "Mijozlar bazasida raqamlar bir xil ko'rinishda saqlanishi kerak.\n\n"
           "Telefon raqami «+998»siz, 9 ta raqam ko'rinishida kiritiladi (chetida ortiqcha probel bo'lishi mumkin). Raqam "
           "aynan 9 ta belgidan iborat va hammasi raqam bo'lsa, uni «+998 XX XXX XX XX» ko'rinishida chiqaring. Aks holda "
           "«Xato» chiqaring.",
           "Bitta qator.", "Bitta qator.", "raqam_xz"),
-    _spec("k6-smena", "Ish smenasi", "medium", 20, ["strings", "arithmetic"], smena_solve, smena_tests,
+    _spec("k6-smena", "Ish smenasi", "medium", 400, ["strings", "arithmetic"], smena_solve, smena_tests,
           "Zavodda smena kechasi boshlanib, ertasi kuni tugashi mumkin. Hisobchiga smena necha soat va necha daqiqa davom "
           "etganini aytish kerak.\n\n"
           "Smena boshlanishi va tugashi alohida qatorlarda «S:D» ko'rinishida kiritiladi (soat 0–23, daqiqa 0–59, ikkalasi "
@@ -250,7 +250,7 @@ PROBLEMS = [
           "yozilgan bo'lsa, smena yarim tundan o'tgan (ertasi kuni tugagan). Boshlanish va tugash vaqti bir xil bo'lmaydi, "
           "smena 24 soatdan kam. «X soat Y daqiqa» ko'rinishida chiqaring.",
           "1-qator: boshlanish. 2-qator: tugash.", "Bitta qator.", "davomiylik_qv"),
-    _spec("k6-email", "Email tekshiruvi", "medium", 20, ["strings", "conditionals"], email_solve, email_tests,
+    _spec("k6-email", "Email tekshiruvi", "medium", 400, ["strings", "conditionals"], email_solve, email_tests,
           "Sayt ro'yxatdan o'tishda noto'g'ri yozilgan elektron pochtani rad etadi.\n\n"
           "Email kiritiladi (chetida ortiqcha probel bo'lishi mumkin). U to'g'ri hisoblanishi uchun: (1) aynan bitta «@» "
           "bo'lishi; (2) «@» dan oldin kamida bitta belgi bo'lishi; (3) «@» dan keyingi qismda (domen) kamida bitta «.» "
