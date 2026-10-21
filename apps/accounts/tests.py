@@ -955,10 +955,10 @@ def _google_callback(client, monkeypatch, info, state="s1"):
 @pytest.mark.django_db
 def test_google_buttons_show_only_when_configured(client, settings):
     settings.GOOGLE_CLIENT_ID = settings.GOOGLE_CLIENT_SECRET = ""  # the test container reads the real .env
-    assert "Google bilan davom etish" not in client.get(reverse("login")).content.decode()
+    assert "Google bilan davom" not in client.get(reverse("login")).content.decode()
     settings.GOOGLE_CLIENT_ID, settings.GOOGLE_CLIENT_SECRET = "cid", "secret"
-    assert "Google bilan davom etish" in client.get(reverse("login")).content.decode()
-    assert "Google bilan davom etish" in client.get(reverse("register")).content.decode()
+    assert "Google bilan davom" in client.get(reverse("login")).content.decode()
+    assert "Google bilan davom" in client.get(reverse("register")).content.decode()
     r = client.get(reverse("google_login"))
     assert r.status_code == 302 and r.url.startswith("https://accounts.google.com/") and "state=" in r.url
 
@@ -1093,11 +1093,11 @@ def _apple_callback(client, monkeypatch, post=None, state="s1", **claims):
 @pytest.mark.django_db
 def test_apple_button_shows_only_when_configured_and_login_sets_a_state_cookie(client, settings):
     settings.APPLE_CLIENT_ID = settings.APPLE_TEAM_ID = settings.APPLE_KEY_ID = settings.APPLE_PRIVATE_KEY = ""
-    assert "Apple bilan davom etish" not in client.get(reverse("login")).content.decode()
+    assert "Apple bilan davom" not in client.get(reverse("login")).content.decode()
     settings.APPLE_CLIENT_ID, settings.APPLE_TEAM_ID, settings.APPLE_KEY_ID = "uz.codearena.web", "TEAM", "KEY"
     settings.APPLE_PRIVATE_KEY = "pem"
-    assert "Apple bilan davom etish" in client.get(reverse("login")).content.decode()
-    assert "Apple bilan davom etish" in client.get(reverse("register")).content.decode()
+    assert "Apple bilan davom" in client.get(reverse("login")).content.decode()
+    assert "Apple bilan davom" in client.get(reverse("register")).content.decode()
     r = client.get(reverse("apple_login"))
     assert r.status_code == 302 and r.url.startswith("https://appleid.apple.com/auth/authorize") and "response_mode=form_post" in r.url
     assert "ca_apple" in r.cookies
