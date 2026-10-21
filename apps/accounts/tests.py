@@ -1046,3 +1046,18 @@ def test_wiping_a_users_activity_takes_their_badges_and_bell_lines_too():
     call_command("wipe_user_activity", "wiped", "--yes", verbosity=0)
     assert not UserBadge.objects.filter(user=u).exists() and not Notification.objects.filter(user=u).exists()
     assert UserBadge.objects.filter(user=other).count() == 1 and Notification.objects.filter(user=other).count() == 1
+
+
+@pytest.mark.django_db
+def test_telegram_daily_messages_speak_each_recipients_language(settings, django_capture_on_commit_callbacks):
+    from django.core.management import call_command
+    from .models import TelegramLink, TelegramOutbox
+    settings.TELEGRAM_BOT_TOKEN = "t"
+    uz = User.objects.create_user("uzu", password="x")
+    en = User.objects.create_user("enu", password="x", language="en")
+    for i, u in enumerate((uz, en)):
+        TelegramLink.objects.create(user=u, chat_id=str(100 + i), notify_daily_tip=True)
+    with django_capture_on_commit_callbacks(execute=False):
+        call_command("telegram_notifications", verbosity=0)
+    texts = {o.link.user.username: o.text for o in TelegramOutbox.objects.filter(preference="notify_daily_tip")}
+    assert "Kunlik tavsiya" in texts["uzu"] and "Daily tip" in texts["enu"] and "Kunlik" not in texts["enu"]
