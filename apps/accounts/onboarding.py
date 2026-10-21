@@ -17,7 +17,6 @@ from django.utils import timezone
 
 from .usernames import valid_username
 from django.utils.translation import gettext as _t
-from django.utils.translation import gettext as _t
 
 _SALT = "accounts.verify-email"
 MAX_AGE = 3 * 24 * 3600  # a link works for three days
@@ -88,18 +87,21 @@ def send_verification(request, user, force: bool = False) -> bool:
     cache.set(key, 1, RESEND_EVERY)
     link = request.build_absolute_uri(reverse("verify_email", args=[make_token(user)]))
     name = user.first_name or user.username
-    text = (f"Salom, {name}!\n\n"
-            f"CodeArena hisobingizni faollashtirish uchun quyidagi havolani oching:\n{link}\n\n"
-            "Havola 3 kun amal qiladi. Agar siz ro‘yxatdan o‘tmagan bo‘lsangiz, bu xatni e’tiborsiz qoldiring.")
-    html = (f'<div style="font:16px/1.5 Arial,sans-serif;color:#14203A;max-width:480px">'
-            f'<p>Salom, {escape(name)}!</p>'
-            f'<p>CodeArena hisobingizni faollashtirish uchun emailingizni tasdiqlang:</p>'
-            f'<p><a href="{escape(link)}" style="display:inline-block;background:#F2B53A;color:#1A1F33;font-weight:700;'
-            f'padding:10px 18px;border-radius:8px;text-decoration:none">Emailni tasdiqlash</a></p>'
-            f'<p style="color:#3E4A63;font-size:14px">Tugma ishlamasa, havolani brauzerga qo‘ying:<br>{escape(link)}</p>'
-            f'<p style="color:#3E4A63;font-size:14px">Havola 3 kun amal qiladi. Agar siz ro‘yxatdan o‘tmagan bo‘lsangiz, '
-            f'bu xatni e’tiborsiz qoldiring.</p></div>')
-    message = EmailMultiAlternatives("CodeArena: emailingizni tasdiqlang", text, settings.DEFAULT_FROM_EMAIL, [user.email])
+    from django.utils import translation
+    # the mail speaks the language the page was in (the sign-up page's), else the account's
+    with translation.override(translation.get_language() or user.language or "uz"):
+        text = (_t("Salom, {name}!").format(name=name) + "\n\n"
+                + _t("CodeArena hisobingizni faollashtirish uchun quyidagi havolani oching:") + f"\n{link}\n\n"
+                + _t("Havola 3 kun amal qiladi. Agar siz ro‘yxatdan o‘tmagan bo‘lsangiz, bu xatni e’tiborsiz qoldiring."))
+        html = ('<div style="font:16px/1.5 Arial,sans-serif;color:#14203A;max-width:480px">'
+                f'<p>{escape(_t("Salom, {name}!").format(name=name))}</p>'
+                f'<p>{escape(_t("CodeArena hisobingizni faollashtirish uchun emailingizni tasdiqlang:"))}</p>'
+                f'<p><a href="{escape(link)}" style="display:inline-block;background:#F2B53A;color:#1A1F33;font-weight:700;'
+                f'padding:10px 18px;border-radius:8px;text-decoration:none">{escape(_t("Emailni tasdiqlash"))}</a></p>'
+                f'<p style="color:#3E4A63;font-size:14px">{escape(_t("Tugma ishlamasa, havolani brauzerga qo‘ying:"))}<br>{escape(link)}</p>'
+                f'<p style="color:#3E4A63;font-size:14px">{escape(_t("Havola 3 kun amal qiladi. Agar siz ro‘yxatdan o‘tmagan bo‘lsangiz, bu xatni e’tiborsiz qoldiring."))}</p></div>')
+        subject = _t("CodeArena: emailingizni tasdiqlang")
+    message = EmailMultiAlternatives(subject, text, settings.DEFAULT_FROM_EMAIL, [user.email])
     message.attach_alternative(html, "text/html")
     message.send()
     return True

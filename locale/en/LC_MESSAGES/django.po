@@ -1053,17 +1053,88 @@ msgstr "Badge"
 msgid "Murojaat"
 msgstr "Appeal"
 
+#: apps/accounts/onboarding.py
+msgid "CodeArena: emailingizni tasdiqlang"
+msgstr "CodeArena: confirm your email"
+
+#: apps/accounts/onboarding.py apps/accounts/onboarding.py
+msgid ""
+"Havola 3 kun amal qiladi. Agar siz ro‘yxatdan o‘tmagan bo‘lsangiz, bu xatni "
+"e’tiborsiz qoldiring."
+msgstr ""
+"The link is valid for 3 days. If you didn't sign up, ignore this message."
+
 #: apps/accounts/onboarding.py templates/accounts/_board_tools.html
 msgid "Foydalanuvchi nomi"
 msgstr "Username"
+
+#: apps/accounts/onboarding.py
+msgid "CodeArena hisobingizni faollashtirish uchun quyidagi havolani oching:"
+msgstr "To activate your CodeArena account, open the link below:"
+
+#: apps/accounts/onboarding.py
+msgid "CodeArena hisobingizni faollashtirish uchun emailingizni tasdiqlang:"
+msgstr "To activate your CodeArena account, confirm your email:"
+
+#: apps/accounts/onboarding.py
+msgid "Emailni tasdiqlash"
+msgstr "Confirm email"
+
+#: apps/accounts/onboarding.py
+msgid "Tugma ishlamasa, havolani brauzerga qo‘ying:"
+msgstr "If the button doesn't work, paste the link into your browser:"
+
+#: apps/accounts/onboarding.py apps/accounts/onboarding.py
+msgid "Salom, {name}!"
+msgstr "Hello, {name}!"
+
+#: apps/accounts/telegram.py
+msgid "Duelni ochish →"
+msgstr "Open the duel →"
 
 #: apps/accounts/telegram.py
 msgid "🏆 G‘alaba!"
 msgstr "🏆 Victory!"
 
+#: apps/accounts/telegram.py
+msgid "Nishonlaringiz →"
+msgstr "Your badges →"
+
+#: apps/accounts/telegram.py apps/classroom/duels.py
+msgid "Durang"
+msgstr "Draw"
+
 #: apps/accounts/telegram.py apps/classroom/duels.py
 msgid "Mag‘lubiyat"
 msgstr "Defeat"
+
+#: apps/accounts/telegram.py
+msgid "Natija va savollar →"
+msgstr "Result and questions →"
+
+#: apps/accounts/telegram.py
+msgid "3 kun ichida qabul qiling."
+msgstr "Accept within 3 days."
+
+#: apps/accounts/telegram.py
+msgid "🏅 Yangi nishon!"
+msgstr "🏅 New badge!"
+
+#: apps/accounts/telegram.py
+msgid "Duel reytingi: {delta}"
+msgstr "Duel rating: {delta}"
+
+#: apps/accounts/telegram.py
+msgid "⚔️ Sizni duelga chaqirishdi"
+msgstr "⚔️ You've been challenged to a duel"
+
+#: apps/accounts/telegram.py
+msgid "<b>{username}</b> — {language}: {n} ta savol, har biriga 20 soniya."
+msgstr "<b>{username}</b> — {language}: {n} questions, 20 seconds each."
+
+#: apps/accounts/telegram.py
+msgid "{username} bilan duel: <b>{mine} : {theirs}</b>"
+msgstr "Duel with {username}: <b>{mine} : {theirs}</b>"
 
 #: apps/accounts/telegram_views.py
 msgid "Telegram bot hali sozlanmagan. Keyinroq urinib ko‘ring."
@@ -1237,10 +1308,6 @@ msgstr "You already have an open duel with this opponent."
 #: apps/classroom/duels.py templates/accounts/duel_board.html
 msgid "G‘alaba"
 msgstr "Victory"
-
-#: apps/classroom/duels.py templates/classroom/_duel_row.html
-msgid "Durang"
-msgstr "Draw"
 
 #: apps/classroom/models.py
 msgid "Nima chiqaradi?"

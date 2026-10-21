@@ -16,7 +16,7 @@ from django.db import IntegrityError, transaction
 from django.utils import timezone
 
 from .models import TelegramLink, TelegramLinkToken, TelegramLoginRequest, TelegramOutbox
-from django.utils.translation import gettext as _t
+from django.utils import translation
 from django.utils.translation import gettext as _t
 
 log = logging.getLogger(__name__)
@@ -262,11 +262,12 @@ def notify_duel_challenge(duel_id: int):
         duel = Duel.objects.select_related("challenger", "opponent").filter(pk=duel_id).first()
         if duel is None or duel.opponent_id is None:
             return
-        text = (f"<b>⚔️ Sizni duelga chaqirishdi</b>\n\n"
-                f"<b>{html.escape(duel.challenger.username)}</b> — {duel.get_language_display()}: "
-                f"{len(duel.questions)} ta savol, har biriga 20 soniya.\n"
-                f"3 kun ichida qabul qiling.\n\n"
-                f'<a href="{_site()}/classroom/duels/{duel.pk}/">Duelni ochish →</a>')
+        with translation.override(duel.opponent.language or "uz"):  # the message speaks the recipient's language
+            text = ("<b>" + _t("⚔️ Sizni duelga chaqirishdi") + "</b>\n\n"
+                    + _t("<b>{username}</b> — {language}: {n} ta savol, har biriga 20 soniya.").format(
+                        username=html.escape(duel.challenger.username), language=duel.get_language_display(), n=len(duel.questions))
+                    + "\n" + _t("3 kun ichida qabul qiling.")
+                    + f'\n\n<a href="{_site()}/classroom/duels/{duel.pk}/">' + _t("Duelni ochish →") + "</a>")
         queue_notification(duel.opponent_id, "notify_duels", f"duel:{duel.pk}:challenge", text)
     except Exception:
         log.exception("Could not queue Telegram duel challenge %s", duel_id)
@@ -287,11 +288,13 @@ def notify_duel_result(duel_id: int):
             right[player.pk] = r.points if r else 0
         for me, them, delta in ((duel.challenger, duel.opponent, duel.challenger_delta),
                                 (duel.opponent, duel.challenger, duel.opponent_delta)):
-            head = (_t("🏆 G‘alaba!") if duel.winner_id == me.pk else "Durang" if duel.winner_id is None else _t("Mag‘lubiyat"))
-            text = (f"<b>{head}</b>\n\n"
-                    f"{html.escape(them.username)} bilan duel: <b>{right[me.pk]} : {right[them.pk]}</b>\n"
-                    f"Duel reytingi: {delta:+d}\n\n"
-                    f'<a href="{_site()}/classroom/duels/{duel.pk}/">Natija va savollar →</a>')
+            with translation.override(me.language or "uz"):
+                head = (_t("🏆 G‘alaba!") if duel.winner_id == me.pk else _t("Durang") if duel.winner_id is None else _t("Mag‘lubiyat"))
+                text = (f"<b>{head}</b>\n\n"
+                        + _t("{username} bilan duel: <b>{mine} : {theirs}</b>").format(
+                            username=html.escape(them.username), mine=right[me.pk], theirs=right[them.pk])
+                        + "\n" + _t("Duel reytingi: {delta}").format(delta=f"{delta:+d}")
+                        + f'\n\n<a href="{_site()}/classroom/duels/{duel.pk}/">' + _t("Natija va savollar →") + "</a>")
             queue_notification(me.pk, "notify_duels", f"duel:{duel.pk}:result", text)
     except Exception:
         log.exception("Could not queue Telegram duel result %s", duel_id)
@@ -308,11 +311,14 @@ def notify_badges(user_id: int, levels: list[tuple[str, int]]):
                 best[fam] = tier
         if not best:
             return
-        lines = "\n".join(f"• <b>{titled(BY_KEY[f].name, t)}</b> — {BY_KEY[f].unit.format(n=BY_KEY[f].levels[t - 1])}"
-                          for f, t in sorted(best.items(), key=lambda x: -x[1]))
-        key = ",".join(f"{f}{t}" for f, t in sorted(best.items()))
-        text = (f"<b>🏅 Yangi nishon!</b>\n\n{lines}\n\n"
-                f'<a href="{_site()}/accounts/badges/">Nishonlaringiz →</a>')
+        from django.contrib.auth import get_user_model
+        lang = get_user_model().objects.filter(pk=user_id).values_list("language", flat=True).first() or "uz"
+        with translation.override(lang):
+            lines = "\n".join(f"• <b>{titled(BY_KEY[f].name, t)}</b> — {str(BY_KEY[f].unit).format(n=BY_KEY[f].levels[t - 1])}"
+                              for f, t in sorted(best.items(), key=lambda x: -x[1]))
+            key = ",".join(f"{f}{t}" for f, t in sorted(best.items()))
+            text = ("<b>" + _t("🏅 Yangi nishon!") + "</b>\n\n" + lines + f'\n\n<a href="{_site()}/accounts/badges/">'
+                    + _t("Nishonlaringiz →") + "</a>")
         queue_notification(user_id, "notify_badges", f"badges:{key}", text)
     except Exception:
         log.exception("Could not queue Telegram badges for user %s", user_id)
