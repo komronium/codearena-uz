@@ -1,0 +1,23 @@
+{% comment %}A rating histogram (apps.accounts.charts.rating_histogram): a column per band of the rating in its tier's colour, the
+count over each column, round grid lines, tier boundaries on the scale, the viewer's own band marked "Siz" and the median
+as a dashed line. ctx: chart, title (optional), id. Columns are keyboard-readable through their text alternative.{% endcomment %}
+{% if chart %}
+<figure class="rc" aria-labelledby="{{ id|default:'rc' }}-t">
+  <figcaption id="{{ id|default:'rc' }}-t" class="rc-cap"><b>{{ title|default:_("Reyting taqsimoti") }}</b><span class="tabular">{% blocktrans with n=chart.n median=chart.median %}{{ n }} kishi · median {{ median }}{% endblocktrans %}</span></figcaption>
+  <div class="rc-plot">
+    <div class="rc-grid" aria-hidden="true">{% for t in chart.yticks %}<span style="bottom: {{ t.bottom }}%"><em class="tabular">{{ t.value }}</em></span>{% endfor %}</div>
+    <div class="rc-cols" style="--n: {{ chart.cols|length }}" role="list">
+      {% for c in chart.cols %}
+      <div class="rc-col{% if c.me %} is-me{% endif %}{% if not c.n %} is-empty{% endif %}" role="listitem" style="--h: {{ c.pct }}%{% if c.color %}; --c: {{ c.color }}{% endif %}" title="{{ c.from }}–{{ c.to }}{% if c.tier %} · {{ c.tier }}{% endif %}: {{ c.n }}">
+        {% if c.me %}<span class="rc-me">{% trans "Siz" %}</span>{% endif %}
+        <b class="rc-n tabular">{% if c.n %}{{ c.n }}{% endif %}</b><i></i>
+        <span class="sr-only">{{ c.from }}–{{ c.to }}: {{ c.n }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    <span class="rc-median" style="left: {{ chart.median_left }}%" aria-hidden="true"><em>{% trans "median" %}</em></span>
+  </div>
+  <div class="rc-x" aria-hidden="true">{% for t in chart.xticks %}<span style="left: {{ t.left }}%"><em class="tabular">{{ t.value }}</em>{% if t.name %}<small style="color: {{ t.color }}">{{ t.name }}</small>{% endif %}</span>{% endfor %}</div>
+  {% if chart.present %}<ul class="rc-legend">{% for p in chart.present %}<li><i style="background: {{ p.color }}"></i>{{ p.name }} <b class="tabular">{{ p.n }}</b></li>{% endfor %}</ul>{% endif %}
+</figure>
+{% endif %}

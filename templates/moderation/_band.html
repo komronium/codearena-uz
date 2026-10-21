@@ -1,0 +1,11 @@
+{% comment %}The one header of every staff page: the same blue band the dashboard has, with the way back, the title, a subtitle and
+(from the including page) nothing else. ctx: title, subtitle (opt), back_url + back_label (opt).{% endcomment %}
+<section class="ca-hud" aria-labelledby="mod-title">
+  <div class="ca-hud-in">
+    <div class="min-w-0">
+      {% if back_url %}<p class="ca-hud-lbl"><a class="text-white no-underline hover:underline" href="{{ back_url }}">{{ back_label }}</a></p>{% endif %}
+      <h1 id="mod-title" translate="no">{{ title }}</h1>
+      {% if subtitle %}<p class="ca-hud-sub">{{ subtitle }}</p>{% endif %}
+    </div>
+  </div>
+</section>

@@ -47,7 +47,7 @@ class Courses(sitemaps.Sitemap):
 
 
 def _public_contests():
-    return Contest.objects.order_by("-start").only("pk", "start", "end", "updated")
+    return Contest.objects.filter(is_draft=False).order_by("-start").only("pk", "start", "end", "updated")
 
 
 class Contests(sitemaps.Sitemap):

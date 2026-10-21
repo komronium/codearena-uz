@@ -1,11 +1,20 @@
 {% extends "base.html" %}
 {% block title %}{% trans "Duellar — boshqaruv" %}{% endblock %}
+{% block band %}
+<section class="ca-hud" aria-labelledby="mod-title">
+  <div class="ca-hud-in">
+    <div>
+      <h1 id="mod-title">{% trans "Duellar" %}</h1>
+      <p class="ca-hud-sub">{% trans "Har bir duel natijasi: kim nechta to‘g‘ri javob berdi, qancha vaqtda, reyting qanchaga o‘zgardi" %}</p>
+    </div>
+  </div>
+</section>
+{% endblock %}
 {% block content %}
-{% comment %}Every duel for staff: the two players face to face with their scores (right answers out of five and the time
-spent, the rating change once it's over), the score between them, then language and state. A duel's page opens
-for staff too, with every question and both players' answers.{% endcomment %}
-<div class="mb-4">{% include "moderation/_duel_switch.html" %}</div>
-<div class="mb-5">{% include "moderation/_header.html" with title="Duellar" subtitle=_("Har bir duel natijasi: kim nechta to‘g‘ri javob berdi, qancha vaqtda, reyting qanchaga o‘zgardi") %}</div>
+{% comment %}Every duel for staff: the two players face to face with their scores, the score between them, then language and
+state. A duel's staff page shows each answer's time and lets staff void the duel. The switch that closes the duels for a
+lesson sits right here, with its state said in words.{% endcomment %}
+<div class="mt-duel-switch mb-5">{% include "moderation/_duel_switch.html" %}</div>
 
 <dl class="ca7-nums mb-5">
   <a href="{% url 'moderation:duels' %}"><dd class="tabular">{{ counts.all }}</dd><dt>{% trans "Jami duel" %}</dt></a>
@@ -42,11 +51,11 @@ for staff too, with every question and both players' answers.{% endcomment %}
 {% if page.object_list %}
 <div class="overflow-x-auto">
 <table class="ca-table ca-table-flat ca-aduels">
-  <thead><tr><th scope="col" class="w-14">#</th><th scope="col">{% trans "Chaqirgan" %}</th><th scope="col" class="text-center">{% trans "Hisob" %}</th><th scope="col">{% trans "Raqib" %}</th><th scope="col">{% trans "Duel" %}</th><th scope="col">{% trans "Holat" %}</th><th scope="col" class="text-right">{% trans "Tugagan" %}</th></tr></thead>
+  <thead><tr><th scope="col" class="w-14">#</th><th scope="col">{% trans "Chaqirgan" %}</th><th scope="col" class="text-center">{% trans "Hisob" %}</th><th scope="col">{% trans "Raqib" %}</th><th scope="col">{% trans "Til" %}</th><th scope="col">{% trans "Holat" %}</th><th scope="col" class="text-right">{% trans "Tugagan" %}</th></tr></thead>
   <tbody>
   {% for d in page %}
   <tr>
-    <td><a class="ca-link tabular text-sm" href="{% url 'classroom:duel' d.pk %}">{{ d.pk }}</a></td>
+    <td><a class="ca-link tabular text-sm" href="{% url 'moderation:duel_detail' d.pk %}" title="{% trans 'Javoblar va vaqtlar' %}">{{ d.pk }}</a></td>
     {% for s in d.sides %}
     {% if forloop.last %}<td class="ca-aduels-score tabular">{% with a=d.sides.0 b=d.sides.1 %}{% if d.mode == "quiz" and a.right is not None %}<b class="{% if a.won %}is-won{% endif %}">{% if a.over %}{{ a.right }}{% else %}…{% endif %}</b><span>:</span><b class="{% if b.won %}is-won{% endif %}">{% if b.user and b.over %}{{ b.right }}{% elif b.user %}…{% else %}–{% endif %}</b>{% elif d.mode == "code" %}<span class="text-xs text-mute">{% trans "masala" %}</span>{% else %}–{% endif %}{% endwith %}</td>{% endif %}
     <td class="ca-aduels-p{% if s.won %} is-won{% endif %}">
@@ -57,7 +66,7 @@ for staff too, with every question and both players' answers.{% endcomment %}
     </td>
     {% endfor %}
     <td class="whitespace-nowrap text-sm">{% if d.mode == "quiz" %}{{ d.get_language_display }}{% else %}{% trans "Masala" %}{% endif %}</td>
-    <td>{% if d.status == "finished" %}<span class="ca7-pill is-ok">{% if d.winner %}{% trans "Tugagan" %}{% else %}{% trans "Durang" %}{% endif %}</span>{% elif d.status == "active" %}<span class="ca7-pill is-warn">{% trans "Davom etmoqda" %}</span>{% elif d.status == "pending" %}<span class="ca7-pill">{% trans "Kutmoqda" %}</span>{% else %}<span class="ca7-pill is-bad">{{ d.get_status_display }}</span>{% endif %}</td>
+    <td>{% if d.status == "finished" %}<span class="ca7-pill is-ok">{% if d.winner %}{% trans "Tugagan" %}{% else %}{% trans "Durang" %}{% endif %}</span>{% elif d.status == "active" %}<span class="ca7-pill is-warn">{% trans "Davom etmoqda" %}</span>{% elif d.status == "pending" %}<span class="ca7-pill">{% trans "Kutmoqda" %}</span>{% elif d.status == "void" %}<span class="st st-off">{% trans "Bekor qilingan" %}</span>{% else %}<span class="ca7-pill is-bad">{{ d.get_status_display }}</span>{% endif %}</td>
     <td class="whitespace-nowrap text-right tabular text-sm text-mute">{{ d.ended_at|date:"d.m H:i" }}</td>
   </tr>
   {% endfor %}

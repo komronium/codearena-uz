@@ -1,59 +1,68 @@
 {% extends "base.html" %}
 {% block title %}{% trans "Urinishlar — boshqaruv" %}{% endblock %}
+{% block band %}
+<section class="ca-hud" aria-labelledby="mod-title">
+  <div class="ca-hud-in">
+    <div>
+      <h1 id="mod-title">{% trans "Barcha urinishlar" %}</h1>
+      <p class="ca-hud-sub">{% trans "Har bir foydalanuvchi yuborgan yechimlar, eng yangisi tepada" %}</p>
+    </div>
+    <div class="ml-auto"><a class="ca7-hbtn is-wide" href="{% querystring stuck='1' page=None %}"><i data-lucide="hourglass" class="lu" aria-hidden="true"></i>{% trans "Qotib qolganlar" %}</a></div>
+  </div>
+</section>
+{% endblock %}
 {% block content %}
-<div class="mb-6">{% include "moderation/_header.html" with title=_("Barcha urinishlar") subtitle=_("Har bir foydalanuvchi yuborgan yechimlar, eng yangisi tepada") %}</div>
-
-<form method="get" class="mb-4 flex flex-wrap items-end gap-3">
-  <div class="w-full max-w-[12rem]">
-    <label class="ca-label" for="f-user">{% trans "Foydalanuvchi" %}</label>
-    <input id="f-user" name="user" value="{{ f.user }}" class="ca-input !py-1.5 text-sm" placeholder="{% trans 'login…' %}" autocomplete="off" spellcheck="false">
-  </div>
-  <div class="w-full max-w-[12rem]">
-    <label class="ca-label" for="f-problem">{% trans "Masala (slug)" %}</label>
-    <input id="f-problem" name="problem" value="{{ f.problem }}" class="ca-input !py-1.5 text-sm" placeholder="{% trans 'a-plus-b…' %}" autocomplete="off" spellcheck="false">
-  </div>
-  <div>
-    <label class="ca-label" for="f-verdict">{% trans "Holat" %}</label>
-    <select id="f-verdict" name="verdict" class="ca-select !w-auto !py-1.5 text-sm">
-      <option value="">{% trans "Hammasi" %}</option>
-      {% for v, label in verdicts %}<option value="{{ v }}" {% if v == f.verdict %}selected{% endif %}>{{ label }}</option>{% endfor %}
-    </select>
-  </div>
-  <div>
-    <label class="ca-label" for="f-contest">{% trans "Musobaqa" %}</label>
-    <select id="f-contest" name="contest" class="ca-select !w-auto max-w-[14rem] !py-1.5 text-sm">
-      <option value="">{% trans "Hammasi" %}</option>
-      {% for c in contests %}<option value="{{ c.pk }}" {% if f.contest == c.pk|stringformat:"d" %}selected{% endif %}>{{ c.title }}</option>{% endfor %}
-    </select>
-  </div>
-  <button class="ca-btn ca-btn-ghost !py-1.5"><i data-lucide="list-filter" class="lu" aria-hidden="true"></i>{% trans "Filtrlash" %}</button>
-  {% if f.user or f.problem or f.verdict or f.contest %}<a class="ca-link text-sm" href="{% url 'moderation:submissions' %}">{% trans "Tozalash" %}</a>{% endif %}
+<form method="get" id="sub-filters" class="mt-bar items-end">
+  <div class="w-full max-w-[11rem]"><label class="ca-label" for="f-user">{% trans "Foydalanuvchi" %}</label>
+    <input id="f-user" name="user" value="{{ f.user }}" class="ca-input !py-1.5 text-sm" placeholder="{% trans 'login…' %}" autocomplete="off" spellcheck="false"></div>
+  <div class="w-full max-w-[12rem]"><label class="ca-label" for="f-problem">{% trans "Masala" %}</label>
+    <input id="f-problem" name="problem" value="{{ f.problem }}" class="ca-input !py-1.5 text-sm" placeholder="{% trans 'nom yoki slug…' %}" autocomplete="off" spellcheck="false"></div>
+  <div><label class="ca-label" for="f-verdict">{% trans "Holat" %}</label>
+    <select id="f-verdict" name="verdict" class="ca-select !w-auto !py-1.5 text-sm"><option value="">{% trans "Hammasi" %}</option>{% for v, label in verdicts %}<option value="{{ v }}" {% if v == f.verdict %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+  <div><label class="ca-label" for="f-lang">{% trans "Til" %}</label>
+    <select id="f-lang" name="lang" class="ca-select !w-auto !py-1.5 text-sm"><option value="">{% trans "Hammasi" %}</option>{% for l in languages %}<option value="{{ l.code }}" {% if f.lang == l.code %}selected{% endif %}>{{ l.name }}</option>{% endfor %}</select></div>
+  <div><label class="ca-label" for="f-contest">{% trans "Musobaqa" %}</label>
+    <select id="f-contest" name="contest" class="ca-select !w-auto max-w-[14rem] !py-1.5 text-sm"><option value="">{% trans "Hammasi" %}</option>{% for c in contests %}<option value="{{ c.pk }}" {% if f.contest == c.pk|stringformat:"d" %}selected{% endif %}>{{ c.title }}</option>{% endfor %}</select></div>
+  <div><label class="ca-label" for="f-since">{% trans "Sanadan" %}</label>
+    <input id="f-since" type="date" name="since" value="{{ f.since }}" class="ca-input !py-1.5 text-sm"></div>
+  {% if f.stuck %}<input type="hidden" name="stuck" value="1">{% endif %}
+  {% if f.user or f.problem or f.verdict or f.contest or f.lang or f.since or f.stuck %}<a class="ca-link pb-2 text-sm" href="{% url 'moderation:submissions' %}">{% trans "Tozalash" %}</a>{% endif %}
 </form>
+<script>
+  // filters apply as you pick or type (no button); the page refreshes itself while something is still being judged
+  (() => {
+    const form = document.getElementById("sub-filters"); let t;
+    form.addEventListener("change", () => form.submit());
+    form.addEventListener("input", (e) => { if (e.target.tagName === "INPUT" && e.target.type === "text") { clearTimeout(t); t = setTimeout(() => form.submit(), 600); } });
+    if (document.querySelector("[data-live-row]")) setTimeout(() => { if (!document.activeElement || document.activeElement === document.body) location.reload(); }, 6000);
+  })();
+</script>
 
 {% if page.object_list %}
-<ul class="ca-rows">
+<div class="overflow-x-auto">
+<table class="ca-table ca-table-flat mt">
+  <thead><tr>
+    <th scope="col" class="w-20">#</th><th scope="col">{% trans "Foydalanuvchi" %}</th><th scope="col">{% trans "Masala" %}</th>
+    <th scope="col" class="hidden w-28 md:table-cell">{% trans "Til" %}</th><th scope="col" class="hidden w-44 lg:table-cell">{% trans "Musobaqa" %}</th>
+    <th scope="col" class="w-36">{% trans "Vaqti" %}</th><th scope="col" class="w-32 text-right">{% trans "Testlar" %}</th><th scope="col" class="w-36">{% trans "Natija" %}</th><th scope="col" class="w-12"></th>
+  </tr></thead>
+  <tbody>
   {% for s in page %}
-  <li class="ca-row !py-3">
-    <div class="ca-row-main">
-      <div class="ca-row-title">
-        <a class="ca-link tabular shrink-0 text-sm" href="{% url 'submissions:detail' s.pk %}">#{{ s.pk|stringformat:"06d" }}</a>
-        {% include "accounts/_user.html" with u=s.user tier=False %}
-      </div>
-      <div class="ca-row-meta">
-        <a class="ca-link !font-normal" href="{% url 'problems:detail' s.problem.slug %}">{{ s.problem.title }}</a>
-        <span>{{ s.language.name }}</span>
-        {% if s.contest %}<a class="ca-link !font-normal" href="{% url 'contests:standings' s.contest_id %}"><i data-lucide="trophy" class="lu" aria-hidden="true"></i>{{ s.contest.title }}</a>{% endif %}
-        <time class="tabular" datetime="{{ s.created|date:'c' }}">{{ s.created|date:"d.m.Y H:i:s" }}</time>
-      </div>
-    </div>
-    <div class="ca-row-side">
-      {% if s.is_terminal and s.verdict != 'CE' %}<span class="tabular text-xs text-mute">{% blocktrans with s_passed=s.passed s_total=s.total s_exec_ms=s.exec_ms %}{{ s_passed }}/{{ s_total }} · {{ s_exec_ms }} ms{% endblocktrans %}{% if s.mem_kb %} · {% widthratio s.mem_kb 1024 1 %} {% trans "MB" %}{% endif %}</span>{% endif %}
-      {% include "submissions/_vd.html" with v=s.verdict sub=s %}
-      <a class="ca-btn ca-btn-ghost !px-2 !py-1.5" href="{% url 'submissions:detail' s.pk %}" title="{% trans 'Kodni ko‘rish' %}" aria-label="{% blocktrans with s_pk=s.pk %}Kodni ko‘rish: #{{ s_pk }}{% endblocktrans %}"><i data-lucide="code" class="lu" aria-hidden="true"></i></a>
-    </div>
-  </li>
+  <tr{% if not s.is_terminal %} data-live-row{% endif %}>
+    <td><a class="ca-link tabular text-sm" href="{% url 'submissions:detail' s.pk %}">#{{ s.pk|stringformat:"06d" }}</a></td>
+    <td>{% include "accounts/_u7.html" with u=s.user you=False %}</td>
+    <td class="min-w-0"><a class="ca-link" href="{% url 'problems:detail' s.problem.slug %}">{{ s.problem.title }}</a></td>
+    <td class="hidden text-sm text-mute md:table-cell">{{ s.language.name }}</td>
+    <td class="hidden text-sm lg:table-cell">{% if s.contest %}<a class="ca-link !font-normal" href="{% url 'contests:standings' s.contest_id %}">{{ s.contest.title }}</a>{% else %}<span class="text-mute">—</span>{% endif %}</td>
+    <td class="tabular text-sm text-mute"><time datetime="{{ s.created|date:'c' }}">{{ s.created|date:"d.m.Y H:i" }}</time>{% if not s.is_terminal and s.created < stale_at %}<small class="block font-semibold text-warn">{% trans "qotib qolgan" %}</small>{% endif %}</td>
+    <td class="text-right tabular text-sm text-mute">{% if s.is_terminal and s.verdict != 'CE' %}{{ s.passed }}/{{ s.total }} · {{ s.exec_ms }} ms{% endif %}</td>
+    <td>{% include "submissions/_vd.html" with v=s.verdict sub=s %}</td>
+    <td class="text-right"><a class="ca-btn ca-btn-ghost !px-2 !py-1" href="{% url 'submissions:detail' s.pk %}" title="{% trans 'Kodni ko‘rish' %}" aria-label="{% blocktrans with s_pk=s.pk %}Kodni ko‘rish: #{{ s_pk }}{% endblocktrans %}"><i data-lucide="code" class="lu" aria-hidden="true"></i></a></td>
+  </tr>
   {% endfor %}
-</ul>
+  </tbody>
+</table>
+</div>
 {% include "_pagination.html" with page=page %}
 {% else %}
 <div class="ca-empty">{% trans "Bu filtr bo‘yicha urinish yo‘q." %}</div>

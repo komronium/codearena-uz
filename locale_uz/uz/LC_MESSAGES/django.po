@@ -564,6 +564,21 @@ msgstr "Kodini tuşuntirdi"
 msgid "Rasmiy reyting qo‘llandi"
 msgstr "Rasmiy reyting qöllandi"
 
+msgid "Masala ko‘rinishi o‘zgardi"
+msgstr "Masala körinişi özgardi"
+
+msgid "Mavzu o‘chirildi"
+msgstr "Mavzu öçirildi"
+
+msgid "Kurs o‘chirildi"
+msgstr "Kurs öçirildi"
+
+msgid "Foydalanuvchi tahrirlandi"
+msgstr "Foydalanuvçi tahrirlandi"
+
+msgid "Kun masalasi almashtirildi"
+msgstr "Kun masalasi almaştirildi"
+
 msgid "Shikoyat"
 msgstr "Şikoyat"
 
@@ -717,17 +732,71 @@ msgstr "Bu nom band (Örganiş bölimidagi sahifa). Boşqa slug tanlang."
 msgid "Tugash vaqti allaqachon o'tib ketgan — sana va yilni tekshiring."
 msgstr "Tugaş vaqti allaqaçon ötib ketgan — sana va yilni tekşiring."
 
+msgid " · ishlatilgan"
+msgstr " · işlatilgan"
+
 msgid "0 — hamma uchun bir soat"
 msgstr "0 — hamma uçun bir soat"
 
+msgid "login, login … (tanlovdan tashqari qatnashadi)"
+msgstr "login, login … (tanlovdan taşqari qatnaşadi)"
+
+msgid "Bunday foydalanuvchi yo‘q: {names}"
+msgstr "Bunday foydalanuvçi yöq: {names}"
+
 msgid "Jami 1 dan {max_count} tagacha masala so‘rang."
 msgstr "Jami 1 dan {max_count} tagaça masala sörang."
+
+msgid "So‘nggi 7 kun"
+msgstr "Sönggi 7 kun"
+
+msgid "Eng uzun g‘alaba seriyasi"
+msgstr "Eng uzun ğalaba seriyasi"
+
+msgid "Eng faol o‘yinchi"
+msgstr "Eng faol öyinçi"
+
+msgid "Bir duelda eng katta o‘sish"
+msgstr "Bir duelda eng katta ösiş"
+
+msgid "Eng katta o‘sish"
+msgstr "Eng katta ösiş"
+
+msgid "Eng katta tushish"
+msgstr "Eng katta tuşiş"
+
+msgid "Eng ko‘p reytingli raund"
+msgstr "Eng köp reytingli raund"
+
+msgid "kishi"
+msgstr "kişi"
+
+msgid "Hech qachon tushmaganlar"
+msgstr "Heç qaçon tuşmaganlar"
+
+msgid "Eng yuqori g‘alaba ulushi"
+msgstr "Eng yuqori ğalaba uluşi"
+
+msgid "Eng ko‘p durang qilgan"
+msgstr "Eng köp durang qilgan"
+
+msgid "Eng ko‘p o‘ynalgan"
+msgstr "Eng köp öynalgan"
+
+msgid "Eng qizg‘in: deyarli teng hisob"
+msgstr "Eng qizğin: deyarli teng hisob"
+
+msgid "{other} ga qarshi"
+msgstr "{other} ga qarşi"
 
 msgid "AI tarjima qilmoqda: bir necha soniyadan keyin sahifani yangilang."
 msgstr "AI tarjima qilmoqda: bir neça soniyadan keyin sahifani yangilang."
 
 msgid "{n} ta tarjima navbatga qo‘yildi."
 msgstr "{n} ta tarjima navbatga qöyildi."
+
+msgid "Namunaviy yechim uchun tilni tanlang."
+msgstr "Namunaviy yeçim uçun tilni tanlang."
 
 msgid "«{problem_title}» masalangiz tasdiqlandi va saytda chiqdi"
 msgstr "«{problem_title}» masalangiz tasdiqlandi va saytda çiqdi"
@@ -757,8 +826,37 @@ msgstr ""
 msgid "SQL masala uchun jadval, ma'lumot va kutilgan natija kerak."
 msgstr "SQL masala uçun jadval, ma'lumot va kutilgan natija kerak."
 
+msgid ""
+"Namunaviy yechim vaqtida tekshirilmadi: tekshiruvchi band. Keyinroq urinib "
+"ko‘ring."
+msgstr ""
+"Namunaviy yeçim vaqtida tekşirilmadi: tekşiruvçi band. Keyinroq urinib "
+"köring."
+
+msgid ""
+"Navbatdagi yoki rad etilgan masalani ochib bo‘lmaydi: avval tasdiqlang."
+msgstr "Navbatdagi yoki rad etilgan masalani oçib bölmaydi: avval tasdiqlang."
+
+msgid "Qaysi mavzuga birlashtirilishini tanlang."
+msgstr "Qaysi mavzuga birlaştirilişini tanlang."
+
+msgid "Raundda masala yo‘q."
+msgstr "Raundda masala yöq."
+
+msgid ""
+"Avval reytingni hisoblang: masalalar ochilgach urinishlar mashq ballariga "
+"o‘tadi."
+msgstr ""
+"Avval reytingni hisoblang: masalalar oçilgaç urinişlar maşq ballariga ötadi."
+
+msgid "Bu raundning masalalari ochilmagan."
+msgstr "Bu raundning masalalari oçilmagan."
+
 msgid "Faqat tugagan rasmiy musobaqa uchun."
 msgstr "Faqat tugagan rasmiy musobaqa uçun."
+
+msgid "Faqat tugagan duelni bekor qilish mumkin."
+msgstr "Faqat tugagan duelni bekor qiliş mumkin."
 
 msgid "admin hisobini o‘chirib bo‘lmaydi — avval admin huquqini oling"
 msgstr "admin hisobini öçirib bölmaydi — avval admin huquqini oling"
@@ -772,14 +870,53 @@ msgstr "Sana yoki masala notöğri tanlandi."
 msgid "Bu sana uchun masala boshqa so‘rovda tanlandi. Sahifani yangilang."
 msgstr "Bu sana uçun masala boşqa sörovda tanlandi. Sahifani yangilang."
 
+msgid "Bugungi rasm yuklash chegarasi tugadi."
+msgstr "Bugungi rasm yuklaş çegarasi tugadi."
+
 msgid "Kamida bitta test kerak: qo'lda kiriting yoki ZIP yuklang."
 msgstr "Kamida bitta test kerak: qölda kiriting yoki ZIP yuklang."
+
+msgid "Namunaviy yechim kompilyatsiya bo‘lmadi: {log}"
+msgstr "Namunaviy yeçim kompilyatsiya bölmadi: {log}"
+
+msgid ""
+"Namunaviy yechim {n} ta testdan o‘tmadi (test raqami: {nums}). Test yoki "
+"yechimni tekshiring."
+msgstr ""
+"Namunaviy yeçim {n} ta testdan ötmadi (test raqami: {nums}). Test yoki "
+"yeçimni tekşiring."
+
+msgid ""
+"Masala tugamagan musobaqada turibdi: musobaqa tugagach «Masalalarni ochish» "
+"bilan oching."
+msgstr ""
+"Masala tugamagan musobaqada turibdi: musobaqa tugagaç «Masalalarni oçiş» "
+"bilan oçing."
 
 msgid "{len_ids} ta urinish qayta tekshirishga yuborildi."
 msgstr "{len_ids} ta uriniş qayta tekşirişga yuborildi."
 
+msgid "«{tag}» o‘chirildi."
+msgstr "«{tag}» öçirildi."
+
+msgid "«{a}» «{b}» bilan birlashtirildi."
+msgstr "«{a}» «{b}» bilan birlaştirildi."
+
 msgid "«{plan_title}» o‘chirildi."
 msgstr "«{plan_title}» öçirildi."
+
+msgid ""
+"Reyting hisoblangan: masalalar ro‘yxati va ballarini o‘zgartirib bo‘lmaydi "
+"(jadval va reyting buziladi)."
+msgstr ""
+"Reyting hisoblangan: masalalar röyxati va ballarini özgartirib bölmaydi "
+"(jadval va reyting buziladi)."
+
+msgid ""
+"Boshlanish vaqti o‘tib ketgan: raund vaqtini yangilash uchun muallifga "
+"qaytaring."
+msgstr ""
+"Boşlaniş vaqti ötib ketgan: raund vaqtini yangilaş uçun muallifga qaytaring."
 
 msgid "Masalalar ochildi; {granted} ta yechim amaliyot balliga o'tkazildi."
 msgstr "Masalalar oçildi; {granted} ta yeçim amaliyot balliga ötkazildi."
@@ -799,14 +936,12 @@ msgstr "{user_username} öçirildi."
 msgid "Bugungi masala tanlov paytida e’lon qilindi va endi almashtirilmaydi."
 msgstr "Bugungi masala tanlov paytida e’lon qilindi va endi almaştirilmaydi."
 
-msgid "{pending} ta ishtirokchi hali tekshirilmagan."
-msgstr "{pending} ta iştirokçi hali tekşirilmagan."
-
 msgid ""
-"{len_drafts} ta masala tuzildi — Navbat bo'limida ko'rib chiqing va "
-"tasdiqlang."
+"Ochiq masala uchun kamida 2 ta test kerak: bitta test bilan noto‘g‘ri yechim"
+" ham o‘tib ketishi mumkin."
 msgstr ""
-"{len_drafts} ta masala tuzildi — Navbat bölimida körib çiqing va tasdiqlang."
+"Oçiq masala uçun kamida 2 ta test kerak: bitta test bilan notöğri yeçim ham "
+"ötib ketişi mumkin."
 
 msgid ""
 "Masala adminlar ko‘rib chiqishi uchun yuborildi. Tasdiqlansa, sizning "
@@ -815,14 +950,90 @@ msgstr ""
 "Masala adminlar körib çiqişi uçun yuborildi. Tasdiqlansa, sizning nomingiz "
 "bilan çiqadi."
 
+msgid "{n} tasi o‘tkazib yuborildi: tasdiqlanmagan yoki tugamagan musobaqada."
+msgstr "{n} tasi ötkazib yuborildi: tasdiqlanmagan yoki tugamagan musobaqada."
+
+msgid "«{t}»: kamida 2 ta test kerak, tasdiqlab bo‘lmaydi."
+msgstr "«{t}»: kamida 2 ta test kerak, tasdiqlab bölmaydi."
+
+msgid ""
+"«{tag}» ishlatilmoqda: {n} ta masala, kurslar: {courses}. O‘chirishdan oldin"
+" boshqa mavzuga birlashtiring."
+msgstr ""
+"«{tag}» işlatilmoqda: {n} ta masala, kurslar: {courses}. Öçirişdan oldin "
+"boşqa mavzuga birlaştiring."
+
+msgid ""
+"«{plan_title}»: {n} ta o‘quvchi yozuvi bor. O‘chirmang, kursni yashiring "
+"(Ochiq belgisini olib tashlang)."
+msgstr ""
+"«{plan_title}»: {n} ta öquvçi yozuvi bor. Öçirmang, kursni yaşiring (Oçiq "
+"belgisini olib taşlang)."
+
+msgid ""
+"{n} ta ko‘rilmagan o‘xshashlik belgisi bor: avval ko‘rib chiqing (yoki "
+"«Baribir ochish»)."
+msgstr ""
+"{n} ta körilmagan öxşaşlik belgisi bor: avval körib çiqing (yoki «Baribir "
+"oçiş»)."
+
+msgid "{pending} ta ishtirokchi hali tekshirilmagan."
+msgstr "{pending} ta iştirokçi hali tekşirilmagan."
+
+msgid ""
+"Qo‘lda yozilgan reyting keyingi to‘liq qayta hisobda (replay) o‘chib ketadi."
+msgstr ""
+"Qölda yozilgan reyting keyingi töliq qayta hisobda (replay) öçib ketadi."
+
+msgid ""
+"reytingli raundlarda qatnashgan: o‘chirsangiz boshqalarning o‘rni ham "
+"o‘zgaradi. Hisobni bloklang (Faol belgisini olib tashlang) yoki «Baribir "
+"o‘chirish» ni bosing"
+msgstr ""
+"reytingli raundlarda qatnaşgan: öçirsangiz boşqalarning örni ham özgaradi. "
+"Hisobni bloklang (Faol belgisini olib taşlang) yoki «Baribir öçiriş» ni "
+"bosing"
+
+msgid "{d} uchun tanlov bekor qilindi."
+msgstr "{d} uçun tanlov bekor qilindi."
+
+msgid ""
+"{len_drafts} ta masala tuzildi — Navbat bo'limida ko'rib chiqing va "
+"tasdiqlang."
+msgstr ""
+"{len_drafts} ta masala tuzildi — Navbat bölimida körib çiqing va tasdiqlang."
+
+msgid "mualliflar o‘zgardi"
+msgstr "mualliflar özgardi"
+
 msgid "«{contest_title}» musobaqasida urinishlar bor — o‘chirib bo‘lmaydi."
 msgstr "«{contest_title}» musobaqasida urinişlar bor — öçirib bölmaydi."
+
+msgid ""
+"Testlar o‘zgardi, lekin mavjud urinishlar eski testlar bilan baholangan: "
+"«Qayta tekshirish» ni bosing."
+msgstr ""
+"Testlar özgardi, lekin mavjud urinişlar eski testlar bilan baholangan: "
+"«Qayta tekşiriş» ni bosing."
+
+msgid "{problem_title}: {len_ids} ta urinish"
+msgstr "{problem_title}: {len_ids} ta uriniş"
+
+msgid "Mualliflar o‘zgardi: {n} ta raundning reytingi qayta hisoblandi."
+msgstr "Mualliflar özgardi: {n} ta raundning reytingi qayta hisoblandi."
 
 msgid "Reyting hisoblanmoqda: bir necha soniyadan keyin sahifani yangilang."
 msgstr "Reyting hisoblanmoqda: bir neça soniyadan keyin sahifani yangilang."
 
-msgid "{problem_title}: {len_ids} ta urinish"
-msgstr "{problem_title}: {len_ids} ta uriniş"
+msgid ""
+"{n} ta ko‘rilmagan o‘xshashlik belgisi bor: avval «Halollik» da ko‘rib "
+"chiqing (yoki «Baribir hisoblash»)."
+msgstr ""
+"{n} ta körilmagan öxşaşlik belgisi bor: avval «Halollik» da körib çiqing "
+"(yoki «Baribir hisoblaş»)."
+
+msgid "Testlar o‘zgardi: {n} ta urinish qayta tekshirishga yuborildi."
+msgstr "Testlar özgardi: {n} ta uriniş qayta tekşirişga yuborildi."
 
 msgid "Dasturlash"
 msgstr "Dasturlaş"
@@ -993,6 +1204,9 @@ msgstr "Boşqaruv bölimlari"
 msgid "Boshqaruv"
 msgstr "Boşqaruv"
 
+msgid "Reyting kutayotgan, qoralama va ko‘rilmagan belgilar"
+msgstr "Reyting kutayotgan, qoralama va körilmagan belgilar"
+
 msgid "Urinishlar"
 msgstr "Urinişlar"
 
@@ -1133,6 +1347,9 @@ msgstr "Öquv joyi <span class=\"font-normal text-mute\">(ixtiyoriy)</span>"
 
 msgid "%(rank)s-o‘rin"
 msgstr "%(rank)s-örin"
+
+msgid "%(n)s kishi · median %(median)s"
+msgstr "%(n)s kişi · median %(median)s"
 
 msgid "· o‘yinchilarning"
 msgstr "· öyinçilarning"
@@ -2530,11 +2747,22 @@ msgstr "boşlanişiga"
 msgid "Qatnashdingiz"
 msgstr "Qatnaşdingiz"
 
+msgid "Siz muallifsiz: tanlovdan tashqari"
+msgstr "Siz muallifsiz: tanlovdan taşqari"
+
 msgid "Ishtirokchi"
 msgstr "Iştirokçi"
 
 msgid "Yechildi"
 msgstr "Yeçildi"
+
+msgid "Muallif: tanlovdan tashqari"
+msgstr "Muallif: tanlovdan taşqari"
+
+msgid ""
+"Raund muallifi: tanlovdan tashqari, reytingga va o‘ringa ta’sir qilmaydi"
+msgstr ""
+"Raund muallifi: tanlovdan taşqari, reytingga va öringa ta’sir qilmaydi"
 
 msgid "tashqarida"
 msgstr "taşqarida"
@@ -3226,6 +3454,13 @@ msgid ""
 msgstr ""
 "<span class=\"font-semibold text-white\">%(rating_card_next_name)s</span> "
 "darajasigaça %(rating_card_next_need)s ball"
+
+msgid ""
+"Siz bu raundning muallifisiz: tanlovdan tashqari qatnashasiz. "
+"%(live_n_problems)s masaladan %(live_solved)s tasi yechilgan."
+msgstr ""
+"Siz bu raundning muallifisiz: tanlovdan taşqari qatnaşasiz. "
+"%(live_n_problems)s masaladan %(live_solved)s tasi yeçilgan."
 
 msgid ""
 "Siz <b>%(live_rank)s-o‘rin</b>dasiz, %(live_n_problems)s masaladan "
@@ -3996,9 +4231,6 @@ msgid ""
 msgstr ""
 "«%(lst_name)s» — %(lst_owner_username)s tuzgan %(rows)s ta masalalik röyxat."
 
-msgid "<b class=\"tabular text-ink\">%(n_solved)s / %(rows)s</b> yechilgan"
-msgstr "<b class=\"tabular text-ink\">%(n_solved)s / %(rows)s</b> yeçilgan"
-
 msgid "Ro‘yxatdan olish: %(p_title)s"
 msgstr "Röyxatdan oliş: %(p_title)s"
 
@@ -4030,14 +4262,20 @@ msgstr ""
 msgid "Yaratish"
 msgstr "Yaratiş"
 
-msgid "Duellar ochiq. Dars uchun yoping:"
-msgstr "Duellar oçiq. Dars uçun yoping:"
+msgid "Duellar ochiq"
+msgstr "Duellar oçiq"
+
+msgid "O‘quvchilar duel sahifasini ko‘rmaydi."
+msgstr "Öquvçilar duel sahifasini körmaydi."
+
+msgid "Dars paytida chalg‘imasligi uchun yoping."
+msgstr "Dars paytida çalğimasligi uçun yoping."
 
 msgid "Men ochgunimcha"
 msgstr "Men oçgunimça"
 
-msgid "· %(duel_switch_1)s gacha"
-msgstr "· %(duel_switch_1)s gaça"
+msgid "· %(t)s gacha"
+msgstr "· %(t)s gaça"
 
 msgid "AI bilan masala yaratish"
 msgstr "AI bilan masala yaratiş"
@@ -4091,11 +4329,38 @@ msgid "Musobaqani tahrirlash"
 msgstr "Musobaqani tahrirlaş"
 
 msgid ""
+"Qoralama: faqat siz va xodimlar ko‘radi. Tayyor bo‘lgach xodimga e’lon "
+"qilish uchun ayting."
+msgstr ""
+"Qoralama: faqat siz va xodimlar köradi. Tayyor bölgaç xodimga e’lon qiliş "
+"uçun ayting."
+
+msgid ""
 "Musobaqa masalalarini yashirin qilib qo‘shing — boshlanguncha ular hech "
 "kimga ko‘rinmaydi. Tugagach ochish mumkin."
 msgstr ""
 "Musobaqa masalalarini yaşirin qilib qöşing — boşlangunça ular heç kimga "
 "körinmaydi. Tugagaç oçiş mumkin."
+
+msgid ""
+"Yopiq raund: masalalar ro‘yxati va ballari raund tugaguncha muallifdan "
+"boshqa xodimga ko‘rinmaydi. Boshqa sozlamalarni o‘zgartirish mumkin."
+msgstr ""
+"Yopiq raund: masalalar röyxati va ballari raund tugagunça muallifdan boşqa "
+"xodimga körinmaydi. Boşqa sozlamalarni özgartiriş mumkin."
+
+msgid ""
+"Reyting hisoblangan: masalalar ro‘yxati va ballarini o‘zgartirib bo‘lmaydi. "
+"Mualliflarni o‘zgartirsangiz reyting o‘zi qayta hisoblanadi."
+msgstr ""
+"Reyting hisoblangan: masalalar röyxati va ballarini özgartirib bölmaydi. "
+"Mualliflarni özgartirsangiz reyting özi qayta hisoblanadi."
+
+msgid ""
+"Musobaqa boshlangan: reytingli/yo‘qligi, divizion va shaxsiy vaqt "
+"o‘zgarmaydi."
+msgstr ""
+"Musobaqa boşlangan: reytingli/yöqligi, divizion va şaxsiy vaqt özgarmaydi."
 
 msgid ""
 "Faqat bitta tilda yozing: ikkinchi tilni admin yoki AI keyin to‘ldiradi va "
@@ -4109,6 +4374,24 @@ msgstr "Boşlanişi"
 
 msgid "Tugashi"
 msgstr "Tugaşi"
+
+msgid "Vaqt Toshkent bo‘yicha (UTC+5)."
+msgstr "Vaqt Toşkent böyiça (UTC+5)."
+
+msgid "Masala qidirish"
+msgstr "Masala qidiriş"
+
+msgid "Ro‘yxatdan qidirish…"
+msgstr "Röyxatdan qidiriş…"
+
+msgid ""
+"Yorliq: A, B, C… · Ball masala qiyinligiga qarab o‘zi qo‘yiladi (250–1000), "
+"xohlasangiz o‘zgartiring · «ishlatilgan» belgisi masala boshqa raundda "
+"bo‘lganini bildiradi"
+msgstr ""
+"Yorliq: A, B, C… · Ball masala qiyinligiga qarab özi qöyiladi (250–1000), "
+"xohlasangiz özgartiring · «işlatilgan» belgisi masala boşqa raundda "
+"bölganini bildiradi"
 
 msgid "Qoidalar qanday ishlaydi?"
 msgstr "Qoidalar qanday işlaydi?"
@@ -4155,6 +4438,22 @@ msgstr ""
 "Musobaqa tugagaç 12 soat ötib, körilmagan öxşaşlik belgisi qolmasa, "
 "masalalar oçiladi va (reytingli bölsa) reyting hisoblanadi. Öçiq bölsa, buni"
 " özingiz qilasiz."
+
+msgid ""
+"Ular raund sahifasida ko‘rinadi, tanlovdan tashqari qatnashadi: reytingga, "
+"o‘ringa va nishonga ta’sir qilmaydi."
+msgstr ""
+"Ular raund sahifasida körinadi, tanlovdan taşqari qatnaşadi: reytingga, "
+"öringa va nişonga ta’sir qilmaydi."
+
+msgid ""
+"Tugaguncha muallifdan boshqa xodim masalalar, testlar va yechimlarni staff "
+"sahifalarida ko‘rmaydi: egasi ham halol qatnasha oladi (muallif tanlovdan "
+"tashqari)."
+msgstr ""
+"Tugagunça muallifdan boşqa xodim masalalar, testlar va yeçimlarni staff "
+"sahifalarida körmaydi: egasi ham halol qatnaşa oladi (muallif tanlovdan "
+"taşqari)."
 
 msgid "Nishon (ixtiyoriy)"
 msgstr "Nişon (ixtiyoriy)"
@@ -4225,8 +4524,54 @@ msgstr "%(pending)s ta iştirokçi hali tekşirilmagan."
 msgid "Qo‘llangan: %(contest_official_applied_at)s"
 msgstr "Qöllangan: %(contest_official_applied_at)s"
 
+msgid "Reytingni oldindan ko‘rish"
+msgstr "Reytingni oldindan köriş"
+
+msgid "Reyting hisoblansa shunday o‘zgaradi. Hech narsa yozilmagan."
+msgstr "Reyting hisoblansa şunday özgaradi. Heç narsa yozilmagan."
+
+msgid "Baribir hisoblash"
+msgstr "Baribir hisoblaş"
+
+msgid "Reytingni hisoblash"
+msgstr "Reytingni hisoblaş"
+
+msgid "Reytingga kiradigan ishtirokchi yo‘q."
+msgstr "Reytingga kiradigan iştirokçi yöq."
+
+msgid "%(n)s ta ko‘rilmagan o‘xshashlik belgisi bor."
+msgstr "%(n)s ta körilmagan öxşaşlik belgisi bor."
+
 msgid "Musobaqalar — boshqaruv"
 msgstr "Musobaqalar — boşqaruv"
+
+msgid "Sizning qoralama raundlaringiz: staff e’lon qilgach hamma ko‘radi"
+msgstr "Sizning qoralama raundlaringiz: staff e’lon qilgaç hamma köradi"
+
+msgid "Yaratish, tahrirlash, natijalar va halollik hisoboti"
+msgstr "Yaratiş, tahrirlaş, natijalar va halollik hisoboti"
+
+msgid "Raund qidirish"
+msgstr "Raund qidiriş"
+
+msgid "Masala · qatnashgan"
+msgstr "Masala · qatnaşgan"
+
+msgid "Yopiq raund: muallifdan boshqa xodim masalalarni tugaguncha ko‘rmaydi"
+msgstr "Yopiq raund: muallifdan boşqa xodim masalalarni tugagunça körmaydi"
+
+msgid ""
+"Raund e’lon qilinadi, masalalari tasdiqlanadi (raund tugaguncha yopiq "
+"qoladi). Davom etasizmi?"
+msgstr ""
+"Raund e’lon qilinadi, masalalari tasdiqlanadi (raund tugagunça yopiq "
+"qoladi). Davom etasizmi?"
+
+msgid "E’lon qilish"
+msgstr "E’lon qiliş"
+
+msgid "Reytingni ko‘rish"
+msgstr "Reytingni köriş"
 
 msgid ""
 "Masalalar ochiladi va ishtirokchilarning AC yechimlari amaliyot balliga "
@@ -4238,36 +4583,31 @@ msgstr ""
 msgid "Masalalarni ochish"
 msgstr "Masalalarni oçiş"
 
-msgid "Reytingdan oldin ko‘rib chiqing"
-msgstr "Reytingdan oldin körib çiqing"
-
-msgid "ta o‘xshashlik hali ko‘rib chiqilmagan!"
-msgstr "ta öxşaşlik hali körib çiqilmagan!"
+msgid "Reyting oldindan ko‘rish"
+msgstr "Reyting oldindan köriş"
 
 msgid ""
-"Reyting bir marta hisoblanadi va qaytarib bo‘lmaydi. Shubhali natijalar "
-"bekor qilinganmi?"
+"Reyting hisoblanadi. Keyin faqat to‘liq qayta hisob bilan o‘zgaradi. Davom "
+"etasizmi?"
 msgstr ""
-"Reyting bir marta hisoblanadi va qaytarib bölmaydi. Şubhali natijalar bekor "
-"qilinganmi?"
+"Reyting hisoblanadi. Keyin faqat töliq qayta hisob bilan özgaradi. Davom "
+"etasizmi?"
 
-msgid "Reytingni hisoblash"
-msgstr "Reytingni hisoblaş"
+msgid "Baribir hisoblash (belgilar ochiq)"
+msgstr "Baribir hisoblaş (belgilar oçiq)"
 
-msgid "Hali musobaqa yo‘q."
-msgstr "Hali musobaqa yöq."
+msgid "Baribir ochish (belgilar ochiq)"
+msgstr "Baribir oçiş (belgilar oçiq)"
 
-msgid "Birinchisini yarating"
-msgstr "Birinçisini yarating"
+msgid ""
+"Masalalar yopiladi va raund yechimlari amaliyot ballidan olinadi. Davom "
+"etasizmi?"
+msgstr ""
+"Masalalar yopiladi va raund yeçimlari amaliyot ballidan olinadi. Davom "
+"etasizmi?"
 
-msgid "Yaratish, tahrirlash, natijalar va halollik hisoboti"
-msgstr "Yaratiş, tahrirlaş, natijalar va halollik hisoboti"
-
-msgid "· %(c_n_hidden)s yashirin"
-msgstr "· %(c_n_hidden)s yaşirin"
-
-msgid "%(c_n_open_flags)s ta o‘xshashlik ko‘rilmagan"
-msgstr "%(c_n_open_flags)s ta öxşaşlik körilmagan"
+msgid "Masalalarni yopish"
+msgstr "Masalalarni yopiş"
 
 msgid "Boshqa amallar: %(c_title)s"
 msgstr "Boşqa amallar: %(c_title)s"
@@ -4301,12 +4641,31 @@ msgstr ""
 msgid "Variantlarni ko‘rish"
 msgstr "Variantlarni köriş"
 
+msgid "Tanlov bekor qilinadi, kunni sayt o‘zi belgilaydi. Davom etasizmi?"
+msgstr "Tanlov bekor qilinadi, kunni sayt özi belgilaydi. Davom etasizmi?"
+
+msgid "Tanlovni bekor qilish"
+msgstr "Tanlovni bekor qiliş"
+
 msgid ""
 "Bugungi masala foydalanuvchilarga ko‘rinib bo‘lgan. Streak va bonuslar "
 "o‘zgarmasligi uchun bugungi tanlovni qulfladik."
 msgstr ""
 "Bugungi masala foydalanuvçilarga körinib bölgan. Streak va bonuslar "
 "özgarmasligi uçun bugungi tanlovni qulfladik."
+
+msgid "Shoshilinch almashtirish (buzuq masala)"
+msgstr "Şoşilinç almaştiriş (buzuq masala)"
+
+msgid ""
+"Faqat masala buzuq bo‘lsa: pastdagi variantlardan biri bugunga qo‘yiladi, "
+"jurnalga yoziladi."
+msgstr ""
+"Faqat masala buzuq bölsa: pastdagi variantlardan biri bugunga qöyiladi, "
+"jurnalga yoziladi."
+
+msgid "Bugungi masala almashtiriladi. Davom etasizmi?"
+msgstr "Bugungi masala almaştiriladi. Davom etasizmi?"
 
 msgid ""
 "Avval haftaning kuniga mos qiyinlik, keyin boshqa darajalar. Yaqinda kunlik "
@@ -4325,8 +4684,14 @@ msgstr ""
 "Hozirça mos oçiq masala topilmadi. Oçiq masalalar qöşilgaç, variantlar şu "
 "yerda çiqadi."
 
-msgid "Hali yaqin kunlar uchun reja yo‘q."
-msgstr "Hali yaqin kunlar uçun reja yöq."
+msgid "Boshqa masala tanlash"
+msgstr "Boşqa masala tanlaş"
+
+msgid "Tanlash"
+msgstr "Tanlaş"
+
+msgid "Hech narsa topilmadi."
+msgstr "Heç narsa topilmadi."
 
 msgid ""
 "Tanlov bo‘lmasa, sayt birinchi murojaatda masalani avtomatik belgilaydi. "
@@ -4354,6 +4719,15 @@ msgstr "AI bilan tuziş"
 msgid "Duellarni yopish"
 msgstr "Duellarni yopiş"
 
+msgid "Kutayotgan ishlar"
+msgstr "Kutayotgan işlar"
+
+msgid "Belgi va shikoyat"
+msgstr "Belgi va şikoyat"
+
+msgid "Kelgusi raund yo‘q"
+msgstr "Kelgusi raund yöq"
+
 msgid "Navbatni ochish"
 msgstr "Navbatni oçiş"
 
@@ -4366,9 +4740,6 @@ msgstr ""
 
 msgid "<b>Navbat bo‘sh</b>Yangi masala yuborilganda shu yerda chiqadi."
 msgstr "<b>Navbat böş</b>Yangi masala yuborilganda şu yerda çiqadi."
-
-msgid "Kutayotgan ishlar"
-msgstr "Kutayotgan işlar"
 
 msgid ""
 "<b class=\"ca7-mis-t\">Halollik</b><small>Mashq va musobaqadagi shubhali "
@@ -4383,14 +4754,14 @@ msgstr "Hisobotni oçiş"
 msgid "Boshqasini tanlash"
 msgstr "Boşqasini tanlaş"
 
-msgid "Tanlash"
-msgstr "Tanlaş"
-
 msgid "So‘nggi 14 kun"
 msgstr "Sönggi 14 kun"
 
 msgid "Kunlik urinishlar soni"
 msgstr "Kunlik urinişlar soni"
+
+msgid "Tekshiruvchi ishchisi ishlamayapti!"
+msgstr "Tekşiruvçi işçisi işlamayapti!"
 
 msgid "Tekshiruvchi sog‘lom: kutayotgan urinish yo‘q."
 msgstr "Tekşiruvçi soğlom: kutayotgan uriniş yöq."
@@ -4414,20 +4785,40 @@ msgstr "Tekşiruvçi: %(judge_stuck)s ta uriniş 2 daqiqadan beri kutmoqda."
 msgid "So‘nggi natija: %(judge_last)s."
 msgstr "Sönggi natija: %(judge_last)s."
 
-msgid "Duellar — boshqaruv"
-msgstr "Duellar — boşqaruv"
+msgid "Ishchilar: %(w)s · qayta tekshiruv navbati: %(q)s."
+msgstr "Işçilar: %(w)s · qayta tekşiruv navbati: %(q)s."
 
-msgid "O‘yinchilar"
-msgstr "Öyinçilar"
+msgid "O‘yinchi ko‘rinishi"
+msgstr "Öyinçi körinişi"
 
-msgid "Chaqirgan"
-msgstr "Çaqirgan"
+msgid ""
+"Duel bekor qilinadi va barcha duel reytinglari qayta hisoblanadi. Davom "
+"etasizmi?"
+msgstr ""
+"Duel bekor qilinadi va barça duel reytinglari qayta hisoblanadi. Davom "
+"etasizmi?"
+
+msgid "Duelni bekor qilish"
+msgstr "Duelni bekor qiliş"
 
 msgid "g‘olib"
 msgstr "ğolib"
 
-msgid "Bu filtr bo‘yicha duel yo‘q."
-msgstr "Bu filtr böyiça duel yöq."
+msgid "Hali javob yo‘q"
+msgstr "Hali javob yöq"
+
+msgid ""
+"Juda tez javoblar (1,5 soniyadan kam) savolni o‘qib ulgurish uchun juda "
+"qisqa: gumon belgisi, isbot emas."
+msgstr ""
+"Juda tez javoblar (1,5 soniyadan kam) savolni öqib ulguriş uçun juda qisqa: "
+"gumon belgisi, isbot emas."
+
+msgid "o‘rtacha %(a)s s"
+msgstr "örtaça %(a)s s"
+
+msgid "Duellar — boshqaruv"
+msgstr "Duellar — boşqaruv"
 
 msgid ""
 "Har bir duel natijasi: kim nechta to‘g‘ri javob berdi, qancha vaqtda, "
@@ -4436,18 +4827,20 @@ msgstr ""
 "Har bir duel natijasi: kim neçta töğri javob berdi, qança vaqtda, reyting "
 "qançaga özgardi"
 
+msgid "O‘yinchilar"
+msgstr "Öyinçilar"
+
+msgid "Chaqirgan"
+msgstr "Çaqirgan"
+
+msgid "Bu filtr bo‘yicha duel yo‘q."
+msgstr "Bu filtr böyiça duel yöq."
+
 msgid "%(s_right)s/%(n_questions)s to‘g‘ri · %(s_spent)s s"
 msgstr "%(s_right)s/%(n_questions)s töğri · %(s_spent)s s"
 
 msgid "o‘ynamoqda · %(s_seen)s/%(n_questions)s"
 msgstr "öynamoqda · %(s_seen)s/%(n_questions)s"
-
-msgid ""
-"Yuborgan masalalaringiz adminlar ko‘rib chiqadi. Tasdiqlansa, saytda sizning"
-" nomingiz bilan chiqadi."
-msgstr ""
-"Yuborgan masalalaringiz adminlar körib çiqadi. Tasdiqlansa, saytda sizning "
-"nomingiz bilan çiqadi."
 
 msgid "Chop etilgan"
 msgstr "Çop etilgan"
@@ -4457,6 +4850,13 @@ msgstr "Körib çiqilmoqda"
 
 msgid "Tahrirlab qayta yuborish"
 msgstr "Tahrirlab qayta yuboriş"
+
+msgid ""
+"Yuborgan masalalaringiz adminlar ko‘rib chiqadi. Tasdiqlansa, saytda sizning"
+" nomingiz bilan chiqadi."
+msgstr ""
+"Yuborgan masalalaringiz adminlar körib çiqadi. Tasdiqlansa, saytda sizning "
+"nomingiz bilan çiqadi."
 
 msgid "Qisqa tavsif (kartochkada)"
 msgstr "Qisqa tavsif (kartoçkada)"
@@ -4479,27 +4879,26 @@ msgstr "%(form_is_public)s Hammaga körinadi"
 msgid "Kurslar — boshqaruv"
 msgstr "Kurslar — boşqaruv"
 
+msgid "Har kurs — bitta mavzu. Masalalar kursga teglari orqali tushadi."
+msgstr "Har kurs — bitta mavzu. Masalalar kursga teglari orqali tuşadi."
+
 msgid "Kurs qo‘shish"
 msgstr "Kurs qöşiş"
 
-msgid "masala yo‘q"
-msgstr "masala yöq"
+msgid "Bo‘sh"
+msgstr "Böş"
 
 msgid "Hali kurs yo‘q."
 msgstr "Hali kurs yöq."
 
-msgid ""
-"Birinchisini tuzing</a> yoki <code>python manage.py add_courses</code> "
-"buyrug‘ini ishga tushiring."
-msgstr ""
-"Birinçisini tuzing</a> yoki <code>python manage.py add_courses</code> "
-"buyruğini işga tuşiring."
+msgid "Birinchisini tuzing"
+msgstr "Birinçisini tuzing"
 
-msgid "Har kurs — bitta mavzu. Masalalar kursga teglari orqali tushadi."
-msgstr "Har kurs — bitta mavzu. Masalalar kursga teglari orqali tuşadi."
+msgid "%(n)s ta kursda masala yetishmaydi."
+msgstr "%(n)s ta kursda masala yetişmaydi."
 
-msgid "Tahrirlash: %(p_title)s"
-msgstr "Tahrirlaş: %(p_title)s"
+msgid "Boshqa amallar: %(t)s"
+msgstr "Boşqa amallar: %(t)s"
 
 msgid ""
 "«%(p_title)s» kursi o‘chiriladi. Masalalar va teglar o‘chmaydi. Davom "
@@ -4507,32 +4906,44 @@ msgid ""
 msgstr ""
 "«%(p_title)s» kursi öçiriladi. Masalalar va teglar öçmaydi. Davom etasizmi?"
 
-msgid "O‘chirish: %(p_title)s"
-msgstr "Öçiriş: %(p_title)s"
-
 msgid "Masalalar — boshqaruv"
 msgstr "Masalalar — boşqaruv"
 
-msgid "Masala qidirish"
-msgstr "Masala qidiriş"
+msgid "Barcha masalalar: ochiq, yashirin, kutilayotgan"
+msgstr "Barça masalalar: oçiq, yaşirin, kutilayotgan"
+
+msgid "Hech kim yechmagan"
+msgstr "Heç kim yeçmagan"
 
 msgid "Barcha darajalar"
 msgstr "Barça darajalar"
 
-msgid "Testsiz — yechimlar tekshirilmaydi"
-msgstr "Testsiz — yeçimlar tekşirilmaydi"
-
-msgid "Urinishlarni ko‘rish"
-msgstr "Urinişlarni köriş"
-
-msgid "Qayta tekshirish"
-msgstr "Qayta tekşiriş"
+msgid "Barcha mavzular"
+msgstr "Barça mavzular"
 
 msgid "Ochiq qilish"
 msgstr "Oçiq qiliş"
 
-msgid "Barcha masalalar: ochiq, yashirin, kutilayotgan"
-msgstr "Barça masalalar: oçiq, yaşirin, kutilayotgan"
+msgid "Qayta tekshirish"
+msgstr "Qayta tekşiriş"
+
+msgid "Mavzu qo‘shish…"
+msgstr "Mavzu qöşiş…"
+
+msgid "Bajarish"
+msgstr "Bajariş"
+
+msgid "Hammasini belgilash"
+msgstr "Hammasini belgilaş"
+
+msgid "Urinishlarni ko‘rish"
+msgstr "Urinişlarni köriş"
+
+msgid "%(n)s tasi yopiq raundniki: ko‘rsatilmaydi"
+msgstr "%(n)s tasi yopiq raundniki: körsatilmaydi"
+
+msgid "Tahrirlash: %(p_title)s"
+msgstr "Tahrirlaş: %(p_title)s"
 
 msgid "Boshqa amallar: %(p_title)s"
 msgstr "Boşqa amallar: %(p_title)s"
@@ -4558,6 +4969,137 @@ msgstr ""
 "Foydalanuvçilar yuborgan va AI tuzgan qoralamalar. Tasdiqlangaç masala "
 "saytda körinadi."
 
+msgid "Reyting hozir qanday, nima kutilmoqda va shu sur’atda nima bo‘ladi"
+msgstr "Reyting hozir qanday, nima kutilmoqda va şu sur’atda nima böladi"
+
+msgid "Ochiq reytingda"
+msgstr "Oçiq reytingda"
+
+msgid "O‘rtacha"
+msgstr "Örtaça"
+
+msgid "1- va 2-o‘rin farqi"
+msgstr "1- va 2-örin farqi"
+
+msgid "Bosqichlar bo‘yicha"
+msgstr "Bosqiçlar böyiça"
+
+msgid "Hali ochiq reytingda hech kim yo‘q"
+msgstr "Hali oçiq reytingda heç kim yöq"
+
+msgid ""
+"Rejalashtirilgan reytingli raund yo‘q: reyting qotib turadi, 90 kundan keyin"
+" o‘yinchilar jadvaldan tusha boshlaydi."
+msgstr ""
+"Rejalaştirilgan reytingli raund yöq: reyting qotib turadi, 90 kundan keyin "
+"öyinçilar jadvaldan tuşa boşlaydi."
+
+msgid "Yangi bosqichga oz qolgan"
+msgstr "Yangi bosqiçga oz qolgan"
+
+msgid "Hozircha hech kim bosqich chegarasiga 40 balldan yaqin emas."
+msgstr "Hozirça heç kim bosqiç çegarasiga 40 balldan yaqin emas."
+
+msgid "Bosqichdan tushish xavfida"
+msgstr "Bosqiçdan tuşiş xavfida"
+
+msgid "Hozircha hech kim bosqich pastki chegarasiga 25 balldan yaqin emas."
+msgstr "Hozirça heç kim bosqiç pastki çegarasiga 25 balldan yaqin emas."
+
+msgid "Shunday ketsa"
+msgstr "Şunday ketsa"
+
+msgid "taxminiy, chiziqli hisob"
+msgstr "taxminiy, çiziqli hisob"
+
+msgid "So‘nggi raundlar"
+msgstr "Sönggi raundlar"
+
+msgid "Maydon o‘rtachasi"
+msgstr "Maydon örtaçasi"
+
+msgid "O‘rtacha ±"
+msgstr "Örtaça ±"
+
+msgid "Ko‘tarilgan"
+msgstr "Kötarilgan"
+
+msgid "Oylar bo‘yicha"
+msgstr "Oylar böyiça"
+
+msgid "Hali reyting qo‘llangan raund yo‘q"
+msgstr "Hali reyting qöllangan raund yöq"
+
+msgid "Durang ulushi"
+msgstr "Durang uluşi"
+
+msgid "O‘yinchiga duel"
+msgstr "Öyinçiga duel"
+
+msgid "Reyting boshida"
+msgstr "Reyting boşida"
+
+msgid "Raqobatlar: kim kimga qarshi"
+msgstr "Raqobatlar: kim kimga qarşi"
+
+msgid "Hozircha yetarli duel yo‘q."
+msgstr "Hozirça yetarli duel yöq."
+
+msgid "Hali tugagan duel yo‘q"
+msgstr "Hali tugagan duel yöq"
+
+msgid "%(ever)s kishi reytingli o‘ynagan · %(rounds)s ta reytingli raund"
+msgstr "%(ever)s kişi reytingli öynagan · %(rounds)s ta reytingli raund"
+
+msgid ""
+"%(n)s kishi hali yangi o‘yinchi bosqichida: shu raundlarda ularning "
+"ko‘rsatilgan reytingi bonus bilan ko‘tariladi."
+msgstr ""
+"%(n)s kişi hali yangi öyinçi bosqiçida: şu raundlarda ularning körsatilgan "
+"reytingi bonus bilan kötariladi."
+
+msgid ""
+"%(n)s kishi 90 kunlik chegaraga yaqin: yaqin kunlarda reytingli raundda "
+"qatnashmasa, ochiq jadvaldan tushadi."
+msgstr ""
+"%(n)s kişi 90 kunlik çegaraga yaqin: yaqin kunlarda reytingli raundda "
+"qatnaşmasa, oçiq jadvaldan tuşadi."
+
+msgid ""
+"Oxirgi oylarda oyiga o‘rtacha %(pace)s yangi kishi birinchi reytingli "
+"raundini o‘ynadi. Shu sur’atda va %(leaving)s kishi chiqib ketsa, ochiq "
+"reytingda 3 oydan keyin taxminan <b>%(pool)s</b> kishi bo‘ladi (hozir "
+"%(now)s)."
+msgstr ""
+"Oxirgi oylarda oyiga örtaça %(pace)s yangi kişi birinçi reytingli raundini "
+"öynadi. Şu sur’atda va %(leaving)s kişi çiqib ketsa, oçiq reytingda 3 oydan "
+"keyin taxminan <b>%(pool)s</b> kişi böladi (hozir %(now)s)."
+
+msgid ""
+"Yangilar reyting bonusi bilan tajribali o‘yinchilar darajasiga (~%(settle)s)"
+" ko‘tariladi, shuning uchun o‘rtacha reyting %(avg)s dan taxminan "
+"<b>%(avg3)s</b> ga qarab siljiydi."
+msgstr ""
+"Yangilar reyting bonusi bilan tajribali öyinçilar darajasiga (~%(settle)s) "
+"kötariladi, şuning uçun örtaça reyting %(avg)s dan taxminan <b>%(avg3)s</b> "
+"ga qarab siljiydi."
+
+msgid ""
+"Raund boshiga o‘rtacha o‘zgarish %(drift)s ball: 10 raunddan keyin umumiy "
+"darajaga ta’siri taxminan %(d10)s ball (tizim ataylab nolga yaqin ushlaydi)."
+msgstr ""
+"Raund boşiga örtaça özgariş %(drift)s ball: 10 raunddan keyin umumiy "
+"darajaga ta’siri taxminan %(d10)s ball (tizim ataylab nolga yaqin uşlaydi)."
+
+msgid "raundda o‘rtacha %(f)s reytingli ishtirokchi"
+msgstr "raundda örtaça %(f)s reytingli iştirokçi"
+
+msgid "%(e)s ishtirok · %(r)s raund · %(n)s yangi"
+msgstr "%(e)s iştirok · %(r)s raund · %(n)s yangi"
+
+msgid "%(n)s ta tugagan duel · so‘nggi 7 kunda %(week)s"
+msgstr "%(n)s ta tugagan duel · sönggi 7 kunda %(week)s"
+
 msgid "Urinishlar — boshqaruv"
 msgstr "Urinişlar — boşqaruv"
 
@@ -4569,10 +5111,13 @@ msgstr "Masalani tahrirlaş"
 
 msgid ""
 "Yangi masala yopiq holda saqlanadi. Amaliyot uchun bo‘lsa «Ochiq»ni "
-"belgilang; musobaqa masalasini yopiq qoldirib, musobaqaga ulang."
+"belgilang; musobaqa masalasini yopiq qoldiring."
 msgstr ""
 "Yangi masala yopiq holda saqlanadi. Amaliyot uçun bölsa «Oçiq»ni belgilang; "
-"musobaqa masalasini yopiq qoldirib, musobaqaga ulang."
+"musobaqa masalasini yopiq qoldiring."
+
+msgid "Tashlab yuborish"
+msgstr "Taşlab yuboriş"
 
 msgid "Forma bo‘limlari"
 msgstr "Forma bölimlari"
@@ -4669,6 +5214,16 @@ msgstr ""
 msgid "Kutilgan chiqish"
 msgstr "Kutilgan çiqiş"
 
+msgid "Namunaviy yechim bilan tekshirish (tavsiya etiladi)"
+msgstr "Namunaviy yeçim bilan tekşiriş (tavsiya etiladi)"
+
+msgid ""
+"Yechimingizni shu yerga qo‘ying: saqlashdan oldin u BARCHA testlardan "
+"o‘tishi kerak, o‘tmasa masala saqlanmaydi. Yechim saqlanmaydi."
+msgstr ""
+"Yeçimingizni şu yerga qöying: saqlaşdan oldin u BARÇA testlardan ötişi "
+"kerak, ötmasa masala saqlanmaydi. Yeçim saqlanmaydi."
+
 msgid ""
 "Maslahat narxi — masala ballining foizi (yechishdan oldin ochilsa). Jami "
 "ko‘pi bilan 90%%."
@@ -4684,6 +5239,9 @@ msgstr "Yeçim tahlili (Markdown) — masalani yeçganlarga körinadi"
 
 msgid "Masalani saqlash"
 msgstr "Masalani saqlaş"
+
+msgid "Testlar o‘zgarsa, mavjud urinishlarni qayta tekshirish"
+msgstr "Testlar özgarsa, mavjud urinişlarni qayta tekşiriş"
 
 msgid ""
 "Qaysi reytingdagi o‘quvchi masalani taxminan yarim holda yechadi, deb "
@@ -4741,8 +5299,26 @@ msgstr "Bu teg heç bir kursda yöq — masalalari Örganiş bölimida körinmay
 msgid "Teglar — boshqaruv"
 msgstr "Teglar — boşqaruv"
 
+msgid "Masalalarni saralaydi; kurs o‘z masalalarini teglaridan oladi"
+msgstr "Masalalarni saralaydi; kurs öz masalalarini teglaridan oladi"
+
+msgid "Teg qidirish"
+msgstr "Teg qidiriş"
+
+msgid "Kursda yo‘q"
+msgstr "Kursda yöq"
+
 msgid "kursda yo‘q"
 msgstr "kursda yöq"
+
+msgid "Shu tegga birlashtirish"
+msgstr "Şu tegga birlaştiriş"
+
+msgid "Birlashtirish"
+msgstr "Birlaştiriş"
+
+msgid "Ishlatilmoqda: avval birlashtiring"
+msgstr "Işlatilmoqda: avval birlaştiring"
 
 msgid "Teg yo‘q."
 msgstr "Teg yöq."
@@ -4750,20 +5326,14 @@ msgstr "Teg yöq."
 msgid "Qo‘shish"
 msgstr "Qöşiş"
 
-msgid "Masalalarni saralaydi; kurs o‘z masalalarini teglaridan oladi"
-msgstr "Masalalarni saralaydi; kurs öz masalalarini teglaridan oladi"
+msgid "Boshqa amallar: %(t_name)s"
+msgstr "Boşqa amallar: %(t_name)s"
 
-msgid "Tahrirlash: %(t_name)s"
-msgstr "Tahrirlaş: %(t_name)s"
+msgid "«%(t_name)s» boshqa tegga birlashtiriladi va o‘chadi. Davom etasizmi?"
+msgstr "«%(t_name)s» boşqa tegga birlaştiriladi va öçadi. Davom etasizmi?"
 
-msgid ""
-"«%(t_name)s» tegini o‘chirasizmi? Masalalar o‘chmaydi, kurslardan ham "
-"chiqadi."
-msgstr ""
-"«%(t_name)s» tegini öçirasizmi? Masalalar öçmaydi, kurslardan ham çiqadi."
-
-msgid "O‘chirish: %(t_name)s"
-msgstr "Öçiriş: %(t_name)s"
+msgid "«%(t_name)s» tegi o‘chiriladi. Davom etasizmi?"
+msgstr "«%(t_name)s» tegi öçiriladi. Davom etasizmi?"
 
 msgid "Tarjima yo‘q"
 msgstr "Tarjima yöq"
@@ -4783,18 +5353,6 @@ msgstr "Asl matn çapda, tarjima öngda."
 msgid "Tarjimalar — boshqaruv"
 msgstr "Tarjimalar — boşqaruv"
 
-msgid "Tarjimasizlarni AI bilan tarjima qilish"
-msgstr "Tarjimasizlarni AI bilan tarjima qiliş"
-
-msgid "Qoralamalarni tasdiqlash"
-msgstr "Qoralamalarni tasdiqlaş"
-
-msgid "Yo‘q"
-msgstr "Yöq"
-
-msgid "Hech narsa topilmadi."
-msgstr "Heç narsa topilmadi."
-
 msgid ""
 "Muallif bitta tilda yozadi; ikkinchi tilni AI yoki admin to‘ldiradi. Admin "
 "tasdiqlamaguncha u o‘quvchilarga ko‘rinmaydi."
@@ -4802,19 +5360,41 @@ msgstr ""
 "Muallif bitta tilda yozadi; ikkinçi tilni AI yoki admin töldiradi. Admin "
 "tasdiqlamagunça u öquvçilarga körinmaydi."
 
+msgid "Qoralamalarni tasdiqlash"
+msgstr "Qoralamalarni tasdiqlaş"
+
 msgid ""
-"%(n)s ta qoralama tasdiqlanadi va o‘quvchilarga ko‘rinadi. Davom etasizmi?"
+"AI orqali tarjima hozir ishlamaydi (kalit yoki hisob yo‘q). Matnni qo‘lda "
+"kiritib, tasdiqlang."
 msgstr ""
-"%(n)s ta qoralama tasdiqlanadi va öquvçilarga körinadi. Davom etasizmi?"
+"AI orqali tarjima hozir işlamaydi (kalit yoki hisob yöq). Matnni qölda "
+"kiritib, tasdiqlang."
+
+msgid ""
+"%(n)s ta qoralama tasdiqlanadi va o‘quvchilarga ko‘rinadi: %(s)s… Davom "
+"etasizmi?"
+msgstr ""
+"%(n)s ta qoralama tasdiqlanadi va öquvçilarga körinadi: %(s)s… Davom "
+"etasizmi?"
 
 msgid "Urinishlari"
 msgstr "Urinişlari"
+
+msgid "Qo‘lda yozilgan reyting keyingi to‘liq qayta hisobda o‘chib ketadi."
+msgstr "Qölda yozilgan reyting keyingi töliq qayta hisobda öçib ketadi."
 
 msgid "Parolni faqat foydalanuvchining o‘zi"
 msgstr "Parolni faqat foydalanuvçining özi"
 
 msgid "tiklash havolasi</a> orqali o‘zgartiradi."
 msgstr "tiklaş havolasi</a> orqali özgartiradi."
+
+msgid ""
+"Reytingli raundlarda qatnashgan bo‘lsa ham o‘chirish (boshqalarning o‘rni "
+"o‘zgaradi). Odatda hisobni bloklash yaxshiroq."
+msgstr ""
+"Reytingli raundlarda qatnaşgan bölsa ham öçiriş (boşqalarning örni "
+"özgaradi). Odatda hisobni bloklaş yaxşiroq."
 
 msgid "Butunlay o‘chirish"
 msgstr "Butunlay öçiriş"
@@ -4851,17 +5431,32 @@ msgstr "Login, email, ism, öquv joyi…"
 msgid "Foydalanuvchi qidirish"
 msgstr "Foydalanuvçi qidiriş"
 
+msgid "Masala yozuvchilar"
+msgstr "Masala yozuvçilar"
+
+msgid "Hech narsa yubormagan"
+msgstr "Heç narsa yubormagan"
+
+msgid "Barcha mamlakatlar"
+msgstr "Barça mamlakatlar"
+
 msgid "Oxirgi kirish"
 msgstr "Oxirgi kiriş"
 
-msgid "O‘quvchi"
-msgstr "Öquvçi"
+msgid "Qo‘shilgan"
+msgstr "Qöşilgan"
+
+msgid "Urinish"
+msgstr "Uriniş"
+
+msgid "Emailni nusxalash"
+msgstr "Emailni nusxalaş"
+
+msgid "Yozuvchi"
+msgstr "Yozuvçi"
 
 msgid "Foydalanuvchi topilmadi."
 msgstr "Foydalanuvçi topilmadi."
-
-msgid "<b>%(u_n_subs)s</b>urinish"
-msgstr "<b>%(u_n_subs)s</b>uriniş"
 
 msgid "Urinishlari: %(u_username)s"
 msgstr "Urinişlari: %(u_username)s"

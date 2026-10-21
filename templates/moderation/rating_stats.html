@@ -35,12 +35,8 @@
         <h3 class="rs-h">{% trans "Bosqichlar bo‘yicha" %}</h3>
         <ul class="rs-bars">{% for t in cr.tiers %}<li><span style="color: {{ t.color }}">{{ t.uz }}</span><i><b style="width: {{ t.pct }}%; background: {{ t.color }}"></b></i><span class="tabular">{{ t.n }}</span></li>{% endfor %}</ul>
       </div>
-      <div>
-        <h3 class="rs-h">{% trans "100 balllik oraliqlar" %}</h3>
-        <div class="ca-actbars rs-hist" role="img" aria-label="{% trans 'Reyting taqsimoti' %}">{% for b in cr.buckets %}<span title="{{ b.from }}–{{ b.from|add:99 }}: {{ b.n }}"><i style="height: {{ b.pct }}%"></i></span>{% endfor %}</div>
-        <p class="rs-axis tabular"><span>{{ cr.buckets.0.from }}</span><span>{{ cr.pool.hi }}</span></p>
-      </div>
     </div>
+    {% include "accounts/_rating_chart.html" with chart=cr.chart id="rc-contest" %}
     <p class="rs-top">{% for u in cr.top %}{% if not forloop.first %} · {% endif %}<b class="tabular">{{ forloop.counter }}.</b> <a class="ca-link" href="{% url 'profile' u.username %}">{{ u.username }}</a> <span class="tabular text-mute">{{ u.rating }}</span>{% endfor %}</p>
     {% else %}<p class="ca7-empty"><b>{% trans "Hali ochiq reytingda hech kim yo‘q" %}</b></p>{% endif %}
   </section>
@@ -102,15 +98,25 @@
       <div><dt>{% trans "O‘yinchiga duel" %}</dt><dd class="tabular">{{ dr.per_player }}</dd></div>
     </dl>
     <div class="rs-two">
-      <div><h3 class="rs-h">{% trans "100 balllik oraliqlar" %}</h3>
-        <div class="ca-actbars rs-hist" role="img" aria-label="{% trans 'Duel reyting taqsimoti' %}">{% for b in dr.buckets %}<span title="{{ b.from }}–{{ b.from|add:99 }}: {{ b.n }}"><i style="height: {{ b.pct }}%"></i></span>{% endfor %}</div>
-        <p class="rs-axis tabular"><span>{{ dr.buckets.0.from }}</span><span>{{ dr.spread.hi }}</span></p></div>
-      <div><h3 class="rs-h">{% trans "Faktlar" %}</h3>
-        <ul class="rs-rows">
-          <li><span>{% trans "Eng uzun g‘alaba seriyasi" %}</span><span>{% if dr.best_streak.who %}<a class="ca-link" href="{% url 'profile' dr.best_streak.who %}">{{ dr.best_streak.who }}</a> <b class="tabular">{{ dr.best_streak.n }}</b>{% else %}—{% endif %}</span></li>
-          <li><span>{% trans "Eng ko‘p o‘ynagan juftlik" %}</span><span>{% if dr.busiest_pair.who %}{{ dr.busiest_pair.who.0 }} – {{ dr.busiest_pair.who.1 }} <b class="tabular">{{ dr.busiest_pair.n }}</b>{% else %}—{% endif %}</span></li>
-          {% for u in dr.top %}<li><span>{{ forloop.counter }}-{% trans "o‘rin" %}</span><span><a class="ca-link" href="{% url 'profile' u.username %}">{{ u.username }}</a> <b class="tabular">{{ u.duel_rating }}</b></span></li>{% endfor %}
-        </ul></div>
+      <div>{% include "accounts/_rating_chart.html" with chart=dr.chart id="rc-duel" title=_("Duel reytingi taqsimoti") %}</div>
+      <div><h3 class="rs-h">{% trans "Reyting boshida" %}</h3>
+        <ol class="rs-podium">{% for u in dr.top %}<li><b class="tabular">{{ forloop.counter }}</b><a class="ca-link" href="{% url 'profile' u.username %}">{{ u.username }}</a><span class="tabular">{{ u.duel_rating }}</span></li>{% endfor %}</ol></div>
+    </div>
+    <ul class="rs-facts mt-6">{% for f in dr.facts %}<li><i data-lucide="{{ f.icon }}" class="lu" aria-hidden="true"></i><div><small>{{ f.title }}</small><b class="tabular">{{ f.value }}{% if f.unit %} <span class="text-mute">{{ f.unit }}</span>{% endif %}</b><span>{% if f.who %}<a class="ca-link" href="{% url 'profile' f.who %}">{{ f.who }}</a>{% endif %}{% if f.who and f.note %} · {% endif %}{{ f.note }}</span></div></li>{% endfor %}</ul>
+    <h3 class="rs-h mt-8">{% trans "Raqobatlar: kim kimga qarshi" %}</h3>
+    <div class="rs-rivals">
+      {% for g in dr.rivalries %}
+      <section class="rs-riv" aria-label="{{ g.title }}">
+        <h4><i data-lucide="{{ g.icon }}" class="lu" aria-hidden="true"></i>{{ g.title }}</h4>
+        {% if g.rows %}<ul>{% for r in g.rows %}
+          <li>
+            <p class="rs-riv-names"><a class="ca-link" href="{% url 'profile' r.a %}">{{ r.a }}</a><span class="rs-score tabular"><b>{{ r.wa }}</b><em>–</em><b>{{ r.wb }}</b></span><a class="ca-link" href="{% url 'profile' r.b %}">{{ r.b }}</a></p>
+            <span class="rs-vs" role="img" aria-label="{{ r.wa }} – {{ r.wb }}"><b style="width: {{ r.share }}%"></b></span>
+            <small class="tabular">{% blocktrans with n=r.n d=r.draws %}{{ n }} duel · {{ d }} durang{% endblocktrans %}</small>
+          </li>{% endfor %}</ul>
+        {% else %}<p class="text-sm text-mute">{% trans "Hozircha yetarli duel yo‘q." %}</p>{% endif %}
+      </section>
+      {% endfor %}
     </div>
     {% else %}<p class="ca7-empty"><b>{% trans "Hali tugagan duel yo‘q" %}</b></p>{% endif %}
   </section>

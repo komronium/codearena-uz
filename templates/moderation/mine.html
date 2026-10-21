@@ -1,12 +1,10 @@
 {% extends "base.html" %}
 {% block title %}{% trans "Mening masalalarim" %}{% endblock %}
+{% block band %}{% include "moderation/_band.html" with title=_("Mening masalalarim") subtitle=_("Yuborgan masalalaringiz adminlar ko‘rib chiqadi. Tasdiqlansa, saytda sizning nomingiz bilan chiqadi.") %}{% endblock %}
 {% block content %}
-<div class="mb-6 flex items-start justify-between gap-3">
-  <div>
-    <h1 class="ca-page-title">{% trans "Mening masalalarim" %}</h1>
-    <p class="mt-1 text-sm text-mute">{% trans "Yuborgan masalalaringiz adminlar ko‘rib chiqadi. Tasdiqlansa, saytda sizning nomingiz bilan chiqadi." %}</p>
-  </div>
+<div class="mb-4 flex flex-wrap gap-2">
   <a href="{% url 'moderation:submit' %}" class="ca-btn ca-btn-primary !py-1.5"><i data-lucide="circle-plus" class="lu" aria-hidden="true"></i>{% trans "Yangi masala" %}</a>
+  <a href="{% url 'moderation:contests' %}" class="ca-btn ca-btn-ghost !py-1.5"><i data-lucide="trophy" class="lu" aria-hidden="true"></i>{% trans "Qoralama raundlarim" %}</a>
 </div>
 {% if problems %}
 <div class="ca-panel !p-0 overflow-x-auto">

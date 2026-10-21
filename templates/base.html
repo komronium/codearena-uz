@@ -322,7 +322,7 @@ from /problems/suggest/. "go" is the second key of a "g <key>" shortcut.{% endco
     {% trans "<span><kbd class=\"ca-kbd\">↑</kbd><kbd class=\"ca-kbd\">↓</kbd> tanlash</span><span><kbd class=\"ca-kbd\">Enter</kbd> ochish</span><span><kbd class=\"ca-kbd\">?</kbd> yorliqlar</span>" %}
   </div>
 </dialog>
-<script type="application/json" id="ca-palette-data">{"suggest": "{% url 'problems:suggest' %}", "courses": "{% url 'learn:search' %}", "all": "{% url 'problems:list' %}", "items": [
+<script type="application/json" id="ca-palette-data">{"suggest": "{% url 'problems:suggest' %}",{% if user.is_staff %} "staff": "{% url 'moderation:search' %}",{% endif %} "courses": "{% url 'learn:search' %}", "all": "{% url 'problems:list' %}", "items": [
   {% if nav.live %}{"group": "{% jt "Tezkor" %}", "quick": true, "icon": "radio", "label": "{% jt "Jonli:" %} {{ nav.live.title|escapejs }}", "hint": "{% jt "musobaqa" %}", "url": "{% url 'contests:detail' nav.live.pk %}"},{% endif %}
   {% if streak_pill.daily %}{"group": "{% jt "Tezkor" %}", "quick": true, "icon": "calendar-check", "label": "{% jt "Bugungi masala:" %} {{ streak_pill.daily.problem.title|escapejs }}", "hint": "{% if streak_pill.done %}{% jt "yechilgan" %}{% else %}{% jt "+5 ball" %}{% endif %}", "url": "{% url 'problems:detail' streak_pill.daily.problem.slug %}"},{% endif %}
   {"group": "{% jt "Sahifalar" %}", "icon": "house", "label": "{% jt "Bosh sahifa" %}", "words": "home dashboard", "keys": "g h", "go": "h", "url": "{% url 'home' %}"},

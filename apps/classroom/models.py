@@ -78,6 +78,7 @@ class Duel(models.Model):
         FINISHED = "finished", _tl("Tugagan")
         DECLINED = "declined", _tl("Rad etilgan")
         EXPIRED = "expired", _tl("Muddati o‘tgan")
+        VOID = "void", _tl("Bekor qilingan")  # staff took the result back (rating replays without it)
 
     challenger = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="+")
     opponent = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.CASCADE,

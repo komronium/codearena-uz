@@ -1,8 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{% trans "Navbat — boshqaruv" %}{% endblock %}
+{% block band %}{% include "moderation/_band.html" with title=_("Navbat") subtitle=_("Foydalanuvchilar yuborgan va AI tuzgan qoralamalar. Tasdiqlangach masala saytda ko‘rinadi.") %}{% endblock %}
 {% block content %}
-
-<div class="mb-6">{% include "moderation/_header.html" with title="Navbat" subtitle=_("Foydalanuvchilar yuborgan va AI tuzgan qoralamalar. Tasdiqlangach masala saytda ko‘rinadi.") %}</div>
 
 {% if problems %}
 <div class="ca-panel !p-0 overflow-x-auto">

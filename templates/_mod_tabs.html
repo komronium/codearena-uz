@@ -4,14 +4,14 @@ the page. A contest's integrity report and replay count as Musobaqalar.{% endcom
 <nav class="ca-box ca7-side ca7-admin-nav" aria-label="{% trans 'Boshqaruv bo‘limlari' %}">
   <a href="{% url 'moderation:dashboard' %}"{% if ns == 'moderation' and un == 'dashboard' %} aria-current="page"{% endif %}><i data-lucide="layout-dashboard" class="lu" aria-hidden="true"></i>{% trans "Boshqaruv" %}</a>
   <p>{% trans "Kontent" %}</p>
-  <a href="{% url 'moderation:queue' %}"{% if ns == 'moderation' and un == 'queue' %} aria-current="page"{% endif %}><i data-lucide="inbox" class="lu" aria-hidden="true"></i>{% trans "Navbat" %}</a>
+  <a href="{% url 'moderation:queue' %}"{% if ns == 'moderation' and un == 'queue' %} aria-current="page"{% endif %}><i data-lucide="inbox" class="lu" aria-hidden="true"></i>{% trans "Navbat" %}{% if nav.staff.queue %}<b class="mt-n ml-auto">{{ nav.staff.queue }}</b>{% endif %}</a>
   <a href="{% url 'moderation:problems' %}"{% if ns == 'moderation' and un in 'problems,submit,problem_edit,ai_generate' %} aria-current="page"{% endif %}><i data-lucide="list" class="lu" aria-hidden="true"></i>{% trans "Masalalar" %}</a>
   <a href="{% url 'moderation:daily_problem' %}"{% if ns == 'moderation' and un in 'daily_problem,daily_problem_choose' %} aria-current="page"{% endif %}><i data-lucide="calendar" class="lu" aria-hidden="true"></i>{% trans "Kun masalasi" %}</a>
   <a href="{% url 'moderation:plans' %}"{% if ns == 'moderation' and un in 'plans,plan_new,plan_edit' %} aria-current="page"{% endif %}><i data-lucide="book-open" class="lu" aria-hidden="true"></i>{% trans "Kurslar" %}</a>
   <a href="{% url 'moderation:tags' %}"{% if ns == 'moderation' and un in 'tags,tag_edit' %} aria-current="page"{% endif %}><i data-lucide="tag" class="lu" aria-hidden="true"></i>{% trans "Teglar" %}</a>
-  <a href="{% url 'moderation:translations' %}"{% if ns == 'moderation' and un in 'translations,translation_edit' %} aria-current="page"{% endif %}><i data-lucide="languages" class="lu" aria-hidden="true"></i>{% trans "Tarjimalar" %}</a>
+  <a href="{% url 'moderation:translations' %}"{% if ns == 'moderation' and un in 'translations,translation_edit' %} aria-current="page"{% endif %}><i data-lucide="languages" class="lu" aria-hidden="true"></i>{% trans "Tarjimalar" %}{% if nav.staff.translations %}<b class="mt-n mt-n-soft ml-auto">{{ nav.staff.translations }}</b>{% endif %}</a>
   <p>{% trans "Musobaqa" %}</p>
-  <a href="{% url 'moderation:contests' %}"{% if ns == 'moderation' and un in 'contests,contest_new,contest_edit,contest_official' or ns == 'integrity' and un in 'contest_report,replay' %} aria-current="page"{% endif %}><i data-lucide="trophy" class="lu" aria-hidden="true"></i>{% trans "Musobaqalar" %}</a>
+  <a href="{% url 'moderation:contests' %}"{% if ns == 'moderation' and un in 'contests,contest_new,contest_edit,contest_official' or ns == 'integrity' and un in 'contest_report,replay' %} aria-current="page"{% endif %}><i data-lucide="trophy" class="lu" aria-hidden="true"></i>{% trans "Musobaqalar" %}{% if nav.staff.to_rate or nav.staff.rounds or nav.staff.flags %}<b class="mt-n ml-auto" title="{% trans 'Reyting kutayotgan, qoralama va ko‘rilmagan belgilar' %}">{{ nav.staff.to_rate|add:nav.staff.rounds|add:nav.staff.flags }}</b>{% endif %}</a>
   <a href="{% url 'moderation:submissions' %}"{% if ns == 'moderation' and un == 'submissions' %} aria-current="page"{% endif %}><i data-lucide="send" class="lu" aria-hidden="true"></i>{% trans "Urinishlar" %}</a>
   <a href="{% url 'moderation:duels' %}"{% if ns == 'moderation' and un == 'duels' %} aria-current="page"{% endif %}><i data-lucide="swords" class="lu" aria-hidden="true"></i>{% trans "Duellar" %}</a>
   <a href="{% url 'moderation:rating_stats' %}"{% if ns == 'moderation' and un == 'rating_stats' %} aria-current="page"{% endif %}><i data-lucide="chart-no-axes-column" class="lu" aria-hidden="true"></i>{% trans "Reyting statistikasi" %}</a>
@@ -19,7 +19,7 @@ the page. A contest's integrity report and replay count as Musobaqalar.{% endcom
   <a href="{% url 'moderation:users' %}"{% if ns == 'moderation' and un in 'users,user_edit' %} aria-current="page"{% endif %}><i data-lucide="users" class="lu" aria-hidden="true"></i>{% trans "Foydalanuvchilar" %}</a>
   <p>{% trans "Halollik" %}</p>
   <a href="{% url 'integrity:practice_report' %}"{% if ns == 'integrity' and un == 'practice_report' %} aria-current="page"{% endif %}><i data-lucide="shield" class="lu" aria-hidden="true"></i>{% trans "Mashq nazorati" %}</a>
-  <a href="{% url 'integrity:reports' %}"{% if ns == 'integrity' and un in 'reports,report_done' %} aria-current="page"{% endif %}><i data-lucide="flag" class="lu" aria-hidden="true"></i>{% trans "Shikoyatlar" %}</a>
+  <a href="{% url 'integrity:reports' %}"{% if ns == 'integrity' and un in 'reports,report_done' %} aria-current="page"{% endif %}><i data-lucide="flag" class="lu" aria-hidden="true"></i>{% trans "Shikoyatlar" %}{% if nav.staff.reports %}<b class="mt-n ml-auto">{{ nav.staff.reports }}</b>{% endif %}</a>
   <a href="{% url 'integrity:audit' %}"{% if ns == 'integrity' and un == 'audit' %} aria-current="page"{% endif %}><i data-lucide="scroll-text" class="lu" aria-hidden="true"></i>{% trans "Jurnal" %}</a>
 </nav>
 {% endwith %}

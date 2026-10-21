@@ -43,7 +43,9 @@ def _gate(request, slug):
     except Problem.DoesNotExist:
         raise Http404
     contest = active_contest_for(request.user, problem)
-    is_owner_or_staff = request.user.is_staff or problem.author_id == request.user.id
+    from apps.contests.services import blind_problem_ids
+    is_owner_or_staff = ((request.user.is_staff and problem.pk not in blind_problem_ids(request.user))
+                         or problem.author_id == request.user.id)
     if not is_owner_or_staff and (
         (not problem.is_public and contest is None) or in_upcoming_contest(problem)
     ):
@@ -238,9 +240,10 @@ def _own(request, pk):
     s = get_object_or_404(
         Submission.objects.select_related("problem", "language", "user"), pk=pk
     )
+    from apps.contests.services import blind_problem_ids
     if (
         s.user_id == request.user.pk
-        or request.user.is_staff
+        or (request.user.is_staff and s.problem_id not in blind_problem_ids(request.user))
     ):
         return s
     if (

@@ -1037,10 +1037,6 @@ msgid "Davlatni tanlang"
 msgstr "Choose a country"
 
 #: apps/accounts/google.py
-msgid "Xodim hisoblari Google orqali kira olmaydi. Parol bilan kiring."
-msgstr "Staff accounts can't sign in with Google. Sign in with a password."
-
-#: apps/accounts/google.py
 msgid ""
 "Google orqali kirish bekor qilindi yoki eskirdi. Qaytadan urinib ko‘ring."
 msgstr "Google sign-in was cancelled or expired. Try again."
@@ -1166,7 +1162,7 @@ msgstr "Starts: {when}"
 msgid "🔥 Trenddagi masala"
 msgstr "🔥 Trending problem"
 
-#: apps/accounts/models.py templates/moderation/contests.html
+#: apps/accounts/models.py
 msgid "Kutilmoqda"
 msgstr "Pending"
 
@@ -1481,6 +1477,10 @@ msgstr "Rejected"
 #: apps/classroom/models.py
 msgid "Muddati o‘tgan"
 msgstr "Expired"
+
+#: apps/classroom/models.py templates/contests/_standings_live.html
+msgid "Bekor qilingan"
+msgstr "Voided"
 
 #: apps/classroom/quiz_check.py
 msgid "javob variantlar orasida yo‘q"
@@ -1864,6 +1864,42 @@ msgid "Rasmiy reyting qo‘llandi"
 msgstr "Official rating applied"
 
 #: apps/integrity/models.py
+msgid "Masala ko‘rinishi o‘zgardi"
+msgstr "Problem visibility changed"
+
+#: apps/integrity/models.py
+msgid "Mavzu o‘chirildi"
+msgstr "Topic deleted"
+
+#: apps/integrity/models.py
+msgid "Kurs o‘chirildi"
+msgstr "Course deleted"
+
+#: apps/integrity/models.py
+msgid "Foydalanuvchi tahrirlandi"
+msgstr "User edited"
+
+#: apps/integrity/models.py
+msgid "Musobaqa tahrirlandi"
+msgstr "Contest edited"
+
+#: apps/integrity/models.py
+msgid "Masalalar yopildi"
+msgstr "Problems closed"
+
+#: apps/integrity/models.py
+msgid "Duel bekor qilindi"
+msgstr "Duel voided"
+
+#: apps/integrity/models.py
+msgid "Kun masalasi almashtirildi"
+msgstr "Daily problem swapped"
+
+#: apps/integrity/models.py
+msgid "Qoralama raund e’lon qilindi"
+msgstr "Draft round published"
+
+#: apps/integrity/models.py
 msgid "Shikoyat"
 msgstr "Report"
 
@@ -2085,6 +2121,10 @@ msgid " ({labels_level} darajasida {same_index_key_1}-si, jami {len_same} ta)"
 msgstr ""
 " ({same_index_key_1} of the {labels_level} level, {len_same} in total)"
 
+#: apps/moderation/forms.py templates/contests/list.html
+msgid "Mualliflar"
+msgstr "Authors"
+
 #: apps/moderation/forms.py apps/moderation/views.py
 msgid "Rasm hajmi 10 MB dan oshmasligi kerak."
 msgstr "The image must not exceed 10 MB."
@@ -2112,12 +2152,116 @@ msgid "Tugash vaqti allaqachon o'tib ketgan — sana va yilni tekshiring."
 msgstr "The end time has already passed — check the date and year."
 
 #: apps/moderation/forms.py
+msgid " · ishlatilgan"
+msgstr " · used"
+
+#: apps/moderation/forms.py
 msgid "0 — hamma uchun bir soat"
 msgstr "0 — one hour for everyone"
 
 #: apps/moderation/forms.py
+msgid "login, login … (tanlovdan tashqari qatnashadi)"
+msgstr "login, login … (they take part out of competition)"
+
+#: apps/moderation/forms.py
+msgid "Bunday foydalanuvchi yo‘q: {names}"
+msgstr "No such user: {names}"
+
+#: apps/moderation/forms.py
 msgid "Jami 1 dan {max_count} tagacha masala so‘rang."
 msgstr "Ask for 1 to {max_count} problems in total."
+
+#: apps/moderation/rating_stats.py
+msgid "So‘nggi 7 kun"
+msgstr "Last 7 days"
+
+#: apps/moderation/rating_stats.py
+msgid "Eng uzun g‘alaba seriyasi"
+msgstr "Longest win streak"
+
+#: apps/moderation/rating_stats.py
+msgid "Eng faol o‘yinchi"
+msgstr "Most active player"
+
+#: apps/moderation/rating_stats.py
+msgid "Bir duelda eng katta o‘sish"
+msgstr "Biggest rating gain in one duel"
+
+#: apps/moderation/rating_stats.py apps/moderation/rating_stats.py
+msgid "duel"
+msgstr "duels"
+
+#: apps/moderation/rating_stats.py
+msgid "Eng katta o‘sish"
+msgstr "Biggest gain"
+
+#: apps/moderation/rating_stats.py
+msgid "Eng katta tushish"
+msgstr "Biggest drop"
+
+#: apps/moderation/rating_stats.py
+msgid "Hamma vaqtdagi eng yuqori"
+msgstr "Highest ever"
+
+#: apps/moderation/rating_stats.py
+msgid "Eng ko‘p reytingli raund"
+msgstr "Most rated rounds"
+
+#: apps/moderation/rating_stats.py
+msgid "ta"
+msgstr "rounds"
+
+#: apps/moderation/rating_stats.py
+msgid "Eng gavjum raund"
+msgstr "Busiest round"
+
+#: apps/moderation/rating_stats.py
+msgid "kishi"
+msgstr "people"
+
+#: apps/moderation/rating_stats.py
+msgid "Hech qachon tushmaganlar"
+msgstr "Never dropped"
+
+#: apps/moderation/rating_stats.py
+msgid "reytingi bir marta ham kamaymagan"
+msgstr "rating never decreased"
+
+#: apps/moderation/rating_stats.py
+msgid "ketma-ket"
+msgstr "in a row"
+
+#: apps/moderation/rating_stats.py
+msgid "Eng yuqori g‘alaba ulushi"
+msgstr "Highest win rate"
+
+#: apps/moderation/rating_stats.py
+msgid "Eng ko‘p durang qilgan"
+msgstr "Most draws"
+
+#: apps/moderation/rating_stats.py
+msgid "Eng ko‘p o‘ynalgan"
+msgstr "Most played"
+
+#: apps/moderation/rating_stats.py
+msgid "Eng qizg‘in: deyarli teng hisob"
+msgstr "Closest: nearly even score"
+
+#: apps/moderation/rating_stats.py
+msgid "Eng bir tomonlama"
+msgstr "Most one-sided"
+
+#: apps/moderation/rating_stats.py
+msgid "durang"
+msgstr "draws"
+
+#: apps/moderation/rating_stats.py
+msgid "{other} ga qarshi"
+msgstr "against {other}"
+
+#: apps/moderation/rating_stats.py
+msgid "{g} duelda"
+msgstr "in {g} duels"
 
 #: apps/moderation/translations.py apps/moderation/translations.py
 msgid "AI kaliti sozlanmagan (ANTHROPIC_API_KEY)."
@@ -2139,9 +2283,13 @@ msgstr "The AI translation is ready."
 msgid "AI tarjimasi tayyor."
 msgstr "The AI is translating: refresh the page in a few seconds."
 
-#: apps/moderation/translations.py apps/moderation/translations.py
+#: apps/moderation/translations.py
 msgid "{n} ta matn tasdiqlandi."
 msgstr "{n} texts were confirmed."
+
+#: apps/moderation/translations.py
+msgid "{n} ta matn tasdiqlandi ({objs} ta element)."
+msgstr "{n} texts confirmed ({objs} items)."
 
 #: apps/moderation/translations.py
 msgid "{n} ta tarjima navbatga qo‘yildi."
@@ -2150,6 +2298,10 @@ msgstr "{n} translations were queued."
 #: apps/moderation/views.py templates/moderation/duels.html
 msgid "masala"
 msgstr "problem"
+
+#: apps/moderation/views.py
+msgid "Namunaviy yechim uchun tilni tanlang."
+msgstr "Choose a language for the reference solution."
 
 #: apps/moderation/views.py
 msgid "«{problem_title}» masalangiz tasdiqlandi va saytda chiqdi"
@@ -2162,6 +2314,10 @@ msgid ""
 msgstr ""
 "Your problem “{problem_title}” was rejected: you can edit it and send it "
 "again"
+
+#: apps/moderation/views.py
+msgid "Masalalar yopildi."
+msgstr "Problems closed."
 
 #: apps/moderation/views.py
 msgid "Rasmiy reyting qo‘llandi."
@@ -2187,13 +2343,58 @@ msgstr ""
 msgid "SQL masala uchun jadval, ma'lumot va kutilgan natija kerak."
 msgstr "An SQL problem needs a table, data and the expected result."
 
+#: apps/moderation/views.py
+msgid ""
+"Namunaviy yechim vaqtida tekshirilmadi: tekshiruvchi band. Keyinroq urinib "
+"ko‘ring."
+msgstr ""
+"The reference solution was not checked in time: the judge is busy. Try again"
+" later."
+
+#: apps/moderation/views.py
+msgid "Masalalarni belgilang va amalni tanlang."
+msgstr "Tick problems and choose an action."
+
+#: apps/moderation/views.py
+msgid "{n} ta masala yangilandi."
+msgstr "{n} problems updated."
+
+#: apps/moderation/views.py
+msgid ""
+"Navbatdagi yoki rad etilgan masalani ochib bo‘lmaydi: avval tasdiqlang."
+msgstr "A pending or rejected problem cannot be opened: approve it first."
+
+#: apps/moderation/views.py
+msgid "Qaysi mavzuga birlashtirilishini tanlang."
+msgstr "Choose which topic to merge into."
+
+#: apps/moderation/views.py
+msgid "Raundda masala yo‘q."
+msgstr "The round has no problems."
+
 #: apps/moderation/views.py templates/moderation/contest_official.html
 msgid "Musobaqa hali tugamagan."
 msgstr "The contest hasn't ended yet."
 
 #: apps/moderation/views.py
+msgid ""
+"Avval reytingni hisoblang: masalalar ochilgach urinishlar mashq ballariga "
+"o‘tadi."
+msgstr ""
+"Apply the rating first: once the problems open, attempts move to practice "
+"points."
+
+#: apps/moderation/views.py
+msgid "Bu raundning masalalari ochilmagan."
+msgstr "This round's problems are not open."
+
+#: apps/moderation/views.py
 msgid "Faqat tugagan rasmiy musobaqa uchun."
 msgstr "Only for a finished official contest."
+
+#: apps/moderation/views.py
+msgid "Faqat tugagan duelni bekor qilish mumkin."
+msgstr "Only a finished duel can be voided."
 
 #: apps/moderation/views.py
 msgid "admin hisobini o‘chirib bo‘lmaydi — avval admin huquqini oling"
@@ -2213,16 +2414,76 @@ msgstr ""
 "A problem for this date was chosen in another request. Refresh the page."
 
 #: apps/moderation/views.py
+msgid "Faqat rasm fayllari (PNG, JPG, GIF, WebP) ruxsat etilgan."
+msgstr "Only image files (PNG, JPG, GIF, WebP) are allowed."
+
+#: apps/moderation/views.py
+msgid "Bugungi rasm yuklash chegarasi tugadi."
+msgstr "Today's image upload limit is used up."
+
+#: apps/moderation/views.py
 msgid "Kamida bitta test kerak: qo'lda kiriting yoki ZIP yuklang."
 msgstr "At least one test is needed: enter it by hand or upload a ZIP."
+
+#: apps/moderation/views.py
+msgid "Masala saqlandi."
+msgstr "Problem saved."
+
+#: apps/moderation/views.py
+msgid "Namunaviy yechim kompilyatsiya bo‘lmadi: {log}"
+msgstr "The reference solution did not compile: {log}"
+
+#: apps/moderation/views.py
+msgid ""
+"Namunaviy yechim {n} ta testdan o‘tmadi (test raqami: {nums}). Test yoki "
+"yechimni tekshiring."
+msgstr ""
+"The reference solution failed {n} tests (test numbers: {nums}). Check the "
+"tests or the solution."
+
+#: apps/moderation/views.py
+msgid ""
+"Masala tugamagan musobaqada turibdi: musobaqa tugagach «Masalalarni ochish» "
+"bilan oching."
+msgstr ""
+"The problem is in a round that has not ended: open it with “Open the "
+"problems” after the round."
 
 #: apps/moderation/views.py
 msgid "{len_ids} ta urinish qayta tekshirishga yuborildi."
 msgstr "{len_ids} submissions were sent for rechecking."
 
 #: apps/moderation/views.py
+msgid "«{tag}» o‘chirildi."
+msgstr "“{tag}” deleted."
+
+#: apps/moderation/views.py
+msgid "«{a}» «{b}» bilan birlashtirildi."
+msgstr "“{a}” merged into “{b}”."
+
+#: apps/moderation/views.py
 msgid "«{plan_title}» o‘chirildi."
 msgstr "“{plan_title}” deleted."
+
+#: apps/moderation/views.py
+msgid ""
+"Reyting hisoblangan: masalalar ro‘yxati va ballarini o‘zgartirib bo‘lmaydi "
+"(jadval va reyting buziladi)."
+msgstr ""
+"The rating is applied: the problem list and points cannot be changed (the "
+"board and the rating would break)."
+
+#: apps/moderation/views.py
+msgid "Musobaqa saqlandi."
+msgstr "Contest saved."
+
+#: apps/moderation/views.py
+msgid ""
+"Boshlanish vaqti o‘tib ketgan: raund vaqtini yangilash uchun muallifga "
+"qaytaring."
+msgstr ""
+"The start time has passed: send the round back to its author to update the "
+"time."
 
 #: apps/moderation/views.py
 msgid "Masalalar ochildi; {granted} ta yechim amaliyot balliga o'tkazildi."
@@ -2233,6 +2494,10 @@ msgstr ""
 #: apps/moderation/views.py
 msgid "Reyting hisoblanmadi: musobaqa hali tugamagan."
 msgstr "The rating was not calculated: the contest hasn't ended yet."
+
+#: apps/moderation/views.py
+msgid "Duel #{n} bekor qilindi, duel reytinglari qayta hisoblandi."
+msgstr "Duel #{n} voided, duel ratings recalculated."
 
 #: apps/moderation/views.py
 msgid "O'zingizni admin huquqidan yoki faollikdan mahrum qila olmaysiz."
@@ -2257,20 +2522,16 @@ msgstr ""
 "now."
 
 #: apps/moderation/views.py
-msgid "Masala saqlandi."
-msgstr "Problem saved."
-
-#: apps/moderation/views.py
-msgid "{pending} ta ishtirokchi hali tekshirilmagan."
-msgstr "{pending} participants haven't been checked yet."
+msgid "Fayl rasm emas yoki buzilgan."
+msgstr "The file is not an image or is damaged."
 
 #: apps/moderation/views.py
 msgid ""
-"{len_drafts} ta masala tuzildi — Navbat bo'limida ko'rib chiqing va "
-"tasdiqlang."
+"Ochiq masala uchun kamida 2 ta test kerak: bitta test bilan noto‘g‘ri yechim"
+" ham o‘tib ketishi mumkin."
 msgstr ""
-"{len_drafts} problems were created — review and approve them in the Queue "
-"section."
+"An open problem needs at least 2 tests: with a single test a wrong solution "
+"can pass."
 
 #: apps/moderation/views.py
 msgid ""
@@ -2281,20 +2542,126 @@ msgstr ""
 "under your name."
 
 #: apps/moderation/views.py
+msgid "{n} tasi o‘tkazib yuborildi: tasdiqlanmagan yoki tugamagan musobaqada."
+msgstr "{n} skipped: not approved or in a round that has not ended."
+
+#: apps/moderation/views.py
+msgid "«{t}»: kamida 2 ta test kerak, tasdiqlab bo‘lmaydi."
+msgstr "“{t}”: at least 2 tests are needed, it cannot be approved."
+
+#: apps/moderation/views.py
+msgid ""
+"«{tag}» ishlatilmoqda: {n} ta masala, kurslar: {courses}. O‘chirishdan oldin"
+" boshqa mavzuga birlashtiring."
+msgstr ""
+"“{tag}” is in use: {n} problems, courses: {courses}. Merge it into another "
+"topic before deleting."
+
+#: apps/moderation/views.py
+msgid ""
+"«{plan_title}»: {n} ta o‘quvchi yozuvi bor. O‘chirmang, kursni yashiring "
+"(Ochiq belgisini olib tashlang)."
+msgstr ""
+"“{plan_title}”: {n} learner records exist. Do not delete it, hide the course"
+" (remove the Public mark)."
+
+#: apps/moderation/views.py
+msgid ""
+"{n} ta ko‘rilmagan o‘xshashlik belgisi bor: avval ko‘rib chiqing (yoki "
+"«Baribir ochish»)."
+msgstr ""
+"{n} similarity flags are unreviewed: review them first (or “Open anyway”)."
+
+#: apps/moderation/views.py
+msgid "{pending} ta ishtirokchi hali tekshirilmagan."
+msgstr "{pending} participants haven't been checked yet."
+
+#: apps/moderation/views.py
+msgid ""
+"Qo‘lda yozilgan reyting keyingi to‘liq qayta hisobda (replay) o‘chib ketadi."
+msgstr ""
+"A hand-written rating is erased at the next full recalculation (replay)."
+
+#: apps/moderation/views.py
+msgid ""
+"reytingli raundlarda qatnashgan: o‘chirsangiz boshqalarning o‘rni ham "
+"o‘zgaradi. Hisobni bloklang (Faol belgisini olib tashlang) yoki «Baribir "
+"o‘chirish» ni bosing"
+msgstr ""
+"took part in rated rounds: deleting would also move everyone else's places. "
+"Block the account (clear the Active mark) or press “Delete anyway”"
+
+#: apps/moderation/views.py
+msgid "{d} uchun tanlov bekor qilindi."
+msgstr "The pick for {d} was cancelled."
+
+#: apps/moderation/views.py
+msgid ""
+"{len_drafts} ta masala tuzildi — Navbat bo'limida ko'rib chiqing va "
+"tasdiqlang."
+msgstr ""
+"{len_drafts} problems were created — review and approve them in the Queue "
+"section."
+
+#: apps/moderation/views.py
+msgid "mualliflar o‘zgardi"
+msgstr "authors changed"
+
+#: apps/moderation/views.py
 msgid "«{contest_title}» musobaqasida urinishlar bor — o‘chirib bo‘lmaydi."
 msgstr "The contest “{contest_title}” has submissions — it can't be deleted."
 
 #: apps/moderation/views.py
-msgid "Reyting hisoblanmoqda: bir necha soniyadan keyin sahifani yangilang."
-msgstr "The rating is being calculated: refresh the page in a few seconds."
+msgid "tanlov bekor qilindi"
+msgstr "pick cancelled"
 
 #: apps/moderation/views.py
 msgid "AI xato: {e}"
 msgstr "AI error: {e}"
 
 #: apps/moderation/views.py
+msgid ""
+"Testlar o‘zgardi, lekin mavjud urinishlar eski testlar bilan baholangan: "
+"«Qayta tekshirish» ni bosing."
+msgstr ""
+"The tests changed, but existing attempts were judged with the old tests: "
+"press “Rejudge”."
+
+#: apps/moderation/views.py
 msgid "{problem_title}: {len_ids} ta urinish"
 msgstr "{problem_title}: {len_ids} submissions"
+
+#: apps/moderation/views.py
+msgid "Mualliflar o‘zgardi: {n} ta raundning reytingi qayta hisoblandi."
+msgstr "Authors changed: the rating of {n} rounds was recalculated."
+
+#: apps/moderation/views.py
+msgid "{labels}: kamida 2 ta test kerak."
+msgstr "{labels}: at least 2 tests are needed."
+
+#: apps/moderation/views.py
+msgid "«{t}» e’lon qilindi."
+msgstr "“{t}” published."
+
+#: apps/moderation/views.py
+msgid "Reyting hisoblanmoqda: bir necha soniyadan keyin sahifani yangilang."
+msgstr "The rating is being calculated: refresh the page in a few seconds."
+
+#: apps/moderation/views.py
+msgid "Mavzu topilmadi."
+msgstr "Topic not found."
+
+#: apps/moderation/views.py
+msgid ""
+"{n} ta ko‘rilmagan o‘xshashlik belgisi bor: avval «Halollik» da ko‘rib "
+"chiqing (yoki «Baribir hisoblash»)."
+msgstr ""
+"{n} similarity flags are unreviewed: review them in “Integrity” first (or "
+"“Apply anyway”)."
+
+#: apps/moderation/views.py
+msgid "Testlar o‘zgardi: {n} ta urinish qayta tekshirishga yuborildi."
+msgstr "The tests changed: {n} attempts were sent to be rejudged."
 
 #: apps/problems/models.py apps/problems/models.py
 msgid "Dasturlash"
@@ -2809,9 +3176,17 @@ msgstr "Translations"
 msgid "Musobaqa"
 msgstr "Contest"
 
+#: templates/_mod_tabs.html
+msgid "Reyting kutayotgan, qoralama va ko‘rilmagan belgilar"
+msgstr "Rounds waiting for a rating, drafts and unreviewed flags"
+
 #: templates/_mod_tabs.html templates/contests/_band.html
 msgid "Urinishlar"
 msgstr "Submissions"
+
+#: templates/_mod_tabs.html templates/moderation/rating_stats.html
+msgid "Reyting statistikasi"
+msgstr "Rating statistics"
 
 #: templates/_mod_tabs.html
 msgid "Odamlar"
@@ -3151,6 +3526,18 @@ msgstr "Name of a school, college or university"
 msgid "%(rank)s-o‘rin"
 msgstr "rank %(rank)s"
 
+#: templates/accounts/_rating_chart.html templates/accounts/clubs.html
+msgid "Siz"
+msgstr "You"
+
+#: templates/accounts/_rating_chart.html
+msgid "median"
+msgstr "median"
+
+#: templates/accounts/_rating_chart.html
+msgid "%(n)s kishi · median %(median)s"
+msgstr "%(n)s people · median %(median)s"
+
 #: templates/accounts/_tbadge.html templates/accounts/_tbadge.html
 msgid "Hali olinmagan"
 msgstr "Not earned yet"
@@ -3386,10 +3773,6 @@ msgstr "Create a club"
 msgid ""
 "Kiring</a>, so‘ng klub oching yoki do‘stingiz havolasi bilan qo‘shiling."
 msgstr "Sign in</a>, then create a club or join with a friend's link."
-
-#: templates/accounts/clubs.html templates/accounts/rating.html
-msgid "Siz"
-msgstr "You"
 
 #: templates/accounts/clubs.html templates/learn/list.html
 msgid "Nomi"
@@ -3965,7 +4348,7 @@ msgstr ""
 msgid "Mavzular bo‘yicha"
 msgstr "By topic"
 
-#: templates/accounts/profile.html templates/moderation/submit.html
+#: templates/accounts/profile.html
 msgid "Barcha masalalar"
 msgstr "All problems"
 
@@ -4424,7 +4807,7 @@ msgstr "How is it calculated?"
 msgid "Reyting jadvali"
 msgstr "Rating table"
 
-#: templates/accounts/rating.html templates/moderation/users.html
+#: templates/accounts/rating.html templates/moderation/tags.html
 msgid "Saralash"
 msgstr "Sort"
 
@@ -4636,7 +5019,7 @@ msgstr ""
 "Confirm your email: until you do, you won't count in the rating in contests "
 "and can't open duels."
 
-#: templates/base.html templates/moderation/dashboard.html
+#: templates/base.html templates/contests/_standings_live.html
 msgid "Tasdiqlash"
 msgstr "Confirm"
 
@@ -4814,7 +5197,7 @@ msgstr "Pick from the calendar"
 msgid "Sanani kk.oo.yyyy shaklida yozing"
 msgstr "Type the date as dd.mm.yyyy"
 
-#: templates/base.html
+#: templates/base.html templates/moderation/rating_stats.html
 msgid "Hozir"
 msgstr "Now"
 
@@ -4890,7 +5273,7 @@ msgstr "Nothing found. Try another word."
 msgid "o‘sish"
 msgstr "ascending"
 
-#: templates/base.html templates/problems/_daily_card.html
+#: templates/base.html templates/moderation/rating_stats.html
 msgid "kun"
 msgstr "day"
 
@@ -5592,6 +5975,10 @@ msgstr "You are taking part"
 msgid "Ro‘yxatdasiz"
 msgstr "You are signed up"
 
+#: templates/contests/_band.html templates/contests/_card.html
+msgid "Mualliflar:"
+msgstr "Authors:"
+
 #: templates/contests/_band.html templates/contests/list.html
 msgid "O‘rningiz"
 msgstr "Your rank"
@@ -5760,6 +6147,15 @@ msgid "Siz diskvalifikatsiya qilindingiz"
 msgstr "You were disqualified"
 
 #: templates/contests/_standings_live.html
+msgid "Siz muallifsiz: tanlovdan tashqari"
+msgstr "You are an author: out of competition"
+
+#: templates/contests/_standings_live.html
+msgid "Emailingiz tasdiqlanmagan: natijangiz reytingga hisoblanmaydi."
+msgstr ""
+"Your email is not confirmed: your result does not count towards the rating."
+
+#: templates/contests/_standings_live.html
 msgid "Natijalar jadvali (gorizontal suriladi)"
 msgstr "Results table (scrolls horizontally)"
 
@@ -5790,6 +6186,28 @@ msgid "Amal"
 msgstr "Action"
 
 #: templates/contests/_standings_live.html
+msgid "Muallif: tanlovdan tashqari"
+msgstr "Author: out of competition"
+
+#: templates/contests/_standings_live.html
+msgid "Email tasdiqlanmagan: bu natija reytingga hisoblanmaydi"
+msgstr "Email not confirmed: this result does not count towards the rating"
+
+#: templates/contests/_standings_live.html
+msgid "reytingsiz"
+msgstr "unrated"
+
+#: templates/contests/_standings_live.html
+msgid ""
+"Raund muallifi: tanlovdan tashqari, reytingga va o‘ringa ta’sir qilmaydi"
+msgstr ""
+"Round author: out of competition, does not affect the rating or the places"
+
+#: templates/contests/_standings_live.html
+msgid "muallif"
+msgstr "author"
+
+#: templates/contests/_standings_live.html
 msgid "tashqarida"
 msgstr "out of range"
 
@@ -5808,10 +6226,6 @@ msgid ""
 msgstr ""
 "AI penalty: the result is voided, counted as a wrong attempt, the problem is"
 " blocked"
-
-#: templates/contests/_standings_live.html templates/contests/submissions.html
-msgid "Bekor qilingan"
-msgstr "Voided"
 
 #: templates/contests/_standings_live.html
 msgid "birinchi bo‘lib yechdi,"
@@ -6052,6 +6466,7 @@ msgid "Umumiy savol"
 msgstr "General question"
 
 #: templates/contests/clarifications.html
+#: templates/moderation/duel_detail.html
 msgid "Savol"
 msgstr "Question"
 
@@ -6687,7 +7102,7 @@ msgstr "AI penalty"
 msgid "· xato urinish hisoblandi, masala bloklangan"
 msgstr "· counted as a wrong attempt, the problem is blocked"
 
-#: templates/contests/submissions.html
+#: templates/contests/submissions.html templates/moderation/submit.html
 msgid "Tiklash"
 msgstr "Restore"
 
@@ -7016,6 +7431,14 @@ msgid ""
 msgstr ""
 "<span class=\"font-semibold text-white\">%(rating_card_next_need)s</span> "
 "points to the %(rating_card_next_name)s level"
+
+#: templates/home/dashboard.html
+msgid ""
+"Siz bu raundning muallifisiz: tanlovdan tashqari qatnashasiz. "
+"%(live_n_problems)s masaladan %(live_solved)s tasi yechilgan."
+msgstr ""
+"You are an author of this round: you take part out of competition. "
+"%(live_solved)s of %(live_n_problems)s problems solved."
 
 #: templates/home/dashboard.html
 msgid ""
@@ -8012,7 +8435,7 @@ msgstr "Other topics"
 msgid "Shu masalani yechganlar soni"
 msgstr "How many people solved this problem"
 
-#: templates/learn/_problem_rows.html
+#: templates/learn/_problem_rows.html templates/moderation/problems.html
 msgid "Yechgan"
 msgstr "Solved by"
 
@@ -8024,7 +8447,7 @@ msgstr ""
 "<span class=\"ca-st is-solved\" title=\"Solved\"></span><span class=\"sr-"
 "only\">Solved</span>"
 
-#: templates/learn/_problem_rows.html templates/moderation/tags.html
+#: templates/learn/_problem_rows.html templates/problems/detail.html
 msgid "SQL"
 msgstr "SQL"
 
@@ -8277,7 +8700,7 @@ msgstr "Hidden"
 msgid "Siz shu yerdasiz"
 msgstr "You are here"
 
-#: templates/learn/hub.html
+#: templates/learn/hub.html templates/moderation/plans.html
 msgid "Qisman"
 msgstr "Partial"
 
@@ -8393,10 +8816,6 @@ msgid "· %(n_hidden)s ta masala hozir yopiq"
 msgstr "· %(n_hidden)s problems are closed right now"
 
 #: templates/learn/list.html
-msgid "<b class=\"tabular text-ink\">%(n_solved)s / %(rows)s</b> yechilgan"
-msgstr "<b class=\"tabular text-ink\">%(n_solved)s / %(rows)s</b> solved"
-
-#: templates/learn/list.html
 msgid "Ro‘yxatdan olish: %(p_title)s"
 msgstr "Remove from the list: %(p_title)s"
 
@@ -8420,7 +8839,7 @@ msgstr "Lists"
 msgid "O‘zgargan"
 msgstr "Changed"
 
-#: templates/learn/lists.html templates/moderation/problems.html
+#: templates/learn/lists.html templates/moderation/plans.html
 msgid "Ochiq"
 msgstr "Public"
 
@@ -8437,8 +8856,16 @@ msgid "Yaratish"
 msgstr "Create"
 
 #: templates/moderation/_duel_switch.html
-msgid "Duellar ochiq. Dars uchun yoping:"
-msgstr "The duels are open. Close them for a lesson:"
+msgid "Duellar ochiq"
+msgstr "Duels are open"
+
+#: templates/moderation/_duel_switch.html
+msgid "O‘quvchilar duel sahifasini ko‘rmaydi."
+msgstr "Students cannot see the duel page."
+
+#: templates/moderation/_duel_switch.html
+msgid "Dars paytida chalg‘imasligi uchun yoping."
+msgstr "Close it during a lesson so nobody is distracted."
 
 #: templates/moderation/_duel_switch.html
 msgid "45 daqiqa"
@@ -8453,8 +8880,8 @@ msgid "Men ochgunimcha"
 msgstr "Until I open them"
 
 #: templates/moderation/_duel_switch.html
-msgid "· %(duel_switch_1)s gacha"
-msgstr "· until %(duel_switch_1)s"
+msgid "· %(t)s gacha"
+msgstr "· until %(t)s"
 
 #: templates/moderation/ai_generate.html
 msgid "AI bilan masala yaratish"
@@ -8534,8 +8961,20 @@ msgid "Musobaqani tahrirlash"
 msgstr "Edit contest"
 
 #: templates/moderation/contest_form.html
+msgid "Yangi qoralama raund"
+msgstr "New draft round"
+
+#: templates/moderation/contest_form.html
 msgid "Yangi musobaqa"
 msgstr "New contest"
+
+#: templates/moderation/contest_form.html
+msgid ""
+"Qoralama: faqat siz va xodimlar ko‘radi. Tayyor bo‘lgach xodimga e’lon "
+"qilish uchun ayting."
+msgstr ""
+"Draft: only you and staff can see it. When it is ready, ask staff to publish"
+" it."
 
 #: templates/moderation/contest_form.html
 msgid ""
@@ -8544,6 +8983,30 @@ msgid ""
 msgstr ""
 "Add the contest problems hidden — nobody sees them until it starts. They can"
 " be opened after it ends."
+
+#: templates/moderation/contest_form.html
+msgid ""
+"Yopiq raund: masalalar ro‘yxati va ballari raund tugaguncha muallifdan "
+"boshqa xodimga ko‘rinmaydi. Boshqa sozlamalarni o‘zgartirish mumkin."
+msgstr ""
+"Blind round: the problem list and points are hidden from staff other than "
+"the authors until the round ends. Other settings can be changed."
+
+#: templates/moderation/contest_form.html
+msgid ""
+"Reyting hisoblangan: masalalar ro‘yxati va ballarini o‘zgartirib bo‘lmaydi. "
+"Mualliflarni o‘zgartirsangiz reyting o‘zi qayta hisoblanadi."
+msgstr ""
+"The rating is applied: the problem list and points cannot be changed. If you"
+" change the authors, the rating is recalculated automatically."
+
+#: templates/moderation/contest_form.html
+msgid ""
+"Musobaqa boshlangan: reytingli/yo‘qligi, divizion va shaxsiy vaqt "
+"o‘zgarmaydi."
+msgstr ""
+"The contest has started: whether it is rated, the division and the personal "
+"time do not change."
 
 #: templates/moderation/contest_form.html templates/moderation/plan_form.html
 msgid "Qaysi tilda yozyapsiz?"
@@ -8570,8 +9033,26 @@ msgid "Tugashi"
 msgstr "Ends"
 
 #: templates/moderation/contest_form.html
-msgid "Yorliq: A, B, C… · Ball — musobaqa balli"
-msgstr "Label: A, B, C… · Points — the contest points"
+msgid "Vaqt Toshkent bo‘yicha (UTC+5)."
+msgstr "Time is Tashkent time (UTC+5)."
+
+#: templates/moderation/contest_form.html
+#: templates/moderation/daily_problem.html
+msgid "Masala qidirish"
+msgstr "Search for a problem"
+
+#: templates/moderation/contest_form.html
+msgid "Ro‘yxatdan qidirish…"
+msgstr "Search the list…"
+
+#: templates/moderation/contest_form.html
+msgid ""
+"Yorliq: A, B, C… · Ball masala qiyinligiga qarab o‘zi qo‘yiladi (250–1000), "
+"xohlasangiz o‘zgartiring · «ishlatilgan» belgisi masala boshqa raundda "
+"bo‘lganini bildiradi"
+msgstr ""
+"Label: A, B, C… · Points follow the problem's difficulty (250–1000), change "
+"them if you wish · “used” means the problem was in another round"
 
 #: templates/moderation/contest_form.html
 #: templates/moderation/contest_form.html
@@ -8663,6 +9144,24 @@ msgstr ""
 "do this yourself."
 
 #: templates/moderation/contest_form.html
+msgid ""
+"Ular raund sahifasida ko‘rinadi, tanlovdan tashqari qatnashadi: reytingga, "
+"o‘ringa va nishonga ta’sir qilmaydi."
+msgstr ""
+"They are shown on the round page and take part out of competition: no effect"
+" on the rating, the place or badges."
+
+#: templates/moderation/contest_form.html
+msgid ""
+"Tugaguncha muallifdan boshqa xodim masalalar, testlar va yechimlarni staff "
+"sahifalarida ko‘rmaydi: egasi ham halol qatnasha oladi (muallif tanlovdan "
+"tashqari)."
+msgstr ""
+"Until it ends, staff other than the authors cannot see the problems, tests "
+"and solutions on staff pages: the owner can play fairly too (authors are out"
+" of competition)."
+
+#: templates/moderation/contest_form.html
 msgid "Nishon (ixtiyoriy)"
 msgstr "Badge (optional)"
 
@@ -8685,6 +9184,10 @@ msgstr "%(form_is_rated)s Rated contest"
 #: templates/moderation/contest_form.html
 msgid "%(form_auto_finish)s Natijani avtomatik e’lon qilish"
 msgstr "%(form_auto_finish)s Publish the result automatically"
+
+#: templates/moderation/contest_form.html
+msgid "%(f)s Yopiq raund"
+msgstr "%(f)s Blind round"
 
 #: templates/moderation/contest_official.html
 msgid ""
@@ -8731,6 +9234,10 @@ msgid "Rasmiy reytingni qo‘llash"
 msgstr "Apply the official rating"
 
 #: templates/moderation/contest_official.html
+#: templates/moderation/contests.html
+msgid "Rasmiy reyting"
+msgstr "Official rating"
+
 #: templates/moderation/contest_official.html
 msgid "%(contest_title)s — rasmiy reyting"
 msgstr "%(contest_title)s — official rating"
@@ -8777,17 +9284,140 @@ msgstr "%(pending)s participants haven't been checked yet."
 msgid "Qo‘llangan: %(contest_official_applied_at)s"
 msgstr "Applied: %(contest_official_applied_at)s"
 
+#: templates/moderation/contest_preview.html
+msgid "Reytingni oldindan ko‘rish"
+msgstr "Preview the rating"
+
+#: templates/moderation/contest_preview.html
+msgid "Reyting hisoblansa shunday o‘zgaradi. Hech narsa yozilmagan."
+msgstr ""
+"This is how the rating would change if applied. Nothing has been written."
+
+#: templates/moderation/contest_preview.html
+msgid "Reyting hisoblanadi. Davom etasizmi?"
+msgstr "The rating will be applied. Continue?"
+
+#: templates/moderation/contest_preview.html
+msgid "Baribir hisoblash"
+msgstr "Apply anyway"
+
+#: templates/moderation/contest_preview.html
+#: templates/moderation/contests.html
+msgid "Reytingni hisoblash"
+msgstr "Calculate the rating"
+
+#: templates/moderation/contest_preview.html
+msgid "Halollik hisoboti"
+msgstr "Integrity report"
+
+#: templates/moderation/contest_preview.html
+msgid ""
+"Emaili tasdiqlanmaganlar bu raundda reytingga kirmaydi (20.10.2026 dan "
+"beri)."
+msgstr ""
+"Unconfirmed emails do not enter the rating of this round (since 20.10.2026)."
+
+#: templates/moderation/contest_preview.html
+msgid "Oldin"
+msgstr "Before"
+
+#: templates/moderation/contest_preview.html
+msgid "Keyin"
+msgstr "After"
+
+#: templates/moderation/contest_preview.html
+msgid "Reytingga kiradigan ishtirokchi yo‘q."
+msgstr "No one enters the rating."
+
+#: templates/moderation/contest_preview.html
+msgid "%(n)s ta ko‘rilmagan o‘xshashlik belgisi bor."
+msgstr "%(n)s similarity flags are unreviewed."
+
 #: templates/moderation/contests.html
 msgid "Musobaqalar — boshqaruv"
 msgstr "Contests — admin"
 
 #: templates/moderation/contests.html
-msgid "· hisoblangan"
-msgstr "· calculated"
+msgid "Sizning qoralama raundlaringiz: staff e’lon qilgach hamma ko‘radi"
+msgstr "Your draft rounds: everyone sees them once staff publish them"
 
 #: templates/moderation/contests.html
-msgid "· hisoblanmagan"
-msgstr "· not calculated"
+msgid "Yaratish, tahrirlash, natijalar va halollik hisoboti"
+msgstr "Create, edit, results and the integrity report"
+
+#: templates/moderation/contests.html templates/moderation/dashboard.html
+msgid "Qoralama raund"
+msgstr "Draft round"
+
+#: templates/moderation/contests.html
+msgid "Raund nomi…"
+msgstr "Round name…"
+
+#: templates/moderation/contests.html
+msgid "Raund qidirish"
+msgstr "Search rounds"
+
+#: templates/moderation/contests.html templates/moderation/contests.html
+msgid "Jonli"
+msgstr "Live"
+
+#: templates/moderation/contests.html
+msgid "Reyting kutmoqda"
+msgstr "Awaiting rating"
+
+#: templates/moderation/contests.html templates/moderation/contests.html
+msgid "Qoralama"
+msgstr "Draft"
+
+#: templates/moderation/contests.html templates/moderation/rating_stats.html
+msgid "Raund"
+msgstr "Round"
+
+#: templates/moderation/contests.html
+msgid "Vaqti va holati"
+msgstr "Time and state"
+
+#: templates/moderation/contests.html
+msgid "Masala · qatnashgan"
+msgstr "Problems · entrants"
+
+#: templates/moderation/contests.html
+msgid "Yopiq raund: muallifdan boshqa xodim masalalarni tugaguncha ko‘rmaydi"
+msgstr ""
+"Blind round: staff other than the authors do not see the problems until it "
+"ends"
+
+#: templates/moderation/contests.html
+msgid "yopiq"
+msgstr "blind"
+
+#: templates/moderation/contests.html
+msgid "E’lon qilinmagan"
+msgstr "Not published"
+
+#: templates/moderation/contests.html
+msgid "hisoblangan"
+msgstr "applied"
+
+#: templates/moderation/contests.html
+msgid "reyting kutmoqda"
+msgstr "awaiting rating"
+
+#: templates/moderation/contests.html
+msgid ""
+"Raund e’lon qilinadi, masalalari tasdiqlanadi (raund tugaguncha yopiq "
+"qoladi). Davom etasizmi?"
+msgstr ""
+"The round will be published and its problems approved (they stay closed "
+"until the round ends). Continue?"
+
+#: templates/moderation/contests.html
+msgid "E’lon qilish"
+msgstr "Publish"
+
+#: templates/moderation/contests.html
+msgid "Reytingni ko‘rish"
+msgstr "See the rating"
 
 #: templates/moderation/contests.html
 msgid ""
@@ -8797,57 +9427,53 @@ msgstr ""
 "The problems will be opened and the participants' AC solutions will go to "
 "practice points. Continue?"
 
-#: templates/moderation/contests.html
+#: templates/moderation/contests.html templates/moderation/contests.html
 msgid "Masalalarni ochish"
 msgstr "Open the problems"
 
 #: templates/moderation/contests.html
-msgid "Reytingdan oldin ko‘rib chiqing"
-msgstr "Review before the rating"
-
-#: templates/moderation/contests.html
-msgid "ta o‘xshashlik hali ko‘rib chiqilmagan!"
-msgstr "similarities haven't been reviewed yet!"
+msgid "Reyting oldindan ko‘rish"
+msgstr "Preview the rating"
 
 #: templates/moderation/contests.html
 msgid ""
-"Reyting bir marta hisoblanadi va qaytarib bo‘lmaydi. Shubhali natijalar "
-"bekor qilinganmi?"
+"Reyting hisoblanadi. Keyin faqat to‘liq qayta hisob bilan o‘zgaradi. Davom "
+"etasizmi?"
 msgstr ""
-"The rating is calculated once and can't be undone. Have the suspicious "
-"results been voided?"
+"The rating will be applied. After that it only changes with a full "
+"recalculation. Continue?"
 
 #: templates/moderation/contests.html
-msgid "Reytingni hisoblash"
-msgstr "Calculate the rating"
+msgid "Baribir hisoblash (belgilar ochiq)"
+msgstr "Apply anyway (flags open)"
 
 #: templates/moderation/contests.html
-msgid "Rasmiy reyting"
-msgstr "Official rating"
+msgid "Baribir ochish (belgilar ochiq)"
+msgstr "Open anyway (flags open)"
 
 #: templates/moderation/contests.html
-msgid "Hali musobaqa yo‘q."
-msgstr "No contests yet."
+msgid ""
+"Masalalar yopiladi va raund yechimlari amaliyot ballidan olinadi. Davom "
+"etasizmi?"
+msgstr ""
+"The problems will be closed and the round's solutions removed from practice "
+"points. Continue?"
 
 #: templates/moderation/contests.html
-msgid "Birinchisini yarating"
-msgstr "Create the first one"
+msgid "Masalalarni yopish"
+msgstr "Close the problems"
 
 #: templates/moderation/contests.html
-msgid "Yaratish, tahrirlash, natijalar va halollik hisoboti"
-msgstr "Create, edit, results and the integrity report"
+msgid "Raund topilmadi."
+msgstr "No rounds found."
 
 #: templates/moderation/contests.html
-msgid "%(c_n_problems)s masala"
-msgstr "%(c_n_problems)s problems"
+msgid "Yangisini yarating"
+msgstr "Create a new one"
 
 #: templates/moderation/contests.html
-msgid "· %(c_n_hidden)s yashirin"
-msgstr "· %(c_n_hidden)s hidden"
-
-#: templates/moderation/contests.html
-msgid "%(c_n_open_flags)s ta o‘xshashlik ko‘rilmagan"
-msgstr "%(c_n_open_flags)s similarities not seen"
+msgid "%(n)s masala hali yopiq"
+msgstr "%(n)s problems still closed"
 
 #: templates/moderation/contests.html
 msgid "Boshqa amallar: %(c_title)s"
@@ -8860,6 +9486,14 @@ msgstr "The contest “%(c_title)s” and its results will be deleted. Continue?
 #: templates/moderation/daily_problem.html
 msgid "Kun masalasi — boshqaruv"
 msgstr "Daily problem — admin"
+
+#: templates/moderation/daily_problem.html
+msgid ""
+"Algoritm sanaga mos 5 ta variant tayyorlaydi. Admin tanlamasa, kunlik masala"
+" odatdagidek avtomatik belgilanadi."
+msgstr ""
+"The algorithm prepares 5 options that fit the date. If an admin doesn't "
+"pick, the daily problem is set automatically as usual."
 
 #: templates/moderation/daily_problem.html
 msgid ""
@@ -8889,6 +9523,15 @@ msgid "Variantlarni ko‘rish"
 msgstr "View the options"
 
 #: templates/moderation/daily_problem.html
+msgid "Tanlov bekor qilinadi, kunni sayt o‘zi belgilaydi. Davom etasizmi?"
+msgstr ""
+"The pick will be cancelled and the site chooses the day itself. Continue?"
+
+#: templates/moderation/daily_problem.html
+msgid "Tanlovni bekor qilish"
+msgstr "Cancel the pick"
+
+#: templates/moderation/daily_problem.html
 msgid "Avtomatik tanlangan"
 msgstr "Chosen automatically"
 
@@ -8903,6 +9546,22 @@ msgid ""
 msgstr ""
 "Today's problem has already been seen by users. We locked today's pick so "
 "streaks and bonuses don't change."
+
+#: templates/moderation/daily_problem.html
+msgid "Shoshilinch almashtirish (buzuq masala)"
+msgstr "Emergency swap (broken problem)"
+
+#: templates/moderation/daily_problem.html
+msgid ""
+"Faqat masala buzuq bo‘lsa: pastdagi variantlardan biri bugunga qo‘yiladi, "
+"jurnalga yoziladi."
+msgstr ""
+"Only if the problem is broken: one of the variants below is put in for today"
+" and the swap is logged."
+
+#: templates/moderation/daily_problem.html
+msgid "Bugungi masala almashtiriladi. Davom etasizmi?"
+msgstr "Today's problem will be replaced. Continue?"
 
 #: templates/moderation/daily_problem.html
 msgid ""
@@ -8937,6 +9596,23 @@ msgstr ""
 "options appear here."
 
 #: templates/moderation/daily_problem.html
+msgid "Boshqa masala tanlash"
+msgstr "Choose another problem"
+
+#: templates/moderation/daily_problem.html templates/moderation/problems.html
+msgid "Sarlavha yoki slug…"
+msgstr "Title or slug…"
+
+#: templates/moderation/daily_problem.html templates/moderation/dashboard.html
+msgid "Tanlash"
+msgstr "Pick"
+
+#: templates/moderation/daily_problem.html
+#: templates/moderation/translations.html
+msgid "Hech narsa topilmadi."
+msgstr "Nothing found."
+
+#: templates/moderation/daily_problem.html
 msgid "Yaqin kunlar"
 msgstr "The next days"
 
@@ -8953,12 +9629,12 @@ msgid "· Bugun"
 msgstr "· Today"
 
 #: templates/moderation/daily_problem.html
-msgid "Admin tanlagan"
-msgstr "Chosen by an admin"
+msgid "avtomatik"
+msgstr "automatic"
 
 #: templates/moderation/daily_problem.html
-msgid "Hali yaqin kunlar uchun reja yo‘q."
-msgstr "There's no plan for the next days yet."
+msgid "Admin tanlagan"
+msgstr "Chosen by an admin"
 
 #: templates/moderation/daily_problem.html
 msgid ""
@@ -8968,14 +9644,6 @@ msgstr ""
 "If there's no pick, the site picks a problem automatically on the first "
 "visit. An admin's pick is saved for the date and shown the same to every "
 "user."
-
-#: templates/moderation/daily_problem.html
-msgid ""
-"Algoritm sanaga mos 5 ta variant tayyorlaydi. Admin tanlamasa, kunlik masala"
-" odatdagidek avtomatik belgilanadi."
-msgstr ""
-"The algorithm prepares 5 options that fit the date. If an admin doesn't "
-"pick, the daily problem is set automatically as usual."
 
 #: templates/moderation/daily_problem.html
 msgid "%(day)s uchun tanlangan masala"
@@ -9013,6 +9681,30 @@ msgstr "Create with AI"
 msgid "Duellarni yopish"
 msgstr "Close the duels"
 
+#: templates/moderation/dashboard.html templates/moderation/dashboard.html
+msgid "Kutayotgan ishlar"
+msgstr "Pending work"
+
+#: templates/moderation/dashboard.html
+msgid "Tasdiq kutayotgan masala"
+msgstr "Problems awaiting approval"
+
+#: templates/moderation/dashboard.html
+msgid "Reyting kutayotgan raund"
+msgstr "Rounds awaiting a rating"
+
+#: templates/moderation/dashboard.html
+msgid "Belgi va shikoyat"
+msgstr "Flags and reports"
+
+#: templates/moderation/dashboard.html
+msgid "Tasdiqlanmagan tarjima"
+msgstr "Unconfirmed translations"
+
+#: templates/moderation/dashboard.html
+msgid "Kelgusi raund yo‘q"
+msgstr "No upcoming round"
+
 #: templates/moderation/dashboard.html
 msgid "Tasdiq kutayotgan masalalar"
 msgstr "Problems waiting for approval"
@@ -9021,7 +9713,7 @@ msgstr "Problems waiting for approval"
 msgid "Navbatni ochish"
 msgstr "Open the queue"
 
-#: templates/moderation/dashboard.html templates/moderation/queue.html
+#: templates/moderation/dashboard.html templates/moderation/problems.html
 msgid "Muallif"
 msgstr "Author"
 
@@ -9037,10 +9729,6 @@ msgstr ""
 msgid "<b>Navbat bo‘sh</b>Yangi masala yuborilganda shu yerda chiqadi."
 msgstr ""
 "<b>The queue is empty</b>When a new problem is submitted, it appears here."
-
-#: templates/moderation/dashboard.html
-msgid "Kutayotgan ishlar"
-msgstr "Pending work"
 
 #: templates/moderation/dashboard.html
 msgid ""
@@ -9063,16 +9751,16 @@ msgid "Boshqasini tanlash"
 msgstr "Pick another"
 
 #: templates/moderation/dashboard.html
-msgid "Tanlash"
-msgstr "Pick"
-
-#: templates/moderation/dashboard.html
 msgid "So‘nggi 14 kun"
 msgstr "Last 14 days"
 
 #: templates/moderation/dashboard.html
 msgid "Kunlik urinishlar soni"
 msgstr "Number of submissions per day"
+
+#: templates/moderation/dashboard.html
+msgid "Tekshiruvchi ishchisi ishlamayapti!"
+msgstr "The judge worker is not running!"
 
 #: templates/moderation/dashboard.html
 msgid "Tekshiruvchi sog‘lom: kutayotgan urinish yo‘q."
@@ -9082,7 +9770,7 @@ msgstr "The judge is healthy: no attempt is waiting."
 msgid "Sayt holati"
 msgstr "Site state"
 
-#: templates/moderation/dashboard.html templates/moderation/submit.html
+#: templates/moderation/dashboard.html templates/moderation/problems.html
 msgid "Mavzular"
 msgstr "Topics"
 
@@ -9117,9 +9805,63 @@ msgstr ""
 msgid "So‘nggi natija: %(judge_last)s."
 msgstr "The latest result: %(judge_last)s."
 
+#: templates/moderation/dashboard.html
+msgid "Ishchilar: %(w)s · qayta tekshiruv navbati: %(q)s."
+msgstr "Workers: %(w)s · rejudge queue: %(q)s."
+
+#: templates/moderation/duel_detail.html
+msgid "O‘yinchi ko‘rinishi"
+msgstr "Player view"
+
+#: templates/moderation/duel_detail.html
+msgid ""
+"Duel bekor qilinadi va barcha duel reytinglari qayta hisoblanadi. Davom "
+"etasizmi?"
+msgstr "The duel will be voided and every duel rating recalculated. Continue?"
+
+#: templates/moderation/duel_detail.html
+msgid "Duelni bekor qilish"
+msgstr "Void the duel"
+
+#: templates/moderation/duel_detail.html templates/moderation/duels.html
+msgid "g‘olib"
+msgstr "winner"
+
+#: templates/moderation/duel_detail.html
+msgid "Hali javob yo‘q"
+msgstr "No answers yet"
+
+#: templates/moderation/duel_detail.html
+msgid ""
+"Juda tez javoblar (1,5 soniyadan kam) savolni o‘qib ulgurish uchun juda "
+"qisqa: gumon belgisi, isbot emas."
+msgstr ""
+"Very fast answers (under 1.5 seconds) are too short to have read the "
+"question: a sign of suspicion, not proof."
+
+#: templates/moderation/duel_detail.html
+msgid "Duel #%(n)s"
+msgstr "Duel #%(n)s"
+
+#: templates/moderation/duel_detail.html
+msgid "o‘rtacha %(a)s s"
+msgstr "average %(a)s s"
+
+#: templates/moderation/duel_detail.html
+msgid "%(n)s ta 1,5 s dan tez"
+msgstr "%(n)s under 1.5 s"
+
 #: templates/moderation/duels.html
 msgid "Duellar — boshqaruv"
 msgstr "Duels — admin"
+
+#: templates/moderation/duels.html
+msgid ""
+"Har bir duel natijasi: kim nechta to‘g‘ri javob berdi, qancha vaqtda, "
+"reyting qanchaga o‘zgardi"
+msgstr ""
+"The result of each duel: who got how many right, in how long, and how the "
+"rating changed"
 
 #: templates/moderation/duels.html
 msgid "Jami duel"
@@ -9129,7 +9871,7 @@ msgstr "Total duels"
 msgid "Raqib kutmoqda"
 msgstr "Waiting for an opponent"
 
-#: templates/moderation/duels.html
+#: templates/moderation/duels.html templates/moderation/rating_stats.html
 msgid "O‘yinchilar"
 msgstr "Players"
 
@@ -9138,8 +9880,8 @@ msgid "Chaqirgan"
 msgstr "Challenged"
 
 #: templates/moderation/duels.html
-msgid "g‘olib"
-msgstr "winner"
+msgid "Javoblar va vaqtlar"
+msgstr "Answers and times"
 
 #: templates/moderation/duels.html
 msgid "qabul qilmagan"
@@ -9158,14 +9900,6 @@ msgid "Bu filtr bo‘yicha duel yo‘q."
 msgstr "No duel matches this filter."
 
 #: templates/moderation/duels.html
-msgid ""
-"Har bir duel natijasi: kim nechta to‘g‘ri javob berdi, qancha vaqtda, "
-"reyting qanchaga o‘zgardi"
-msgstr ""
-"The result of each duel: who got how many right, in how long, and how the "
-"rating changed"
-
-#: templates/moderation/duels.html
 msgid "%(s_right)s/%(n_questions)s to‘g‘ri · %(s_spent)s s"
 msgstr "%(s_right)s/%(n_questions)s correct · %(s_spent)s s"
 
@@ -9174,16 +9908,12 @@ msgid "o‘ynamoqda · %(s_seen)s/%(n_questions)s"
 msgstr "playing · %(s_seen)s/%(n_questions)s"
 
 #: templates/moderation/mine.html
-msgid ""
-"Yuborgan masalalaringiz adminlar ko‘rib chiqadi. Tasdiqlansa, saytda sizning"
-" nomingiz bilan chiqadi."
-msgstr ""
-"The problems you submit are reviewed by the admins. Once approved, they "
-"appear on the site under your name."
-
-#: templates/moderation/mine.html
 msgid "Yangi masala"
 msgstr "New problem"
+
+#: templates/moderation/mine.html
+msgid "Qoralama raundlarim"
+msgstr "My draft rounds"
 
 #: templates/moderation/mine.html templates/moderation/queue.html
 msgid "Sarlavha"
@@ -9209,6 +9939,14 @@ msgstr "Edit and resend"
 msgid "Hali masala yubormagansiz."
 msgstr "You haven't submitted a problem yet."
 
+#: templates/moderation/mine.html
+msgid ""
+"Yuborgan masalalaringiz adminlar ko‘rib chiqadi. Tasdiqlansa, saytda sizning"
+" nomingiz bilan chiqadi."
+msgstr ""
+"The problems you submit are reviewed by the admins. Once approved, they "
+"appear on the site under your name."
+
 #: templates/moderation/plan_form.html
 msgid "Yangi kurs"
 msgstr "New course"
@@ -9229,7 +9967,7 @@ msgstr "Theory (Markdown: headings, lists, ```code```)"
 msgid "«Kurs haqida» (Markdown, ixtiyoriy)"
 msgstr "“About the course” (Markdown, optional)"
 
-#: templates/moderation/plan_form.html
+#: templates/moderation/plan_form.html templates/moderation/problems.html
 msgid "Daraja"
 msgstr "Level"
 
@@ -9258,56 +9996,60 @@ msgid "Kurslar — boshqaruv"
 msgstr "Courses — admin"
 
 #: templates/moderation/plans.html
+msgid "Har kurs — bitta mavzu. Masalalar kursga teglari orqali tushadi."
+msgstr "Each course is one topic. Problems enter a course through its tags."
+
+#: templates/moderation/plans.html
 msgid "Kurs qo‘shish"
 msgstr "Add a course"
 
 #: templates/moderation/plans.html
-msgid "masala yo‘q"
-msgstr "no problems"
+msgid "nazariya"
+msgstr "theory"
 
 #: templates/moderation/plans.html
-msgid "faqat nazariya"
-msgstr "theory only"
+msgid "Bo‘sh"
+msgstr "Empty"
+
+#: templates/moderation/plans.html
+msgid "Yuqoriga"
+msgstr "Up"
+
+#: templates/moderation/plans.html
+msgid "Pastga"
+msgstr "Down"
 
 #: templates/moderation/plans.html
 msgid "Hali kurs yo‘q."
 msgstr "No courses yet."
 
 #: templates/moderation/plans.html
-msgid ""
-"Birinchisini tuzing</a> yoki <code>python manage.py add_courses</code> "
-"buyrug‘ini ishga tushiring."
-msgstr ""
-"Create the first one</a> or run the <code>python manage.py "
-"add_courses</code> command."
+msgid "Birinchisini tuzing"
+msgstr "Create the first one"
 
 #: templates/moderation/plans.html
-msgid "Har kurs — bitta mavzu. Masalalar kursga teglari orqali tushadi."
-msgstr "Each course is one topic. Problems enter a course through its tags."
+msgid "%(n)s ta kursda masala yetishmaydi."
+msgstr "%(n)s courses are short of problems."
 
 #: templates/moderation/plans.html
-msgid "%(p_get_level_display)s</span> <span>%(p_n_tags)s mavzu ·"
-msgstr "%(p_get_level_display)s</span> <span>%(p_n_tags)s topics ·"
+msgid "%(n)s kurs"
+msgstr "%(n)s courses"
 
 #: templates/moderation/plans.html
-msgid "%(p_n_open)s masala"
-msgstr "%(p_n_open)s problems"
+msgid "%(n)s mavzu"
+msgstr "%(n)s topics"
 
 #: templates/moderation/plans.html
-msgid ""
-"· <span class=\"text-warn\">tayyorlanmoqda: kamida %(course_min)s ta "
-"kerak</span>"
-msgstr ""
-"· <span class=\"text-warn\">being prepared: at least %(course_min)s "
-"needed</span>"
+msgid "Yuqoriga: %(t)s"
+msgstr "Up: %(t)s"
 
 #: templates/moderation/plans.html
-msgid "· <span class=\"text-mute\">kursda %(course_max)s tasi</span>"
-msgstr "· <span class=\"text-mute\">%(course_max)s in the course</span>"
+msgid "Pastga: %(t)s"
+msgstr "Down: %(t)s"
 
-#: templates/moderation/plans.html templates/moderation/problems.html
-msgid "Tahrirlash: %(p_title)s"
-msgstr "Edit: %(p_title)s"
+#: templates/moderation/plans.html
+msgid "Boshqa amallar: %(t)s"
+msgstr "More actions: %(t)s"
 
 #: templates/moderation/plans.html
 msgid ""
@@ -9317,21 +10059,17 @@ msgstr ""
 "The course “%(p_title)s” will be deleted. Problems and tags are not deleted."
 " Continue?"
 
-#: templates/moderation/plans.html
-msgid "O‘chirish: %(p_title)s"
-msgstr "Delete: %(p_title)s"
-
 #: templates/moderation/problems.html
 msgid "Masalalar — boshqaruv"
 msgstr "Problems — admin"
 
 #: templates/moderation/problems.html
-msgid "Sarlavha yoki slug…"
-msgstr "Title or slug…"
+msgid "Barcha masalalar: ochiq, yashirin, kutilayotgan"
+msgstr "All problems: public, hidden, pending"
 
-#: templates/moderation/problems.html templates/problems/list.html
-msgid "Masala qidirish"
-msgstr "Search for a problem"
+#: templates/moderation/problems.html
+msgid "Hech kim yechmagan"
+msgstr "Solved by nobody"
 
 #: templates/moderation/problems.html
 msgid "Testsiz"
@@ -9342,32 +10080,52 @@ msgid "Barcha darajalar"
 msgstr "All levels"
 
 #: templates/moderation/problems.html
-msgid "Testsiz — yechimlar tekshirilmaydi"
-msgstr "No tests — solutions aren't checked"
+msgid "Barcha mavzular"
+msgstr "All topics"
+
+#: templates/moderation/problems.html
+msgid "ta masala belgilandi"
+msgstr "problems ticked"
+
+#: templates/moderation/problems.html templates/moderation/problems.html
+msgid "Ochiq qilish"
+msgstr "Make public"
+
+#: templates/moderation/problems.html templates/moderation/problems.html
+msgid "Qayta tekshirish"
+msgstr "Recheck"
+
+#: templates/moderation/problems.html
+msgid "Mavzu qo‘shish…"
+msgstr "Add a topic…"
+
+#: templates/moderation/problems.html
+msgid "Bajarish"
+msgstr "Apply"
+
+#: templates/moderation/problems.html
+msgid "Hammasini belgilash"
+msgstr "Tick all"
+
+#: templates/moderation/problems.html
+msgid "Test"
+msgstr "Tests"
 
 #: templates/moderation/problems.html
 msgid "Urinishlarni ko‘rish"
 msgstr "View submissions"
 
 #: templates/moderation/problems.html
-msgid "Qayta tekshirish"
-msgstr "Recheck"
-
-#: templates/moderation/problems.html
-msgid "Ochiq qilish"
-msgstr "Make public"
-
-#: templates/moderation/problems.html
 msgid "Masala topilmadi."
 msgstr "No problem found."
 
 #: templates/moderation/problems.html
-msgid "Barcha masalalar: ochiq, yashirin, kutilayotgan"
-msgstr "All problems: public, hidden, pending"
+msgid "%(n)s tasi yopiq raundniki: ko‘rsatilmaydi"
+msgstr "%(n)s belong to a blind round: not shown"
 
 #: templates/moderation/problems.html
-msgid "%(p_n_tests)s test"
-msgstr "%(p_n_tests)s tests"
+msgid "Tahrirlash: %(p_title)s"
+msgstr "Edit: %(p_title)s"
 
 #: templates/moderation/problems.html
 msgid "Boshqa amallar: %(p_title)s"
@@ -9399,41 +10157,274 @@ msgstr ""
 "Drafts submitted by users and created by AI. Once approved, a problem "
 "appears on the site."
 
+#: templates/moderation/rating_stats.html
+msgid "Reyting hozir qanday, nima kutilmoqda va shu sur’atda nima bo‘ladi"
+msgstr "How the rating stands, what is coming and what happens at this pace"
+
+#: templates/moderation/rating_stats.html
+msgid "Ochiq reytingda"
+msgstr "On the open rating"
+
+#: templates/moderation/rating_stats.html
+#: templates/moderation/rating_stats.html
+msgid "O‘rtacha"
+msgstr "Average"
+
+#: templates/moderation/rating_stats.html
+msgid "Duelda"
+msgstr "In duels"
+
+#: templates/moderation/rating_stats.html
+#: templates/moderation/rating_stats.html
+msgid "Median"
+msgstr "Median"
+
+#: templates/moderation/rating_stats.html
+msgid "Tarqoqlik (σ)"
+msgstr "Spread (σ)"
+
+#: templates/moderation/rating_stats.html
+msgid "Eng past"
+msgstr "Lowest"
+
+#: templates/moderation/rating_stats.html
+#: templates/moderation/rating_stats.html
+msgid "Eng yuqori"
+msgstr "Highest"
+
+#: templates/moderation/rating_stats.html
+msgid "1- va 2-o‘rin farqi"
+msgstr "Gap between 1st and 2nd"
+
+#: templates/moderation/rating_stats.html
+msgid "Bosqichlar bo‘yicha"
+msgstr "By tier"
+
+#: templates/moderation/rating_stats.html
+msgid "Hali ochiq reytingda hech kim yo‘q"
+msgstr "No one is on the open rating yet"
+
+#: templates/moderation/rating_stats.html
+msgid "Nima kutilmoqda"
+msgstr "What is coming"
+
+#: templates/moderation/rating_stats.html
+msgid "Eng yaqini:"
+msgstr "Next one:"
+
+#: templates/moderation/rating_stats.html
+msgid ""
+"Rejalashtirilgan reytingli raund yo‘q: reyting qotib turadi, 90 kundan keyin"
+" o‘yinchilar jadvaldan tusha boshlaydi."
+msgstr ""
+"No rated round is planned: the rating stays frozen, and after 90 days "
+"players start dropping off the board."
+
+#: templates/moderation/rating_stats.html
+msgid "Yangi bosqichga oz qolgan"
+msgstr "Close to a new tier"
+
+#: templates/moderation/rating_stats.html
+msgid "Hozircha hech kim bosqich chegarasiga 40 balldan yaqin emas."
+msgstr "No one is within 40 points of a tier boundary yet."
+
+#: templates/moderation/rating_stats.html
+msgid "Bosqichdan tushish xavfida"
+msgstr "At risk of dropping a tier"
+
+#: templates/moderation/rating_stats.html
+msgid "Hozircha hech kim bosqich pastki chegarasiga 25 balldan yaqin emas."
+msgstr "No one is within 25 points of a tier's lower boundary yet."
+
+#: templates/moderation/rating_stats.html
+msgid "Shunday ketsa"
+msgstr "If it goes on like this"
+
+#: templates/moderation/rating_stats.html
+msgid "taxminiy, chiziqli hisob"
+msgstr "rough, linear estimate"
+
+#: templates/moderation/rating_stats.html
+msgid "So‘nggi raundlar"
+msgstr "Recent rounds"
+
+#: templates/moderation/rating_stats.html templates/moderation/users.html
+msgid "Yangi"
+msgstr "New"
+
+#: templates/moderation/rating_stats.html
+msgid "Maydon o‘rtachasi"
+msgstr "Field average"
+
+#: templates/moderation/rating_stats.html
+msgid "O‘rtacha ±"
+msgstr "Average ±"
+
+#: templates/moderation/rating_stats.html
+msgid "Ko‘tarilgan"
+msgstr "Gained"
+
+#: templates/moderation/rating_stats.html
+msgid "Oylar bo‘yicha"
+msgstr "By month"
+
+#: templates/moderation/rating_stats.html
+msgid "Hali reyting qo‘llangan raund yo‘q"
+msgstr "No round with an applied rating yet"
+
+#: templates/moderation/rating_stats.html
+msgid "Qiziq faktlar"
+msgstr "Interesting facts"
+
+#: templates/moderation/rating_stats.html
+msgid "Durang ulushi"
+msgstr "Share of draws"
+
+#: templates/moderation/rating_stats.html
+msgid "O‘yinchiga duel"
+msgstr "Duels per player"
+
+#: templates/moderation/rating_stats.html
+msgid "Reyting boshida"
+msgstr "At the top"
+
+#: templates/moderation/rating_stats.html
+msgid "Raqobatlar: kim kimga qarshi"
+msgstr "Rivalries: who against whom"
+
+#: templates/moderation/rating_stats.html
+msgid "Hozircha yetarli duel yo‘q."
+msgstr "Not enough duels yet."
+
+#: templates/moderation/rating_stats.html
+msgid "Hali tugagan duel yo‘q"
+msgstr "No finished duels yet"
+
+#: templates/moderation/rating_stats.html
+msgid "Duel reytingi taqsimoti"
+msgstr "Duel rating distribution"
+
+#: templates/moderation/rating_stats.html
+msgid "%(ever)s kishi reytingli o‘ynagan · %(rounds)s ta reytingli raund"
+msgstr "%(ever)s people played rated · %(rounds)s rated rounds"
+
+#: templates/moderation/rating_stats.html
+msgid "%(n)s ta reytingli raund kutilmoqda."
+msgstr "%(n)s rated rounds are expected."
+
+#: templates/moderation/rating_stats.html
+msgid ""
+"%(n)s kishi hali yangi o‘yinchi bosqichida: shu raundlarda ularning "
+"ko‘rsatilgan reytingi bonus bilan ko‘tariladi."
+msgstr ""
+"%(n)s people are still in the newcomer stage: their shown rating rises with "
+"a bonus in these rounds."
+
+#: templates/moderation/rating_stats.html
+msgid ""
+"%(n)s kishi 90 kunlik chegaraga yaqin: yaqin kunlarda reytingli raundda "
+"qatnashmasa, ochiq jadvaldan tushadi."
+msgstr ""
+"%(n)s people are close to the 90-day limit: if they do not play a rated "
+"round soon, they drop off the open board."
+
+#: templates/moderation/rating_stats.html
+msgid ""
+"Oxirgi oylarda oyiga o‘rtacha %(pace)s yangi kishi birinchi reytingli "
+"raundini o‘ynadi. Shu sur’atda va %(leaving)s kishi chiqib ketsa, ochiq "
+"reytingda 3 oydan keyin taxminan <b>%(pool)s</b> kishi bo‘ladi (hozir "
+"%(now)s)."
+msgstr ""
+"In recent months an average of %(pace)s new people a month played their "
+"first rated round. At this pace, and with %(leaving)s leaving, the open "
+"rating will have about <b>%(pool)s</b> people in 3 months (now %(now)s)."
+
+#: templates/moderation/rating_stats.html
+msgid ""
+"Yangilar reyting bonusi bilan tajribali o‘yinchilar darajasiga (~%(settle)s)"
+" ko‘tariladi, shuning uchun o‘rtacha reyting %(avg)s dan taxminan "
+"<b>%(avg3)s</b> ga qarab siljiydi."
+msgstr ""
+"Newcomers rise with the rating bonus to the level of experienced players "
+"(~%(settle)s), so the average rating moves from %(avg)s towards about "
+"<b>%(avg3)s</b>."
+
+#: templates/moderation/rating_stats.html
+msgid ""
+"Raund boshiga o‘rtacha o‘zgarish %(drift)s ball: 10 raunddan keyin umumiy "
+"darajaga ta’siri taxminan %(d10)s ball (tizim ataylab nolga yaqin ushlaydi)."
+msgstr ""
+"The average change per round is %(drift)s points: after 10 rounds the effect"
+" on the overall level is about %(d10)s points (the system deliberately keeps"
+" it near zero)."
+
+#: templates/moderation/rating_stats.html
+msgid "raundda o‘rtacha %(f)s reytingli ishtirokchi"
+msgstr "%(f)s rated entrants per round on average"
+
+#: templates/moderation/rating_stats.html
+msgid "%(e)s ishtirok · %(r)s raund · %(n)s yangi"
+msgstr "%(e)s entries · %(r)s rounds · %(n)s new"
+
+#: templates/moderation/rating_stats.html
+msgid "%(n)s ta tugagan duel · so‘nggi 7 kunda %(week)s"
+msgstr "%(n)s finished duels · %(week)s in the last 7 days"
+
+#: templates/moderation/rating_stats.html
+msgid "%(n)s duel · %(d)s durang"
+msgstr "%(n)s duels · %(d)s draws"
+
 #: templates/moderation/submissions.html
 msgid "Urinishlar — boshqaruv"
 msgstr "Submissions — admin"
-
-#: templates/moderation/submissions.html
-msgid "Masala (slug)"
-msgstr "Problem (slug)"
-
-#: templates/moderation/submissions.html
-msgid "a-plus-b…"
-msgstr "a-plus-b…"
-
-#: templates/moderation/submissions.html templates/submissions/_status.html
-msgid "MB"
-msgstr "MB"
 
 #: templates/moderation/submissions.html
 msgid "Har bir foydalanuvchi yuborgan yechimlar, eng yangisi tepada"
 msgstr "The solutions each user submitted, the newest first"
 
 #: templates/moderation/submissions.html
-msgid "%(s_passed)s/%(s_total)s · %(s_exec_ms)s ms"
-msgstr "%(s_passed)s/%(s_total)s · %(s_exec_ms)s ms"
+msgid "Qotib qolganlar"
+msgstr "Stuck ones"
 
-#: templates/moderation/submit.html templates/moderation/submit.html
+#: templates/moderation/submissions.html
+msgid "nom yoki slug…"
+msgstr "name or slug…"
+
+#: templates/moderation/submissions.html
+msgid "Sanadan"
+msgstr "Since"
+
+#: templates/moderation/submissions.html
+msgid "Vaqti"
+msgstr "Time"
+
+#: templates/moderation/submissions.html templates/moderation/submit.html
+msgid "Testlar"
+msgstr "Tests"
+
+#: templates/moderation/submissions.html
+msgid "qotib qolgan"
+msgstr "stuck"
+
+#: templates/moderation/submit.html
 msgid "Masalani tahrirlash"
 msgstr "Edit the problem"
 
 #: templates/moderation/submit.html
 msgid ""
 "Yangi masala yopiq holda saqlanadi. Amaliyot uchun bo‘lsa «Ochiq»ni "
-"belgilang; musobaqa masalasini yopiq qoldirib, musobaqaga ulang."
+"belgilang; musobaqa masalasini yopiq qoldiring."
 msgstr ""
-"A new problem is saved hidden. For practice, tick “Public”; leave a contest "
-"problem hidden and attach it to the contest."
+"A new problem is saved closed. For practice, tick “Public”; leave a round's "
+"problem closed."
+
+#: templates/moderation/submit.html
+msgid "Saqlanmagan qoralama topildi:"
+msgstr "An unsaved draft was found:"
+
+#: templates/moderation/submit.html
+msgid "Tashlab yuborish"
+msgstr "Discard"
 
 #: templates/moderation/submit.html
 msgid "Forma bo‘limlari"
@@ -9556,10 +10547,6 @@ msgid "Yashirin ma’lumotlarda kutilgan natija"
 msgstr "Expected result on the hidden data"
 
 #: templates/moderation/submit.html
-msgid "Testlar"
-msgstr "Tests"
-
-#: templates/moderation/submit.html
 msgid "Namuna testlar masala sahifasida ko‘rinadi"
 msgstr "Sample tests are shown on the problem page"
 
@@ -9586,6 +10573,22 @@ msgstr "Expected output"
 #: templates/moderation/submit.html
 msgid "Yana test"
 msgstr "Another test"
+
+#: templates/moderation/submit.html
+msgid "Namunaviy yechim bilan tekshirish (tavsiya etiladi)"
+msgstr "Check with a reference solution (recommended)"
+
+#: templates/moderation/submit.html
+msgid ""
+"Yechimingizni shu yerga qo‘ying: saqlashdan oldin u BARCHA testlardan "
+"o‘tishi kerak, o‘tmasa masala saqlanmaydi. Yechim saqlanmaydi."
+msgstr ""
+"Paste your solution here: before saving it must pass ALL tests, otherwise "
+"the problem is not saved. The solution is not stored."
+
+#: templates/moderation/submit.html templates/problems/leaders.html
+msgid "Kod"
+msgstr "Code"
 
 #: templates/moderation/submit.html
 msgid "Maslahatlar va tahlil"
@@ -9619,6 +10622,10 @@ msgstr ""
 #: templates/moderation/submit.html templates/moderation/submit.html
 msgid "Masalani saqlash"
 msgstr "Save the problem"
+
+#: templates/moderation/submit.html
+msgid "Testlar o‘zgarsa, mavjud urinishlarni qayta tekshirish"
+msgstr "If the tests change, rejudge existing attempts"
 
 #: templates/moderation/submit.html templates/moderation/tag_form.html
 msgid "Turi"
@@ -9749,6 +10756,34 @@ msgid "Teglar — boshqaruv"
 msgstr "Tags — admin"
 
 #: templates/moderation/tags.html
+msgid "Masalalarni saralaydi; kurs o‘z masalalarini teglaridan oladi"
+msgstr "It sorts the problems; a course takes its problems from its tags"
+
+#: templates/moderation/tags.html
+msgid "Teg…"
+msgstr "Tag…"
+
+#: templates/moderation/tags.html
+msgid "Teg qidirish"
+msgstr "Search tags"
+
+#: templates/moderation/tags.html
+msgid "Filtr"
+msgstr "Filter"
+
+#: templates/moderation/tags.html
+msgid "Masalasiz"
+msgstr "Without problems"
+
+#: templates/moderation/tags.html
+msgid "Kursda yo‘q"
+msgstr "Not in a course"
+
+#: templates/moderation/tags.html
+msgid "Masalalar soni"
+msgstr "Number of problems"
+
+#: templates/moderation/tags.html
 msgid "Teg"
 msgstr "Tag"
 
@@ -9759,6 +10794,18 @@ msgstr "Course"
 #: templates/moderation/tags.html
 msgid "kursda yo‘q"
 msgstr "not in a course"
+
+#: templates/moderation/tags.html
+msgid "Shu tegga birlashtirish"
+msgstr "Merge into this tag"
+
+#: templates/moderation/tags.html
+msgid "Birlashtirish"
+msgstr "Merge"
+
+#: templates/moderation/tags.html
+msgid "Ishlatilmoqda: avval birlashtiring"
+msgstr "In use: merge it first"
 
 #: templates/moderation/tags.html
 msgid "Teg yo‘q."
@@ -9773,24 +10820,16 @@ msgid "Qo‘shish"
 msgstr "Add"
 
 #: templates/moderation/tags.html
-msgid "Masalalarni saralaydi; kurs o‘z masalalarini teglaridan oladi"
-msgstr "It sorts the problems; a course takes its problems from its tags"
+msgid "Boshqa amallar: %(t_name)s"
+msgstr "More actions: %(t_name)s"
 
 #: templates/moderation/tags.html
-msgid "Tahrirlash: %(t_name)s"
-msgstr "Edit: %(t_name)s"
+msgid "«%(t_name)s» boshqa tegga birlashtiriladi va o‘chadi. Davom etasizmi?"
+msgstr "“%(t_name)s” will be merged into another tag and removed. Continue?"
 
 #: templates/moderation/tags.html
-msgid ""
-"«%(t_name)s» tegini o‘chirasizmi? Masalalar o‘chmaydi, kurslardan ham "
-"chiqadi."
-msgstr ""
-"Delete the tag “%(t_name)s”? The problems aren't deleted; it also leaves the"
-" courses."
-
-#: templates/moderation/tags.html
-msgid "O‘chirish: %(t_name)s"
-msgstr "Delete: %(t_name)s"
+msgid "«%(t_name)s» tegi o‘chiriladi. Davom etasizmi?"
+msgstr "The tag “%(t_name)s” will be deleted. Continue?"
 
 #: templates/moderation/translation_edit.html
 #: templates/moderation/translations.html
@@ -9799,10 +10838,6 @@ msgstr "Translation"
 
 #: templates/moderation/translation_edit.html
 #: templates/moderation/translations.html
-msgid "Qoralama"
-msgstr "Draft"
-
-#: templates/moderation/translation_edit.html
 msgid "Tarjima yo‘q"
 msgstr "No translation"
 
@@ -9836,20 +10871,36 @@ msgid "Tarjimalar — boshqaruv"
 msgstr "Translations — admin"
 
 #: templates/moderation/translations.html
+msgid ""
+"Muallif bitta tilda yozadi; ikkinchi tilni AI yoki admin to‘ldiradi. Admin "
+"tasdiqlamaguncha u o‘quvchilarga ko‘rinmaydi."
+msgstr ""
+"The author writes in one language; the AI or an admin fills in the other. "
+"Until an admin confirms it, readers don't see it."
+
+#: templates/moderation/translations.html
 msgid "Tarjima turi"
 msgstr "Translation type"
 
 #: templates/moderation/translations.html
-msgid "Tarjimasiz"
-msgstr "Untranslated"
+msgid "AI kaliti sozlanmagan"
+msgstr "The AI key is not set"
 
 #: templates/moderation/translations.html
-msgid "Tarjimasizlarni AI bilan tarjima qilish"
-msgstr "Translate the untranslated with AI"
+msgid "Tarjimasizlarni AI bilan"
+msgstr "Untranslated with AI"
 
 #: templates/moderation/translations.html
 msgid "Qoralamalarni tasdiqlash"
 msgstr "Confirm the drafts"
+
+#: templates/moderation/translations.html
+msgid ""
+"AI orqali tarjima hozir ishlamaydi (kalit yoki hisob yo‘q). Matnni qo‘lda "
+"kiritib, tasdiqlang."
+msgstr ""
+"AI translation is not working right now (no key or no balance). Enter the "
+"text by hand and confirm it."
 
 #: templates/moderation/translations.html
 msgid "Sarlavha yoki raqam…"
@@ -9860,29 +10911,18 @@ msgid "Asl til"
 msgstr "Original language"
 
 #: templates/moderation/translations.html
-msgid "Yo‘q"
-msgstr "None"
-
-#: templates/moderation/translations.html
-msgid "Hech narsa topilmadi."
-msgstr "Nothing found."
-
-#: templates/moderation/translations.html
-msgid ""
-"Muallif bitta tilda yozadi; ikkinchi tilni AI yoki admin to‘ldiradi. Admin "
-"tasdiqlamaguncha u o‘quvchilarga ko‘rinmaydi."
-msgstr ""
-"The author writes in one language; the AI or an admin fills in the other. "
-"Until an admin confirms it, readers don't see it."
-
-#: templates/moderation/translations.html
 msgid "Tarjimasiz %(n)s ta matn AI bilan tarjima qilinadi. Davom etasizmi?"
 msgstr "%(n)s untranslated texts will be translated with AI. Continue?"
 
 #: templates/moderation/translations.html
 msgid ""
-"%(n)s ta qoralama tasdiqlanadi va o‘quvchilarga ko‘rinadi. Davom etasizmi?"
-msgstr "%(n)s drafts will be confirmed and shown to readers. Continue?"
+"%(n)s ta qoralama tasdiqlanadi va o‘quvchilarga ko‘rinadi: %(s)s… Davom "
+"etasizmi?"
+msgstr "%(n)s drafts will be confirmed and shown to readers: %(s)s… Continue?"
+
+#: templates/moderation/user_form.html
+msgid "email tasdiqlanmagan"
+msgstr "email not confirmed"
 
 #: templates/moderation/user_form.html templates/moderation/users.html
 msgid "Urinishlari"
@@ -9891,6 +10931,10 @@ msgstr "Submissions"
 #: templates/moderation/user_form.html
 msgid "Login"
 msgstr "Login"
+
+#: templates/moderation/user_form.html
+msgid "Qo‘lda yozilgan reyting keyingi to‘liq qayta hisobda o‘chib ketadi."
+msgstr "A hand-written rating is erased at the next full recalculation."
 
 #: templates/moderation/user_form.html
 msgid "Amaliyot ball"
@@ -9908,9 +10952,17 @@ msgstr "reset link</a>."
 msgid "Huquqlar"
 msgstr "Permissions"
 
-#: templates/moderation/user_form.html templates/moderation/users.html
+#: templates/moderation/user_form.html
 msgid "Rol"
 msgstr "Role"
+
+#: templates/moderation/user_form.html
+msgid ""
+"Reytingli raundlarda qatnashgan bo‘lsa ham o‘chirish (boshqalarning o‘rni "
+"o‘zgaradi). Odatda hisobni bloklash yaxshiroq."
+msgstr ""
+"Delete even if they took part in rated rounds (everyone else's places "
+"change). Blocking the account is usually better."
 
 #: templates/moderation/user_form.html
 msgid "Butunlay o‘chirish"
@@ -9953,6 +11005,10 @@ msgid "Foydalanuvchilar — boshqaruv"
 msgstr "Users — admin"
 
 #: templates/moderation/users.html
+msgid "Rol, huquq va profil ma’lumotlari"
+msgstr "Role, permissions and profile details"
+
+#: templates/moderation/users.html
 msgid "Login, email, ism, o‘quv joyi…"
 msgstr "Login, email, name, school…"
 
@@ -9961,44 +11017,72 @@ msgid "Foydalanuvchi qidirish"
 msgstr "Search for a user"
 
 #: templates/moderation/users.html
+msgid "Guruh"
+msgstr "Group"
+
+#: templates/moderation/users.html
 msgid "Adminlar"
 msgstr "Admins"
 
 #: templates/moderation/users.html
-msgid "Yangi"
-msgstr "New"
+msgid "Masala yozuvchilar"
+msgstr "Problem setters"
 
 #: templates/moderation/users.html
+msgid "Email tasdiqlanmagan"
+msgstr "Email not confirmed"
+
+#: templates/moderation/users.html
+msgid "Hech narsa yubormagan"
+msgstr "Never submitted"
+
+#: templates/moderation/users.html
+msgid "Mamlakat"
+msgstr "Country"
+
+#: templates/moderation/users.html
+msgid "Barcha mamlakatlar"
+msgstr "All countries"
+
+#: templates/moderation/users.html templates/moderation/users.html
 msgid "Oxirgi kirish"
 msgstr "Last sign-in"
 
 #: templates/moderation/users.html
-msgid "O‘quvchi"
-msgstr "Student"
+msgid "Qo‘shilgan"
+msgstr "Joined"
 
 #: templates/moderation/users.html
-msgid "Bloklangan"
-msgstr "Blocked"
+msgid "Urinish"
+msgstr "Attempts"
+
+#: templates/moderation/users.html templates/moderation/users.html
+msgid "Emailni nusxalash"
+msgstr "Copy email"
 
 #: templates/moderation/users.html
 msgid "kirmagan"
 msgstr "never signed in"
 
 #: templates/moderation/users.html
+msgid "Bloklangan"
+msgstr "Blocked"
+
+#: templates/moderation/users.html
+msgid "Yozuvchi"
+msgstr "Setter"
+
+#: templates/moderation/users.html
+msgid "Emaili tasdiqlanmagan: yangi raundlarda reytingga kirmaydi"
+msgstr "Email not confirmed: does not enter the rating of new rounds"
+
+#: templates/moderation/users.html
+msgid "email ✗"
+msgstr "email ✗"
+
+#: templates/moderation/users.html
 msgid "Foydalanuvchi topilmadi."
 msgstr "No user found."
-
-#: templates/moderation/users.html
-msgid "Rol, huquq va profil ma’lumotlari"
-msgstr "Role, permissions and profile details"
-
-#: templates/moderation/users.html
-msgid "%(u_rating)s</b>reyting"
-msgstr "%(u_rating)s</b>rating"
-
-#: templates/moderation/users.html
-msgid "<b>%(u_n_subs)s</b>urinish"
-msgstr "<b>%(u_n_subs)s</b>submissions"
 
 #: templates/moderation/users.html
 msgid "Urinishlari: %(u_username)s"
@@ -11002,10 +12086,6 @@ msgstr ""
 msgid "Hajm"
 msgstr "Size"
 
-#: templates/problems/leaders.html templates/registration/telegram_login.html
-msgid "Kod"
-msgstr "Code"
-
 #: templates/problems/leaders.html
 msgid "Boshqalarning kodini ko‘rish uchun avval masalani o‘zingiz yeching."
 msgstr "To see others' code, solve the problem yourself first."
@@ -11514,6 +12594,10 @@ msgstr "Starting soon"
 #: templates/submissions/_status.html templates/submissions/list.html
 msgid "Xotira"
 msgstr "Memory"
+
+#: templates/submissions/_status.html templates/submissions/_status.html
+msgid "MB"
+msgstr "MB"
 
 #: templates/submissions/_status.html
 msgid ""

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}{% blocktrans with n=duel.pk %}Duel #{{ n }}{% endblocktrans %}{% endblock %}
+{% block band %}
+<section class="ca-hud" aria-labelledby="mod-title">
+  <div class="ca-hud-in">
+    <div>
+      <p class="ca-hud-lbl"><a class="text-white no-underline hover:underline" href="{% url 'moderation:duels' %}">{% trans "Duellar" %}</a></p>
+      <h1 id="mod-title">{{ duel.challenger.username }} – {{ duel.opponent.username|default:"?" }}</h1>
+      <p class="ca-hud-sub">{{ duel.get_language_display }} · {{ duel.get_status_display }}{% if duel.finished_at %} · {{ duel.finished_at|date:"d.m.Y H:i" }}{% endif %}</p>
+    </div>
+    <div class="ml-auto flex gap-2">
+      <a class="ca7-hbtn is-wide" href="{% url 'classroom:duel' duel.pk %}"><i data-lucide="eye" class="lu" aria-hidden="true"></i>{% trans "O‘yinchi ko‘rinishi" %}</a>
+      {% if duel.status == "finished" %}
+      <form method="post" action="{% url 'moderation:duel_void' duel.pk %}" data-confirm="{% trans 'Duel bekor qilinadi va barcha duel reytinglari qayta hisoblanadi. Davom etasizmi?' %}">{% csrf_token %}
+        <button class="ca-btn ca-btn-gold"><i data-lucide="undo-2" class="lu" aria-hidden="true"></i>{% trans "Duelni bekor qilish" %}</button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block content %}
+<div class="rs-two">
+  {% for s in sides %}
+  <section aria-label="{{ s.user.username }}">
+    <h2 class="rs-h flex items-center gap-2">{% include "accounts/_u7.html" with u=s.user you=False %}{% if duel.winner_id == s.user.pk %}<i data-lucide="trophy" class="lu text-gold" aria-label="{% trans 'g‘olib' %}"></i>{% endif %}
+      <span class="ml-auto text-sm font-normal text-mute tabular">{% if s.avg is not None %}{% blocktrans with a=s.avg %}o‘rtacha {{ a }} s{% endblocktrans %}{% endif %}{% if s.fast %} · <b class="text-warn">{% blocktrans with n=s.fast %}{{ n }} ta 1,5 s dan tez{% endblocktrans %}</b>{% endif %}</span></h2>
+    <table class="ca-table ca-table-flat mt">
+      <thead><tr><th scope="col" class="w-10">#</th><th scope="col">{% trans "Savol" %}</th><th scope="col">{% trans "Javob" %}</th><th scope="col" class="w-20 text-right">{% trans "Vaqt" %}</th><th scope="col" class="w-16"></th></tr></thead>
+      <tbody>{% for r in s.rows %}<tr><td class="tabular text-mute">{{ r.a.index|add:1 }}</td><td class="text-sm">{{ r.a.question.level|default:"" }}</td><td class="text-sm" translate="no">{{ r.a.answer|default:"—" }}</td><td class="text-right tabular {% if r.fast %}font-bold text-warn{% endif %}">{% if r.took is not None %}{{ r.took }} s{% else %}—{% endif %}</td><td>{% if r.a.correct %}<span class="st st-ok">✓</span>{% else %}<span class="st st-bad">✗</span>{% endif %}</td></tr>{% empty %}<tr><td colspan="5" class="text-mute">{% trans "Hali javob yo‘q" %}</td></tr>{% endfor %}</tbody>
+    </table>
+  </section>
+  {% endfor %}
+</div>
+<p class="ca7-foot-note">{% trans "Juda tez javoblar (1,5 soniyadan kam) savolni o‘qib ulgurish uchun juda qisqa: gumon belgisi, isbot emas." %}</p>
+{% endblock %}

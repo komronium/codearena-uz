@@ -1,30 +1,67 @@
-{% extends "base.html" %}
+{% extends "base.html" %}{% load tagnames %}
 {% block title %}{% trans "Teglar — boshqaruv" %}{% endblock %}
+{% block band %}
+<section class="ca-hud" aria-labelledby="mod-title">
+  <div class="ca-hud-in">
+    <div>
+      <h1 id="mod-title">{% trans "Teglar" %}</h1>
+      <p class="ca-hud-sub">{% trans "Masalalarni saralaydi; kurs o‘z masalalarini teglaridan oladi" %}</p>
+    </div>
+  </div>
+</section>
+{% endblock %}
 {% block content %}
-<div class="mb-6">{% include "moderation/_header.html" with title="Teglar" subtitle=_("Masalalarni saralaydi; kurs o‘z masalalarini teglaridan oladi") %}</div>
-
+{% comment %}Topics with the name learners see (Uzbek) beside the slug, a search, a sort by size and two filters (empty, no course).
+A topic in use cannot be deleted: it is merged into another one, which moves its problems and courses.{% endcomment %}
+<div class="mt-bar">
+  <form method="get" class="relative w-full max-w-xs" role="search">
+    {% if sort %}<input type="hidden" name="sort" value="{{ sort }}">{% endif %}{% if show %}<input type="hidden" name="show" value="{{ show }}">{% endif %}
+    <i data-lucide="search" class="lu pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-mute" aria-hidden="true"></i>
+    <input type="search" name="q" value="{{ q }}" placeholder="{% trans 'Teg…' %}" class="ca-input !py-1.5 pl-8 text-sm" aria-label="{% trans 'Teg qidirish' %}">
+  </form>
+  <nav class="ca7-seg" aria-label="{% trans 'Filtr' %}">
+    <a href="{% querystring show=None %}"{% if not show %} aria-current="true"{% endif %}>{% trans "Hammasi" %}</a>
+    <a href="{% querystring show='empty' %}"{% if show == 'empty' %} aria-current="true"{% endif %}>{% trans "Masalasiz" %}</a>
+    <a href="{% querystring show='nocourse' %}"{% if show == 'nocourse' %} aria-current="true"{% endif %}>{% trans "Kursda yo‘q" %}</a>
+  </nav>
+  <nav class="ca7-seg ml-auto" aria-label="{% trans 'Saralash' %}">
+    <a href="{% querystring sort=None %}"{% if not sort %} aria-current="true"{% endif %}>{% trans "Nomi" %}</a>
+    <a href="{% querystring sort='count' %}"{% if sort == 'count' %} aria-current="true"{% endif %}>{% trans "Masalalar soni" %}</a>
+  </nav>
+</div>
 <div class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:items-start">
-  <div class="ca-panel !p-0 overflow-x-auto">
-    <table class="ca-table">
-      <thead><tr><th scope="col">{% trans "Teg" %}</th><th scope="col">{% trans "Kurs" %}</th><th scope="col" class="text-right">{% trans "Masalalar" %}</th><th scope="col" class="text-right">{% trans "Amal" %}</th></tr></thead>
+  <div class="overflow-x-auto">
+    <table class="ca-table ca-table-flat mt">
+      <thead><tr><th scope="col">{% trans "Teg" %}</th><th scope="col">{% trans "Kurs" %}</th><th scope="col" class="w-24 text-right">{% trans "Masalalar" %}</th><th scope="col" class="w-40 text-right"><span class="sr-only">{% trans "Amallar" %}</span></th></tr></thead>
       <tbody>
       {% for t in tags %}
       <tr>
-        <td><a class="ca-link font-medium" href="{% url 'problems:list' %}?tag={{ t.name|urlencode }}">{{ t.name }}</a>{% if t.kind == "sql" %} <span class="ca-kind-sql">{% trans "SQL" %}</span>{% endif %}</td>
-        <td class="text-sm">{% for c in t.courses.all %}<a class="ca-link" href="{% url 'learn:course' c.slug %}">{{ c.title }}</a>{% if not forloop.last %}, {% endif %}{% empty %}<span class="text-warn">{% trans "kursda yo‘q" %}</span>{% endfor %}</td>
-        <td class="tabular text-right text-mute">{{ t.n }}</td>
+        <td><a class="ca-link font-medium" href="{% url 'problems:list' %}?tag={{ t.name|urlencode }}">{{ t.name|tag_uz }}</a>{% if t.kind == "sql" %} <span class="st st-off">SQL</span>{% endif %}<small class="block text-xs text-mute" translate="no">{{ t.name }}</small></td>
+        <td class="text-sm">{% for c in t.courses.all %}<a class="ca-link" href="{% url 'learn:course' c.slug %}">{{ c.title }}</a>{% if not forloop.last %}, {% endif %}{% empty %}<span class="st st-warn">{% trans "kursda yo‘q" %}</span>{% endfor %}</td>
+        <td class="tabular text-right {% if t.n %}font-semibold{% else %}text-mute{% endif %}">{{ t.n }}</td>
         <td class="text-right whitespace-nowrap">
-          <a href="{% url 'moderation:tag_edit' t.pk %}" class="ca-btn ca-btn-ghost !px-2 !py-1.5 text-xs" title="{% trans 'Tahrirlash' %}" aria-label="{% blocktrans with t_name=t.name %}Tahrirlash: {{ t_name }}{% endblocktrans %}"><i data-lucide="pencil" class="lu" aria-hidden="true"></i></a>
-          <form method="post" class="inline" action="{% url 'moderation:tag_delete' t.pk %}" data-confirm="{% blocktrans with t_name=t.name %}«{{ t_name }}» tegini o‘chirasizmi? Masalalar o‘chmaydi, kurslardan ham chiqadi.{% endblocktrans %}">{% csrf_token %}
-            <button class="ca-btn ca-btn-ghost !px-2 !py-1.5 text-xs text-bad" title="{% trans 'O‘chirish' %}" aria-label="{% blocktrans with t_name=t.name %}O‘chirish: {{ t_name }}{% endblocktrans %}"><i data-lucide="trash-2" class="lu" aria-hidden="true"></i></button>
-          </form>
+          <a href="{% url 'moderation:tag_edit' t.pk %}" class="ca-btn ca-btn-ghost !py-1"><i data-lucide="pencil" class="lu" aria-hidden="true"></i>{% trans "Tahrirlash" %}</a>
+          <details class="ca-dropdown" data-dropdown>
+            <summary class="ca-btn ca-btn-ghost !px-2 !py-1" aria-label="{% blocktrans with t_name=t.name %}Boshqa amallar: {{ t_name }}{% endblocktrans %}"><i data-lucide="ellipsis" class="lu" aria-hidden="true"></i></summary>
+            <div class="ca-dropdown-panel !w-72">
+              <form method="post" action="{% url 'moderation:tag_merge' t.pk %}" class="grid gap-2 p-2" data-confirm="{% blocktrans with t_name=t.name %}«{{ t_name }}» boshqa tegga birlashtiriladi va o‘chadi. Davom etasizmi?{% endblocktrans %}">{% csrf_token %}
+                <label class="ca-label !mb-0" for="into-{{ t.pk }}">{% trans "Shu tegga birlashtirish" %}</label>
+                <select id="into-{{ t.pk }}" name="into" class="ca-select !py-1 text-sm">{% for o in all_tags %}{% if o.pk != t.pk %}<option value="{{ o.pk }}">{{ o.name|tag_uz }}</option>{% endif %}{% endfor %}</select>
+                <button class="ca-btn ca-btn-primary !py-1"><i data-lucide="combine" class="lu" aria-hidden="true"></i>{% trans "Birlashtirish" %}</button>
+              </form>
+              <hr class="my-1 border-line">
+              <form method="post" action="{% url 'moderation:tag_delete' t.pk %}" data-confirm="{% blocktrans with t_name=t.name %}«{{ t_name }}» tegi o‘chiriladi. Davom etasizmi?{% endblocktrans %}">{% csrf_token %}
+                <button class="ca-dropdown-item w-full text-left text-bad"{% if t.n or t.courses.all %} disabled title="{% trans 'Ishlatilmoqda: avval birlashtiring' %}"{% endif %}><i data-lucide="trash-2" class="lu" aria-hidden="true"></i>{% trans "O‘chirish" %}</button>
+              </form>
+            </div>
+          </details>
         </td>
       </tr>
       {% empty %}<tr><td colspan="4" class="text-center text-mute">{% trans "Teg yo‘q." %}</td></tr>{% endfor %}
       </tbody>
     </table>
   </div>
-  <form method="post" class="ca-panel space-y-3">
+  <form method="post" class="ca-panel space-y-3 lg:sticky lg:top-20">
     {% csrf_token %}
     <h2 class="ca-section-title !mb-0"><label for="{{ form.name.id_for_label }}">{% trans "Yangi teg" %}</label></h2>
     {{ form.name }}{{ form.name.errors }}

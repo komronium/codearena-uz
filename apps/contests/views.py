@@ -28,9 +28,18 @@ from django.utils.translation import gettext as _t
 from django.utils.translation import gettext as _t
 
 
+def _contest_or_404(request, pk):
+    """The contest, 404 for a draft unless the person is staff or one of its authors."""
+    contest = get_object_or_404(Contest, pk=pk)
+    if contest.is_draft and not (request.user.is_authenticated and (request.user.is_staff
+                                                                    or contest.authors.filter(pk=request.user.pk).exists())):
+        raise Http404
+    return contest
+
+
 def contest_list(request):
     now = timezone.now()
-    contests = (Contest.objects.annotate(n_participants=Count("participations")).prefetch_related("authors")
+    contests = (Contest.objects.filter(is_draft=False).annotate(n_participants=Count("participations")).prefetch_related("authors")
                 .order_by("-start"))
     running = [c for c in contests if c.start <= now < c.end]
     upcoming = sorted((c for c in contests if c.start > now), key=lambda c: c.start)
@@ -100,7 +109,7 @@ def _standings(contest, problems=None):
 
 
 def contest_detail(request, pk):
-    contest = get_object_or_404(Contest, pk=pk)
+    contest = _contest_or_404(request, pk)
     problems = list(contest.contest_problems.select_related("problem"))
     me = (Participation.objects.filter(user=request.user, contest=contest).first()
           if request.user.is_authenticated else None)
@@ -176,7 +185,7 @@ def _personal_state(contest, me, user) -> dict | None:
 @require_POST
 def begin(request, pk):
     """"Boshlash": start this participant's own clock (once; it cannot be restarted or paused)."""
-    contest = get_object_or_404(Contest, pk=pk)
+    contest = _contest_or_404(request, pk)
     if not contest.personal_minutes or not contest.is_running:
         return HttpResponseBadRequest("no personal clock to start")
     me = get_object_or_404(Participation, user=request.user, contest=contest)
@@ -191,7 +200,7 @@ def begin(request, pk):
 
 def calendar_ics(request, pk):
     """The round as a calendar event (.ics) with a reminder an hour before, for any calendar app."""
-    contest = get_object_or_404(Contest, pk=pk)
+    contest = _contest_or_404(request, pk)
     url = request.build_absolute_uri(reverse("contests:detail", args=[contest.pk]))
 
     def stamp(moment):
@@ -223,7 +232,7 @@ def _virtual_ctx(request, contest) -> dict:
 @login_required
 @require_POST
 def register(request, pk):
-    contest = get_object_or_404(Contest, pk=pk)
+    contest = _contest_or_404(request, pk)
     if contest.has_ended:
         return HttpResponseBadRequest("contest has ended")
     if not access_allowed(request.user, contest, request.META.get("REMOTE_ADDR")):
@@ -233,7 +242,7 @@ def register(request, pk):
 
 
 def standings(request, pk):
-    contest = get_object_or_404(Contest, pk=pk)
+    contest = _contest_or_404(request, pk)
     problems = list(contest.contest_problems.select_related("problem"))
     rows = _standings(contest, problems)
     # a personal-clock round keeps everyone's results shut until it ends (a late starter must not learn the answers)
@@ -274,7 +283,7 @@ def submissions(request, pk):
     """Every submission of a round, newest first, for staff: during the round too, which the public
     status page hides. ?problem=<label>, ?user=<handle> and ?verdict=<code> narrow it; a standings
     cell opens one participant's one problem here. The table re-fetches itself while the round runs."""
-    contest = get_object_or_404(Contest, pk=pk)
+    contest = _contest_or_404(request, pk)
     problems = list(contest.contest_problems.select_related("problem"))
     label = {cp.problem_id: cp.label for cp in problems}
     f = {k: request.GET.get(k, "").strip() for k in ("problem", "user", "verdict")}
@@ -417,7 +426,7 @@ def _rerate(request, contest):
 
 @login_required
 def clarifications(request, pk):
-    contest = get_object_or_404(Contest, pk=pk)
+    contest = _contest_or_404(request, pk)
     registered = Participation.objects.filter(user=request.user, contest=contest).exists()
     if not registered and not request.user.is_staff:
         raise Http404
@@ -437,7 +446,7 @@ def clarifications(request, pk):
 @login_required
 @require_POST
 def ask_clarification(request, pk):
-    contest = get_object_or_404(Contest, pk=pk)
+    contest = _contest_or_404(request, pk)
     if not Participation.objects.filter(user=request.user, contest=contest).exists():
         return HttpResponseBadRequest("not registered")
     if contest.has_ended:
@@ -473,7 +482,7 @@ def answer_clarification(request, pk, cid):
 @login_required
 @require_POST
 def virtual_start(request, pk):
-    contest = get_object_or_404(Contest, pk=pk)
+    contest = _contest_or_404(request, pk)
     if not contest.has_ended:
         return HttpResponseBadRequest("contest has not ended")
     refusal = virtual.start_refusal(request.user, contest)

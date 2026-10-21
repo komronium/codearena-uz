@@ -27,7 +27,7 @@
     return i === q.length ? 3 : -1;
   };
 
-  let rows = [], active = 0, problems = [], courses = [], lastQ = "", timer = null, ctrl = null;
+  let rows = [], active = 0, problems = [], courses = [], staffHits = [], lastQ = "", timer = null, ctrl = null;
   const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
   function render() {
@@ -46,7 +46,8 @@
       hint: `${p.difficulty_label} · #${String(p.id).padStart(4, "0")}`, level: p.difficulty, solved: p.solved }));
     const pagesFirst = !q || (pages.length && pages[0].s <= 1) || !problems.length;
     const addCourses = () => courses.forEach((c) => add(caT("Kurslar"), { label: c.title, url: c.url, icon: c.icon, hint: c.hint }));
-    if (pagesFirst) { addPages(); addCourses(); addProblems(); } else { addCourses(); addProblems(); addPages(); }
+    const addStaff = () => staffHits.forEach((r) => add(caT("Boshqaruv"), r));
+    if (pagesFirst) { addPages(); addStaff(); addCourses(); addProblems(); } else { addStaff(); addCourses(); addProblems(); addPages(); }
     if (q) add(caT("Masalalar"), { label: caT("«{q}» bo‘yicha barcha masalalar").replace("{q}", input.value.trim()), url: `${data.all}?q=${encodeURIComponent(input.value.trim())}`, icon: "search" });
 
     rows = [];
@@ -89,12 +90,12 @@
     if (q === lastQ) return;
     lastQ = q;
     ctrl?.abort();
-    if (!q) { problems = []; courses = []; render(); return; }
+    if (!q) { problems = []; courses = []; staffHits = []; render(); return; }
     ctrl = new AbortController();
     const get = (url) => (url ? fetch(`${url}?q=${encodeURIComponent(q)}`, { signal: ctrl.signal, headers: { Accept: "application/json" } })
       .then((r) => r.json()).then((j) => j.results || []) : Promise.resolve([]));
-    Promise.all([get(data.suggest), get(data.courses)])
-      .then(([p, c]) => { problems = p; courses = c; render(); }).catch(() => {});
+    Promise.all([get(data.suggest), get(data.courses), get(data.staff)])
+      .then(([p, c, s]) => { problems = p; courses = c; staffHits = s; render(); }).catch(() => {});
   }
 
   input.addEventListener("input", () => {
@@ -120,7 +121,7 @@
   const open = () => {
     if (dlg.open) return;
     document.querySelectorAll("dialog[open]").forEach((d) => d.id !== "ca-tier-up" && d.close());
-    input.value = ""; lastQ = ""; problems = []; courses = []; active = 0;
+    input.value = ""; lastQ = ""; problems = []; courses = []; staffHits = []; active = 0;
     render();
     dlg.showModal();
     input.focus();

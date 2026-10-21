@@ -12,7 +12,7 @@ def site_counts() -> dict:
         from apps.contests.models import Contest
         from apps.problems.skills import open_problems
         from apps.submissions.models import Submission
-        counts = {"problems": open_problems().count(), "contests": Contest.objects.count(),
+        counts = {"problems": open_problems().count(), "contests": Contest.objects.filter(is_draft=False).count(),
                   "submissions": Submission.objects.count()}
         cache.set("site-counts", counts, 600)
     return counts

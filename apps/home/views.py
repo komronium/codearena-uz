@@ -82,12 +82,12 @@ def home(request):
         request.session["ref"] = ref  # an invite link: remembered until they sign up (accounts.views.register)
     now = timezone.now()
     daily = daily_for()
-    contests = Contest.objects.annotate(n_participants=Count("participations"))  # contests/_row.html shows it
+    contests = Contest.objects.filter(is_draft=False).annotate(n_participants=Count("participations"))  # contests/_row.html shows it
     running = list(contests.filter(start__lte=now, end__gt=now).order_by("end")[:3])
     upcoming = list(contests.filter(start__gt=now).order_by("start")[:3])
     if not request.user.is_authenticated:
         # the latest rated contest whose ratings are applied: its real top three, not a mock-up
-        last_rated = (Contest.objects.filter(is_rated=True, end__lte=now, participations__rating_after__isnull=False)
+        last_rated = (Contest.objects.filter(is_draft=False, is_rated=True, end__lte=now, participations__rating_after__isnull=False)
                       .order_by("-end").distinct().first())
         # the hero's first line: the round running now, else the next one, that anyone may enter
         next_round = (running + upcoming or [None])[0]

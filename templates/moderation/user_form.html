@@ -1,18 +1,21 @@
 {% extends "base.html" %}
 {% block title %}{% blocktrans with obj_username=obj.username %}{{ obj_username }} — tahrirlash{% endblocktrans %}{% endblock %}
+{% block band %}
+<section class="ca-hud" aria-labelledby="mod-title">
+  <div class="ca-hud-in">
+    <div class="min-w-0">
+      <p class="ca-hud-lbl"><a class="text-white no-underline hover:underline" href="{% url 'moderation:users' %}">{% trans "Foydalanuvchilar" %}</a></p>
+      <h1 id="mod-title" translate="no">{{ obj.username }}</h1>
+      <p class="ca-hud-sub">{{ obj.email|default:"" }}{% if not obj.email_verified_at %} · <b class="text-warn">{% trans "email tasdiqlanmagan" %}</b>{% endif %}</p>
+    </div>
+    <div class="ml-auto flex gap-2">
+      <a href="{% url 'moderation:submissions' %}?user={{ obj.username|urlencode }}" class="ca7-hbtn is-wide"><i data-lucide="history" class="lu" aria-hidden="true"></i>{% trans "Urinishlari" %}</a>
+      <a href="{% url 'profile' obj.username %}" class="ca7-hbtn is-wide"><i data-lucide="user" class="lu" aria-hidden="true"></i>{% trans "Profil" %}</a>
+    </div>
+  </div>
+</section>
+{% endblock %}
 {% block content %}
-
-<div class="mb-6 flex flex-wrap items-end justify-between gap-3">
-  <div>
-    <a class="ca-link mb-2 inline-block text-sm text-mute" href="{% url 'moderation:users' %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>{% trans "Foydalanuvchilar" %}</a>
-    <h1 class="ca-page-title" translate="no">{{ obj.username }}</h1>
-  </div>
-  <div class="flex gap-2">
-    <a href="{% url 'moderation:submissions' %}?user={{ obj.username|urlencode }}" class="ca-btn ca-btn-ghost"><i data-lucide="history" class="lu" aria-hidden="true"></i>{% trans "Urinishlari" %}</a>
-    <a href="{% url 'profile' obj.username %}" class="ca-btn ca-btn-ghost"><i data-lucide="user" class="lu" aria-hidden="true"></i>{% trans "Profil" %}</a>
-  </div>
-</div>
-
 {% if form.non_field_errors %}<div class="ca-alert ca-alert-bad mb-4" role="alert">{{ form.non_field_errors }}</div>{% endif %}
 
 <form method="post" novalidate class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:items-start">
@@ -28,7 +31,7 @@
       <div><label class="ca-label" for="{{ form.location.id_for_label }}">{% trans "Shahar" %}</label>{{ form.location }}</div>
     </div>
     <div class="grid gap-4 sm:grid-cols-2">
-      <div><label class="ca-label" for="{{ form.rating.id_for_label }}">{% trans "Reyting" %}</label>{{ form.rating }}{{ form.rating.errors }}</div>
+      <div><label class="ca-label" for="{{ form.rating.id_for_label }}">{% trans "Reyting" %}</label>{{ form.rating }}{{ form.rating.errors }}<p class="mt-1 text-xs text-mute">{% trans "Qo‘lda yozilgan reyting keyingi to‘liq qayta hisobda o‘chib ketadi." %}</p></div>
       <div><p class="ca-label">{% trans "Amaliyot ball" %}</p><p class="tabular py-2 text-sm">{% blocktrans with form_instance_practice_points=form.instance.practice_points %}{{ form_instance_practice_points }} <span class="text-mute">· yechilgan masalalardan hisoblanadi</span>{% endblocktrans %}</p></div>
     </div>
     <p class="text-xs text-mute">{% trans "Parolni faqat foydalanuvchining o‘zi" %} <a class="ca-link" href="{% url 'password_reset' %}">{% trans "tiklash havolasi</a> orqali o‘zgartiradi." %}</p>
@@ -43,6 +46,7 @@
     </section>
     <button type="submit" class="ca-btn ca-btn-primary w-full"><i data-lucide="check" class="lu" aria-hidden="true"></i>{% trans "Saqlash" %}</button>
     {% if obj != request.user and not obj.is_staff %}
+    <label class="mb-2 flex items-start gap-2 text-xs text-mute"><input type="checkbox" name="force" value="1" form="user-delete" class="mt-0.5 rounded border-line"><span>{% trans "Reytingli raundlarda qatnashgan bo‘lsa ham o‘chirish (boshqalarning o‘rni o‘zgaradi). Odatda hisobni bloklash yaxshiroq." %}</span></label>
     <button type="submit" form="user-delete" class="ca-btn ca-btn-ghost w-full text-bad"><i data-lucide="trash-2" class="lu" aria-hidden="true"></i>{% trans "Butunlay o‘chirish" %}</button>
     {% endif %}
   </aside>

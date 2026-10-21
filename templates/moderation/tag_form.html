@@ -1,9 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{% blocktrans with tag_name=tag.name %}{{ tag_name }} — teg{% endblocktrans %}{% endblock %}
+{% block band %}{% url 'moderation:tags' as back %}{% include "moderation/_band.html" with title=tag.name subtitle=_("Nazariya kursda yoziladi; teg masalalarni kursga olib kiradi.") back_url=back back_label=_("Teglar") %}{% endblock %}
 {% block content %}
-<div class="mb-6">
-  {% url 'moderation:tags' as back %}{% include "moderation/_header.html" with title=tag.name subtitle=_("Nazariya kursda yoziladi; teg masalalarni kursga olib kiradi.") back_url=back back_label="Teglar" %}
-</div>
 <form method="post" novalidate class="grid max-w-3xl gap-6 sm:grid-cols-2 sm:items-start">
   {% csrf_token %}
   <section class="ca-panel space-y-4">

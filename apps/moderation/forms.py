@@ -37,6 +37,10 @@ class _SourceLang:
 
 
 class ProblemForm(_SourceLang, ModelForm):
+    # A reference solution is checked against every test before saving; it is not stored.
+    ref_lang = forms.ChoiceField(required=False, widget=forms.Select(attrs={"class": "ca-select"}))
+    ref_source = forms.CharField(required=False, widget=forms.Textarea(attrs={**_CA_INPUT, "rows": 8, "class": "ca-input font-mono",
+                                                                         "spellcheck": "false"}))
     tests_zip = forms.FileField(
         required=False,
         widget=forms.FileInput(attrs={"accept": ".zip", "class": "ca-input"}),
@@ -64,6 +68,8 @@ class ProblemForm(_SourceLang, ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        from apps.problems.models import Language
+        self.fields["ref_lang"].choices = [("", "—")] + list(Language.objects.filter(is_active=True).values_list("code", "name"))
         if not self.instance.pk:
             # a new problem starts hidden: publishing is a choice, a contest problem must never leak by default
             self.fields["is_public"].initial = False
@@ -173,7 +179,7 @@ class ContestForm(_SourceLang, ModelForm):
     class Meta:
         model = Contest
         fields = ["source_lang", "title", "description_md", "start", "end", "type", "is_rated", "division", "is_official", "review_top_n",
-                  "allowed_ip_prefix", "badge", "personal_minutes", "auto_finish"]
+                  "allowed_ip_prefix", "badge", "personal_minutes", "auto_finish", "blind"]
         widgets = {
             "personal_minutes": forms.NumberInput(attrs={**_CA_INPUT, "min": 0, "max": 1440, "placeholder": _tl("0 — hamma uchun bir soat")}),
             "title": forms.TextInput(attrs=_CA_INPUT),
@@ -190,10 +196,26 @@ class ContestForm(_SourceLang, ModelForm):
     authors_text = forms.CharField(required=False, label=_tl("Mualliflar"), widget=forms.TextInput(attrs={
         **_CA_INPUT, "placeholder": _tl("login, login … (tanlovdan tashqari qatnashadi)")}))
 
-    def __init__(self, *args, **kwargs):
+    # what a trusted writer may set on the draft round they prepare; everything else is the staff's
+    WRITER_FIELDS = ("source_lang", "title", "description_md", "start", "end", "type")
+
+    def __init__(self, *args, writer=False, **kwargs):
         super().__init__(*args, **kwargs)
+        self.writer = writer
+        self.authors_changed = False
+        if writer:
+            for name in [n for n in self.fields if n not in self.WRITER_FIELDS]:
+                del self.fields[name]
+            self.fields["type"].required = False
+            if self.instance.pk is None:
+                self.initial.setdefault("type", Contest.Type.CF)
+            return
         if self.instance.pk:
             self.initial["authors_text"] = ", ".join(self.instance.authors.values_list("username", flat=True))
+        if self.instance.pk and self.instance.has_started:
+            # what the round was rated and ranked by stays as it was played
+            for name in ("is_rated", "division", "personal_minutes"):
+                self.fields[name].disabled = True
         self.fields["review_top_n"].required = False
         self.fields["division"].required = False
         self.fields["type"].required = False
@@ -221,11 +243,19 @@ class ContestForm(_SourceLang, ModelForm):
 
     def save(self, commit=True):
         contest = super().save(commit)
+
+        def authors():
+            if self.writer:
+                return
+            new = {u.pk for u in self.cleaned_data.get("authors_text") or []}
+            self.authors_changed = bool(contest.pk) and {u for u in contest.authors.values_list("pk", flat=True)} != new
+            contest.authors.set(new)
+
         if commit:
-            contest.authors.set(self.cleaned_data.get("authors_text") or [])
+            authors()
         else:
             old = self.save_m2m
-            self.save_m2m = lambda: (old(), contest.authors.set(self.cleaned_data.get("authors_text") or []))
+            self.save_m2m = lambda: (old(), authors())
         return contest
 
     def clean_review_top_n(self):
@@ -243,6 +273,28 @@ class ContestForm(_SourceLang, ModelForm):
 
 
 class BaseContestProblemFormSet(BaseInlineFormSet):
+    def add_fields(self, form, index):
+        super().add_fields(form, index)
+        field = form.fields["problem"]
+        if self.problem_queryset is not None:
+            field.queryset = self.problem_queryset
+        else:
+            field.queryset = Problem.objects.order_by("title")
+        used = self._used_ids()
+        # the picker's rows say how hard a problem is and whether it was used before; the form's script filters them as you type
+        field.label_from_instance = lambda p: (f"{p.title} · {p.get_difficulty_display()}"
+                                               + (_t(" · ishlatilgan") if p.pk in used else ""))
+
+    problem_queryset = None
+
+    def _used_ids(self):
+        if not hasattr(self, "_used"):
+            others = ContestProblem.objects.all()
+            if self.instance.pk:
+                others = others.exclude(contest=self.instance)
+            self._used = set(others.values_list("problem_id", flat=True))
+        return self._used
+
     def clean(self):
         super().clean()
         contest = self.instance  # contest_edit validates ContestForm first, which copies the POSTed values here

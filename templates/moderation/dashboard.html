@@ -19,7 +19,18 @@ site's figures; the side column has every staff section.{% endcomment %}
 {% endblock %}
 {% block content %}
 <div class="ca7-col">
-  <section class="mb-4" aria-label="{% trans 'Duellarni yopish' %}">{% include "moderation/_duel_switch.html" %}</section>
+  <section class="mb-5" aria-label="{% trans 'Duellarni yopish' %}">
+    {% include "moderation/_duel_switch.html" %}
+  </section>
+
+  <section class="dash-todo" aria-label="{% trans 'Kutayotgan ishlar' %}">
+    <a href="{% url 'moderation:queue' %}" class="{% if todo.queue %}is-on{% endif %}"><b class="tabular">{{ todo.queue }}</b><span>{% trans "Tasdiq kutayotgan masala" %}</span></a>
+    <a href="{% url 'moderation:contests' %}?state=torate" class="{% if todo.to_rate %}is-on{% endif %}"><b class="tabular">{{ todo.to_rate }}</b><span>{% trans "Reyting kutayotgan raund" %}</span></a>
+    <a href="{% url 'integrity:reports' %}" class="{% if todo.flags or todo.reports %}is-on{% endif %}"><b class="tabular">{{ todo.flags|add:todo.reports }}</b><span>{% trans "Belgi va shikoyat" %}</span></a>
+    <a href="{% url 'moderation:translations' %}" class="{% if todo.translations %}is-on{% endif %}"><b class="tabular">{{ todo.translations }}</b><span>{% trans "Tasdiqlanmagan tarjima" %}</span></a>
+    <a href="{% url 'moderation:contests' %}?state=draft" class="{% if todo.rounds %}is-on{% endif %}"><b class="tabular">{{ todo.rounds }}</b><span>{% trans "Qoralama raund" %}</span></a>
+    <a href="{% if next_round %}{% url 'moderation:contest_edit' next_round.pk %}{% else %}{% url 'moderation:contest_new' %}{% endif %}"><b class="tabular">{% if next_round %}{{ next_round.start|date:"d.m" }}{% else %}—{% endif %}</b><span>{% if next_round %}{{ next_round.title }}{% else %}{% trans "Kelgusi raund yo‘q" %}{% endif %}</span></a>
+  </section>
   <section aria-labelledby="queue-title">
     <div class="ca7-sec-h"><h2 id="queue-title">{% trans "Tasdiq kutayotgan masalalar" %}</h2>{% if counts.pending %}<span class="ca7-pill is-warn tabular">{{ counts.pending }}</span>{% endif %}<a class="ca-link" href="{% url 'moderation:queue' %}">{% trans "Navbatni ochish" %}</a></div>
     {% if pending %}
@@ -67,8 +78,9 @@ site's figures; the side column has every staff section.{% endcomment %}
     </div>
     <p class="mt-3 text-sm {% if judge.stuck %}text-bad{% else %}text-mute{% endif %}">
       <i data-lucide="{% if judge.stuck %}triangle-alert{% else %}circle-check-big{% endif %}" class="lu mr-1" aria-hidden="true"></i>
-      {% if judge.stuck %}{% blocktrans with judge_stuck=judge.stuck %}Tekshiruvchi: {{ judge_stuck }} ta urinish 2 daqiqadan beri kutmoqda.{% endblocktrans %}{% else %}{% trans "Tekshiruvchi sog‘lom: kutayotgan urinish yo‘q." %}{% endif %}
+      {% if judge.workers == 0 %}{% trans "Tekshiruvchi ishchisi ishlamayapti!" %} {% elif judge.stuck %}{% blocktrans with judge_stuck=judge.stuck %}Tekshiruvchi: {{ judge_stuck }} ta urinish 2 daqiqadan beri kutmoqda.{% endblocktrans %}{% else %}{% trans "Tekshiruvchi sog‘lom: kutayotgan urinish yo‘q." %}{% endif %}
       {% if judge.last %} {% blocktrans with judge_last=judge.last|date:"d.m H:i" %}So‘nggi natija: {{ judge_last }}.{% endblocktrans %}{% endif %}
+      {% if judge.workers is not None %} {% blocktrans with w=judge.workers q=judge.rejudge %}Ishchilar: {{ w }} · qayta tekshiruv navbati: {{ q }}.{% endblocktrans %}{% endif %}
     </p>
   </section>
 

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{% trans "AI bilan masala yaratish" %}{% endblock %}
+{% block band %}{% url "moderation:problems" as back %}{% include "moderation/_band.html" with title=_("AI bilan masala tuzish") back_url=back back_label=_("Masalalar") %}{% endblock %}
 {% block content %}
-<div class="mb-6">{% url "moderation:problems" as back %}{% include "moderation/_header.html" with title=_("AI bilan masala tuzish") back_url=back back_label="Masalalar" %}</div>
 
 <div class="max-w-2xl">
   <form method="post" class="ca-panel space-y-6" id="ai-form">

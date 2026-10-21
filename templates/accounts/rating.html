@@ -20,6 +20,7 @@ own row marked.{% endcomment %}
 <div class="ca7">
 <div class="ca7-col">
 <section aria-label="{% trans 'Reyting jadvali' %}">
+  {% include "accounts/_rating_chart.html" with chart=chart id="rc" %}
   <div class="ca7-tools is-board">
     <div class="ca7-trow">
       <form method="get" class="ca7-search" role="search" aria-label="{% trans 'Foydalanuvchini qidirish' %}">

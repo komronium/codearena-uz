@@ -71,6 +71,11 @@ class Contest(Translatable, models.Model):
     # The people who wrote the round (named on its pages, like Codeforces' writers). They may take part, but out of
     # competition: on the board with a star instead of a place, never rated, no badge, and not counted in anyone's place.
     authors = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name="authored_contests")
+    # A round a trusted writer (User.is_setter) prepared: only staff and its authors see it until staff publish it.
+    is_draft = models.BooleanField(default=False)
+    # Until the round ends, staff who are not its authors cannot read its problems, tests or solutions on the staff pages,
+    # so a person who runs the site can still play it (the round's writers stay out of competition).
+    blind = models.BooleanField(default=False)
     problems = models.ManyToManyField(Problem, through="ContestProblem", related_name="contests")
     updated = models.DateTimeField(auto_now=True)  # the sitemap's lastmod; partial saves leave it
     # When the similarity check last ran over every problem by itself, after the end (flag_similarity

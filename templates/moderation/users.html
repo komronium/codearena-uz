@@ -1,20 +1,35 @@
 {% extends "base.html" %}{% load tiers %}
 {% block title %}{% trans "Foydalanuvchilar — boshqaruv" %}{% endblock %}
+{% block band %}
+<section class="ca-hud" aria-labelledby="mod-title">
+  <div class="ca-hud-in">
+    <div>
+      <h1 id="mod-title">{% trans "Foydalanuvchilar" %}</h1>
+      <p class="ca-hud-sub">{% trans "Rol, huquq va profil ma’lumotlari" %}</p>
+    </div>
+    <form method="get" class="relative ml-auto w-full max-w-xs" role="search">
+      {% if role %}<input type="hidden" name="role" value="{{ role }}">{% endif %}{% if sort %}<input type="hidden" name="sort" value="{{ sort }}">{% endif %}{% if country %}<input type="hidden" name="country" value="{{ country }}">{% endif %}
+      <i data-lucide="search" class="lu pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-mute" aria-hidden="true"></i>
+      <input type="search" name="q" value="{{ q }}" placeholder="{% trans 'Login, email, ism, o‘quv joyi…' %}" class="ca-input !py-1.5 pl-8 text-sm" aria-label="{% trans 'Foydalanuvchi qidirish' %}">
+    </form>
+  </div>
+</section>
+{% endblock %}
 {% block content %}
-<div class="mb-6 flex flex-wrap items-end justify-between gap-3">
-  <div>{% include "moderation/_header.html" with title="Foydalanuvchilar" subtitle=_("Rol, huquq va profil ma’lumotlari") %}</div>
-  <form method="get" class="relative w-full max-w-xs" role="search">
-    <i data-lucide="search" class="lu pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-mute" aria-hidden="true"></i>
-    <input type="search" name="q" value="{{ q }}" placeholder="{% trans 'Login, email, ism, o‘quv joyi…' %}" class="ca-input !py-1.5 pl-8 text-sm" aria-label="{% trans 'Foydalanuvchi qidirish' %}">
-  </form>
-</div>
-
-<div class="mb-4 flex flex-wrap items-center gap-3">
-  <nav class="ca7-seg" aria-label="{% trans 'Rol' %}">
+<div class="mt-bar">
+  <nav class="ca7-seg" aria-label="{% trans 'Guruh' %}">
     <a href="{% querystring role=None page=None %}"{% if not role %} aria-current="true"{% endif %}>{% trans "Hammasi" %}</a>
     <a href="{% querystring role='student' page=None %}"{% if role == 'student' %} aria-current="true"{% endif %}>{% trans "Foydalanuvchilar" %}</a>
     <a href="{% querystring role='staff' page=None %}"{% if role == 'staff' %} aria-current="true"{% endif %}>{% trans "Adminlar" %}</a>
+    <a href="{% querystring role='setter' page=None %}"{% if role == 'setter' %} aria-current="true"{% endif %}>{% trans "Masala yozuvchilar" %}</a>
+    <a href="{% querystring role='unverified' page=None %}"{% if role == 'unverified' %} aria-current="true"{% endif %}>{% trans "Email tasdiqlanmagan" %} <b class="mt-n">{{ counts.unverified }}</b></a>
+    <a href="{% querystring role='idle' page=None %}"{% if role == 'idle' %} aria-current="true"{% endif %}>{% trans "Hech narsa yubormagan" %} <b class="mt-n">{{ counts.idle }}</b></a>
   </nav>
+  <form method="get" class="flex items-center gap-2">
+    {% if q %}<input type="hidden" name="q" value="{{ q }}">{% endif %}{% if role %}<input type="hidden" name="role" value="{{ role }}">{% endif %}{% if sort %}<input type="hidden" name="sort" value="{{ sort }}">{% endif %}
+    <label class="sr-only" for="country-filter">{% trans "Mamlakat" %}</label>
+    <select id="country-filter" name="country" class="ca-select !py-1.5 text-sm" onchange="this.form.submit()"><option value="">{% trans "Barcha mamlakatlar" %}</option>{% for code, name in countries %}<option value="{{ code }}"{% if country == code %} selected{% endif %}>{{ name }}</option>{% endfor %}</select>
+  </form>
   <nav class="ca7-seg ml-auto" aria-label="{% trans 'Saralash' %}">
     <a href="{% querystring sort=None page=None %}"{% if not sort %} aria-current="true"{% endif %}>{% trans "Yangi" %}</a>
     <a href="{% querystring sort='login' page=None %}"{% if sort == 'login' %} aria-current="true"{% endif %}>{% trans "Oxirgi kirish" %}</a>
@@ -24,32 +39,50 @@
 </div>
 
 {% if page.object_list %}
-<ul class="ca-rows">
+<div class="overflow-x-auto">
+<table class="ca-table ca-table-flat mt">
+  <thead><tr>
+    <th scope="col">{% trans "Foydalanuvchi" %}</th>
+    <th scope="col" class="hidden md:table-cell">{% trans "Email" %}</th>
+    <th scope="col" class="hidden w-28 xl:table-cell">{% trans "Qo‘shilgan" %}</th>
+    <th scope="col" class="hidden w-36 xl:table-cell">{% trans "Oxirgi kirish" %}</th>
+    <th scope="col" class="w-36">{% trans "Holat" %}</th>
+    <th scope="col" class="w-20 text-right">{% trans "Reyting" %}</th>
+    <th scope="col" class="w-20 text-right">{% trans "Urinish" %}</th>
+    <th scope="col" class="w-28 text-right"><span class="sr-only">{% trans "Amallar" %}</span></th>
+  </tr></thead>
+  <tbody>
   {% for u in page %}
-  <li class="ca-row{% if not u.is_active %} opacity-60{% endif %}">
-    <div class="ca-row-main">
-      <div class="ca-row-title">
-        {% include "accounts/_user.html" with tier=False %}
-        {% if u.is_staff %}<span class="ca-chip shrink-0"><i data-lucide="shield" class="lu mr-1" aria-hidden="true"></i>{% trans "Admin" %}</span>{% else %}<span class="ca-chip shrink-0 !bg-ink/5 text-mute">{% trans "O‘quvchi" %}</span>{% endif %}
-        {% if not u.is_active %}<span class="ca-chip shrink-0 text-bad">{% trans "Bloklangan" %}</span>{% endif %}
-      </div>
-      <div class="ca-row-meta pl-9">
-        <span class="truncate" translate="no">{{ u.email|default:"email yo‘q" }}</span>
-        {% if u.school %}<span class="truncate"><i data-lucide="graduation-cap" class="lu" aria-hidden="true"></i>{{ u.school }}</span>{% endif %}
-        <span class="tabular"><i data-lucide="calendar" class="lu" aria-hidden="true"></i>{{ u.date_joined|date:"d.m.Y" }}</span>
-        <span class="tabular" title="Oxirgi kirish"><i data-lucide="log-in" class="lu" aria-hidden="true"></i>{% if u.last_login %}{{ u.last_login|date:"d.m.Y H:i" }}{% else %}{% trans "kirmagan" %}{% endif %}</span>
-      </div>
-    </div>
-    <div class="ca-row-side">
-      <div class="ca-row-stat"><b style="--tier: {{ u.rating|tier_color }}" class="ca-tier-ink">{% blocktrans with u_rating=u.rating %}{{ u_rating }}</b>reyting{% endblocktrans %}</div>
-      <div class="ca-row-stat">{% blocktrans with u_n_subs=u.n_subs %}<b>{{ u_n_subs }}</b>urinish{% endblocktrans %}</div>
-      <a href="{% url 'moderation:submissions' %}?user={{ u.username|urlencode }}" class="ca-btn ca-btn-ghost !p-1.5" title="{% trans 'Urinishlari' %}" aria-label="{% blocktrans with u_username=u.username %}Urinishlari: {{ u_username }}{% endblocktrans %}"><i data-lucide="history" class="lu" aria-hidden="true"></i></a>
-      <a href="{% url 'moderation:user_edit' u.pk %}" class="ca-btn ca-btn-ghost !py-1.5 text-xs" aria-label="{% blocktrans with u_username=u.username %}Tahrirlash: {{ u_username }}{% endblocktrans %}"><i data-lucide="pencil" class="lu" aria-hidden="true"></i>{% trans "Tahrirlash" %}</a>
-    </div>
-  </li>
+  <tr{% if not u.is_active %} class="opacity-60"{% endif %}>
+    <td>{% include "accounts/_u7.html" with u=u you=False flag=True %}{% if u.school %}<small class="block truncate text-xs text-mute">{{ u.school }}</small>{% endif %}</td>
+    <td class="hidden text-sm md:table-cell"><span class="truncate" translate="no">{{ u.email|default:"—" }}</span>{% if u.email %} <button type="button" class="mt-copy" data-copy="{{ u.email }}" title="{% trans 'Emailni nusxalash' %}" aria-label="{% trans 'Emailni nusxalash' %}"><i data-lucide="copy" class="lu" aria-hidden="true"></i></button>{% endif %}</td>
+    <td class="hidden tabular text-sm text-mute xl:table-cell">{{ u.date_joined|date:"d.m.Y" }}</td>
+    <td class="hidden tabular text-sm text-mute xl:table-cell">{% if u.last_login %}{{ u.last_login|date:"d.m.Y H:i" }}{% else %}{% trans "kirmagan" %}{% endif %}</td>
+    <td>
+      {% if not u.is_active %}<span class="st st-bad">{% trans "Bloklangan" %}</span>{% endif %}
+      {% if u.is_staff %}<span class="st st-wait"><i data-lucide="shield" class="lu" aria-hidden="true"></i>{% trans "Admin" %}</span>{% endif %}
+      {% if u.is_setter %}<span class="st st-off">{% trans "Yozuvchi" %}</span>{% endif %}
+      {% if not u.email_verified_at and not u.is_staff %}<span class="st st-warn" title="{% trans 'Emaili tasdiqlanmagan: yangi raundlarda reytingga kirmaydi' %}">{% trans "email ✗" %}</span>{% endif %}
+    </td>
+    <td class="text-right tabular font-bold"><span class="ca-tier-ink" style="--tier: {{ u.rating|tier_color }}">{{ u.rating }}</span></td>
+    <td class="text-right tabular text-mute">{{ u.n_subs }}</td>
+    <td class="text-right whitespace-nowrap">
+      <a href="{% url 'moderation:submissions' %}?user={{ u.username|urlencode }}" class="ca-btn ca-btn-ghost !p-1.5" title="{% trans 'Urinishlari' %}" aria-label="{% blocktrans with u_username=u.username %}Urinishlari: {{ u_username }}{% endblocktrans %}"><i data-lucide="history" class="lu" aria-hidden="true"></i><span class="mt-lbl">{% trans "Urinishlar" %}</span></a>
+      <a href="{% url 'moderation:user_edit' u.pk %}" class="ca-btn ca-btn-ghost !py-1" aria-label="{% blocktrans with u_username=u.username %}Tahrirlash: {{ u_username }}{% endblocktrans %}"><i data-lucide="pencil" class="lu" aria-hidden="true"></i>{% trans "Tahrirlash" %}</a>
+    </td>
+  </tr>
   {% endfor %}
-</ul>
+  </tbody>
+</table>
+</div>
 {% include "_pagination.html" with page=page %}
+<script>
+  document.addEventListener("click", async (e) => {
+    const b = e.target.closest("[data-copy]");
+    if (!b) return;
+    try { await navigator.clipboard.writeText(b.dataset.copy); b.classList.add("is-copied"); setTimeout(() => b.classList.remove("is-copied"), 1100); } catch {}
+  });
+</script>
 {% else %}
 <div class="ca-empty">{% trans "Foydalanuvchi topilmadi." %}</div>
 {% endif %}

@@ -1,36 +1,59 @@
 {% extends "base.html" %}
 {% block title %}{% trans "Kurslar — boshqaruv" %}{% endblock %}
+{% block band %}
+<section class="ca-hud" aria-labelledby="mod-title">
+  <div class="ca-hud-in">
+    <div>
+      <h1 id="mod-title">{% trans "Kurslar" %}</h1>
+      <p class="ca-hud-sub">{% trans "Har kurs — bitta mavzu. Masalalar kursga teglari orqali tushadi." %}{% if n_partial %} {% blocktrans with n=n_partial %}{{ n }} ta kursda masala yetishmaydi.{% endblocktrans %}{% endif %}</p>
+    </div>
+    <div class="ml-auto"><a href="{% url 'moderation:plan_new' %}" class="ca-btn ca-btn-gold"><i data-lucide="plus" class="lu" aria-hidden="true"></i>{% trans "Kurs qo‘shish" %}</a></div>
+  </div>
+</section>
+{% endblock %}
 {% block content %}
-<div class="mb-6 flex flex-wrap items-end justify-between gap-3">
-  <div>{% include "moderation/_header.html" with title="Kurslar" subtitle=_("Har kurs — bitta mavzu. Masalalar kursga teglari orqali tushadi.") %}</div>
-  <a href="{% url 'moderation:plan_new' %}" class="ca-btn ca-btn-primary"><i data-lucide="plus" class="lu" aria-hidden="true"></i>{% trans "Kurs qo‘shish" %}</a>
-</div>
+{% comment %}Courses grouped by stage like the learn hub, in path order: the arrows move one a step up or down inside its stage;
+"Qisman" (1–9 problems) and "Bo‘sh" (none yet) are counted pills; delete sits in the menu and is refused while learners have records.{% endcomment %}
 {% if plans %}
-<ul class="ca-rows">
-  {% for p in plans %}
-  <li class="ca-row">
-    <span class="ca-tile-icon !h-9 !w-9 shrink-0"><i data-lucide="{{ p.icon }}" class="lu" aria-hidden="true"></i></span>
-    <div class="ca-row-main">
-      <div class="ca-row-title">
-        <span class="tabular shrink-0 text-xs font-normal text-mute">{{ p.order }}</span>
-        <a class="ca-link" href="{% url 'learn:course' p.slug %}">{{ p.title }}</a>
-        {% if not p.is_public %}<span class="ca-chip shrink-0 !bg-ink/5 text-mute">{% trans "Yashirin" %}</span>{% endif %}
-      </div>
-      <div class="ca-row-meta">
-        <span>{{ p.get_stage_display }}</span>
-        <span class="ca-diff ca-diff-{{ p.level }}">{% blocktrans with p_get_level_display=p.get_level_display p_n_tags=p.n_tags %}{{ p_get_level_display }}</span> <span>{{ p_n_tags }} mavzu ·{% endblocktrans %} {% if p.n_open %}{% blocktrans with p_n_open=p.n_open %}{{ p_n_open }} masala{% endblocktrans %}{% if p.n_open < course_min %} {% blocktrans with course_min=course_min %}· <span class="text-warn">tayyorlanmoqda: kamida {{ course_min }} ta kerak</span>{% endblocktrans %}{% elif p.n_open > course_max %} {% blocktrans with course_max=course_max %}· <span class="text-mute">kursda {{ course_max }} tasi</span>{% endblocktrans %}{% endif %}{% elif p.n_tags %}<span class="text-warn">{% trans "masala yo‘q" %}</span>{% else %}{% trans "faqat nazariya" %}{% endif %}</span>
-      </div>
-    </div>
-    <div class="ca-row-side">
-      <a href="{% url 'moderation:plan_edit' p.pk %}" class="ca-btn ca-btn-ghost !px-2 !py-1.5" title="{% trans 'Tahrirlash' %}" aria-label="{% blocktrans with p_title=p.title %}Tahrirlash: {{ p_title }}{% endblocktrans %}"><i data-lucide="pencil" class="lu" aria-hidden="true"></i></a>
-      <form method="post" action="{% url 'moderation:plan_delete' p.pk %}" data-confirm="{% blocktrans with p_title=p.title %}«{{ p_title }}» kursi o‘chiriladi. Masalalar va teglar o‘chmaydi. Davom etasizmi?{% endblocktrans %}">{% csrf_token %}
-        <button class="ca-btn ca-btn-ghost !px-2 !py-1.5 text-bad" title="{% trans 'O‘chirish' %}" aria-label="{% blocktrans with p_title=p.title %}O‘chirish: {{ p_title }}{% endblocktrans %}"><i data-lucide="trash-2" class="lu" aria-hidden="true"></i></button>
-      </form>
-    </div>
-  </li>
-  {% endfor %}
-</ul>
+{% regroup plans by get_stage_display as stages %}
+{% for st in stages %}
+<section class="mb-6" aria-labelledby="st-{{ forloop.counter }}">
+  <div class="ca7-sec-h"><h2 id="st-{{ forloop.counter }}">{{ st.grouper }}</h2><span class="ca7-r text-mute">{% blocktrans with n=st.list|length %}{{ n }} kurs{% endblocktrans %}</span></div>
+  <table class="ca-table ca-table-flat mt">
+    <tbody>
+    {% for p in st.list %}
+    <tr>
+      <td class="w-12"><span class="ca-tile-icon !h-8 !w-8"><i data-lucide="{{ p.icon }}" class="lu" aria-hidden="true"></i></span></td>
+      <td><a class="ca-link font-medium" href="{% url 'learn:course' p.slug %}">{{ p.title }}</a>{% if p.summary %}<small class="block truncate text-xs text-mute">{{ p.summary }}</small>{% endif %}</td>
+      <td class="w-24"><span class="ca-diff ca-diff-{{ p.level }}">{{ p.get_level_display }}</span></td>
+      <td class="w-28 text-sm text-mute tabular">{% blocktrans with n=p.n_tags %}{{ n }} mavzu{% endblocktrans %}</td>
+      <td class="w-32 tabular text-sm">{% if p.n_tags %}{{ p.n_open }}/{{ course_min }}+{% else %}<span class="text-mute">{% trans "nazariya" %}</span>{% endif %}</td>
+      <td class="w-40">
+        {% if not p.is_public %}<span class="st st-off">{% trans "Yashirin" %}</span>{% else %}<span class="st st-ok">{% trans "Ochiq" %}</span>{% endif %}
+        {% if p.partial %}<span class="st st-warn">{% trans "Qisman" %}</span>{% elif p.empty %}<span class="st st-bad">{% trans "Bo‘sh" %}</span>{% endif %}
+      </td>
+      <td class="w-44 text-right whitespace-nowrap">
+        <form method="post" action="{% url 'moderation:plan_move' p.pk %}" class="inline">{% csrf_token %}
+          <button name="dir" value="up" class="ca-btn ca-btn-ghost !px-2 !py-1"{% if forloop.first %} disabled{% endif %} title="{% trans 'Yuqoriga' %}" aria-label="{% blocktrans with t=p.title %}Yuqoriga: {{ t }}{% endblocktrans %}"><i data-lucide="chevron-up" class="lu" aria-hidden="true"></i></button>
+          <button name="dir" value="down" class="ca-btn ca-btn-ghost !px-2 !py-1"{% if forloop.last %} disabled{% endif %} title="{% trans 'Pastga' %}" aria-label="{% blocktrans with t=p.title %}Pastga: {{ t }}{% endblocktrans %}"><i data-lucide="chevron-down" class="lu" aria-hidden="true"></i></button>
+        </form>
+        <a href="{% url 'moderation:plan_edit' p.pk %}" class="ca-btn ca-btn-ghost !py-1"><i data-lucide="pencil" class="lu" aria-hidden="true"></i>{% trans "Tahrirlash" %}</a>
+        <details class="ca-dropdown" data-dropdown>
+          <summary class="ca-btn ca-btn-ghost !px-2 !py-1" aria-label="{% blocktrans with t=p.title %}Boshqa amallar: {{ t }}{% endblocktrans %}"><i data-lucide="ellipsis" class="lu" aria-hidden="true"></i></summary>
+          <div class="ca-dropdown-panel !w-60">
+            <form method="post" action="{% url 'moderation:plan_delete' p.pk %}" data-confirm="{% blocktrans with p_title=p.title %}«{{ p_title }}» kursi o‘chiriladi. Masalalar va teglar o‘chmaydi. Davom etasizmi?{% endblocktrans %}">{% csrf_token %}
+              <button class="ca-dropdown-item w-full text-left text-bad"><i data-lucide="trash-2" class="lu" aria-hidden="true"></i>{% trans "O‘chirish" %}</button>
+            </form>
+          </div>
+        </details>
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endfor %}
 {% else %}
-<div class="ca-empty">{% trans "Hali kurs yo‘q." %} <a class="ca-link" href="{% url 'moderation:plan_new' %}">{% trans "Birinchisini tuzing</a> yoki <code>python manage.py add_courses</code> buyrug‘ini ishga tushiring." %}</div>
+<div class="ca-empty">{% trans "Hali kurs yo‘q." %} <a class="ca-link" href="{% url 'moderation:plan_new' %}">{% trans "Birinchisini tuzing" %}</a></div>
 {% endif %}
 {% endblock %}

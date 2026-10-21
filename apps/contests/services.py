@@ -32,6 +32,15 @@ def active_contest_for(user, problem):
     return None
 
 
+def blind_problem_ids(user) -> set[int]:
+    """Problems a staff member must not read yet: those of a blind round that has not ended, unless they wrote the round.
+    (Everyone who is not staff already sees such problems only as a participant.)"""
+    if not (user.is_authenticated and user.is_staff):
+        return set()
+    return set(ContestProblem.objects.filter(contest__blind=True, contest__end__gt=timezone.now())
+               .exclude(contest__authors=user).values_list("problem_id", flat=True))
+
+
 def in_upcoming_contest(problem) -> bool:
     """Problems of a not-yet-started contest are secret regardless of is_public:
     no statement, no submit, not in the list. Staff and the author still see them."""

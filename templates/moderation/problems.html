@@ -1,16 +1,25 @@
-{% extends "base.html" %}
+{% extends "base.html" %}{% load tagnames %}
 {% block title %}{% trans "Masalalar — boshqaruv" %}{% endblock %}
-{% block content %}
-<div class="mb-6 flex flex-wrap items-end justify-between gap-3">
-  <div>{% include "moderation/_header.html" with title="Masalalar" subtitle=_("Barcha masalalar: ochiq, yashirin, kutilayotgan") %}</div>
-  <div class="flex flex-wrap gap-2">
-    <a href="{% url 'moderation:ai_generate' %}" class="ca-btn ca-btn-ghost"><i data-lucide="sparkles" class="lu" aria-hidden="true"></i>{% trans "AI bilan tuzish" %}</a>
-    <a href="{% url 'moderation:submit' %}" class="ca-btn ca-btn-primary"><i data-lucide="circle-plus" class="lu" aria-hidden="true"></i>{% trans "Masala qo‘shish" %}</a>
+{% block band %}
+<section class="ca-hud" aria-labelledby="mod-title">
+  <div class="ca-hud-in">
+    <div>
+      <h1 id="mod-title">{% trans "Masalalar" %}</h1>
+      <p class="ca-hud-sub">{% trans "Barcha masalalar: ochiq, yashirin, kutilayotgan" %}{% if n_blind %} · {% blocktrans with n=n_blind %}{{ n }} tasi yopiq raundniki: ko‘rsatilmaydi{% endblocktrans %}{% endif %}</p>
+    </div>
+    <div class="ml-auto flex flex-wrap gap-2">
+      <a href="{% url 'moderation:ai_generate' %}" class="ca7-hbtn is-wide"><i data-lucide="sparkles" class="lu" aria-hidden="true"></i>{% trans "AI bilan tuzish" %}</a>
+      <a href="{% url 'moderation:submit' %}" class="ca-btn ca-btn-gold"><i data-lucide="plus" class="lu" aria-hidden="true"></i>{% trans "Masala qo‘shish" %}</a>
+    </div>
   </div>
-</div>
-<div class="mb-4 flex flex-wrap items-center gap-3">
+</section>
+{% endblock %}
+{% block content %}
+{% comment %}Staff problem list as a compact table: sortable columns, a topic filter, ticks for bulk actions (publish, hide, rejudge,
+add a topic). The "Testsiz" warning is one counted filter, not a line on every row.{% endcomment %}
+<div class="mt-bar">
   <form method="get" class="relative w-full max-w-xs" role="search">
-    {% if status %}<input type="hidden" name="status" value="{{ status }}">{% endif %}{% if difficulty %}<input type="hidden" name="difficulty" value="{{ difficulty }}">{% endif %}
+    {% if status %}<input type="hidden" name="status" value="{{ status }}">{% endif %}{% if difficulty %}<input type="hidden" name="difficulty" value="{{ difficulty }}">{% endif %}{% if tag %}<input type="hidden" name="tag" value="{{ tag }}">{% endif %}{% if sort %}<input type="hidden" name="sort" value="{{ sort }}">{% endif %}
     <i data-lucide="search" class="lu pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-mute" aria-hidden="true"></i>
     <input type="search" name="q" value="{{ q }}" placeholder="{% trans 'Sarlavha yoki slug…' %}" class="ca-input !py-1.5 pl-8 text-sm" aria-label="{% trans 'Masala qidirish' %}">
   </form>
@@ -19,46 +28,72 @@
     <a href="{% querystring status='public' page=None %}"{% if status == 'public' %} aria-current="true"{% endif %}>{% trans "Ochiq" %}</a>
     <a href="{% querystring status='hidden' page=None %}"{% if status == 'hidden' %} aria-current="true"{% endif %}>{% trans "Yashirin" %}</a>
     <a href="{% querystring status='pending' page=None %}"{% if status == 'pending' %} aria-current="true"{% endif %}>{% trans "Kutmoqda" %}</a>
-    <a href="{% querystring status='notests' page=None %}"{% if status == 'notests' %} aria-current="true"{% endif %}>{% trans "Testsiz" %}</a>
+    <a href="{% querystring status='unsolved' page=None %}"{% if status == 'unsolved' %} aria-current="true"{% endif %}>{% trans "Hech kim yechmagan" %}</a>
+    <a href="{% querystring status='notests' page=None %}"{% if status == 'notests' %} aria-current="true"{% endif %}>{% trans "Testsiz" %}{% if n_notests %} <b class="mt-n">{{ n_notests }}</b>{% endif %}</a>
   </nav>
   <nav class="ca7-seg" aria-label="{% trans 'Qiyinlik' %}">
     <a href="{% querystring difficulty=None page=None %}"{% if not difficulty %} aria-current="true"{% endif %}>{% trans "Barcha darajalar" %}</a>
     {% for v, label in difficulties %}<a href="{% querystring difficulty=v page=None %}"{% if difficulty == v %} aria-current="true"{% endif %}>{{ label }}</a>{% endfor %}
   </nav>
+  <form method="get" class="flex items-center gap-2">
+    {% if q %}<input type="hidden" name="q" value="{{ q }}">{% endif %}{% if status %}<input type="hidden" name="status" value="{{ status }}">{% endif %}{% if difficulty %}<input type="hidden" name="difficulty" value="{{ difficulty }}">{% endif %}{% if sort %}<input type="hidden" name="sort" value="{{ sort }}">{% endif %}
+    <label class="sr-only" for="tag-filter">{% trans "Mavzu" %}</label>
+    <select id="tag-filter" name="tag" class="ca-select !py-1.5 text-sm" onchange="this.form.submit()"><option value="">{% trans "Barcha mavzular" %}</option>{% for t in tags %}<option value="{{ t.name }}"{% if tag == t.name %} selected{% endif %}>{{ t.name|tag_uz }}</option>{% endfor %}</select>
+  </form>
 </div>
 
 {% if page.object_list %}
-<ul class="ca-rows">
+<form id="bulk" method="post" action="{% url 'moderation:problems_bulk' %}" class="mt-bulk" hidden>
+  {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+  <b id="bulk-n" class="tabular">0</b> <span>{% trans "ta masala belgilandi" %}</span>
+  <select name="do" class="ca-select !py-1 text-sm" aria-label="{% trans 'Amal' %}" id="bulk-do">
+    <option value="publish">{% trans "Ochiq qilish" %}</option><option value="hide">{% trans "Yashirish" %}</option><option value="rejudge">{% trans "Qayta tekshirish" %}</option><option value="tag">{% trans "Mavzu qo‘shish…" %}</option>
+  </select>
+  <select name="tag" class="ca-select !py-1 text-sm" aria-label="{% trans 'Mavzu' %}" id="bulk-tag" hidden>{% for t in tags %}<option value="{{ t.name }}">{{ t.name|tag_uz }}</option>{% endfor %}</select>
+  <button class="ca-btn ca-btn-primary !py-1">{% trans "Bajarish" %}</button>
+</form>
+<div class="overflow-x-auto">
+<table class="ca-table ca-table-flat mt">
+  <thead><tr>
+    <th scope="col" class="w-8"><input type="checkbox" id="bulk-all" aria-label="{% trans 'Hammasini belgilash' %}"></th>
+    <th scope="col" class="w-12">#</th>
+    <th scope="col"><a class="mt-sort{% if sort == 'title' %} is-on{% endif %}" href="{% querystring sort='title' page=None %}">{% trans "Masala" %}</a></th>
+    <th scope="col" class="w-20">{% trans "Daraja" %}</th>
+    <th scope="col" class="w-14 text-right"><a class="mt-sort{% if sort == 'tests' %} is-on{% endif %}" href="{% querystring sort='tests' page=None %}">{% trans "Test" %}</a></th>
+    <th scope="col" class="w-16 text-right"><a class="mt-sort{% if sort == 'solved' %} is-on{% endif %}" href="{% querystring sort='solved' page=None %}">{% trans "Yechgan" %}</a></th>
+    <th scope="col" class="hidden w-36 xl:table-cell">{% trans "Mavzular" %}</th>
+    <th scope="col" class="hidden w-24 xl:table-cell">{% trans "Muallif" %}</th>
+    <th scope="col" class="w-24">{% trans "Holat" %}</th>
+    <th scope="col" class="w-32 text-right"><span class="sr-only">{% trans "Amallar" %}</span></th>
+  </tr></thead>
+  <tbody>
   {% for p in page %}
-  <li class="ca-row">
-    <div class="ca-row-main">
-      <div class="ca-row-title">
-        <span class="tabular shrink-0 text-xs font-normal text-mute">{{ p.pk|stringformat:"04d" }}</span>
-        <a class="ca-link" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a>
-        <span class="ca-diff ca-diff-{{ p.difficulty }} shrink-0">{{ p.get_difficulty_display }}</span>
-      </div>
-      <div class="ca-row-meta">
-        <span class="truncate" translate="no">{{ p.slug }}</span>
-        <span>{{ p.get_kind_display }}</span>
-        {% if p.kind == 'code' and not p.n_tests %}<span class="font-semibold text-bad"><i data-lucide="triangle-alert" class="lu" aria-hidden="true"></i>{% trans "Testsiz — yechimlar tekshirilmaydi" %}</span>{% else %}<span class="tabular">{% blocktrans with p_n_tests=p.n_tests %}{{ p_n_tests }} test{% endblocktrans %}</span>{% endif %}
-        <span translate="no"><i data-lucide="user" class="lu" aria-hidden="true"></i>{{ p.author.username }}</span>
-      </div>
-    </div>
-    <div class="ca-row-side">
-      {% if p.status == 'pending' %}<span class="ca-chip ca-chip-score">{% trans "Kutmoqda" %}</span>
-      {% elif p.status == 'rejected' %}<span class="ca-chip text-bad">{% trans "Rad etilgan" %}</span>
-      {% elif p.is_public %}<span class="ca-chip ca-chip-rated"><i data-lucide="eye" class="lu mr-1" aria-hidden="true"></i>{% trans "Ochiq" %}</span>
-      {% else %}<span class="ca-chip !bg-ink/5 text-mute"><i data-lucide="eye-off" class="lu mr-1" aria-hidden="true"></i>{% trans "Yashirin" %}</span>{% endif %}
-      <a href="{% url 'moderation:problem_edit' p.pk %}" class="ca-btn ca-btn-ghost !py-1.5" aria-label="{% blocktrans with p_title=p.title %}Tahrirlash: {{ p_title }}{% endblocktrans %}"><i data-lucide="pencil" class="lu" aria-hidden="true"></i>{% trans "Tahrirlash" %}</a>
+  <tr>
+    <td><input type="checkbox" name="ids" value="{{ p.pk }}" form="bulk" class="bulk-one" aria-label="{{ p.title }}"></td>
+    <td class="ca-pid tabular">{{ p.pk|stringformat:"04d" }}</td>
+    <td class="min-w-[13rem]"><a class="ca-link font-medium" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a>{% if p.kind == 'sql' %} <span class="st st-off">SQL</span>{% endif %}<small class="block truncate text-xs text-mute" translate="no">{{ p.slug }}</small></td>
+    <td><span class="ca-diff ca-diff-{{ p.difficulty }}">{{ p.get_difficulty_display }}</span></td>
+    <td class="text-right tabular{% if p.kind == 'code' and not p.n_tests %} text-bad font-bold{% endif %}">{{ p.n_tests }}</td>
+    <td class="text-right tabular text-mute">{{ p.n_solved }}</td>
+    <td class="hidden truncate text-sm text-mute xl:table-cell" style="max-width: 9rem">{% for t in p.tags.all|slice:":2" %}{{ t.name|tag_uz }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+    <td class="hidden truncate text-sm text-mute xl:table-cell" style="max-width: 6rem" translate="no">{{ p.author.username }}</td>
+    <td>
+      {% if p.status == 'pending' %}<span class="st st-wait">{% trans "Kutmoqda" %}</span>
+      {% elif p.status == 'rejected' %}<span class="st st-bad">{% trans "Rad etilgan" %}</span>
+      {% elif p.is_public %}<span class="st st-ok">{% trans "Ochiq" %}</span>
+      {% else %}<span class="st st-off">{% trans "Yashirin" %}</span>{% endif %}
+    </td>
+    <td class="text-right whitespace-nowrap">
+      <a href="{% url 'moderation:problem_edit' p.pk %}" class="ca-btn ca-btn-ghost !py-1" aria-label="{% blocktrans with p_title=p.title %}Tahrirlash: {{ p_title }}{% endblocktrans %}"><i data-lucide="pencil" class="lu" aria-hidden="true"></i><span class="sr-only">{% trans "Tahrirlash" %}</span></a>
       <details class="ca-dropdown" data-dropdown>
-        <summary class="ca-btn ca-btn-ghost !px-2 !py-1.5" aria-label="{% blocktrans with p_title=p.title %}Boshqa amallar: {{ p_title }}{% endblocktrans %}" title="{% trans 'Boshqa amallar' %}"><i data-lucide="ellipsis" class="lu" aria-hidden="true"></i></summary>
+        <summary class="ca-btn ca-btn-ghost !px-2 !py-1" aria-label="{% blocktrans with p_title=p.title %}Boshqa amallar: {{ p_title }}{% endblocktrans %}" title="{% trans 'Boshqa amallar' %}"><i data-lucide="ellipsis" class="lu" aria-hidden="true"></i></summary>
         <div class="ca-dropdown-panel !w-60">
           <a class="ca-dropdown-item" href="{% url 'moderation:submissions' %}?problem={{ p.slug|urlencode }}"><i data-lucide="history" class="lu" aria-hidden="true"></i>{% trans "Urinishlarni ko‘rish" %}</a>
           <form method="post" action="{% url 'moderation:problem_rejudge' p.pk %}" data-confirm="{% blocktrans with p_title=p.title p_n_subs=p.n_subs %}«{{ p_title }}»: {{ p_n_subs }} ta urinish qayta tekshiriladi. Davom etasizmi?{% endblocktrans %}">{% csrf_token %}
             <button class="ca-dropdown-item w-full text-left"{% if not p.n_subs %} disabled{% endif %}><i data-lucide="refresh-cw" class="lu" aria-hidden="true"></i>{% trans "Qayta tekshirish" %}{% if p.n_subs %} <span class="ml-auto text-xs text-mute">{{ p.n_subs }}</span>{% endif %}</button>
           </form>
-          <form method="post" action="{% url 'moderation:problem_toggle' p.pk %}">{% csrf_token %}
-            <button class="ca-dropdown-item w-full text-left"><i data-lucide="{% if p.is_public %}eye-off{% else %}eye{% endif %}" class="lu" aria-hidden="true"></i>{% if p.is_public %}{% trans "Yashirish" %}{% else %}{% trans "Ochiq qilish" %}{% endif %}</button>
+          <form method="post" action="{% url 'moderation:problem_toggle' p.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <button class="ca-dropdown-item w-full text-left"{% if p.status != 'approved' %} disabled{% endif %}><i data-lucide="{% if p.is_public %}eye-off{% else %}eye{% endif %}" class="lu" aria-hidden="true"></i>{% if p.is_public %}{% trans "Yashirish" %}{% else %}{% trans "Ochiq qilish" %}{% endif %}</button>
           </form>
           <hr class="my-1 border-line">
           <form method="post" action="{% url 'moderation:problem_delete' p.pk %}" data-confirm="{% blocktrans with p_title=p.title %}«{{ p_title }}» va barcha urinishlari o‘chiriladi. Davom etasizmi?{% endblocktrans %}">{% csrf_token %}
@@ -66,11 +101,25 @@
           </form>
         </div>
       </details>
-    </div>
-  </li>
+    </td>
+  </tr>
   {% endfor %}
-</ul>
+  </tbody>
+</table>
+</div>
 {% include "_pagination.html" with page=page %}
+<script>
+  // ticks reveal the bulk bar; "all" ticks the page; the topic picker shows only for "add a topic"
+  (() => {
+    const bar = document.getElementById("bulk"), all = document.getElementById("bulk-all"), n = document.getElementById("bulk-n");
+    const ones = () => [...document.querySelectorAll(".bulk-one")];
+    const sync = () => { const c = ones().filter((x) => x.checked).length; n.textContent = c; bar.hidden = !c; };
+    all.addEventListener("change", () => { ones().forEach((x) => (x.checked = all.checked)); sync(); });
+    document.addEventListener("change", (e) => { if (e.target.classList.contains("bulk-one")) sync(); });
+    const doSel = document.getElementById("bulk-do"), tagSel = document.getElementById("bulk-tag");
+    doSel.addEventListener("change", () => { tagSel.hidden = doSel.value !== "tag"; });
+  })();
+</script>
 {% else %}
 <div class="ca-empty">{% trans "Masala topilmadi." %}</div>
 {% endif %}

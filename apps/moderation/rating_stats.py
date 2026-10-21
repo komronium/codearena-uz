@@ -10,6 +10,7 @@ from django.utils.translation import gettext_lazy as _tl
 from apps.accounts.models import User
 from apps.accounts.tiers import RATING_TIERS, TIER_UZ, rating_tier
 from apps.classroom.models import Duel
+from apps.accounts.charts import rating_histogram
 from apps.contests import rating as rating_system
 from apps.contests.models import Contest, Participation
 
@@ -61,7 +62,7 @@ def contest_rating() -> dict:
         first_end.setdefault(p.user_id, p.contest.end)
         per_contest[p.contest_id].append(p)
 
-    out = {"pool": _spread(ratings), "tiers": _tiers(ratings), "buckets": _buckets(ratings),
+    out = {"pool": _spread(ratings), "tiers": _tiers(ratings), "chart": rating_histogram(ratings, floor=0, ceiling=2000),
            "ever_rated": len({p.user_id for p in rows}), "rated_rounds": len(per_contest)}
     ordered = sorted(pool, key=lambda u: -u["rating"])
     out["top"] = ordered[:3]
@@ -161,25 +162,73 @@ def duel_rating() -> dict:
     n = finished.count()
     draws = finished.filter(winner__isnull=True).count()
     week = finished.filter(finished_at__gte=now - timedelta(days=7)).count()
-    pairs = Counter()
-    wins, streak, best = Counter(), Counter(), (0, None)
-    for d in finished.order_by("finished_at", "pk").values("challenger_id", "opponent_id", "winner_id"):
-        a, b = sorted((d["challenger_id"], d["opponent_id"]))
-        pairs[(a, b)] += 1
-        for uid in (d["challenger_id"], d["opponent_id"]):
-            if d["winner_id"] == uid:
+
+    names = dict(User.objects.filter(pk__in=ids).values_list("pk", "username"))
+    pairs = defaultdict(lambda: Counter())  # (a, b) sorted -> wins of each, draws
+    games, wins, draw_of, streak, best = Counter(), Counter(), Counter(), Counter(), (0, None)
+    biggest = (0, None)  # the largest single rating gain
+    for d in finished.order_by("finished_at", "pk").values("challenger_id", "opponent_id", "winner_id", "challenger_delta", "opponent_delta"):
+        c, o, w = d["challenger_id"], d["opponent_id"], d["winner_id"]
+        key = tuple(sorted((c, o)))
+        pairs[key]["n"] += 1
+        for uid, delta, other in ((c, d["challenger_delta"], o), (o, d["opponent_delta"], c)):
+            games[uid] += 1
+            if delta is not None and delta > biggest[0]:
+                biggest = (delta, (uid, other))
+            if w == uid:
                 wins[uid] += 1
+                pairs[key][uid] += 1
                 streak[uid] += 1
                 if streak[uid] > best[0]:
                     best = (streak[uid], uid)
             else:
                 streak[uid] = 0
-    names = dict(User.objects.filter(pk__in={x for p in pairs for x in p} | ({best[1]} if best[1] else set()))
-                 .values_list("pk", "username"))
-    pair, pair_n = (pairs.most_common(1)[0] if pairs else (None, 0))
+            if w is None:
+                draw_of[uid] += 1
+        if w is None:
+            pairs[key]["draws"] += 1
+
+    def pair_row(key, rec):
+        a, b = key
+        wa, wb = rec[a], rec[b]
+        return {"a": names.get(a), "b": names.get(b), "wa": wa, "wb": wb, "draws": rec["draws"], "n": rec["n"],
+                "share": round(100 * wa / (wa + wb)) if wa + wb else 50, "gap": abs(wa - wb)}
+
+    rows = [pair_row(k, r) for k, r in pairs.items()]
+    # a head-to-head means something only after a few games: the lists take pairs with at least this many
+    many = [r for r in rows if r["n"] >= 10] or [r for r in rows if r["n"] >= 3]
+    busiest = sorted(rows, key=lambda r: -r["n"])[:3]
+    closest = sorted((r for r in many if r["wa"] + r["wb"]), key=lambda r: (r["gap"] / (r["wa"] + r["wb"]), -r["n"]))[:3]
+    lopsided = sorted((r for r in many if r["wa"] + r["wb"]), key=lambda r: (-(max(r["wa"], r["wb"]) / (r["wa"] + r["wb"])), -r["n"]))[:3]
+    for r in lopsided:  # the stronger side first, so the long bar is always on the left
+        if r["wb"] > r["wa"]:
+            r.update(a=r["b"], b=r["a"], wa=r["wb"], wb=r["wa"], share=100 - r["share"])
+
+    facts = []
+
+    def fact(icon, title, value, who="", note="", unit=""):
+        facts.append({"icon": icon, "title": title, "value": value, "who": who, "note": note, "unit": unit})
+
+    if best[1]:
+        fact("flame", _tl("Eng uzun g‘alaba seriyasi"), best[0], names.get(best[1]), unit=_tl("ketma-ket"))
+    if games:
+        busy = games.most_common(1)[0]
+        fact("swords", _tl("Eng faol o‘yinchi"), busy[1], names.get(busy[0]), unit=_tl("duel"))
+        rate = [(wins[u] / g, u, g) for u, g in games.items() if g >= 20]
+        if rate:
+            r, u, g = max(rate)
+            fact("percent", _tl("Eng yuqori g‘alaba ulushi"), round(100 * r), names.get(u), note=_tl("{g} duelda").format(g=g), unit="%")
+        if draw_of:
+            u, dn = draw_of.most_common(1)[0]
+            fact("scale", _tl("Eng ko‘p durang qilgan"), dn, names.get(u), unit=_tl("durang"))
+    if biggest[1]:
+        fact("trending-up", _tl("Bir duelda eng katta o‘sish"), f"+{biggest[0]}", names.get(biggest[1][0]),
+             note=_tl("{other} ga qarshi").format(other=names.get(biggest[1][1])))
+    fact("calendar-days", _tl("So‘nggi 7 kun"), week, "", unit=_tl("duel"))
     return {"n": n, "players": len(players), "draw_pct": round(100 * draws / n) if n else 0, "week": week,
-            "spread": _spread(ratings), "tiers": _tiers(ratings), "buckets": _buckets(ratings),
+            "spread": _spread(ratings), "tiers": _tiers(ratings), "chart": rating_histogram(ratings, size=None, tiers=False),
             "per_player": round(2 * n / len(players), 1) if players else 0,
-            "top": sorted(players, key=lambda u: -u["duel_rating"])[:3],
-            "best_streak": {"n": best[0], "who": names.get(best[1])},
-            "busiest_pair": {"n": pair_n, "who": [names.get(x) for x in pair] if pair else []}}
+            "top": sorted(players, key=lambda u: -u["duel_rating"])[:3], "facts": facts,
+            "rivalries": [{"title": _tl("Eng ko‘p o‘ynalgan"), "icon": "repeat", "rows": busiest},
+                          {"title": _tl("Eng qizg‘in: deyarli teng hisob"), "icon": "equal", "rows": closest},
+                          {"title": _tl("Eng bir tomonlama"), "icon": "chevrons-right", "rows": lopsided}]}

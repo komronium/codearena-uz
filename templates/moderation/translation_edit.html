@@ -1,10 +1,9 @@
 {% extends "base.html" %}
 {% block title %}{% trans "Tarjima" %}: {{ obj.title }}{% endblock %}
+{% block band %}{% url 'moderation:translations' as back %}{% include "moderation/_band.html" with title=obj.title subtitle=_("Asl matn chapda, tarjima o‘ngda.") back_url=back back_label=_("Tarjimalar") %}{% endblock %}
 {% block content %}
 {% comment %}One piece of content, its original beside the other-language text. Saving keeps it a draft; "Save and confirm" shows it to
 readers. ctx: kind, obj, rows (i, label, source, text, confirmed, by_ai, long), target, source, status.{% endcomment %}
-{% url 'moderation:translations' as back %}
-<div class="mb-5">{% include "moderation/_header.html" with title=obj.title subtitle=_("Asl matn chapda, tarjima o‘ngda.") back_url=back back_label=_("Tarjimalar") %}</div>
 <p class="mb-4 text-sm text-mute">{{ source }} → <b class="text-ink">{{ target }}</b> ·
   {% if status == "confirmed" %}<span class="ca-chip ca-chip-ok">{% trans "Tasdiqlangan" %}</span>{% elif status == "draft" %}<span class="ca-chip ca-chip-warn">{% trans "Qoralama" %}</span>{% else %}<span class="ca-chip">{% trans "Tarjima yo‘q" %}</span>{% endif %}</p>
 <div class="mb-5 flex flex-wrap gap-2">

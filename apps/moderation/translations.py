@@ -41,9 +41,12 @@ def index(request):
         if not want or want == st:
             rows.append({"obj": obj, "status": st, "target": service.other(obj.source_lang)})
     page = Paginator(rows, 40).get_page(request.GET.get("page"))
+    drafts = [r["obj"].title for r in rows if r["status"] == "draft"] if want in ("", "draft") else []
+    if want not in ("", "draft"):
+        drafts = [o.title for o in qs if service.status(o) == "draft"]
     return render(request, "moderation/translations.html", {
         "kind": kind, "kinds": [(k, KIND_LABELS[k]) for k in service.KINDS], "page": page, "counts": counts,
-        "q": q, "want": want, "langs": dict(LANGS)})
+        "q": q, "want": want, "langs": dict(LANGS), "ai_ready": _ai_ready(), "draft_sample": ", ".join(drafts[:5])})
 
 
 @staff_required
@@ -112,11 +115,12 @@ def confirm_one(request, kind, pk):
 @staff_required
 @require_POST
 def confirm_all(request, kind):
-    n = 0
+    n = objs = 0
     for obj in service.model_of(_kind(kind)).objects.all():
         if service.status(obj) == "draft":
             n += service.confirm_all(obj, request.user)
-    messages.success(request, _t("{n} ta matn tasdiqlandi.").format(n=n))
+            objs += 1
+    messages.success(request, _t("{n} ta matn tasdiqlandi ({objs} ta element).").format(n=n, objs=objs))
     return redirect(f"{reverse('moderation:translations')}?kind={kind}")
 
 

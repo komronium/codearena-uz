@@ -1,10 +1,16 @@
 {% extends "base.html" %}{% load tagnames uzdates %}
 {% block title %}{% trans "Kun masalasi — boshqaruv" %}{% endblock %}
+{% block band %}
+<section class="ca-hud" aria-labelledby="mod-title">
+  <div class="ca-hud-in">
+    <div>
+      <h1 id="mod-title">{% trans "Kun masalasi" %}</h1>
+      <p class="ca-hud-sub">{% trans "Algoritm sanaga mos 5 ta variant tayyorlaydi. Admin tanlamasa, kunlik masala odatdagidek avtomatik belgilanadi." %}</p>
+    </div>
+  </div>
+</section>
+{% endblock %}
 {% block content %}
-<div class="mb-6">
-  {% include "moderation/_header.html" with title=_("Kun masalasi") subtitle=_("Algoritm sanaga mos 5 ta variant tayyorlaydi. Admin tanlamasa, kunlik masala odatdagidek avtomatik belgilanadi.") %}
-</div>
-
 {% if invalid_date %}<div class="ca-alert mb-4">{% trans "Sana bugun bilan keyingi 365 kun oralig‘ida bo‘lishi kerak. Yaqin sanani tanlang." %}</div>{% endif %}
 
 <div class="grid gap-5 lg:grid-cols-[minmax(0,1fr)_20rem]">
@@ -25,6 +31,9 @@
       </div>
     </div>
 
+    {% if assignment and day > today %}
+    <form method="post" action="{% url 'moderation:daily_problem_clear' %}" class="text-right" data-confirm="{% trans 'Tanlov bekor qilinadi, kunni sayt o‘zi belgilaydi. Davom etasizmi?' %}">{% csrf_token %}<input type="hidden" name="date" value="{{ day|date:'Y-m-d' }}"><button class="ca-link text-sm text-bad">{% trans "Tanlovni bekor qilish" %}</button></form>
+    {% endif %}
     {% if assignment %}
     <div class="ca-panel border-ok/30">
       <div class="flex flex-wrap items-center justify-between gap-3">
@@ -43,7 +52,11 @@
     {% endif %}
 
     {% if day == today and today_assignment %}
-    <div class="ca-empty"><i data-lucide="calendar-check" class="lu mx-auto mb-2" aria-hidden="true"></i>{% trans "Bugungi masala foydalanuvchilarga ko‘rinib bo‘lgan. Streak va bonuslar o‘zgarmasligi uchun bugungi tanlovni qulfladik." %}</div>
+    <div class="ca-empty"><i data-lucide="calendar-check" class="lu mx-auto mb-2" aria-hidden="true"></i>{% trans "Bugungi masala foydalanuvchilarga ko‘rinib bo‘lgan. Streak va bonuslar o‘zgarmasligi uchun bugungi tanlovni qulfladik." %}
+      {% if user.is_superuser %}<details class="mt-3 text-left"><summary class="cursor-pointer text-sm font-semibold text-accent">{% trans "Shoshilinch almashtirish (buzuq masala)" %}</summary>
+        <p class="mt-1 text-xs text-mute">{% trans "Faqat masala buzuq bo‘lsa: pastdagi variantlardan biri bugunga qo‘yiladi, jurnalga yoziladi." %}</p>
+        <div class="mt-2 grid gap-2 sm:grid-cols-2">{% for p in candidates %}<form method="post" action="{% url 'moderation:daily_problem_choose' %}" data-confirm="{% trans 'Bugungi masala almashtiriladi. Davom etasizmi?' %}">{% csrf_token %}<input type="hidden" name="date" value="{{ day|date:'Y-m-d' }}"><input type="hidden" name="problem_id" value="{{ p.pk }}"><input type="hidden" name="swap" value="1"><button class="ca-btn ca-btn-ghost w-full !py-1 text-left">{{ p.title }}</button></form>{% endfor %}</div></details>{% endif %}
+    </div>
     {% else %}
     <div>
       <div class="mb-3 flex flex-wrap items-end justify-between gap-2">
@@ -85,27 +98,33 @@
     {% endif %}
   </section>
 
-  <aside class="ca-panel h-fit" aria-labelledby="schedule-title">
+  <aside class="h-fit space-y-5">
+  <section class="ca-panel" aria-labelledby="find-title">
+    <h2 id="find-title" class="text-[1.0625rem] font-bold">{% trans "Boshqa masala tanlash" %}</h2>
+    <form method="get" class="mt-3 flex gap-2" role="search"><input type="hidden" name="date" value="{{ day|date:'Y-m-d' }}"><label class="sr-only" for="daily-q">{% trans "Masala qidirish" %}</label><input id="daily-q" class="ca-input !py-1.5 text-sm" type="search" name="q" value="{{ q }}" placeholder="{% trans 'Sarlavha yoki slug…' %}"><button class="ca-btn ca-btn-ghost !py-1.5"><i data-lucide="search" class="lu" aria-hidden="true"></i></button></form>
+    {% if found %}<ul class="mt-3 space-y-2">{% for p in found %}<li class="flex items-center gap-2"><span class="min-w-0 flex-1 truncate text-sm">{{ p.title }} <span class="ca-diff ca-diff-{{ p.difficulty }} text-xs">{{ p.get_difficulty_display }}</span></span>
+      <form method="post" action="{% url 'moderation:daily_problem_choose' %}">{% csrf_token %}<input type="hidden" name="date" value="{{ day|date:'Y-m-d' }}"><input type="hidden" name="problem_id" value="{{ p.pk }}"><input type="hidden" name="custom" value="1"><button class="ca-btn ca-btn-soft !py-1">{% trans "Tanlash" %}</button></form></li>{% endfor %}</ul>
+    {% elif q %}<p class="mt-3 text-sm text-mute">{% trans "Hech narsa topilmadi." %}</p>{% endif %}
+  </section>
+  <section class="ca-panel" aria-labelledby="schedule-title">
     <div class="flex items-center justify-between gap-2">
       <h2 id="schedule-title" class="text-[1.0625rem] font-bold">{% trans "Yaqin kunlar" %}</h2>
       <span class="ca-chip">{% trans "15 kun" %}</span>
     </div>
     <p class="mt-1 text-sm text-mute">{% trans "Tanlangan va avtomatik rejalangan masalalar." %}</p>
-    {% if schedule %}
-    <ul class="mt-4 space-y-2">
-      {% for row in schedule %}
-      <li>
-        <a class="flex items-start justify-between gap-3 rounded-lg border border-ink/10 p-3 transition hover:border-accent/40{% if row.date == day %} border-accent/50 bg-accent/5{% endif %}" href="{% url 'moderation:daily_problem' %}?date={{ row.date|date:'Y-m-d' }}">
-          <span class="min-w-0"><span class="block text-xs text-mute">{{ row.date|weekday_uz }} · {{ row.date|date:"d.m.Y" }}{% if row.date == today %} {% trans "· Bugun" %}{% endif %}</span><span class="mt-0.5 block truncate text-sm font-medium">{{ row.problem.title }}</span></span>
-          {% if row.selection_method == 'admin' %}<i data-lucide="user-check" class="lu shrink-0 text-ok" aria-label="{% trans 'Admin tanlagan' %}"></i>{% else %}<i data-lucide="sparkles" class="lu shrink-0 text-mute" aria-label="{% trans 'Avtomatik' %}"></i>{% endif %}
-        </a>
-      </li>
+    <ul class="mt-4 space-y-1.5">
+      {% for c in calendar %}
+      <li><a class="flex items-start justify-between gap-3 rounded-lg border border-ink/10 px-3 py-2 transition hover:border-accent/40{% if c.date == day %} border-accent/50 bg-accent/5{% endif %}" href="{% url 'moderation:daily_problem' %}?date={{ c.date|date:'Y-m-d' }}">
+        <span class="min-w-0"><span class="block text-xs text-mute">{{ c.date|weekday_uz }} · {{ c.date|date:"d.m" }}{% if c.date == today %} {% trans "· Bugun" %}{% endif %}</span>
+          <span class="block truncate text-sm {% if c.row %}font-medium{% else %}text-mute{% endif %}">{% if c.row %}{{ c.row.problem.title }}{% else %}{% trans "avtomatik" %}{% endif %}</span></span>
+        {% if c.row and c.row.selection_method == 'admin' %}<i data-lucide="user-check" class="lu shrink-0 text-ok" aria-label="{% trans 'Admin tanlagan' %}"></i>{% elif c.row %}<i data-lucide="sparkles" class="lu shrink-0 text-mute" aria-label="{% trans 'Avtomatik' %}"></i>{% endif %}
+      </a></li>
       {% endfor %}
     </ul>
-    {% else %}<div class="ca-empty mt-4 !p-4">{% trans "Hali yaqin kunlar uchun reja yo‘q." %}</div>{% endif %}
     <div class="mt-4 border-t border-ink/10 pt-3 text-xs leading-relaxed text-mute">
       <p><i data-lucide="info" class="lu mr-1" aria-hidden="true"></i>{% trans "Tanlov bo‘lmasa, sayt birinchi murojaatda masalani avtomatik belgilaydi. Admin tanlovi esa sanaga saqlanib, hamma foydalanuvchiga bir xil ko‘rinadi." %}</p>
     </div>
+  </section>
   </aside>
 </div>
 {% endblock %}

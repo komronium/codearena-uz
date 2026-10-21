@@ -478,9 +478,10 @@ def rating(request):
             me = None if row is None else {"rank": sum(1 for r in everyone if r > request.user.rating) + 1, "page": row // 50 + 1,
                   "delta": mine.rating_after - mine.rating_before, "next": _next_tier(request.user.rating),
                   "contests": rated.filter(user=request.user).count()}
-    spread = _rating_spread(ratings, request.user.rating if me else None)
+    from .charts import rating_histogram
+    chart = rating_histogram(ratings, request.user.rating if me else None, floor=0, ceiling=2000)
     return render(request, "accounts/rating.html",
-                  {"users": page, "total": len(ratings), "tiers": tiers, "spread": spread, "me": me, "q": q,
+                  {"users": page, "total": len(ratings), "tiers": tiers, "chart": chart, "me": me, "q": q,
                    "sort": sort if order else "", "tier_sel": tier_sel, **geo})
 
 

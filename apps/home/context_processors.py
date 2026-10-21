@@ -21,7 +21,7 @@ def _running_contests() -> list[dict]:
         now = timezone.now()
         soon = now + datetime.timedelta(seconds=_LIVE_TTL)
         live = [{"pk": c.pk, "title": c.title, "start": c.start, "end": c.end}
-                for c in Contest.objects.filter(start__lte=soon, end__gt=now).order_by("end")
+                for c in Contest.objects.filter(is_draft=False, start__lte=soon, end__gt=now).order_by("end")
                 .only("pk", "title", "start", "end")]
         cache.set(_LIVE_KEY, live, _LIVE_TTL)
     return live
@@ -50,8 +50,21 @@ def _staff_todo() -> dict:
     if todo is None:
         from apps.problems.models import Problem
 
+        from django.utils import timezone
+
+        from apps.contests.models import Contest
+        from apps.integrity.models import Report, SimilarityFlag
+        from apps.translations.models import ContentTranslation
+
         queue = Problem.objects.filter(status=Problem.Status.PENDING).count()
-        todo = {"queue": queue, "total": queue}
+        flags = SimilarityFlag.objects.filter(reviewed=False).count()
+        reports = Report.objects.filter(done_at__isnull=True).count()
+        to_rate = Contest.objects.filter(is_rated=True, rating_applied=False, end__lte=timezone.now(), is_draft=False,
+                                         participations__isnull=False).distinct().count()
+        drafts = Contest.objects.filter(is_draft=True).count()
+        drafts_tr = ContentTranslation.objects.filter(confirmed=False).exclude(text="").count()
+        todo = {"queue": queue, "flags": flags, "reports": reports, "to_rate": to_rate, "rounds": drafts, "translations": drafts_tr,
+                "total": queue + flags + reports + to_rate + drafts}
         cache.set("nav-staff-todo", todo, 30)
     return todo
 

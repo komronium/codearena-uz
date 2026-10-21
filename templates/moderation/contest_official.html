@@ -1,10 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{% blocktrans with contest_title=contest.title %}{{ contest_title }} — rasmiy reyting{% endblocktrans %}{% endblock %}
+{% block band %}{% url 'moderation:contests' as back %}{% include "moderation/_band.html" with title=contest.title subtitle=_("Rasmiy reyting") back_url=back back_label=_("Musobaqalar") %}{% endblock %}
 {% block content %}
-<div class="mb-6">
-  <a class="ca-link mb-2 inline-block text-sm text-mute" href="{% url 'moderation:contests' %}"><i data-lucide="arrow-left" class="lu mr-1" aria-hidden="true"></i>{% trans "Musobaqalar" %}</a>
-  <h1 class="ca-page-title">{% blocktrans with contest_title=contest.title %}{{ contest_title }} — rasmiy reyting{% endblocktrans %}</h1>
-</div>
 
 {% if not contest.is_official %}
 <div class="ca-alert mb-4 items-center">

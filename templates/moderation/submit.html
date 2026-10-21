@@ -1,18 +1,26 @@
 {% extends "base.html" %}{% load static tagnames %}
 {% block title %}{% if problem %}{% trans "Masalani tahrirlash" %}{% else %}{% trans "Masala qo‘shish" %}{% endif %}{% endblock %}
 
-{% block content %}
-<div class="mb-6 flex items-start justify-between gap-3">
-  <div>
-    <h1 class="ca-page-title">{% if problem %}{% trans "Masalani tahrirlash" %}{% else %}{% trans "Masala qo‘shish" %}{% endif %}</h1>
-    <p class="mt-1 text-sm text-mute">{% if problem %}#{{ problem.pk|stringformat:"04d" }} · {{ problem.slug }}{% else %}{% trans "Yangi masala yopiq holda saqlanadi. Amaliyot uchun bo‘lsa «Ochiq»ni belgilang; musobaqa masalasini yopiq qoldirib, musobaqaga ulang." %}{% endif %}</p>
+{% block band %}
+<section class="ca-hud" aria-labelledby="mod-title">
+  <div class="ca-hud-in">
+    <div>
+      <p class="ca-hud-lbl"><a class="text-white no-underline hover:underline" href="{% url 'moderation:problems' %}">{% trans "Masalalar" %}</a></p>
+      <h1 id="mod-title">{% if problem %}{{ problem.title }}{% else %}{% trans "Masala qo‘shish" %}{% endif %}</h1>
+      <p class="ca-hud-sub">{% if problem %}#{{ problem.pk|stringformat:"04d" }} · {{ problem.slug }}{% else %}{% trans "Yangi masala yopiq holda saqlanadi. Amaliyot uchun bo‘lsa «Ochiq»ni belgilang; musobaqa masalasini yopiq qoldiring." %}{% endif %}</p>
+    </div>
   </div>
-  <a href="{% url 'moderation:problems' %}" class="ca-btn ca-btn-ghost !py-1.5">{% trans "Barcha masalalar" %}</a>
+</section>
+{% endblock %}
+{% block content %}
+<div id="draft-bar" class="ca-alert mb-4 flex flex-wrap items-center gap-3" role="status" hidden>
+  <span>{% trans "Saqlanmagan qoralama topildi:" %} <b id="draft-when" class="tabular"></b></span>
+  <button type="button" id="draft-restore" class="ca-btn ca-btn-primary !py-1">{% trans "Tiklash" %}</button>
+  <button type="button" id="draft-drop" class="ca-btn ca-btn-ghost !py-1">{% trans "Tashlab yuborish" %}</button>
 </div>
-
 {% if error %}<div class="ca-alert ca-alert-bad mb-4" role="alert">{{ error }}</div>{% endif %}
 
-<nav class="ca-secnav mb-4" aria-label="{% trans 'Forma bo‘limlari' %}">{% trans "<a href=\"#sec-shart\">Shart</a><a href=\"#sec-testlar\" data-kind-only=\"code\">Testlar</a><a href=\"#sec-yordam\">Maslahatlar</a><a href=\"#sec-sozlama\">Sozlamalar</a>" %}</nav>
+<nav class="ca-secnav mb-4" id="sec-nav" aria-label="{% trans 'Forma bo‘limlari' %}">{% trans "<a href=\"#sec-shart\">Shart</a><a href=\"#sec-testlar\" data-kind-only=\"code\">Testlar</a><a href=\"#sec-yordam\">Maslahatlar</a><a href=\"#sec-sozlama\">Sozlamalar</a>" %}</nav>
 <form method="post" enctype="multipart/form-data" novalidate class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:items-start">
   {% csrf_token %}
   <div class="space-y-6">
@@ -148,6 +156,14 @@
         </div>
       </template>
       <button type="button" id="add-testcase" class="ca-btn ca-btn-ghost"><i data-lucide="plus" class="lu" aria-hidden="true"></i>{% trans "Yana test" %}</button>
+      <details class="rounded-[var(--ca-radius)] border border-line p-3" {% if form.ref_source.value %}open{% endif %}>
+        <summary class="cursor-pointer text-sm font-semibold">{% trans "Namunaviy yechim bilan tekshirish (tavsiya etiladi)" %}</summary>
+        <p class="mt-2 text-xs text-mute">{% trans "Yechimingizni shu yerga qo‘ying: saqlashdan oldin u BARCHA testlardan o‘tishi kerak, o‘tmasa masala saqlanmaydi. Yechim saqlanmaydi." %}</p>
+        <div class="mt-2 grid gap-2 sm:grid-cols-[12rem_1fr]">
+          <div><label class="ca-label" for="{{ form.ref_lang.id_for_label }}">{% trans "Til" %}</label>{{ form.ref_lang }}</div>
+          <div><label class="ca-label" for="{{ form.ref_source.id_for_label }}">{% trans "Kod" %}</label>{{ form.ref_source }}</div>
+        </div>
+      </details>
     </section>
 
     <section class="ca-panel scroll-mt-20 space-y-4" id="sec-yordam">
@@ -176,6 +192,7 @@
     {% comment %}The sticky aside is taller than a screen, so only its top stays in view down a long test list:
     on a wide screen the save button sits there; on a phone it ends the form.{% endcomment %}
     <button type="submit" class="ca-btn ca-btn-primary hidden w-full lg:flex"><i data-lucide="check" class="lu" aria-hidden="true"></i>{% trans "Masalani saqlash" %}</button>
+    {% if problem %}<label class="flex items-start gap-2 text-sm"><input type="checkbox" name="rejudge" value="1" class="mt-1 rounded border-line" checked><span>{% trans "Testlar o‘zgarsa, mavjud urinishlarni qayta tekshirish" %}</span></label>{% endif %}
     <section class="ca-panel space-y-4">
       <h2 class="ca-section-title !mb-0">{% trans "Sozlamalar" %}</h2>
       <div>
@@ -254,7 +271,7 @@
       toolbar: ["bold", "italic", "heading", "|", "code", "quote", "unordered-list", "ordered-list", "table", "|", "upload-image", "|", "preview", "guide"],
       uploadImage: true,
       imageUploadFunction: uploadImageFn,
-      imageAccept: "image/png, image/jpeg, image/gif, image/webp, image/svg+xml",
+      imageAccept: "image/png, image/jpeg, image/gif, image/webp",
       imageMaxSize: 10 * 1024 * 1024,
       imageTexts: {
         sbInit: "{% jt "Rasmni tashlang yoki yuklang" %}",
@@ -266,7 +283,7 @@
       },
       errorMessages: {
         noFileGiven: "{% jt "Hech qanday fayl tanlanmadi" %}",
-        typeNotAllowed: "Faqat rasm fayllari (PNG, JPG, GIF, WebP, SVG) ruxsat etilgan",
+        typeNotAllowed: "Faqat rasm fayllari (PNG, JPG, GIF, WebP) ruxsat etilgan",
         fileTooLarge: "Fayl hajmi juda katta (maksimal #imageMaxSize#)",
         importError: "{% jt "Rasmni yuklashda xatolik yuz berdi" %}",
       }
@@ -274,6 +291,7 @@
     // typing goes into CodeMirror's own hidden textarea: give it the field's label for screen readers
     const label = el.id && document.querySelector(`label[for="${el.id}"]`);
     if (label) mde.codemirror.getInputField().setAttribute("aria-label", label.textContent.trim());
+    (window.caEditors = window.caEditors || []).push({ el, mde });
   });
 
   const imgInput = document.getElementById("{{ form.statement_image.id_for_label }}");
@@ -331,6 +349,45 @@
     container.appendChild(wrap.firstElementChild);
     totalForms.value = idx + 1;
   });
+
+  // ---- unsaved work: warn on leaving, keep a draft in this browser, offer it back; mark finished sections ----
+  const form = document.querySelector("form[enctype]");
+  const key = "ca-draft:{% if problem %}{{ problem.pk }}{% else %}new{% endif %}";
+  let dirty = false;
+  const touch = () => { dirty = true; };
+  form.addEventListener("input", touch);
+  (window.caEditors || []).forEach(({ mde }) => mde.codemirror.on("change", touch));
+  form.addEventListener("submit", () => { dirty = false; try { localStorage.removeItem(key); } catch (e) {} });
+  window.addEventListener("beforeunload", (e) => { if (dirty) { e.preventDefault(); e.returnValue = ""; } });
+  const snapshot = () => {
+    const data = {};
+    form.querySelectorAll("input:not([type=file]):not([type=hidden]):not([type=checkbox]), textarea, select").forEach((el) => { if (el.name) data[el.name] = el.value; });
+    (window.caEditors || []).forEach(({ el, mde }) => { data[el.name] = mde.value(); });
+    return data;
+  };
+  setInterval(() => { if (dirty) { try { localStorage.setItem(key, JSON.stringify({ t: Date.now(), data: snapshot() })); } catch (e) {} } }, 5000);
+  try {
+    const raw = localStorage.getItem(key), bar = document.getElementById("draft-bar");
+    if (raw) {
+      const saved = JSON.parse(raw);
+      document.getElementById("draft-when").textContent = new Date(saved.t).toLocaleString();
+      bar.hidden = false;
+      document.getElementById("draft-restore").addEventListener("click", () => {
+        Object.entries(saved.data).forEach(([name, v]) => { const el = form.elements[name]; if (el && el.type !== "file") el.value = v; });
+        (window.caEditors || []).forEach(({ el, mde }) => { if (saved.data[el.name] != null) mde.value(saved.data[el.name]); });
+        bar.hidden = true; dirty = true;
+      });
+      document.getElementById("draft-drop").addEventListener("click", () => { localStorage.removeItem(key); bar.hidden = true; });
+    }
+  } catch (e) {}
+  const mark = () => {
+    const nav = document.getElementById("sec-nav"); if (!nav) return;
+    const val = (name) => { const ed = (window.caEditors || []).find((x) => x.el.name === name); return ed ? ed.mde.value().trim() : (form.elements[name] ? form.elements[name].value.trim() : ""); };
+    const tests = [...form.querySelectorAll("textarea[name$='-expected']")].filter((t) => t.value.trim() && !t.closest("template")).length;
+    const done = { "#sec-shart": val("title") && val("statement_md"), "#sec-testlar": tests >= 2, "#sec-yordam": [...form.querySelectorAll("textarea[name^='hints-'][name$='-body_md']")].some((t) => t.value.trim()) };
+    nav.querySelectorAll("a").forEach((a) => a.classList.toggle("is-done", !!done[a.getAttribute("href")]));
+  };
+  form.addEventListener("input", mark); setTimeout(mark, 400);
 })();
 </script>
 {% endblock %}
