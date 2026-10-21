@@ -6,24 +6,40 @@ from html import escape
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db.models import Count
-from django.utils import timezone
+from django.utils import timezone, translation
+from django.utils.translation import gettext as _t, gettext_lazy as _tl
 
 from apps.accounts.models import TelegramLink, TelegramLinkToken, TelegramOutbox
 from apps.accounts.telegram import queue_notification, recover_outbox
 from apps.contests.models import Contest
 from apps.problems.daily import daily_for
 from apps.submissions.models import Submission
+from apps.translations.mixin import localized
 
 
 DAILY_TIPS = (
-    "Masalani kodlashdan oldin kirish va chiqish formatini o‘qing. Kichik misolni qo‘lda yechib, algoritm nima qilishi kerakligini aniqlang.",
-    "Chekka holatlarni tekshiring: n=1, eng kichik qiymatlar, takroriy sonlar va javob chegaralari ko‘p xatolarni topadi.",
-    "Murakkablikni baholang: n 10⁵ bo‘lsa, O(n²) algoritm odatda sekinlik qiladi. Avval yechimning vaqt va xotira sarfini hisoblang.",
-    "Katta yechimdan oldin kichik brute-force yozib ko‘ring. Tasodifiy kichik testlarda tez algoritm bilan solishtirish xatolarni topishga yordam beradi.",
-    "Xato javob chiqsa, bir o‘zgarishni tekshiring: oraliq qiymatlar, sikl chegarasi va indekslar. Debug chiqarishlarini yakuniy javobdan olib tashlang.",
-    "Yechimni topshirishdan oldin namunadan tashqari o‘zingiz tuzgan kamida bitta testda ham sinang.",
-    "Masalani yechgach, boshqa yechimni o‘qing va o‘zingiznikiga solishtiring. Yangi g‘oyani keyingi masalada qo‘llab ko‘ring.",
+    _tl("Masalani kodlashdan oldin kirish va chiqish formatini o‘qing. Kichik misolni qo‘lda yechib, algoritm nima qilishi kerakligini aniqlang."),
+    _tl("Chekka holatlarni tekshiring: n=1, eng kichik qiymatlar, takroriy sonlar va javob chegaralari ko‘p xatolarni topadi."),
+    _tl("Murakkablikni baholang: n 10⁵ bo‘lsa, O(n²) algoritm odatda sekinlik qiladi. Avval yechimning vaqt va xotira sarfini hisoblang."),
+    _tl("Katta yechimdan oldin kichik brute-force yozib ko‘ring. Tasodifiy kichik testlarda tez algoritm bilan solishtirish xatolarni topishga yordam beradi."),
+    _tl("Xato javob chiqsa, bir o‘zgarishni tekshiring: oraliq qiymatlar, sikl chegarasi va indekslar. Debug chiqarishlarini yakuniy javobdan olib tashlang."),
+    _tl("Yechimni topshirishdan oldin namunadan tashqari o‘zingiz tuzgan kamida bitta testda ham sinang."),
+    _tl("Masalani yechgach, boshqa yechimni o‘qing va o‘zingiznikiga solishtiring. Yangi g‘oyani keyingi masalada qo‘llab ko‘ring."),
 )
+
+
+def push(user_ids, preference: str, key: str, build) -> None:
+    """Queue one message to each user in that user's own language: `build()` is called once per language, with it active."""
+    from apps.accounts.models import User
+
+    by_lang: dict = {}
+    for uid, lang in User.objects.filter(pk__in=list(user_ids)).values_list("pk", "language"):
+        by_lang.setdefault(lang or "uz", []).append(uid)
+    for lang, ids in by_lang.items():
+        with translation.override(lang):
+            text = build()
+        for uid in ids:
+            queue_notification(uid, preference, key, text)
 
 
 class Command(BaseCommand):
@@ -43,25 +59,16 @@ class Command(BaseCommand):
         day = timezone.localdate()
         if daily:
             url = f"{site_url}/problems/{daily.problem.slug}/"
-            text = (
-                f"<b>📅 Bugungi masala</b>\n\n"
-                f"<b>{escape(daily.problem.title)}</b>\n"
-                f'<a href="{url}">Masalani ochish →</a>'
-            )
-            for user_id in TelegramLink.objects.filter(
-                is_active=True, notify_daily_problem=True, user__is_active=True
-            ).values_list("user_id", flat=True).iterator():
-                queue_notification(user_id, "notify_daily_problem", f"daily:{daily.date.isoformat()}", text)
+            push(TelegramLink.objects.filter(is_active=True, notify_daily_problem=True, user__is_active=True)
+                 .values_list("user_id", flat=True), "notify_daily_problem", f"daily:{daily.date.isoformat()}",
+                 lambda: ("<b>" + _t("📅 Bugungi masala") + f"</b>\n\n<b>{escape(localized(daily.problem, 'title'))}</b>\n"
+                          + f'<a href="{url}">' + _t("Masalani ochish →") + "</a>"))
 
         tip = DAILY_TIPS[day.toordinal() % len(DAILY_TIPS)]
-        tip_text = (
-            f"<b>💡 Kunlik tavsiya</b>\n\n{escape(tip)}\n\n"
-            f'<a href="{site_url}/problems/">Yechishga o‘tish →</a>'
-        )
-        for user_id in TelegramLink.objects.filter(
-            is_active=True, notify_daily_tip=True, user__is_active=True
-        ).values_list("user_id", flat=True).iterator():
-            queue_notification(user_id, "notify_daily_tip", f"tip:{day.isoformat()}", tip_text)
+        push(TelegramLink.objects.filter(is_active=True, notify_daily_tip=True, user__is_active=True)
+             .values_list("user_id", flat=True), "notify_daily_tip", f"tip:{day.isoformat()}",
+             lambda: ("<b>" + _t("💡 Kunlik tavsiya") + f"</b>\n\n{escape(str(tip))}\n\n"
+                      + f'<a href="{site_url}/problems/">' + _t("Yechishga o‘tish →") + "</a>"))
 
         # Pick among today's top five practice problems by distinct users who tried them
         # during the last week. Rotate ties/trending candidates by date and skip the daily pick.
@@ -79,33 +86,25 @@ class Command(BaseCommand):
             trend_problem = Problem.objects.filter(pk=trending[day.toordinal() % min(5, len(trending))]).first()
             if trend_problem:
                 trend_url = f"{site_url}/problems/{trend_problem.slug}/"
-                trend_text = (
-                    f"<b>🔥 Trenddagi masala</b>\n\n"
-                    f"<b>{escape(trend_problem.title)}</b>\n"
-                    "So‘nggi 7 kunda ko‘p foydalanuvchi sinab ko‘rgan masala.\n\n"
-                    f'<a href="{trend_url}">Masalani ochish →</a>'
-                )
-                for user_id in TelegramLink.objects.filter(
-                    is_active=True, notify_trending_problem=True, user__is_active=True
-                ).values_list("user_id", flat=True).iterator():
-                    queue_notification(user_id, "notify_trending_problem", f"trending:{day.isoformat()}", trend_text)
+                push(TelegramLink.objects.filter(is_active=True, notify_trending_problem=True, user__is_active=True)
+                     .values_list("user_id", flat=True), "notify_trending_problem", f"trending:{day.isoformat()}",
+                     lambda: ("<b>" + _t("🔥 Trenddagi masala") + f"</b>\n\n<b>{escape(localized(trend_problem, 'title'))}</b>\n"
+                              + _t("So‘nggi 7 kunda ko‘p foydalanuvchi sinab ko‘rgan masala.") + "\n\n"
+                              + f'<a href="{trend_url}">' + _t("Masalani ochish →") + "</a>"))
 
         upcoming = Contest.objects.filter(start__gt=now, start__lte=now + datetime.timedelta(hours=1))
         for contest in upcoming.iterator():
             when = timezone.localtime(contest.start).strftime("%d.%m, %H:%M")
             url = f"{site_url}/contests/{contest.pk}/"
-            text = (
-                f"<b>🏆 Musobaqa 1 soat ichida</b>\n\n"
-                f"<b>{escape(contest.title)}</b>\n"
-                f"Boshlanishi: {when}\n\n"
-                f'<a href="{url}">Musobaqani ko‘rish →</a>'
-            )
             user_ids = (TelegramLink.objects.filter(
                 is_active=True, notify_contests=True, user__is_active=True,
                 user__participations__contest=contest, user__participations__disqualified=False,
             ).values_list("user_id", flat=True).distinct())
-            for user_id in user_ids.iterator():
-                queue_notification(user_id, "notify_contests", f"contest:{contest.pk}:start", text)
+            push(user_ids, "notify_contests", f"contest:{contest.pk}:start",
+                 lambda contest=contest, when=when, url=url: (
+                     "<b>" + _t("🏆 Musobaqa 1 soat ichida") + f"</b>\n\n<b>{escape(localized(contest, 'title'))}</b>\n"
+                     + _t("Boshlanishi: {when}").format(when=when) + "\n\n"
+                     + f'<a href="{url}">' + _t("Musobaqani ko‘rish →") + "</a>"))
 
         # in the evening, a nudge to anyone whose daily streak breaks tonight: a run going, today not solved yet
         if daily and timezone.localtime(now).hour >= 19:
@@ -122,10 +121,10 @@ class Command(BaseCommand):
                 run = streaks(link.user)[0]
                 if run < 1:
                     continue
-                text = (f"<b>🔥 Olov o‘chmasin!</b>\n\n"
-                        f"Ketma-ket <b>{run}</b> kun faol bo‘ldingiz. Bugun hali hech narsa qilmadingiz — "
-                        f"yarim tungacha kun masalasini yoki bitta vazifani bajarsangiz, Olov <b>{run + 1}</b> kun bo‘ladi.\n\n"
-                        f'<a href="{url}">{escape(daily.problem.title)} →</a>')
-                queue_notification(link.user_id, "notify_streak", f"streak:{day.isoformat()}", text)
+                push([link.user_id], "notify_streak", f"streak:{day.isoformat()}",
+                     lambda run=run: (
+                         "<b>" + _t("🔥 Olov o‘chmasin!") + "</b>\n\n"
+                         + _t("Ketma-ket <b>{run}</b> kun faol bo‘ldingiz. Bugun hali hech narsa qilmadingiz — yarim tungacha kun masalasini yoki bitta vazifani bajarsangiz, Olov <b>{next}</b> kun bo‘ladi.").format(run=run, next=run + 1)
+                         + "\n\n" + f'<a href="{url}">{escape(localized(daily.problem, "title"))} →</a>'))
 
         recover_outbox()

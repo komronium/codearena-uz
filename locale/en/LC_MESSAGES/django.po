@@ -1029,6 +1029,114 @@ msgstr "Couldn't reach Google. Try again in a moment."
 msgid "Bu email bir nechta hisobda. Parol bilan kiring."
 msgstr "This email belongs to several accounts. Sign in with a password."
 
+#: apps/accounts/management/commands/telegram_notifications.py
+msgid ""
+"Masalani kodlashdan oldin kirish va chiqish formatini o‘qing. Kichik misolni"
+" qo‘lda yechib, algoritm nima qilishi kerakligini aniqlang."
+msgstr ""
+"Read the input and output format before coding. Solve a small example by "
+"hand to work out what the algorithm must do."
+
+#: apps/accounts/management/commands/telegram_notifications.py
+msgid ""
+"Chekka holatlarni tekshiring: n=1, eng kichik qiymatlar, takroriy sonlar va "
+"javob chegaralari ko‘p xatolarni topadi."
+msgstr ""
+"Check the edge cases: n=1, the smallest values, repeated numbers and answer "
+"limits catch many mistakes."
+
+#: apps/accounts/management/commands/telegram_notifications.py
+msgid ""
+"Murakkablikni baholang: n 10⁵ bo‘lsa, O(n²) algoritm odatda sekinlik qiladi."
+" Avval yechimning vaqt va xotira sarfini hisoblang."
+msgstr ""
+"Estimate the complexity: if n is 10⁵, an O(n²) algorithm is usually too "
+"slow. First work out the solution's time and memory use."
+
+#: apps/accounts/management/commands/telegram_notifications.py
+msgid ""
+"Katta yechimdan oldin kichik brute-force yozib ko‘ring. Tasodifiy kichik "
+"testlarda tez algoritm bilan solishtirish xatolarni topishga yordam beradi."
+msgstr ""
+"Write a small brute force before the big solution. Comparing it with the "
+"fast algorithm on random small tests helps find mistakes."
+
+#: apps/accounts/management/commands/telegram_notifications.py
+msgid ""
+"Xato javob chiqsa, bir o‘zgarishni tekshiring: oraliq qiymatlar, sikl "
+"chegarasi va indekslar. Debug chiqarishlarini yakuniy javobdan olib "
+"tashlang."
+msgstr ""
+"If the answer is wrong, check one change at a time: intermediate values, "
+"loop bounds and indices. Remove debug output from the final answer."
+
+#: apps/accounts/management/commands/telegram_notifications.py
+msgid ""
+"Yechimni topshirishdan oldin namunadan tashqari o‘zingiz tuzgan kamida bitta"
+" testda ham sinang."
+msgstr ""
+"Before submitting, test it on at least one test of your own besides the "
+"sample."
+
+#: apps/accounts/management/commands/telegram_notifications.py
+msgid ""
+"Masalani yechgach, boshqa yechimni o‘qing va o‘zingiznikiga solishtiring. "
+"Yangi g‘oyani keyingi masalada qo‘llab ko‘ring."
+msgstr ""
+"After solving, read another solution and compare it with yours. Try the new "
+"idea on the next problem."
+
+#: apps/accounts/management/commands/telegram_notifications.py
+msgid "Yechishga o‘tish →"
+msgstr "Go solve →"
+
+#: apps/accounts/management/commands/telegram_notifications.py
+#: apps/accounts/management/commands/telegram_notifications.py
+msgid "Masalani ochish →"
+msgstr "Open the problem →"
+
+#: apps/accounts/management/commands/telegram_notifications.py
+msgid "Musobaqani ko‘rish →"
+msgstr "View the contest →"
+
+#: apps/accounts/management/commands/telegram_notifications.py
+msgid "💡 Kunlik tavsiya"
+msgstr "💡 Daily tip"
+
+#: apps/accounts/management/commands/telegram_notifications.py
+msgid "📅 Bugungi masala"
+msgstr "📅 Today's problem"
+
+#: apps/accounts/management/commands/telegram_notifications.py
+msgid "So‘nggi 7 kunda ko‘p foydalanuvchi sinab ko‘rgan masala."
+msgstr "A problem many users tried in the last 7 days."
+
+#: apps/accounts/management/commands/telegram_notifications.py
+msgid "🔥 Olov o‘chmasin!"
+msgstr "🔥 Keep your streak alive!"
+
+#: apps/accounts/management/commands/telegram_notifications.py
+msgid ""
+"Ketma-ket <b>{run}</b> kun faol bo‘ldingiz. Bugun hali hech narsa "
+"qilmadingiz — yarim tungacha kun masalasini yoki bitta vazifani bajarsangiz,"
+" Olov <b>{next}</b> kun bo‘ladi."
+msgstr ""
+"You've been active <b>{run}</b> days in a row. You haven't done anything yet"
+" today — if you solve the daily problem or one task before midnight, your "
+"streak becomes <b>{next}</b> days."
+
+#: apps/accounts/management/commands/telegram_notifications.py
+msgid "🏆 Musobaqa 1 soat ichida"
+msgstr "🏆 A contest starts within 1 hour"
+
+#: apps/accounts/management/commands/telegram_notifications.py
+msgid "Boshlanishi: {when}"
+msgstr "Starts: {when}"
+
+#: apps/accounts/management/commands/telegram_notifications.py
+msgid "🔥 Trenddagi masala"
+msgstr "🔥 Trending problem"
+
 #: apps/accounts/models.py templates/moderation/contests.html
 msgid "Kutilmoqda"
 msgstr "Pending"
