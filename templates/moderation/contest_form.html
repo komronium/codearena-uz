@@ -14,6 +14,7 @@
   {% csrf_token %}
   <div class="space-y-6">
     <section class="ca-panel space-y-4">
+      <div><label class="ca-label" for="{{ form.source_lang.id_for_label }}">{% trans "Qaysi tilda yozyapsiz?" %}</label>{{ form.source_lang }}<p class="mt-1 text-xs text-mute">{% trans "Faqat bitta tilda yozing: ikkinchi tilni admin yoki AI keyin to‘ldiradi va tasdiqlaydi." %}</p></div>
       <div><label class="ca-label" for="{{ form.title.id_for_label }}">{% trans "Nomi" %}</label>{{ form.title }}{{ form.title.errors }}</div>
       <div><label class="ca-label" for="{{ form.description_md.id_for_label }}">{% trans "Tavsif (Markdown)" %}</label>{{ form.description_md }}{{ form.description_md.errors }}</div>
       <div class="grid gap-4 sm:grid-cols-2">

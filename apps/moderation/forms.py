@@ -23,7 +23,20 @@ _CA_INPUT = {"class": "ca-input"}
 _MD = {"class": "ca-input ca-md", "rows": 6}
 
 
-class ProblemForm(ModelForm):
+class _SourceLang:
+    """The language the author writes in: optional on the form (an older client that doesn't send it keeps the current one)."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if "source_lang" in self.fields:
+            self.fields["source_lang"].required = False
+            self.fields["source_lang"].widget.attrs.setdefault("class", "ca-select")
+
+    def clean_source_lang(self):
+        return self.cleaned_data.get("source_lang") or getattr(self.instance, "source_lang", None) or "uz"
+
+
+class ProblemForm(_SourceLang, ModelForm):
     tests_zip = forms.FileField(
         required=False,
         widget=forms.FileInput(attrs={"accept": ".zip", "class": "ca-input"}),
@@ -156,10 +169,10 @@ class _DateTimeLocal(forms.DateTimeInput):
         super().__init__(attrs=_CA_INPUT, format="%Y-%m-%dT%H:%M", **kw)
 
 
-class ContestForm(ModelForm):
+class ContestForm(_SourceLang, ModelForm):
     class Meta:
         model = Contest
-        fields = ["title", "description_md", "start", "end", "type", "is_rated", "division", "is_official", "review_top_n",
+        fields = ["source_lang", "title", "description_md", "start", "end", "type", "is_rated", "division", "is_official", "review_top_n",
                   "allowed_ip_prefix", "badge", "personal_minutes", "auto_finish"]
         widgets = {
             "personal_minutes": forms.NumberInput(attrs={**_CA_INPUT, "min": 0, "max": 1440, "placeholder": _tl("0 — hamma uchun bir soat")}),
@@ -324,11 +337,11 @@ class AIGenerateForm(forms.Form):
 
 # ---- courses -----------------------------------------------------------------
 
-class StudyPlanForm(ModelForm):
+class StudyPlanForm(_SourceLang, ModelForm):
     """A course: its problems are every open problem carrying any of the chosen tags."""
     class Meta:
         model = StudyPlan
-        fields = ["title", "slug", "stage", "order", "level", "icon", "summary", "theory_md", "description_md",
+        fields = ["source_lang", "title", "slug", "stage", "order", "level", "icon", "summary", "theory_md", "description_md",
                   "tags", "is_public"]
         widgets = {
             **{k: forms.TextInput(attrs=_CA_INPUT) for k in ["title", "slug", "summary"]},

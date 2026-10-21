@@ -139,6 +139,10 @@ msgstr "Polyglot"
 msgid "{n} ta tilda g‘alaba"
 msgstr "Wins in {n} languages"
 
+#: apps/accounts/badges.py
+msgid "Yangi nishon: {title}"
+msgstr "New badge: {title}"
+
 #: apps/accounts/clubs.py
 msgid "Qo‘shilish havolasi noto‘g‘ri yoki eskirgan."
 msgstr "The join link is invalid or has expired."
@@ -1211,12 +1215,16 @@ msgid "O‘zingizni chaqira olmaysiz."
 msgstr "You can't challenge yourself."
 
 #: apps/classroom/duels.py
+msgid "{username} sizni duelga chaqirdi ({language})"
+msgstr "{username} challenged you to a duel ({language})"
+
+#: apps/classroom/duels.py
 msgid "Chaqiriq muddati o‘tgan."
 msgstr "The challenge has expired."
 
-#: apps/classroom/duels.py templates/accounts/duel_board.html
-msgid "G‘alaba"
-msgstr "Victory"
+#: apps/classroom/duels.py
+msgid "{head}: {other_username} bilan duel tugadi"
+msgstr "{head}: duel with {other_username} is over"
 
 #: apps/classroom/duels.py apps/classroom/duels.py
 msgid "Bu tilda savollar hali yetarli emas — boshqasini tanlang."
@@ -1226,9 +1234,13 @@ msgstr "There aren't enough questions in this language yet — choose another."
 msgid "Bu raqib bilan ochiq duel bor."
 msgstr "You already have an open duel with this opponent."
 
-#: apps/classroom/duels.py
-msgid "{head}: {other_username} bilan duel tugadi"
-msgstr "{head}: duel with {other_username} is over"
+#: apps/classroom/duels.py templates/accounts/duel_board.html
+msgid "G‘alaba"
+msgstr "Victory"
+
+#: apps/classroom/duels.py templates/classroom/_duel_row.html
+msgid "Durang"
+msgstr "Draw"
 
 #: apps/classroom/models.py
 msgid "Nima chiqaradi?"
@@ -1752,6 +1764,18 @@ msgid "masala"
 msgstr "problem"
 
 #: apps/moderation/views.py
+msgid "«{problem_title}» masalangiz tasdiqlandi va saytda chiqdi"
+msgstr "Your problem “{problem_title}” was approved and is now on the site"
+
+#: apps/moderation/views.py
+msgid ""
+"«{problem_title}» masalangiz rad etildi: tahrirlab qayta yuborishingiz "
+"mumkin"
+msgstr ""
+"Your problem “{problem_title}” was rejected: you can edit it and send it "
+"again"
+
+#: apps/moderation/views.py
 msgid "Rasmiy reyting qo‘llandi."
 msgstr "Official rating applied."
 
@@ -1807,18 +1831,6 @@ msgstr "At least one test is needed: enter it by hand or upload a ZIP."
 #: apps/moderation/views.py
 msgid "{len_ids} ta urinish qayta tekshirishga yuborildi."
 msgstr "{len_ids} submissions were sent for rechecking."
-
-#: apps/moderation/views.py
-msgid "«{problem_title}» masalangiz tasdiqlandi va saytda chiqdi"
-msgstr "Your problem “{problem_title}” was approved and is now on the site"
-
-#: apps/moderation/views.py
-msgid ""
-"«{problem_title}» masalangiz rad etildi: tahrirlab qayta yuborishingiz "
-"mumkin"
-msgstr ""
-"Your problem “{problem_title}” was rejected: you can edit it and send it "
-"again"
 
 #: apps/moderation/views.py
 msgid "«{plan_title}» o‘chirildi."

@@ -11,7 +11,8 @@
   <div class="space-y-6">
     <section class="ca-panel space-y-4">
       <div class="grid gap-4 sm:grid-cols-2">
-        <div><label class="ca-label" for="{{ form.title.id_for_label }}">{% trans "Nomi" %}</label>{{ form.title }}{{ form.title.errors }}</div>
+        <div><label class="ca-label" for="{{ form.source_lang.id_for_label }}">{% trans "Qaysi tilda yozyapsiz?" %}</label>{{ form.source_lang }}<p class="mt-1 text-xs text-mute">{% trans "Faqat bitta tilda yozing: ikkinchi tilni admin yoki AI keyin to‘ldiradi va tasdiqlaydi." %}</p></div>
+      <div><label class="ca-label" for="{{ form.title.id_for_label }}">{% trans "Nomi" %}</label>{{ form.title }}{{ form.title.errors }}</div>
         <div><label class="ca-label" for="{{ form.slug.id_for_label }}">{% trans "Slug (manzil: /learn/&lt;slug&gt;/)" %}</label>{{ form.slug }}{{ form.slug.errors }}</div>
       </div>
       <div><label class="ca-label" for="{{ form.summary.id_for_label }}">{% trans "Qisqa tavsif (kartochkada)" %}</label>{{ form.summary }}{{ form.summary.errors }}</div>

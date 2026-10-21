@@ -198,13 +198,14 @@ def award(user, groups: set[str]) -> None:
         if added:  # and say so in the bell and on Telegram too, for whoever turned that on
             from django.db import transaction
 
-            from .notifications import notify
+            from .notifications import notify_t
             from .telegram import notify_badges
             best = {}
             for fam, tier in added:
                 best[fam] = max(tier, best.get(fam, 0))
             for fam, tier in best.items():
-                notify(user.pk, "badge", f"badge:{fam}:{tier}", f"Yangi nishon: {titled(BY_KEY[fam].name, tier)}", "/accounts/badges/")
+                notify_t(user.pk, "badge", f"badge:{fam}:{tier}", _tl("Yangi nishon: {title}"), "/accounts/badges/",
+                         title=lambda fam=fam, tier=tier: titled(BY_KEY[fam].name, tier))
             transaction.on_commit(lambda: notify_badges(user.pk, added))
     except Exception:  # noqa: BLE001 - a badge is a nicety; judging, duels and ratings must go on
         import logging

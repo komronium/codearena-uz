@@ -402,10 +402,10 @@ def challenge(challenger, opponent_username: str, language: str) -> tuple[Duel |
         if questions is None:
             return None, _t("Bu tilda savollar hali yetarli emas — boshqasini tanlang.")
         duel = _open(challenger, language, questions, opponent=opponent)
-        from apps.accounts.notifications import notify
+        from apps.accounts.notifications import notify_t
         from apps.accounts.telegram import notify_duel_challenge
-        notify(opponent.pk, "duel", f"duel:{duel.pk}:challenge",
-               f"{challenger.username} sizni duelga chaqirdi ({duel.get_language_display()})", f"/classroom/duels/{duel.pk}/")
+        notify_t(opponent.pk, "duel", f"duel:{duel.pk}:challenge", _tl("{username} sizni duelga chaqirdi ({language})"),
+                 f"/classroom/duels/{duel.pk}/", username=challenger.username, language=lambda: duel.get_language_display())
         transaction.on_commit(lambda: notify_duel_challenge(duel.pk))
         return duel, ""
 
@@ -470,13 +470,14 @@ def settle(duel) -> None:
         User.objects.filter(pk=a.pk).update(duel_rating=ra + da, duel_season=season)
         User.objects.filter(pk=b.pk).update(duel_rating=rb + db, duel_season=season)
     from apps.accounts.badges import award  # a finished duel can lift both players' duel badges
-    from apps.accounts.notifications import notify
+    from apps.accounts.notifications import notify_t
     from apps.accounts.telegram import notify_duel_result
     for player, other in ((a, b), (b, a)):
         award(player, {"duels"})
-        head = _t("G‘alaba") if duel.winner_id == player.pk else "Durang" if duel.winner_id is None else _t("Mag‘lubiyat")
-        notify(player.pk, "duel", f"duel:{duel.pk}:result", _t("{head}: {other_username} bilan duel tugadi").format(head=head, other_username=other.username),
-               f"/classroom/duels/{duel.pk}/")
+        head = ((lambda: _t("G‘alaba")) if duel.winner_id == player.pk else (lambda: _t("Durang")) if duel.winner_id is None
+                else (lambda: _t("Mag‘lubiyat")))
+        notify_t(player.pk, "duel", f"duel:{duel.pk}:result", _tl("{head}: {other_username} bilan duel tugadi"),
+                 f"/classroom/duels/{duel.pk}/", head=head, other_username=other.username)
     notify_duel_result(duel.pk)
 
 

@@ -17,6 +17,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
+from django.utils.translation import gettext as _t, gettext_lazy as _tl
 from django.views.decorators.http import require_POST
 
 from apps.accounts.decorators import setter_required, staff_required
@@ -47,8 +48,6 @@ from .forms import (
     TestCaseFormSet,
     UserForm,
 )
-from django.utils.translation import gettext as _t
-from django.utils.translation import gettext as _t
 
 
 def _unique_slug(title: str) -> str:
@@ -440,11 +439,11 @@ def problem_rejudge(request, pk):
     return redirect("moderation:problems")
 
 
-def _tell_author(problem, text: str, url: str) -> None:
+def _tell_author(problem, msgid, url: str) -> None:
     """The writer hears the staff's decision in the bell (nothing for a problem the staff wrote themselves)."""
     if problem.author_id and not problem.author.is_staff:
-        from apps.accounts.notifications import notify
-        notify(problem.author_id, "report", f"problem:{problem.pk}:{problem.status}", text, url)
+        from apps.accounts.notifications import notify_t
+        notify_t(problem.author_id, "report", f"problem:{problem.pk}:{problem.status}", msgid, url, problem_title=problem.title)
 
 
 @staff_required
@@ -461,7 +460,7 @@ def approve(request, pk):
     problem.status = Problem.Status.APPROVED
     problem.is_public = True
     problem.save(update_fields=["status", "is_public"])
-    _tell_author(problem, _t("«{problem_title}» masalangiz tasdiqlandi va saytda chiqdi").format(problem_title=problem.title), reverse("problems:detail", args=[problem.slug]))
+    _tell_author(problem, _tl("«{problem_title}» masalangiz tasdiqlandi va saytda chiqdi"), reverse("problems:detail", args=[problem.slug]))
     return redirect("moderation:queue")
 
 
@@ -471,7 +470,7 @@ def reject(request, pk):
     problem = get_object_or_404(Problem, pk=pk, status=Problem.Status.PENDING)
     problem.status = Problem.Status.REJECTED
     problem.save(update_fields=["status"])
-    _tell_author(problem, _t("«{problem_title}» masalangiz rad etildi: tahrirlab qayta yuborishingiz mumkin").format(problem_title=problem.title), reverse("moderation:mine"))
+    _tell_author(problem, _tl("«{problem_title}» masalangiz rad etildi: tahrirlab qayta yuborishingiz mumkin"), reverse("moderation:mine"))
     return redirect("moderation:queue")
 
 
@@ -522,6 +521,9 @@ def plan_edit(request, pk=None):
     form = StudyPlanForm(request.POST or None, instance=plan)
     if request.method == "POST" and form.is_valid():
         plan = form.save()
+        if form.changed_data and set(form.changed_data) & set(StudyPlan.TRANSLATABLE):
+            from apps.translations import service as translations
+            translations.stale(plan)  # the original changed: the other language waits for an admin again
         messages.success(request, "Kurs saqlandi.")
         return redirect("learn:course", plan.slug)
     return render(request, "moderation/plan_form.html", {"form": form, "plan": plan})
@@ -559,6 +561,9 @@ def contest_edit(request, pk=None):
     if request.method == "POST" and form.is_valid() and formset.is_valid():
         with transaction.atomic():
             contest = form.save()
+            if form.changed_data and set(form.changed_data) & set(Contest.TRANSLATABLE):
+                from apps.translations import service as translations
+                translations.stale(contest)
             formset.instance = contest
             formset.save()
         messages.success(request, "Musobaqa saqlandi.")
