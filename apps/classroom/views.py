@@ -180,7 +180,7 @@ def _duel_board(duel, viewer) -> dict:
             cells += [{"state": ""}] * (r.total - len(cells))
         rows.append({"user": u, "run": r, "delta": delta, "winner": u is not None and duel.winner_id == u.pk,
                      "over": r is not None and r.over(now), "right": r.right if r else 0,
-                     "points": r.points if r else 0, "cells": cells})
+                     "points": r.points if r else 0, "seconds": r.seconds if r else 0, "speed": bool(r and r.speed), "cells": cells})
     mine = runs.get(viewer.pk)
     my_over = mine is not None and mine.over(now)
     review = []
@@ -259,7 +259,7 @@ def duel_play(request, pk):
             if a is None:
                 return JsonResponse({"next": play_url})
             verdict = _verdict(duel, request.user, a)
-            return JsonResponse({"verdict": verdict["state"], "next": verdict["next"]})
+            return JsonResponse({"verdict": verdict["state"], "gain": verdict["gain"], "next": verdict["next"]})
         return redirect(play_url + f"?after={index}")
     after = request.GET.get("after")
     if after is not None and after.isdigit():
@@ -277,7 +277,7 @@ def duel_play(request, pk):
     return render(request, "classroom/duel_play.html", {
         "duel": duel, "a": current, "q": q, "n": current.index + 1, "n_questions": r.total,
         "remaining_ms": max(0, int((current.shown_at + duels.PER_QUESTION - timezone.now()).total_seconds() * 1000)),
-        "per_question": int(duels.PER_QUESTION.total_seconds()), "away_ms": duels.AWAY_MS,
+        "per_question": int(duels.PER_QUESTION.total_seconds()), "speed": duel.created >= duels.SPEED_FROM, "away_ms": duels.AWAY_MS,
         "options": _shuffled(q.options, f"{duel.pk}-{request.user.pk}-{current.index}"),
         "cells": _my_cells(r), "language": duel.get_language_display(),
         "my_points": r.points,
@@ -290,7 +290,8 @@ def _verdict(duel, user, a) -> dict:
     state = "ok" if a.correct else ("late" if late or not a.answer else "bad")
     r = duels.run(duel, user.pk)
     over = r is None or r.over(timezone.now())
-    return {"state": state, "last": over,
+    gain = duels.answer_points(a) if a.correct and duel.created >= duels.SPEED_FROM else 0
+    return {"state": state, "last": over, "gain": gain,
             "next": reverse("classroom:duel", args=[duel.pk]) if over else reverse("classroom:duel_play", args=[duel.pk])}
 
 

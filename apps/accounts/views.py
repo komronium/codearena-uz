@@ -464,6 +464,10 @@ def rating(request):
     tiers = [{"name": n, "color": c, "floor": f, "ceiling": ce,
               "count": sum(1 for r in ratings if (f is None or r >= f) and (ce is None or r < ce))}
              for f, ce, n, c in _RATING_TIERS]
+    biggest = max((t["count"] for t in tiers), default=0) or 1
+    for t in tiers:  # the bar of each tier against the fullest one, and its share of the board
+        t["bar"] = round(100 * t["count"] / biggest)
+        t["share"] = round(100 * t["count"] / len(ratings)) if ratings else 0
     me = None
     if request.user.is_authenticated:
         mine = rated.filter(user=request.user).order_by("-contest__end").first()

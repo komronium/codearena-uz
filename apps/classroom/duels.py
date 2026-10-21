@@ -2,16 +2,20 @@
 questions in one language, so nobody has to wait for anyone; the opponent gets the same
 questions and their own run when they join. Each question has PER_QUESTION from the moment it is first
 shown; a run left half-way ends RUN_LIMIT after its start, unseen questions counting as wrong. More points
-(every right answer is worth 1, whatever the question's level) wins; equal is a draw (time is only the 20 seconds a question gets, never a tie-break). Duel Elo moves once both runs
+wins. Duels made before SPEED_FROM count right answers (each worth 1; equal is a draw). Later ones count whole points: a right answer
+is worth SPEED_TOP within FAST seconds and falls by one point every two seconds to SPEED_LOW at the 20th, so an answer that
+had to be looked up elsewhere is worth little; equal points are decided by the shorter total time in whole seconds when it
+is TIE_GAP seconds shorter or more, else it is a draw. Duel Elo moves once both runs
 are over, by each player's own K (k_factor), as in chess: high for a newcomer, low at the top.
 
 A duel names its opponent (a friend, who has WAIT_FOR to accept) or leaves the seat open: find_opponent
 puts the next player who asks in that language into the open duel whose owner's duel rating is
 closest to theirs, or opens a new one for them. A pair may play PAIR_LIMIT duels in 24 hours (Elo at half after the first PAIR_FULL_K). Each duel mixes levels by the pair's duel rating (MIX) and takes the questions
 the two have seen least; the right answers are shown only once both runs are over. Duels before the quiz were coding races (mode "code"); they are history only."""
+import math
 import random
 from collections import Counter
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone as dt_timezone
 from typing import NamedTuple
 
 from django.db import IntegrityError, transaction
@@ -28,6 +32,9 @@ from django.utils.translation import gettext as _t, gettext_lazy as _tl
 QUESTIONS = 7  # of a new duel; a duel keeps the number it was made with (len(duel.questions))
 WEIGHT = {"beginner": 1, "easy": 1, "medium": 1}  # every right answer is one point; levels only shape the mix of a duel
 PER_QUESTION = timedelta(seconds=20)
+SPEED_FROM = datetime(2026, 10, 21, 18, 35, tzinfo=dt_timezone.utc)  # duels made from here on score by speed
+FAST, SPEED_TOP, SPEED_LOW = 10, 10, 5  # seconds for the full points; the most and the least a right answer is worth
+TIE_GAP = 5  # seconds of total time that decide equal points
 AWAY_MS = 1500  # out of the window this long on a question is a sign worth a look (a chat window, an AI, a snip tool)
 GRACE = timedelta(seconds=2)  # an answer's trip to the server at the last second
 RUN_LIMIT = timedelta(minutes=5)
@@ -187,6 +194,7 @@ class Run(NamedTuple):
     end: datetime
     answers: list  # DuelAnswer rows by index: the questions shown so far
     total: int = QUESTIONS  # questions in this duel
+    speed: bool = False  # scored by speed (see SPEED_FROM) rather than by the count of right answers
 
     def closed(self, a, now) -> bool:
         """Answered, or its time is up."""
@@ -201,8 +209,15 @@ class Run(NamedTuple):
 
     @property
     def points(self) -> int:
-        """What the right answers are worth: one point each, so a duel is decided by who got more of them right."""
+        """What the right answers are worth: by speed (answer_points) in a duel scored that way, else one point each."""
+        if self.speed:
+            return sum(answer_points(a) for a in self.answers if a.correct)
         return sum(WEIGHT.get(a.question.level, 1) for a in self.answers if a.correct)
+
+    @property
+    def seconds(self) -> int:
+        """Whole seconds on all the questions, an unanswered or unseen one counting its full PER_QUESTION."""
+        return sum(took_seconds(a) for a in self.answers) + int(PER_QUESTION.total_seconds()) * (self.total - len(self.answers))
 
     def spent(self, now) -> timedelta:
         """Time on the questions: an answered one as taken, any other its full PER_QUESTION."""
@@ -213,13 +228,27 @@ class Run(NamedTuple):
         return total + PER_QUESTION * (self.total - len(self.answers))
 
 
+def took_seconds(a) -> int:
+    """Whole seconds a question was open to its player (at least 1, at most PER_QUESTION; unanswered is the most)."""
+    full = int(PER_QUESTION.total_seconds())
+    if a.answered_at is None:
+        return full
+    return min(full, max(1, math.ceil((a.answered_at - a.shown_at).total_seconds())))
+
+
+def answer_points(a) -> int:
+    """A right answer's whole points: SPEED_TOP within FAST seconds, then one less every two seconds down to SPEED_LOW."""
+    secs = took_seconds(a)
+    return SPEED_TOP if secs <= FAST else max(SPEED_LOW, SPEED_TOP - math.ceil((secs - FAST) / 2))
+
+
 def run(duel, user_id) -> Run | None:
     """None until that player's clock starts (an opponent who hasn't joined yet)."""
     clock = duel.clock(user_id)
     if clock is None:
         return None
     answers = list(DuelAnswer.objects.filter(duel=duel, user_id=user_id).select_related("question").order_by("index"))
-    return Run(clock[0], clock[1], answers, len(duel.questions) or QUESTIONS)
+    return Run(clock[0], clock[1], answers, len(duel.questions) or QUESTIONS, duel.created >= SPEED_FROM)
 
 
 def _winner(duel, now) -> int | None:
@@ -228,6 +257,8 @@ def _winner(duel, now) -> int | None:
     if a is None or b is None or not a.over(now) or not b.over(now):
         return None
     if a.points == b.points:
+        if a.speed and abs(a.seconds - b.seconds) >= TIE_GAP:
+            return duel.challenger_id if a.seconds < b.seconds else duel.opponent_id
         return 0
     return duel.challenger_id if a.points > b.points else duel.opponent_id
 

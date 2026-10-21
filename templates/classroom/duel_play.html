@@ -28,7 +28,7 @@ second. Copying out of the question is blocked, so it can't be pasted into an AI
   <section class="ca-quiz-card is-{{ verdict.state }}" aria-live="polite">
     <div class="ca-quiz-flash is-on">
       <span class="ca-quiz-flash-ico" aria-hidden="true"><i data-lucide="{% if verdict.state == 'ok' %}check{% elif verdict.state == 'late' %}timer-off{% else %}x{% endif %}" class="lu"></i></span>
-      <b>{% if verdict.state == "ok" %}{% trans "To‘g‘ri!" %}{% elif verdict.state == "late" %}{% trans "Vaqt tugadi" %}{% else %}{% trans "Noto‘g‘ri" %}{% endif %}</b>
+      <b>{% if verdict.state == "ok" %}{% trans "To‘g‘ri!" %}{% if verdict.gain %} +{{ verdict.gain }}{% endif %}{% elif verdict.state == "late" %}{% trans "Vaqt tugadi" %}{% else %}{% trans "Noto‘g‘ri" %}{% endif %}</b>
       <a class="ca-link text-sm" href="{{ verdict.next }}">{% if verdict.last %}{% trans "Natijaga o‘tish" %}{% else %}{% trans "Keyingi savol" %}{% endif %}</a>
     </div>
   </section>
@@ -60,6 +60,7 @@ second. Copying out of the question is blocked, so it can't be pasted into an AI
       <p class="ca-quiz-note">{% trans "Bo‘sh joylar hisobga olinmaydi; katta-kichik harf hisobga olinadi." %}</p>
       {% endif %}
     </form>
+    {% if speed %}<p class="ca-quiz-note ca-quiz-watch">{% blocktrans with top=10 fast=10 %}To‘g‘ri javob {{ fast }} soniyagacha {{ top }} ball, keyin kamayib boradi: tez javob ko‘proq ball beradi.{% endblocktrans %}</p>{% endif %}
     <p class="ca-quiz-note ca-quiz-watch">{% trans "Savol vaqtida boshqa oynaga o‘tish qayd etiladi." %}</p>
     <p class="ca-quiz-away" id="quiz-away" hidden role="status"><i data-lucide="eye-off" class="lu" aria-hidden="true"></i>{% trans "Savol vaqtida oynadan chiqdingiz: bu qayd etildi va tekshiriladi." %}</p>
     {# the verdict, drawn over the card once the answer is in #}
@@ -88,7 +89,7 @@ second. Copying out of the question is blocked, so it can't be pasted into an AI
   const PAUSE = { ok: 800, bad: 1100, late: 1100 };
   let sent = false;
 
-  const show = (state, picked, next) => {
+  const show = (state, picked, next, gain) => {
     setTimeout(() => location.replace(next), PAUSE[state]);  // first, so nothing below can hold the run up
     card.classList.add(`is-${state}`);
     if (picked) picked.classList.add("is-picked");
@@ -97,7 +98,7 @@ second. Copying out of the question is blocked, so it can't be pasted into an AI
     if (here) here.className = state === "ok" ? "is-ok is-here" : "is-bad is-here";
     // the icons are SVG by now, which has no .hidden: set the attribute
     flash.querySelectorAll("[data-v]").forEach((i) => i.toggleAttribute("hidden", i.dataset.v !== state));
-    document.getElementById("quiz-flash-text").textContent = WORDS[state];
+    document.getElementById("quiz-flash-text").textContent = WORDS[state] + (state === "ok" && gain ? ` +${gain}` : "");
     flash.style.setProperty("--pause", `${PAUSE[state]}ms`);
     flash.classList.add("is-on");
   };
@@ -125,7 +126,7 @@ second. Copying out of the question is blocked, so it can't be pasted into an AI
     fetch(location.pathname, { method: "POST", body: data, headers: { "X-Duel-Answer": "1" }, credentials: "same-origin" })
       .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
       .then((j) => {
-        return j.verdict ? show(j.verdict, picked, j.next) : location.replace(j.next);
+        return j.verdict ? show(j.verdict, picked, j.next, j.gain) : location.replace(j.next);
       })
       .catch(() => location.reload());  // the server has the answer or the clock: the page picks up from there
   };

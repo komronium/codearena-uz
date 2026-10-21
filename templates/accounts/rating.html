@@ -20,7 +20,6 @@ own row marked.{% endcomment %}
 <div class="ca7">
 <div class="ca7-col">
 <section aria-label="{% trans 'Reyting jadvali' %}">
-  {% include "accounts/_rating_chart.html" with chart=chart id="rc" %}
   <div class="ca7-tools is-board">
     <div class="ca7-trow">
       <form method="get" class="ca7-search" role="search" aria-label="{% trans 'Foydalanuvchini qidirish' %}">
@@ -61,9 +60,9 @@ own row marked.{% endcomment %}
 </section>
 </div>
 
-<aside class="ca7-aside" aria-label="{% trans 'Darajalar' %}">
+<aside class="ca7-aside" aria-label="{% trans 'Reyting taqsimoti' %}">
   <section class="ca-box" aria-labelledby="tiers-title">
-    <div class="ca-box-cap ca-hd"><h2 id="tiers-title">{% trans "Darajalar" %}</h2>{% if tier_sel %}<a class="ca-box-tools ca-link" href="{% querystring tier=None page=None %}">{% trans "Hammasi" %}</a>{% endif %}</div>
+    <div class="ca-box-cap ca-hd"><h2 id="tiers-title">{% trans "Reyting taqsimoti" %}</h2>{% if chart %}<span class="ca-box-tools tabular text-mute">{% blocktrans with n=chart.n median=chart.median %}{{ n }} kishi · median {{ median }}{% endblocktrans %}</span>{% endif %}{% if tier_sel %}<a class="ca-box-tools ca-link" href="{% querystring tier=None page=None %}">{% trans "Hammasi" %}</a>{% endif %}</div>
     {% if me %}{% for t in tiers %}{% if t.here %}
     <div class="ca7-tier-me" style="--tier: {{ t.color }}">
       <p><b class="tabular">{{ user.rating }}</b>{% if me.next %}<span><b class="ca-tier-ink" style="--tier: {{ me.next.color }}">{% blocktrans with me_next_name=me.next.name me_next_need=me.next.need %}{{ me_next_name }}</b> gacha <b class="tabular">+{{ me_next_need }}</b>{% endblocktrans %}</span>{% else %}<span>{% trans "Eng yuqori daraja" %}</span>{% endif %}</p>
@@ -76,7 +75,8 @@ own row marked.{% endcomment %}
         <a class="ca7-ladder-go" href="{% if tier_sel == t.name %}{% querystring tier=None page=None %}{% else %}{% querystring tier=t.name page=None %}{% endif %}" aria-label="{{ t.name }}: {% if tier_sel == t.name %}{% trans 'filtrni olib tashlash' %}{% else %}{% trans 'shu darajadagilarni ko‘rsatish' %}{% endif %}"></a>
         <i class="ca7-ladder-dot" aria-hidden="true"></i>
         <span class="ca7-tier-n"><span><b class="ca-tier-ink{% if not t.ceiling %} ca-lg{% endif %}">{{ t.name }}</b>{% if me and t.here %}<em>{% trans "Siz" %}</em>{% endif %}</span><small class="tabular">{% if t.floor %}{{ t.floor }}{% else %}0{% endif %}{% if t.ceiling %}–{{ t.ceiling|add:"-1" }}{% else %}+{% endif %}</small></span>
-        <span class="ca7-tier-c tabular">{% blocktrans with t_count=t.count %}<b>{{ t_count }}</b> kishi{% endblocktrans %}</span>
+        <span class="ca7-tier-c tabular">{% blocktrans with t_count=t.count %}<b>{{ t_count }}</b> kishi{% endblocktrans %}{% if t.count %} <small>{{ t.share }}%</small>{% endif %}</span>
+        <span class="ca7-tier-bar" aria-hidden="true"><i style="width: {{ t.bar }}%"></i></span>
       </li>
       {% endfor %}
     </ol>

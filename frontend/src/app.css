@@ -3953,3 +3953,10 @@ small { font-size: max(12.25px, .8em); }
 .ca-quiz-card > .ca-quiz-watch { margin: .35rem 0 0; font-size: 0.75rem; opacity: .85; }
 .ca-quiz-away { display: flex; align-items: center; gap: .4rem; margin: .6rem 0 0; padding: .4rem .6rem; border-radius: .5rem; font-size: 0.8125rem; font-weight: 600; background: rgb(var(--ca-warn-rgb, 180 100 0) / .12); color: rgb(var(--ca-warn-rgb, 180 100 0)); }
 .ca-quiz-away[hidden] { display: none; }
+
+/* the rating page's right box: the distribution by tier, a bar under each tier row */
+.ca7-tiers li { flex-wrap: wrap; row-gap: .35rem; }
+.ca7-tier-bar { order: 9; flex: 0 0 calc(100% - 1.4rem); display: block; height: 8px; margin-left: 1.4rem; border-radius: 9999px; background: rgb(var(--ca-ink-rgb) / .07); overflow: hidden; }
+.ca7-tier-bar i { display: block; height: 100%; min-width: 2px; border-radius: inherit; background: var(--tier); }
+.ca7-tiers li.is-empty .ca7-tier-bar i { min-width: 0; }
+.ca7-tier-c small { margin-left: .2rem; font-size: 0.8125rem; color: rgb(var(--ca-mute-rgb)); }
