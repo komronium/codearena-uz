@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% block title %}{% trans "Reyting qanday ishlaydi" %}{% endblock %}
-{% block description %}{% trans "CodeArena'da musobaqa reytingi, rasmiy reyting, amaliyot balli, duel reytingi va nishonlar qanday hisoblanadi." %}{% endblock %}
+{% block description %}{% trans "CodeArena'da musobaqa reytingi, amaliyot balli, duel reytingi va nishonlar qanday hisoblanadi." %}{% endblock %}
 {% comment %}One page for the numbers a person sees: what each is, what moves it, what does not. Linked from the rating page.{% endcomment %}
 {% block content %}
 <div class="mx-auto max-w-3xl">
   <h1 class="ca-page-title">{% trans "Reyting qanday ishlaydi" %}</h1>
-  <p class="mt-2 text-mute">{% trans "CodeArena'da to‘rt xil raqam bor. Ularning har biri o‘z ishi uchun va bir-biriga ta’sir qilmaydi." %}</p>
+  <p class="mt-2 text-mute">{% trans "CodeArena'da uch xil raqam bor. Ularning har biri o‘z ishi uchun va bir-biriga ta’sir qilmaydi." %}</p>
 
   <section class="ca-panel mt-6" aria-labelledby="r1">
     <h2 id="r1" class="text-[1.125rem] font-bold">{% trans "Musobaqa reytingi" %}</h2>
@@ -17,11 +17,6 @@
       <li>{% trans "So‘nggi 90 kunda reytingli musobaqada qatnashmagan odam jadvaldan yashiriladi; reytingi saqlanadi va yangi raunddan keyin qaytadi." %}</li>
       <li>{% trans "Diskvalifikatsiya qilingan ishtirokchi oxirgi o‘ringa tushadi, reyting faqat pasayadi. Bunday qaror kech chiqsa, shu raunddan keyingi raundlar ham qayta hisoblanadi." %}</li>
     </ul>
-  </section>
-
-  <section class="ca-panel mt-4" aria-labelledby="r2">
-    <h2 id="r2" class="text-[1.125rem] font-bold">{% trans "Rasmiy reyting va «Tasdiqlangan» belgisi" %}</h2>
-    <p class="mt-2 text-sm">{% trans "Shaxsi adminlar tomonidan tasdiqlangan o‘yinchilar uchun, <b>rasmiy</b> deb belgilangan musobaqalardan alohida hisoblanadi. Maktab va tashkilotlar shunga tayanadi. Profilda ochiq reyting yonida «rasmiy» raqami ko‘rinadi." %}</p>
   </section>
 
   <section class="ca-panel mt-4" aria-labelledby="r3">

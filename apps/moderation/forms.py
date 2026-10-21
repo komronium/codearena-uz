@@ -178,7 +178,7 @@ class _DateTimeLocal(forms.DateTimeInput):
 class ContestForm(_SourceLang, ModelForm):
     class Meta:
         model = Contest
-        fields = ["source_lang", "title", "description_md", "start", "end", "type", "is_rated", "division", "is_official", "review_top_n",
+        fields = ["source_lang", "title", "description_md", "start", "end", "type", "is_rated", "division",
                   "allowed_ip_prefix", "badge", "personal_minutes", "auto_finish", "blind"]
         widgets = {
             "personal_minutes": forms.NumberInput(attrs={**_CA_INPUT, "min": 0, "max": 1440, "placeholder": _tl("0 — hamma uchun bir soat")}),
@@ -188,7 +188,6 @@ class ContestForm(_SourceLang, ModelForm):
             "end": _DateTimeLocal(),
             "allowed_ip_prefix": forms.TextInput(attrs={**_CA_INPUT, "placeholder": "masalan 10.0."}),
             "badge": forms.TextInput(attrs={**_CA_INPUT, "placeholder": "masalan Marathon #1"}),
-            "review_top_n": forms.NumberInput(attrs={**_CA_INPUT, "min": 0, "max": 100}),
             "division": forms.Select(attrs={"class": "ca-select"}),
             "type": forms.Select(attrs={"class": "ca-select"}),
         }
@@ -216,7 +215,6 @@ class ContestForm(_SourceLang, ModelForm):
             # what the round was rated and ranked by stays as it was played
             for name in ("is_rated", "division", "personal_minutes"):
                 self.fields[name].disabled = True
-        self.fields["review_top_n"].required = False
         self.fields["division"].required = False
         self.fields["type"].required = False
         if self.instance.pk is None:
@@ -257,11 +255,6 @@ class ContestForm(_SourceLang, ModelForm):
             old = self.save_m2m
             self.save_m2m = lambda: (old(), authors())
         return contest
-
-    def clean_review_top_n(self):
-        # left empty = the model default, not a validation error on an otherwise filled form
-        value = self.cleaned_data.get("review_top_n")
-        return 10 if value is None else value
 
     def clean_type(self):
         # left out (an older form) = the rules it has, Codeforces' for a new contest

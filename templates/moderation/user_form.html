@@ -44,20 +44,6 @@
       <label class="flex items-center gap-2 text-sm">{% blocktrans with form_is_setter=form.is_setter %}{{ form_is_setter }} Muallif (masala yozadi; admin tasdiqlaydi){% endblocktrans %}</label>
       <label class="flex items-center gap-2 text-sm">{% blocktrans with form_is_active=form.is_active %}{{ form_is_active }} Faol (o‘chirilsa — kira olmaydi){% endblocktrans %}</label>
     </section>
-    {% if not obj.is_staff %}
-    <section class="ca-panel space-y-3">
-      <h2 class="ca-section-title !mb-0">{% trans "Rasmiy reyting" %}</h2>
-      {% if obj.verified_at %}
-      <p class="text-sm"><span class="st st-ok"><i data-lucide="badge-check" class="lu" aria-hidden="true"></i>{% trans "Haqiqiy talaba deb tasdiqlangan" %}</span></p>
-      <p class="text-xs text-mute">{% blocktrans with d=obj.verified_at|date:"d.m.Y" by=obj.verified_by.username|default:"—" %}{{ d }} · {{ by }}{% endblocktrans %}{% if obj.verified_note %} · {{ obj.verified_note }}{% endif %}</p>
-      <button type="submit" name="verified" value="0" form="user-verify" class="ca-btn ca-btn-ghost w-full">{% trans "Tasdiqni bekor qilish" %}</button>
-      {% else %}
-      <p class="text-xs text-mute">{% trans "Faqat tasdiqlangan foydalanuvchilar rasmiy raundlarda rasmiy reyting oladi. Ularning haqiqiy talaba ekaniga ishonch hosil qilgach tasdiqlang." %}</p>
-      <input class="ca7-fld !pl-3" name="note" form="user-verify" maxlength="200" placeholder="{% trans 'Izoh (masalan: 9-sinf, 12-maktab)' %}" aria-label="{% trans 'Izoh' %}">
-      <button type="submit" name="verified" value="1" form="user-verify" class="ca-btn ca-btn-soft w-full"><i data-lucide="badge-check" class="lu" aria-hidden="true"></i>{% trans "Haqiqiy talaba deb tasdiqlash" %}</button>
-      {% endif %}
-    </section>
-    {% endif %}
     <button type="submit" class="ca-btn ca-btn-primary w-full"><i data-lucide="check" class="lu" aria-hidden="true"></i>{% trans "Saqlash" %}</button>
     {% if obj != request.user and not obj.is_staff %}
     <label class="mb-2 flex items-start gap-2 text-xs text-mute"><input type="checkbox" name="force" value="1" form="user-delete" class="mt-0.5 rounded border-line"><span>{% trans "Reytingli raundlarda qatnashgan bo‘lsa ham o‘chirish (boshqalarning o‘rni o‘zgaradi). Odatda hisobni bloklash yaxshiroq." %}</span></label>
@@ -65,7 +51,6 @@
     {% endif %}
   </aside>
 </form>
-<form id="user-verify" method="post" action="{% url 'verify_user' obj.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.path }}"></form>
 {% if obj != request.user and not obj.is_staff %}
 <form id="user-delete" method="post" action="{% url 'moderation:user_delete' obj.pk %}" data-confirm="{% blocktrans with obj_username=obj.username %}«{{ obj_username }}» va uning barcha urinishlari, natijalari butunlay o‘chiriladi. Qaytarib bo‘lmaydi. Davom etasizmi?{% endblocktrans %}">{% csrf_token %}</form>
 {% endif %}

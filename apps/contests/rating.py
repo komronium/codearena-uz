@@ -92,8 +92,8 @@ def _rated_rows(contest) -> list:
 def _new_ratings(rows, shown: list[int], rated: list[int]) -> list[int]:
     """Shown ratings after the contest for `rows` (standings order), from each one's shown
     rating before and the number of rated contests behind it."""
-    # Places are recounted inside `rows`, which may be a subset of the standings (official
-    # rating skips unverified users); a tie group all take its last place, as on Codeforces.
+    # Places are recounted inside `rows`, which may be a subset of the standings (those who are rated);
+    # a tie group all take its last place, as on Codeforces.
     last = {}
     for i, row in enumerate(rows, start=1):
         last[row["rank"]] = i
@@ -171,40 +171,6 @@ def replay() -> int:
             contest.rating_applied = False
             apply_rating(contest)
     return len(contests)
-
-
-def review_queue(contest) -> list:
-    """Standings rows an online official contest must check before its official rating applies:
-    the top `review_top_n` verified, not disqualified finishers. A DQ pulls the next one in."""
-    if contest.allowed_ip_prefix or not contest.review_top_n:
-        return []
-    rows = [r for r in _rated_rows(contest) if r["user"].verified_at and not r["disqualified"]]
-    return rows[:contest.review_top_n]
-
-
-def recalc_official() -> None:
-    """Rebuild every official rating from scratch: applied official contests in end order,
-    verified users only, the same maths and newcomer ramp as the open rating. A full replay,
-    so a late DQ, a late verification or un-marking a contest all come out right with no
-    rollback bookkeeping."""
-    current: dict[int, int] = {}
-    played: dict[int, int] = {}
-    with transaction.atomic():
-        Participation.objects.filter(official_after__isnull=False).update(official_before=None, official_after=None)
-        contests = Contest.objects.filter(is_official=True, official_applied_at__isnull=False).order_by("end", "pk")
-        for contest in contests:
-            rows = [r for r in _rated_rows(contest) if r["user"].verified_at]
-            ids = [r["user"].pk for r in rows]
-            before = [current.get(pk, 0) for pk in ids]
-            after = _new_ratings(rows, before, [played.get(pk, 0) for pk in ids])
-            for row, old, new in zip(rows, before, after):
-                p = row["participation"]
-                p.official_before, p.official_after = old, new
-                p.save(update_fields=["official_before", "official_after"])
-                current[p.user_id] = new
-                played[p.user_id] = played.get(p.user_id, 0) + (not row["disqualified"])
-        User.objects.exclude(pk__in=current).filter(official_rating__isnull=False).update(official_rating=None)
-        User.objects.bulk_update([User(pk=pk, official_rating=r) for pk, r in current.items()], ["official_rating"])
 
 
 def is_latest(contest) -> bool:

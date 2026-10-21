@@ -51,8 +51,6 @@ def contest_list(request):
     show = request.GET.get("show", "")
     if show == "rated":
         past = [c for c in past if c.is_rated]
-    elif show == "official":
-        past = [c for c in past if c.is_official]
     elif show == "unrated":  # rounds that only practise
         past = [c for c in past if not c.is_rated]
     else:
@@ -345,15 +343,9 @@ def disqualify(request, pk, user_id):
                 refresh_solves(problem_id, [p.user_id])
         if p.contest.rating_applied:
             _rerate(request, p.contest)
-        if p.contest.official_applied_at:
-            rating.recalc_official()
-            audit.record(request, audit.Action.RATING_RECOMPUTE, contest=p.contest, note="rasmiy")
-            messages.success(request, _t("Rasmiy reyting qayta hisoblandi."))
     cache.delete(f"contest-standings-{pk}")
     if request.POST.get("back") == "report":
         return redirect("integrity:contest_report", pk)
-    if request.POST.get("back") == "official":
-        return redirect("moderation:contest_official", pk)
     return redirect("contests:standings", pk=pk)
 
 
@@ -395,10 +387,6 @@ def void(request, pk, user_id):
         refresh_solves(cp.problem_id, [p.user_id])
     if p.contest.rating_applied:
         _rerate(request, p.contest)
-    if p.contest.official_applied_at:
-        rating.recalc_official()
-        audit.record(request, audit.Action.RATING_RECOMPUTE, contest=p.contest, note="rasmiy")
-        messages.success(request, _t("Rasmiy reyting qayta hisoblandi."))
     return _back(request, pk)
 
 
@@ -413,7 +401,7 @@ def _back(request, pk):
 def _rerate(request, contest):
     """A DQ moves the participant to last place, and a voided problem lowers their score, which
     changes everyone's delta. When the people in it have played since, the later rounds are redone too
-    (rating.recompute_from), so the open rating never disagrees with the official one."""
+    (rating.recompute_from), so the rating never disagrees with the standings."""
     if rating.is_latest(contest):
         rating.recompute(contest)
         audit.record(request, audit.Action.RATING_RECOMPUTE, contest=contest)

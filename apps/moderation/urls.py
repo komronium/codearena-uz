@@ -48,10 +48,6 @@ urlpatterns = [
     path("contests/<int:pk>/unpublish/", views.contest_unpublish, name="contest_unpublish"),
     path("contests/<int:pk>/draft-publish/", views.contest_draft_publish, name="contest_draft_publish"),
     path("contests/<int:pk>/rating-preview/", views.contest_rating_preview, name="contest_rating_preview"),
-    path("contests/<int:pk>/official/", views.contest_official, name="contest_official"),
-    path("contests/<int:pk>/official/make/", views.contest_make_official, name="contest_make_official"),
-    path("contests/<int:pk>/official/apply/", views.contest_apply_official, name="contest_apply_official"),
-    path("contests/<int:pk>/official/review/<int:user_id>/", views.contest_review, name="contest_review"),
 
     path("submissions/", views.submissions, name="submissions"),
     path("duels/", views.duels, name="duels"),

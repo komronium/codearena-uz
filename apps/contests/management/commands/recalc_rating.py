@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 
 from apps.contests.models import Contest
-from apps.contests.rating import apply_rating, recalc_official, replay
+from apps.contests.rating import apply_rating, replay
 
 
 class Command(BaseCommand):
@@ -21,8 +21,7 @@ class Command(BaseCommand):
             if opts["contest_id"] is not None:
                 raise CommandError("--replay takes no contest_id")
             n = replay()
-            recalc_official()  # same maths
-            self.stdout.write(self.style.SUCCESS(f"replayed {n} rated contests and the official rating"))
+            self.stdout.write(self.style.SUCCESS(f"replayed {n} rated contests"))
             from apps.accounts import badges
             self.stdout.write(f"stored {badges.backfill()} badge level(s) quietly")
             return

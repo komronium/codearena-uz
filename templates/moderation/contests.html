@@ -98,7 +98,6 @@ the rating, open the problems, edit); the rest is in the menu.{% endcomment %}
             <button class="ca-dropdown-item w-full text-left"><i data-lucide="eye-off" class="lu" aria-hidden="true"></i>{% trans "Masalalarni yopish" %}</button>
           </form>
           {% endif %}
-          <a class="ca-dropdown-item" href="{% url 'moderation:contest_official' c.pk %}"><i data-lucide="award" class="lu" aria-hidden="true"></i>{% trans "Rasmiy reyting" %}</a>
           {% endif %}
           <hr class="my-1 border-line">
           <form method="post" action="{% url 'moderation:contest_delete' c.pk %}" data-confirm="{% blocktrans with c_title=c.title %}«{{ c_title }}» musobaqasi va natijalari o‘chiriladi. Davom etasizmi?{% endblocktrans %}">{% csrf_token %}

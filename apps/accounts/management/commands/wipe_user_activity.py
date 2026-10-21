@@ -1,5 +1,5 @@
 """Erase one user's duels, submissions, contest participations, badges and bell lines, then rebuild what they had touched
-(contest and official rating, duel Elo and season podiums, solves and practice points) so nobody else keeps a
+(contest rating, duel Elo and season podiums, solves and practice points) so nobody else keeps a
 rank or a rating that depended on them. The account itself stays. Prints the counts and stops unless --yes."""
 from django.core.management import call_command
 from django.core.management.base import BaseCommand, CommandError

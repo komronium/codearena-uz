@@ -37,7 +37,6 @@ urlpatterns = [
     path("clubs/<slug:slug>/join/", clubs.club_join, name="club_join"),
     path("clubs/<slug:slug>/leave/", clubs.club_leave, name="club_leave"),
     path("how-ratings-work/", views.how_ratings, name="how_ratings"),
-    path("verify/<int:user_id>/", views.verify_user, name="verify_user"),
     path("password-change/", views.PasswordChange.as_view(), name="password_change"),
     path("profile/<str:username>/", views.profile, name="profile"),
     path("password-reset/", views.PasswordReset.as_view(

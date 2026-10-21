@@ -39,7 +39,6 @@ the right.{% endcomment %}
       <nav class="ca7-seg ca7-r" aria-label="{% trans 'Qaysi musobaqalar' %}">
         <a href="{% querystring show=None mine=None page=None %}"{% if not show and not only_mine %} aria-current="true"{% endif %}>{% trans "Hammasi" %}</a>
         <a href="{% querystring show='rated' mine=None page=None %}"{% if show == 'rated' %} aria-current="true"{% endif %}>{% trans "Reytingli" %}</a>
-        <a href="{% querystring show='official' mine=None page=None %}"{% if show == 'official' %} aria-current="true"{% endif %}>{% trans "Rasmiy" %}</a>
         <a href="{% querystring show='unrated' mine=None page=None %}"{% if show == 'unrated' %} aria-current="true"{% endif %}>{% trans "Mashq" %}</a>
         {% if user.is_authenticated %}<a href="{% querystring mine=1 show=None page=None %}"{% if only_mine %} aria-current="true"{% endif %}>{% trans "Men qatnashgan" %}</a>{% endif %}
       </nav></div>
