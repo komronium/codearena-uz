@@ -264,9 +264,9 @@ def test_k_is_high_for_newcomers_and_low_at_the_top():
     assert k_factor(1999, 30) == 20 and k_factor(2000, 30) == 10
     assert elo(1200, 1200, 1.0, 40, 40) == (20, -20)
     assert elo(1200, 1200, 1.0, 40, 10) == (20, -5)  # each pays by their own K
-    assert elo(1000, 1400, 0.5, 20, 20) == (8, 0)  # a draw lifts the lower one and costs the higher one nothing
-    assert elo(1400, 1000, 0.5, 20, 20) == (0, 8)
-    assert elo(1200, 1200, 0.5, 20, 20) == (0, 0)
+    assert elo(1000, 1400, 0.5, 20, 20) == (8, -8)  # a draw lifts the lower one
+    assert elo(1000, 1400, 0.5, 20, 20, perfect=True) == (8, 0)  # both got all right: it costs the higher one nothing
+    assert elo(1400, 1000, 0.5, 20, 20, perfect=True) == (0, 8)
 
 
 @pytest.mark.django_db
@@ -310,10 +310,10 @@ def test_replay_works_the_ratings_out_again_keeping_every_result(db):
     Duel.objects.create(challenger=a, opponent=c, status="expired", mode="code")
     replay(Duel.objects.all(), User.objects.all())
     ratings = dict(User.objects.values_list("username", "duel_rating"))
-    # a beat b at 1200 each: ±20; then b (1180) drew with c (1200): the lower one gains a point, the higher one loses none
-    assert (ratings["a"], ratings["b"], ratings["c"], ratings["lonely"]) == (1220, 1181, 1200, 1200)
+    # a beat b at 1200 each: ±20; then b (1180) drew with c (1200): the lower one gains a point, the higher one loses one
+    assert (ratings["a"], ratings["b"], ratings["c"], ratings["lonely"]) == (1220, 1181, 1199, 1200)
     deltas = list(Duel.objects.order_by("pk").values_list("challenger_delta", "opponent_delta"))
-    assert deltas[:2] == [(20, -20), (1, 0)] and deltas[2] == (None, None)
+    assert deltas[:2] == [(20, -20), (1, -1)] and deltas[2] == (None, None)
 
 
 @pytest.mark.django_db

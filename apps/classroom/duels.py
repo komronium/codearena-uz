@@ -51,12 +51,19 @@ def k_factor(rating: int, played: int) -> int:
     return 10 if rating >= 2000 else 20
 
 
-def elo(a: int, b: int, score: float, ka: int, kb: int) -> tuple[int, int]:
-    """Rating changes of a and b for a's score (1 win, 0.5 draw, 0 loss). A draw takes nothing from the stronger
-    player: the lower one gains, the higher one stays where they are."""
+def elo(a: int, b: int, score: float, ka: int, kb: int, perfect: bool = False) -> tuple[int, int]:
+    """Rating changes of a and b for a's score (1 win, 0.5 draw, 0 loss). `perfect` is a draw where both got every
+    question right: nobody can have done better, so it takes nothing from the stronger player (the lower one
+    gains, the higher one stays where they are). Any other draw moves the ratings as usual."""
     expected = 1 / (1 + 10 ** ((b - a) / 400))
     da, db = round(ka * (score - expected)), round(kb * ((1 - score) - (1 - expected)))
-    return (max(da, 0), max(db, 0)) if score == 0.5 else (da, db)
+    return (max(da, 0), max(db, 0)) if perfect and score == 0.5 else (da, db)
+
+
+def is_perfect_draw(duel) -> bool:
+    """Both players answered every question right."""
+    runs = [run(duel, duel.challenger_id), run(duel, duel.opponent_id)]
+    return all(r is not None and r.total and r.right == r.total for r in runs)
 
 
 PAIR_WINDOW = timedelta(hours=24)
@@ -463,7 +470,8 @@ def settle(duel) -> None:
         season = duel_season(duel)  # a new month starts everyone's rating part of the way back to the middle
         ra, rb = carried(a.duel_rating, a.duel_season, season), carried(b.duel_rating, b.duel_season, season)
         weight = pair_weight(duel)
-        da, db = elo(ra, rb, score, k_factor(ra, _played(a.pk)) * weight, k_factor(rb, _played(b.pk)) * weight)
+        da, db = elo(ra, rb, score, k_factor(ra, _played(a.pk)) * weight, k_factor(rb, _played(b.pk)) * weight,
+                     perfect=winner == 0 and is_perfect_draw(duel))
         duel.status, duel.winner_id = Duel.Status.FINISHED, winner or None
         duel.challenger_delta, duel.opponent_delta = da, db
         duel.finished_at = now  # both runs are over: the duel's own date, not when it was created
@@ -499,7 +507,8 @@ def replay(duels, users) -> None:
         rb = carried(rating.get(b, START_RATING), season_of_user.get(b, ""), season)
         score = 0.5 if d.winner_id is None else (1.0 if d.winner_id == a else 0.0)
         weight = pair_weight(d)
-        da, db = elo(ra, rb, score, k_factor(ra, played.get(a, 0)) * weight, k_factor(rb, played.get(b, 0)) * weight)
+        da, db = elo(ra, rb, score, k_factor(ra, played.get(a, 0)) * weight, k_factor(rb, played.get(b, 0)) * weight,
+                     perfect=d.winner_id is None and d.mode == "quiz" and is_perfect_draw(d))
         duels.filter(pk=d.pk).update(challenger_delta=da, opponent_delta=db)
         rating[a], rating[b] = ra + da, rb + db
         season_of_user[a] = season_of_user[b] = season
