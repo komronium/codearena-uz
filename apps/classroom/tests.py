@@ -207,7 +207,7 @@ def test_more_right_answers_win_and_equal_is_a_draw_whatever_the_time(bank):
     duel.refresh_from_db()
     p1.refresh_from_db()
     p2.refresh_from_db()
-    assert duel.status == "finished" and duel.winner == p1
+    assert duel.status == "finished" and duel.winner == p2
     assert (duel.challenger_delta, duel.opponent_delta) == (-20, 20)  # K 40 for both newcomers
     assert (p1.duel_rating, p2.duel_rating) == (1180, 1220)
     settle(Duel.objects.get(pk=duel.pk))  # settling again changes nothing
