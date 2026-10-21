@@ -65,12 +65,26 @@ def deltas(ratings: list[int], places: list[int]) -> list[int]:
     return [d + fee for d in out]
 
 
+# The email gate came to the rating on 2026-10-20 (Marathon #2 was the first round it applied to). Earlier rounds were rated
+# without it, and a replay must not take their ratings away from people whose email is still unconfirmed.
+EMAIL_GATE_FROM = "2026-10-20"
+
+
+def gate_applies(contest) -> bool:
+    """Whether an unconfirmed email keeps someone out of this round's rating."""
+    from datetime import datetime
+
+    from django.conf import settings
+    from django.utils import timezone
+    start = timezone.make_aware(datetime.strptime(EMAIL_GATE_FROM, "%Y-%m-%d"))
+    return bool(getattr(settings, "ACCOUNT_GATE", True)) and contest.end >= start
+
+
 def _rated_rows(contest) -> list:
     # Registered but never submitted = didn't take part; rated only if you played
     # (Codeforces/AtCoder rule). Disqualified stays in: ranking last is the penalty.
     # Out of the division: on the board, not rated.
-    from django.conf import settings
-    gated = getattr(settings, "ACCOUNT_GATE", True)  # an unconfirmed email can join a round but is not rated until confirmed
+    gated = gate_applies(contest)  # an unconfirmed email can join a round but is not rated until confirmed
     return [r for r in compute_standings(contest) if (r["attempted"] or r["disqualified"]) and not r["out"]
             and (not gated or r["user"].email_verified_at is not None or r["user"].is_staff)]
 

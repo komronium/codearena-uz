@@ -59,6 +59,8 @@ def compute_standings(contest):
     problems = list(contest.contest_problems.select_related("problem"))
     participations = list(contest.participations.select_related("user"))
     author_ids = set(contest.authors.values_list("pk", flat=True))
+    from .rating import gate_applies
+    gated = gate_applies(contest)
 
     subs_by_user_problem = {}
     for cp in problems:
@@ -96,10 +98,12 @@ def compute_standings(contest):
         # Out of the contest's division: on the board, never rated. Judged by the rating it
         # was rated from once applied, so a later climb doesn't relabel an old result.
         author = p.user_id in author_ids
+        # an unconfirmed email can take part but is not rated (rating._rated_rows): the board says why
+        no_email = gated and p.user.email_verified_at is None and not p.user.is_staff
         out = author or not contest.rates(p.user.rating if p.rating_before is None else p.rating_before)
         rows.append({"participation": p, "user": p.user, "solved": solved, "penalty": penalty,
                      "score": score, "cells": cells, "rating_delta": delta,
-                     "disqualified": p.disqualified, "attempted": attempted, "out": out, "author": author})
+                     "disqualified": p.disqualified, "attempted": attempted, "out": out, "author": author, "no_email": no_email})
 
     # Disqualified participants always sort below everyone else: they keep their cells
     # for the record but take the last ranks, which is what makes their rating drop.

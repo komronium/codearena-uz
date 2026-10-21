@@ -12,6 +12,7 @@ a grey −N, accepted / tried per problem last. Codeforces rules have no penalty
   <span class="ca7-pill">{% trans "Siz" %}</span>
   {% if my_row.disqualified %}<b class="text-bad">{% trans "Siz diskvalifikatsiya qilindingiz" %}</b>
   {% elif my_row.author %}<b>{% trans "Siz muallifsiz: tanlovdan tashqari" %}</b>
+  {% elif my_row.no_email and contest.is_rated %}<b class="text-warn">{% trans "Emailingiz tasdiqlanmagan: natijangiz reytingga hisoblanmaydi." %}</b> <a class="ca-link" href="{% url 'welcome' %}">{% trans "Tasdiqlash" %}</a>
   {% else %}<span>{% blocktrans with my_row_rank=my_row.rank rows=rows|length %}<b class="tabular">{{ my_row_rank }}-o‘rin</b> <span class="text-mute tabular">/ {{ rows }}</span>{% endblocktrans %}</span>{% endif %}
   <span>{% if contest.type == "icpc" %}{% blocktrans with my_row_solved=my_row.solved %}<b class="tabular">{{ my_row_solved }}</b> ta masala{% endblocktrans %}{% else %}{% blocktrans with my_row_score=my_row.score %}<b class="tabular">{{ my_row_score }}</b> ball{% endblocktrans %}{% endif %}{% if contest.wrong_try_minutes is not None %} {% blocktrans with my_row_penalty=my_row.penalty %}· jarima <b class="tabular">{{ my_row_penalty }}</b>{% endblocktrans %}{% endif %}</span>
   <span class="ca-st-mine-cells">{% for cell in my_row.cells %}{% with cp=problems|slice:forloop.counter|last %}{% if cell.solved %}<span>{% blocktrans with cp_label=cp.label cell_time=cell.time %}<b>{{ cp_label }}</b> yechildi <span class="text-mute tabular">{{ cell_time }}</span>{% endblocktrans %}</span>{% elif cell.wrong %}<span>{% blocktrans with cp_label=cp.label cell_wrong=cell.wrong %}<b>{{ cp_label }}</b> masalada {{ cell_wrong }} ta noto‘g‘ri urinish{% endblocktrans %}</span>{% endif %}{% endwith %}{% endfor %}</span>
@@ -43,6 +44,7 @@ a grey −N, accepted / tried per problem last. Codeforces rules have no penalty
     <td class="ca-sticky ca-sticky-user">
       {% if r.user == user %}{% include "accounts/_u7.html" with u=r.user you=True flag=True %}{% else %}{% include "accounts/_u7.html" with u=r.user you=False flag=True %}{% endif %}
       {% if r.disqualified %}<span class="ca-tag ml-1 !text-bad" title="{{ r.participation.disqualified_reason|default:'Diskvalifikatsiya' }}">{% trans "DQ" %}</span>
+      {% elif r.no_email and contest.is_rated and not r.out %}<span class="ca-tag ca-tag-out ml-1" title="{% trans 'Email tasdiqlanmagan: bu natija reytingga hisoblanmaydi' %}">{% trans "reytingsiz" %}</span>
       {% elif r.author %}<span class="ca-tag ca-tag-out ml-1" title="{% trans 'Raund muallifi: tanlovdan tashqari, reytingga va o‘ringa ta’sir qilmaydi' %}">{% trans "muallif" %}</span>
       {% elif r.out and contest.is_rated %}<span class="ca-tag ca-tag-out ml-1" title="{% blocktrans with contest_get_division_display=contest.get_division_display %}{{ contest_get_division_display }}: natija reytingga ta’sir qilmaydi{% endblocktrans %}">{% trans "tashqarida" %}</span>{% endif %}
     </td>
