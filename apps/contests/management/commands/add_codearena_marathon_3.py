@@ -108,29 +108,23 @@ def longest_word_tests(rng):
     def sentence():
         return " ".join(_text(rng, rng.randint(1, rng.choice([3, 6, 10]))) for _ in range(rng.randint(1, 15)))[:200].strip()
     tests = ["men bugun maktabga bordim", "olma anor nok", "salom", "a", "a b c", "ab cd ef", "ali vali sami", "ali vali ola",
-             "bir ikki uch to rt besh", "z" * 100 + " " + "y" * 100, "y" * 100 + " " + "z" * 100, "a " * 99 + "a",
+             "bir ikki uch to rt besh", "z" * 99 + " " + "y" * 99, "y" * 99 + " " + "z" * 99, "a " * 99 + "a",
              "kitob daftar qalam", "qalam daftar kitob", "dastur kod"]
     tests += [sentence() for _ in range(12)]
     return _uniq(tests)
 
 
-# ---- E. Beginner (satr): maxfiy xat ------------------------------------------------------
-def caesar_solve(inp):
-    k, text = inp.split("\n")[:2]
-    k = int(k)
-    return _lines("".join(" " if ch == " " else chr((ord(ch) - 97 + k) % 26 + 97) for ch in text))
+# ---- E. Beginner (satr): raqamlar yig'indisi ---------------------------------------------
+def digits_solve(inp):
+    return _lines(sum(int(ch) for ch in inp.strip() if ch.isdigit()))
 
 
-def caesar_tests(rng):
-    def case(k, text):
-        return f"{k}\n{text}"
-    tests = [case(3, "salom dunyo"), case(25, "abc xyz"), case(1, "z"), case(1, "zzzz zzzz"), case(5, "a"),
-             case(25, "a b c"), case(13, "abcdefghijklmnopqrstuvwxyz"), case(1, "abc"), case(2, "xyz"),
-             case(12, "x" * 100), case(10, "ab " * 33 + "a"), case(7, "marafon uchun omad"), case(24, "yz"),
-             case(3, "a b")]
-    for _ in range(10):
-        words = [_text(rng, rng.randint(1, 8)) for _ in range(rng.randint(1, 12))]
-        tests.append(case(rng.randint(1, 25), " ".join(words)[:100].strip()))
+def digits_tests(rng):
+    tests = ["a1b2c3", "salom2026", "abc", "7", "0", "x9y9", "12345", "9" * 100, "a" * 100, "0a0b0", "100", "a1", "1a",
+             "kod007", "z" * 50 + "5" + "z" * 49, "ab12cd34ef56"]
+    for _ in range(12):
+        n = rng.choice([rng.randint(1, 10), rng.randint(1, 100), 100])
+        tests.append(_text(rng, n, rng.choice([string.ascii_lowercase + string.digits, "abc123", "ab0", "9a"])))
     return _uniq(tests)
 
 
@@ -160,30 +154,25 @@ def balance_tests(rng):
     return _uniq(tests)
 
 
-# ---- G. Easy (satr): siqish --------------------------------------------------------------
-def runs_solve(inp):
-    s = inp.strip()
-    out, i = [], 0
-    while i < len(s):
-        j = i
-        while j < len(s) and s[j] == s[i]:
-            j += 1
-        out.append(f"{s[i]}{j - i}")
-        i = j
-    return _lines("".join(out))
+# ---- G. Easy (satr): birinchi takror -----------------------------------------------------
+def repeat_solve(inp):
+    seen = set()
+    for ch in inp.strip():
+        if ch in seen:
+            return _lines(ch)  # the letter whose second appearance comes first
+        seen.add(ch)
+    return _lines(-1)
 
 
-def runs_tests(rng):
-    tests = ["aaabccdd", "abc", "a", "a" * 12, "a" * 9, "a" * 10, "ab" * 5, "zzzzzzzzzzzzzzzzzzzzbzz", "aabbaabb",
-             "a" * 1000, "ab" * 500, "a" * 999 + "b", "b" + "a" * 999, "abcdefghijklmnopqrstuvwxyz"]
-    for _ in range(12):
-        n = _size(rng, 20, 200, 1000)
-        runs, total = [], 0
-        while total < n:
-            r = rng.choice([1, 1, 2, 3, 5, 9, 10, 11, 100])
-            runs.append(rng.choice(LOWER[: rng.choice([2, 3, 26])]) * r)
-            total += r
-        tests.append("".join(runs)[: max(1, n)])
+def repeat_tests(rng):
+    tests = ["kitobxona", "abcd", "abba", "abcdcba", "aab", "a", "aa", "abab", "abcabc", "zyxwvutsrqponmlkjihgfedcba",
+             "abcdefghijklmnopqrstuvwxyza", "a" * 100, "ab" * 50, "bcdefghijklmnopqrstuvwxyz" + "a" + "z", "xyzzy"]
+    for _ in range(14):
+        n = rng.choice([rng.randint(1, 10), rng.randint(1, 26), rng.randint(1, 100)])
+        alphabet = rng.choice([LOWER, "abcdefgh", LOWER[:20]])
+        tests.append(_text(rng, n, alphabet))
+    tests.append("".join(rng.sample(LOWER, 26)))  # no repeat at all
+    tests.append("".join(rng.sample(LOWER, 10)))
     return _uniq(tests)
 
 
@@ -194,9 +183,9 @@ def pyramid_solve(inp):
 
 
 def pyramid_tests(rng):
-    top = 10**9
+    top = 10**6
     tests = ["10", "20", "1", "2", "3", "4", "5", "6", "7", "15", "21", "55", str(top), str(top - 1)]
-    for k in (10, 1000, 31622, 44720, 44719, 44721):
+    for k in (10, 100, 1000, 1413, 1412, 1414):
         t = k * (k + 1) // 2
         tests += [str(t - 1), str(t), str(t + 1)]
     for _ in range(8):
@@ -206,20 +195,18 @@ def pyramid_tests(rng):
 
 # ---- I. Easy (satr): eng ko'p harf -------------------------------------------------------
 def common_solve(inp):
-    s = inp.strip()
     count = {}
-    for ch in s:
+    for ch in inp.strip():
         count[ch] = count.get(ch, 0) + 1
     best = max(count.values())
-    letter = min(ch for ch, c in count.items() if c == best)  # the alphabetically first of the most frequent
-    return _lines(f"{letter} {best}")
+    return _lines(min(ch for ch, c in count.items() if c == best))  # the alphabetically first of the most frequent
 
 
 def common_tests(rng):
-    tests = ["salom", "banana", "abc", "a", "zzaa", "aazz", "abababc", "mississippi", "xyzxyz", "a" * 1000, "z" * 1000,
-             "ab" * 500, "ba" * 500, "q" + "a" * 999, "programmalash", "kitob"]
+    tests = ["salom", "banana", "abc", "a", "zzaa", "aazz", "abababc", "mississippi", "xyzxyz", "a" * 100, "z" * 100,
+             "ab" * 50, "ba" * 50, "q" + "a" * 99, "programmalash", "kitob"]
     for _ in range(12):
-        n = _size(rng, 8, 100, 1000)
+        n = _size(rng, 8, 50, 100)
         tests.append(_text(rng, n, rng.choice(["ab", "abc", "abcde", LOWER, "xyz"])))
     return _uniq(tests)
 
@@ -235,11 +222,11 @@ def pattern_solve(inp):
 
 def pattern_tests(rng):
     tests = ["abcabcabc", "abcd", "aaaa", "abab", "abaaba", "ababab", "abcab", "a", "aa", "ab", "aba", "abcabc", "aabaab",
-             "aabaa", "abcabcabcabc", "a" * 1000, "a" * 999 + "b", "ab" * 500, "ab" * 499 + "ba", "abc" * 333 + "a"]
+             "aabaa", "abcabcabcabc", "a" * 100, "a" * 99 + "b", "ab" * 50, "ab" * 49 + "ba", "abc" * 33 + "a"]
     for _ in range(12):
-        size = rng.choice([1, 2, 3, 4, 6, 10, 25, 100])
+        size = rng.choice([1, 2, 3, 4, 5, 10, 25])
         block = _text(rng, size, rng.choice(["ab", "abc", LOWER]))
-        s = block * rng.randint(1, max(1, 1000 // size))
+        s = block * rng.randint(1, max(1, 100 // size))
         if rng.random() < 0.3:  # one letter off: the pattern breaks and the answer jumps up
             i = rng.randrange(len(s))
             s = s[:i] + ("b" if s[i] == "a" else "a") + s[i + 1:]
@@ -325,27 +312,22 @@ PROBLEMS = [
         },
     },
     {
-        "slug": "cam3-maxfiy-xat", "title": "Maxfiy xat", "difficulty": "beginner", "points": 350,
-        "tags": ["strings", "math"], "solve": caesar_solve, "tests": caesar_tests, "samples": 2,
-        "statement": ("Ikki do‘st maxfiy xat yozishadi. Shifrlash oddiy: matndagi **har bir harf** alifboda $k$ qadam "
-                      "**oldinga** suriladi (`a` → `b` → … → `z` → yana `a`). Probellar o‘zgarmaydi.\n\n"
-                      "Masalan, $k = 3$ bo‘lsa, `xyz` so‘zi `abc` bo‘ladi.\n\n"
-                      "Matnni shifrlab bering. Alifbo $26$ ta harfdan iborat."),
-        "input": ("* Birinchi qatorda butun son $k$ ($1 \\le k \\le 25$) beriladi.\n"
-                  "* Ikkinchi qatorda matn: kichik lotin harflari va probellar, so‘zlar orasida bitta probel, "
-                  "boshida va oxirida probel yo‘q ($1 \\le |s| \\le 100$)."),
-        "output": "Bitta qatorda shifrlangan matn.",
+        "slug": "cam3-raqamlar-yigindisi", "title": "Raqamlar yig‘indisi", "difficulty": "beginner", "points": 300,
+        "tags": ["strings", "for-loop"], "solve": digits_solve, "tests": digits_tests, "samples": 2,
+        "statement": ("Kvitansiya raqami harflar va raqamlardan iborat, masalan, `a1b2c3`. Buxgalter undagi **faqat "
+                      "raqamlarning** yig‘indisini hisoblamoqchi: harflar hisobga kirmaydi. Masalan, `a1b2c3` uchun "
+                      "$1 + 2 + 3 = 6$.\n\n"
+                      "Raqamlar yig‘indisi nechaga teng? Raqam bo‘lmasa, javob $0$."),
+        "input": "Bitta qatorda satr $s$ ($1 \\le |s| \\le 100$): kichik lotin harflari va raqamlar.",
+        "output": "Bitta butun son: raqamlar yig‘indisi.",
         "en": {
-            "title": "Secret letter",
-            "statement": ("Two friends write each other secret letters. The cipher is simple: **every letter** of the text is "
-                          "moved **forward** by $k$ steps in the alphabet (`a` → `b` → … → `z` → `a` again). Spaces "
-                          "stay as they are.\n\n"
-                          "For example, with $k = 3$ the word `xyz` becomes `abc`.\n\n"
-                          "Encrypt the text. The alphabet has $26$ letters."),
-            "input": ("* The first line contains an integer $k$ ($1 \\le k \\le 25$).\n"
-                      "* The second line contains the text: lowercase Latin letters and spaces, one space between "
-                      "words, no space at the start or the end ($1 \\le |s| \\le 100$)."),
-            "output": "One line: the encrypted text.",
+            "title": "Sum of digits",
+            "statement": ("A receipt number consists of letters and digits, for example `a1b2c3`. The accountant wants "
+                          "the sum of **the digits only**: letters do not count. For `a1b2c3` that is "
+                          "$1 + 2 + 3 = 6$.\n\n"
+                          "What is the sum of the digits? If there are no digits, the answer is $0$."),
+            "input": "A single line with a string $s$ ($1 \\le |s| \\le 100$): lowercase Latin letters and digits.",
+            "output": "One integer: the sum of the digits.",
         },
     },
     {
@@ -374,32 +356,36 @@ PROBLEMS = [
         },
     },
     {
-        "slug": "cam3-siqish", "title": "Siqish", "difficulty": "easy", "points": 450,
-        "tags": ["strings", "implementation"], "solve": runs_solve, "tests": runs_tests, "samples": 2,
-        "statement": ("Faks apparati uzun satrlarni siqib yuboradi: bir xil harflarning har bir **ketma-ket guruhi** "
-                      "harf va uning guruhdagi soni bilan almashtiriladi. Masalan, `aaabccdd` satri `a3b1c2d2` "
-                      "bo‘ladi. Bitta turgan harf ham `1` bilan yoziladi.\n\n"
-                      "Berilgan satrning siqilgan ko‘rinishini chiqaring."),
-        "input": "Bitta qatorda kichik lotin harflaridan iborat satr $s$ ($1 \\le |s| \\le 1000$).",
-        "output": "Bitta qatorda siqilgan satr.",
+        "slug": "cam3-birinchi-takror", "title": "Birinchi takror", "difficulty": "easy", "points": 400,
+        "tags": ["strings", "hash-table"], "solve": repeat_solve, "tests": repeat_tests, "samples": 2,
+        "statement": ("Parol qatorida bir xil harf ikki marta uchrashi xavfli hisoblanadi. Qatorni chapdan o‘ngga "
+                      "o‘qib boring va **ikkinchi marta uchragan birinchi harfni** toping: ya’ni shunday harfki, "
+                      "uning takror kelgan joyi boshqa har qanday harfning takror joyidan oldin turadi.\n\n"
+                      "Masalan, `abba` qatorida `b` ikkinchi marta 3-o‘rinda uchraydi, `a` esa faqat 4-o‘rinda, "
+                      "shuning uchun javob `b`.\n\n"
+                      "Hech bir harf takrorlanmasa, $-1$ chiqaring."),
+        "input": "Bitta qatorda kichik lotin harflaridan iborat satr $s$ ($1 \\le |s| \\le 100$).",
+        "output": "Bitta harf yoki $-1$.",
         "en": {
-            "title": "Compression",
-            "statement": ("A fax machine compresses long strings: every **consecutive group** of equal letters is replaced "
-                          "by the letter and the size of the group. For example, `aaabccdd` becomes `a3b1c2d2`. A "
-                          "single letter is written with `1` too.\n\n"
-                          "Print the compressed form of the given string."),
-            "input": "A single line with a string $s$ of lowercase Latin letters ($1 \\le |s| \\le 1000$).",
-            "output": "One line: the compressed string.",
+            "title": "First repeat",
+            "statement": ("In a password string a letter appearing twice is considered risky. Read the string from "
+                          "left to right and find **the first letter to appear for the second time**: the letter "
+                          "whose repeat stands earlier than the repeat of any other letter.\n\n"
+                          "For example, in `abba` the letter `b` appears a second time at position 3, while `a` does "
+                          "so only at position 4, so the answer is `b`.\n\n"
+                          "If no letter repeats, print $-1$."),
+            "input": "A single line with a string $s$ of lowercase Latin letters ($1 \\le |s| \\le 100$).",
+            "output": "One letter or $-1$.",
         },
     },
     {
-        "slug": "cam3-stakan-piramidasi", "title": "Stakan piramidasi", "difficulty": "easy", "points": 500,
+        "slug": "cam3-stakan-piramidasi", "title": "Stakan piramidasi", "difficulty": "easy", "points": 450,
         "tags": ["math", "loops"], "solve": pyramid_solve, "tests": pyramid_tests, "samples": 2,
         "statement": ("Bayramda stakanlardan piramida quriladi: birinchi qatorda $1$ ta, ikkinchisida $2$ ta, "
                       "uchinchisida $3$ ta va hokazo — har keyingi qatorda avvalgisidan bittaga ko‘p stakan.\n\n"
                       "Qatorni **to‘liq** qilib qo‘yish kerak: yarim qator bo‘lmaydi. Omborda $n$ ta stakan bor. "
                       "Ulardan nechta to‘liq qator yasash mumkin?"),
-        "input": "Bitta qatorda butun son $n$ ($1 \\le n \\le 10^9$).",
+        "input": "Bitta qatorda butun son $n$ ($1 \\le n \\le 10^6$).",
         "output": "Bitta butun son: to‘liq qatorlarning eng ko‘p soni.",
         "en": {
             "title": "Pyramid of glasses",
@@ -407,31 +393,31 @@ PROBLEMS = [
                           "$3$ in the third, and so on: every next row has one glass more than the previous one.\n\n"
                           "A row has to be **complete**: there are no half rows. The storeroom has $n$ glasses. How many "
                           "complete rows can be built from them?"),
-            "input": "A single line with an integer $n$ ($1 \\le n \\le 10^9$).",
+            "input": "A single line with an integer $n$ ($1 \\le n \\le 10^6$).",
             "output": "One integer: the largest number of complete rows.",
         },
     },
     {
-        "slug": "cam3-eng-kop-harf", "title": "Eng ko‘p harf", "difficulty": "easy", "points": 600,
+        "slug": "cam3-eng-kop-harf", "title": "Eng ko‘p harf", "difficulty": "easy", "points": 500,
         "tags": ["strings", "hash-table"], "solve": common_solve, "tests": common_tests, "samples": 2,
         "statement": ("Kriptograf shifrlangan matnni tahlil qilmoqda: eng ko‘p uchraydigan harf shifrni ochishga "
                       "yordam beradi.\n\n"
-                      "Satrda qaysi harf **eng ko‘p** uchraydi va necha marta? Bir nechta harf teng ko‘p uchrasa, "
+                      "Satrda qaysi harf **eng ko‘p** uchraydi? Bir nechta harf teng ko‘p uchrasa, "
                       "**alifbo bo‘yicha birinchisini** chiqaring."),
-        "input": "Bitta qatorda kichik lotin harflaridan iborat satr $s$ ($1 \\le |s| \\le 1000$).",
-        "output": "Bitta qatorda harf va uning soni, bo‘shliq bilan ajratilgan.",
+        "input": "Bitta qatorda kichik lotin harflaridan iborat satr $s$ ($1 \\le |s| \\le 100$).",
+        "output": "Bitta harf.",
         "en": {
             "title": "Most frequent letter",
             "statement": ("A cryptographer is analysing an encrypted text: the most frequent letter helps to break the "
                           "cipher.\n\n"
-                          "Which letter occurs **most often** in the string, and how many times? If several letters are "
+                          "Which letter occurs **most often** in the string? If several letters are "
                           "equally frequent, print **the first one in alphabetical order**."),
-            "input": "A single line with a string $s$ of lowercase Latin letters ($1 \\le |s| \\le 1000$).",
-            "output": "One line: the letter and its count, separated by a space.",
+            "input": "A single line with a string $s$ of lowercase Latin letters ($1 \\le |s| \\le 100$).",
+            "output": "One letter.",
         },
     },
     {
-        "slug": "cam3-naqsh", "title": "Naqsh", "difficulty": "medium", "points": 800,
+        "slug": "cam3-naqsh", "title": "Naqsh", "difficulty": "medium", "points": 700,
         "tags": ["strings", "implementation"], "solve": pattern_solve, "tests": pattern_tests, "samples": 2,
         "statement": ("Gilam to‘quvchi bir xil naqshni qayta-qayta to‘qiydi: bir bo‘lakni yonma-yon necha marta "
                       "takrorlaydi. Gilam $s$ satr bilan berilgan.\n\n"
@@ -439,7 +425,7 @@ PROBLEMS = [
                       "(bir marta yozish ham mumkin). Eng qisqa naqshning uzunligini toping.\n\n"
                       "Masalan, `abcabcabc` satrida naqsh `abc`, uzunligi $3$. `abcab` satrida takror yo‘q: naqsh "
                       "butun satr, javob $5$."),
-        "input": "Bitta qatorda kichik lotin harflaridan iborat satr $s$ ($1 \\le |s| \\le 1000$).",
+        "input": "Bitta qatorda kichik lotin harflaridan iborat satr $s$ ($1 \\le |s| \\le 100$).",
         "output": "Bitta butun son: eng qisqa naqshning uzunligi.",
         "en": {
             "title": "Pattern",
@@ -449,7 +435,7 @@ PROBLEMS = [
                           "$s$ (writing it once is allowed too). Find the length of the shortest pattern.\n\n"
                           "For example, in `abcabcabc` the pattern is `abc`, of length $3$. In `abcab` there is no "
                           "repetition: the pattern is the whole string, and the answer is $5$."),
-            "input": "A single line with a string $s$ of lowercase Latin letters ($1 \\le |s| \\le 1000$).",
+            "input": "A single line with a string $s$ of lowercase Latin letters ($1 \\le |s| \\le 100$).",
             "output": "One integer: the length of the shortest pattern.",
         },
     },
