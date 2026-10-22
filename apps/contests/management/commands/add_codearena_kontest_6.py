@@ -184,13 +184,14 @@ def ism_solve(inp):
 
 
 def ism_tests(rng):
-    tests = [_rows("Karimov Aziz Bahodirovich"), _rows("Valiyev Sardor"), _rows("ALIYEV JASUR BOBURJONOVICH"),
-             _rows("tursunov madina"), _rows("rahimov o'tkir sodiqovich"), _rows("G'ulomov Anvar"), _rows("Nazarova Dilnoza Rustamovna")]
+    tests = [_rows("Karimov Aziz Bahodirovich"), _rows("Valiyev Sardor Anvarovich"), _rows("ALIYEV JASUR BOBURJONOVICH"),
+             _rows("tursunov madina karimovna"), _rows("rahimov o'tkir sodiqovich"), _rows("G'ulomov Anvar Olimovich"),
+             _rows("Nazarova Dilnoza Rustamovna")]
     last = ["karimov", "valiyev", "tursunov", "rahimov", "aliyev", "nazarova", "yusupov", "ergashev", "saidova", "umarov"]
     first = ["aziz", "sardor", "madina", "jasur", "dilnoza", "bobur", "zilola", "otabek", "feruza", "g'ayrat"]
     father = ["bahodirovich", "rustamovna", "sodiqovich", "karimovna", "olimovich", "anvarovich"]
     while len(tests) < 22:
-        words = [rng.choice(last), rng.choice(first)] + ([rng.choice(father)] if rng.random() < .6 else [])
+        words = [rng.choice(last), rng.choice(first), rng.choice(father)]
         tests.append(_rows(" ".join(_case(rng, w) for w in words)))
     return tests
 
@@ -267,12 +268,12 @@ PROBLEMS = [
           "Email kiritiladi. U to'g'ri hisoblanishi uchun: (1) aynan bitta «@» bo'lishi; (2) «@» dan keyingi qismda "
           "kamida bitta «.» bo'lishi kerak. To'g'ri bo'lsa «Ha», aks holda «Yo'q» chiqaring.",
           "Bitta qator.", "Ha yoki Yo'q.", "pochta_zx"),
-    _spec("k6-ism", "Ism qisqartmasi", "easy", 600, ["strings", "split"], ism_solve, ism_tests,
+    _spec("k6-ism", "Ism qisqartmasi", "easy", 400, ["strings", "split"], ism_solve, ism_tests,
           "Hujjatlarda ism-sharif ko'pincha qisqartirib yoziladi: «Karimov Aziz Bahodirovich» o'rniga «Karimov A.B.».\n\n"
-          "Ism-sharif bitta qatorda kiritiladi: familiya, ism va (ba'zan) otasining ismi, probel bilan ajratilgan (2 yoki 3 ta "
+          "Ism-sharif bitta qatorda kiritiladi: familiya, ism va otasining ismi, probel bilan ajratilgan (aynan 3 ta "
           "so'z). Harflari katta-kichik aralash yozilgan bo'lishi mumkin. Familiyani to'liq chiqaring (birinchi harfi katta, "
           "qolganlari kichik), keyin probel va ism hamda otasining ismining faqat birinchi harflarini katta qilib, har birining "
-          "orqasiga nuqta qo'yib chiqaring: «Karimov A.B.» yoki «Valiyev S.».",
+          "orqasiga nuqta qo'yib chiqaring: «Karimov A.B.».",
           "Bitta qator.", "Bitta qator.", "qisqa_nm"),
 ]
 
