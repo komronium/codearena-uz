@@ -1521,6 +1521,10 @@ def test_marathon_3_command_builds_a_rated_round_with_seven_string_problems_of_t
     assert c.is_rated and c.personal_minutes == 120 and c.badge == "Marathon #3" and c.contest_problems.count() == 10
     assert sum(cp.problem.tags.filter(name="strings").exists() for cp in c.contest_problems.all()) == 7
     assert all(not cp.problem.is_public and cp.problem.testcases.count() >= 20 for cp in c.contest_problems.all())
+    from apps.translations.models import ContentTranslation
+    assert ContentTranslation.objects.filter(lang="en", confirmed=False).count() == 3 + 4 * 10  # contest + problems, drafts
+    call_command("add_codearena_marathon_3", stdout=StringIO())  # a re-run keeps what exists
+    assert ContentTranslation.objects.filter(lang="en").count() == 43 and c.contest_problems.count() == 10
 
 
 @pytest.mark.django_db
