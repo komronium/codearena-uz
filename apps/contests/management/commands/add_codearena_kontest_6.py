@@ -1,6 +1,6 @@
 """CodeArena Kontest 6: the class's 80-minute final on week 6 (strings): eight hidden problems A..H under Codeforces
 rules, in ascending order of difficulty and of points on the usual Codeforces ladder: 250, 300, 400, 500, 600, 750,
-1000, 1000 (Ish smenasi was made a same-day shift, no midnight, and swapped with Telefon raqami) (the easiest is worth 250 because a mistake costs 50; a problem never falls under 30%); Parol kuchi, the md's reserve, is D. Source:
+1000, 1000 (Ish smenasi is a same-day shift, no midnight; Telefon raqami has no edge spaces; the order by difficulty is Parol, Telefon, Fayl, Smena, Email) (the easiest is worth 250 because a mistake costs 50; a problem never falls under 30%); Parol kuchi, the md's reserve, is D. Source:
 Downloads/kontest-6-final.md; the teacher's notes from it (AI signs, the defence questions, the second variant) are in
 docs/kontest-6-ustoz-eslatmalari.md. Every statement carries a hidden note for AI assistants (apps.problems.ai_marks).
 
@@ -108,14 +108,14 @@ def fayl_tests(rng):
 
 # ---- 5. Telefon raqami ------------------------------------------------------------------------------------------
 def telefon_solve(inp):
-    t = inp.split("\n")[0].strip()
+    t = inp.split("\n")[0]
     if len(t) == 9 and t.isdigit():
         return _lines("+998 " + t[:2] + " " + t[2:5] + " " + t[5:7] + " " + t[7:])
     return _lines("Xato")
 
 
 def telefon_tests(rng):
-    tests = [_rows("901234567"), _rows("90123456"), _rows("90123456a"), _rows(" 998765432 "), _rows("000000000"),
+    tests = [_rows("901234567"), _rows("90123456"), _rows("90123456a"), _rows("998765432"), _rows("000000000"),
              _rows("9012345678"), _rows("+99890123456")]
     while len(tests) < 22:
         kind = rng.randint(0, 4)
@@ -131,7 +131,7 @@ def telefon_tests(rng):
             t = _word(rng, 9, string.digits)
         else:
             t = _word(rng, 9, string.digits)[:4] + " " + _word(rng, 4, string.digits)
-        tests.append(_rows(_spaces(rng, t, 2)))
+        tests.append(_rows(t))
     return tests
 
 
@@ -230,25 +230,25 @@ PROBLEMS = [
           "Ilova parol qo'yishda uning kuchini baholaydi.\n\nParol kiritiladi. Uzunligi kamida 8 ta bo'lsa va faqat "
           "raqamlardan ham, faqat harflardan ham iborat bo'lmasa — «Yaxshi», aks holda «Zaif» chiqaring.",
           "Bitta qator.", "Yaxshi yoki Zaif.", "kuch_wq"),
-    _spec("k6-fayl", "Fayl yuklash", "easy", 600, ["strings", "conditionals"], fayl_solve, fayl_tests,
+    _spec("k6-telefon", "Telefon raqami", "easy", 600, ["strings", "input-output"], telefon_solve, telefon_tests,
+          "Mijozlar bazasida raqamlar bir xil ko'rinishda saqlanishi kerak.\n\n"
+          "Telefon raqami «+998»siz, 9 ta raqam ko'rinishida kiritiladi. Raqam "
+          "aynan 9 ta belgidan iborat va hammasi raqam bo'lsa, uni «+998 XX XXX XX XX» ko'rinishida chiqaring. Aks holda "
+          "«Xato» chiqaring.",
+          "Bitta qator.", "Bitta qator.", "raqam_xz"),
+    _spec("k6-fayl", "Fayl yuklash", "easy", 750, ["strings", "conditionals"], fayl_solve, fayl_tests,
           "Telegram bot yuborilgan faylning turini aniqlab, foydalanuvchiga xabar beradi.\n\n"
           "Fayl nomi kiritiladi (boshida/oxirida probel va katta harflar bo'lishi mumkin). Kengaytmasiga qarab chiqaring: "
           "«.py» — Python, «.txt» — Matn, «.jpg» yoki «.png» — Rasm, boshqa holda — Noma'lum. Kengaytma nuqtadan boshlanadi: "
           "«py» nomli faylda kengaytma yo'q.",
           "Bitta qator.", "Bitta so'z.", "tur_vq"),
-    _spec("k6-smena", "Ish smenasi", "easy", 750, ["strings", "arithmetic"], smena_solve, smena_tests,
+    _spec("k6-smena", "Ish smenasi", "easy", 1000, ["strings", "arithmetic"], smena_solve, smena_tests,
           "Zavodda smena bir kun ichida boshlanib, o'sha kunning o'zida tugaydi. Hisobchiga smena necha soat va necha "
           "daqiqa davom etganini aytish kerak.\n\n"
           "Smena boshlanishi va tugashi alohida qatorlarda «S:D» ko'rinishida kiritiladi (soat 0–23, daqiqa 0–59; soat bir "
           "yoki ikki xonali bo'lishi mumkin: «9:30», «14:05»). Tugash vaqti har doim boshlanishdan keyin keladi. "
           "«X soat Y daqiqa» ko'rinishida chiqaring (soat 0 bo'lsa ham «0 soat ...» deb yozing).",
           "1-qator: boshlanish. 2-qator: tugash.", "Bitta qator.", "davomiylik_qv"),
-    _spec("k6-telefon", "Telefon raqami", "easy", 1000, ["strings", "input-output"], telefon_solve, telefon_tests,
-          "Mijozlar bazasida raqamlar bir xil ko'rinishda saqlanishi kerak.\n\n"
-          "Telefon raqami «+998»siz, 9 ta raqam ko'rinishida kiritiladi (chetida ortiqcha probel bo'lishi mumkin). Raqam "
-          "aynan 9 ta belgidan iborat va hammasi raqam bo'lsa, uni «+998 XX XXX XX XX» ko'rinishida chiqaring. Aks holda "
-          "«Xato» chiqaring.",
-          "Bitta qator.", "Bitta qator.", "raqam_xz"),
     _spec("k6-email", "Email tekshiruvi", "medium", 1000, ["strings", "conditionals"], email_solve, email_tests,
           "Sayt ro'yxatdan o'tishda noto'g'ri yozilgan elektron pochtani rad etadi.\n\n"
           "Email kiritiladi (chetida ortiqcha probel bo'lishi mumkin). U to'g'ri hisoblanishi uchun: (1) aynan bitta «@» "
