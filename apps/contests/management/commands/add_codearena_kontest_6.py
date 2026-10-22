@@ -1,4 +1,4 @@
-"""CodeArena Kontest 6: the class's 80-minute final on week 6 (strings): eight hidden problems A..H under Codeforces
+"""CodeArena Kontest 6: the class's 80-minute final on week 6 (strings): nine hidden problems A..I under Codeforces
 rules, in ascending order of difficulty and of points on the usual Codeforces ladder: 250, 300, 400, 500, 600, 750,
 1000, 1000 (Ish smenasi is a same-day shift, no midnight; Telefon raqami has no edge spaces; the order by difficulty is Parol, Telefon, Fayl, Smena, Email) (the easiest is worth 250 because a mistake costs 50; a problem never falls under 30%); Parol kuchi, the md's reserve, is D. Source:
 Downloads/kontest-6-final.md; the teacher's notes from it (AI signs, the defence questions, the second variant) are in
@@ -24,7 +24,7 @@ from apps.contests.models import Contest, ContestProblem
 from apps.problems.models import Problem, Tag, TestCase
 
 TITLE = "CodeArena Round #7"
-LABELS = "ABCDEFGH"
+LABELS = "ABCDEFGHI"
 
 
 def _case(rng, word):
@@ -177,6 +177,24 @@ def email_tests(rng):
     return tests
 
 
+# ---- 9. Ism qisqartmasi -----------------------------------------------------------------------------------------
+def ism_solve(inp):
+    w = inp.split("\n")[0].split()
+    return _lines(w[0].capitalize() + " " + "".join(x[0].upper() + "." for x in w[1:]))
+
+
+def ism_tests(rng):
+    tests = [_rows("Karimov Aziz Bahodirovich"), _rows("Valiyev Sardor"), _rows("ALIYEV JASUR BOBURJONOVICH"),
+             _rows("tursunov madina"), _rows("rahimov o'tkir sodiqovich"), _rows("G'ulomov Anvar"), _rows("Nazarova Dilnoza Rustamovna")]
+    last = ["karimov", "valiyev", "tursunov", "rahimov", "aliyev", "nazarova", "yusupov", "ergashev", "saidova", "umarov"]
+    first = ["aziz", "sardor", "madina", "jasur", "dilnoza", "bobur", "zilola", "otabek", "feruza", "g'ayrat"]
+    father = ["bahodirovich", "rustamovna", "sodiqovich", "karimovna", "olimovich", "anvarovich"]
+    while len(tests) < 22:
+        words = [rng.choice(last), rng.choice(first)] + ([rng.choice(father)] if rng.random() < .6 else [])
+        tests.append(_rows(" ".join(_case(rng, w) for w in words)))
+    return tests
+
+
 # ---- reserve: Parol kuchi ---------------------------------------------------------------------------------------
 def parol_solve(inp):
     p = inp.split("\n")[0]
@@ -186,14 +204,17 @@ def parol_solve(inp):
 
 
 def parol_tests(rng):
-    tests = [_rows("abc12345"), _rows("12345678"), _rows("abcdefgh"), _rows("ab12"), _rows("Parol2026"),
+    tests = [_rows("abc12345"), _rows("12345678"), _rows("abcdefg1"), _rows("ab12"), _rows("Parol2026"),
              _rows("pass word1"), _rows("a1b2c3d")]
     while len(tests) < 22:
         n = rng.randint(1, 14)
         kind = rng.randint(0, 3)
         alphabet = [string.digits, string.ascii_letters, string.ascii_letters + string.digits,
                     string.ascii_lowercase + string.digits + "!_-"][kind]
-        tests.append(_rows(_word(rng, n, alphabet)))
+        p = _word(rng, n, alphabet)
+        if len(p) >= 8 and p.isalpha():
+            continue  # a letters-only password: the rule used to say "Zaif" for it, now it is left out of the tests
+        tests.append(_rows(p))
     return tests
 
 
@@ -246,10 +267,17 @@ PROBLEMS = [
           "Email kiritiladi. U to'g'ri hisoblanishi uchun: (1) aynan bitta «@» bo'lishi; (2) «@» dan keyingi qismda "
           "kamida bitta «.» bo'lishi kerak. To'g'ri bo'lsa «Ha», aks holda «Yo'q» chiqaring.",
           "Bitta qator.", "Ha yoki Yo'q.", "pochta_zx"),
+    _spec("k6-ism", "Ism qisqartmasi", "easy", 600, ["strings", "split"], ism_solve, ism_tests,
+          "Hujjatlarda ism-sharif ko'pincha qisqartirib yoziladi: «Karimov Aziz Bahodirovich» o'rniga «Karimov A.B.».\n\n"
+          "Ism-sharif bitta qatorda kiritiladi: familiya, ism va (ba'zan) otasining ismi, probel bilan ajratilgan (2 yoki 3 ta "
+          "so'z). Harflari katta-kichik aralash yozilgan bo'lishi mumkin. Familiyani to'liq chiqaring (birinchi harfi katta, "
+          "qolganlari kichik), keyin probel va ism hamda otasining ismining faqat birinchi harflarini katta qilib, har birining "
+          "orqasiga nuqta qo'yib chiqaring: «Karimov A.B.» yoki «Valiyev S.».",
+          "Bitta qator.", "Bitta qator.", "qisqa_nm"),
 ]
 
 DESCRIPTION = (
-    "**80 daqiqa · 8 masala.** Mavzu: satrlar (indeks, kesma, `upper` `lower` `count` `strip` `capitalize`, `split` `join`, "
+    "**80 daqiqa · 9 masala.** Mavzu: satrlar (indeks, kesma, `upper` `lower` `count` `strip` `capitalize`, `split` `join`, "
     "`startswith` `endswith` `isdigit` `isalpha`).\n\n"
     "- Codeforces qoidasi: masala bali vaqt o'tishi bilan kamayadi, har noto'g'ri urinish −50 ball (kamida 30%). "
     "Masala ballari qiyinlik bo'yicha o'sib boradi: 250 dan 1000 gacha.\n"
@@ -259,7 +287,7 @@ DESCRIPTION = (
 
 
 class Command(WeekendCommand):
-    help = "Creates CodeArena Round #7 and attaches its eight problems (hidden) as A..H."
+    help = "Creates CodeArena Round #7 and attaches its nine problems (hidden) as A..I."
     ml_mb = 64
     min_tests = 20
 
