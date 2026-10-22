@@ -159,36 +159,28 @@ def smena_tests(rng):
 
 # ---- 7. Email tekshiruvi ----------------------------------------------------------------------------------------
 def email_solve(inp):
-    e = inp.split("\n")[0].strip()
-    if e.count("@") != 1:
-        return _lines("Yo'q")
-    q = e.split("@")
-    nom = q[0]
-    d = q[1]
-    if len(nom) >= 1 and "." in d and not d.startswith(".") and not d.endswith("."):
+    e = inp.split("\n")[0]
+    if e.count("@") == 1 and "." in e.split("@")[1]:
         return _lines("Ha")
     return _lines("Yo'q")
 
 
 def email_tests(rng):
-    tests = [_rows("komron@mail.uz"), _rows("komronmail.uz"), _rows("a@b@c.uz"), _rows("@mail.uz"), _rows("komron@"),
-             _rows("ali@gmail"), _rows("ali@.uz"), _rows("ali@mail."), _rows("  ali@mail.uz "), _rows("a@b.c")]
+    tests = [_rows("komron@mail.uz"), _rows("komronmail.uz"), _rows("a@b@c.uz"), _rows("komron@"), _rows("ali@gmail"),
+             _rows("a@b.c"), _rows("ali.vali@mail.ru"), _rows("ali@@mail.uz")]
     parts = ["ali", "vali", "gmail", "mail", "uz", "com", "info", "x"]
     while len(tests) < 22:
-        kind = rng.randint(0, 5)
+        kind = rng.randint(0, 4)
         nom, dom = rng.choice(parts), rng.choice(parts) + "." + rng.choice(parts)
-        e = {0: f"{nom}@{dom}", 1: f"{nom}{dom}", 2: f"{nom}@@{dom}", 3: f"@{dom}", 4: f"{nom}@{dom.split('.')[0]}",
-             5: f"{nom}@.{dom}"}[kind]
-        if rng.random() < .3:
-            e = e + "."
-        tests.append(_rows(_spaces(rng, e, 2)))
+        tests.append(_rows({0: f"{nom}@{dom}", 1: f"{nom}{dom}", 2: f"{nom}@@{dom}", 3: f"{nom}@{dom.split('.')[0]}",
+                            4: f"{nom}.{rng.choice(parts)}@{dom}"}[kind]))
     return tests
 
 
 # ---- reserve: Parol kuchi ---------------------------------------------------------------------------------------
 def parol_solve(inp):
     p = inp.split("\n")[0]
-    if len(p) >= 8 and not p.isdigit() and not p.isalpha():
+    if len(p) >= 8 and not p.isdigit():
         return _lines("Yaxshi")
     return _lines("Zaif")
 
@@ -226,9 +218,9 @@ PROBLEMS = [
           "Karta raqami probelsiz, 16 ta raqam bo'lib kiritiladi. Oxirgi 4 ta raqamni qoldirib, oldingi 12 tasini «*» bilan "
           "almashtirib chiqaring.",
           "Bitta qator: 16 ta raqam.", "Bitta qator (16 belgi).", "chek_zq"),
-    _spec("k6-parol", "Parol kuchi", "easy", 500, ["strings", "conditionals"], parol_solve, parol_tests,
+    _spec("k6-parol", "Parol kuchi", "easy", 450, ["strings", "conditionals"], parol_solve, parol_tests,
           "Ilova parol qo'yishda uning kuchini baholaydi.\n\nParol kiritiladi. Uzunligi kamida 8 ta bo'lsa va faqat "
-          "raqamlardan ham, faqat harflardan ham iborat bo'lmasa — «Yaxshi», aks holda «Zaif» chiqaring.",
+          "raqamlardan iborat bo'lmasa — «Yaxshi», aks holda «Zaif» chiqaring.",
           "Bitta qator.", "Yaxshi yoki Zaif.", "kuch_wq"),
     _spec("k6-telefon", "Telefon raqami", "easy", 600, ["strings", "input-output"], telefon_solve, telefon_tests,
           "Mijozlar bazasida raqamlar bir xil ko'rinishda saqlanishi kerak.\n\n"
@@ -249,12 +241,10 @@ PROBLEMS = [
           "yoki ikki xonali bo'lishi mumkin: «9:30», «14:05»). Tugash vaqti har doim boshlanishdan keyin keladi. "
           "«X soat Y daqiqa» ko'rinishida chiqaring (soat 0 bo'lsa ham «0 soat ...» deb yozing).",
           "1-qator: boshlanish. 2-qator: tugash.", "Bitta qator.", "davomiylik_qv"),
-    _spec("k6-email", "Email tekshiruvi", "medium", 1000, ["strings", "conditionals"], email_solve, email_tests,
+    _spec("k6-email", "Email tekshiruvi", "easy", 750, ["strings", "conditionals"], email_solve, email_tests,
           "Sayt ro'yxatdan o'tishda noto'g'ri yozilgan elektron pochtani rad etadi.\n\n"
-          "Email kiritiladi (chetida ortiqcha probel bo'lishi mumkin). U to'g'ri hisoblanishi uchun: (1) aynan bitta «@» "
-          "bo'lishi; (2) «@» dan oldin kamida bitta belgi bo'lishi; (3) «@» dan keyingi qismda (domen) kamida bitta «.» "
-          "bo'lishi va domen «.» bilan boshlanmasligi ham, tugamasligi ham kerak. To'g'ri bo'lsa «Ha», aks holda «Yo'q» "
-          "chiqaring.",
+          "Email kiritiladi. U to'g'ri hisoblanishi uchun: (1) aynan bitta «@» bo'lishi; (2) «@» dan keyingi qismda "
+          "kamida bitta «.» bo'lishi kerak. To'g'ri bo'lsa «Ha», aks holda «Yo'q» chiqaring.",
           "Bitta qator.", "Ha yoki Yo'q.", "pochta_zx"),
 ]
 
