@@ -307,10 +307,11 @@ PROBLEMS = [
 class Command(WeekendCommand):
     help = "Creates CodeArena Marathon #2 (rated, 120-minute personal clock) if needed and attaches its 8 problems (hidden) as A..H."
     ml_mb = 256
+    title, badge, description, problems, prefix = TITLE, BADGE, DESCRIPTION, PROBLEMS, "cam2-"  # Marathon #3 swaps these
 
     def add_arguments(self, parser):
         super().add_arguments(parser)
-        parser.set_defaults(contest=TITLE)
+        parser.set_defaults(contest=self.title)
         parser.add_argument("--start", default=None, help='Opens, Tashkent time: "2026-10-19 08:00" (new contest)')
         parser.add_argument("--end", default=None, help='Closes, Tashkent time: "2026-10-21 20:00" (new contest)')
         parser.add_argument("--minutes", type=int, default=120, help="Each participant's own time (new contest)")
@@ -339,24 +340,24 @@ class Command(WeekendCommand):
                 if start <= timezone.now():
                     raise CommandError("Boshlanish vaqti o'tib ketgan.")
                 contest = Contest.objects.create(
-                    title=opts["contest"], description_md=DESCRIPTION, start=start, end=end,
+                    title=opts["contest"], description_md=self.description, start=start, end=end,
                     type=Contest.Type.CF, is_rated=True, personal_minutes=opts["minutes"],
-                    division=Contest.Division.OPEN, badge=BADGE)
+                    division=Contest.Division.OPEN, badge=self.badge)
                 self.stdout.write(f"«{contest.title}» yaratildi: {timezone.localtime(contest.start):%d.%m.%Y %H:%M} — "
                                   f"{timezone.localtime(contest.end):%d.%m.%Y %H:%M}, reytingli, "
                                   f"har kimga {contest.personal_minutes} daqiqa.")
             elif contest.start <= timezone.now() and not opts["force"]:
                 raise CommandError("Musobaqa allaqachon boshlangan. Baribir ulash uchun --force qo'shing.")
             else:  # a re-run before the start: the rules text and the personal clock follow this file
-                contest.description_md, contest.personal_minutes, contest.badge = DESCRIPTION, opts["minutes"], BADGE
+                contest.description_md, contest.personal_minutes, contest.badge = self.description, opts["minutes"], self.badge
                 contest.type = Contest.Type.CF
                 contest.save(update_fields=["description_md", "personal_minutes", "badge", "type"])
 
-            self._drop_old(contest, PROBLEMS, "cam2-")
+            self._drop_old(contest, self.problems, self.prefix)
             taken = set(contest.contest_problems.values_list("label", flat=True))
-            for i, spec in enumerate(PROBLEMS):
+            for i, spec in enumerate(self.problems):
                 self._add(contest, spec, "ABCDEFGHIJ"[i], i, author, taken)
-            for spec in PROBLEMS:  # a re-run keeps the worth of problems already attached in step with this file
+            for spec in self.problems:  # a re-run keeps the worth of problems already attached in step with this file
                 contest.contest_problems.filter(problem__slug=spec["slug"]).update(points=spec["points"])
             if opts["dry_run"]:
                 transaction.set_rollback(True)

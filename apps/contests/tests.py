@@ -1512,6 +1512,18 @@ def test_marathon_2_command_builds_a_rated_personal_clock_round():
 
 
 @pytest.mark.django_db
+def test_marathon_3_command_builds_a_rated_round_with_seven_string_problems_of_ten():
+    User.objects.create_user("boss", password="x", is_superuser=True, is_staff=True)
+    start = (timezone.localtime() + timedelta(days=1)).strftime("%Y-%m-%d %H:%M")
+    end = (timezone.localtime() + timedelta(days=4)).strftime("%Y-%m-%d %H:%M")
+    call_command("add_codearena_marathon_3", start=start, end=end, stdout=StringIO())
+    c = Contest.objects.get(title="CodeArena Marathon #3")
+    assert c.is_rated and c.personal_minutes == 120 and c.badge == "Marathon #3" and c.contest_problems.count() == 10
+    assert sum(cp.problem.tags.filter(name="strings").exists() for cp in c.contest_problems.all()) == 7
+    assert all(not cp.problem.is_public and cp.problem.testcases.count() >= 20 for cp in c.contest_problems.all())
+
+
+@pytest.mark.django_db
 def test_personal_clock_under_codeforces_rules_decays_over_the_persons_own_minutes():
     c, p = _marathon(minutes=120)
     c.type = Contest.Type.CF
