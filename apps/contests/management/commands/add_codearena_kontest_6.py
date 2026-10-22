@@ -1,6 +1,6 @@
 """CodeArena Kontest 6: the class's 80-minute final on week 6 (strings): eight hidden problems A..H under Codeforces
 rules, in ascending order of difficulty and of points on the usual Codeforces ladder: 250, 300, 400, 500, 600, 750,
-1000, 1000 (the easiest is worth 250 because a mistake costs 50; a problem never falls under 30%); Parol kuchi, the md's reserve, is D. Source:
+1000, 1000 (Ish smenasi was made a same-day shift, no midnight, and swapped with Telefon raqami) (the easiest is worth 250 because a mistake costs 50; a problem never falls under 30%); Parol kuchi, the md's reserve, is D. Source:
 Downloads/kontest-6-final.md; the teacher's notes from it (AI signs, the defence questions, the second variant) are in
 docs/kontest-6-ustoz-eslatmalari.md. Every statement carries a hidden note for AI assistants (apps.problems.ai_marks).
 
@@ -142,22 +142,18 @@ def smena_solve(inp):
     b = lines[1].split(":")
     x = int(a[0]) * 60 + int(a[1])
     y = int(b[0]) * 60 + int(b[1])
-    if y < x:
-        y = y + 24 * 60
     f = y - x
     return _lines(f"{f // 60} soat {f % 60} daqiqa")
 
 
 def smena_tests(rng):
-    tests = [_rows("9:30", "17:45"), _rows("22:00", "6:30"), _rows("8:00", "12:00"), _rows("0:00", "23:59"),
-             _rows("23:30", "0:15"), _rows("14:05", "14:06"), _rows("18:45", "3:10")]
+    tests = [_rows("9:30", "17:45"), _rows("14:20", "15:05"), _rows("8:00", "12:00"), _rows("0:00", "23:59"),
+             _rows("9:50", "10:10"), _rows("14:05", "14:06"), _rows("12:00", "12:30"), _rows("10:30", "12:15"),
+             _rows("0:00", "0:01"), _rows("7:59", "8:00")]
     while len(tests) < 22:
-        h1, m1 = rng.randint(0, 23), rng.randint(0, 59)
-        h2, m2 = rng.randint(0, 23), rng.randint(0, 59)
-        if (h1, m1) == (h2, m2):
-            continue
-        two = lambda n: str(n).zfill(2) if rng.random() < .3 else str(n)  # noqa: E731 - 09:05 or 9:5? minutes keep two digits
-        tests.append(_rows(f"{two(h1)}:{str(m1).zfill(2)}", f"{two(h2)}:{str(m2).zfill(2)}"))
+        x, y = sorted(rng.sample(range(24 * 60), 2))  # the end is always after the start, the same day
+        two = lambda n: str(n).zfill(2) if rng.random() < .3 else str(n)  # noqa: E731 - 09:05 or 9:05; minutes keep two digits
+        tests.append(_rows(f"{two(x // 60)}:{str(x % 60).zfill(2)}", f"{two(y // 60)}:{str(y % 60).zfill(2)}"))
     return tests
 
 
@@ -240,20 +236,19 @@ PROBLEMS = [
           "«.py» — Python, «.txt» — Matn, «.jpg» yoki «.png» — Rasm, boshqa holda — Noma'lum. Kengaytma nuqtadan boshlanadi: "
           "«py» nomli faylda kengaytma yo'q.",
           "Bitta qator.", "Bitta so'z.", "tur_vq"),
-    _spec("k6-telefon", "Telefon raqami", "easy", 750, ["strings", "input-output"], telefon_solve, telefon_tests,
+    _spec("k6-smena", "Ish smenasi", "easy", 750, ["strings", "arithmetic"], smena_solve, smena_tests,
+          "Zavodda smena bir kun ichida boshlanib, o'sha kunning o'zida tugaydi. Hisobchiga smena necha soat va necha "
+          "daqiqa davom etganini aytish kerak.\n\n"
+          "Smena boshlanishi va tugashi alohida qatorlarda «S:D» ko'rinishida kiritiladi (soat 0–23, daqiqa 0–59; soat bir "
+          "yoki ikki xonali bo'lishi mumkin: «9:30», «14:05»). Tugash vaqti har doim boshlanishdan keyin keladi. "
+          "«X soat Y daqiqa» ko'rinishida chiqaring (soat 0 bo'lsa ham «0 soat ...» deb yozing).",
+          "1-qator: boshlanish. 2-qator: tugash.", "Bitta qator.", "davomiylik_qv"),
+    _spec("k6-telefon", "Telefon raqami", "easy", 1000, ["strings", "input-output"], telefon_solve, telefon_tests,
           "Mijozlar bazasida raqamlar bir xil ko'rinishda saqlanishi kerak.\n\n"
           "Telefon raqami «+998»siz, 9 ta raqam ko'rinishida kiritiladi (chetida ortiqcha probel bo'lishi mumkin). Raqam "
           "aynan 9 ta belgidan iborat va hammasi raqam bo'lsa, uni «+998 XX XXX XX XX» ko'rinishida chiqaring. Aks holda "
           "«Xato» chiqaring.",
           "Bitta qator.", "Bitta qator.", "raqam_xz"),
-    _spec("k6-smena", "Ish smenasi", "medium", 1000, ["strings", "arithmetic"], smena_solve, smena_tests,
-          "Zavodda smena kechasi boshlanib, ertasi kuni tugashi mumkin. Hisobchiga smena necha soat va necha daqiqa davom "
-          "etganini aytish kerak.\n\n"
-          "Smena boshlanishi va tugashi alohida qatorlarda «S:D» ko'rinishida kiritiladi (soat 0–23, daqiqa 0–59, ikkalasi "
-          "bir yoki ikki xonali bo'lishi mumkin). Tugash vaqti boshlanishdan keyin keladi; agar u boshlanishdan kichik "
-          "yozilgan bo'lsa, smena yarim tundan o'tgan (ertasi kuni tugagan). Boshlanish va tugash vaqti bir xil bo'lmaydi, "
-          "smena 24 soatdan kam. «X soat Y daqiqa» ko'rinishida chiqaring.",
-          "1-qator: boshlanish. 2-qator: tugash.", "Bitta qator.", "davomiylik_qv"),
     _spec("k6-email", "Email tekshiruvi", "medium", 1000, ["strings", "conditionals"], email_solve, email_tests,
           "Sayt ro'yxatdan o'tishda noto'g'ri yozilgan elektron pochtani rad etadi.\n\n"
           "Email kiritiladi (chetida ortiqcha probel bo'lishi mumkin). U to'g'ri hisoblanishi uchun: (1) aynan bitta «@» "
