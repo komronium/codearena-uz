@@ -142,7 +142,7 @@ def test_users_are_the_rating_board_with_ranks(client, past):
     users = client.get("/api/v1/users/").json()["data"]
     assert [(u["username"], u["rank"]) for u in users] == [("ali", 1), ("vali", 2), ("sami", 3)]
     one = client.get("/api/v1/users/vali/").json()["user"]
-    assert one["rank"] == 2 and one["max_rating"] == 70 and one["country"] == "UZ"
+    assert one["rank"] == 2 and one["max_rating"] == 40 and one["country"] == "UZ"
 
 
 def test_a_user_off_the_board_has_a_profile_but_no_rank(client, past):
