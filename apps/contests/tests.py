@@ -1606,8 +1606,9 @@ def test_divisions_rate_by_the_ranges_staff_set():
     c5 = Contest.objects.create(kind="round", number=2, division=5, start=now, end=now + timedelta(hours=2))
     assert c1.rates(1500) and not c1.rates(1499)  # the defaults until staff save their own
     assert c5.rates(899) and not c5.rates(900)
-    DivisionRange.objects.create(number=1, floor=1800)
-    DivisionRange.objects.create(number=5, ceiling=1000)
+    DivisionRange.objects.filter(number=1).update(floor=1800)  # the migration seeded the five divisions
+    DivisionRange.objects.filter(number=5).update(ceiling=1000)
+    cache.clear()
     assert not c1.rates(1500) and c1.rates(1800)
     assert c5.rates(999) and not c5.rates(1000)
     assert c1.division_span == "1800+"
@@ -1618,7 +1619,6 @@ def test_staff_edit_divisions_and_a_used_one_stays(client):
     from apps.accounts.models import User
     from apps.contests.models import Contest, DivisionRange
 
-    DivisionRange.objects.create(number=2, floor=None, ceiling=1500)
     now = timezone.now()
     Contest.objects.create(kind="round", number=1, division=2, start=now, end=now + timedelta(hours=2))
     client.force_login(User.objects.create_user("boss", password="x", is_staff=True))

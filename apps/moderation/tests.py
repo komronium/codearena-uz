@@ -230,7 +230,7 @@ def test_staff_can_create_contest_with_problems(client):
     staff = User.objects.create_user("teacher", password="x", is_staff=True)
     p = Problem.objects.create(slug="p", title="P", statement_md="x", author=staff, is_public=False)
     client.force_login(staff)
-    data = {"kind": "round", "number": "41", "description_md": "", "start": "2030-01-01T10:00", "end": "2030-01-01T12:00",
+    data = {"kind": "round", "number": "41", "personal_minutes": "0", "description_md": "", "start": "2030-01-01T10:00", "end": "2030-01-01T12:00",
             "is_rated": "on", "allowed_ip_prefix": "",
             "cp-TOTAL_FORMS": "1", "cp-INITIAL_FORMS": "0", "cp-MIN_NUM_FORMS": "0", "cp-MAX_NUM_FORMS": "1000",
             "cp-0-label": "A", "cp-0-problem": str(p.pk), "cp-0-points": "500", "cp-0-order": "0"}
@@ -242,7 +242,7 @@ def test_staff_can_create_contest_with_problems(client):
 @pytest.mark.django_db
 def test_contest_end_must_follow_start(client):
     client.force_login(User.objects.create_user("teacher", password="x", is_staff=True))
-    data = {"title": "Bad", "start": "2030-01-01T12:00", "end": "2030-01-01T10:00",
+    data = {"kind": "round", "personal_minutes": "0", "start": "2030-01-01T12:00", "end": "2030-01-01T10:00",
             "cp-TOTAL_FORMS": "0", "cp-INITIAL_FORMS": "0", "cp-MIN_NUM_FORMS": "0", "cp-MAX_NUM_FORMS": "1000"}
     r = client.post(reverse("moderation:contest_new"), data)
     assert r.status_code == 200
@@ -506,7 +506,7 @@ def test_staff_sees_every_users_submissions(client):
 
 def _contest_data(problem, rated=True):
     """POST body for moderation:contest_new with one problem row."""
-    data = {"kind": "round", "description_md": "", "start": "2030-01-01T10:00", "end": "2030-01-01T12:00",
+    data = {"kind": "round", "personal_minutes": "0", "description_md": "", "start": "2030-01-01T10:00", "end": "2030-01-01T12:00",
             "allowed_ip_prefix": "",
             "cp-TOTAL_FORMS": "1", "cp-INITIAL_FORMS": "0", "cp-MIN_NUM_FORMS": "0", "cp-MAX_NUM_FORMS": "1000",
             "cp-0-label": "A", "cp-0-problem": str(problem.pk), "cp-0-points": "500", "cp-0-order": "0"}
@@ -522,6 +522,7 @@ def _contest_edit_data(contest):
     fmt = "%Y-%m-%dT%H:%M"
     rows = list(contest.contest_problems.all())
     data = {"kind": contest.kind, "number": str(contest.number or ""), "division": str(contest.division),
+            "personal_minutes": str(contest.personal_minutes),
             "description_md": "", "allowed_ip_prefix": "",
             "start": timezone.localtime(contest.start).strftime(fmt),
             "end": timezone.localtime(contest.end).strftime(fmt),
