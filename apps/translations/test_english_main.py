@@ -20,7 +20,7 @@ def english_main(settings):
     settings.LOCALE_PATHS = [BASE / "locale", BASE / "locale_uz"]
 
 
-def test_nothing_chosen_is_english_and_uzbek_lives_under_uz(english_main):
+def test_nothing_chosen_is_english_and_uzbek_lives_under_uz(english_main, db):
     page = Client().get("/accounts/login/", **HTML)
     assert page.status_code == 200 and page["Content-Language"] == "en"
     assert '<html lang="en"' in page.content.decode()
@@ -64,7 +64,7 @@ def test_every_english_line_has_an_uzbek_one(english_main):
 
 def test_the_uzbek_page_does_not_fall_back_to_english(english_main):
     with translation.override("uz"):
-        assert translation.gettext("Yuborish") == "Yuborish"
+        assert translation.gettext("Yuborish") == "Yuboriş"  # the Uzbek catalogue, not the English one
     with translation.override("en"):
         assert translation.gettext("Yuborish") == "Send"
 
