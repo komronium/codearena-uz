@@ -4,13 +4,13 @@ import zipfile
 from django import forms
 from django.core.exceptions import ValidationError
 from django.forms import inlineformset_factory
-from django.forms.models import BaseInlineFormSet, ModelForm
+from django.forms.models import BaseInlineFormSet, BaseModelFormSet, ModelForm, modelformset_factory
 from django.utils import timezone
 
 from apps.accounts.countries import COUNTRY_CHOICES
 from apps.accounts.forms import validate_public_username
 from apps.accounts.models import User
-from apps.contests.models import MIN_POINTS, Contest, ContestProblem
+from apps.contests.models import MIN_POINTS, Contest, ContestProblem, DivisionRange
 from apps.contests.services import reuse_reason
 from apps.learn.models import RESERVED_SLUGS, StudyPlan
 from apps.problems.models import MAX_HINT_PCT, Problem, ProblemHint, SQLDataset, Tag, TestCase
@@ -178,30 +178,37 @@ class _DateTimeLocal(forms.DateTimeInput):
 class ContestForm(_SourceLang, ModelForm):
     class Meta:
         model = Contest
-        fields = ["source_lang", "title", "description_md", "start", "end", "type", "is_rated", "division",
+        fields = ["source_lang", "kind", "number", "description_md", "start", "end", "type", "is_rated", "division",
                   "allowed_ip_prefix", "badge", "personal_minutes", "auto_finish", "blind"]
         widgets = {
             "personal_minutes": forms.NumberInput(attrs={**_CA_INPUT, "min": 0, "max": 1440, "placeholder": _tl("0 — hamma uchun bir soat")}),
-            "title": forms.TextInput(attrs=_CA_INPUT),
+            "kind": forms.Select(attrs={"class": "ca-select"}),
+            "number": forms.NumberInput(attrs={**_CA_INPUT, "min": 1, "placeholder": _tl("bo‘sh — keyingisi")}),
             "description_md": forms.Textarea(attrs={**_MD, "rows": 4}),
             "start": _DateTimeLocal(),
             "end": _DateTimeLocal(),
             "allowed_ip_prefix": forms.TextInput(attrs={**_CA_INPUT, "placeholder": "masalan 10.0."}),
             "badge": forms.TextInput(attrs={**_CA_INPUT, "placeholder": "masalan Marathon #1"}),
-            "division": forms.Select(attrs={"class": "ca-select"}),
             "type": forms.Select(attrs={"class": "ca-select"}),
         }
+
+    # the open contest and the divisions staff have set up (DivisionRange); filled in __init__
+    division = forms.TypedChoiceField(required=False, coerce=int, empty_value=Contest.Division.OPEN, label=_tl("Divizion"),
+                                      widget=forms.Select(attrs={"class": "ca-select"}))
 
     authors_text = forms.CharField(required=False, label=_tl("Mualliflar"), widget=forms.TextInput(attrs={
         **_CA_INPUT, "placeholder": _tl("login, login … (tanlovdan tashqari qatnashadi)")}))
 
     # what a trusted writer may set on the draft round they prepare; everything else is the staff's
-    WRITER_FIELDS = ("source_lang", "title", "description_md", "start", "end", "type")
+    WRITER_FIELDS = ("source_lang", "description_md", "start", "end", "type")
 
     def __init__(self, *args, writer=False, **kwargs):
         super().__init__(*args, **kwargs)
         self.writer = writer
         self.authors_changed = False
+        self.fields["division"].choices = [(0, _t("Ochiq (hamma uchun)"))] + [
+            (d.number, f"{d} ({d.span})") for d in DivisionRange.objects.all()]
+        self.fields["number"].required = False
         if writer:
             for name in [n for n in self.fields if n not in self.WRITER_FIELDS]:
                 del self.fields[name]
@@ -213,7 +220,7 @@ class ContestForm(_SourceLang, ModelForm):
             self.initial["authors_text"] = ", ".join(self.instance.authors.values_list("username", flat=True))
         if self.instance.pk and self.instance.has_started:
             # what the round was rated and ranked by stays as it was played
-            for name in ("is_rated", "division", "personal_minutes"):
+            for name in ("is_rated", "division", "personal_minutes", "kind"):
                 self.fields[name].disabled = True
         self.fields["division"].required = False
         self.fields["type"].required = False
@@ -225,6 +232,8 @@ class ContestForm(_SourceLang, ModelForm):
 
     def clean(self):
         data = super().clean()
+        if not self.writer and not data.get("number") and data.get("kind"):
+            data["number"] = Contest.next_number(data["kind"])  # left blank = the next one of its kind
         if data.get("start") and data.get("end") and data["end"] <= data["start"]:
             self.add_error("end", _t("Tugash vaqti boshlanishdan keyin bo'lishi kerak."))
         elif self.instance.pk is None and data.get("end") and data["end"] <= timezone.now():
@@ -240,6 +249,8 @@ class ContestForm(_SourceLang, ModelForm):
         return list({u.pk: u for u in found.values()}.values())
 
     def save(self, commit=True):
+        if not self.instance.number:  # a writer's draft takes the next Round number
+            self.instance.number = Contest.next_number(self.instance.kind)
         contest = super().save(commit)
 
         def authors():
@@ -262,6 +273,8 @@ class ContestForm(_SourceLang, ModelForm):
 
     def clean_division(self):
         value = self.cleaned_data.get("division")
+        if value and not DivisionRange.objects.filter(number=value).exists():
+            raise forms.ValidationError(_t("Bunday divizion yo‘q."))
         return Contest.Division.OPEN if value is None else value
 
 
@@ -428,3 +441,28 @@ class StudyPlanForm(_SourceLang, ModelForm):
         if slug in RESERVED_SLUGS:
             raise ValidationError(_t("Bu nom band (O‘rganish bo‘limidagi sahifa). Boshqa slug tanlang."))
         return slug
+
+
+class BaseDivisionFormSet(BaseModelFormSet):
+    """The divisions staff edit: a division a contest still uses cannot be removed, and a range must not be empty."""
+
+    def clean(self):
+        super().clean()
+        for form in self.forms:
+            data = getattr(form, "cleaned_data", None)
+            if not data:
+                continue
+            if data.get("DELETE"):
+                number = form.instance.number
+                if form.instance.pk and Contest.objects.filter(division=number).exists():
+                    raise forms.ValidationError(_t("Div. {n} musobaqalarda ishlatilgan — o‘chirib bo‘lmaydi.").format(n=number))
+            elif data.get("floor") is not None and data.get("ceiling") is not None and data["floor"] >= data["ceiling"]:
+                raise forms.ValidationError(_t("Div. {n}: pastki chegara yuqorisidan kichik bo‘lishi kerak.").format(n=data.get("number")))
+
+
+DivisionFormSet = modelformset_factory(
+    DivisionRange, formset=BaseDivisionFormSet, fields=["number", "floor", "ceiling"], extra=1, can_delete=True,
+    widgets={"number": forms.NumberInput(attrs={**_CA_INPUT, "min": 1, "class": "ca-input w-20"}),
+             "floor": forms.NumberInput(attrs={**_CA_INPUT, "class": "ca-input w-28"}),
+             "ceiling": forms.NumberInput(attrs={**_CA_INPUT, "class": "ca-input w-28"})},
+)

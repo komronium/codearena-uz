@@ -13,7 +13,6 @@ and optionally problems, n_participants, next_cp (the first problem you have not
           {% elif contest.has_ended %}<span class="ca7-htag">{% trans "Tugagan" %}</span>
           {% else %}<span class="ca7-htag">{% trans "Kelgusi" %}</span>{% endif %}
           <span class="ca7-htag" title="{{ contest.get_type_display }}">{% if contest.type == "cf" %}{% trans "Codeforces qoidasi" %}{% elif contest.type == "icpc" %}{% trans "ICPC qoidasi" %}{% else %}{% trans "Ball qoidasi" %}{% endif %}</span>
-          {% if contest.division %}<span class="ca7-htag" title="{{ contest.get_division_display }}">{% blocktrans with contest_division=contest.division %}Div. {{ contest_division }}{% endblocktrans %}</span>{% endif %}
           <span class="ca7-htag">{% if contest.is_rated %}{% trans "Reytingli" %}{% else %}{% trans "Reytingga ta’sir qilmaydi" %}{% endif %}</span>
           {% if registered %}<span class="ca7-htag"><i data-lucide="check" class="lu" aria-hidden="true"></i>{% if contest.has_ended %}{% trans "Qatnashgansiz" %}{% elif contest.is_running %}{% trans "Qatnashyapsiz" %}{% else %}{% trans "Ro‘yxatdasiz" %}{% endif %}</span>{% endif %}
         </p>

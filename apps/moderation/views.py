@@ -1,4 +1,5 @@
 import datetime
+import json
 import os
 import time
 import uuid
@@ -23,7 +24,7 @@ from django.views.decorators.http import require_POST
 
 from apps.accounts.decorators import setter_required, staff_required
 from apps.accounts.models import User
-from apps.contests.models import Contest, Participation
+from apps.contests.models import Contest, DivisionRange, Participation
 from apps.contests import rating
 from apps.contests.services import blind_problem_ids, reuse_reason
 from apps.problems.daily import daily_candidates, daily_for, refresh_daily
@@ -40,6 +41,7 @@ from .ai import MAX_COUNT, AIGenerationError, generate_problems
 from .forms import (
     AIGenerateForm,
     ContestForm,
+    DivisionFormSet,
     ContestProblemFormSet,
     HintFormSet,
     ProblemForm,
@@ -921,8 +923,22 @@ def contest_edit(request, pk=None):
         problem_points = {}
     return render(request, "moderation/contest_form.html", {"form": form, "formset": formset, "contest": contest, "writer": writer,
                                                             "hidden": hidden, "problem_points": problem_points,
+                                                            "next_numbers": json.dumps({k: Contest.next_number(k) for k in Contest.Kind.values}),
                                                             "started": bool(contest and contest.has_started),
                                                             "applied": bool(contest and contest.rating_applied)})
+
+
+@staff_required
+def divisions(request):
+    """The divisions and the shown ratings each one rates. A change reaches the contests made afterwards and the
+    ones not yet rated; what a played contest rated stays in its ratings."""
+    formset = DivisionFormSet(request.POST or None, queryset=DivisionRange.objects.all())
+    if request.method == "POST" and formset.is_valid():
+        formset.save()
+        messages.success(request, _t("Divizionlar saqlandi."))
+        return redirect("moderation:divisions")
+    used = dict(Contest.objects.exclude(division=0).values_list("division").annotate(n=Count("pk")))
+    return render(request, "moderation/divisions.html", {"formset": formset, "used": used})
 
 
 @staff_required

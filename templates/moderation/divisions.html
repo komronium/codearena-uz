@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}{% trans "Divizionlar — boshqaruv" %}{% endblock %}
+{% block band %}
+<section class="ca-hud" aria-labelledby="mod-title">
+  <div class="ca-hud-in">
+    <div>
+      <p class="ca-hud-lbl"><a class="text-white no-underline hover:underline" href="{% url 'moderation:contests' %}">{% trans "Musobaqalar" %}</a></p>
+      <h1 id="mod-title">{% trans "Divizionlar" %}</h1>
+      <p class="ca-hud-sub">{% trans "Divizion kimning reytingi o‘zgarishini belgilaydi; qolganlar ham qatnashadi, lekin reytingsiz" %}</p>
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block content %}
+{% comment %}One row per division: its number and the shown ratings it rates, [from, below). Empty = no bound. The last row is blank, for a new division.{% endcomment %}
+{% if formset.non_form_errors %}<div class="ca-alert ca-alert-bad mb-4" role="alert">{{ formset.non_form_errors }}</div>{% endif %}
+<form method="post" novalidate class="ca-panel max-w-2xl space-y-4">
+  {% csrf_token %}{{ formset.management_form }}
+  <table class="ca-table ca-table-flat">
+    <thead><tr><th scope="col">{% trans "Divizion" %}</th><th scope="col">{% trans "Reyting dan (shu qiymat ham kiradi)" %}</th><th scope="col">{% trans "Reyting gacha (kirmaydi)" %}</th><th scope="col" class="text-right">{% trans "Musobaqalar" %}</th><th scope="col"><span class="sr-only">{% trans "O‘chirish" %}</span></th></tr></thead>
+    <tbody>
+    {% for f in formset %}
+    <tr>
+      <td>{{ f.id }}{{ f.number }}{{ f.number.errors }}</td>
+      <td>{{ f.floor }}{{ f.floor.errors }}</td>
+      <td>{{ f.ceiling }}{{ f.ceiling.errors }}</td>
+      <td class="tabular text-right">{% if f.instance.pk %}{% for n, c in used.items %}{% if n == f.instance.number %}{{ c }}{% endif %}{% endfor %}{% endif %}</td>
+      <td>{% if f.instance.pk %}<label class="flex items-center gap-1.5 text-sm text-bad">{{ f.DELETE }} {% trans "O‘chirish" %}</label>{% endif %}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <p class="text-xs text-mute">{% trans "Div. 1 uchun faqat «dan» (masalan 1500), pastkilar uchun faqat «gacha» (masalan 900). Yangi divizion qo‘shish uchun oxirgi bo‘sh qatorni to‘ldiring. Ishlatilgan divizionni o‘chirib bo‘lmaydi." %}</p>
+  <button type="submit" class="ca-btn ca-btn-primary"><i data-lucide="check" class="lu" aria-hidden="true"></i>{% trans "Saqlash" %}</button>
+</form>
+{% endblock %}

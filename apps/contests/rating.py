@@ -68,7 +68,7 @@ def deltas(ratings: list[int], places: list[int]) -> list[int]:
 # The email gate came to the rating on 2026-10-20 (Marathon #2 was the first round it applied to). Earlier rounds were rated
 # without it, and a replay must not take their ratings away from people whose email is still unconfirmed.
 EMAIL_GATE_FROM = "2026-10-20"
-# Rounds the owner let rate everyone whatever their email (a one-off exception): CodeArena Round #7.
+# Rounds the owner let rate everyone whatever their email (a one-off exception): pk 20, now CodeArena Round #12.
 EMAIL_GATE_EXEMPT = {20}
 
 

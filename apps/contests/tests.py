@@ -1578,3 +1578,55 @@ def test_an_unconfirmed_email_can_join_a_round_but_is_not_rated(client, settings
     apply_rating(c)
     rows = {p.user.username: p for p in Participation.objects.filter(contest=c)}
     assert rows["done"].rating_after is not None and rows["fresh"].rating_after is None
+
+
+# ---- numbered titles and divisions ------------------------------------------------------------------
+
+@pytest.mark.django_db
+def test_title_is_built_from_kind_number_and_division():
+    from apps.contests.models import Contest
+
+    now = timezone.now()
+    c = Contest.objects.create(kind="round", number=8, division=3, start=now, end=now + timedelta(hours=2))
+    assert c.title == "CodeArena Round #8 (Div. 3)"
+    c.division = 0
+    c.save()
+    assert c.title == "CodeArena Round #8"
+    m = Contest.objects.create(kind="marathon", number=1, start=now, end=now + timedelta(hours=2))
+    assert m.title == "CodeArena Marathon #1"
+    assert Contest.next_number("round") == 9 and Contest.next_number("marathon") == 2
+
+
+@pytest.mark.django_db
+def test_divisions_rate_by_the_ranges_staff_set():
+    from apps.contests.models import Contest, DivisionRange
+
+    now = timezone.now()
+    c1 = Contest.objects.create(kind="round", number=1, division=1, start=now, end=now + timedelta(hours=2))
+    c5 = Contest.objects.create(kind="round", number=2, division=5, start=now, end=now + timedelta(hours=2))
+    assert c1.rates(1500) and not c1.rates(1499)  # the defaults until staff save their own
+    assert c5.rates(899) and not c5.rates(900)
+    DivisionRange.objects.create(number=1, floor=1800)
+    DivisionRange.objects.create(number=5, ceiling=1000)
+    assert not c1.rates(1500) and c1.rates(1800)
+    assert c5.rates(999) and not c5.rates(1000)
+    assert c1.division_span == "1800+"
+
+
+@pytest.mark.django_db
+def test_staff_edit_divisions_and_a_used_one_stays(client):
+    from apps.accounts.models import User
+    from apps.contests.models import Contest, DivisionRange
+
+    DivisionRange.objects.create(number=2, floor=None, ceiling=1500)
+    now = timezone.now()
+    Contest.objects.create(kind="round", number=1, division=2, start=now, end=now + timedelta(hours=2))
+    client.force_login(User.objects.create_user("boss", password="x", is_staff=True))
+    row = DivisionRange.objects.get(number=2)
+    data = {"form-TOTAL_FORMS": "1", "form-INITIAL_FORMS": "1", "form-MIN_NUM_FORMS": "0", "form-MAX_NUM_FORMS": "1000",
+            "form-0-id": str(row.pk), "form-0-number": "2", "form-0-ceiling": "1400", "form-0-DELETE": "on"}
+    r = client.post(reverse("moderation:divisions"), data)
+    assert r.status_code == 200 and DivisionRange.objects.filter(number=2).exists()  # used by a contest: kept
+    del data["form-0-DELETE"]
+    assert client.post(reverse("moderation:divisions"), data).status_code == 302
+    assert DivisionRange.objects.get(number=2).ceiling == 1400

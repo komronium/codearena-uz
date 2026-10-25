@@ -254,7 +254,7 @@ it is scored, virtual participation.{% endcomment %}
     {% if contest.type != "score" or contest.division and contest.is_rated %}
     <div class="ca-box-pad border-t border-line text-xs text-mute">
       {% if contest.type != "score" %}<p>{% trans "Kompilyatsiya xatosi va 1-testda (misolda) yiqilgan urinish hisobga olinmaydi." %}</p>{% endif %}
-      {% if contest.division and contest.is_rated %}<p class="mt-1">{% blocktrans with contest_get_division_display=contest.get_division_display %}{{ contest_get_division_display }}: diapazondan tashqaridagilar ham qatnashadi, lekin reytingi o‘zgarmaydi.{% endblocktrans %}</p>{% endif %}
+      {% if contest.division and contest.is_rated %}<p class="mt-1">{% blocktrans with label=contest.division_label span=contest.division_span %}{{ label }} ({{ span }}): diapazondan tashqaridagilar ham qatnashadi, lekin reytingi o‘zgarmaydi.{% endblocktrans %}</p>{% endif %}
     </div>
     {% endif %}
   </section>

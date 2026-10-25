@@ -7,7 +7,7 @@
       <h1 id="mod-title">{% trans "Musobaqalar" %}</h1>
       <p class="ca-hud-sub">{% if writer %}{% trans "Sizning qoralama raundlaringiz: staff e’lon qilgach hamma ko‘radi" %}{% else %}{% trans "Yaratish, tahrirlash, natijalar va halollik hisoboti" %}{% endif %}</p>
     </div>
-    <div class="ml-auto"><a href="{% url 'moderation:contest_new' %}" class="ca-btn ca-btn-gold"><i data-lucide="plus" class="lu" aria-hidden="true"></i>{% if writer %}{% trans "Qoralama raund" %}{% else %}{% trans "Musobaqa yaratish" %}{% endif %}</a></div>
+    <div class="ml-auto flex flex-wrap gap-2">{% if not writer %}<a href="{% url 'moderation:divisions' %}" class="ca-btn ca-btn-ghost"><i data-lucide="layers" class="lu" aria-hidden="true"></i>{% trans "Divizionlar" %}</a>{% endif %}<a href="{% url 'moderation:contest_new' %}" class="ca-btn ca-btn-gold"><i data-lucide="plus" class="lu" aria-hidden="true"></i>{% if writer %}{% trans "Qoralama raund" %}{% else %}{% trans "Musobaqa yaratish" %}{% endif %}</a></div>
   </div>
 </section>
 {% endblock %}

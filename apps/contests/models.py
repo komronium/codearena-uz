@@ -1,8 +1,11 @@
 from datetime import timedelta
 
 from django.conf import settings
+from django.core.cache import cache
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.db.models.signals import post_delete, post_save
+from django.dispatch import receiver
 from django.utils import timezone
 
 from apps.problems.models import Problem
@@ -14,8 +17,47 @@ from apps.translations.mixin import Translatable
 _UZ_MONTHS_SHORT = [_tl("Yan"), _tl("Fev"), _tl("Mar"), _tl("Apr"), _tl("May"), _tl("Iyn"), _tl("Iyl"), _tl("Avg"), _tl("Sen"), _tl("Okt"), _tl("Noy"), _tl("Dek")]
 _UZ_MONTHS = [_tl("Yanvar"), _tl("Fevral"), _tl("Mart"), _tl("Aprel"), _tl("May"), _tl("Iyun"), _tl("Iyul"), _tl("Avgust"), _tl("Sentabr"), _tl("Oktabr"), _tl("Noyabr"), _tl("Dekabr")]
 
-# Shown ratings each division rates, [floor, ceiling); None = no bound (info.md, Codeforces' split).
-DIVISION_RANGE = {1: (1900, None), 2: (None, 1900), 3: (None, 1600), 4: (None, 1400)}
+# What the divisions rate until staff edit them (moderation:divisions): shown ratings in [floor, ceiling),
+# None = no bound. The tier steps of RATING_TIERS: Div. 1 from Candidate Master up, then 200 lower each.
+DEFAULT_DIVISIONS = {1: (1500, None), 2: (None, 1500), 3: (None, 1300), 4: (None, 1100), 5: (None, 900)}
+_RANGES_KEY = "contest-division-ranges"
+
+
+class DivisionRange(models.Model):
+    """A division and the shown ratings it rates: [floor, ceiling), None = no bound. Staff edit the rows, so the
+    lines can move (and divisions be added) as the players change. A contest keeps only the division's number."""
+    number = models.PositiveSmallIntegerField(unique=True, validators=[MinValueValidator(1)])
+    floor = models.IntegerField(null=True, blank=True)
+    ceiling = models.IntegerField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["number"]
+
+    def __str__(self):
+        return f"Div. {self.number}"
+
+    @property
+    def span(self) -> str:
+        """The rated range in words: "1500+", "below 900", "700–1100"."""
+        if self.floor is not None and self.ceiling is not None:
+            return f"{self.floor}–{self.ceiling}"
+        if self.floor is not None:
+            return f"{self.floor}+"
+        return _t("{n} dan past").format(n=self.ceiling) if self.ceiling is not None else _t("hamma")
+
+
+def division_ranges() -> dict:
+    """{number: (floor, ceiling)}, cached for a minute and dropped whenever staff save a division."""
+    ranges = cache.get(_RANGES_KEY)
+    if ranges is None:
+        ranges = {d.number: (d.floor, d.ceiling) for d in DivisionRange.objects.all()} or dict(DEFAULT_DIVISIONS)
+        cache.set(_RANGES_KEY, ranges, 60)
+    return ranges
+
+
+@receiver([post_save, post_delete], sender=DivisionRange)
+def _drop_ranges(sender, **kwargs):
+    cache.delete(_RANGES_KEY)
 
 
 class Contest(Translatable, models.Model):
@@ -27,18 +69,23 @@ class Contest(Translatable, models.Model):
         CF = "cf", _tl("Codeforces: ball vaqt bilan kamayadi")
         ICPC = "icpc", _tl("ICPC: yechilganlar soni va jarima")
 
-    class Division(models.IntegerChoices):
-        OPEN = 0, _tl("Ochiq (hamma uchun)")
-        DIV1 = 1, _tl("Div. 1 (reyting 1900 va yuqori)")
-        DIV2 = 2, _tl("Div. 2 (reyting 1900 dan past)")
-        DIV3 = 3, _tl("Div. 3 (reyting 1600 dan past)")
-        DIV4 = 4, _tl("Div. 4 (reyting 1400 dan past)")
+    class Kind(models.TextChoices):
+        ROUND = "round", "Round"  # names, not translated
+        MARATHON = "marathon", "Marathon"
 
-    TRANSLATABLE = ("title", "description_md", "badge")
-    SHORT = ("title", "badge")
+    class Division(models.IntegerChoices):
+        OPEN = 0, _tl("Ochiq (hamma uchun)")  # the others are DivisionRange rows
+
+    # the title is built from kind, number and division (compose_title), the same in every language: not translated
+    TRANSLATABLE = ("description_md", "badge")
+    SHORT = ("badge",)
     source_lang = models.CharField(max_length=2, default="uz", choices=[("uz", "O‘zbekcha"), ("en", "English")])
 
-    title = models.CharField(max_length=200)
+    # "CodeArena Round #8 (Div. 3)": every contest is a Round or a Marathon with its own running number.
+    # Contests made before numbering (number null) keep the title they were typed with.
+    kind = models.CharField(max_length=10, choices=Kind.choices, default=Kind.ROUND)
+    number = models.PositiveIntegerField(null=True, blank=True)
+    title = models.CharField(max_length=200, blank=True)
     description_md = models.TextField(blank=True)
     start = models.DateTimeField()
     end = models.DateTimeField()
@@ -54,7 +101,7 @@ class Contest(Translatable, models.Model):
     auto_finish = models.BooleanField(default=False)
     # Rated only for users in the division's range; the rest take part out of competition:
     # on the board, but not rated (apps.contests.rating).
-    division = models.PositiveSmallIntegerField(choices=Division.choices, default=Division.OPEN)
+    division = models.PositiveSmallIntegerField(default=Division.OPEN)  # 0 = open, else a DivisionRange number
     # Set by staff publishing the ended contest; from then on participants' contest ACs
     # count as practice solves (apps.submissions.solves).
     published_at = models.DateTimeField(null=True, blank=True)
@@ -76,8 +123,36 @@ class Contest(Translatable, models.Model):
     # before the sweep carry their end: done, but never swept.
     similarity_checked_at = models.DateTimeField(null=True, blank=True)
 
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["kind", "number"], name="contest_kind_number_uniq")]
+
     def __str__(self):
         return self.title
+
+    @classmethod
+    def next_number(cls, kind) -> int:
+        return (cls.objects.filter(kind=kind).aggregate(m=models.Max("number"))["m"] or 0) + 1
+
+    def compose_title(self) -> str:
+        title = f"CodeArena {self.get_kind_display()} #{self.number}"
+        return f"{title} (Div. {self.division})" if self.division else title
+
+    def save(self, *args, **kwargs):
+        if self.number:
+            self.title = self.compose_title()
+            if (update := kwargs.get("update_fields")) is not None:
+                kwargs["update_fields"] = {*update, "title"}
+        super().save(*args, **kwargs)
+
+    @property
+    def division_label(self) -> str:
+        return f"Div. {self.division}" if self.division else _t("Ochiq")
+
+    @property
+    def division_span(self) -> str:
+        """What this contest's division rates, in words ("1500+"); empty for an open contest."""
+        floor, ceiling = division_ranges().get(self.division, (None, None))
+        return DivisionRange(number=self.division, floor=floor, ceiling=ceiling).span if self.division else ""
 
     @property
     def wrong_try_minutes(self) -> int | None:
@@ -87,7 +162,7 @@ class Contest(Translatable, models.Model):
 
     def rates(self, rating: int) -> bool:
         """Whether a user with this shown rating competes officially (is rated) in this contest."""
-        floor, ceiling = DIVISION_RANGE.get(self.division, (None, None))
+        floor, ceiling = division_ranges().get(self.division, (None, None))
         return (floor is None or rating >= floor) and (ceiling is None or rating < ceiling)
 
     @property

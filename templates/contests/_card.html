@@ -5,7 +5,6 @@ ctx: c (from contests.views.contest_list), state ("running" | "upcoming").{% end
   <p class="ca7-ccard-tags">
     {% if state == "running" %}<span class="ca7-htag">{% trans "<span class=\"ca-live-dot\" aria-hidden=\"true\"></span>Jonli" %}</span>{% else %}<span class="ca7-htag">{% trans "Kelgusi" %}</span>{% endif %}
     <span class="ca7-htag">{% if c.is_rated %}{% trans "Reytingli" %}{% else %}{% trans "Reytingga ta’sir qilmaydi" %}{% endif %}</span>
-    {% if c.division %}<span class="ca7-htag" title="{{ c.get_division_display }}">{% blocktrans with c_division=c.division %}Div. {{ c_division }}{% endblocktrans %}</span>{% endif %}
     {% if c.me %}<span class="ca7-htag"><i data-lucide="check" class="lu" aria-hidden="true"></i>{% if state == "running" %}{% trans "Qatnashyapsiz" %}{% else %}{% trans "Ro‘yxatdasiz" %}{% endif %}</span>{% endif %}
   </p>
   <h3 id="cc-{{ c.pk }}"><a href="{% url 'contests:detail' c.pk %}">{{ c.title }}</a></h3>

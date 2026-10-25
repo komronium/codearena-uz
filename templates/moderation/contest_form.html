@@ -23,7 +23,13 @@
   <div class="space-y-6">
     <section class="ca-panel space-y-4">
       <div><label class="ca-label" for="{{ form.source_lang.id_for_label }}">{% trans "Qaysi tilda yozyapsiz?" %}</label>{{ form.source_lang }}<p class="mt-1 text-xs text-mute">{% trans "Faqat bitta tilda yozing: ikkinchi tilni admin yoki AI keyin to‘ldiradi va tasdiqlaydi." %}</p></div>
-      <div><label class="ca-label" for="{{ form.title.id_for_label }}">{% trans "Nomi" %}</label>{{ form.title }}{{ form.title.errors }}</div>
+      {% if not writer %}
+      <div class="grid gap-4 sm:grid-cols-[1fr_8rem]">
+        <div><label class="ca-label" for="{{ form.kind.id_for_label }}">{% trans "Turi" %}</label>{{ form.kind }}{{ form.kind.errors }}</div>
+        <div><label class="ca-label" for="{{ form.number.id_for_label }}">{% trans "Raqami" %}</label>{{ form.number }}{{ form.number.errors }}</div>
+      </div>
+      <p class="text-sm">{% trans "Nomi:" %} <b id="ct-name" class="tabular">{% if contest %}{{ contest.title }}{% endif %}</b> <span class="text-xs text-mute">{% trans "— turi, raqami va diviziondan o‘zi yig‘iladi" %}</span></p>
+      {% else %}<p class="text-sm text-mute">{% trans "Nomi (CodeArena Round #N) o‘zi qo‘yiladi; divizionni xodim belgilaydi." %}</p>{% endif %}
       <div><label class="ca-label" for="{{ form.description_md.id_for_label }}">{% trans "Tavsif (Markdown)" %}</label>{{ form.description_md }}{{ form.description_md.errors }}</div>
       <div class="grid gap-4 sm:grid-cols-2">
         <div><label class="ca-label" for="{{ form.start.id_for_label }}">{% trans "Boshlanishi" %}</label>{{ form.start }}{{ form.start.errors }}</div>
@@ -106,6 +112,21 @@
   </aside>
 </form>
 
+{% if not writer %}<script>
+(function () {
+  // the name staff will get, as they type: "CodeArena Round #8 (Div. 3)"
+  var kind = document.getElementById("{{ form.kind.id_for_label }}"), num = document.getElementById("{{ form.number.id_for_label }}"),
+      div = document.getElementById("{{ form.division.id_for_label }}"), out = document.getElementById("ct-name");
+  if (!kind || !num || !div || !out) return;
+  var next = {{ next_numbers|safe }};
+  function show() {
+    var n = num.value || next[kind.value] || "";
+    out.textContent = "CodeArena " + kind.options[kind.selectedIndex].text + " #" + n + (+div.value ? " (Div. " + div.value + ")" : "");
+  }
+  [kind, num, div].forEach(function (el) { el.addEventListener("input", show); el.addEventListener("change", show); });
+  show();
+})();
+</script>{% endif %}
 <script>
 (function () {
   // the round's length, printed under the date fields
