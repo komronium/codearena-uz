@@ -952,6 +952,8 @@ def contest_draft_publish(request, pk):
         messages.error(request, _t("Raundda masala yo‘q."))
     elif contest.start <= timezone.now():
         messages.error(request, _t("Boshlanish vaqti o‘tib ketgan: raund vaqtini yangilash uchun muallifga qaytaring."))
+    elif contest.kind == Contest.Kind.ROUND and not contest.division:
+        messages.error(request, _t("Avval raundni tahrirlab divizionini tanlang."))
     else:
         weak = [cp.label for cp in problems if cp.problem.kind == Problem.Kind.CODE and cp.problem.testcases.count() < 2]
         if weak:

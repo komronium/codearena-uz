@@ -232,6 +232,9 @@ class ContestForm(_SourceLang, ModelForm):
 
     def clean(self):
         data = super().clean()
+        if not self.writer and data.get("kind") == Contest.Kind.ROUND and not data.get("division") \
+                and not self.fields["division"].disabled:
+            self.add_error("division", _t("Raund uchun divizion tanlang."))  # no open Rounds; only Marathons are for everyone
         if not self.writer and not data.get("number") and data.get("kind"):
             data["number"] = Contest.next_number(data["kind"])  # left blank = the next one of its kind
         if data.get("start") and data.get("end") and data["end"] <= data["start"]:

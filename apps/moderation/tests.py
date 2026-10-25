@@ -230,7 +230,7 @@ def test_staff_can_create_contest_with_problems(client):
     staff = User.objects.create_user("teacher", password="x", is_staff=True)
     p = Problem.objects.create(slug="p", title="P", statement_md="x", author=staff, is_public=False)
     client.force_login(staff)
-    data = {"kind": "round", "number": "41", "personal_minutes": "0", "description_md": "", "start": "2030-01-01T10:00", "end": "2030-01-01T12:00",
+    data = {"kind": "round", "number": "41", "division": "2", "personal_minutes": "0", "description_md": "", "start": "2030-01-01T10:00", "end": "2030-01-01T12:00",
             "is_rated": "on", "allowed_ip_prefix": "",
             "cp-TOTAL_FORMS": "1", "cp-INITIAL_FORMS": "0", "cp-MIN_NUM_FORMS": "0", "cp-MAX_NUM_FORMS": "1000",
             "cp-0-label": "A", "cp-0-problem": str(p.pk), "cp-0-points": "500", "cp-0-order": "0"}
@@ -506,7 +506,7 @@ def test_staff_sees_every_users_submissions(client):
 
 def _contest_data(problem, rated=True):
     """POST body for moderation:contest_new with one problem row."""
-    data = {"kind": "round", "personal_minutes": "0", "description_md": "", "start": "2030-01-01T10:00", "end": "2030-01-01T12:00",
+    data = {"kind": "round", "division": "2", "personal_minutes": "0", "description_md": "", "start": "2030-01-01T10:00", "end": "2030-01-01T12:00",
             "allowed_ip_prefix": "",
             "cp-TOTAL_FORMS": "1", "cp-INITIAL_FORMS": "0", "cp-MIN_NUM_FORMS": "0", "cp-MAX_NUM_FORMS": "1000",
             "cp-0-label": "A", "cp-0-problem": str(problem.pk), "cp-0-points": "500", "cp-0-order": "0"}

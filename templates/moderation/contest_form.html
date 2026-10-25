@@ -89,7 +89,7 @@
       {% if not writer %}
       <label class="flex items-center gap-2 text-sm">{% blocktrans with form_is_rated=form.is_rated %}{{ form_is_rated }} Reytingli musobaqa{% endblocktrans %}</label>
       <div><label class="ca-label" for="{{ form.division.id_for_label }}">{% trans "Divizion" %}</label>{{ form.division }}
-        <p class="mt-1 text-xs text-mute">{% trans "Diapazondan tashqaridagilar ham qatnashadi, lekin reytingi o‘zgarmaydi." %}</p>
+        <p class="mt-1 text-xs text-mute">{% trans "Raund uchun divizion kerak (Marafon hamma uchun ochiq bo‘lishi mumkin). Diapazondan tashqaridagilar ham qatnashadi, lekin reytingi o‘zgarmaydi." %}</p>
         {% if form.division.errors %}<p class="mt-1 text-sm text-bad">{{ form.division.errors.0 }}</p>{% endif %}</div>
       <div><label class="ca-label" for="{{ form.allowed_ip_prefix.id_for_label }}">{% trans "IP prefiks (ixtiyoriy)" %}</label>{{ form.allowed_ip_prefix }}
         <p class="mt-1 text-xs text-mute">{% trans "Faqat shu prefiksli IP dan yuborish mumkin, masalan sinf tarmog‘i." %}</p></div>
