@@ -17,6 +17,7 @@ urlpatterns = [
     path("moderation/", include("apps.moderation.urls")),
     path("classroom/", include("apps.classroom.urls")),
     path("learn/", include("apps.learn.urls")),
+    path("api/v1/", include("apps.api.urls")),
     path("robots.txt", robots_txt, name="robots"),
     # an index of one sitemap per kind of page, so Search Console reports each kind's indexing apart
     path("sitemap.xml", sitemaps.index, {"sitemaps": SITEMAPS, "sitemap_url_name": "sitemap_section"},

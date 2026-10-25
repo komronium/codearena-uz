@@ -157,7 +157,7 @@ def home(request):
 _NOT_FOR_CRAWLERS = ["/moderation/", "/integrity/", "/submissions/", "/classroom/", "/django-rq/",
                      "/accounts/profile/edit/", "/accounts/password-", "/accounts/reset/", "/accounts/verify/",
                      "/accounts/logout/", "/problems/suggest/", "/learn/search/",
-                     "/media/avatars/"]
+                     "/media/avatars/", "/api/"]
 # a list's search, sorting, own-progress filter and random pick: endless addresses for the one list
 # (its tag and level filters stay open; their canonical URL folds them into the list)
 _LIST_PARAMS = ["q", "sort", "dir", "status", "kind", "random"]
