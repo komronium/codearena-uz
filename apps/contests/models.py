@@ -102,6 +102,9 @@ class Contest(Translatable, models.Model):
     # Rated only for users in the division's range; the rest take part out of competition:
     # on the board, but not rated (apps.contests.rating).
     division = models.PositiveSmallIntegerField(default=Division.OPEN)  # 0 = open, else a DivisionRange number
+    # Rounds played before divisions existed rated everyone; the division they are named after ("Round #5 (Div. 5)") is
+    # only a name, so the ratings stay as they were played. 0 = none. A real `division` wins.
+    named_division = models.PositiveSmallIntegerField(default=0, editable=False)
     # Set by staff publishing the ended contest; from then on participants' contest ACs
     # count as practice solves (apps.submissions.solves).
     published_at = models.DateTimeField(null=True, blank=True)
@@ -135,7 +138,8 @@ class Contest(Translatable, models.Model):
 
     def compose_title(self) -> str:
         title = f"CodeArena {self.get_kind_display()} #{self.number}"
-        return f"{title} (Div. {self.division})" if self.division else title
+        division = self.division or self.named_division
+        return f"{title} (Div. {division})" if division else title
 
     def save(self, *args, **kwargs):
         if self.number:
