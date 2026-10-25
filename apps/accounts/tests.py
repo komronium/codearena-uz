@@ -1068,7 +1068,7 @@ def test_telegram_daily_messages_speak_each_recipients_language(settings, django
     with django_capture_on_commit_callbacks(execute=False), patch(
             "apps.accounts.management.commands.telegram_notifications.MORNING_FROM", 0):
         call_command("telegram_notifications", verbosity=0)
-    texts = {o.link.user.username: o.text for o in TelegramOutbox.objects.filter(preference="notify_daily_tip")}
+    texts = {o.link.user.username: o.text for o in TelegramOutbox.objects.filter(event_key__startswith="morning:")}
     assert "Bugun CodeArena" in texts["uzu"] and "Today on CodeArena" in texts["enu"] and "Bugun" not in texts["enu"]
 
 

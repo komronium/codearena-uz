@@ -485,7 +485,7 @@ def test_report_ranks_by_server_evidence_and_shows_it(client, flag_contest, flag
     r = client.get(reverse("integrity:contest_report", args=[flag_contest.pk]))
     row = dict(r.context["rows"])[curl]
     assert row["risk"] >= 14 and [e.kind for e in row["evidence"]] == ["silent", "unseen"]
-    assert "muharrirda yozilmagan" in r.content.decode()
+    assert "Muharrirda yozilmagan" in r.content.decode()  # the evidence's label, in the row and in the legend
 
 
 def test_flag_similarity_checks_last_attempt_of_users_without_ac(flag_contest, flag_problem, flag_python):

@@ -185,7 +185,7 @@ def test_hub_continues_the_course_solved_in_last(client, staff, ali):
     _solve(ali, a1, when=now - timezone.timedelta(days=1))
     _solve(ali, b1, when=now)
     body = client.get(reverse("learn:hub")).content.decode()
-    assert 'href="/problems/b2/?plan=bb"' in body and "Siz shu yerdasiz" in body
+    assert 'href="/problems/b2/?plan=bb"' in body and "is-here" in body  # the card of the course in hand is outlined
     _solve(ali, b2)  # a finished course is never "current"
     r = client.get(reverse("learn:hub"))
     assert 'href="/problems/a2/?plan=aa"' in r.content.decode()
