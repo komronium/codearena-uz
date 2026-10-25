@@ -12,7 +12,6 @@ table; on the right your progress per level, picks for you and, while browsing, 
       <h1 id="pl-title">{% trans "Masalalar" %}</h1>
       <p class="ca-hud-sub">{% if progress %}{% trans "Oson masaladan boshlang, qiyinlari reytingga tayyorlaydi." %}{% else %}{% blocktrans with total=total %}{{ total }} ta ochiq masala: boshlang‘ichdan qiyingacha, mavzular bo‘yicha.{% endblocktrans %}{% endif %}</p>
     </div>
-    {% if daily %}{% include "home/_hud_today.html" %}{% endif %}
   </div>
 </section>
 {% endblock %}
@@ -66,7 +65,7 @@ table; on the right your progress per level, picks for you and, while browsing, 
       {% endif %}
       <div class="ca7-tools-r">
         <a href="{% querystring random=1 page=None %}" class="ca-btn ca-btn-soft" title="{% trans 'Shu filtrdan tasodifiy' %} {% if user.is_authenticated %}{% trans 'yechilmagan' %} {% endif %}{% trans 'masala' %}" rel="nofollow"><i data-lucide="shuffle" class="lu" aria-hidden="true"></i>{% trans "Tasodifiy" %}</a>
-        {% if user.is_authenticated %}<a href="{% url 'learn:lists' %}" class="ca-btn ca-btn-soft" title="{% trans 'Saqlanganlar: keyinroq yechish uchun saqlangan masalalar' %}"><i data-lucide="bookmark" class="lu" aria-hidden="true"></i><span class="sr-only">{% trans "Saqlanganlar" %}</span></a>{% endif %}
+        {% if user.is_authenticated %}<a href="{% url 'learn:lists' %}" class="ca-btn ca-btn-soft" title="{% trans 'Saqlanganlar: keyinroq yechish uchun saqlangan masalalar' %}"><i data-lucide="bookmark" class="lu" aria-hidden="true"></i><span class="hidden xl:inline">{% trans "Saqlanganlar" %}</span><span class="sr-only xl:hidden">{% trans "Saqlanganlar" %}</span></a>{% endif %}
         {% if user.is_staff %}<a href="{% url 'moderation:submit' %}" class="ca-btn ca-btn-soft" title="{% trans 'Masala qo‘shish' %}"><i data-lucide="plus" class="lu" aria-hidden="true"></i><span class="sr-only">{% trans "Masala qo‘shish" %}</span></a>{% endif %}
       </div>
     </div>
@@ -95,9 +94,9 @@ table; on the right your progress per level, picks for you and, while browsing, 
       <td>{% if p.id in solved_ids %}{% trans "<span class=\"ca-st is-solved\" title=\"Yechilgan\"></span><span class=\"sr-only\">Yechilgan</span>" %}{% elif p.id in tried_ids %}{% trans "<span class=\"ca-st is-tried\" title=\"Urinilgan, hali yechilmagan\"></span><span class=\"sr-only\">Urinilgan</span>" %}{% elif user.is_authenticated %}{% trans "<span class=\"ca-st is-new\" title=\"Hali urinilmagan\"></span><span class=\"sr-only\">Yangi</span>" %}{% endif %}</td>
       <td class="ca-pid">{{ p.id|stringformat:"04d" }}</td>
       <td><a class="ca-link" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a>{% if p.id == daily.problem_id %} <span class="ca-chip">{% trans "Kun masalasi" %}</span>{% endif %}{% if p.kind == "sql" %} <span class="ca-kind-sql" title="{% trans 'SQL so‘rov masalasi' %}"><i data-lucide="database" class="lu" aria-hidden="true"></i>{% trans "SQL" %}</span>{% endif %}</td>
-      <td class="ca7-col-tags"><span class="ca7-ptags">{% for t in p.tags.all|slice:":2" %}<a{% if t.kind == "sql" %} class="is-sql"{% endif %} href="{% querystring tag=t.name page=None %}">{{ t.name|tag_uz }}</a>{% if not forloop.last %}, {% endif %}{% empty %}{% if p.kind == "sql" %}<span>{% trans "SQL" %}</span>{% else %}<span aria-hidden="true">—</span>{% endif %}{% endfor %}</span></td>
+      <td class="ca7-col-tags"><span class="ca7-ptags" title="{% for t in p.tags.all %}{{ t.name|tag_uz }}{% if not forloop.last %}, {% endif %}{% endfor %}">{% for t in p.tags.all|slice:":2" %}<a{% if t.kind == "sql" %} class="is-sql"{% endif %} href="{% querystring tag=t.name page=None %}">{{ t.name|tag_uz }}</a>{% if not forloop.last %}, {% endif %}{% empty %}{% if p.kind == "sql" %}<span>{% trans "SQL" %}</span>{% else %}<span aria-hidden="true">—</span>{% endif %}{% endfor %}</span></td>
       <td>{% include "problems/_difficulty.html" %}</td>
-      <td class="hidden text-right md:table-cell">{% if p.attempts >= 5 %}{% widthratio p.ac_count p.attempts 100 %}%{% elif p.attempts %}<span class="text-mute" title="{% trans 'Foiz 5 ta urinishdan keyin ko‘rsatiladi' %}">{{ p.ac_count }}/{{ p.attempts }}</span>{% else %}<span class="text-mute">—</span>{% endif %}</td>
+      <td class="hidden text-right md:table-cell">{% if p.attempts >= 5 %}{% widthratio p.ac_count p.attempts 100 %}%{% elif p.attempts %}<span class="text-mute" title="{% blocktrans with p_ac_count=p.ac_count p_attempts=p.attempts %}{{ p_ac_count }} / {{ p_attempts }} urinish qabul qilingan; foiz 5 ta urinishdan keyin ko‘rsatiladi{% endblocktrans %}">—</span>{% else %}<span class="text-mute">—</span>{% endif %}</td>
       <td class="text-right" title="{% blocktrans with p_solvers=p.solvers p_ac_count=p.ac_count p_attempts=p.attempts %}{{ p_solvers }} kishi yechgan, {{ p_ac_count }} / {{ p_attempts }} urinish qabul qilingan{% endblocktrans %}">{{ p.solvers|kplus }}</td>
     </tr>
     {% endfor %}
@@ -114,7 +113,7 @@ table; on the right your progress per level, picks for you and, while browsing, 
 </section>
 
 <aside class="ca7-aside" aria-label="{% trans 'Tavsiyalar' %}">
-  {% if ring %}{% url 'profile' user.username as profile_url %}{% include "problems/_solved_card.html" with title=_("Taraqqiyot") more_url=profile_url %}{% endif %}
+  {% if ring and ring.done %}{% url 'profile' user.username as profile_url %}{% include "problems/_solved_card.html" with title=_("Taraqqiyot") more_url=profile_url %}{% endif %}
   {% if next_picks %}
   <section class="ca-box" aria-labelledby="picks-title">
     <div class="ca-box-cap ca-hd"><h2 id="picks-title">{% trans "Siz uchun" %}</h2>{% if picks_reason %}<a class="ca-box-tools ca-link" href="{% querystring tag=picks_reason page=None %}" title="{% trans 'Eng kam yechgan mavzuingiz' %}">{{ picks_reason|tag_uz }}</a>{% endif %}</div>

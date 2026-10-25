@@ -32,17 +32,26 @@ participants by risk, the similar code pairs, the fast solves and the journal.{%
 <section class="mb-10 scroll-mt-20" id="people">
   <div class="mb-3 flex flex-wrap items-end justify-between gap-2">
     <h2 class="ca7-h">{% trans "Xavf bo‘yicha saralangan" %}</h2>
-    <p class="text-xs text-mute">{% trans "Chiqish — musobaqa sahifalaridan tashqariga (boshqa oyna, varaq yoki saytning boshqa sahifasi) · Tashqarida — jami vaqt · Paste — muharrirga qo‘yish urinishi · Tez — g‘ayrioddiy tez matn kiritish · Nusxa — shart matnidan nusxa. Dalillar — serverda tekshirilgani, brauzerda o‘chirib bo‘lmaydi: tracker o‘chiq (×6), muharrirda yozilmagan kod (×8), kod sakrashi (×3), umumiy qurilma (×10), ikki qurilma (×5), o‘xshash kod (×8). Xavf = paste×5 + tez×3 + nusxa×2 + chiqish + tashqarida daqiqa + shubhali yechim×4 + dalillar." %}</p>
   </div>
+  <details class="ca-legend mb-4 text-xs text-mute">
+    <summary class="cursor-pointer font-medium hover:text-ink">{% trans "Qanday o‘qiladi" %}</summary>
+    <div class="mt-2 space-y-1.5 text-left">
+      <p>{% trans "Sahifadan chiqish — musobaqa sahifalaridan tashqariga (boshqa oyna, varaq yoki saytning boshqa sahifasi) · Tashqarida — jami vaqt · Paste — muharrirga qo‘yish urinishi · Tez — g‘ayrioddiy tez matn kiritish · Nusxa — shart matnidan nusxa." %}</p>
+      <p>{% trans "Dalillar serverda tekshiriladi, brauzerda o‘chirib bo‘lmaydi. Har biri hakamlarga maslahat, hukm emas. Og‘irligi:" %}
+        {% for label, w in evidence_weights %}<span class="ca-chip mr-1">{{ label }} ×{{ w }}</span>{% endfor %}</p>
+      <p>{% trans "Xavf = paste×5 + tez×3 + nusxa×2 + chiqishlar + tashqarida daqiqa + shubhali yechim×4 + dalillar + oldingi raundlardagi qarorlar (ko‘pi bilan 12)." %}</p>
+    </div>
+  </details>
   <div class="overflow-x-auto">
   <table class="ca-table ca-table-flat">
     <thead>
-      <tr><th scope="col">{% trans "Ishtirokchi" %}</th><th scope="col" class="text-right">{% trans "Chiqish" %}</th><th scope="col" class="text-right">{% trans "Tashqarida" %}</th><th scope="col" class="text-right">{% trans "Paste" %}</th><th scope="col" class="text-right">{% trans "Tez" %}</th><th scope="col" class="text-right">{% trans "Nusxa" %}</th><th scope="col">{% trans "Dalillar" %}</th><th scope="col" class="text-right">{% trans "Xavf" %}</th><th scope="col" class="hidden md:table-cell">{% trans "Oxirgi hodisa" %}</th><th scope="col" class="text-right">{% trans "Amal" %}</th></tr>
+      <tr><th scope="col">{% trans "Ishtirokchi" %}</th><th scope="col" class="text-right">{% trans "Sahifadan chiqish" %}</th><th scope="col" class="text-right">{% trans "Tashqarida" %}</th><th scope="col" class="text-right">{% trans "Paste" %}</th><th scope="col" class="text-right">{% trans "Tez" %}</th><th scope="col" class="text-right">{% trans "Nusxa" %}</th><th scope="col">{% trans "Dalillar" %}</th><th scope="col" class="text-right">{% trans "Xavf" %}</th><th scope="col" class="hidden md:table-cell">{% trans "Oxirgi hodisa" %}</th><th scope="col" class="text-right">{% trans "Amal" %}</th></tr>
     </thead>
     <tbody>
     {% for user, c in rows %}
     <tr>
-      <td>{% include "accounts/_u7.html" with u=user you=False %}</td>
+      <td>{% include "accounts/_u7.html" with u=user you=False %}
+        {% if c.history.dq or c.history.voided %}<p class="mt-0.5 text-xs font-semibold text-bad" title="{% trans 'Oldingi musobaqalarda hakamlar qaror qilgan' %}">{% blocktrans with dq=c.history.dq voided=c.history.voided played=c.history.played %}Oldin: DQ {{ dq }}, bekor {{ voided }} · {{ played }} ta raund{% endblocktrans %}</p>{% endif %}</td>
       <td class="tabular text-right {% if c.blur > 5 %}text-warn font-semibold{% endif %}">{{ c.blur }}</td>
       <td class="tabular text-right whitespace-nowrap {% if c.away_ms >= 120000 %}text-warn font-semibold{% endif %}">{% if c.away_ms %}{% widthratio c.away_ms 60000 1 %} {% trans "daq" %}{% else %}—{% endif %}</td>
       <td class="tabular text-right {% if c.paste %}text-bad font-semibold{% endif %}">{{ c.paste }}</td>
@@ -60,18 +69,18 @@ participants by risk, the similar code pairs, the fast solves and the journal.{%
           <form method="post" action="{% url 'contests:void' contest.pk user.pk %}"{% csrf_token %}
             <input type="hidden" name="label" value="{{ label }}"><input type="hidden" name="voided" value="0">
             <input type="hidden" name="reason" value=""><input type="hidden" name="next" value="{% url 'integrity:contest_report' contest.pk %}">
-            <button class="ca-btn ca-btn-ghost !px-2 !py-0.5 text-xs" title="{% blocktrans with label=label %}{{ label }} bekor qilingan — tiklash{% endblocktrans %}"><i data-lucide="undo-2" class="lu" aria-hidden="true"></i>{{ label }}</button>
+            <button class="ca-btn ca-btn-ghost !px-2 !py-0.5 text-xs" title="{% blocktrans with label=label %}{{ label }} bekor qilingan — tiklash{% endblocktrans %}"><i data-lucide="undo-2" class="lu" aria-hidden="true"></i>{% trans "Tiklash" %} {{ label }}</button>
           </form>
           {% else %}
           <form method="post" action="{% url 'contests:void' contest.pk user.pk %}" data-confirm="{% blocktrans with label=label %}{{ label }} masalasi natijasini bekor qilish. Sabab (ixtiyoriy, faqat adminlar ko‘radi):{% endblocktrans %}" data-reason data-reason-default="Nazorat hisoboti: {{ label }}">{% csrf_token %}
             <input type="hidden" name="label" value="{{ label }}"><input type="hidden" name="voided" value="1">
             <input type="hidden" name="reason" value=""><input type="hidden" name="next" value="{% url 'integrity:contest_report' contest.pk %}">
-            <button class="ca-btn ca-btn-ghost !px-2 !py-0.5 text-xs text-bad" title="{% blocktrans with label=label %}Faqat {{ label }} masalasi natijasini bekor qilish{% endblocktrans %}"><i data-lucide="circle-slash" class="lu" aria-hidden="true"></i>{{ label }}</button>
+            <button class="ca-btn ca-btn-ghost !px-2 !py-0.5 text-xs text-bad" title="{% blocktrans with label=label %}Faqat {{ label }} masalasi natijasini bekor qilish{% endblocktrans %}"><i data-lucide="circle-slash" class="lu" aria-hidden="true"></i>{% trans "Bekor" %} {{ label }}</button>
           </form>
           <form method="post" action="{% url 'contests:void' contest.pk user.pk %}" data-confirm="{% blocktrans with label=label %}{{ label }} masalasi natijasini AI tufayli bekor qilish: xato urinish hisoblanadi va masala bloklanadi. Sabab (ixtiyoriy, faqat adminlar ko‘radi):{% endblocktrans %}" data-reason data-reason-default="AI ishlatgan">{% csrf_token %}
             <input type="hidden" name="label" value="{{ label }}"><input type="hidden" name="voided" value="1"><input type="hidden" name="penalty" value="1">
             <input type="hidden" name="reason" value=""><input type="hidden" name="next" value="{% url 'integrity:contest_report' contest.pk %}">
-            <button class="ca-btn ca-btn-ghost !px-2 !py-0.5 text-xs text-bad" title="{% blocktrans with label=label %}AI tufayli: {{ label }} natijasi xato urinish sifatida qaytariladi va masala bloklanadi{% endblocktrans %}"><i data-lucide="bot" class="lu" aria-hidden="true"></i>{{ label }}</button>
+            <button class="ca-btn ca-btn-ghost !px-2 !py-0.5 text-xs text-bad" title="{% blocktrans with label=label %}AI tufayli: {{ label }} natijasi xato urinish sifatida qaytariladi va masala bloklanadi{% endblocktrans %}"><i data-lucide="bot" class="lu" aria-hidden="true"></i>{% trans "AI jarima" %} {{ label }}</button>
           </form>
           {% endif %}
           {% endfor %}
@@ -85,7 +94,7 @@ participants by risk, the similar code pairs, the fast solves and the journal.{%
         <div class="flex items-center justify-end gap-1">
         <a class="ca-btn ca-btn-ghost !px-2 !py-1" href="{% url 'contests:submissions' contest.pk %}?user={{ user.username|urlencode }}" title="{% trans 'Urinishlari, masalalar bo‘yicha' %}" aria-label="{% blocktrans with user_username=user.username %}{{ user_username }}: urinishlari{% endblocktrans %}"><i data-lucide="history" class="lu" aria-hidden="true"></i></a>
         <form method="post" action="{% url 'integrity:flag_user' contest.pk user.pk %}">{% csrf_token %}
-          <button class="ca-btn ca-btn-ghost !px-2 !py-1" title="{% trans 'Chuqur tekshirish: barcha urinishlari hammaniki va oldingi yechimlar bilan solishtiriladi' %}" aria-label="{% blocktrans with user_username=user.username %}{{ user_username }}: chuqur tekshirish{% endblocktrans %}"><i data-lucide="scan-search" class="lu" aria-hidden="true"></i></button>
+          <button class="ca-btn ca-btn-ghost whitespace-nowrap !px-2.5 !py-1" title="{% trans 'Chuqur tekshirish: barcha urinishlari hammaniki va oldingi yechimlar bilan solishtiriladi' %}" aria-label="{% blocktrans with user_username=user.username %}{{ user_username }}: chuqur tekshirish{% endblocktrans %}"><i data-lucide="scan-search" class="lu" aria-hidden="true"></i><span class="hidden xl:inline">{% trans "Chuqur tekshiruv" %}</span></button>
         </form>
         {% if c.participation.disqualified or c.advice == "dq" %}
         <form method="post" action="{% url 'contests:disqualify' contest.pk user.pk %}" {% if not c.participation.disqualified %}data-confirm="{% trans 'Sabab (ixtiyoriy):' %}" data-reason data-reason-default=""{% endif %}>{% csrf_token %}
@@ -161,6 +170,11 @@ participants by risk, the similar code pairs, the fast solves and the journal.{%
     <p class="max-w-2xl text-xs text-mute">{% blocktrans with min_lines=min_lines threshold=threshold %}Bir masala, bir til, kamida {{ min_lines }} qator kod, o‘xshashlik ≥ {{ threshold }}%. AC yechimlar, AC olmaganlarning oxirgi urinishi, va musobaqadan oldingi yechimlar (amaliyot, oldingi musobaqalar, muallif) solishtiriladi; ishtirokchi qatoridagi{% endblocktrans %} <i data-lucide="scan-search" class="lu" aria-hidden="true"></i> {% trans "chuqur tekshiruv esa uning barcha urinishlarini solishtiradi. O‘zgaruvchi nomlari va izohlar hisobga olinmaydi. <span class=\"ca-cmp-key\"></span> — ikkala kodda ham bor qatorlar." %}
       {% if contest.similarity_checked_at and contest.similarity_checked_at > contest.end %}<b class="text-ink">{% blocktrans with contest_similarity_checked_at=contest.similarity_checked_at|date:"d.m H:i" %}Barcha masalalar avtomatik tekshirildi: {{ contest_similarity_checked_at }}.{% endblocktrans %}</b>{% elif not contest.similarity_checked_at %}<b class="text-ink">{% trans "Musobaqa tugaganidan 10 daqiqa o‘tib barcha masalalar avtomatik tekshiriladi." %}</b>{% endif %}</p>
   </div>
+  <p class="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-mute">
+    <span class="font-medium text-ink">{% trans "AI namunalari" %}</span>
+    {% for label, n in baselines %}<span class="ca-chip{% if not n %} opacity-60{% endif %}" title="{% trans 'Masala uchun AI yozgan yechimlar soni: yuborilganlar shular bilan ham solishtiriladi' %}">{{ label }} · {{ n }}</span>{% endfor %}
+    <code class="rounded bg-ink/5 px-1.5 py-0.5">manage.py gen_ai_baselines {{ contest.pk }}</code>
+  </p>
   <form method="post" action="{% url 'integrity:flag_run' contest.pk %}" class="ca-panel mb-4 flex flex-wrap items-center gap-x-4 gap-y-3 !py-3">{% csrf_token %}
     <fieldset class="flex flex-wrap items-center gap-1.5">
       <legend class="sr-only">{% trans "Tekshiriladigan masalalar" %}</legend>

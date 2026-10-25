@@ -7,7 +7,7 @@ from itertools import combinations
 
 from apps.submissions.models import Submission
 
-from .models import CodeSnapshot, DeviceSeen, SimilarityFlag
+from .models import AiMatch, CodeSnapshot, DeviceSeen, SimilarityFlag
 from .similarity import similarity
 from django.utils.translation import gettext as _t, gettext_lazy as _tl
 
@@ -17,8 +17,10 @@ UNSEEN_LOOKBACK = timedelta(minutes=10)
 UNSEEN_MIN_SIMILARITY = 0.9
 JUMP_CHARS = 150          # appeared between two snapshots (at most one ~10 s tick of editing)
 
-WEIGHTS = {"ai_mark": 15, "silent": 6, "unseen": 8, "jump": 3, "shared_device": 10, "multi_device": 5, "similar": 8}
-LABELS = {"ai_mark": _tl("AI belgisi"), "silent": _tl("Tracker o‘chiq"), "unseen": _tl("Muharrirda yozilmagan"), "jump": _tl("Kod sakrashi"),
+WEIGHTS = {"ai_mark": 15, "mark_shared": 15, "mark_source": 10, "ai_match": 9, "silent": 6, "unseen": 8, "jump": 3,
+           "shared_device": 10, "multi_device": 5, "similar": 8}
+LABELS = {"ai_mark": _tl("AI belgisi"), "mark_shared": _tl("Boshqaning AI belgisi"), "mark_source": _tl("Belgisi boshqada chiqdi"),
+          "ai_match": _tl("AI yechimiga o‘xshash"), "silent": _tl("Tracker o‘chiq"), "unseen": _tl("Muharrirda yozilmagan"), "jump": _tl("Kod sakrashi"),
           "shared_device": _tl("Umumiy qurilma"), "multi_device": _tl("Ikki qurilma"), "similar": _tl("O‘xshash kod")}
 
 
@@ -74,6 +76,7 @@ def contest_evidence(contest) -> dict[int, list[Evidence]]:
                 "jump", _t("{labels_get_problem_id}: {grew} belgi birdaniga paydo bo‘lgan").format(labels_get_problem_id=labels.get(problem_id, '?'), grew=grew), problem_id))
 
     _ai_marks(contest, labels, subs, out)
+    _ai_matches(contest, labels, out)
     _devices(contest, subs, out)
     _similar(contest, labels, out)
     order = list(WEIGHTS)
@@ -150,19 +153,67 @@ def _similar(contest, labels, out):
 
 def _ai_marks(contest, labels, subs, out):
     """A submission whose code carries a name a statement's hidden AI note asked for (apps.problems.ai_marks):
-    the statement went to an AI and its answer came back. One line per problem, with its last such submission."""
-    from apps.problems.ai_marks import tokens
+    the statement went to an AI and its answer came back. One line per problem, with its last such submission.
+    The name is the reader's own copy (`javob_qz_k3`), so a copy that is someone else's shows who passed the
+    statement or the answer on: "mark_shared" for the one who submitted it, "mark_source" for the one it names."""
+    from apps.accounts.models import User
+    from apps.problems.ai_marks import owner, pattern, tokens
     from apps.problems.models import Problem
 
-    wanted = {p.pk: tokens(p.statement_md, p.input_md, p.output_md)
+    wanted = {p.pk: {t: pattern(t) for t in tokens(p.statement_md, p.input_md, p.output_md)}
               for p in Problem.objects.filter(pk__in=list(labels)).only("statement_md", "input_md", "output_md")}
-    hits: dict[tuple[int, int], tuple[list[Submission], set[str]]] = {}
+    own: dict[tuple[int, int], tuple[list[Submission], set[str]]] = {}
+    others: dict[tuple[int, int, int], tuple[list[Submission], set[str]]] = {}  # (user, problem, whose copy)
     for sub in subs:
-        found = {t for t in wanted.get(sub.problem_id, ()) if re.search(rf"\b{re.escape(t)}\b", sub.source)}
-        if found:
-            bad, names = hits.setdefault((sub.user_id, sub.problem_id), ([], set()))
-            bad.append(sub)
-            names |= found
-    for (user_id, problem_id), (bad, names) in hits.items():
+        for token, rx in wanted.get(sub.problem_id, {}).items():
+            for m in rx.finditer(sub.source):
+                whose = owner(m.group(1))
+                if whose is None or whose == sub.user_id:
+                    bad, names = own.setdefault((sub.user_id, sub.problem_id), ([], set()))
+                else:
+                    bad, names = others.setdefault((sub.user_id, sub.problem_id, whose), ([], set()))
+                if not bad or bad[-1] is not sub:
+                    bad.append(sub)
+                names.add(m.group(0))
+    for (user_id, problem_id), (bad, names) in own.items():
         out.setdefault(user_id, []).append(Evidence(
             "ai_mark", _t("{problem}: kodda «{names}»").format(problem=labels.get(problem_id, "?"), names=", ".join(sorted(names))), problem_id, bad[-1]))
+    handles = dict(User.objects.filter(pk__in={w for _, _, w in others} | {u for u, _, _ in others})
+                   .values_list("pk", "username"))
+    for (user_id, problem_id, whose), (bad, names) in others.items():
+        label = labels.get(problem_id, "?")
+        out.setdefault(user_id, []).append(Evidence(
+            "mark_shared", _t("{problem}: kodda {user} nusxasining belgisi «{names}»").format(
+                problem=label, user=handles.get(whose, whose), names=", ".join(sorted(names))), problem_id, bad[-1]))
+        out.setdefault(whose, []).append(Evidence(
+            "mark_source", _t("{problem}: belgisi {user} kodida chiqdi «{names}»").format(
+                problem=label, user=handles.get(user_id, user_id), names=", ".join(sorted(names))), problem_id))
+
+
+def _ai_matches(contest, labels, out):
+    """Submissions close to an AI's own answer to the problem (ai_match). One line per problem, its closest."""
+    best: dict[tuple[int, int], AiMatch] = {}
+    for m in AiMatch.objects.filter(submission__contest=contest).select_related("submission"):
+        key = (m.submission.user_id, m.submission.problem_id)
+        if key not in best or m.score > best[key].score:
+            best[key] = m
+    for (user_id, problem_id), m in best.items():
+        out.setdefault(user_id, []).append(Evidence(
+            "ai_match", _t("{label}: {pct}% o‘xshash").format(label=labels.get(problem_id, "?"), pct=round(m.score * 100)),
+            problem_id, m.submission))
+
+
+def history(contest, user_ids) -> dict[int, dict[str, int]]:
+    """What staff decided about these users in other rounds: rounds played, disqualified, problems voided.
+    Decisions only (not raw signals), so a repeat is visible without recomputing old evidence."""
+    from apps.contests.models import Participation, VoidedProblem
+
+    out = {u: {"played": 0, "dq": 0, "voided": 0} for u in user_ids}
+    for user_id, dq in (Participation.objects.filter(user_id__in=user_ids).exclude(contest=contest)
+                        .values_list("user_id", "disqualified")):
+        out[user_id]["played"] += 1
+        out[user_id]["dq"] += bool(dq)
+    for user_id in (VoidedProblem.objects.filter(participation__user_id__in=user_ids)
+                    .exclude(participation__contest=contest).values_list("participation__user_id", flat=True)):
+        out[user_id]["voided"] += 1
+    return out

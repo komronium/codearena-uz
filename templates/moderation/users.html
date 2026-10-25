@@ -28,7 +28,7 @@
   <form method="get" class="flex items-center gap-2">
     {% if q %}<input type="hidden" name="q" value="{{ q }}">{% endif %}{% if role %}<input type="hidden" name="role" value="{{ role }}">{% endif %}{% if sort %}<input type="hidden" name="sort" value="{{ sort }}">{% endif %}
     <label class="sr-only" for="country-filter">{% trans "Mamlakat" %}</label>
-    <select id="country-filter" name="country" class="ca-select !py-1.5 text-sm" onchange="this.form.submit()"><option value="">{% trans "Barcha mamlakatlar" %}</option>{% for code, name in countries %}<option value="{{ code }}"{% if country == code %} selected{% endif %}>{{ name }}</option>{% endfor %}</select>
+    <select id="country-filter" name="country" class="ca-select max-w-[11rem] !py-1.5 text-sm" onchange="this.form.submit()"><option value="">{% trans "Barcha mamlakatlar" %}</option>{% for code, name in countries %}<option value="{{ code }}"{% if country == code %} selected{% endif %}>{{ name }}</option>{% endfor %}</select>
   </form>
   <nav class="ca7-seg ml-auto" aria-label="{% trans 'Saralash' %}">
     <a href="{% querystring sort=None page=None %}"{% if not sort %} aria-current="true"{% endif %}>{% trans "Yangi" %}</a>
@@ -62,7 +62,7 @@
       {% if not u.is_active %}<span class="st st-bad">{% trans "Bloklangan" %}</span>{% endif %}
       {% if u.is_staff %}<span class="st st-wait"><i data-lucide="shield" class="lu" aria-hidden="true"></i>{% trans "Admin" %}</span>{% endif %}
       {% if u.is_setter %}<span class="st st-off">{% trans "Yozuvchi" %}</span>{% endif %}
-      {% if not u.email_verified_at and not u.is_staff %}<span class="st st-warn" title="{% trans 'Emaili tasdiqlanmagan: yangi raundlarda reytingga kirmaydi' %}">{% trans "email ✗" %}</span>{% endif %}
+      {% if not u.email_verified_at and not u.is_staff and role != 'unverified' %}<span class="text-warn" title="{% trans 'Emaili tasdiqlanmagan: yangi raundlarda reytingga kirmaydi' %}"><i data-lucide="mail-x" class="lu" aria-hidden="true"></i><span class="sr-only">{% trans "email ✗" %}</span></span>{% endif %}
     </td>
     <td class="text-right tabular font-bold"><span class="ca-tier-ink" style="--tier: {{ u.rating|tier_color }}">{{ u.rating }}</span></td>
     <td class="text-right tabular text-mute">{{ u.n_subs }}</td>

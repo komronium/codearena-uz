@@ -9,12 +9,12 @@ progress or where it stands).{% endcomment %}
   <div class="ca-hud-in">
     <div>
       <h1 id="learn-title">{% trans "O‘rganish" %}</h1>
-      <p class="ca-hud-sub">{% trans "Har kurs bitta mavzu: qisqa nazariya, keyin osonidan qiyinga masalalar." %}{% if soon %} {% blocktrans with soon=soon|length %}Yana {{ soon }} ta kurs tayyorlanmoqda.{% endblocktrans %}{% endif %}</p>
+      <p class="ca-hud-sub">{% trans "Har kurs bitta mavzu: qisqa nazariya, keyin osonidan qiyinga masalalar." %}</p>
     </div>
     {% if user.is_authenticated and path.total %}
     <dl class="ca-hud-stats ml-auto">
       <div><dt><small>{% trans "Kurslar" %}</small></dt><dd><b class="tabular">{{ path.done }}</b><small> / {{ path.total }} {% trans "tugatildi" %}</small></dd></div>
-      <div><dt><small>{% trans "Yo‘l" %}</small></dt><dd><span class="ca-hud-pg" role="progressbar" aria-valuenow="{{ path.pct }}" aria-valuemin="0" aria-valuemax="100" aria-label="{% trans 'Yo‘l bo‘yicha' %}"><i style="width: {{ path.pct }}%"></i></span></dd></div>
+      <div><dt><small>{% trans "Yo‘l" %}</small></dt><dd><span class="ca-hud-pg" role="progressbar" aria-valuenow="{{ path.pct }}" aria-valuemin="0" aria-valuemax="100" aria-label="{% trans 'Yo‘l bo‘yicha' %}"><i style="width: {{ path.pct }}%"></i></span><small class="tabular"> {{ path.pct }}%</small></dd></div>
     </dl>
     {% endif %}
     {% if stages %}<label class="ca7-hsearch{% if not user.is_authenticated %} ml-auto{% endif %}"><span class="sr-only">{% trans "Kurslarni filtrlash" %}</span><i data-lucide="search" class="lu" aria-hidden="true"></i><input type="search" id="course-filter" placeholder="{% trans 'Kurs yoki mavzu…' %}" autocomplete="off" spellcheck="false"></label>{% endif %}
@@ -62,7 +62,7 @@ progress or where it stands).{% endcomment %}
       <li data-course="{{ p.title|lower }} {{ p.summary|lower }}" class="lc-card{% if p == here %} is-here{% endif %}{% if p.progress.completed %} is-done{% endif %}">
         <span class="lc-ico" aria-hidden="true">{% if p.progress.completed %}<i data-lucide="check" class="lu"></i>{% else %}<i data-lucide="{{ p.icon }}" class="lu"></i>{% endif %}</span>
         <div class="lc-main">
-          <p class="lc-title"><span class="lc-num tabular">{{ p.step }}</span><a class="lc-link" href="{% url 'learn:course' p.slug %}">{{ p.title }}</a>{% if not p.is_public %} <span class="ca-tag">{% trans "Yashirin" %}</span>{% endif %}{% if p == here and user.is_authenticated and not p.progress.completed %} <span class="ca-you">{% trans "Siz shu yerdasiz" %}</span>{% endif %}</p>
+          <p class="lc-title"><span class="lc-num tabular">{{ p.step }}</span><a class="lc-link" href="{% url 'learn:course' p.slug %}">{{ p.title }}</a>{% if not p.is_public %} <span class="ca-tag">{% trans "Yashirin" %}</span>{% endif %}</p>
           {% if p.summary %}<small>{{ p.summary }}</small>{% endif %}
           <p class="lc-meta">
             <span class="ca-diff ca-diff-chip ca-diff-{{ p.level }}">{{ p.get_level_display }}</span>

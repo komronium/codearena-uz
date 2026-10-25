@@ -38,7 +38,7 @@ the rating, open the problems, edit); the rest is in the menu.{% endcomment %}
   <thead><tr>
     <th scope="col" class="w-12">#</th>
     <th scope="col" class="min-w-[13rem]">{% trans "Raund" %}</th>
-    <th scope="col" class="hidden w-40 xl:table-cell">{% trans "Mualliflar" %}</th>
+    {% if has_authors %}<th scope="col" class="hidden w-40 xl:table-cell">{% trans "Mualliflar" %}</th>{% endif %}
     <th scope="col" class="w-40">{% trans "Vaqti va holati" %}</th>
     <th scope="col" class="w-28 text-right">{% trans "Masala · qatnashgan" %}</th>
     <th scope="col" class="w-56 text-right"><span class="sr-only">{% trans "Amallar" %}</span></th>
@@ -50,7 +50,7 @@ the rating, open the problems, edit); the rest is in the menu.{% endcomment %}
     <td class="min-w-[13rem]"><a class="ca-link font-medium" href="{% url 'contests:detail' c.pk %}">{{ c.title }}</a>
       {% if c.is_draft %} <span class="st st-wait">{% trans "Qoralama" %}</span>{% endif %}{% if c.blind_now %} <span class="st st-off" title="{% trans 'Yopiq raund: muallifdan boshqa xodim masalalarni tugaguncha ko‘rmaydi' %}"><i data-lucide="eye-off" class="lu" aria-hidden="true"></i>{% trans "yopiq" %}</span>{% endif %}
       {% if c.n_hidden and c.has_ended and not c.published_at %}<small class="block text-xs text-mute">{% blocktrans with n=c.n_hidden %}{{ n }} masala hali yopiq{% endblocktrans %}</small>{% endif %}</td>
-    <td class="hidden xl:table-cell"><span class="ca7-authors">{% for a in c.authors.all %}{% include "accounts/_u7.html" with u=a you=False %}{% empty %}<span class="text-mute">—</span>{% endfor %}</span></td>
+    {% if has_authors %}<td class="hidden xl:table-cell"><span class="ca7-authors">{% for a in c.authors.all %}{% include "accounts/_u7.html" with u=a you=False %}{% empty %}<span class="text-mute">—</span>{% endfor %}</span></td>{% endif %}
     <td class="tabular text-sm">{{ c.start|date:"d.m.Y H:i" }}<small class="block text-mute">{{ c.duration_label }}</small>
       <span class="mt-1 flex flex-wrap items-center gap-1">
       {% if c.state == "running" %}<span class="st st-ok"><span class="ca-live-dot" aria-hidden="true"></span>{% trans "Jonli" %}</span>
@@ -67,7 +67,7 @@ the rating, open the problems, edit); the rest is in the menu.{% endcomment %}
       {% elif c.to_rate and not writer %}
         <a href="{% url 'moderation:contest_rating_preview' c.pk %}" class="ca-btn ca-btn-primary !py-1"><i data-lucide="trending-up" class="lu" aria-hidden="true"></i>{% trans "Reytingni ko‘rish" %}{% if c.n_open_flags %} <b class="mt-n">{{ c.n_open_flags }}</b>{% endif %}</a>
       {% elif c.has_ended and not c.published_at and not writer %}
-        <form method="post" action="{% url 'moderation:contest_publish' c.pk %}" class="inline" data-confirm="{% trans 'Masalalar ochiladi va ishtirokchilarning AC yechimlari amaliyot balliga o‘tadi. Davom etasizmi?' %}">{% csrf_token %}<button class="ca-btn ca-btn-primary !py-1"><i data-lucide="eye" class="lu" aria-hidden="true"></i>{% trans "Masalalarni ochish" %}</button></form>
+        <form method="post" action="{% url 'moderation:contest_publish' c.pk %}" class="inline" data-confirm="{% trans 'Masalalar ochiladi va ishtirokchilarning AC yechimlari amaliyot balliga o‘tadi. Davom etasizmi?' %}">{% csrf_token %}<button class="ca-btn ca-btn-soft !py-1"><i data-lucide="eye" class="lu" aria-hidden="true"></i>{% trans "Masalalarni ochish" %}</button></form>
       {% elif c.has_ended and not writer %}
         <a href="{% url 'contests:standings' c.pk %}" class="ca-btn ca-btn-ghost !py-1"><i data-lucide="medal" class="lu" aria-hidden="true"></i>{% trans "Natijalar" %}</a>
       {% else %}

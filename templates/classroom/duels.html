@@ -5,7 +5,7 @@
   <div class="ca-hud-in">
     <div>
       <h1 id="duels-title">{% trans "Duellar" %}</h1>
-      <p class="ca-hud-sub">{% blocktrans with n_questions=n_questions per_question=per_question %}{{ n_questions }} ta savol, har biriga {{ per_question }} soniya. To‘g‘ri javob 10 soniyagacha 10 ball, keyin har 2 soniyada 1 ballga kamayib 5 ballgacha tushadi. Ko‘p ball to‘plagan g‘olib; ball teng bo‘lsa, umumiy vaqti kamida 5 soniyaga kam bo‘lgan yutadi, aks holda durang.{% endblocktrans %}</p>
+      <p class="ca-hud-sub">{% blocktrans with n_questions=n_questions per_question=per_question %}{{ n_questions }} ta savol, har biriga {{ per_question }} soniya. Ko‘p ball to‘plagan g‘olib.{% endblocktrans %}</p>
     </div>
     <dl class="ca-hud-stats">
       <div><dt><small>{% trans "Duel reytingi" %}</small></dt><dd><b class="tabular">{{ user.duel_rating }}</b></dd></div>
@@ -20,6 +20,10 @@
 as a table; on the right your duel record and the duel rating board (everyone with a finished duel).
 The duel rating is its own Elo and never touches the contest rating.{% endcomment %}
 {% if error %}<div class="ca-alert ca-alert-bad mb-4" role="alert">{{ error }}</div>{% endif %}
+<details class="ca7-rules mb-4 text-sm text-mute">
+  <summary class="cursor-pointer font-medium hover:text-ink">{% trans "Duel qanday o‘tadi" %}</summary>
+  <p class="mt-1.5 max-w-3xl">{% blocktrans with n_questions=n_questions per_question=per_question %}{{ n_questions }} ta savol, har biriga {{ per_question }} soniya. To‘g‘ri javob 10 soniyagacha 10 ball, keyin har 2 soniyada 1 ballga kamayib 5 ballgacha tushadi. Ko‘p ball to‘plagan g‘olib; ball teng bo‘lsa, umumiy vaqti kamida 5 soniyaga kam bo‘lgan yutadi, aks holda durang.{% endblocktrans %}</p>
+</details>
 <div class="ca7">
 <div class="ca7-col">
   {% if incoming %}
@@ -41,7 +45,7 @@ The duel rating is its own Elo and never touches the contest rating.{% endcommen
   {% endif %}
 
   {% if user.is_superuser %}
-  <p class="ca7-quiet">{% trans "Admin akkaunti duelda qatnashmaydi: duel ochish va chaqiriq yuborish o‘chirilgan." %}</p>
+  <div class="ca-empty">{% trans "Admin akkaunti duelda qatnashmaydi: duel ochish va chaqiriq yuborish o‘chirilgan." %}</div>
   {% else %}
   <div class="ca7-split">
     <form method="post" aria-labelledby="quick-title">{% csrf_token %}
@@ -123,7 +127,7 @@ The duel rating is its own Elo and never touches the contest rating.{% endcommen
   </section>
   <section class="ca-box" aria-labelledby="dbadges-title">
     <div class="ca-box-cap ca-hd"><h2 id="dbadges-title">{% trans "Duel nishonlari" %}</h2><a class="ca-box-tools ca-link" href="{% url 'profile' user.username %}#badges-title">{% trans "Hammasi" %}</a></div>
-    <ul class="ca-bts ca-bts-one">{% for b in badges %}{% include "accounts/_tbadge.html" with owner=True %}{% endfor %}</ul>
+    <ul class="ca-bts ca-bts-one">{% for b in badges|slice:":3" %}{% include "accounts/_tbadge.html" with owner=True %}{% endfor %}</ul>
   </section>
   <section class="ca-box" aria-labelledby="board-title">
     <div class="ca-box-cap ca-hd"><h2 id="board-title">{% trans "Duel reytingi" %}</h2><a class="ca-box-tools ca-link" href="{% url 'duel_board' %}">{% trans "Hammasi" %}</a></div>

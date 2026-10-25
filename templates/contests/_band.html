@@ -67,6 +67,7 @@ and optionally problems, n_participants, next_cp (the first problem you have not
                 b.textContent = "{% jt "Yuborilmoqda…" %}";
               });
             </script>
+            <p class="basis-full text-xs text-white/80">{% blocktrans %}Qatnashsangiz, halollik qoidalariga rozisiz: sahifadan chiqish, kod qo‘yish va muharrir tarixi yoziladi, kodingizni tushuntirish so‘ralishi mumkin.{% endblocktrans %} <a class="underline hover:text-white" href="{% url 'honor' %}">{% trans "Halollik qoidalari" %}</a></p>
           {% elif contest.is_running and next_cp %}
             <a class="ca-btn ca-btn-primary" href="{% url 'problems:detail' next_cp.problem.slug %}">{% trans "Masalalarni yechish" %}</a>
           {% endif %}

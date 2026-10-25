@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.management import call_command
 from django.core.paginator import Paginator
+from django.db.models import Count
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -17,8 +18,8 @@ from apps.submissions.models import Submission
 from apps.submissions.ratelimit import rate_limited
 
 from . import audit
-from .evidence import JUMP_CHARS, contest_evidence
-from .models import (AuditEntry, CodeSnapshot, DeviceSeen, FocusEvent, PracticeEvent, PracticeReview,
+from .evidence import JUMP_CHARS, LABELS, WEIGHTS, contest_evidence, history
+from .models import (AiBaseline, AuditEntry, CodeSnapshot, DeviceSeen, FocusEvent, PracticeEvent, PracticeReview,
                      PracticeSnapshot, SimilarityFlag)
 from .practice import suspicious_solves
 from .similarity import MIN_LINES, THRESHOLD, matched_lines
@@ -135,12 +136,15 @@ def contest_report(request, pk):
     def _risk(user, c):
         return (c["paste"] * 5 + c["copy"] * 2 + c["blur"] + c["fast"] * 3
                 + c["away_ms"] // 60_000 + n_suspicious.get(user, 0) * 4
-                + sum(e.weight for e in c["evidence"]))
+                + sum(e.weight for e in c["evidence"])
+                + min(c["history"]["dq"] * 6 + c["history"]["voided"] * 3, 12))  # repeat: staff acted before
     parts = {p.user_id: p for p in Participation.objects.filter(contest=contest)}
     labels = dict(contest.contest_problems.values_list("problem_id", "label"))
     voided = set(VoidedProblem.objects.filter(participation__contest=contest)
                  .values_list("participation__user_id", "contest_problem__label"))
+    past = history(contest, [u.pk for u in counts])
     for user, c in counts.items():
+        c["history"] = past[user.pk]
         c["evidence"] = evidence.get(user.pk, [])
         c["risk"] = _risk(user, c)
         c["suspicious"] = n_suspicious.get(user, 0)
@@ -151,12 +155,21 @@ def contest_report(request, pk):
     flags = _flag_cards(contest, counts, parts, voided)
     return render(request, "integrity/contest_report.html", {
         "contest": contest, "rows": rows, "flags": flags,
+        "evidence_weights": [(LABELS[k], w) for k, w in WEIGHTS.items()],
+        "baselines": _baseline_counts(contest),
         "open_flags": sum(1 for f in flags if not f.reviewed),
         "suspicious": suspicious, "min_lines": MIN_LINES, "threshold": round(THRESHOLD * 100),
         "quick_after_return_s": _QUICK_AFTER_RETURN_S, "min_away_s": _MIN_AWAY_S,
         "speed_limits": _SPEED_LIMITS_S, "contest_problems": contest.contest_problems.select_related("problem"),
         "audit": AuditEntry.objects.filter(contest=contest).select_related("actor", "subject")[:20],
     })
+
+
+def _baseline_counts(contest):
+    """(label, how many AI baselines) per problem of the round: what the similarity sweep compares with."""
+    made = dict(AiBaseline.objects.filter(problem__in=contest.contest_problems.values("problem"))
+                .values_list("problem_id").annotate(n=Count("pk")))
+    return [(cp.label, made.get(cp.problem_id, 0)) for cp in contest.contest_problems.all()]
 
 
 def _advice(c, suspicious_labels, voided_labels, labels) -> dict:

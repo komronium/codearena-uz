@@ -45,6 +45,28 @@ class SimilarityFlag(models.Model):
         ordering = ["-score"]
 
 
+class AiBaseline(models.Model):
+    """What an AI answers when given a problem's statement: a reference set per problem and language.
+    A contest submission that reads like one of these is a hint (AiMatch), even when nobody else
+    submitted the same code. Made by `manage.py gen_ai_baselines`."""
+    problem = models.ForeignKey(Problem, on_delete=models.CASCADE, related_name="+")
+    language = models.ForeignKey(Language, on_delete=models.CASCADE, related_name="+")
+    source = models.TextField()
+    model = models.CharField(max_length=60, blank=True)
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes: ClassVar[list[models.Index]] = [models.Index(fields=["problem", "language"])]
+
+
+class AiMatch(models.Model):
+    """A contest submission whose code is close to an AI baseline (the closest one, per submission).
+    Rebuilt by the similarity sweep; a hint for staff, never a verdict."""
+    submission = models.OneToOneField(Submission, on_delete=models.CASCADE, related_name="+")
+    baseline = models.ForeignKey(AiBaseline, on_delete=models.CASCADE, related_name="+")
+    score = models.FloatField()
+
+
 class CodeSnapshot(models.Model):
     """Editor contents saved every few seconds during a contest, so staff can replay
     how a solution was written: typed and reworked, or transcribed top to bottom."""

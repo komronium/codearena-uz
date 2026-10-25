@@ -27,6 +27,23 @@ ctx: the dashboard's, with first_problem, n_courses, joined_any, learning, upcom
   </section>
   {% endwith %}
 
+  <section aria-labelledby="next-title">
+    <div class="ca7-sec-h"><h2 id="next-title">{% trans "Yaqin orada" %}</h2>
+      <a class="ca7-r ca-link text-sm" href="{% url 'contests:list' %}">{% trans "Barcha musobaqalar" %}</a></div>
+    {% if upcoming %}
+    <ul class="ca-rows">
+      {% for c in upcoming|slice:":3" %}
+      <li class="ca-row"><div class="ca-row-main">
+        <div class="ca-row-title"><a class="ca-link" href="{% url 'contests:detail' c.pk %}">{{ c.title }}</a>{% include "contests/_tags.html" %}</div>
+        <div class="ca-row-meta tabular">{{ c.start|ztime:"d.m H:i" }} · {{ c.duration_label }}</div>
+      </div></li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <div class="ca-empty">{% trans "Yaqin orada musobaqa yo‘q. Shu orada yechilmagan masalalarni mashq qiling." %} <a class="ca-link" href="{% url 'problems:list' %}?status=new">{% trans "Yechilmagan masalalar" %}</a></div>
+    {% endif %}
+  </section>
+
 </div>
 
 <aside class="ca7-aside" aria-label="{% trans 'Qo‘shimcha' %}">

@@ -7,6 +7,7 @@ from django.utils import timezone
 
 from apps.accounts.models import User
 from apps.contests.models import Contest
+from apps.integrity.ai_match import match as match_ai
 from apps.integrity.models import SimilarityFlag
 from apps.integrity.similarity import MIN_LINES, THRESHOLD, code_lines, similarity
 from apps.submissions.models import Submission
@@ -75,6 +76,7 @@ class Command(BaseCommand):
         problem_ids = list(cps.values_list("problem_id", flat=True))
         for problem_id in problem_ids:
             subs = _candidates(contest, problem_id)
+            match_ai(contest, problem_id, subs)  # against the problem's AI baselines, if any were made
             best: dict[tuple, tuple[float, Submission, Submission]] = {}
             for a, b in combinations(subs, 2):
                 # different languages read too differently for a text similarity score to mean anything

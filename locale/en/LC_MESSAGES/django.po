@@ -3361,6 +3361,18 @@ msgid "AI belgisi"
 msgstr "AI mark"
 
 #: apps/integrity/evidence.py
+msgid "Boshqaning AI belgisi"
+msgstr "Someone else's AI marker"
+
+#: apps/integrity/evidence.py
+msgid "Belgisi boshqada chiqdi"
+msgstr "Marker turned up in another's code"
+
+#: apps/integrity/evidence.py
+msgid "AI yechimiga o‘xshash"
+msgstr "Similar to an AI solution"
+
+#: apps/integrity/evidence.py
 msgid "Tracker o‘chiq"
 msgstr "Tracker off"
 
@@ -3391,6 +3403,18 @@ msgstr "From one device: {names}"
 #: apps/integrity/evidence.py
 msgid "{problem}: kodda «{names}»"
 msgstr "{problem}: «{names}» in the code"
+
+#: apps/integrity/evidence.py
+msgid "{problem}: kodda {user} nusxasining belgisi «{names}»"
+msgstr "{problem}: the code carries {user}'s copy of the marker “{names}”"
+
+#: apps/integrity/evidence.py
+msgid "{problem}: belgisi {user} kodida chiqdi «{names}»"
+msgstr "{problem}: their marker turned up in {user}'s code “{names}”"
+
+#: apps/integrity/evidence.py
+msgid "{label}: {pct}% o‘xshash"
+msgstr "{label}: {pct}% similar"
 
 #: apps/integrity/evidence.py
 msgid "{labels_get_problem_id}: {len_bad} ta yuborish"
@@ -4939,16 +4963,16 @@ msgid "Hozircha xabar yo‘q. Duel chaqiruvlari va nishonlar shu yerda chiqadi."
 msgstr "No messages yet. Duel challenges and badges appear here."
 
 #: templates/_lang_switch.html templates/_lang_switch.html
-msgid "UZ"
-msgstr "UZ"
-
-#: templates/_lang_switch.html templates/_lang_switch.html
 msgid "English"
 msgstr "English"
 
 #: templates/_lang_switch.html templates/_lang_switch.html
 msgid "EN"
 msgstr "EN"
+
+#: templates/_lang_switch.html templates/_lang_switch.html
+msgid "UZ"
+msgstr "UZ"
 
 #: templates/_mod_tabs.html
 msgid "Boshqaruv bo‘limlari"
@@ -5135,8 +5159,12 @@ msgid "%(n)s<span class=\"sr-only\"> ta duel kutmoqda</span>"
 msgstr "%(n)s<span class=\"sr-only\"> duels waiting</span>"
 
 #: templates/_navbar.html
-msgid "%(nav_staff_total)s ta ish ko‘rib chiqishni kutmoqda"
-msgstr "%(nav_staff_total)s items waiting for review"
+msgid ""
+"Navbat: %(q)s · o‘xshash kod: %(f)s · shikoyat: %(r)s · reyting kutmoqda: "
+"%(t)s · qoralama: %(d)s"
+msgstr ""
+"Queue: %(q)s · similar code: %(f)s · reports: %(r)s · awaiting rating: %(t)s"
+" · drafts: %(d)s"
 
 #: templates/_navbar.html
 msgid "%(nav_staff_total)s<span class=\"sr-only\"> ta ish kutmoqda</span>"
@@ -5356,7 +5384,7 @@ msgstr "Rating distribution"
 msgid "%(n)s kishi · median %(median)s"
 msgstr "%(n)s people · median %(median)s"
 
-#: templates/accounts/_tbadge.html templates/accounts/_tbadge.html
+#: templates/accounts/_tbadge.html
 msgid "Hali olinmagan"
 msgstr "Not earned yet"
 
@@ -6370,6 +6398,10 @@ msgstr "verified"
 msgid ""
 "Hech kimga ko‘rinmaydi. Yangi emailni havola orqali qayta tasdiqlaysiz."
 msgstr "Visible to nobody. You confirm a new email again by a link."
+
+#: templates/accounts/profile_edit.html
+msgid "Saqlanmagan o‘zgarishlar bor"
+msgstr "You have unsaved changes"
 
 #: templates/accounts/profile_edit.html templates/learn/list.html
 msgid "Saqlash"
@@ -7626,6 +7658,10 @@ msgstr ""
 "falls: a quick answer earns more points."
 
 #: templates/classroom/duels.html
+msgid "Duel qanday o‘tadi"
+msgstr "How a duel works"
+
+#: templates/classroom/duels.html
 msgid "Sizni duelga chaqirishdi"
 msgstr "You've been challenged to a duel"
 
@@ -7755,6 +7791,13 @@ msgstr "No such user found"
 
 #: templates/classroom/duels.html
 msgid ""
+"%(n_questions)s ta savol, har biriga %(per_question)s soniya. Ko‘p ball "
+"to‘plagan g‘olib."
+msgstr ""
+"%(n_questions)s questions, %(per_question)s seconds each. More points wins."
+
+#: templates/classroom/duels.html
+msgid ""
 "%(n_questions)s ta savol, har biriga %(per_question)s soniya. To‘g‘ri javob "
 "10 soniyagacha 10 ball, keyin har 2 soniyada 1 ballga kamayib 5 ballgacha "
 "tushadi. Ko‘p ball to‘plagan g‘olib; ball teng bo‘lsa, umumiy vaqti kamida 5"
@@ -7795,15 +7838,15 @@ msgstr "Upcoming"
 
 #: templates/contests/_band.html templates/contests/_card.html
 msgid "Codeforces qoidasi"
-msgstr "Codeforces rule"
+msgstr "Scoring: Codeforces"
 
 #: templates/contests/_band.html templates/contests/_card.html
 msgid "ICPC qoidasi"
-msgstr "ICPC rule"
+msgstr "Scoring: ICPC"
 
 #: templates/contests/_band.html
 msgid "Ball qoidasi"
-msgstr "Points rule"
+msgstr "Scoring: points"
 
 #: templates/contests/_band.html templates/contests/_card.html
 msgid "Reytingli"
@@ -7904,6 +7947,14 @@ msgstr "%(problems)s problems"
 #: templates/contests/_band.html
 msgid "%(n_participants)s ishtirokchi"
 msgstr "%(n_participants)s participants"
+
+#: templates/contests/_band.html
+msgid ""
+"Qatnashsangiz, halollik qoidalariga rozisiz: sahifadan chiqish, kod qo‘yish "
+"va muharrir tarixi yoziladi, kodingizni tushuntirish so‘ralishi mumkin."
+msgstr ""
+"By joining you accept the honor code: leaving the page, pasting and editor "
+"history are recorded, and you may be asked to explain your code."
 
 #: templates/contests/_card.html
 msgid "ball qoidasi"
@@ -9000,7 +9051,7 @@ msgstr "AI penalty"
 msgid "· xato urinish hisoblandi, masala bloklangan"
 msgstr "· counted as a wrong attempt, the problem is blocked"
 
-#: templates/contests/submissions.html templates/moderation/submit.html
+#: templates/contests/submissions.html templates/integrity/contest_report.html
 msgid "Tiklash"
 msgstr "Restore"
 
@@ -9098,6 +9149,24 @@ msgid ""
 msgstr ""
 "7 questions with an opponent, 20 seconds each. A new contest appears here "
 "when it is announced."
+
+#: templates/home/_dash_new.html
+msgid "Yaqin orada"
+msgstr "Coming up"
+
+#: templates/home/_dash_new.html
+msgid "Barcha musobaqalar"
+msgstr "All contests"
+
+#: templates/home/_dash_new.html
+msgid ""
+"Yaqin orada musobaqa yo‘q. Shu orada yechilmagan masalalarni mashq qiling."
+msgstr ""
+"No contest is coming up. Meanwhile, practise problems you haven't solved."
+
+#: templates/home/_dash_new.html
+msgid "Yechilmagan masalalar"
+msgstr "Unsolved problems"
 
 #: templates/home/_dash_new.html templates/home/dashboard.html
 msgid "Qo‘shimcha"
@@ -9629,6 +9698,10 @@ msgid "Hali amal yo‘q."
 msgstr "No actions yet."
 
 #: templates/integrity/_tracker.html
+msgid "Sahifadan chiqdingiz — bu vaqti bilan qayd etildi."
+msgstr "You left the page — this is recorded with its time."
+
+#: templates/integrity/_tracker.html
 msgid "Musobaqa sahifasidan chiqdingiz"
 msgstr "You left the contest page"
 
@@ -9693,23 +9766,40 @@ msgid "Xavf bo‘yicha saralangan"
 msgstr "Sorted by risk"
 
 #: templates/integrity/contest_report.html
+msgid "Qanday o‘qiladi"
+msgstr "How to read this"
+
+#: templates/integrity/contest_report.html
 msgid ""
-"Chiqish — musobaqa sahifalaridan tashqariga (boshqa oyna, varaq yoki "
-"saytning boshqa sahifasi) · Tashqarida — jami vaqt · Paste — muharrirga "
-"qo‘yish urinishi · Tez — g‘ayrioddiy tez matn kiritish · Nusxa — shart "
-"matnidan nusxa. Dalillar — serverda tekshirilgani, brauzerda o‘chirib "
-"bo‘lmaydi: tracker o‘chiq (×6), muharrirda yozilmagan kod (×8), kod sakrashi"
-" (×3), umumiy qurilma (×10), ikki qurilma (×5), o‘xshash kod (×8). Xavf = "
-"paste×5 + tez×3 + nusxa×2 + chiqish + tashqarida daqiqa + shubhali yechim×4 "
-"+ dalillar."
+"Sahifadan chiqish — musobaqa sahifalaridan tashqariga (boshqa oyna, varaq "
+"yoki saytning boshqa sahifasi) · Tashqarida — jami vaqt · Paste — muharrirga"
+" qo‘yish urinishi · Tez — g‘ayrioddiy tez matn kiritish · Nusxa — shart "
+"matnidan nusxa."
 msgstr ""
-"Leave — going outside the contest pages (another window, tab or another page"
-" of the site) · Away — the total time · Paste — an attempt to paste into the"
-" editor · Fast — unusually fast typing · Copy — copying from the statement. "
-"Evidence — checked on the server, can't be turned off in the browser: "
-"tracker off (×6), code not written in the editor (×8), code jumps (×3), "
-"shared device (×10), two devices (×5), similar code (×8). Risk = paste×5 + "
-"fast×3 + copy×2 + leaves + minutes away + suspicious solve×4 + evidence."
+"Left page — going outside the contest pages (another window, tab or another "
+"page of the site) · Away — the total time · Paste — an attempt to paste into"
+" the editor · Fast — unusually fast typing · Copy — copying from the "
+"statement."
+
+#: templates/integrity/contest_report.html
+msgid ""
+"Dalillar serverda tekshiriladi, brauzerda o‘chirib bo‘lmaydi. Har biri "
+"hakamlarga maslahat, hukm emas. Og‘irligi:"
+msgstr ""
+"Evidence is checked on the server and can't be turned off in the browser. "
+"Each is a hint for the judges, not a verdict. Weight:"
+
+#: templates/integrity/contest_report.html
+msgid ""
+"Xavf = paste×5 + tez×3 + nusxa×2 + chiqishlar + tashqarida daqiqa + shubhali"
+" yechim×4 + dalillar + oldingi raundlardagi qarorlar (ko‘pi bilan 12)."
+msgstr ""
+"Risk = paste×5 + fast×3 + copy×2 + leaves + minutes away + suspicious "
+"solve×4 + evidence + decisions in earlier rounds (12 at most)."
+
+#: templates/integrity/contest_report.html
+msgid "Sahifadan chiqish"
+msgstr "Left page"
 
 #: templates/integrity/contest_report.html
 msgid "Tashqarida"
@@ -9741,8 +9831,20 @@ msgid "Oxirgi hodisa"
 msgstr "Last event"
 
 #: templates/integrity/contest_report.html
+msgid "Oldingi musobaqalarda hakamlar qaror qilgan"
+msgstr "Decided by the judges in earlier rounds"
+
+#: templates/integrity/contest_report.html
 msgid "Tavsiya: diskvalifikatsiya"
 msgstr "Recommended: disqualification"
+
+#: templates/integrity/contest_report.html
+msgid "Bekor"
+msgstr "Void"
+
+#: templates/integrity/contest_report.html
+msgid "AI jarima"
+msgstr "AI penalty"
 
 #: templates/integrity/contest_report.html
 msgid "Urinishlari, masalalar bo‘yicha"
@@ -9755,6 +9857,11 @@ msgid ""
 msgstr ""
 "Deep check: all of their attempts are compared with everyone's and with "
 "earlier solutions"
+
+#: templates/integrity/contest_report.html
+#: templates/integrity/contest_report.html
+msgid "Chuqur tekshiruv"
+msgstr "Deep check"
 
 #: templates/integrity/contest_report.html
 #: templates/integrity/contest_report.html
@@ -9812,6 +9919,18 @@ msgstr ""
 "10 minutes after the contest ends, all problems are checked automatically."
 
 #: templates/integrity/contest_report.html
+msgid "AI namunalari"
+msgstr "AI solutions"
+
+#: templates/integrity/contest_report.html
+msgid ""
+"Masala uchun AI yozgan yechimlar soni: yuborilganlar shular bilan ham "
+"solishtiriladi"
+msgstr ""
+"How many solutions an AI wrote for this problem: submissions are compared "
+"with them too"
+
+#: templates/integrity/contest_report.html
 msgid "Tekshiriladigan masalalar"
 msgstr "Problems to check"
 
@@ -9842,10 +9961,6 @@ msgstr "sent later"
 #: templates/integrity/contest_report.html
 msgid "Bitta ishtirokchining barcha urinishlari solishtirilganda topilgan"
 msgstr "Found by comparing all of one participant's attempts"
-
-#: templates/integrity/contest_report.html
-msgid "Chuqur tekshiruv"
-msgstr "Deep check"
 
 #: templates/integrity/contest_report.html
 #: templates/integrity/contest_report.html
@@ -9945,6 +10060,10 @@ msgid ""
 msgstr ""
 "<a href=\"#suspicious\">Suspicious solutions <span>%(suspicious)s</span></a>"
 " <a href=\"#journal\">Activity log <span>%(audit)s</span></a>"
+
+#: templates/integrity/contest_report.html
+msgid "Oldin: DQ %(dq)s, bekor %(voided)s · %(played)s ta raund"
+msgstr "Before: DQ %(dq)s, voided %(voided)s · %(played)s rounds"
 
 #: templates/integrity/contest_report.html
 msgid "Tavsiya: %(c_open_problems)s ni bekor qilish"
@@ -10629,13 +10748,9 @@ msgstr "Start here"
 msgid "Yashirin"
 msgstr "Hidden"
 
-#: templates/learn/hub.html
-msgid "Siz shu yerdasiz"
-msgstr "You are here"
-
 #: templates/learn/hub.html templates/moderation/plans.html
 msgid "Qisman"
-msgstr "Partial"
+msgstr "Partly ready"
 
 #: templates/learn/hub.html
 msgid "Taxminiy vaqt"
@@ -10660,10 +10775,6 @@ msgstr "Readiness"
 #: templates/learn/hub.html
 msgid "<b>Bunday kurs topilmadi</b>Boshqa so‘z bilan qidirib ko‘ring."
 msgstr "<b>No such course found</b>Try searching with another word."
-
-#: templates/learn/hub.html
-msgid "Yana %(soon)s ta kurs tayyorlanmoqda."
-msgstr "%(soon)s more courses are being prepared."
 
 #: templates/learn/hub.html
 msgid "Tez orada <span class=\"tabular\">%(soon)s</span>"
@@ -11302,7 +11413,7 @@ msgstr "Not published"
 
 #: templates/moderation/contests.html
 msgid "hisoblangan"
-msgstr "applied"
+msgstr "rating applied"
 
 #: templates/moderation/contests.html
 msgid "reyting kutmoqda"
@@ -11582,13 +11693,13 @@ msgstr "The pending work first, then the site's state"
 msgid "AI bilan tuzish"
 msgstr "Create with AI"
 
-#: templates/moderation/dashboard.html
-msgid "Duellarni yopish"
-msgstr "Close the duels"
-
 #: templates/moderation/dashboard.html templates/moderation/dashboard.html
 msgid "Kutayotgan ishlar"
 msgstr "Pending work"
+
+#: templates/moderation/dashboard.html
+msgid "Kutayotgan ish yo‘q."
+msgstr "Nothing is waiting."
 
 #: templates/moderation/dashboard.html
 msgid "Tasdiq kutayotgan masala"
@@ -11678,6 +11789,10 @@ msgstr "Site state"
 #: templates/moderation/dashboard.html templates/moderation/problems.html
 msgid "Mavzular"
 msgstr "Topics"
+
+#: templates/moderation/dashboard.html
+msgid "Duellarni yopish"
+msgstr "Close the duels"
 
 #: templates/moderation/dashboard.html templates/moderation/queue.html
 msgid "«%(p_title)s» masalasini rad etishni tasdiqlaysizmi?"
@@ -12447,13 +12562,13 @@ msgstr ""
 "PNG, JPG, GIF or WebP (at most 10 MB). It appears under the statement as a "
 "separate illustration."
 
-#: templates/moderation/submit.html templates/problems/detail.html
+#: templates/moderation/submit.html templates/moderation/submit.html
 msgid "Kirish ma’lumotlari"
-msgstr "Input data"
+msgstr "Input"
 
 #: templates/moderation/submit.html templates/problems/detail.html
 msgid "Chiqish ma’lumotlari"
-msgstr "Output data"
+msgstr "Output"
 
 #: templates/moderation/submit.html
 msgid "SQL ma’lumotlar bazasi"
@@ -13214,7 +13329,7 @@ msgstr ""
 
 #: templates/problems/detail.html
 msgid "Baholash"
-msgstr "Scoring"
+msgstr "Rate"
 
 #: templates/problems/detail.html
 msgid "Yechim"
@@ -14163,7 +14278,7 @@ msgstr "Problem list"
 
 #: templates/problems/list.html
 msgid "Masala qidirish…"
-msgstr "Search for a problem…"
+msgstr "Search…"
 
 #: templates/problems/list.html
 msgid "Masala nomi bo‘yicha qidirish"
@@ -14205,7 +14320,7 @@ msgstr "Random"
 msgid "Saqlanganlar: keyinroq yechish uchun saqlangan masalalar"
 msgstr "Saved: problems saved to solve later"
 
-#: templates/problems/list.html
+#: templates/problems/list.html templates/problems/list.html
 msgid "Saqlanganlar"
 msgstr "Saved"
 
@@ -14248,10 +14363,6 @@ msgstr ""
 #: templates/problems/list.html
 msgid "SQL so‘rov masalasi"
 msgstr "SQL query problem"
-
-#: templates/problems/list.html
-msgid "Foiz 5 ta urinishdan keyin ko‘rsatiladi"
-msgstr "The percentage is shown after 5 attempts"
 
 #: templates/problems/list.html
 msgid ""
@@ -14317,6 +14428,14 @@ msgstr "For “%(q)s”:"
 #: templates/problems/list.html
 msgid "%(problems_paginator_count)s ta masala ·"
 msgstr "%(problems_paginator_count)s problems ·"
+
+#: templates/problems/list.html
+msgid ""
+"%(p_ac_count)s / %(p_attempts)s urinish qabul qilingan; foiz 5 ta urinishdan"
+" keyin ko‘rsatiladi"
+msgstr ""
+"%(p_ac_count)s of %(p_attempts)s attempts accepted; the percentage shows "
+"after 5 attempts"
 
 #: templates/problems/list.html
 msgid ""

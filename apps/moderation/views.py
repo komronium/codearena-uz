@@ -866,7 +866,8 @@ def contests(request):
         c.to_rate = c.is_rated and not c.rating_applied and c.end <= now
         c.blind_now = c.blind and c.end > now
     return render(request, "moderation/contests.html", {"contests": rows, "state": state, "q": q, "writer": writer,
-                                                        "n_draft": sum(1 for c in rows if c.is_draft)})
+                                                        "n_draft": sum(1 for c in rows if c.is_draft),
+                                                        "has_authors": any(c.authors.all() for c in rows)})
 
 
 @setter_required

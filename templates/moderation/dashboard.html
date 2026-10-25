@@ -19,16 +19,13 @@ site's figures; the side column has every staff section.{% endcomment %}
 {% endblock %}
 {% block content %}
 <div class="ca7-col">
-  <section class="mb-5" aria-label="{% trans 'Duellarni yopish' %}">
-    {% include "moderation/_duel_switch.html" %}
-  </section>
-
   <section class="dash-todo" aria-label="{% trans 'Kutayotgan ishlar' %}">
-    <a href="{% url 'moderation:queue' %}" class="{% if todo.queue %}is-on{% endif %}"><b class="tabular">{{ todo.queue }}</b><span>{% trans "Tasdiq kutayotgan masala" %}</span></a>
-    <a href="{% url 'moderation:contests' %}?state=torate" class="{% if todo.to_rate %}is-on{% endif %}"><b class="tabular">{{ todo.to_rate }}</b><span>{% trans "Reyting kutayotgan raund" %}</span></a>
-    <a href="{% url 'integrity:reports' %}" class="{% if todo.flags or todo.reports %}is-on{% endif %}"><b class="tabular">{{ todo.flags|add:todo.reports }}</b><span>{% trans "Belgi va shikoyat" %}</span></a>
-    <a href="{% url 'moderation:translations' %}" class="{% if todo.translations %}is-on{% endif %}"><b class="tabular">{{ todo.translations }}</b><span>{% trans "Tasdiqlanmagan tarjima" %}</span></a>
-    <a href="{% url 'moderation:contests' %}?state=draft" class="{% if todo.rounds %}is-on{% endif %}"><b class="tabular">{{ todo.rounds }}</b><span>{% trans "Qoralama raund" %}</span></a>
+    {% if not todo.queue and not todo.to_rate and not todo.flags and not todo.reports and not todo.translations and not todo.rounds %}<p class="ca7-quiet !m-0 flex items-center gap-2"><i data-lucide="circle-check-big" class="lu text-ok" aria-hidden="true"></i>{% trans "Kutayotgan ish yo‘q." %}</p>{% endif %}
+    {% if todo.queue %}<a href="{% url 'moderation:queue' %}" class="{% if todo.queue %}is-on{% endif %}"><b class="tabular">{{ todo.queue }}</b><span>{% trans "Tasdiq kutayotgan masala" %}</span></a>{% endif %}
+    {% if todo.to_rate %}<a href="{% url 'moderation:contests' %}?state=torate" class="{% if todo.to_rate %}is-on{% endif %}"><b class="tabular">{{ todo.to_rate }}</b><span>{% trans "Reyting kutayotgan raund" %}</span></a>{% endif %}
+    {% if todo.flags or todo.reports %}<a href="{% url 'integrity:reports' %}" class="{% if todo.flags or todo.reports %}is-on{% endif %}"><b class="tabular">{{ todo.flags|add:todo.reports }}</b><span>{% trans "Belgi va shikoyat" %}</span></a>{% endif %}
+    {% if todo.translations %}<a href="{% url 'moderation:translations' %}" class="{% if todo.translations %}is-on{% endif %}"><b class="tabular">{{ todo.translations }}</b><span>{% trans "Tasdiqlanmagan tarjima" %}</span></a>{% endif %}
+    {% if todo.rounds %}<a href="{% url 'moderation:contests' %}?state=draft" class="{% if todo.rounds %}is-on{% endif %}"><b class="tabular">{{ todo.rounds }}</b><span>{% trans "Qoralama raund" %}</span></a>{% endif %}
     <a href="{% if next_round %}{% url 'moderation:contest_edit' next_round.pk %}{% else %}{% url 'moderation:contest_new' %}{% endif %}"><b class="tabular">{% if next_round %}{{ next_round.start|date:"d.m" }}{% else %}—{% endif %}</b><span>{% if next_round %}{{ next_round.title }}{% else %}{% trans "Kelgusi raund yo‘q" %}{% endif %}</span></a>
   </section>
   <section aria-labelledby="queue-title">
@@ -93,6 +90,10 @@ site's figures; the side column has every staff section.{% endcomment %}
       <a href="{% url 'moderation:submissions' %}"><dd class="tabular">{{ counts.submissions }}</dd><dt>{% trans "Urinishlar" %}</dt></a>
       <a href="{% url 'moderation:tags' %}"><dd class="tabular">{{ counts.tags }}</dd><dt>{% trans "Mavzular" %}</dt></a>
     </dl>
+  </section>
+
+  <section aria-label="{% trans 'Duellarni yopish' %}">
+    {% include "moderation/_duel_switch.html" %}
   </section>
 </div>
 {% endblock %}

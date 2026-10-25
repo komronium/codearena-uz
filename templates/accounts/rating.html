@@ -27,13 +27,13 @@ own row marked.{% endcomment %}
         <i data-lucide="search" class="lu" aria-hidden="true"></i><input class="ca7-fld" type="search" name="q" value="{{ q }}" placeholder="{% trans 'Foydalanuvchi…' %}" aria-label="{% trans 'Foydalanuvchi nomi' %}" autocomplete="off" spellcheck="false">
       </form>
       {% if user.is_authenticated and not q %}<a class="ca-btn ca-btn-soft" href="#me"><i data-lucide="crosshair" class="lu" aria-hidden="true"></i>{% trans "Mening o‘rnim" %}</a>{% endif %}
+      {% if geo.countries %}{% include "accounts/_geo_filters.html" %}{% if geo.active %}<a class="ca-link text-sm" href="{% querystring country=None city=None school=None page=None %}">{% trans "Tozalash" %}</a>{% endif %}{% endif %}
       <nav class="ca7-seg ca7-tools-r" aria-label="{% trans 'Saralash' %}">
         <a href="{% querystring sort=None page=None %}"{% if not sort %} aria-current="true"{% endif %}>{% trans "Reyting" %}</a>
         <a href="{% querystring sort='delta' page=None %}"{% if sort == 'delta' %} aria-current="true"{% endif %}>{% trans "Oxirgi o‘zgarish" %}</a>
         <a href="{% querystring sort='contests' page=None %}"{% if sort == 'contests' %} aria-current="true"{% endif %}>{% trans "Musobaqalar soni" %}</a>
       </nav>
     </div>
-    {% if geo.countries %}<div class="ca7-trow">{% include "accounts/_geo_filters.html" %}{% if geo.active %}<a class="ca-link text-sm" href="{% querystring country=None city=None school=None page=None %}">{% trans "Tozalash" %}</a>{% endif %}</div>{% endif %}
   </div>
   {% if q or tier_sel or geo.active %}<p class="ca7-found">{% if geo.country %}{% flag geo.country %} <b>{{ geo.country_name }}{% if geo.city %}, {{ geo.city|city_label }}{% endif %}{% if geo.school %}, {{ geo.school|school_label }}{% endif %}</b>{% endif %}{% if tier_sel %}<b class="ca-tier-ink" style="--tier: {% for t in tiers %}{% if t.name == tier_sel %}{{ t.color }}{% endif %}{% endfor %}">{{ tier_sel }}</b>{% endif %}{% if q %} «{{ q }}»{% endif %}{% blocktrans with users_paginator_count=users.paginator.count %}: {{ users_paginator_count }} ta ·{% endblocktrans %} <a class="ca-link" href="{% url 'rating' %}">{% trans "hammasi" %}</a></p>{% endif %}
   {% if users %}
@@ -44,10 +44,10 @@ own row marked.{% endcomment %}
     {% for u in users %}
     <tr{% if u == user %} class="ca-row-me" id="me"{% endif %}>
       <td class="text-center">{% if u.rank <= 3 and not q %}<span class="ca7-medal m{{ u.rank }}">{{ u.rank }}</span>{% else %}<span class="tabular text-mute">{{ u.rank }}</span>{% endif %}</td>
-      <td>{% if u == user %}{% include "accounts/_u7.html" with u=u you=True flag=True %}{% else %}{% include "accounts/_u7.html" with u=u you=False flag=True %} <span class="text-xs text-mute">{{ u.rating|tier_name }}</span>{% endif %}</td>
+      <td>{% if u == user %}{% include "accounts/_u7.html" with u=u you=True flag=True %}{% else %}{% include "accounts/_u7.html" with u=u you=False flag=True %}{% endif %}</td>
       <td class="hidden text-right tabular sm:table-cell">{{ u.contest_count }}</td>
       <td class="text-right tabular font-semibold {% if u.last_delta > 0 %}text-ok{% elif u.last_delta < 0 %}text-bad{% else %}text-mute{% endif %}">{{ u.last_delta|signed }}</td>
-      <td class="text-right tabular font-bold"><span class="ca-tier-ink" style="--tier: {{ u.rating|tier_color }}">{{ u.rating }}</span></td>
+      <td class="text-right tabular font-bold"><span class="ca-tier-ink" style="--tier: {{ u.rating|tier_color }}" title="{{ u.rating|tier_name }}">{{ u.rating }}<span class="sr-only"> {{ u.rating|tier_name }}</span></span></td>
     </tr>
     {% endfor %}
     </tbody>

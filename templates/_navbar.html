@@ -17,7 +17,7 @@ menu sheet (base.html). Badges: a pulsing dot while a contest runs, waiting duel
     {% endwith %}
     {% endif %}
     {% if user.is_staff %}
-    <a href="{% url 'moderation:dashboard' %}" class="ca-nav-link is-more{% if ns == 'moderation' or ns == 'integrity' %} is-active{% endif %}"{% if ns == 'moderation' or ns == 'integrity' %} aria-current="page"{% endif %}{% if nav.staff.total %} title="{% blocktrans with nav_staff_total=nav.staff.total %}{{ nav_staff_total }} ta ish ko‘rib chiqishni kutmoqda{% endblocktrans %}"{% endif %}>{% trans "Admin" %}{% if nav.staff.total %}<b class="ca-badge-n is-warn">{% blocktrans with nav_staff_total=nav.staff.total %}{{ nav_staff_total }}<span class="sr-only"> ta ish kutmoqda</span>{% endblocktrans %}</b>{% endif %}</a>
+    <a href="{% url 'moderation:dashboard' %}" class="ca-nav-link is-more{% if ns == 'moderation' or ns == 'integrity' %} is-active{% endif %}"{% if ns == 'moderation' or ns == 'integrity' %} aria-current="page"{% endif %}{% if nav.staff.total %} title="{% blocktrans with q=nav.staff.queue f=nav.staff.flags r=nav.staff.reports t=nav.staff.to_rate d=nav.staff.rounds %}Navbat: {{ q }} · o‘xshash kod: {{ f }} · shikoyat: {{ r }} · reyting kutmoqda: {{ t }} · qoralama: {{ d }}{% endblocktrans %}"{% endif %}>{% trans "Admin" %}{% if nav.staff.total %}<b class="ca-badge-n is-warn">{% blocktrans with nav_staff_total=nav.staff.total %}{{ nav_staff_total }}<span class="sr-only"> ta ish kutmoqda</span>{% endblocktrans %}</b>{% endif %}</a>
     {% endif %}
   </nav>
   <div class="ca-nav-tools">

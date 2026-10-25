@@ -120,7 +120,7 @@ the console (samples, your own input, the run's result) and the one gold "Yubori
         </div>
       </div>
 
-      {% if translation_pending %}<p class="ca-alert mb-3 text-sm" role="note">{% trans "Bu masalaning tarjimasi hali tayyor emas: shart asl tilda ko‘rsatilmoqda." %}</p>{% endif %}
+      {% if translation_pending %}<p class="mb-3 flex items-center gap-2 text-xs text-mute" role="note"><i data-lucide="languages" class="lu" aria-hidden="true"></i>{% trans "Bu masalaning tarjimasi hali tayyor emas: shart asl tilda ko‘rsatilmoqda." %}</p>{% endif %}
       <div class="ca-statement">
         <div class="prose max-w-none">{{ statement_html|safe }}</div>
         {% if problem.statement_image %}
@@ -187,14 +187,14 @@ the console (samples, your own input, the run's result) and the one gold "Yubori
             <div class="ca-example-grid">
             <div class="ca-sample">
               <div class="ca-sample-head">
-                <span><i data-lucide="arrow-down-to-line" class="lu" aria-hidden="true"></i>{% trans "Kirish" %}</span>
+                <span><i data-lucide="arrow-down-to-line" class="lu" aria-hidden="true"></i>{% trans "Kirish ma’lumotlari" %}</span>
                 <button type="button" class="ca-copy-btn" data-copy-target="sample-in-{{ forloop.counter }}" title="{% trans 'Nusxalash' %}" aria-label="{% trans 'Kirishni nusxalash' %}"><i data-lucide="copy" class="lu" aria-hidden="true"></i></button>
               </div>
               <pre id="sample-in-{{ forloop.counter }}">{{ t.input }}</pre>
             </div>
             <div class="ca-sample">
               <div class="ca-sample-head">
-                <span><i data-lucide="arrow-up-from-line" class="lu" aria-hidden="true"></i>{% trans "Chiqish" %}</span>
+                <span><i data-lucide="arrow-up-from-line" class="lu" aria-hidden="true"></i>{% trans "Chiqish ma’lumotlari" %}</span>
                 <button type="button" class="ca-copy-btn" data-copy-target="sample-out-{{ forloop.counter }}" title="{% trans 'Nusxalash' %}" aria-label="{% trans 'Chiqishni nusxalash' %}"><i data-lucide="copy" class="lu" aria-hidden="true"></i></button>
               </div>
               <pre id="sample-out-{{ forloop.counter }}">{{ t.expected }}</pre>

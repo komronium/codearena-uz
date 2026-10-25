@@ -71,7 +71,7 @@ add a topic). The "Testsiz" warning is one counted filter, not a line on every r
   <tr>
     <td><input type="checkbox" name="ids" value="{{ p.pk }}" form="bulk" class="bulk-one" aria-label="{{ p.title }}"></td>
     <td class="ca-pid tabular">{{ p.pk|stringformat:"04d" }}</td>
-    <td class="min-w-[13rem]"><a class="ca-link font-medium" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a>{% if p.kind == 'sql' %} <span class="st st-off">SQL</span>{% endif %}<small class="block truncate text-xs text-mute" translate="no">{{ p.slug }}</small></td>
+    <td class="min-w-[13rem]"><a class="ca-link font-medium" href="{% url 'problems:detail' p.slug %}" title="{{ p.slug }}">{{ p.title }}</a>{% if p.kind == 'sql' %} <span class="st st-off">SQL</span>{% endif %}</td>
     <td><span class="ca-diff ca-diff-{{ p.difficulty }}">{{ p.get_difficulty_display }}</span></td>
     <td class="text-right tabular{% if p.kind == 'code' and not p.n_tests %} text-bad font-bold{% endif %}">{{ p.n_tests }}</td>
     <td class="text-right tabular text-mute">{{ p.n_solved }}</td>

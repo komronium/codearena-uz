@@ -103,13 +103,14 @@ _ALLOWED_ATTRS = {
 _markdown = mistune.create_markdown(plugins=["table"])
 
 
-def _render_statement(statement_md: str) -> str:
+def _render_statement(statement_md: str, user_id: int | None = None) -> str:
     # mistune (not python-markdown): CommonMark-compliant, so a list right after a
     # paragraph with no blank line — as the editor's own live preview renders it —
     # is recognized here too, instead of collapsing into the paragraph's text.
     html = _markdown(statement_md)
-    # an [[ai: …]] note becomes its hidden span after sanitizing (apps.problems.ai_marks)
-    return ai_marks.render(bleach.clean(html, tags=_ALLOWED_TAGS, attributes=_ALLOWED_ATTRS))
+    # an [[ai: …]] note becomes its hidden span after sanitizing (apps.problems.ai_marks); a signed-in
+    # reader's span names their own copy of the marker's name
+    return ai_marks.render(bleach.clean(html, tags=_ALLOWED_TAGS, attributes=_ALLOWED_ATTRS), user_id)
 
 
 # Clickable column -> ordering expression. Difficulty is the problem's rating (difficulty.py).
@@ -580,6 +581,7 @@ def problem_detail(request, slug):
         src = Submission.objects.filter(pk=int(from_pk), user=request.user, problem=problem).select_related("language").first()
         if src is not None:
             preload = {"source": src.source, "language": src.language.code, "id": src.pk}
+    reader_id = request.user.pk if request.user.is_authenticated else None
     return render(
         request,
         "problems/detail.html",
@@ -615,14 +617,14 @@ def problem_detail(request, slug):
             "stats": _problem_stats(problem) if contest is None else None,
             "prev_problem": public.filter(id__lt=problem.id).order_by("-id").first(),
             "next_problem": public.filter(id__gt=problem.id).order_by("id").first(),
-            "statement_html": _render_statement(localized(problem, "statement_md")),
+            "statement_html": _render_statement(localized(problem, "statement_md"), reader_id),
             "translation_pending": problem.pending(),
             # KaTeX (300 KB) only for a statement that has a formula in it
             "has_math": any("$" in (text or "") for text in (localized(problem, "statement_md"), localized(problem, "input_md"), localized(problem, "output_md"))),
-            "input_html": _render_statement(localized(problem, "input_md"))
+            "input_html": _render_statement(localized(problem, "input_md"), reader_id)
             if problem.input_md
             else "",
-            "output_html": _render_statement(localized(problem, "output_md"))
+            "output_html": _render_statement(localized(problem, "output_md"), reader_id)
             if problem.output_md
             else "",
             "contest_problem": contest.contest_problems.filter(problem=problem).first()

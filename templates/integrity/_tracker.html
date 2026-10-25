@@ -6,6 +6,7 @@ long they were away when they come back. Moving between the contest page and its
 pages, submitting, and reloading are not leaves. Problem pages also send editor snapshots
 for staff replay.
 {% endcomment %}
+<p id="ca-away-toast" class="ca-away-toast" role="status" hidden><i data-lucide="eye-off" class="lu" aria-hidden="true"></i>{% trans "Sahifadan chiqdingiz — bu vaqti bilan qayd etildi." %}</p>
 <dialog id="ca-away" class="ca-dialog" aria-labelledby="ca-away-title">
   <div class="px-6 pb-5 pt-6 text-center">
     <span class="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-full bg-warn-soft text-warn"><i data-lucide="eye-off" class="lu !h-6 !w-6" aria-hidden="true"></i></span>
@@ -58,6 +59,13 @@ for staff replay.
       showCounter(n);
       document.getElementById("ca-away-n").textContent = n;
       document.getElementById("ca-away-t").textContent = fmt(ms);
+      if (n < 3 && ms < 60000) {  // a first short look elsewhere gets a quiet notice; the dialog is for repeats and long absences
+        const toast = document.getElementById("ca-away-toast");
+        toast.hidden = false;
+        clearTimeout(toast.t);
+        toast.t = setTimeout(() => { toast.hidden = true; }, 6000);
+        return;
+      }
       const d = document.getElementById("ca-away");
       if (!d.open) d.showModal();
     }

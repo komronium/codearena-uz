@@ -40,7 +40,7 @@ compact=True: the verdict chip only.{% endcomment %}
     <span class="ca7-r flex items-center gap-3 text-sm text-mute">{% include "submissions/_vd.html" with v=first_fail.verdict sub=None %}<span class="tabular">{% blocktrans with first_fail_exec_ms=first_fail.exec_ms %}{{ first_fail_exec_ms }} ms{% endblocktrans %}{% if first_fail.mem_kb %} · {% widthratio first_fail.mem_kb 1024 1 %} {% trans "MB" %}{% endif %}</span></span></div>
   {% if first_fail.testcase.is_sample %}
   <div class="ca7-tfail-io">
-    <div><p>{% trans "Kirish" %}</p><pre>{{ first_fail.testcase.input }}</pre></div>
+    <div><p>{% trans "Kirish ma’lumotlari" %}</p><pre>{{ first_fail.testcase.input }}</pre></div>
     <div><p>{% trans "Kutilgan" %}</p><pre>{{ first_fail.testcase.expected }}</pre></div>
     <div><p>{% trans "Sizning chiqishingiz" %}</p><pre>{{ first_fail.stdout_excerpt|default:"—" }}</pre></div>
   </div>

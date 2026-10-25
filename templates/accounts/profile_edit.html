@@ -15,7 +15,7 @@
     <a href="#malumot"><i data-lucide="download" class="lu" aria-hidden="true"></i>{% trans "Ma’lumotlarim" %}</a>
   </nav>
   <div class="min-w-0 max-w-lg">
-  <form method="post" enctype="multipart/form-data" class="ca-panel !p-0 overflow-hidden scroll-mt-20" id="profil">{% csrf_token %}
+  <form method="post" enctype="multipart/form-data" class="ca-panel !p-0 overflow-clip scroll-mt-20" id="profil">{% csrf_token %}
     <div class="flex items-center gap-5 border-b border-line px-6 py-5">
       <div class="relative shrink-0">
         {% if user.avatar %}
@@ -61,11 +61,12 @@
         <p class="mt-1.5 text-[0.8125rem] text-mute">{% trans "Hech kimga ko‘rinmaydi. Yangi emailni havola orqali qayta tasdiqlaysiz." %}</p>
       </div>
     </div>
-    <div class="flex items-center justify-between gap-3 border-t border-line bg-paper/60 px-6 py-4">
-      <span></span>
+    <div class="sticky bottom-0 z-10 flex items-center justify-between gap-3 border-t border-line bg-surface/95 px-6 py-4 backdrop-blur">
+      <span id="profil-dirty" class="text-sm text-mute" hidden>{% trans "Saqlanmagan o‘zgarishlar bor" %}</span><span></span>
       <button type="submit" class="ca-btn ca-btn-gold"><i data-lucide="check" class="lu" aria-hidden="true"></i>{% trans "Saqlash" %}</button>
     </div>
   </form>
+  <script>document.getElementById("profil").addEventListener("input", () => { document.getElementById("profil-dirty").hidden = false; });</script>
   <section class="ca-panel mt-6 flex scroll-mt-20 flex-wrap items-center justify-between gap-3" id="xavfsizlik" aria-labelledby="security-title">
     <div class="min-w-0">
       <h2 id="security-title" class="text-[1.0625rem] font-bold"><i data-lucide="key-round" class="lu mr-1.5 text-accent" aria-hidden="true"></i>{% trans "Xavfsizlik" %}</h2>

@@ -2539,6 +2539,15 @@ msgstr "{weekday}, {day}-{month}"
 msgid "AI belgisi"
 msgstr "AI belgisi"
 
+msgid "Boshqaning AI belgisi"
+msgstr "Boşqaning AI belgisi"
+
+msgid "Belgisi boshqada chiqdi"
+msgstr "Belgisi boşqada çiqdi"
+
+msgid "AI yechimiga o‘xshash"
+msgstr "AI yeçimiga öxşaş"
+
 msgid "Tracker o‘chiq"
 msgstr "Tracker öçiq"
 
@@ -2562,6 +2571,15 @@ msgstr "Bir qurilmadan: {names}"
 
 msgid "{problem}: kodda «{names}»"
 msgstr "{problem}: kodda «{names}»"
+
+msgid "{problem}: kodda {user} nusxasining belgisi «{names}»"
+msgstr "{problem}: kodda {user} nusxasining belgisi «{names}»"
+
+msgid "{problem}: belgisi {user} kodida chiqdi «{names}»"
+msgstr "{problem}: belgisi {user} kodida çiqdi «{names}»"
+
+msgid "{label}: {pct}% o‘xshash"
+msgstr "{label}: {pct}% öxşaş"
 
 msgid "{labels_get_problem_id}: {len_bad} ta yuborish"
 msgstr "{labels_get_problem_id}: {len_bad} ta yuboriş"
@@ -3747,14 +3765,14 @@ msgstr "Hammasi öqildi"
 msgid "Hozircha xabar yo‘q. Duel chaqiruvlari va nishonlar shu yerda chiqadi."
 msgstr "Hozirça xabar yöq. Duel çaqiruvlari va nişonlar şu yerda çiqadi."
 
-msgid "UZ"
-msgstr "UZ"
-
 msgid "English"
 msgstr "English"
 
 msgid "EN"
 msgstr "EN"
+
+msgid "UZ"
+msgstr "UZ"
 
 msgid "Boshqaruv bo‘limlari"
 msgstr "Boşqaruv bölimlari"
@@ -3894,8 +3912,12 @@ msgstr "Duel çaqiruvi: %(n)s"
 msgid "%(n)s<span class=\"sr-only\"> ta duel kutmoqda</span>"
 msgstr "%(n)s<span class=\"sr-only\"> ta duel kutmoqda</span>"
 
-msgid "%(nav_staff_total)s ta ish ko‘rib chiqishni kutmoqda"
-msgstr "%(nav_staff_total)s ta iş körib çiqişni kutmoqda"
+msgid ""
+"Navbat: %(q)s · o‘xshash kod: %(f)s · shikoyat: %(r)s · reyting kutmoqda: "
+"%(t)s · qoralama: %(d)s"
+msgstr ""
+"Navbat: %(q)s · öxşaş kod: %(f)s · şikoyat: %(r)s · reyting kutmoqda: %(t)s "
+"· qoralama: %(d)s"
 
 msgid "%(nav_staff_total)s<span class=\"sr-only\"> ta ish kutmoqda</span>"
 msgstr "%(nav_staff_total)s<span class=\"sr-only\"> ta iş kutmoqda</span>"
@@ -4882,6 +4904,9 @@ msgid ""
 "Hech kimga ko‘rinmaydi. Yangi emailni havola orqali qayta tasdiqlaysiz."
 msgstr "Heç kimga körinmaydi. Yangi emailni havola orqali qayta tasdiqlaysiz."
 
+msgid "Saqlanmagan o‘zgarishlar bor"
+msgstr "Saqlanmagan özgarişlar bor"
+
 msgid "Saqlash"
 msgstr "Saqlaş"
 
@@ -5862,6 +5887,9 @@ msgstr ""
 "Töğri javob %(fast)s soniyagaça %(top)s ball, keyin kamayib boradi: tez "
 "javob köproq ball beradi."
 
+msgid "Duel qanday o‘tadi"
+msgstr "Duel qanday ötadi"
+
 msgid "Sizni duelga chaqirishdi"
 msgstr "Sizni duelga çaqirişdi"
 
@@ -5962,6 +5990,13 @@ msgstr "duel ${p.duel}"
 
 msgid "Bunday foydalanuvchi topilmadi"
 msgstr "Bunday foydalanuvçi topilmadi"
+
+msgid ""
+"%(n_questions)s ta savol, har biriga %(per_question)s soniya. Ko‘p ball "
+"to‘plagan g‘olib."
+msgstr ""
+"%(n_questions)s ta savol, har biriga %(per_question)s soniya. Köp ball "
+"töplagan ğolib."
 
 msgid ""
 "%(n_questions)s ta savol, har biriga %(per_question)s soniya. To‘g‘ri javob "
@@ -6079,6 +6114,13 @@ msgstr "%(problems)s masala"
 
 msgid "%(n_participants)s ishtirokchi"
 msgstr "%(n_participants)s iştirokçi"
+
+msgid ""
+"Qatnashsangiz, halollik qoidalariga rozisiz: sahifadan chiqish, kod qo‘yish "
+"va muharrir tarixi yoziladi, kodingizni tushuntirish so‘ralishi mumkin."
+msgstr ""
+"Qatnaşsangiz, halollik qoidalariga rozisiz: sahifadan çiqiş, kod qöyiş va "
+"muharrir tarixi yoziladi, kodingizni tuşuntiriş söralişi mumkin."
 
 msgid "ball qoidasi"
 msgstr "ball qoidasi"
@@ -7014,6 +7056,20 @@ msgstr ""
 "Raqib bilan 7 ta savol, har biriga 20 soniya. Yangi musobaqa e’lon "
 "qilinganda şu yerda çiqadi."
 
+msgid "Yaqin orada"
+msgstr "Yaqin orada"
+
+msgid "Barcha musobaqalar"
+msgstr "Barça musobaqalar"
+
+msgid ""
+"Yaqin orada musobaqa yo‘q. Shu orada yechilmagan masalalarni mashq qiling."
+msgstr ""
+"Yaqin orada musobaqa yöq. Şu orada yeçilmagan masalalarni maşq qiling."
+
+msgid "Yechilmagan masalalar"
+msgstr "Yeçilmagan masalalar"
+
 msgid "Qo‘shimcha"
 msgstr "Qöşimça"
 
@@ -7439,6 +7495,9 @@ msgstr "Izoh"
 msgid "Hali amal yo‘q."
 msgstr "Hali amal yöq."
 
+msgid "Sahifadan chiqdingiz — bu vaqti bilan qayd etildi."
+msgstr "Sahifadan çiqdingiz — bu vaqti bilan qayd etildi."
+
 msgid "Musobaqa sahifasidan chiqdingiz"
 msgstr "Musobaqa sahifasidan çiqdingiz"
 
@@ -7490,23 +7549,35 @@ msgstr "Hisobot bölimlari"
 msgid "Xavf bo‘yicha saralangan"
 msgstr "Xavf böyiça saralangan"
 
+msgid "Qanday o‘qiladi"
+msgstr "Qanday öqiladi"
+
 msgid ""
-"Chiqish — musobaqa sahifalaridan tashqariga (boshqa oyna, varaq yoki "
-"saytning boshqa sahifasi) · Tashqarida — jami vaqt · Paste — muharrirga "
-"qo‘yish urinishi · Tez — g‘ayrioddiy tez matn kiritish · Nusxa — shart "
-"matnidan nusxa. Dalillar — serverda tekshirilgani, brauzerda o‘chirib "
-"bo‘lmaydi: tracker o‘chiq (×6), muharrirda yozilmagan kod (×8), kod sakrashi"
-" (×3), umumiy qurilma (×10), ikki qurilma (×5), o‘xshash kod (×8). Xavf = "
-"paste×5 + tez×3 + nusxa×2 + chiqish + tashqarida daqiqa + shubhali yechim×4 "
-"+ dalillar."
+"Sahifadan chiqish — musobaqa sahifalaridan tashqariga (boshqa oyna, varaq "
+"yoki saytning boshqa sahifasi) · Tashqarida — jami vaqt · Paste — muharrirga"
+" qo‘yish urinishi · Tez — g‘ayrioddiy tez matn kiritish · Nusxa — shart "
+"matnidan nusxa."
 msgstr ""
-"Çiqiş — musobaqa sahifalaridan taşqariga (boşqa oyna, varaq yoki saytning "
-"boşqa sahifasi) · Taşqarida — jami vaqt · Paste — muharrirga qöyiş urinişi ·"
-" Tez — ğayrioddiy tez matn kiritiş · Nusxa — şart matnidan nusxa. Dalillar —"
-" serverda tekşirilgani, brauzerda öçirib bölmaydi: tracker öçiq (×6), "
-"muharrirda yozilmagan kod (×8), kod sakraşi (×3), umumiy qurilma (×10), ikki"
-" qurilma (×5), öxşaş kod (×8). Xavf = paste×5 + tez×3 + nusxa×2 + çiqiş + "
-"taşqarida daqiqa + şubhali yeçim×4 + dalillar."
+"Sahifadan çiqiş — musobaqa sahifalaridan taşqariga (boşqa oyna, varaq yoki "
+"saytning boşqa sahifasi) · Taşqarida — jami vaqt · Paste — muharrirga qöyiş "
+"urinişi · Tez — ğayrioddiy tez matn kiritiş · Nusxa — şart matnidan nusxa."
+
+msgid ""
+"Dalillar serverda tekshiriladi, brauzerda o‘chirib bo‘lmaydi. Har biri "
+"hakamlarga maslahat, hukm emas. Og‘irligi:"
+msgstr ""
+"Dalillar serverda tekşiriladi, brauzerda öçirib bölmaydi. Har biri "
+"hakamlarga maslahat, hukm emas. Oğirligi:"
+
+msgid ""
+"Xavf = paste×5 + tez×3 + nusxa×2 + chiqishlar + tashqarida daqiqa + shubhali"
+" yechim×4 + dalillar + oldingi raundlardagi qarorlar (ko‘pi bilan 12)."
+msgstr ""
+"Xavf = paste×5 + tez×3 + nusxa×2 + çiqişlar + taşqarida daqiqa + şubhali "
+"yeçim×4 + dalillar + oldingi raundlardagi qarorlar (köpi bilan 12)."
+
+msgid "Sahifadan chiqish"
+msgstr "Sahifadan çiqiş"
 
 msgid "Tashqarida"
 msgstr "Taşqarida"
@@ -7529,8 +7600,17 @@ msgstr "Xavf"
 msgid "Oxirgi hodisa"
 msgstr "Oxirgi hodisa"
 
+msgid "Oldingi musobaqalarda hakamlar qaror qilgan"
+msgstr "Oldingi musobaqalarda hakamlar qaror qilgan"
+
 msgid "Tavsiya: diskvalifikatsiya"
 msgstr "Tavsiya: diskvalifikatsiya"
+
+msgid "Bekor"
+msgstr "Bekor"
+
+msgid "AI jarima"
+msgstr "AI jarima"
 
 msgid "Urinishlari, masalalar bo‘yicha"
 msgstr "Urinişlari, masalalar böyiça"
@@ -7541,6 +7621,9 @@ msgid ""
 msgstr ""
 "Çuqur tekşiriş: barça urinişlari hammaniki va oldingi yeçimlar bilan "
 "soliştiriladi"
+
+msgid "Chuqur tekshiruv"
+msgstr "Çuqur tekşiruv"
 
 msgid "Sabab (ixtiyoriy):"
 msgstr "Sabab (ixtiyoriy):"
@@ -7584,6 +7667,16 @@ msgid ""
 msgstr ""
 "Musobaqa tugaganidan 10 daqiqa ötib barça masalalar avtomatik tekşiriladi."
 
+msgid "AI namunalari"
+msgstr "AI namunalari"
+
+msgid ""
+"Masala uchun AI yozgan yechimlar soni: yuborilganlar shular bilan ham "
+"solishtiriladi"
+msgstr ""
+"Masala uçun AI yozgan yeçimlar soni: yuborilganlar şular bilan ham "
+"soliştiriladi"
+
 msgid "Tekshiriladigan masalalar"
 msgstr "Tekşiriladigan masalalar"
 
@@ -7607,9 +7700,6 @@ msgstr "keyin yuborilgan"
 
 msgid "Bitta ishtirokchining barcha urinishlari solishtirilganda topilgan"
 msgstr "Bitta iştirokçining barça urinişlari soliştirilganda topilgan"
-
-msgid "Chuqur tekshiruv"
-msgstr "Çuqur tekşiruv"
 
 msgid "Ko‘rildi"
 msgstr "Körildi"
@@ -7689,6 +7779,9 @@ msgid ""
 msgstr ""
 "<a href=\"#suspicious\">Şubhali yeçimlar <span>%(suspicious)s</span></a> <a "
 "href=\"#journal\">Amallar jurnali <span>%(audit)s</span></a>"
+
+msgid "Oldin: DQ %(dq)s, bekor %(voided)s · %(played)s ta raund"
+msgstr "Oldin: DQ %(dq)s, bekor %(voided)s · %(played)s ta raund"
 
 msgid "Tavsiya: %(c_open_problems)s ni bekor qilish"
 msgstr "Tavsiya: %(c_open_problems)s ni bekor qiliş"
@@ -8225,9 +8318,6 @@ msgstr "Şu yerdan boşlang"
 msgid "Yashirin"
 msgstr "Yaşirin"
 
-msgid "Siz shu yerdasiz"
-msgstr "Siz şu yerdasiz"
-
 msgid "Qisman"
 msgstr "Qisman"
 
@@ -8248,9 +8338,6 @@ msgstr "Tayyorlik"
 
 msgid "<b>Bunday kurs topilmadi</b>Boshqa so‘z bilan qidirib ko‘ring."
 msgstr "<b>Bunday kurs topilmadi</b>Boşqa söz bilan qidirib köring."
-
-msgid "Yana %(soon)s ta kurs tayyorlanmoqda."
-msgstr "Yana %(soon)s ta kurs tayyorlanmoqda."
 
 msgid "Tez orada <span class=\"tabular\">%(soon)s</span>"
 msgstr "Tez orada <span class=\"tabular\">%(soon)s</span>"
@@ -8968,11 +9055,11 @@ msgstr "Avval kutayotgan işlar, keyin sayt holati"
 msgid "AI bilan tuzish"
 msgstr "AI bilan tuziş"
 
-msgid "Duellarni yopish"
-msgstr "Duellarni yopiş"
-
 msgid "Kutayotgan ishlar"
 msgstr "Kutayotgan işlar"
+
+msgid "Kutayotgan ish yo‘q."
+msgstr "Kutayotgan iş yöq."
 
 msgid "Tasdiq kutayotgan masala"
 msgstr "Tasdiq kutayotgan masala"
@@ -9041,6 +9128,9 @@ msgstr "Sayt holati"
 
 msgid "Mavzular"
 msgstr "Mavzular"
+
+msgid "Duellarni yopish"
+msgstr "Duellarni yopiş"
 
 msgid "«%(p_title)s» masalasini rad etishni tasdiqlaysizmi?"
 msgstr "«%(p_title)s» masalasini rad etişni tasdiqlaysizmi?"
@@ -11033,9 +11123,6 @@ msgstr ""
 msgid "SQL so‘rov masalasi"
 msgstr "SQL sörov masalasi"
 
-msgid "Foiz 5 ta urinishdan keyin ko‘rsatiladi"
-msgstr "Foiz 5 ta urinişdan keyin körsatiladi"
-
 msgid ""
 "<b>Bu filtr bo‘yicha masala topilmadi</b>Boshqa mavzu yoki qiyinlikni "
 "tanlang yoki"
@@ -11086,6 +11173,13 @@ msgstr "«%(q)s» böyiça:"
 
 msgid "%(problems_paginator_count)s ta masala ·"
 msgstr "%(problems_paginator_count)s ta masala ·"
+
+msgid ""
+"%(p_ac_count)s / %(p_attempts)s urinish qabul qilingan; foiz 5 ta urinishdan"
+" keyin ko‘rsatiladi"
+msgstr ""
+"%(p_ac_count)s / %(p_attempts)s uriniş qabul qilingan; foiz 5 ta urinişdan "
+"keyin körsatiladi"
 
 msgid ""
 "%(p_solvers)s kishi yechgan, %(p_ac_count)s / %(p_attempts)s urinish qabul "
