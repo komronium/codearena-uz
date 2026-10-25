@@ -165,7 +165,7 @@ def clist_standings(request, pk):
         out.append(item)
     return respond(base | {
         "hidden": False,
-        "problems": [{"short": cp.label, "name": cp.problem.title, "url": s.absolute(request, "problems:detail", cp.problem.slug),
+        "problems": [{"short": cp.label, "name": s.text(cp.problem, "title"), "url": s.absolute(request, "problems:detail", cp.problem.slug),
                       "full_score": cp.points} for cp in problems],
         "standings": out})
 
