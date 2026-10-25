@@ -8,7 +8,11 @@ from .models import Contest
 
 def apply_rating(contest_id: int) -> bool:
     """Apply a finished rated contest's rating (rating.apply_rating is idempotent)."""
-    return rating.apply_rating(Contest.objects.get(pk=contest_id))
+    applied = rating.apply_rating(Contest.objects.get(pk=contest_id))
+    if applied:  # only the first time: a replay of old rounds must not tell anyone again
+        from apps.accounts.telegram import notify_rating_changes
+        notify_rating_changes(contest_id)
+    return applied
 
 
 def run(func, *args):

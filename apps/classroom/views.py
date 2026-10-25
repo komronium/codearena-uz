@@ -43,7 +43,7 @@ def duel_list(request):
     record["draws"] = len(finished) - record["wins"] - record["losses"]
     # the duel board: everyone with a finished duel, by duel rating
     played = Counter()
-    for pair in Duel.objects.filter(status=Duel.Status.FINISHED).values_list("challenger_id", "opponent_id"):
+    for pair in Duel.objects.filter(status=Duel.Status.FINISHED, unranked=False).values_list("challenger_id", "opponent_id"):
         played.update(pair)
     played.pop(None, None)
     board = list(User.objects.filter(pk__in=played, is_active=True).order_by("-duel_rating", "username")
@@ -59,7 +59,9 @@ def duel_list(request):
                 .values_list("duel_id").annotate(n=Count("id")))
     for d in open_duels:
         d.my_done = done.get(d.pk, 0)
+    left, allow = duels.ranked_left(request.user)
     return render(request, "classroom/duels.html", {
+        "ranked_left": left, "ranked_allow": allow, "ranked_per_solve": duels.RANKED_PER_SOLVE,
         "record": record, "board": board, "duel_rank": rank, "duelists": len(played),
         "incoming": [d for d in mine if d.status == Duel.Status.PENDING and d.opponent_id == request.user.pk],
         "open": open_duels,
@@ -147,7 +149,7 @@ def duel_detail(request, pk):
         template = "classroom/_duel_status.html"
     else:
         template = "classroom/duel.html"
-    return render(request, template, {"duel": duel, "state": state, **board})
+    return render(request, template, {"duel": duel, "state": state, "ranked_per_solve": duels.RANKED_PER_SOLVE, **board})
 
 
 def _rival(me, other) -> dict:

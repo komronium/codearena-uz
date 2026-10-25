@@ -6,7 +6,7 @@
   <div class="ca-hud-in">
     <div>
       <h1 id="board-title">{% trans "Nishonlar reytingi" %}</h1>
-      <p class="ca-hud-sub">{% blocktrans with total=total %}{{ total }} o‘yinchi · har bir nishonning har bir bosqichi bitta ball{% endblocktrans %}</p>
+      <p class="ca-hud-sub">{% blocktrans with total=total %}{{ total }} o‘yinchi · har bir nishonning har bir bosqichi bitta ball{% endblocktrans %} {% trans "Duel nishonlari bu jadvalga kirmaydi: ular duel reytingida." %}</p>
     </div>
     {% include "accounts/_board_tabs.html" %}
   </div>

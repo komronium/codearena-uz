@@ -122,6 +122,8 @@ The duel rating is its own Elo and never touches the contest rating.{% endcommen
         <div><dt>{% trans "Durang" %}</dt><dd>{{ record.draws }}</dd></div>
         <div><dt>{% trans "O‘rin" %}</dt><dd>{% if duel_rank %}{{ duel_rank }}<small>/ {{ duelists }}</small>{% else %}—{% endif %}</dd></div>
       </dl>
+      {% if ranked_left %}<p class="mt-3">{% blocktrans with left=ranked_left allow=ranked_allow n=ranked_per_solve %}Bugun reytingli duellar: <b>{{ left }}</b> / {{ allow }}. Yechilgan har bir masala {{ n }} tasini qo‘shadi.{% endblocktrans %}</p>
+      {% else %}<p class="mt-3 text-warn">{% blocktrans with n=ranked_per_solve %}Bugungi reytingli duellar tugadi: yangi duellar mashq bo‘lib o‘ynaladi (reyting va nishonlar o‘zgarmaydi). Masala yechsangiz yana {{ n }} tasi ochiladi.{% endblocktrans %} <a class="ca-link" href="{% url 'problems:list' %}?status=new">{% trans "Masala yechish" %}</a></p>{% endif %}
       <p class="mt-3">{% trans "Duel reytingi musobaqa reytingiga ta’sir qilmaydi. Hamma 1200 dan boshlaydi; dastlabki 30 duelda tezroq o‘zgaradi, keyin sekinroq." %}</p>
     </div>
   </section>

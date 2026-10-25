@@ -151,8 +151,26 @@ def claim_login_request(raw_token: str):
     return req.user
 
 
-def queue_notification(user_id: int, preference: str, event_key: str, text: str):
-    """Persist once per user/event, then enqueue; the scheduled recovery command handles Redis outages."""
+# What can wait: reminders of habits. A person gets at most SOFT_PER_DAY of them a day, and none at night (they wait for
+# the morning). A friend's challenge, a contest starting and a rating change are not in the list: they go at once.
+SOFT = ("notify_daily_problem", "notify_daily_tip", "notify_trending_problem", "notify_streak", "notify_badges", "notify_digest")
+SOFT_PER_DAY = 2
+QUIET_FROM, QUIET_TO = 22, 8  # local hours
+
+
+def after_quiet(now):
+    """`now`, or 08:00 when it is night."""
+    local = timezone.localtime(now)
+    if local.hour >= QUIET_FROM:
+        return (local + timedelta(days=1)).replace(hour=QUIET_TO, minute=0, second=0, microsecond=0)
+    if local.hour < QUIET_TO:
+        return local.replace(hour=QUIET_TO, minute=0, second=0, microsecond=0)
+    return now
+
+
+def queue_notification(user_id: int, preference: str, event_key: str, text: str, quiet: bool | None = None):
+    """Persist once per user/event, then enqueue; the scheduled recovery command handles Redis outages.
+    `quiet` (default: for the SOFT kinds) keeps it out of the night; the SOFT kinds also stop at SOFT_PER_DAY a day."""
     if not bot_configured():
         return
     link = TelegramLink.objects.filter(
@@ -160,14 +178,23 @@ def queue_notification(user_id: int, preference: str, event_key: str, text: str)
     ).first()
     if link is None:
         return
+    now = timezone.now()
+    soft = preference in SOFT
+    if soft:
+        start = timezone.localtime(now).replace(hour=0, minute=0, second=0, microsecond=0)
+        today = (TelegramOutbox.objects.filter(link=link, preference__in=SOFT, created_at__gte=start)
+                 .exclude(status=TelegramOutbox.Status.FAILED).exclude(event_key=event_key).count())
+        if today >= SOFT_PER_DAY:
+            return
+    available = after_quiet(now) if (soft if quiet is None else quiet) else now
     try:
         outbox, created = TelegramOutbox.objects.get_or_create(
             link=link, event_key=event_key,
-            defaults={"preference": preference, "text": text[:4096]},
+            defaults={"preference": preference, "text": text[:4096], "available_at": available},
         )
     except IntegrityError:
         return  # a concurrent request created this same notification
-    if created:
+    if created and available <= now:  # a night message is left for recover_outbox, which sends it once it is due
         dispatch_outbox(outbox.pk)
 
 
@@ -282,6 +309,8 @@ def notify_duel_result(duel_id: int):
         duel = Duel.objects.select_related("challenger", "opponent").filter(pk=duel_id).first()
         if duel is None or duel.status != Duel.Status.FINISHED or duel.opponent is None:
             return
+        if not duel.friend:
+            return  # a quick match is told on the site (the bell), not in Telegram: too many of them a day
         right = {}
         for player in (duel.challenger, duel.opponent):
             r = duels.run(duel, player.pk)
@@ -293,11 +322,36 @@ def notify_duel_result(duel_id: int):
                 text = (f"<b>{head}</b>\n\n"
                         + _t("{username} bilan duel: <b>{mine} : {theirs}</b>").format(
                             username=html.escape(them.username), mine=right[me.pk], theirs=right[them.pk])
-                        + "\n" + _t("Duel reytingi: {delta}").format(delta=f"{delta:+d}")
+                        + "\n" + (_t("Mashq duel: reyting o‘zgarmadi.") if duel.unranked else _t("Duel reytingi: {delta}").format(delta=f"{delta:+d}"))
                         + f'\n\n<a href="{_site()}/classroom/duels/{duel.pk}/">' + _t("Natija va savollar →") + "</a>")
             queue_notification(me.pk, "notify_duels", f"duel:{duel.pk}:result", text)
     except Exception:
         log.exception("Could not queue Telegram duel result %s", duel_id)
+
+
+def notify_rating_changes(contest_id: int):
+    """A rated round's new ratings, to each rated participant: the change, where they finished."""
+    from apps.contests.models import Contest, Participation
+
+    try:
+        contest = Contest.objects.filter(pk=contest_id).first()
+        if contest is None:
+            return
+        rows = (Participation.objects.filter(contest=contest, rating_after__isnull=False, disqualified=False)
+                .select_related("user"))
+        total = rows.count()
+        for p in rows:
+            before = p.rating_before or 0
+            with translation.override(p.user.language or settings.LANGUAGE_CODE):
+                text = ("<b>" + _t("📈 Reyting yangilandi") + "</b>\n\n"
+                        + f"{html.escape(contest.title)}\n"
+                        + _t("Reyting: <b>{before} → {after}</b> ({delta})").format(
+                            before=before, after=p.rating_after, delta=f"{p.rating_after - before:+d}")
+                        + ((" · " + _t("o‘rin {rank} / {total}").format(rank=p.rank, total=total)) if p.rank else "")
+                        + f'\n\n<a href="{_site()}/contests/{contest.pk}/standings/">' + _t("Natijalar →") + "</a>")
+            queue_notification(p.user_id, "notify_contests", f"rating:{contest.pk}", text)
+    except Exception:
+        log.exception("Could not queue Telegram rating changes for contest %s", contest_id)
 
 
 def notify_badges(user_id: int, levels: list[tuple[str, int]]):

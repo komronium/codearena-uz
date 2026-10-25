@@ -24,7 +24,7 @@ class Command(BaseCommand):
         nxt = Contest.objects.filter(start__gt=timezone.now()).order_by("start").first()
         daily = daily_for()
         queued = 0
-        for link in TelegramLink.objects.filter(is_active=True, notify_contests=True).select_related("user"):
+        for link in TelegramLink.objects.filter(is_active=True, notify_digest=True).select_related("user"):
             u = link.user
             lines = ["<b>📊 Haftalik xulosa</b>", ""]
             lines.append(f"Musobaqa reytingi: <b>{u.rating}</b> · amaliyot balli: <b>{u.practice_points}</b>")
@@ -33,6 +33,6 @@ class Command(BaseCommand):
                              f"{timezone.localtime(nxt.start):%d.%m %H:%M} (UTC+5)")
             if daily:
                 lines.append(f'Bugungi masala: <a href="{site}/problems/{daily.problem.slug}/">{escape(daily.problem.title)}</a>')
-            queue_notification(u.pk, "notify_contests", f"weekly:{week.year}-{week.week}", "\n".join(lines))
+            queue_notification(u.pk, "notify_digest", f"weekly:{week.year}-{week.week}", "\n".join(lines))
             queued += 1
         self.stdout.write(f"{queued} digest(s) queued")

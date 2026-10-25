@@ -63,6 +63,7 @@ class TelegramLink(models.Model):
     notify_duels = models.BooleanField(default=True)  # an invite, and how a duel ended
     notify_badges = models.BooleanField(default=True)  # a badge level reached
     notify_streak = models.BooleanField(default=True)  # the evening before a daily streak would break
+    notify_digest = models.BooleanField(default=True)  # the Monday summary
     last_error = models.CharField(max_length=200, blank=True)
 
     def __str__(self):

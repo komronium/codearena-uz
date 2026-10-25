@@ -24,7 +24,7 @@ def walkovers(duels, user) -> set[int]:
 
 
 def duel_stats(user) -> dict[str, int]:
-    duels = list(Duel.objects.filter(Q(challenger=user) | Q(opponent=user), status=Duel.Status.FINISHED)
+    duels = list(Duel.objects.filter(Q(challenger=user) | Q(opponent=user), status=Duel.Status.FINISHED, unranked=False)
                  .order_by("created", "pk"))
     walk = walkovers([d for d in duels if d.winner_id == user.pk], user)
     wins = [d for d in duels if d.winner_id == user.pk and d.pk not in walk]

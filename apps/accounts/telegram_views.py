@@ -90,6 +90,7 @@ def preferences(request):
         "notify_duels": link.notify_duels,
         "notify_badges": link.notify_badges,
         "notify_streak": link.notify_streak,
+        "notify_digest": link.notify_digest,
     }
     form = TelegramPreferencesForm(request.POST, instance=link)
     if form.is_valid():

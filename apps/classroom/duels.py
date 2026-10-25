@@ -41,6 +41,8 @@ RUN_LIMIT = timedelta(minutes=5)
 WAIT_FOR = timedelta(days=3)  # for someone to join an open duel, or for a friend to accept
 START_RATING = 1200
 OPEN = (Duel.Status.PENDING, Duel.Status.ACTIVE)
+RANKED_FREE = 5  # ranked duels a day for anyone; each problem solved that day earns RANKED_PER_SOLVE more.
+RANKED_PER_SOLVE = 3  # Past that a duel still plays, but as practice: no rating, no badge progress.
 LANGUAGES = DuelQuestion.Lang.choices
 BUSY = _tl("Avval boshlagan duelingizni tugating.")
 NO_ADMIN = _tl("Admin akkaunti duelda qatnasha olmaydi.")
@@ -49,6 +51,19 @@ NO_ADMIN = _tl("Admin akkaunti duelda qatnasha olmaydi.")
 def can_duel(user) -> bool:
     """The admin account stays out of duels: it can't open, join or accept one, and nobody can invite it."""
     return not user.is_superuser
+
+
+def ranked_left(user, now=None) -> tuple[int, int]:
+    """(ranked duels `user` can still play today, the day's allowance): RANKED_FREE, plus RANKED_PER_SOLVE for each
+    different problem they got an AC on today, less the ranked duels they finished today."""
+    from apps.submissions.models import Submission
+
+    start = timezone.localtime(now or timezone.now()).replace(hour=0, minute=0, second=0, microsecond=0)
+    solved = (Submission.objects.filter(user=user, verdict="AC", created__gte=start).values("problem_id").distinct().count())
+    used = (Duel.objects.filter(Q(challenger=user) | Q(opponent=user), status=Duel.Status.FINISHED, mode=Duel.Mode.QUIZ,
+                                unranked=False, finished_at__gte=start).count())
+    allowance = RANKED_FREE + RANKED_PER_SOLVE * solved
+    return max(0, allowance - used), allowance
 
 
 def k_factor(rating: int, played: int) -> int:
@@ -156,7 +171,7 @@ def season_tables() -> dict[str, list[dict]]:
     """For every season with finished duels: players' rating after their last duel in it, with how many they played.
     One pass over the duels, applying the same month changes as settle()."""
     rating, last, table = {}, {}, {}
-    for d in Duel.objects.filter(status=Duel.Status.FINISHED).order_by("created", "pk"):
+    for d in Duel.objects.filter(status=Duel.Status.FINISHED, unranked=False).order_by("created", "pk"):
         season = duel_season(d)
         for uid, delta in ((d.challenger_id, d.challenger_delta), (d.opponent_id, d.opponent_delta)):
             r = carried(rating.get(uid, START_RATING), last.get(uid, ""), season) + (delta or 0)
@@ -366,7 +381,7 @@ def _valid(language: str) -> str:
 
 def _open(challenger, language: str, questions: list[int], opponent=None) -> Duel:
     now = timezone.now()
-    return Duel.objects.create(challenger=challenger, opponent=opponent, language=language,
+    return Duel.objects.create(challenger=challenger, opponent=opponent, language=language, friend=opponent is not None,
                                questions=questions, started_at=now, ends_at=now + RUN_LIMIT)
 
 
@@ -486,7 +501,8 @@ def decline(duel, user) -> None:
 # ---- the result ---------------------------------------------------------------------------------------
 def _played(user_id) -> int:
     """Finished duels behind a player, for their K."""
-    return Duel.objects.filter(Q(challenger_id=user_id) | Q(opponent_id=user_id), status=Duel.Status.FINISHED).count()
+    return Duel.objects.filter(Q(challenger_id=user_id) | Q(opponent_id=user_id), status=Duel.Status.FINISHED,
+                               unranked=False).count()
 
 
 def settle(duel) -> None:
@@ -504,23 +520,29 @@ def settle(duel) -> None:
         if winner is None:
             return
         a, b = User.objects.get(pk=duel.challenger_id), User.objects.get(pk=duel.opponent_id)
+        unranked = ranked_left(a, now)[0] < 1 or ranked_left(b, now)[0] < 1  # a practice duel moves nobody's rating
         score = 0.5 if winner == 0 else (1.0 if winner == a.pk else 0.0)
         season = duel_season(duel)  # a new month starts everyone's rating part of the way back to the middle
         ra, rb = carried(a.duel_rating, a.duel_season, season), carried(b.duel_rating, b.duel_season, season)
-        weight = pair_weight(duel)
-        da, db = elo(ra, rb, score, k_factor(ra, _played(a.pk)) * weight, k_factor(rb, _played(b.pk)) * weight,
-                     perfect=winner == 0 and is_perfect_draw(duel))
-        duel.status, duel.winner_id = Duel.Status.FINISHED, winner or None
+        if unranked:
+            da = db = 0
+        else:
+            weight = pair_weight(duel)
+            da, db = elo(ra, rb, score, k_factor(ra, _played(a.pk)) * weight, k_factor(rb, _played(b.pk)) * weight,
+                         perfect=winner == 0 and is_perfect_draw(duel))
+        duel.status, duel.winner_id, duel.unranked = Duel.Status.FINISHED, winner or None, unranked
         duel.challenger_delta, duel.opponent_delta = da, db
         duel.finished_at = now  # both runs are over: the duel's own date, not when it was created
-        duel.save(update_fields=["status", "winner", "challenger_delta", "opponent_delta", "finished_at"])
-        User.objects.filter(pk=a.pk).update(duel_rating=ra + da, duel_season=season)
-        User.objects.filter(pk=b.pk).update(duel_rating=rb + db, duel_season=season)
+        duel.save(update_fields=["status", "winner", "unranked", "challenger_delta", "opponent_delta", "finished_at"])
+        if not unranked:
+            User.objects.filter(pk=a.pk).update(duel_rating=ra + da, duel_season=season)
+            User.objects.filter(pk=b.pk).update(duel_rating=rb + db, duel_season=season)
     from apps.accounts.badges import award  # a finished duel can lift both players' duel badges
     from apps.accounts.notifications import notify_t
     from apps.accounts.telegram import notify_duel_result
     for player, other in ((a, b), (b, a)):
-        award(player, {"duels"})
+        if not duel.unranked:
+            award(player, {"duels"})
         head = ((lambda: _t("G‘alaba")) if duel.winner_id == player.pk else (lambda: _t("Durang")) if duel.winner_id is None
                 else (lambda: _t("Mag‘lubiyat")))
         notify_t(player.pk, "duel", f"duel:{duel.pk}:result", _tl("{head}: {other_username} bilan duel tugadi"),
@@ -538,7 +560,7 @@ def replay(duels, users) -> None:
     softening: each keeps its result, the deltas are worked out again. `duels`/`users` are querysets. The
     `finished_at` of a duel is left alone: it records real history, not something to work out again."""
     rating, played, season_of_user = {}, {}, {}
-    for d in duels.filter(status="finished").order_by("created", "pk"):
+    for d in duels.filter(status="finished", unranked=False).order_by("created", "pk"):
         a, b = d.challenger_id, d.opponent_id
         season = duel_season(d)
         ra = carried(rating.get(a, START_RATING), season_of_user.get(a, ""), season)

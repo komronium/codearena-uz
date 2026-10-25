@@ -515,7 +515,9 @@ def _badge_ranking() -> list[dict]:
 
     from .models import UserBadge
 
-    rows = list(UserBadge.objects.filter(user__is_active=True, user__is_staff=False).values("user")
+    # duel badges are ranked on the duel board, not here: a player who only duels should not top the badge ranking
+    duel_families = [f.key for f in badge_system.FAMILIES if f.group == "duels"]
+    rows = list(UserBadge.objects.filter(user__is_active=True, user__is_staff=False).exclude(family__in=duel_families).values("user")
                 .annotate(levels=Count("id"), families=Count("family", distinct=True), last=Max("earned_at"))
                 .order_by("-levels", "-families", "last", "user"))
     for i, r in enumerate(rows):
@@ -545,7 +547,7 @@ def badge_board(request):
     return render(request, "accounts/badge_board.html", {
         "rows": page, "total": len(rows), "found": len(shown), "q": q, **geo,
         "me": me, "me_page": (rows.index(me) // 50 + 1) if me else None,
-        "max_levels": sum(len(f.levels) for f in badge_system.FAMILIES)})
+        "max_levels": sum(len(f.levels) for f in badge_system.FAMILIES if f.group != "duels")})
 
 
 def _contest_badges(user) -> list[dict]:

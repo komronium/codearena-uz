@@ -18,6 +18,11 @@
     {% endif %}
   </div>
 </div>
+<p class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-mute">
+  {% if duel.unranked %}<span class="font-semibold text-warn">{% trans "Bu duel mashq edi: reyting va nishonlar o‘zgarmadi." %}</span>{% endif %}
+  <a class="ca-link" href="{% url 'problems:list' %}?status=new"><i data-lucide="code-2" class="lu" aria-hidden="true"></i> {% blocktrans with n=ranked_per_solve %}Masala yeching: har biri {{ n }} ta reytingli duel qo‘shadi{% endblocktrans %}</a>
+  <a class="ca-link" href="{% url 'learn:hub' %}"><i data-lucide="graduation-cap" class="lu" aria-hidden="true"></i> {% trans "Xato qilgan mavzuni kurslarda o‘rganing" %}</a>
+</p>
 {% endif %}{% comment %}The duel board, polled every 5 s while open; ctx: duel, players, my_playing, my_over,
 per_question, n_questions, expires, user. A coding duel from before the quiz shows its result only.{% endcomment %}
 <div class="grid items-stretch gap-3 sm:grid-cols-[1fr_auto_1fr]">

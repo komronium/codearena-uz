@@ -1132,29 +1132,37 @@ msgstr ""
 "idea on the next problem."
 
 #: apps/accounts/management/commands/telegram_notifications.py
+msgid "☀️ Bugun CodeArena’da"
+msgstr "☀️ Today on CodeArena"
+
+#: apps/accounts/management/commands/telegram_notifications.py
 msgid "Yechishga o‘tish →"
 msgstr "Go solve →"
 
 #: apps/accounts/management/commands/telegram_notifications.py
-#: apps/accounts/management/commands/telegram_notifications.py
-msgid "Masalani ochish →"
-msgstr "Open the problem →"
+msgid "Ro‘yxatdan o‘tish →"
+msgstr "Register →"
 
 #: apps/accounts/management/commands/telegram_notifications.py
 msgid "Musobaqani ko‘rish →"
 msgstr "View the contest →"
 
 #: apps/accounts/management/commands/telegram_notifications.py
-msgid "💡 Kunlik tavsiya"
-msgstr "💡 Daily tip"
+msgid "Kun masalasi:"
+msgstr "Problem of the day:"
 
 #: apps/accounts/management/commands/telegram_notifications.py
-msgid "📅 Bugungi masala"
-msgstr "📅 Today's problem"
+msgid "Trenddagi:"
+msgstr "Trending:"
 
 #: apps/accounts/management/commands/telegram_notifications.py
-msgid "So‘nggi 7 kunda ko‘p foydalanuvchi sinab ko‘rgan masala."
-msgstr "A problem many users tried in the last 7 days."
+msgid "🆕 Yangi musobaqa"
+msgstr "🆕 New contest"
+
+#: apps/accounts/management/commands/telegram_notifications.py
+#: apps/accounts/management/commands/telegram_notifications.py
+msgid "Boshlanishi: {when}"
+msgstr "Starts: {when}"
 
 #: apps/accounts/management/commands/telegram_notifications.py
 msgid "🔥 Olov o‘chmasin!"
@@ -1173,14 +1181,6 @@ msgstr ""
 #: apps/accounts/management/commands/telegram_notifications.py
 msgid "🏆 Musobaqa 1 soat ichida"
 msgstr "🏆 A contest starts within 1 hour"
-
-#: apps/accounts/management/commands/telegram_notifications.py
-msgid "Boshlanishi: {when}"
-msgstr "Starts: {when}"
-
-#: apps/accounts/management/commands/telegram_notifications.py
-msgid "🔥 Trenddagi masala"
-msgstr "🔥 Trending problem"
 
 #: apps/accounts/models.py
 msgid "Kutilmoqda"
@@ -1266,16 +1266,20 @@ msgid "Natija va savollar →"
 msgstr "Result and questions →"
 
 #: apps/accounts/telegram.py
+msgid "Natijalar →"
+msgstr "Standings →"
+
+#: apps/accounts/telegram.py
 msgid "3 kun ichida qabul qiling."
 msgstr "Accept within 3 days."
 
 #: apps/accounts/telegram.py
-msgid "🏅 Yangi nishon!"
-msgstr "🏅 New badge!"
+msgid "Mashq duel: reyting o‘zgarmadi."
+msgstr "Practice duel: the rating did not change."
 
 #: apps/accounts/telegram.py
-msgid "Duel reytingi: {delta}"
-msgstr "Duel rating: {delta}"
+msgid "🏅 Yangi nishon!"
+msgstr "🏅 New badge!"
 
 #: apps/accounts/telegram.py
 msgid "⚔️ Sizni duelga chaqirishdi"
@@ -1286,8 +1290,24 @@ msgid "<b>{username}</b> — {language}: {n} ta savol, har biriga 20 soniya."
 msgstr "<b>{username}</b> — {language}: {n} questions, 20 seconds each."
 
 #: apps/accounts/telegram.py
+msgid "Duel reytingi: {delta}"
+msgstr "Duel rating: {delta}"
+
+#: apps/accounts/telegram.py
+msgid "Reyting: <b>{before} → {after}</b> ({delta})"
+msgstr "Rating: <b>{before} → {after}</b> ({delta})"
+
+#: apps/accounts/telegram.py
 msgid "{username} bilan duel: <b>{mine} : {theirs}</b>"
 msgstr "Duel with {username}: <b>{mine} : {theirs}</b>"
+
+#: apps/accounts/telegram.py
+msgid "📈 Reyting yangilandi"
+msgstr "📈 Rating updated"
+
+#: apps/accounts/telegram.py
+msgid "o‘rin {rank} / {total}"
+msgstr "place {rank} / {total}"
 
 #: apps/accounts/telegram_views.py
 msgid "Telegram hisobingiz uzildi."
@@ -5417,6 +5437,10 @@ msgid "Nishonlar reytingi"
 msgstr "Badge ranking"
 
 #: templates/accounts/badge_board.html
+msgid "Duel nishonlari bu jadvalga kirmaydi: ular duel reytingida."
+msgstr "Duel badges are not counted here: they count on the duel rating."
+
+#: templates/accounts/badge_board.html
 msgid ""
 "Har bir nishon 5 bosqichdan iborat: bronza, kumush, oltin, platina, olmos. "
 "Bosqich qancha ko‘p bo‘lsa, o‘rin shuncha yuqori."
@@ -6547,6 +6571,16 @@ msgstr ""
 " if today's problem isn't solved, so your streak doesn't go out</small>"
 
 #: templates/accounts/profile_edit.html
+msgid ""
+"<b>📊 Haftalik xulosa</b><small class=\"mt-0.5 block text-xs text-"
+"mute\">Dushanba ertalab: reytingingiz, keyingi musobaqa va bugungi "
+"masala</small>"
+msgstr ""
+"<b>📊 Weekly summary</b><small class=\"mt-0.5 block text-xs text-"
+"mute\">Monday morning: your rating, the next contest and today's "
+"problem</small>"
+
+#: templates/accounts/profile_edit.html
 msgid "Sozlamalarni saqlash"
 msgstr "Save settings"
 
@@ -7268,6 +7302,14 @@ msgid "Revansh"
 msgstr "Rematch"
 
 #: templates/classroom/_duel_status.html
+msgid "Bu duel mashq edi: reyting va nishonlar o‘zgarmadi."
+msgstr "This duel was practice: your rating and badges did not change."
+
+#: templates/classroom/_duel_status.html
+msgid "Xato qilgan mavzuni kurslarda o‘rganing"
+msgstr "Learn the topic you missed in the courses"
+
+#: templates/classroom/_duel_status.html
 msgid "(siz)"
 msgstr "(you)"
 
@@ -7362,6 +7404,10 @@ msgstr "— with %(result_other_username)s"
 #: templates/classroom/_duel_status.html
 msgid "%(result_other_username)s revansh so‘radi — qabul qilish"
 msgstr "%(result_other_username)s asked for a rematch — accept"
+
+#: templates/classroom/_duel_status.html
+msgid "Masala yeching: har biri %(n)s ta reytingli duel qo‘shadi"
+msgstr "Solve a problem: each one adds %(n)s ranked duels"
 
 #: templates/classroom/_duel_status.html
 msgid "Duel reytingi <b class=\"text-ink\">%(p_user_duel_rating)s</b>"
@@ -7762,6 +7808,10 @@ msgid "boshlang‘ich"
 msgstr "starting"
 
 #: templates/classroom/duels.html
+msgid "Masala yechish"
+msgstr "Solve a problem"
+
+#: templates/classroom/duels.html
 msgid ""
 "Duel reytingi musobaqa reytingiga ta’sir qilmaydi. Hamma 1200 dan boshlaydi;"
 " dastlabki 30 duelda tezroq o‘zgaradi, keyin sekinroq."
@@ -7831,6 +7881,23 @@ msgstr "%(open)s"
 #: templates/classroom/duels.html
 msgid "%(history)s ta duel"
 msgstr "%(history)s duels"
+
+#: templates/classroom/duels.html
+msgid ""
+"Bugun reytingli duellar: <b>%(left)s</b> / %(allow)s. Yechilgan har bir "
+"masala %(n)s tasini qo‘shadi."
+msgstr ""
+"Ranked duels today: <b>%(left)s</b> / %(allow)s. Each problem you solve adds"
+" %(n)s."
+
+#: templates/classroom/duels.html
+msgid ""
+"Bugungi reytingli duellar tugadi: yangi duellar mashq bo‘lib o‘ynaladi "
+"(reyting va nishonlar o‘zgarmaydi). Masala yechsangiz yana %(n)s tasi "
+"ochiladi."
+msgstr ""
+"You are out of ranked duels today: new duels are played as practice (rating "
+"and badges do not change). Solve a problem and %(n)s more open."
 
 #: templates/contests/_band.html templates/contests/_card.html
 msgid "Kelgusi"

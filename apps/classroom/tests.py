@@ -26,6 +26,12 @@ def bank(db):
     return qs
 
 
+@pytest.fixture(autouse=True)
+def _every_duel_ranked(monkeypatch):
+    """The daily ranked-duel allowance would turn a test's later duels into practice; its own tests set it."""
+    monkeypatch.setattr("apps.classroom.duels.RANKED_FREE", 10 ** 6)
+
+
 def _players():
     return User.objects.create_user("p1", password="x"), User.objects.create_user("p2", password="x")
 
@@ -791,3 +797,67 @@ def test_staff_can_close_the_duels_for_a_lesson(client, bank):
     assert switch.is_closed() and switch.closed_until()[1] is None
     client.post(reverse("moderation:duel_switch"), {"do": "open"})
     assert not switch.is_closed()
+
+
+def _finished_duel(p1, p2):
+    from .duels import accept, challenge
+    from .models import Duel
+
+    duel, _ = challenge(p1, p2.username, "python")
+    _play(duel, p1, right=7, secs=2)
+    accept(duel, p2)
+    _play(duel, p2, right=1)
+    return Duel.objects.get(pk=duel.pk)
+
+
+def test_a_duel_past_the_days_ranked_allowance_is_practice(bank, monkeypatch):
+    from apps.problems.models import Language, Problem
+    from apps.submissions.models import Submission
+
+    from .duels import RANKED_PER_SOLVE, ranked_left
+
+    monkeypatch.setattr("apps.classroom.duels.RANKED_FREE", 1)
+    p1, p2 = _players()
+    first = _finished_duel(p1, p2)
+    assert not first.unranked and first.challenger_delta > 0
+    p1.refresh_from_db()
+    rating = p1.duel_rating
+    second = _finished_duel(p1, p2)
+    assert second.unranked and second.status == "finished" and second.winner_id == p1.pk
+    assert second.challenger_delta == second.opponent_delta == 0
+    p1.refresh_from_db()
+    assert p1.duel_rating == rating and ranked_left(p1)[0] == 0
+    # a problem solved today earns more ranked duels
+    lang = Language.objects.create(code="python", name="Python", docker_image="x", run_cmd="python")
+    problem = Problem.objects.create(slug="a", title="A", statement_md="x", author=p2)
+    Submission.objects.create(user=p1, problem=problem, language=lang, source="print(1)", verdict="AC")
+    assert ranked_left(p1)[0] == RANKED_PER_SOLVE
+
+
+def test_a_practice_duel_leaves_the_badge_counts_alone(bank, monkeypatch):
+    from .duel_badges import duel_stats
+
+    monkeypatch.setattr("apps.classroom.duels.RANKED_FREE", 1)
+    p1, p2 = _players()
+    _finished_duel(p1, p2)
+    _finished_duel(p1, p2)  # practice
+    assert duel_stats(p1)["wins"] == 1
+
+
+def test_a_quick_match_is_not_pushed_to_telegram(bank, settings):
+    from apps.accounts.models import TelegramLink, TelegramOutbox
+
+    from .duels import find_opponent
+
+    settings.TELEGRAM_BOT_TOKEN = "x"
+    settings.TELEGRAM_BOT_USERNAME = "codearena_bot"
+    p1, p2 = _players()
+    for u in (p1, p2):
+        TelegramLink.objects.create(user=u, chat_id=f"c{u.pk}")
+    with patch("apps.accounts.telegram.dispatch_outbox"):
+        duel, _ = find_opponent(p1, "python")
+        joined, _ = find_opponent(p2, "python")
+        assert joined.pk == duel.pk and not duel.friend
+        _play(duel, p1, right=7, secs=2)
+        _play(duel, p2, right=1)
+        assert not TelegramOutbox.objects.filter(event_key__startswith="duel:").exists()

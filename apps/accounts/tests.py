@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import pytest
 from django.urls import reverse
 
@@ -1063,10 +1065,11 @@ def test_telegram_daily_messages_speak_each_recipients_language(settings, django
     en = User.objects.create_user("enu", password="x", language="en")
     for i, u in enumerate((uz, en)):
         TelegramLink.objects.create(user=u, chat_id=str(100 + i), notify_daily_tip=True)
-    with django_capture_on_commit_callbacks(execute=False):
+    with django_capture_on_commit_callbacks(execute=False), patch(
+            "apps.accounts.management.commands.telegram_notifications.MORNING_FROM", 0):
         call_command("telegram_notifications", verbosity=0)
     texts = {o.link.user.username: o.text for o in TelegramOutbox.objects.filter(preference="notify_daily_tip")}
-    assert "Kunlik tavsiya" in texts["uzu"] and "Daily tip" in texts["enu"] and "Kunlik" not in texts["enu"]
+    assert "Bugun CodeArena" in texts["uzu"] and "Today on CodeArena" in texts["enu"] and "Bugun" not in texts["enu"]
 
 
 # ---- one address per language: /en/... is the same page in English ----
@@ -1117,3 +1120,56 @@ def test_an_avatar_is_stored_as_a_small_square_webp():
     photo.seek(0)
     small = shrink(photo, "avatar-7")
     assert small.name == "avatar-7.webp" and Image.open(small).size == (256, 256) and is_small(small.name, small.size)
+
+
+@pytest.mark.django_db
+def test_the_morning_message_is_one_message_with_what_each_person_asked_for(settings):
+    from django.core.management import call_command
+    from .models import TelegramLink, TelegramOutbox
+    settings.TELEGRAM_BOT_TOKEN = "t"
+    settings.TELEGRAM_BOT_USERNAME = "b"
+    u = User.objects.create_user("morning", password="x")
+    TelegramLink.objects.create(user=u, chat_id="9")  # every kind on
+    with patch("apps.accounts.telegram.dispatch_outbox"), patch(
+            "apps.accounts.management.commands.telegram_notifications.MORNING_FROM", 0):
+        call_command("telegram_notifications", verbosity=0)
+        call_command("telegram_notifications", verbosity=0)  # the next tick adds nothing
+    assert TelegramOutbox.objects.filter(link__user=u, event_key__startswith="morning:").count() == 1
+
+
+@pytest.mark.django_db
+def test_reminders_stop_at_two_a_day_but_a_challenge_goes_through(settings):
+    from .models import TelegramLink, TelegramOutbox
+    from .telegram import queue_notification
+    settings.TELEGRAM_BOT_TOKEN = "t"
+    settings.TELEGRAM_BOT_USERNAME = "b"
+    u = User.objects.create_user("capped", password="x")
+    link = TelegramLink.objects.create(user=u, chat_id="9")
+    with patch("apps.accounts.telegram.dispatch_outbox"):
+        for i in range(3):
+            queue_notification(u.pk, "notify_badges", f"badge{i}", "text")
+        queue_notification(u.pk, "notify_duels", "duel:1:challenge", "text")
+    assert TelegramOutbox.objects.filter(link=link, preference="notify_badges").count() == 2
+    assert TelegramOutbox.objects.filter(link=link, preference="notify_duels").count() == 1
+
+
+def test_a_night_message_waits_for_the_morning():
+    from datetime import datetime
+    from django.utils import timezone
+    from .telegram import after_quiet
+    at = lambda h: timezone.make_aware(datetime(2026, 10, 26, h, 30))  # noqa: E731
+    late, early, day = at(23), at(3), at(12)
+    assert timezone.localtime(after_quiet(late)).replace(tzinfo=None) == datetime(2026, 10, 27, 8, 0)
+    assert timezone.localtime(after_quiet(early)).replace(tzinfo=None) == datetime(2026, 10, 26, 8, 0)
+    assert after_quiet(day) == day
+
+
+@pytest.mark.django_db
+def test_duel_badges_do_not_rank_on_the_badge_board():
+    from .models import UserBadge
+    from .views import _badge_ranking
+    duelist, solver = (User.objects.create_user(n, password="x") for n in ("duelonly", "solver"))
+    UserBadge.objects.create(user=duelist, family="duelchi", tier=1)
+    UserBadge.objects.create(user=duelist, family="yengilmas", tier=1)
+    UserBadge.objects.create(user=solver, family="yechuvchi", tier=1)
+    assert [r["user"] for r in _badge_ranking()] == [solver.pk]

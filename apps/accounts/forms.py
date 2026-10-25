@@ -208,4 +208,5 @@ class TelegramPreferencesForm(forms.ModelForm):
             "notify_duels",
             "notify_badges",
             "notify_streak",
+            "notify_digest",
         )

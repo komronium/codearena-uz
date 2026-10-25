@@ -99,6 +99,11 @@ class Duel(models.Model):
     opponent_delta = models.IntegerField(null=True, blank=True)
     # When the duel ended (both runs over), set by settle(); the date a finished duel is shown under
     finished_at = models.DateTimeField(null=True, blank=True)
+    # Made by challenging a named friend (not a quick match): the only duels Telegram tells the result of
+    friend = models.BooleanField(default=False)
+    # Settled as practice: a player had no ranked duels left that day (apps.classroom.duels.ranked_left), so no rating
+    # change and no badge progress
+    unranked = models.BooleanField(default=False)
 
     class Meta:
         ordering = ["-created", "-id"]

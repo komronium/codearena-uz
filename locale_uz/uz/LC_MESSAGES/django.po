@@ -860,23 +860,29 @@ msgstr ""
 "Masalani yeçgaç, boşqa yeçimni öqing va özingiznikiga soliştiring. Yangi "
 "ğoyani keyingi masalada qöllab köring."
 
+msgid "☀️ Bugun CodeArena’da"
+msgstr "☀️ Bugun CodeArena’da"
+
 msgid "Yechishga o‘tish →"
 msgstr "Yeçişga ötiş →"
 
-msgid "Masalani ochish →"
-msgstr "Masalani oçiş →"
+msgid "Ro‘yxatdan o‘tish →"
+msgstr "Röyxatdan ötiş →"
 
 msgid "Musobaqani ko‘rish →"
 msgstr "Musobaqani köriş →"
 
-msgid "💡 Kunlik tavsiya"
-msgstr "💡 Kunlik tavsiya"
+msgid "Kun masalasi:"
+msgstr "Kun masalasi:"
 
-msgid "📅 Bugungi masala"
-msgstr "📅 Bugungi masala"
+msgid "Trenddagi:"
+msgstr "Trenddagi:"
 
-msgid "So‘nggi 7 kunda ko‘p foydalanuvchi sinab ko‘rgan masala."
-msgstr "Sönggi 7 kunda köp foydalanuvçi sinab körgan masala."
+msgid "🆕 Yangi musobaqa"
+msgstr "🆕 Yangi musobaqa"
+
+msgid "Boshlanishi: {when}"
+msgstr "Boşlanişi: {when}"
 
 msgid "🔥 Olov o‘chmasin!"
 msgstr "🔥 Olov öçmasin!"
@@ -892,12 +898,6 @@ msgstr ""
 
 msgid "🏆 Musobaqa 1 soat ichida"
 msgstr "🏆 Musobaqa 1 soat içida"
-
-msgid "Boshlanishi: {when}"
-msgstr "Boşlanişi: {when}"
-
-msgid "🔥 Trenddagi masala"
-msgstr "🔥 Trenddagi masala"
 
 msgid "Kutilmoqda"
 msgstr "Kutilmoqda"
@@ -963,14 +963,17 @@ msgstr "Mağlubiyat"
 msgid "Natija va savollar →"
 msgstr "Natija va savollar →"
 
+msgid "Natijalar →"
+msgstr "Natijalar →"
+
 msgid "3 kun ichida qabul qiling."
 msgstr "3 kun içida qabul qiling."
 
+msgid "Mashq duel: reyting o‘zgarmadi."
+msgstr "Maşq duel: reyting özgarmadi."
+
 msgid "🏅 Yangi nishon!"
 msgstr "🏅 Yangi nişon!"
-
-msgid "Duel reytingi: {delta}"
-msgstr "Duel reytingi: {delta}"
 
 msgid "⚔️ Sizni duelga chaqirishdi"
 msgstr "⚔️ Sizni duelga çaqirişdi"
@@ -978,8 +981,20 @@ msgstr "⚔️ Sizni duelga çaqirişdi"
 msgid "<b>{username}</b> — {language}: {n} ta savol, har biriga 20 soniya."
 msgstr "<b>{username}</b> — {language}: {n} ta savol, har biriga 20 soniya."
 
+msgid "Duel reytingi: {delta}"
+msgstr "Duel reytingi: {delta}"
+
+msgid "Reyting: <b>{before} → {after}</b> ({delta})"
+msgstr "Reyting: <b>{before} → {after}</b> ({delta})"
+
 msgid "{username} bilan duel: <b>{mine} : {theirs}</b>"
 msgstr "{username} bilan duel: <b>{mine} : {theirs}</b>"
+
+msgid "📈 Reyting yangilandi"
+msgstr "📈 Reyting yangilandi"
+
+msgid "o‘rin {rank} / {total}"
+msgstr "örin {rank} / {total}"
 
 msgid "Telegram hisobingiz uzildi."
 msgstr "Telegram hisobingiz uzildi."
@@ -4110,6 +4125,9 @@ msgstr "siz"
 msgid "Nishonlar reytingi"
 msgstr "Nişonlar reytingi"
 
+msgid "Duel nishonlari bu jadvalga kirmaydi: ular duel reytingida."
+msgstr "Duel nişonlari bu jadvalga kirmaydi: ular duel reytingida."
+
 msgid ""
 "Har bir nishon 5 bosqichdan iborat: bronza, kumush, oltin, platina, olmos. "
 "Bosqich qancha ko‘p bo‘lsa, o‘rin shuncha yuqori."
@@ -5026,6 +5044,15 @@ msgstr ""
 "<b>Olov</b><small class=\"mt-0.5 block text-xs text-mute\">Keçqurun, bugungi"
 " masala yeçilmagan bölsa, Olov öçmasin</small>"
 
+msgid ""
+"<b>📊 Haftalik xulosa</b><small class=\"mt-0.5 block text-xs text-"
+"mute\">Dushanba ertalab: reytingingiz, keyingi musobaqa va bugungi "
+"masala</small>"
+msgstr ""
+"<b>📊 Haftalik xulosa</b><small class=\"mt-0.5 block text-xs text-"
+"mute\">Duşanba ertalab: reytingingiz, keyingi musobaqa va bugungi "
+"masala</small>"
+
 msgid "Sozlamalarni saqlash"
 msgstr "Sozlamalarni saqlaş"
 
@@ -5587,6 +5614,12 @@ msgstr "Revanş yuborildi"
 msgid "Revansh"
 msgstr "Revanş"
 
+msgid "Bu duel mashq edi: reyting va nishonlar o‘zgarmadi."
+msgstr "Bu duel maşq edi: reyting va nişonlar özgarmadi."
+
+msgid "Xato qilgan mavzuni kurslarda o‘rganing"
+msgstr "Xato qilgan mavzuni kurslarda örganing"
+
 msgid "(siz)"
 msgstr "(siz)"
 
@@ -5658,6 +5691,9 @@ msgstr "— %(result_other_username)s bilan"
 
 msgid "%(result_other_username)s revansh so‘radi — qabul qilish"
 msgstr "%(result_other_username)s revanş söradi — qabul qiliş"
+
+msgid "Masala yeching: har biri %(n)s ta reytingli duel qo‘shadi"
+msgstr "Masala yeçing: har biri %(n)s ta reytingli duel qöşadi"
 
 msgid "Duel reytingi <b class=\"text-ink\">%(p_user_duel_rating)s</b>"
 msgstr "Duel reytingi <b class=\"text-ink\">%(p_user_duel_rating)s</b>"
@@ -5969,6 +6005,9 @@ msgstr "Duel reytingingiz"
 msgid "boshlang‘ich"
 msgstr "boşlanğiç"
 
+msgid "Masala yechish"
+msgstr "Masala yeçiş"
+
 msgid ""
 "Duel reytingi musobaqa reytingiga ta’sir qilmaydi. Hamma 1200 dan boshlaydi;"
 " dastlabki 30 duelda tezroq o‘zgaradi, keyin sekinroq."
@@ -6027,6 +6066,21 @@ msgstr "%(open)s ta"
 
 msgid "%(history)s ta duel"
 msgstr "%(history)s ta duel"
+
+msgid ""
+"Bugun reytingli duellar: <b>%(left)s</b> / %(allow)s. Yechilgan har bir "
+"masala %(n)s tasini qo‘shadi."
+msgstr ""
+"Bugun reytingli duellar: <b>%(left)s</b> / %(allow)s. Yeçilgan har bir "
+"masala %(n)s tasini qöşadi."
+
+msgid ""
+"Bugungi reytingli duellar tugadi: yangi duellar mashq bo‘lib o‘ynaladi "
+"(reyting va nishonlar o‘zgarmaydi). Masala yechsangiz yana %(n)s tasi "
+"ochiladi."
+msgstr ""
+"Bugungi reytingli duellar tugadi: yangi duellar maşq bölib öynaladi (reyting"
+" va nişonlar özgarmaydi). Masala yeçsangiz yana %(n)s tasi oçiladi."
 
 msgid "Kelgusi"
 msgstr "Kelgusi"

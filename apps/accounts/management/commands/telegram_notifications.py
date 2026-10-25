@@ -1,11 +1,12 @@
-"""Queue today's daily problem and one-hour contest reminders; recover pending delivery jobs."""
+"""Queue the morning message (today's problem, a tip, what is trending), new-round announcements, one-hour contest
+reminders and the evening streak warning; recover pending delivery jobs."""
 import datetime
 from datetime import timedelta
 from html import escape
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.utils import timezone, translation
 from django.utils.translation import gettext as _t, gettext_lazy as _tl
 
@@ -28,7 +29,12 @@ DAILY_TIPS = (
 )
 
 
-def push(user_ids, preference: str, key: str, build) -> None:
+MORNING_FROM = 9  # local hour: the morning message goes after this, in one piece, not three at midnight
+ANNOUNCE_DAYS = 7  # a round is announced once its start is this close
+STREAK_HOURS = (19, 21)  # the evening check runs in the first quarter of these hours, not every five minutes until midnight
+
+
+def push(user_ids, preference: str, key: str, build, quiet: bool | None = None) -> None:
     """Queue one message to each user in that user's own language: `build()` is called once per language, with it active."""
     from apps.accounts.models import User
 
@@ -39,11 +45,73 @@ def push(user_ids, preference: str, key: str, build) -> None:
         with translation.override(lang):
             text = build()
         for uid in ids:
-            queue_notification(uid, preference, key, text)
+            queue_notification(uid, preference, key, text, quiet=quiet)
+
+
+def trending_problem(now, daily, day):
+    """One of today's top five practice problems by distinct users who tried them in the last week, rotated by date,
+    skipping the daily pick."""
+    trending = list(Submission.objects.filter(
+        created__gte=now - timedelta(days=7), contest__isnull=True,
+        problem__is_public=True, problem__status="approved",
+    ).values("problem_id").annotate(
+        people=Count("user_id", distinct=True), attempts=Count("pk"),
+    ).order_by("-people", "-attempts", "problem_id").values_list("problem_id", flat=True)[:10])
+    if daily:
+        trending = [problem_id for problem_id in trending if problem_id != daily.problem_id]
+    if not trending:
+        return None
+    from apps.problems.models import Problem
+
+    return Problem.objects.filter(pk=trending[day.toordinal() % min(5, len(trending))]).first()
+
+
+def morning(now, site_url, daily, day) -> None:
+    """One message a day with what each person asked for: today's problem, what is trending and a tip."""
+    trend = trending_problem(now, daily, day)
+    tip = DAILY_TIPS[day.toordinal() % len(DAILY_TIPS)]
+    groups: dict = {}
+    links = (TelegramLink.objects.filter(is_active=True, user__is_active=True)
+             .filter(Q(notify_daily_problem=True) | Q(notify_trending_problem=True) | Q(notify_daily_tip=True))
+             .values_list("user_id", "user__language", "notify_daily_problem", "notify_trending_problem", "notify_daily_tip"))
+    for uid, lang, want_daily, want_trend, want_tip in links:
+        groups.setdefault((lang or settings.LANGUAGE_CODE, bool(want_daily and daily), bool(want_trend and trend),
+                           bool(want_tip)), []).append((uid, want_daily, want_trend))
+    for (lang, has_daily, has_trend, has_tip), people in groups.items():
+        if not (has_daily or has_trend or has_tip):
+            continue
+        with translation.override(lang):
+            lines = ["<b>" + _t("☀️ Bugun CodeArena’da") + "</b>", ""]
+            if has_daily:
+                lines.append("📅 " + _t("Kun masalasi:") + f' <a href="{site_url}/problems/{daily.problem.slug}/">'
+                             + escape(localized(daily.problem, "title")) + "</a>")
+            if has_trend:
+                lines.append("🔥 " + _t("Trenddagi:") + f' <a href="{site_url}/problems/{trend.slug}/">' + escape(localized(trend, "title")) + "</a>")
+            if has_tip:
+                lines += ["", "💡 " + escape(str(tip))]
+            lines += ["", f'<a href="{site_url}/problems/">' + _t("Yechishga o‘tish →") + "</a>"]
+            text = "\n".join(lines)
+        for uid, want_daily, want_trend in people:
+            pref = "notify_daily_problem" if want_daily else "notify_trending_problem" if want_trend else "notify_daily_tip"
+            queue_notification(uid, pref, f"morning:{day.isoformat()}", text)
+
+
+def announce_rounds(now, site_url) -> None:
+    """Tell people who are not in a round yet that it is coming: once each, a week ahead."""
+    for contest in Contest.objects.filter(is_draft=False, start__gt=now, start__lte=now + timedelta(days=ANNOUNCE_DAYS)):
+        when = timezone.localtime(contest.start).strftime("%d.%m, %H:%M")
+        url = f"{site_url}/contests/{contest.pk}/"
+        ids = (TelegramLink.objects.filter(is_active=True, notify_contests=True, user__is_active=True)
+               .exclude(user__participations__contest=contest).values_list("user_id", flat=True).distinct())
+        push(ids, "notify_contests", f"contest:{contest.pk}:new",
+             lambda contest=contest, when=when, url=url: (
+                 "<b>" + _t("🆕 Yangi musobaqa") + f"</b>\n\n<b>{escape(localized(contest, 'title'))}</b>\n"
+                 + _t("Boshlanishi: {when}").format(when=when) + "\n\n" + f'<a href="{url}">' + _t("Ro‘yxatdan o‘tish →") + "</a>"),
+             quiet=True)
 
 
 class Command(BaseCommand):
-    help = "Queue Telegram daily learning, trending problem, and contest notifications."
+    help = "Queue the Telegram morning message, new-round announcements, contest reminders and streak warnings."
 
     def handle(self, *args, **options):
         now = timezone.now()
@@ -57,40 +125,11 @@ class Command(BaseCommand):
         site_url = settings.SITE_URL.rstrip("/")
         daily = daily_for()
         day = timezone.localdate()
-        if daily:
-            url = f"{site_url}/problems/{daily.problem.slug}/"
-            push(TelegramLink.objects.filter(is_active=True, notify_daily_problem=True, user__is_active=True)
-                 .values_list("user_id", flat=True), "notify_daily_problem", f"daily:{daily.date.isoformat()}",
-                 lambda: ("<b>" + _t("📅 Bugungi masala") + f"</b>\n\n<b>{escape(localized(daily.problem, 'title'))}</b>\n"
-                          + f'<a href="{url}">' + _t("Masalani ochish →") + "</a>"))
+        local = timezone.localtime(now)
 
-        tip = DAILY_TIPS[day.toordinal() % len(DAILY_TIPS)]
-        push(TelegramLink.objects.filter(is_active=True, notify_daily_tip=True, user__is_active=True)
-             .values_list("user_id", flat=True), "notify_daily_tip", f"tip:{day.isoformat()}",
-             lambda: ("<b>" + _t("💡 Kunlik tavsiya") + f"</b>\n\n{escape(str(tip))}\n\n"
-                      + f'<a href="{site_url}/problems/">' + _t("Yechishga o‘tish →") + "</a>"))
-
-        # Pick among today's top five practice problems by distinct users who tried them
-        # during the last week. Rotate ties/trending candidates by date and skip the daily pick.
-        trending = list(Submission.objects.filter(
-            created__gte=now - timedelta(days=7), contest__isnull=True,
-            problem__is_public=True, problem__status="approved",
-        ).values("problem_id").annotate(
-            people=Count("user_id", distinct=True), attempts=Count("pk"),
-        ).order_by("-people", "-attempts", "problem_id").values_list("problem_id", flat=True)[:10])
-        if daily:
-            trending = [problem_id for problem_id in trending if problem_id != daily.problem_id]
-        if trending:
-            from apps.problems.models import Problem
-
-            trend_problem = Problem.objects.filter(pk=trending[day.toordinal() % min(5, len(trending))]).first()
-            if trend_problem:
-                trend_url = f"{site_url}/problems/{trend_problem.slug}/"
-                push(TelegramLink.objects.filter(is_active=True, notify_trending_problem=True, user__is_active=True)
-                     .values_list("user_id", flat=True), "notify_trending_problem", f"trending:{day.isoformat()}",
-                     lambda: ("<b>" + _t("🔥 Trenddagi masala") + f"</b>\n\n<b>{escape(localized(trend_problem, 'title'))}</b>\n"
-                              + _t("So‘nggi 7 kunda ko‘p foydalanuvchi sinab ko‘rgan masala.") + "\n\n"
-                              + f'<a href="{trend_url}">' + _t("Masalani ochish →") + "</a>"))
+        if local.hour >= MORNING_FROM:
+            morning(now, site_url, daily, day)
+        announce_rounds(now, site_url)
 
         upcoming = Contest.objects.filter(start__gt=now, start__lte=now + datetime.timedelta(hours=1))
         for contest in upcoming.iterator():
@@ -104,20 +143,22 @@ class Command(BaseCommand):
                  lambda contest=contest, when=when, url=url: (
                      "<b>" + _t("🏆 Musobaqa 1 soat ichida") + f"</b>\n\n<b>{escape(localized(contest, 'title'))}</b>\n"
                      + _t("Boshlanishi: {when}").format(when=when) + "\n\n"
-                     + f'<a href="{url}">' + _t("Musobaqani ko‘rish →") + "</a>"))
+                     + f'<a href="{url}">' + _t("Musobaqani ko‘rish →") + "</a>"), quiet=False)
 
-        # in the evening, a nudge to anyone whose daily streak breaks tonight: a run going, today not solved yet
-        if daily and timezone.localtime(now).hour >= 19:
+        # in the evening, a nudge to anyone whose daily streak breaks tonight: a run going, today not solved yet. Checked at
+        # the start of two evening hours only (each person is told once a day, whatever the key), and not for those already told.
+        if daily and local.hour in STREAK_HOURS and local.minute < 15:
             from apps.problems.daily import streaks
             from apps.problems.models import DailySolve
             from apps.problems.quests import today_quests
 
             solved_today = set(DailySolve.objects.filter(daily=daily).values_list("user_id", flat=True))
+            told = set(TelegramOutbox.objects.filter(event_key=f"streak:{day.isoformat()}").values_list("link__user_id", flat=True))
             url = f"{site_url}/problems/{daily.problem.slug}/"
-            for link in TelegramLink.objects.filter(is_active=True, notify_streak=True, user__is_active=True
-                                                    ).select_related("user").iterator():
-                if link.user_id in solved_today or today_quests(link.user)["done"]:
-                    continue  # the day's problem or any quest already keeps the Olov
+            for link in (TelegramLink.objects.filter(is_active=True, notify_streak=True, user__is_active=True)
+                         .exclude(user_id__in=solved_today | told).select_related("user").iterator()):
+                if today_quests(link.user)["done"]:
+                    continue  # any quest already keeps the Olov
                 run = streaks(link.user)[0]
                 if run < 1:
                     continue
@@ -125,6 +166,6 @@ class Command(BaseCommand):
                      lambda run=run: (
                          "<b>" + _t("🔥 Olov o‘chmasin!") + "</b>\n\n"
                          + _t("Ketma-ket <b>{run}</b> kun faol bo‘ldingiz. Bugun hali hech narsa qilmadingiz — yarim tungacha kun masalasini yoki bitta vazifani bajarsangiz, Olov <b>{next}</b> kun bo‘ladi.").format(run=run, next=run + 1)
-                         + "\n\n" + f'<a href="{url}">{escape(localized(daily.problem, "title"))} →</a>'))
+                         + "\n\n" + f'<a href="{url}">{escape(localized(daily.problem, "title"))} →</a>'), quiet=False)
 
         recover_outbox()
