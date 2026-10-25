@@ -1,6 +1,7 @@
 """The bell in the top bar: notify() records an event for a user once (by key), the context processor gives the
 top bar the unread count and the latest few, and opening one marks it read. Telegram (apps.accounts.telegram)
 sends the same events out of the site for whoever linked it; the bell is for everyone."""
+from django.conf import settings
 from django.db import IntegrityError
 
 from .models import Notification
@@ -20,7 +21,7 @@ def notify(user_ids, kind: str, key: str, text: str, url: str) -> None:
 
 
 def notify_t(user_ids, kind: str, key: str, msgid, url: str, **fmt) -> None:
-    """Like notify(), but the text is worked out in each recipient's own language (User.language, else Uzbek), not the
+    """Like notify(), but the text is worked out in each recipient's own language (User.language, else the main language), not the
     language of whoever caused the event: `msgid` is a gettext_lazy string with {names}, `fmt` its values (a callable is
     called inside the recipient's language)."""
     from django.contrib.auth import get_user_model
@@ -30,7 +31,7 @@ def notify_t(user_ids, kind: str, key: str, msgid, url: str, **fmt) -> None:
     langs = dict(get_user_model().objects.filter(pk__in=ids).values_list("pk", "language"))
     rows = []
     for uid in ids:
-        with translation.override(langs.get(uid) or "uz"):
+        with translation.override(langs.get(uid) or settings.LANGUAGE_CODE):
             values = {k: (v() if callable(v) else v) for k, v in fmt.items()}
             text = str(msgid).format(**values)
         rows.append(Notification(user_id=uid, kind=kind, key=key[:160], text=text[:200], url=url[:300]))

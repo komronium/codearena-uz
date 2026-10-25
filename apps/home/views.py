@@ -11,7 +11,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.cache import cache_control
 
-from apps.accounts.language import PATH_CODES
+from apps.accounts.language import path_codes
 from apps.accounts.models import User
 from apps.accounts.tiers import next_tier as _next_tier
 from apps.classroom import duels
@@ -158,15 +158,15 @@ def home(request):
 _NOT_FOR_CRAWLERS = ["/moderation/", "/integrity/", "/submissions/", "/classroom/",
                      "/accounts/profile/edit/", "/accounts/password-", "/accounts/reset/", "/accounts/verify/",
                      "/accounts/logout/", "/problems/suggest/", "/learn/search/", "/django-rq/", "/media/avatars/", "/api/"]
-# each of them under every language's prefix too
-_NOT_FOR_CRAWLERS = [f"{prefix}{path}" for prefix in ("", *(f"/{code}" for code in PATH_CODES)) for path in _NOT_FOR_CRAWLERS]
 # a list's search, sorting, own-progress filter and random pick: endless addresses for the one list
 # (its tag and level filters stay open; their canonical URL folds them into the list)
 _LIST_PARAMS = ["q", "sort", "dir", "status", "kind", "random"]
 
 
 def robots_txt(request):
-    lines = ["User-agent: *", *(f"Disallow: {path}" for path in _NOT_FOR_CRAWLERS),
+    # each of them under every language's prefix too
+    blocked = [f"{prefix}{path}" for prefix in ("", *(f"/{code}" for code in path_codes())) for path in _NOT_FOR_CRAWLERS]
+    lines = ["User-agent: *", *(f"Disallow: {path}" for path in blocked),
              *(f"Disallow: /*{sep}{param}=" for param in _LIST_PARAMS for sep in "?&"),
              "", f"Sitemap: {request.build_absolute_uri(reverse('sitemap'))}"]
     return HttpResponse("\n".join(lines) + "\n", content_type="text/plain")
@@ -206,7 +206,7 @@ def manifest(request):
     icons = [{"src": static(f"img/{name}.png"), "sizes": f"{size}x{size}", "type": "image/png", "purpose": purpose}
              for name, size, purpose in (("icon-192", 192, "any"), ("icon-512", 512, "any"),
                                          ("icon-maskable-512", 512, "maskable"))]
-    return JsonResponse({"name": SITE_NAME, "short_name": SITE_NAME, "description": SITE_DESCRIPTION, "lang": "uz",
+    return JsonResponse({"name": SITE_NAME, "short_name": SITE_NAME, "description": SITE_DESCRIPTION, "lang": "en",
                          "start_url": "/", "scope": "/", "display": "standalone",
                          "background_color": "#FFFFFF", "theme_color": "#132A6B", "icons": icons},
                         content_type="application/manifest+json", json_dumps_params={"ensure_ascii": False})

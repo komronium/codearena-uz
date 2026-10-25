@@ -30,7 +30,7 @@ it is scored, virtual participation.{% endcomment %}
       <tbody>
       {% for r in leaders %}
       <tr{% if r.user == user %} class="ca-row-me"{% endif %}>
-        <td class="text-center">{% if r.rank <= 3 and r.solved %}<span class="ca7-medal m{{ r.rank }}">{{ r.rank }}</span>{% elif r.score or r.solved %}<span class="tabular text-mute">{{ r.rank }}</span>{% else %}<span class="text-mute" title="Hali ball yo‘q">—</span>{% endif %}</td>
+        <td class="text-center">{% if r.rank <= 3 and r.solved %}<span class="ca7-medal m{{ r.rank }}">{{ r.rank }}</span>{% elif r.score or r.solved %}<span class="tabular text-mute">{{ r.rank }}</span>{% else %}<span class="text-mute" title="{% trans 'Hali ball yo‘q' %}">—</span>{% endif %}</td>
         <td>{% if r.user == user %}{% include "accounts/_u7.html" with u=r.user you=True %}{% else %}{% include "accounts/_u7.html" with u=r.user you=False %}{% endif %}</td>
         <td class="text-right font-semibold tabular">{% if contest.type == "icpc" %}{{ r.solved }}{% else %}{{ r.score }}{% endif %}</td>
         <td class="text-right tabular text-mute">{% if contest.wrong_try_minutes is not None %}{{ r.penalty }}{% else %}{{ r.solved }}{% endif %}</td>
@@ -118,7 +118,7 @@ it is scored, virtual participation.{% endcomment %}
         <td>{% if open %}<a class="ca-link" href="{% url 'problems:detail' cp.problem.slug %}">{{ cp.problem.title }}</a>{% else %}<span class="text-mute">{% trans "Qatnashgach ko‘rinadi" %}</span>{% endif %}</td>
         <td class="hidden md:table-cell">{% if open %}<span class="ca-diff ca-diff-{{ cp.problem.difficulty }}">{{ cp.problem.get_difficulty_display }}</span>{% endif %}</td>
         <td class="hidden whitespace-nowrap text-sm text-mute lg:table-cell">{% blocktrans with cp_problem_tl_ms=cp.problem.tl_ms %}{{ cp_problem_tl_ms }} ms{% endblocktrans %}{% if cp.problem.kind != "sql" %} {% blocktrans with cp_problem_ml_mb=cp.problem.ml_mb %}· {{ cp_problem_ml_mb }} MB{% endblocktrans %}{% endif %}</td>
-        {% if contest.type != "icpc" %}<td class="text-right"><span class="ca-worth"><b>{{ cp.points }}</b>{% if contest.type == "cf" and contest.is_running and cp.now_points is not None %}<small title="Hozir yechsangiz, xatosiz">{% blocktrans with cp_now_points=cp.now_points %}hozir {{ cp_now_points }}{% endblocktrans %}</small>{% endif %}</span></td>{% endif %}
+        {% if contest.type != "icpc" %}<td class="text-right"><span class="ca-worth"><b>{{ cp.points }}</b>{% if contest.type == "cf" and contest.is_running and cp.now_points is not None %}<small title="{% trans 'Hozir yechsangiz, xatosiz' %}">{% blocktrans with cp_now_points=cp.now_points %}hozir {{ cp_now_points }}{% endblocktrans %}</small>{% endif %}</span></td>{% endif %}
         <td class="text-right tabular">{% if contest.has_started %}{{ cp.solved_count }} / {{ cp.n_tried }}{% else %}{{ cp.solved_count }}{% endif %}</td>
         {% if my_row %}<td class="text-right">
           {% if cp.my_cell.solved %}<span class="ca-cf-cell" title="{% trans 'Yechilgan:' %} {{ cp.my_cell.time }}{% if cp.my_cell.wrong %}, {{ cp.my_cell.wrong }} {% trans 'ta xatodan keyin' %}{% endif %}"><b class="ca-cf-ac">{{ cp.my_cell.mark }}</b><span class="ca-cf-time">{{ cp.my_cell.time }}</span></span>
@@ -181,7 +181,7 @@ it is scored, virtual participation.{% endcomment %}
       <thead><tr><th scope="col" class="w-10 text-center">#</th><th scope="col">{% trans "Ishtirokchi" %}</th><th scope="col" class="text-right">{% if contest.type == "icpc" %}{% trans "Yechildi" %}{% else %}{% trans "Ball" %}{% endif %}</th></tr></thead>
       <tbody>
       {% for r in leaders|slice:":5" %}
-      <tr{% if r.user == user %} class="ca-row-me"{% endif %}><td class="text-center">{% if r.rank <= 3 and r.solved %}<span class="ca7-medal m{{ r.rank }}">{{ r.rank }}</span>{% elif r.score or r.solved %}<span class="tabular text-mute">{{ r.rank }}</span>{% else %}<span class="text-mute" title="Hali ball yo‘q">—</span>{% endif %}</td>
+      <tr{% if r.user == user %} class="ca-row-me"{% endif %}><td class="text-center">{% if r.rank <= 3 and r.solved %}<span class="ca7-medal m{{ r.rank }}">{{ r.rank }}</span>{% elif r.score or r.solved %}<span class="tabular text-mute">{{ r.rank }}</span>{% else %}<span class="text-mute" title="{% trans 'Hali ball yo‘q' %}">—</span>{% endif %}</td>
         <td>{% include "accounts/_u7.html" with u=r.user you=False %}</td><td class="text-right font-bold tabular">{% if contest.type == "icpc" %}{{ r.solved }}{% else %}{{ r.score }}{% endif %}</td></tr>
       {% endfor %}
       </tbody>

@@ -2,9 +2,8 @@
 tools, personal pages, profiles with nothing on them and the problems of a round that hasn't started stay
 out; robots.txt and the pages' own robots meta keep crawlers away from them too. lastmod is when the page
 last really changed: an edit, a round starting or ending, a profile's latest solve. Each page is listed in both
-languages (/en/... for English) with hreflang links to the other; a problem or course whose text has no confirmed
-English yet is listed in Uzbek only, as its English page says noindex."""
-from django.conf import settings
+languages (/uz/... for Uzbek) with hreflang links to the other; a problem or course is listed only in the languages
+it is written in or has a confirmed translation for, as its other page says noindex."""
 from django.contrib import sitemaps
 from django.db.models import Exists, OuterRef, Subquery
 from django.urls import reverse
@@ -35,8 +34,8 @@ class Localized(sitemaps.Sitemap):
             return self._languages()
         if not hasattr(self, "_ready"):
             self._ready = {lang: ready_ids(self.translated, lang) for lang in self._languages()}
-        # the source language's address always exists (it shows the author's text); the other needs a confirmed text
-        return [lang for lang in self._languages() if lang == settings.LANGUAGE_CODE or item.pk in self._ready[lang]]
+        # a language's address needs text in it: the author wrote it there, or an admin confirmed its translation
+        return [lang for lang in self._languages() if item.pk in self._ready[lang]]
 
 
 class Sections(Localized):

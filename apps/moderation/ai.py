@@ -7,7 +7,7 @@ from apps.problems.models import Problem
 from django.utils.translation import gettext as _t, gettext_lazy as _tl
 
 MODEL_CHOICES = [
-    ("claude-sonnet-5", "Sonnet 5 (tavsiya etiladi)"),
+    ("claude-sonnet-5", _tl("Sonnet 5 (tavsiya etiladi)")),
     ("claude-opus-5", "Opus 5"),
     ("claude-haiku-4-5", "Haiku 4.5"),
 ]
@@ -120,11 +120,11 @@ def _generate_one(client, model: str, schema: dict, prompt: str) -> dict:
         raise AIGenerationError(_t("AI bu so'rovni bajarmadi — mavzu yoki talabni o'zgartirib ko'ring."))
     text = next((b.text for b in response.content if b.type == "text"), None)
     if text is None:
-        raise AIGenerationError("AI javobida matn topilmadi.")
+        raise AIGenerationError(_t("AI javobida matn topilmadi."))
     try:
         return json.loads(text)
     except json.JSONDecodeError as e:
-        raise AIGenerationError(f"AI javobi JSON emas: {e}") from e
+        raise AIGenerationError(_t("AI javobi JSON emas: {e}").format(e=e)) from e
 
 
 def generate_problems(levels: dict[str, int], topics: list[str] = (), focus: str = "",
@@ -153,8 +153,8 @@ def generate_problems(levels: dict[str, int], topics: list[str] = (), focus: str
             raise AIGenerationError(_t("AI javobida {key} masalasi yo'q. Qayta urinib ko'ring.").format(key=key))
         if len(p.get("testcases", [])) < MIN_TESTCASES:
             raise AIGenerationError(
-                f"«{p.get('title', '?')}» uchun {len(p.get('testcases', []))} ta test bor, "
-                f"kamida {MIN_TESTCASES} ta kerak. Qayta urinib ko'ring."
+                _t("«{title}» uchun {n} ta test bor, kamida {min} ta kerak. Qayta urinib ko‘ring.").format(
+                    title=p.get("title", "?"), n=len(p.get("testcases", [])), min=MIN_TESTCASES)
             )
         problems.append({**p, "difficulty": level})
     return problems

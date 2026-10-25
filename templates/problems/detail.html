@@ -27,7 +27,7 @@ the console (samples, your own input, the run's result) and the one gold "Yubori
     <span class="ca-wbar-nav">
     {% if plan_nav %}{% with p=plan_nav.plan %}
       {% if plan_nav.prev %}<a class="ca-btn ca-btn-soft ca-btn-wb ca-btn-sq" href="{% url 'problems:detail' plan_nav.prev.slug %}?plan={{ p.slug }}" title="{{ plan_nav.prev.title }}" aria-label="{% trans 'Kursdagi oldingi masala' %}"><i data-lucide="chevron-left" class="lu" aria-hidden="true"></i></a>{% endif %}
-      <span class="tabular text-xs text-mute" title="Kursdagi o‘rni">{{ plan_nav.position }} / {{ plan_nav.total }}</span>
+      <span class="tabular text-xs text-mute" title="{% trans 'Kursdagi o‘rni' %}">{{ plan_nav.position }} / {{ plan_nav.total }}</span>
       {% if plan_nav.next %}<a class="ca-btn ca-btn-soft ca-btn-wb ca-btn-sq" href="{% url 'problems:detail' plan_nav.next.slug %}?plan={{ p.slug }}" title="{{ plan_nav.next.title }}" aria-label="{% trans 'Kursdagi keyingi masala' %}"><i data-lucide="chevron-right" class="lu" aria-hidden="true"></i></a>{% endif %}
     {% endwith %}{% else %}
       {% if prev_problem %}<a class="ca-btn ca-btn-soft ca-btn-wb ca-btn-sq" href="{% url 'problems:detail' prev_problem.slug %}" title="{{ prev_problem.title }}" aria-label="{% trans 'Oldingi masala' %}"><i data-lucide="chevron-left" class="lu" aria-hidden="true"></i></a>{% endif %}
@@ -98,16 +98,16 @@ the console (samples, your own input, the run's result) and the one gold "Yubori
           {% else %}
           <span class="ca-diff ca-diff-{{ problem.difficulty }}" title="{% blocktrans with problem_rating=problem.rating %}Masala reytingi {{ problem_rating }}: reytingi shu songa teng o‘quvchi uni taxminan yarim holda yechadi{% endblocktrans %}">{{ problem.get_difficulty_display }}</span>
           {% if voided == "held" %}
-          <span class="font-medium text-warn" title="Yechim qanday yozilgani shubhali ko‘rindi, shuning uchun ball admin ko‘rib chiqquncha ushlab turilibdi. O‘zingiz yozgan bo‘lsangiz, ball qaytariladi."><i data-lucide="hourglass" class="lu" aria-hidden="true"></i>{% trans "Ball tekshiruvda" %}</span>
+          <span class="font-medium text-warn" title="{% trans 'Yechim qanday yozilgani shubhali ko‘rindi, shuning uchun ball admin ko‘rib chiqquncha ushlab turilibdi. O‘zingiz yozgan bo‘lsangiz, ball qaytariladi.' %}"><i data-lucide="hourglass" class="lu" aria-hidden="true"></i>{% trans "Ball tekshiruvda" %}</span>
           {% elif voided %}
-          <span class="font-medium text-bad" title="Admin bu yechimni ko‘chirilgan deb belgiladi, shuning uchun amaliyot baliga qo‘shilmadi. Savol bo‘lsa, adminga murojaat qiling."><i data-lucide="shield-alert" class="lu" aria-hidden="true"></i>{% trans "Ball berilmadi" %}</span>
+          <span class="font-medium text-bad" title="{% trans 'Admin bu yechimni ko‘chirilgan deb belgiladi, shuning uchun amaliyot baliga qo‘shilmadi. Savol bo‘lsa, adminga murojaat qiling.' %}"><i data-lucide="shield-alert" class="lu" aria-hidden="true"></i>{% trans "Ball berilmadi" %}</span>
           {% else %}
-          <span title="Yechsangiz amaliyot balingizga qo‘shiladi. Ko‘p odam yechgan masala biroz arzonlashadi."><i data-lucide="coins" class="lu" aria-hidden="true"></i>{% blocktrans with problem_points=problem.points %}<b class="tabular">+{{ problem_points }}</b> ball{% endblocktrans %}</span>
+          <span title="{% trans 'Yechsangiz amaliyot balingizga qo‘shiladi. Ko‘p odam yechgan masala biroz arzonlashadi.' %}"><i data-lucide="coins" class="lu" aria-hidden="true"></i>{% blocktrans with problem_points=problem.points %}<b class="tabular">+{{ problem_points }}</b> ball{% endblocktrans %}</span>
           {% endif %}
           {% endif %}
           {% if problem.kind == "sql" %}<span class="ca-kind-sql"><i data-lucide="database" class="lu" aria-hidden="true"></i>{% trans "SQL" %}</span>{% endif %}
-          <span title="Vaqt chegarasi"><i data-lucide="clock" class="lu" aria-hidden="true"></i><b class="tabular">{% blocktrans with problem_tl_ms=problem.tl_ms %}{{ problem_tl_ms }} ms{% endblocktrans %}</b></span>
-          {% if problem.kind != "sql" %}<span title="Xotira chegarasi"><b class="tabular">{% blocktrans with problem_ml_mb=problem.ml_mb %}{{ problem_ml_mb }} MB{% endblocktrans %}</b></span>{% endif %}
+          <span title="{% trans 'Vaqt chegarasi' %}"><i data-lucide="clock" class="lu" aria-hidden="true"></i><b class="tabular">{% blocktrans with problem_tl_ms=problem.tl_ms %}{{ problem_tl_ms }} ms{% endblocktrans %}</b></span>
+          {% if problem.kind != "sql" %}<span title="{% trans 'Xotira chegarasi' %}"><b class="tabular">{% blocktrans with problem_ml_mb=problem.ml_mb %}{{ problem_ml_mb }} MB{% endblocktrans %}</b></span>{% endif %}
           {% if not contest and problem.n_ratings %}
           <button type="button" class="ca-stars-sum" data-dialog="rate-dialog" title="{% blocktrans with problem_n_ratings=problem.n_ratings %}{{ problem_n_ratings }} ta baho{% endblocktrans %}"><i data-lucide="star" class="lu" aria-hidden="true"></i><b class="tabular text-ink">{{ problem.avg_stars|floatformat:1 }}</b><span class="sr-only">/5,</span> <span class="tabular text-mute">({{ problem.n_ratings }})</span></button>
           {% endif %}
@@ -517,56 +517,56 @@ resolves their bare imports so @codemirror/state loads once — two copies break
   const S = (label, detail, template) => snip(template, { label, detail, type: "keyword" });
   const SNIPPETS = {
     python: [
-      S("fori", "for sikli", "for ${i} in range(${n}):\n\t${}"),
-      S("inp", "bitta son", "int(input())"),
-      S("ints", "qatordagi sonlar", "map(int, input().split())"),
+      S("fori", "{% jt "for sikli" %}", "for ${i} in range(${n}):\n\t${}"),
+      S("inp", "{% jt "bitta son" %}", "int(input())"),
+      S("ints", "{% jt "qatordagi sonlar" %}", "map(int, input().split())"),
       S("lst", "{% jt "sonlar ro‘yxati" %}", "list(map(int, input().split()))"),
       S("fastio", "{% jt "tez o‘qish" %}", "import sys\ninput = sys.stdin.readline\n"),
       S("gcd", "{% jt "EKUB" %}", "def gcd(a, b):\n\twhile b:\n\t\ta, b = b, a % b\n\treturn a\n"),
-      S("binsearch", "binar qidiruv", "lo, hi = ${0}, ${n}\nwhile lo < hi:\n\tmid = (lo + hi) // 2\n\tif ${check(mid)}:\n\t\thi = mid\n\telse:\n\t\tlo = mid + 1\n"),
-      S("main", "main funksiya", "def main():\n\t${}\n\n\nmain()\n"),
+      S("binsearch", "{% jt "binar qidiruv" %}", "lo, hi = ${0}, ${n}\nwhile lo < hi:\n\tmid = (lo + hi) // 2\n\tif ${check(mid)}:\n\t\thi = mid\n\telse:\n\t\tlo = mid + 1\n"),
+      S("main", "{% jt "main funksiya" %}", "def main():\n\t${}\n\n\nmain()\n"),
     ],
     cpp: [
-      S("fori", "for sikli", "for (int ${i} = 0; ${i} < ${n}; ${i}++) {\n\t${}\n}"),
-      S("forr", "teskari for", "for (int ${i} = ${n} - 1; ${i} >= 0; ${i}--) {\n\t${}\n}"),
-      S("fastio", "tez kiritish", "ios::sync_with_stdio(false);\ncin.tie(nullptr);"),
+      S("fori", "{% jt "for sikli" %}", "for (int ${i} = 0; ${i} < ${n}; ${i}++) {\n\t${}\n}"),
+      S("forr", "{% jt "teskari for" %}", "for (int ${i} = ${n} - 1; ${i} >= 0; ${i}--) {\n\t${}\n}"),
+      S("fastio", "{% jt "tez kiritish" %}", "ios::sync_with_stdio(false);\ncin.tie(nullptr);"),
       S("vi", "{% jt "vector o‘qish" %}", "vector<int> ${a}(${n});\nfor (auto &x : ${a}) cin >> x;"),
       S("ll", "long long", "typedef long long ll;"),
       S("all", "v.begin(), v.end()", "${v}.begin(), ${v}.end()"),
       S("gcd", "{% jt "EKUB" %}", "long long gcd(long long a, long long b) { return b ? gcd(b, a % b) : a; }"),
-      S("binsearch", "binar qidiruv", "int lo = ${0}, hi = ${n};\nwhile (lo < hi) {\n\tint mid = lo + (hi - lo) / 2;\n\tif (${check(mid)}) hi = mid;\n\telse lo = mid + 1;\n}"),
+      S("binsearch", "{% jt "binar qidiruv" %}", "int lo = ${0}, hi = ${n};\nwhile (lo < hi) {\n\tint mid = lo + (hi - lo) / 2;\n\tif (${check(mid)}) hi = mid;\n\telse lo = mid + 1;\n}"),
     ],
     java: [
-      S("fori", "for sikli", "for (int ${i} = 0; ${i} < ${n}; ${i}++) {\n\t${}\n}"),
-      S("forr", "teskari for", "for (int ${i} = ${n} - 1; ${i} >= 0; ${i}--) {\n\t${}\n}"),
+      S("fori", "{% jt "for sikli" %}", "for (int ${i} = 0; ${i} < ${n}; ${i}++) {\n\t${}\n}"),
+      S("forr", "{% jt "teskari for" %}", "for (int ${i} = ${n} - 1; ${i} >= 0; ${i}--) {\n\t${}\n}"),
       S("fastio", "{% jt "tez o‘qish" %}", "BufferedReader br = new BufferedReader(new InputStreamReader(System.in));\nStringTokenizer st = new StringTokenizer(br.readLine());"),
-      S("nextint", "keyingi son", "Integer.parseInt(st.nextToken())"),
-      S("sout", "chiqarish", "System.out.println(${});"),
+      S("nextint", "{% jt "keyingi son" %}", "Integer.parseInt(st.nextToken())"),
+      S("sout", "{% jt "chiqarish" %}", "System.out.println(${});"),
       S("gcd", "{% jt "EKUB" %}", "static long gcd(long a, long b) { return b == 0 ? a : gcd(b, a % b); }"),
-      S("binsearch", "binar qidiruv", "int lo = ${0}, hi = ${n};\nwhile (lo < hi) {\n\tint mid = lo + (hi - lo) / 2;\n\tif (${check(mid)}) hi = mid;\n\telse lo = mid + 1;\n}"),
+      S("binsearch", "{% jt "binar qidiruv" %}", "int lo = ${0}, hi = ${n};\nwhile (lo < hi) {\n\tint mid = lo + (hi - lo) / 2;\n\tif (${check(mid)}) hi = mid;\n\telse lo = mid + 1;\n}"),
     ],
     node: [
-      S("fori", "for sikli", "for (let ${i} = 0; ${i} < ${n}; ${i}++) {\n\t${}\n}"),
-      S("lines", "stdin qatorlari", "const lines = require(\"fs\").readFileSync(0, \"utf8\").split(\"\\n\");"),
-      S("nums", "qatordagi sonlar", "${line}.split(\" \").map(Number)"),
-      S("log", "chiqarish", "console.log(${});"),
+      S("fori", "{% jt "for sikli" %}", "for (let ${i} = 0; ${i} < ${n}; ${i}++) {\n\t${}\n}"),
+      S("lines", "{% jt "stdin qatorlari" %}", "const lines = require(\"fs\").readFileSync(0, \"utf8\").split(\"\\n\");"),
+      S("nums", "{% jt "qatordagi sonlar" %}", "${line}.split(\" \").map(Number)"),
+      S("log", "{% jt "chiqarish" %}", "console.log(${});"),
       S("gcd", "{% jt "EKUB" %}", "const gcd = (a, b) => (b ? gcd(b, a % b) : a);"),
-      S("binsearch", "binar qidiruv", "let lo = ${0}, hi = ${n};\nwhile (lo < hi) {\n\tconst mid = (lo + hi) >> 1;\n\tif (${check(mid)}) hi = mid;\n\telse lo = mid + 1;\n}"),
+      S("binsearch", "{% jt "binar qidiruv" %}", "let lo = ${0}, hi = ${n};\nwhile (lo < hi) {\n\tconst mid = (lo + hi) >> 1;\n\tif (${check(mid)}) hi = mid;\n\telse lo = mid + 1;\n}"),
     ],
     c: [
-      S("fori", "for sikli", "for (int ${i} = 0; ${i} < ${n}; ${i}++) {\n\t${}\n}"),
-      S("forr", "teskari for", "for (int ${i} = ${n} - 1; ${i} >= 0; ${i}--) {\n\t${}\n}"),
+      S("fori", "{% jt "for sikli" %}", "for (int ${i} = 0; ${i} < ${n}; ${i}++) {\n\t${}\n}"),
+      S("forr", "{% jt "teskari for" %}", "for (int ${i} = ${n} - 1; ${i} >= 0; ${i}--) {\n\t${}\n}"),
       S("scan", "{% jt "son o‘qish" %}", "scanf(\"%d\", &${x});"),
       S("scanll", "{% jt "long long o‘qish" %}", "scanf(\"%lld\", &${x});"),
-      S("pr", "chiqarish", "printf(\"%d\\n\", ${x});"),
+      S("pr", "{% jt "chiqarish" %}", "printf(\"%d\\n\", ${x});"),
       S("gcd", "{% jt "EKUB" %}", "long long gcd(long long a, long long b) { return b ? gcd(b, a % b) : a; }"),
       S("cmp", "{% jt "qsort uchun" %}", "int cmp(const void *a, const void *b) { return (*(int *)a > *(int *)b) - (*(int *)a < *(int *)b); }"),
     ],
     rust: [
-      S("next", "keyingi son", "let ${x}: ${i64} = it.next().unwrap().parse().unwrap();"),
+      S("next", "{% jt "keyingi son" %}", "let ${x}: ${i64} = it.next().unwrap().parse().unwrap();"),
       S("vec", "{% jt "n ta son" %}", "let ${a}: Vec<${i64}> = (0..${n}).map(|_| it.next().unwrap().parse().unwrap()).collect();"),
-      S("fori", "for sikli", "for ${i} in 0..${n} {\n\t${}\n}"),
-      S("out", "tez chiqarish", "use std::io::Write;\nlet mut out = io::BufWriter::new(io::stdout().lock());\nwriteln!(out, \"{}\", ${x}).unwrap();"),
+      S("fori", "{% jt "for sikli" %}", "for ${i} in 0..${n} {\n\t${}\n}"),
+      S("out", "{% jt "tez chiqarish" %}", "use std::io::Write;\nlet mut out = io::BufWriter::new(io::stdout().lock());\nwriteln!(out, \"{}\", ${x}).unwrap();"),
       S("gcd", "{% jt "EKUB" %}", "fn gcd(a: u64, b: u64) -> u64 { if b == 0 { a } else { gcd(b, a % b) } }"),
     ],
   };
@@ -889,7 +889,7 @@ resolves their bare imports so @codemirror/state loads once — two copies break
     }
     function render(r) {
       if (r.sql) return renderSql(r);
-      if (r.verdict === "CE") return show(`<p class="mb-2 flex items-center gap-2">${chip("CE")} Kompilyatsiya xatosi</p><pre class="ca-pre max-h-60 text-xs">${esc(r.log)}</pre>`);
+      if (r.verdict === "CE") return show(`<p class="mb-2 flex items-center gap-2">${chip("CE")} {% jt "Kompilyatsiya xatosi" %}</p><pre class="ca-pre max-h-60 text-xs">${esc(r.log)}</pre>`);
       if (!r.cases.length) return show(`<p class="flex items-center gap-2">${chip(r.verdict)} {% jt "Sinovni ishga tushirib bo‘lmadi — qayta urinib ko‘ring." %}</p>`);
       const custom = r.cases[0].expected === null;
       const passed = r.cases.filter((c) => c.verdict === "AC").length;

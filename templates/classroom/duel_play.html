@@ -48,7 +48,7 @@ second. Copying out of the question is blocked, so it can't be pasted into an AI
       <input type="hidden" name="away_ms" value="0"><input type="hidden" name="blurs" value="0">
       {% if options %}
       <div class="ca-quiz-options">
-        {% for o in options %}<button name="answer" value="{{ o }}" class="ca-quiz-option"><kbd>{{ forloop.counter }}</kbd><code>{{ o }}</code></button>{% endfor %}
+        {% for o in options %}<button name="answer" value="{{ o }}" class="ca-quiz-option"><kbd>{{ forloop.counter }}</kbd><code>{{ o|quiz_label }}</code></button>{% endfor %}
       </div>
       {% if q.has_error_option %}<p class="ca-quiz-note">{% trans "«Xato» — dastur xato bilan to‘xtaydi yoki kompilyatsiya qilinmaydi." %}</p>{% endif %}
       {% else %}
@@ -142,8 +142,8 @@ second. Copying out of the question is blocked, so it can't be pasted into an AI
     bar.classList.toggle("is-low", left < 5000);
     secs.textContent = Math.ceil(left / 1000);
     // spoken warnings for screen readers: the visible counter is aria-hidden
-    if (left <= 10000 && !said10) { said10 = true; say.textContent = "10 soniya qoldi"; }
-    if (left <= 5000 && !said5) { said5 = true; say.textContent = "5 soniya qoldi"; }
+    if (left <= 10000 && !said10) { said10 = true; say.textContent = "{% jt "10 soniya qoldi" %}"; }
+    if (left <= 5000 && !said5) { said5 = true; say.textContent = "{% jt "5 soniya qoldi" %}"; }
     if (left <= 0) { send(null); return; }
     requestAnimationFrame(tick);
   };

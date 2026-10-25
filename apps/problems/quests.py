@@ -99,9 +99,9 @@ def today_quests(user) -> dict:
     rows = [
         {"key": "easy", "title": _t("Easy masala yeching"), "hint": _t("Beginner yoki Easy darajali bitta masala"), "icon": "code",
          "href": reverse("problems:list") + "?difficulty=easy&status=new", "done": today in found["easy"]},
-        {"key": "duel", "title": _t("Duelda g‘alaba qozoning"), "hint": "1 ga 1 savollar duelida yuting", "icon": "swords",
+        {"key": "duel", "title": _t("Duelda g‘alaba qozoning"), "hint": _t("1 ga 1 savollar duelida yuting"), "icon": "swords",
          "href": reverse("classroom:duels"), "done": today in found["duel"]},
-        {"key": "course", "title": _t("Kurs nazariyasini o‘qing"), "hint": "Kursda «Tushundim»ni bosing", "icon": "book-open",
+        {"key": "course", "title": _t("Kurs nazariyasini o‘qing"), "hint": _t("Kursda «Tushundim»ni bosing"), "icon": "book-open",
          "href": reverse("learn:hub"), "done": today in found["course"]},
     ]
     done = sum(r["done"] for r in rows)

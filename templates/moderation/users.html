@@ -1,4 +1,4 @@
-{% extends "base.html" %}{% load tiers %}
+{% extends "base.html" %}{% load tiers places %}
 {% block title %}{% trans "Foydalanuvchilar — boshqaruv" %}{% endblock %}
 {% block band %}
 <section class="ca-hud" aria-labelledby="mod-title">
@@ -54,7 +54,7 @@
   <tbody>
   {% for u in page %}
   <tr{% if not u.is_active %} class="opacity-60"{% endif %}>
-    <td>{% include "accounts/_u7.html" with u=u you=False flag=True %}{% if u.school %}<small class="block truncate text-xs text-mute">{{ u.school }}</small>{% endif %}</td>
+    <td>{% include "accounts/_u7.html" with u=u you=False flag=True %}{% if u.school %}<small class="block truncate text-xs text-mute">{{ u.school|school_label }}</small>{% endif %}</td>
     <td class="hidden text-sm md:table-cell"><span class="truncate" translate="no">{{ u.email|default:"—" }}</span>{% if u.email %} <button type="button" class="mt-copy" data-copy="{{ u.email }}" title="{% trans 'Emailni nusxalash' %}" aria-label="{% trans 'Emailni nusxalash' %}"><i data-lucide="copy" class="lu" aria-hidden="true"></i></button>{% endif %}</td>
     <td class="hidden tabular text-sm text-mute xl:table-cell">{{ u.date_joined|date:"d.m.Y" }}</td>
     <td class="hidden tabular text-sm text-mute xl:table-cell">{% if u.last_login %}{{ u.last_login|date:"d.m.Y H:i" }}{% else %}{% trans "kirmagan" %}{% endif %}</td>

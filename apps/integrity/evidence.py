@@ -18,8 +18,8 @@ UNSEEN_MIN_SIMILARITY = 0.9
 JUMP_CHARS = 150          # appeared between two snapshots (at most one ~10 s tick of editing)
 
 WEIGHTS = {"ai_mark": 15, "silent": 6, "unseen": 8, "jump": 3, "shared_device": 10, "multi_device": 5, "similar": 8}
-LABELS = {"ai_mark": "AI belgisi", "silent": _tl("Tracker o‘chiq"), "unseen": "Muharrirda yozilmagan", "jump": "Kod sakrashi",
-          "shared_device": "Umumiy qurilma", "multi_device": "Ikki qurilma", "similar": _tl("O‘xshash kod")}
+LABELS = {"ai_mark": _tl("AI belgisi"), "silent": _tl("Tracker o‘chiq"), "unseen": _tl("Muharrirda yozilmagan"), "jump": _tl("Kod sakrashi"),
+          "shared_device": _tl("Umumiy qurilma"), "multi_device": _tl("Ikki qurilma"), "similar": _tl("O‘xshash kod")}
 
 
 @dataclass
@@ -122,7 +122,7 @@ def _devices(contest, subs, out):
                 shared.setdefault(u, set()).update(users - {u})
     for u, others in shared.items():
         out.setdefault(u, []).append(Evidence(
-            "shared_device", "Bir qurilmadan: " + ", ".join(sorted(names.get(o, str(o)) for o in others))))
+            "shared_device", _t("Bir qurilmadan: {names}").format(names=", ".join(sorted(names.get(o, str(o)) for o in others)))))
 
     by_user: dict[int, list[DeviceSeen]] = {}
     for d in seen:
@@ -165,4 +165,4 @@ def _ai_marks(contest, labels, subs, out):
             names |= found
     for (user_id, problem_id), (bad, names) in hits.items():
         out.setdefault(user_id, []).append(Evidence(
-            "ai_mark", f"{labels.get(problem_id, '?')}: kodda «{', '.join(sorted(names))}»", problem_id, bad[-1]))
+            "ai_mark", _t("{problem}: kodda «{names}»").format(problem=labels.get(problem_id, "?"), names=", ".join(sorted(names))), problem_id, bad[-1]))

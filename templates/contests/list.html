@@ -59,12 +59,12 @@ the right.{% endcomment %}
       {% for c in m.list %}
       <tr>
         <td><span class="ca7-date" aria-hidden="true" title="{{ c.start|weekday_full }}"><b>{{ c.start|date:"d" }}</b>{{ c.start|month_uz }}</span><span class="sr-only">{{ c.start|weekday_full }}, {{ c.start|date:"d.m.Y" }}</span></td>
-        <td><a class="ca-link" href="{% url 'contests:standings' c.pk %}" title="{% trans 'Natijalar jadvali' %}">{{ c.title }}</a>{% if not c.is_rated %} <span class="ca-tag" title="Natija reytingga ta’sir qilmaydi">{% trans "Mashq" %}</span>{% endif %}
+        <td><a class="ca-link" href="{% url 'contests:standings' c.pk %}" title="{% trans 'Natijalar jadvali' %}">{{ c.title }}</a>{% if not c.is_rated %} <span class="ca-tag" title="{% trans 'Natija reytingga ta’sir qilmaydi' %}">{% trans "Mashq" %}</span>{% endif %}
           <span class="block text-xs text-mute"><span class="tabular">{{ c.start|ztime:"H:i" }}</span> · {{ c.duration_label }}</span></td>
         <td class="hidden lg:table-cell"><span class="ca7-authors">{% for a in c.authors.all %}{% include "accounts/_u7.html" with u=a you=False %}{% empty %}<span class="text-mute">—</span>{% endfor %}</span></td>
         <td class="hidden text-right tabular md:table-cell">{{ c.n_participants }}</td>
         {% if user.is_authenticated %}
-        <td class="text-right">{% if c.me and c.me.rank %}<b class="font-semibold tabular">{{ c.me.rank }}</b>{% elif c.me %}<span class="text-mute">{% trans "qatnashgan" %}</span>{% else %}<span class="text-mute" title="Siz bu raundda qatnashmagansiz">—</span>{% endif %}</td>
+        <td class="text-right">{% if c.me and c.me.rank %}<b class="font-semibold tabular">{{ c.me.rank }}</b>{% elif c.me %}<span class="text-mute">{% trans "qatnashgan" %}</span>{% else %}<span class="text-mute" title="{% trans 'Siz bu raundda qatnashmagansiz' %}">—</span>{% endif %}</td>
         <td class="text-right">{% if c.my_delta is not None %}<b class="font-semibold tabular {% if c.my_delta > 0 %}text-ok{% elif c.my_delta < 0 %}text-bad{% else %}text-mute{% endif %}">{{ c.my_delta|signed }}</b>{% else %}<span class="text-mute">—</span>{% endif %}</td>
         {% endif %}
       </tr>

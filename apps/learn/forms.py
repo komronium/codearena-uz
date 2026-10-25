@@ -2,14 +2,14 @@ from django import forms
 
 from .models import MAX_LISTS, ProblemList
 from django.utils.translation import gettext as _t
-from django.utils.translation import gettext as _t
+from django.utils.translation import gettext_lazy as _tl
 
 
 class ListForm(forms.ModelForm):
     class Meta:
         model = ProblemList
         fields = ["name", "is_public"]
-        widgets = {"name": forms.TextInput(attrs={"class": "ca-input", "placeholder": "Masalan: Keyinroq yechaman",
+        widgets = {"name": forms.TextInput(attrs={"class": "ca-input", "placeholder": _tl("Masalan: Keyinroq yechaman"),
                                                   "maxlength": 80})}
 
     def __init__(self, *args, owner=None, **kwargs):
@@ -19,7 +19,7 @@ class ListForm(forms.ModelForm):
     def clean_name(self):
         name = self.cleaned_data["name"].strip()
         if not name:
-            raise forms.ValidationError("Nom kiriting.")
+            raise forms.ValidationError(_t("Nom kiriting."))
         return name
 
     def clean(self):

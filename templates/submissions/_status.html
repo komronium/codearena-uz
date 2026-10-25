@@ -30,7 +30,7 @@ compact=True: the verdict chip only.{% endcomment %}
   {% if s.is_terminal and s.verdict != 'AC' %}
   <p class="ca7-vhero-hint"><i data-lucide="lightbulb" class="lu" aria-hidden="true"></i>{% if s.verdict == 'WA' %}{% trans "Dastur ishladi, lekin javob kutilganidan farq qildi. Chegaraviy holatlarni (0, 1, eng katta qiymat) va chiqish formatini tekshiring." %}{% elif s.verdict == 'TLE' %}{% trans "Dastur vaqt chegarasiga sig‘madi. Tezroq algoritm kerak — masalan, ichma-ich sikllarni kamaytiring." %}{% elif s.verdict == 'MLE' %}{% trans "Dastur ruxsat etilganidan ko‘p xotira ishlatdi. Katta massivlar va rekursiya chuqurligini tekshiring." %}{% elif s.verdict == 'OLE' %}{% trans "Dastur juda ko‘p narsa chiqardi. Ortiqcha yoki sikl ichidagi chiqarishlarni olib tashlang." %}{% elif s.verdict == 'RE' %}{% trans "Dastur xato bilan to‘xtadi: nolga bo‘lish, massiv chegarasidan chiqish yoki noto‘g‘ri kiritishni o‘qish bo‘lishi mumkin." %}{% elif s.verdict == 'CE' %}{% trans "Kod kompilyatsiya bo‘lmadi. Til to‘g‘ri tanlanganini va sintaksisni tekshiring." %}{% else %}{% trans "Tekshiruvda xato yuz berdi. Qayta yuborib ko‘ring." %}{% endif %}</p>
   {% endif %}
-  {% if s.verdict == 'CE' %}<pre class="ca7-vhero-log">{{ s.compile_log|default:"Kompilyator izoh bermadi. Ko‘pincha til noto‘g‘ri tanlangan yoki qavs/ikki nuqta tushib qolgan bo‘ladi: kodni muharrirda ochib, tilni tekshiring." }}</pre>{% endif %}
+  {% if s.verdict == 'CE' %}<pre class="ca7-vhero-log">{{ s.compile_log|default:_("Kompilyator izoh bermadi. Ko‘pincha til noto‘g‘ri tanlangan yoki qavs/ikki nuqta tushib qolgan bo‘ladi: kodni muharrirda ochib, tilni tekshiring.") }}</pre>{% endif %}
 </section>
 
 {% if first_fail and s.is_terminal %}

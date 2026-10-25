@@ -49,7 +49,7 @@ TEMPLATES = [{
     "BACKEND": "django.template.backends.django.DjangoTemplates",
     "DIRS": [BASE_DIR / "templates"],
     "APP_DIRS": True,
-    "OPTIONS": {"builtins": ["apps.problems.templatetags.numbers", "django.templatetags.i18n", "apps.accounts.templatetags.jstrans"], "context_processors": [
+    "OPTIONS": {"builtins": ["apps.problems.templatetags.numbers", "django.templatetags.i18n", "apps.accounts.templatetags.jstrans", "apps.classroom.templatetags.quiz"], "context_processors": [
         "django.template.context_processors.request",
         "django.template.context_processors.i18n",
         "django.contrib.auth.context_processors.auth",
@@ -127,10 +127,11 @@ TELEGRAM_BOT_USERNAME = os.environ.get("TELEGRAM_BOT_USERNAME", "").lstrip("@")
 TELEGRAM_WEBHOOK_SECRET = os.environ.get("TELEGRAM_WEBHOOK_SECRET", "")
 SITE_URL = os.environ.get("SITE_URL", "https://codearena.uz").rstrip("/")
 
-LANGUAGE_CODE = "uz"  # the language of the source strings (msgids); English is locale/en
-LANGUAGES = [("uz", "O‘zbekcha"), ("en", "English")]
-# locale: English; locale_uz: the Uzbek source strings in the new spelling (O‘ -> Ö, G‘ -> Ğ, Sh -> Ş, Ch -> Ç; tools/uz_alphabet.py).
-# Take locale_uz out of the list to go back to the old spelling.
+LANGUAGE_CODE = "en"  # the main language: the plain address, and what a person who chose nothing sees
+LANGUAGES = [("en", "English"), ("uz", "O‘zbekcha")]
+# The source strings (msgids) in the code are Uzbek. locale/en: their English; locale_uz: the Uzbek itself in the new
+# spelling (O‘ -> Ö, G‘ -> Ğ, Sh -> Ş, Ch -> Ç; tools/uz_alphabet.py), a line for every msgid because the fallback of a
+# missing Uzbek line is the English catalog. Take locale_uz out of the list to go back to the old spelling.
 LOCALE_PATHS = [BASE_DIR / "locale", BASE_DIR / "locale_uz"]
 FORMAT_MODULE_PATH = ["config.formats"]  # one decimal point in both languages: numbers also land in CSS and scripts
 TIME_ZONE = "Asia/Tashkent"

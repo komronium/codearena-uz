@@ -420,7 +420,7 @@ def practice_decide(request, user_id, problem_id):
 
     sync_practice_points([user_id])
     messages.success(request, {"confirm": _t("Tasdiqlandi — bu yechim uchun ball berilmaydi."),
-                               "clear": _t("Belgilandi: shubha yo‘q."), "undo": "Qaror bekor qilindi."}[decision])
+                               "clear": _t("Belgilandi: shubha yo‘q."), "undo": _t("Qaror bekor qilindi.")}[decision])
     back = request.POST.get("back", "")
     if not url_has_allowed_host_and_scheme(back, allowed_hosts={request.get_host()}):
         back = reverse("integrity:practice_report")
@@ -450,12 +450,12 @@ def report_create(request):
     else:  # an appeal is about your own result, and only if you have one
         contest = Contest.objects.filter(pk=request.POST.get("contest") or 0).first()
         if contest is None or not Participation.objects.filter(user=request.user, contest=contest).exists():
-            messages.error(request, "Bu musobaqada qatnashmagansiz.")
+            messages.error(request, _t("Bu musobaqada qatnashmagansiz."))
             return redirect(back)
         report.contest = contest
     report.save()
-    messages.success(request, "Xabaringiz adminlarga yuborildi. Rahmat." if kind == Report.Kind.USER
-                     else "Apellyatsiyangiz adminlarga yuborildi. Javob kutilmoqda.")
+    messages.success(request, _t("Xabaringiz adminlarga yuborildi. Rahmat.") if kind == Report.Kind.USER
+                     else _t("Apellyatsiyangiz adminlarga yuborildi. Javob kutilmoqda."))
     return redirect(back)
 
 
@@ -480,7 +480,7 @@ def report_done(request, pk):
     report.save(update_fields=["done_at", "done_by", "outcome"])
     if report.done_at:  # the person who wrote hears the outcome, in the bell
         from apps.accounts.notifications import notify
-        what = "Apellyatsiyangiz" if report.kind == Report.Kind.APPEAL else "Shikoyatingiz"
+        what = _t("Apellyatsiyangiz") if report.kind == Report.Kind.APPEAL else _t("Shikoyatingiz")
         notify(report.reporter_id, "report", f"report:{report.pk}:done",
                _t("{what} ko‘rib chiqildi").format(what=what) + (f": {report.outcome}" if report.outcome else ""), "/")
     return redirect("integrity:reports")

@@ -133,7 +133,7 @@ def _user_for(request, info: dict):
             user.invited_by = inviter
         user.save()
     if not user.is_active:
-        return None, "Bu hisob yopilgan."
+        return None, _t("Bu hisob yopilgan.")
     _give_avatar(user, info.get("picture", ""))  # only for the people who really sign in
     return user, ""
 

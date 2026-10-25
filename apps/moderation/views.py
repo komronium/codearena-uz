@@ -70,7 +70,7 @@ def duel_switch(request):
     action = request.POST.get("do", "")
     if action == "open":
         switch.open_up(request.user)
-        messages.success(request, "Duellar ochildi.")
+        messages.success(request, _t("Duellar ochildi."))
     elif action in ("45", "90", "forever"):
         switch.close(request.user, None if action == "forever" else int(action))
         messages.success(request, _t("Duellar yopildi: talabalar duel sahifasini ko‘rmaydi."))
@@ -272,7 +272,7 @@ def daily_problem_choose(request):
     if day == today:
         # If today's assignment was still unset, account for accepted runs already made today.
         refresh_daily(problem.pk, None)
-    messages.success(request, f"{day:%d.%m.%Y} kuniga «{problem.title}» tanlandi.")
+    messages.success(request, _t("{day} kuniga «{title}» tanlandi.").format(day=f"{day:%d.%m.%Y}", title=problem.title))
     return redirect(f"{reverse('moderation:daily_problem')}?date={assignment.date.isoformat()}")
 
 
@@ -334,7 +334,7 @@ def upload_image(request):
     """AJAX image upload endpoint for markdown editors (EasyMDE) and problem statements."""
     f = request.FILES.get("image")
     if not f:
-        return JsonResponse({"error": "Fayl tanlanmadi."}, status=400)
+        return JsonResponse({"error": _t("Fayl tanlanmadi.")}, status=400)
     if f.size > 10 * 1024 * 1024:
         return JsonResponse({"error": _t("Rasm hajmi 10 MB dan oshmasligi kerak.")}, status=400)
     ext = os.path.splitext(f.name)[1].lower()
@@ -630,12 +630,12 @@ def problem_delete(request, pk):
         problem = get_object_or_404(Problem.objects.select_for_update(), pk=pk)
         # A contest's record or other people's work hangs on it; hiding keeps both.
         if problem.contests.exists() or problem.submissions.exclude(user_id=problem.author_id).exists():
-            messages.error(request, f"«{problem.title}» musobaqada ishlatilgan yoki unga boshqalar urinish "
-                                    "yuborgan — o‘chirib bo‘lmaydi, yashirib qo‘ying.")
+            messages.error(request, _t("«{title}» musobaqada ishlatilgan yoki unga boshqalar urinish yuborgan — "
+                                       "o‘chirib bo‘lmaydi, yashirib qo‘ying.").format(title=problem.title))
             return redirect("moderation:problems")
         problem.delete()
         audit.record(request, audit.Action.PROBLEM_DELETE, note=f"{problem.slug} — {problem.title}")
-    messages.success(request, f"«{problem.title}» o'chirildi.")
+    messages.success(request, _t("«{title}» o‘chirildi.").format(title=problem.title))
     return redirect("moderation:problems")
 
 
@@ -650,8 +650,7 @@ def problem_rejudge(request, pk):
     messages.success(request, _t("{len_ids} ta urinish qayta tekshirishga yuborildi.").format(len_ids=n))
     applied = list(problem.contests.filter(rating_applied=True).values_list("title", flat=True))
     if applied:
-        messages.warning(request, f"{', '.join(applied)}: reyting allaqachon hisoblangan — "
-                                  "qayta tekshiruvdan keyin ham o‘zgarmaydi.")
+        messages.warning(request, _t("{names}: reyting allaqachon hisoblangan — qayta tekshiruvdan keyin ham o‘zgarmaydi.").format(names=", ".join(applied)))
     return redirect("moderation:problems")
 
 
@@ -725,7 +724,7 @@ def tag_edit(request, pk):
     form = TagForm(request.POST or None, instance=tag)
     if request.method == "POST" and form.is_valid():
         form.save()
-        messages.success(request, f"«{tag.name}» saqlandi.")
+        messages.success(request, _t("«{name}» saqlandi.").format(name=tag.name))
         return redirect("moderation:tags")
     return render(request, "moderation/tag_form.html", {"form": form, "tag": tag, "courses": tag.courses.all()})
 
@@ -792,7 +791,7 @@ def plan_edit(request, pk=None):
         if form.changed_data and set(form.changed_data) & set(StudyPlan.TRANSLATABLE):
             from apps.translations import service as translations
             translations.stale(plan)  # the original changed: the other language waits for an admin again
-        messages.success(request, "Kurs saqlandi.")
+        messages.success(request, _t("Kurs saqlandi."))
         return redirect("learn:course", plan.slug)
     return render(request, "moderation/plan_form.html", {"form": form, "plan": plan})
 
@@ -912,8 +911,7 @@ def contest_edit(request, pk=None):
                 known = [cp.label for cp in contest.contest_problems.select_related("problem")
                          if reuse_reason(cp.problem, contest)]
                 if known:
-                    messages.warning(request, f"{', '.join(known)}: ochiq yoki boshqa musobaqada ishlatilgan — "
-                                              "ishtirokchilar bu masalalarni oldindan bilishi mumkin.")
+                    messages.warning(request, _t("{names}: ochiq yoki boshqa musobaqada ishlatilgan — ishtirokchilar bu masalalarni oldindan bilishi mumkin.").format(names=", ".join(known)))
             return redirect("moderation:contests")
     if formset is not None:
         from apps.contests.models import LEVEL_POINTS
@@ -999,7 +997,7 @@ def contest_delete(request, pk):
             return redirect("moderation:contests")
         audit.record(request, audit.Action.CONTEST_DELETE, note=f"#{contest.pk} — {contest.title}")
         contest.delete()
-    messages.success(request, f"«{contest.title}» o'chirildi.")
+    messages.success(request, _t("«{title}» o‘chirildi.").format(title=contest.title))
     return redirect("moderation:contests")
 
 
@@ -1059,18 +1057,18 @@ def contest_apply_rating(request, pk):
     contest = get_object_or_404(Contest, pk=pk)
     open_flags = SimilarityFlag.objects.filter(submission_a__contest=contest, reviewed=False).count()
     if not contest.is_rated:
-        messages.error(request, "Reyting hisoblanmadi: musobaqa reytingli emas.")
+        messages.error(request, _t("Reyting hisoblanmadi: musobaqa reytingli emas."))
     elif not contest.rating_applied and not contest.has_ended:
         messages.error(request, _t("Reyting hisoblanmadi: musobaqa hali tugamagan."))
     elif contest.rating_applied:
-        messages.info(request, "Bu musobaqaning reytingi allaqachon hisoblangan.")
+        messages.info(request, _t("Bu musobaqaning reytingi allaqachon hisoblangan."))
     elif open_flags and request.POST.get("force") != "1":
         messages.error(request, _t("{n} ta ko‘rilmagan o‘xshashlik belgisi bor: avval «Halollik» da ko‘rib chiqing (yoki «Baribir hisoblash»).").format(n=open_flags))
     else:
         jobs.run(jobs.apply_rating, contest.pk)
         audit.record(request, audit.Action.RATING_APPLY, contest=contest)
         messages.success(request, _t("Reyting hisoblanmoqda: bir necha soniyadan keyin sahifani yangilang.") if settings.RQ_ASYNC
-                         else "Reyting hisoblandi.")
+                         else _t("Reyting hisoblandi."))
     return redirect("moderation:contests")
 
 

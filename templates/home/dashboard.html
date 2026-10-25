@@ -26,7 +26,7 @@
     <div class="ca-hud-rt">
       <b class="tabular">{{ user.rating }}</b>
       <div>
-        <p class="ca-hud-lbl">{% blocktrans with user_rating=user.rating|tier_name %}Musobaqa reytingi · <span class="ca-hud-tier">{{ user_rating }}</span>{% endblocktrans %}{% if rating_card.delta is not None %} <span title="Oxirgi reytingli musobaqada">{{ rating_card.delta|signed }}</span>{% endif %}</p>
+        <p class="ca-hud-lbl">{% blocktrans with user_rating=user.rating|tier_name %}Musobaqa reytingi · <span class="ca-hud-tier">{{ user_rating }}</span>{% endblocktrans %}{% if rating_card.delta is not None %} <span title="{% trans 'Oxirgi reytingli musobaqada' %}">{{ rating_card.delta|signed }}</span>{% endif %}</p>
         {% if rating_card.next %}
         <span class="ca-hud-pg" role="progressbar" aria-valuenow="{{ rating_card.next.pct }}" aria-valuemin="0" aria-valuemax="100" aria-label="{% blocktrans with rating_card_next_name=rating_card.next.name %}{{ rating_card_next_name }} darajasigacha{% endblocktrans %}"><i style="width: {{ rating_card.next.pct }}%"></i></span>
         <p class="ca-hud-lbl">{% blocktrans with rating_card_next_name=rating_card.next.name rating_card_next_need=rating_card.next.need %}<span class="font-semibold text-white">{{ rating_card_next_name }}</span> darajasigacha {{ rating_card_next_need }} ball{% endblocktrans %}</p>

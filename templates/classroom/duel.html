@@ -17,10 +17,10 @@
       <p class="ca-quiz-ask"><b>{{ r.n }}.</b> {% include "classroom/_quiz_ask.html" with q=r.q %}</p>
       {% include "classroom/_quiz_code.html" with q=r.q %}
       <dl class="ca-quiz-answers">
-        <div><dt>{% trans "To‘g‘ri javob" %}</dt><dd><code>{{ r.q.answer }}</code></dd></div>
+        <div><dt>{% trans "To‘g‘ri javob" %}</dt><dd><code>{{ r.q.answer|quiz_label }}</code></dd></div>
         {% for s in r.answers %}<div><dt>{{ s.label }}</dt><dd>{% if s.pending %}<span class="text-mute">{% trans "hali o‘ynamadi" %}</span>{% elif s.unseen and not s.a %}<span class="text-mute">{% trans "ko‘rilmagan" %}</span>{% else %}{% include "classroom/_quiz_given.html" with a=s.a %}{% endif %}</dd></div>{% endfor %}
       </dl>
-      {% if r.q.explain %}<p class="ca-quiz-explain">{{ r.q.explain }}</p>{% endif %}
+      {% if r.q.explain %}<p class="ca-quiz-explain">{{ r.q.explain|quiz_text }}</p>{% endif %}
     </li>
     {% endfor %}
   </ol>

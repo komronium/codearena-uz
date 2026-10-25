@@ -65,7 +65,7 @@ def _gate(request, slug):
         return (
             problem,
             contest,
-            HttpResponseBadRequest("Siz bu musobaqadan chetlatilgansiz."),
+            HttpResponseBadRequest(_t("Siz bu musobaqadan chetlatilgansiz.")),
         )
     if (
         contest is not None
@@ -495,7 +495,7 @@ def guest_trial(request, slug):
     from apps.accounts import throttle
 
     if request.user.is_authenticated:
-        return JsonResponse({"error": "Tizimga kirgansiz: sahifani yangilang."}, status=400)
+        return JsonResponse({"error": _t("Tizimga kirgansiz: sahifani yangilang.")}, status=400)
     problem = get_object_or_404(Problem, slug=slug, is_public=True)
     from apps.contests.models import ContestProblem
     if problem.kind == Problem.Kind.SQL or ContestProblem.objects.filter(problem=problem, contest__end__gt=timezone.now()).exists():

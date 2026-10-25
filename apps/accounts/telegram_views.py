@@ -69,7 +69,7 @@ def login_status(request):
 def disconnect(request):
     TelegramLinkToken.objects.filter(user=request.user).delete()
     TelegramLink.objects.filter(user=request.user).delete()
-    messages.success(request, "Telegram hisobingiz uzildi.")
+    messages.success(request, _t("Telegram hisobingiz uzildi."))
     return redirect("profile_edit")
 
 
@@ -99,7 +99,7 @@ def preferences(request):
                 link.outbox.filter(preference=field, status__in=["pending", "sending"]).update(
                     status="failed", last_error="Notification type was disabled"
                 )
-        messages.success(request, "Telegram bildirishnoma sozlamalari saqlandi.")
+        messages.success(request, _t("Telegram bildirishnoma sozlamalari saqlandi."))
     else:
         messages.error(request, _t("Sozlamalarni saqlab bo‘lmadi. Sahifani yangilab, qayta urinib ko‘ring."))
     return redirect("profile_edit")
@@ -126,7 +126,7 @@ def _handle_bot_message(message):
     if pending:
         cache.delete(f"tg-login-pending:{chat_id}")
         if text != login_code(pending):
-            send_chat_message(str(chat_id), "Kod mos kelmadi. Saytda «Telegram orqali kirish»ni qaytadan bosing.")
+            send_chat_message(str(chat_id), _t("Kod mos kelmadi. Saytda «Telegram orqali kirish»ni qaytadan bosing."))
             return
         status = confirm_login_request(pending, str(chat_id))
         replies = {

@@ -75,7 +75,7 @@ def _browser_reasons(solve, before) -> tuple[int, list[str]]:
     limit = SPEED_LIMIT.get(solve.problem.difficulty)
     if views and limit and (ac_at - min(views)).total_seconds() < limit:
         score += 3
-        why.append(f"sahifa ochilgach {_fmt((ac_at - min(views)).total_seconds())} ichida yechildi")
+        why.append(_t("sahifa ochilgach {time} ichida yechildi").format(time=_fmt((ac_at - min(views)).total_seconds())))
     return score, why
 
 
@@ -88,7 +88,7 @@ def _server_reasons(solve, before, snaps) -> tuple[int, list[str]]:
     want = _norm(sub.source)
     if not any(_norm(s.source) == want or similarity(sub.source, s.source) >= THRESHOLD for s in near):
         score += 8
-        why.append("qabul qilingan kod muharrirda yozilmagan")
+        why.append(_t("qabul qilingan kod muharrirda yozilmagan"))
     grew = max((len(b.source) - len(a.source) for a, b in zip(snaps, snaps[1:]) if b.at <= sub.created), default=0)
     if grew >= JUMP_CHARS:
         score += 4

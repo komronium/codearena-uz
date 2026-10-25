@@ -2,10 +2,11 @@ import re
 import zipfile
 
 from django import forms
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.forms import inlineformset_factory
 from django.forms.models import BaseInlineFormSet, BaseModelFormSet, ModelForm, modelformset_factory
-from django.utils import timezone
+from django.utils import timezone, translation
 
 from apps.accounts.countries import COUNTRY_CHOICES
 from apps.accounts.forms import validate_public_username
@@ -31,9 +32,11 @@ class _SourceLang:
         if "source_lang" in self.fields:
             self.fields["source_lang"].required = False
             self.fields["source_lang"].widget.attrs.setdefault("class", "ca-select")
+            if not self.instance.pk:  # a new piece starts in the language the page is in (English, unless the author switched)
+                self.initial["source_lang"] = translation.get_language() or settings.LANGUAGE_CODE
 
     def clean_source_lang(self):
-        return self.cleaned_data.get("source_lang") or getattr(self.instance, "source_lang", None) or "uz"
+        return self.cleaned_data.get("source_lang") or getattr(self.instance, "source_lang", None) or settings.LANGUAGE_CODE
 
 
 class ProblemForm(_SourceLang, ModelForm):
@@ -89,9 +92,9 @@ class ProblemForm(_SourceLang, ModelForm):
         try:
             pairs = parse_tests_zip(f)
         except (zipfile.BadZipFile, UnicodeDecodeError) as e:
-            raise ValidationError(f"ZIP o'qilmadi: {e}")
+            raise ValidationError(_t("ZIP o‘qilmadi: {e}").format(e=e))
         if not pairs:
-            raise ValidationError("ZIP ichida test juftligi topilmadi (masalan 01.in + 01.out).")
+            raise ValidationError(_t("ZIP ichida test juftligi topilmadi (masalan 01.in + 01.out)."))
         return pairs
 
 
@@ -110,7 +113,7 @@ class SQLDatasetForm(ModelForm):
                 try:
                     sql_judge.tables(schema, data[field])
                 except sql_judge.SQLJudgeError as exc:
-                    self.add_error(field, f"SQL xatosi: {exc}")
+                    self.add_error(field, _t("SQL xatosi: {exc}").format(exc=exc))
         if data.get("check_seed_sql", "").strip() and not data.get("check_expected_result", "").strip():
             self.add_error("check_expected_result", _t("Yashirin ma‘lumotlar uchun kutilgan natija kerak."))
         return data
@@ -187,8 +190,8 @@ class ContestForm(_SourceLang, ModelForm):
             "description_md": forms.Textarea(attrs={**_MD, "rows": 4}),
             "start": _DateTimeLocal(),
             "end": _DateTimeLocal(),
-            "allowed_ip_prefix": forms.TextInput(attrs={**_CA_INPUT, "placeholder": "masalan 10.0."}),
-            "badge": forms.TextInput(attrs={**_CA_INPUT, "placeholder": "masalan Marathon #1"}),
+            "allowed_ip_prefix": forms.TextInput(attrs={**_CA_INPUT, "placeholder": _tl("masalan 10.0.")}),
+            "badge": forms.TextInput(attrs={**_CA_INPUT, "placeholder": _tl("masalan Marathon #1")}),
             "type": forms.Select(attrs={"class": "ca-select"}),
         }
 
@@ -368,7 +371,7 @@ class TagForm(ModelForm):
     class Meta:
         model = Tag
         fields = ["name", "kind"]
-        widgets = {"name": forms.TextInput(attrs={**_CA_INPUT, "placeholder": "masalan: two-pointers"}),
+        widgets = {"name": forms.TextInput(attrs={**_CA_INPUT, "placeholder": _tl("masalan: two-pointers")}),
                    "kind": forms.Select(attrs={"class": "ca-select"})}
 
     def __init__(self, *args, **kwargs):
@@ -394,7 +397,7 @@ class AIGenerateForm(forms.Form):
                                             widget=forms.CheckboxSelectMultiple)
     focus = forms.CharField(required=False, max_length=500, widget=forms.Textarea(attrs={
         "class": "ca-input", "rows": 3,
-        "placeholder": "Masalan: bozordagi narxlar, Fibonachchi sonlari, 1 ≤ n ≤ 10⁵"}))
+        "placeholder": _tl("Masalan: bozordagi narxlar, Fibonachchi sonlari, 1 ≤ n ≤ 10⁵")}))
     model = forms.ChoiceField(choices=MODEL_CHOICES, initial=DEFAULT_MODEL,
                               widget=forms.Select(attrs={"class": "ca-select"}))
 

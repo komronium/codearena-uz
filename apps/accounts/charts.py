@@ -4,7 +4,7 @@ median shown. One definition for the public rating page and the staff statistics
 import statistics
 from collections import Counter
 
-from .tiers import RATING_TIERS, TIER_UZ, rating_tier, tier_color
+from .tiers import RATING_TIERS, rating_tier, tier_color, tier_label
 
 
 def _step(top: int) -> int:
@@ -45,7 +45,7 @@ def rating_histogram(ratings: list[int], me: int | None = None, size: int | None
         n = counts.get(x, 0)
         mid = x + size // 2
         cols.append({"from": x, "to": x + size - 1, "n": n, "pct": round(100 * n / top_axis, 2),
-                     "color": tier_color(mid) if tiers else "", "tier": TIER_UZ[rating_tier(mid)] if tiers else "",
+                     "color": tier_color(mid) if tiers else "", "tier": tier_label(rating_tier(mid)) if tiers else "",
                      "me": x == mine})
     span = (hi + size) - lo
     xticks = []
@@ -62,8 +62,8 @@ def rating_histogram(ratings: list[int], me: int | None = None, size: int | None
     present, empty = [], []
     if tiers:
         seen = Counter(rating_tier(r) for r in ratings)
-        present = [{"name": TIER_UZ[n], "color": c, "n": seen[n]} for _f, _c, n, c in RATING_TIERS if seen.get(n)]
-        empty = [{"name": TIER_UZ[n], "color": c, "from": f} for f, _c, n, c in RATING_TIERS if f is not None and not seen.get(n)]
+        present = [{"name": tier_label(n), "color": c, "n": seen[n]} for _f, _c, n, c in RATING_TIERS if seen.get(n)]
+        empty = [{"name": tier_label(n), "color": c, "from": f} for f, _c, n, c in RATING_TIERS if f is not None and not seen.get(n)]
     return {"cols": cols, "xticks": xticks, "yticks": yticks, "n": len(ratings), "median": round(median),
             "median_left": round(100 * (median - lo) / span, 2), "present": present, "empty": empty, "size": size, "tiers": tiers,
             "mine": me}

@@ -89,7 +89,7 @@ def send_verification(request, user, force: bool = False) -> bool:
     name = user.first_name or user.username
     from django.utils import translation
     # the mail speaks the language the page was in (the sign-up page's), else the account's
-    with translation.override(translation.get_language() or user.language or "uz"):
+    with translation.override(translation.get_language() or user.language or settings.LANGUAGE_CODE):
         text = (_t("Salom, {name}!").format(name=name) + "\n\n"
                 + _t("CodeArena hisobingizni faollashtirish uchun quyidagi havolani oching:") + f"\n{link}\n\n"
                 + _t("Havola 3 kun amal qiladi. Agar siz ro‘yxatdan o‘tmagan bo‘lsangiz, bu xatni e’tiborsiz qoldiring."))

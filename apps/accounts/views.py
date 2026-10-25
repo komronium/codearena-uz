@@ -15,6 +15,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.utils.translation import gettext_lazy as _tl
 from django.views.decorators.http import require_POST
 
 from apps.contests.models import _UZ_MONTHS_SHORT, Participation
@@ -218,7 +219,7 @@ class PasswordReset(auth_views.PasswordResetView):
 class PasswordChange(SuccessMessageMixin, auth_views.PasswordChangeView):
     """Knowing the old password is enough — no email round trip."""
     success_url = reverse_lazy("profile_edit")
-    success_message = "Parol almashtirildi."
+    success_message = _tl("Parol almashtirildi.")
 
 
 @login_required
@@ -237,7 +238,7 @@ def profile_edit(request):
         user.save()
         if email_changed:
             onboarding.send_verification(request, user, force=True)
-            messages.info(request, f"{user.email} manziliga tasdiqlash havolasi yuborildi.")
+            messages.info(request, _t("{email} manziliga tasdiqlash havolasi yuborildi.").format(email=user.email))
         return redirect("profile", user.username)
     return render(request, "accounts/profile_edit.html", {
         "form": form,
@@ -302,7 +303,7 @@ def verify_email(request, token):
     if not user or not onboarding.confirm(user, data[1]):
         messages.error(request, _t("Havola eskirgan yoki noto‘g‘ri. Yangi havola so‘rang."))
         return redirect("welcome" if request.user.is_authenticated else "login")
-    messages.success(request, "Email tasdiqlandi. Xush kelibsiz!")
+    messages.success(request, _t("Email tasdiqlandi. Xush kelibsiz!"))
     if request.user.is_authenticated and request.user.pk == user.pk:
         return redirect("home")
     return redirect("login")
@@ -740,7 +741,7 @@ def honor(request):
     if request.method == "POST" and request.user.is_authenticated:
         if not request.user.honor_pledged_at:
             User.objects.filter(pk=request.user.pk).update(honor_pledged_at=timezone.now())
-        messages.success(request, "Rahmat! Halol ishlash — eng katta yutuq.")
+        messages.success(request, _t("Rahmat! Halol ishlash — eng katta yutuq."))
         nxt = request.POST.get("next", "")
         if not url_has_allowed_host_and_scheme(nxt, allowed_hosts={request.get_host()}):
             nxt = "/"

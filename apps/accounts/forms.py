@@ -54,7 +54,7 @@ class RegisterForm(UserCreationForm):
     def clean_email(self):
         email = self.cleaned_data["email"]
         if not _free_stale_email(email):
-            raise forms.ValidationError("Bu email allaqachon ro'yxatdan o'tgan.")
+            raise forms.ValidationError(_t("Bu email allaqachon ro‘yxatdan o‘tgan."))
         return email
 
 

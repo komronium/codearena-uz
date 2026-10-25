@@ -75,7 +75,7 @@ def _unique_slug(name: str) -> str:
 def club_create(request):
     name = " ".join(request.POST.get("name", "").split())[:80]
     if request.user.club_id:
-        messages.error(request, "Avval hozirgi klubingizdan chiqing.")
+        messages.error(request, _t("Avval hozirgi klubingizdan chiqing."))
     elif len(name) < 3:
         messages.error(request, _t("Klub nomi kamida 3 belgi bo‘lsin."))
     elif Club.objects.filter(name__iexact=name).exists():
@@ -103,7 +103,7 @@ def club_join(request, slug):
     if request.POST.get("code", "") != club.join_code:
         messages.error(request, _t("Qo‘shilish havolasi noto‘g‘ri yoki eskirgan."))
     elif request.user.club_id and request.user.club_id != club.pk:
-        messages.error(request, "Avval hozirgi klubingizdan chiqing.")
+        messages.error(request, _t("Avval hozirgi klubingizdan chiqing."))
     else:
         User.objects.filter(pk=request.user.pk).update(club=club)
         messages.success(request, _t("«{club_name}» klubiga qo‘shildingiz.").format(club_name=club.name))
@@ -125,5 +125,5 @@ def club_leave(request, slug):
                 club.delete()
                 messages.success(request, _t("Klubdan chiqdingiz; u bo‘sh qolgani uchun yopildi."))
                 return redirect("clubs")
-        messages.success(request, "Klubdan chiqdingiz.")
+        messages.success(request, _t("Klubdan chiqdingiz."))
     return redirect("clubs")

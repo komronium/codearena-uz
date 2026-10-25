@@ -247,9 +247,9 @@ def problem_list(request):
         shown = set((problems.filter(difficulty=level) if level in Problem.Difficulty.values else problems)
                     .values_list("id", flat=True))
         n_solved, n_tried = len(shown & mine_solved), len(shown & mine_tried)
-        status_chips = [{"value": "solved", "label": "Yechilgan", "n": n_solved},
-                        {"value": "tried", "label": "Urinilgan", "n": n_tried},
-                        {"value": "new", "label": "Yangi", "n": len(shown) - n_solved - n_tried}]
+        status_chips = [{"value": "solved", "label": _t("Yechilgan"), "n": n_solved},
+                        {"value": "tried", "label": _t("Urinilgan"), "n": n_tried},
+                        {"value": "new", "label": _t("Yangi"), "n": len(shown) - n_solved - n_tried}]
         if status == "solved":
             problems = problems.filter(pk__in=mine_solved)
         elif status == "tried":
@@ -516,7 +516,7 @@ def problem_detail(request, slug):
     show_leaders = contest is None and not in_running_contest(problem)
     # Hints and the editorial stay shut while a contest uses the problem.
     help_locked = (
-        "Musobaqa davomida yopiq"
+        _t("Musobaqa davomida yopiq")
         if not show_leaders
         else ""
     )

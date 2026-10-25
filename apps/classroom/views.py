@@ -9,6 +9,7 @@ from django.http import Http404, HttpResponse, HttpResponseBadRequest, JsonRespo
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import gettext as _t
 from django.views.decorators.http import require_POST
 
 from apps.accounts.models import Follow, User
@@ -191,7 +192,7 @@ def _duel_board(duel, viewer) -> dict:
             sides = [(u.username, runs.get(u.pk)) for u in (duel.challenger, duel.opponent) if u]
         else:
             other = duel.opponent if viewer.pk == duel.challenger_id else duel.challenger
-            sides = [("Siz", mine), ("Raqib" if other is None else other.username, runs.get(other.pk) if other else None)]
+            sides = [(_t("Siz"), mine), (_t("Raqib") if other is None else other.username, runs.get(other.pk) if other else None)]
         sides = [(label, r, {a.index: a for a in r.answers} if r else {}, r is not None and r.over(now) or watcher)
                  for label, r in sides]
         questions = DuelQuestion.objects.in_bulk(duel.questions)

@@ -13,22 +13,22 @@
 {% endif %}
 {% if geo.cities %}
 <details class="ca-dropdown ca7-dd{% if geo.city %} is-on{% endif %}" data-dropdown>
-  <summary class="ca7-ddb">{% if geo.city %}{{ geo.city }}{% else %}{% trans "Shahar" %}{% endif %}<i data-lucide="chevron-down" class="lu" aria-hidden="true"></i></summary>
+  <summary class="ca7-ddb">{% if geo.city %}{{ geo.city|city_label }}{% else %}{% trans "Shahar" %}{% endif %}<i data-lucide="chevron-down" class="lu" aria-hidden="true"></i></summary>
   <div class="ca-dropdown-panel ca7-ddp">
     <div class="ca7-ddl">
       <a class="ca-dropdown-item" href="{% querystring city=None page=None %}"{% if not geo.city %} aria-current="true"{% endif %}>{% trans "Barcha shaharlar" %}</a>
-      {% for name, n in geo.cities %}<a class="ca-dropdown-item" href="{% querystring city=name page=None %}"{% if name == geo.city %} aria-current="true"{% endif %}>{{ name }}<em>{{ n }}</em></a>{% endfor %}
+      {% for name, n in geo.cities %}<a class="ca-dropdown-item" href="{% querystring city=name page=None %}"{% if name == geo.city %} aria-current="true"{% endif %}>{{ name|city_label }}<em>{{ n }}</em></a>{% endfor %}
     </div>
   </div>
 </details>
 {% endif %}
 {% if geo.schools %}
 <details class="ca-dropdown ca7-dd{% if geo.school %} is-on{% endif %}" data-dropdown>
-  <summary class="ca7-ddb">{% if geo.school %}{{ geo.school|truncatechars:34 }}{% else %}{% trans "O‘quv joyi" %}{% endif %}<i data-lucide="chevron-down" class="lu" aria-hidden="true"></i></summary>
+  <summary class="ca7-ddb">{% if geo.school %}{{ geo.school|school_label|truncatechars:34 }}{% else %}{% trans "O‘quv joyi" %}{% endif %}<i data-lucide="chevron-down" class="lu" aria-hidden="true"></i></summary>
   <div class="ca-dropdown-panel ca7-ddp is-wide">
     <div class="ca7-ddl">
       <a class="ca-dropdown-item" href="{% querystring school=None page=None %}"{% if not geo.school %} aria-current="true"{% endif %}>{% trans "Barcha o‘quv joylari" %}</a>
-      {% for name, n in geo.schools %}<a class="ca-dropdown-item" href="{% querystring school=name page=None %}"{% if name == geo.school %} aria-current="true"{% endif %}>{{ name }}<em>{{ n }}</em></a>{% endfor %}
+      {% for name, n in geo.schools %}<a class="ca-dropdown-item" href="{% querystring school=name page=None %}"{% if name == geo.school %} aria-current="true"{% endif %}>{{ name|school_label }}<em>{{ n }}</em></a>{% endfor %}
     </div>
   </div>
 </details>

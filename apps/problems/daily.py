@@ -6,6 +6,7 @@ import random
 
 from django.db import IntegrityError, transaction
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _tl
 
 from .models import DailyProblem, DailySolve, Problem
 from .skills import open_problems
@@ -104,8 +105,9 @@ def streaks(user) -> tuple[int, int]:
     return state["current"], state["best"]
 
 
-WEEKDAYS_SHORT = ["Du", "Se", "Ch", "Pa", "Ju", "Sh", "Ya"]
-MONTHS = "Yanvar Fevral Mart Aprel May Iyun Iyul Avgust Sentabr Oktabr Noyabr Dekabr".split()
+WEEKDAYS_SHORT = [_tl("Du"), _tl("Se"), _tl("Ch"), _tl("Pa"), _tl("Ju"), _tl("Sh"), _tl("Ya")]
+MONTHS = [_tl("Yanvar"), _tl("Fevral"), _tl("Mart"), _tl("Aprel"), _tl("May"), _tl("Iyun"), _tl("Iyul"), _tl("Avgust"), _tl("Sentabr"),
+          _tl("Oktabr"), _tl("Noyabr"), _tl("Dekabr")]
 
 
 def week_strip(user) -> list[dict]:
@@ -115,7 +117,7 @@ def week_strip(user) -> list[dict]:
     days = [monday + datetime.timedelta(days=i) for i in range(7)]
     done = set(DailySolve.objects.filter(user=user, daily__date__range=(days[0], days[-1]))
                .values_list("daily__date", flat=True))
-    return [{"label": WEEKDAYS_SHORT[i], "date": d, "done": d in done, "today": d == today, "future": d > today}
+    return [{"label": str(WEEKDAYS_SHORT[i]), "date": d, "done": d in done, "today": d == today, "future": d > today}
             for i, d in enumerate(days)]
 
 
@@ -132,5 +134,5 @@ def month_strip(user) -> dict:
     days = [start + datetime.timedelta(days=i) for i in range((end - start).days + 1)]
     cells = [{"day": d.day, "date": d, "in_month": d.month == today.month, "done": d in done,
               "today": d == today, "future": d > today} for d in days]
-    return {"label": f"{MONTHS[today.month - 1]}, {today.year}", "weekdays": WEEKDAYS_SHORT,
+    return {"label": f"{MONTHS[today.month - 1]}, {today.year}", "weekdays": [str(w) for w in WEEKDAYS_SHORT],
             "weeks": [cells[i:i + 7] for i in range(0, len(cells), 7)]}

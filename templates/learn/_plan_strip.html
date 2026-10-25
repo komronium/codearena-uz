@@ -3,5 +3,5 @@
   <i data-lucide="arrow-left" class="lu" aria-hidden="true"></i>
   <i data-lucide="{{ nav.plan.icon }}" class="lu text-accent" aria-hidden="true"></i>
   <span class="truncate">{% blocktrans with nav_plan_title=nav.plan.title %}<span class="sr-only">Kurs: </span>{{ nav_plan_title }}{% endblocktrans %}</span>
-  {% if user.is_authenticated %}<span class="ca-chip tabular" title="Kursdan yechilgan masalalar"><i data-lucide="check" class="lu mr-1" aria-hidden="true"></i>{{ nav.done }}/{{ nav.total }}</span>{% endif %}
+  {% if user.is_authenticated %}<span class="ca-chip tabular" title="{% trans 'Kursdan yechilgan masalalar' %}"><i data-lucide="check" class="lu mr-1" aria-hidden="true"></i>{{ nav.done }}/{{ nav.total }}</span>{% endif %}
 </a>

@@ -27,15 +27,15 @@ msgstr "platinum"
 msgid "olmos"
 msgstr "diamond"
 
-#: apps/accounts/badges.py templates/403.html
+#: apps/accounts/badges.py apps/moderation/translations.py
 msgid "Masalalar"
 msgstr "Problems"
 
-#: apps/accounts/badges.py templates/_mod_tabs.html
+#: apps/accounts/badges.py apps/moderation/translations.py
 msgid "Kurslar"
 msgstr "Courses"
 
-#: apps/accounts/badges.py templates/404.html
+#: apps/accounts/badges.py apps/moderation/translations.py
 msgid "Musobaqalar"
 msgstr "Contests"
 
@@ -172,9 +172,17 @@ msgstr ""
 msgid "Yangi nishon: {title}"
 msgstr "New badge: {title}"
 
+#: apps/accounts/clubs.py apps/accounts/clubs.py
+msgid "Avval hozirgi klubingizdan chiqing."
+msgstr "First leave your current club."
+
 #: apps/accounts/clubs.py
 msgid "Qo‘shilish havolasi noto‘g‘ri yoki eskirgan."
 msgstr "The join link is invalid or has expired."
+
+#: apps/accounts/clubs.py
+msgid "Klubdan chiqdingiz."
+msgstr "You left the club."
 
 #: apps/accounts/clubs.py
 msgid "Klub nomi kamida 3 belgi bo‘lsin."
@@ -1020,6 +1028,10 @@ msgstr "Country"
 msgid "Foydalanuvchi nomini yozing."
 msgstr "Enter a username."
 
+#: apps/accounts/forms.py apps/accounts/views.py
+msgid "Bu email allaqachon ro‘yxatdan o‘tgan."
+msgstr "This email is already registered."
+
 #: apps/accounts/forms.py apps/accounts/forms.py
 msgid "Bu foydalanuvchi nomi band."
 msgstr "This username is taken."
@@ -1035,6 +1047,14 @@ msgstr "Enter a city."
 #: apps/accounts/forms.py
 msgid "Davlatni tanlang"
 msgstr "Choose a country"
+
+#: apps/accounts/forms.py
+msgid "Bu rasm emas yoki buzilgan."
+msgstr "This is not a picture, or it is damaged."
+
+#: apps/accounts/google.py
+msgid "Bu hisob yopilgan."
+msgstr "This account has been closed."
 
 #: apps/accounts/google.py
 msgid ""
@@ -1174,7 +1194,7 @@ msgstr "Sending"
 msgid "Yuborildi"
 msgstr "Sent"
 
-#: apps/accounts/models.py templates/problems/detail.html
+#: apps/accounts/models.py apps/classroom/templatetags/quiz.py
 msgid "Xato"
 msgstr "Error"
 
@@ -1270,12 +1290,20 @@ msgid "{username} bilan duel: <b>{mine} : {theirs}</b>"
 msgstr "Duel with {username}: <b>{mine} : {theirs}</b>"
 
 #: apps/accounts/telegram_views.py
+msgid "Telegram hisobingiz uzildi."
+msgstr "Your Telegram account was disconnected."
+
+#: apps/accounts/telegram_views.py
 msgid "Telegram bot hali sozlanmagan. Keyinroq urinib ko‘ring."
 msgstr "The Telegram bot isn't set up yet. Try again later."
 
 #: apps/accounts/telegram_views.py
 msgid "Bildirishnoma sozlamalari uchun avval Telegramni ulang."
 msgstr "Connect Telegram first to set notification preferences."
+
+#: apps/accounts/telegram_views.py
+msgid "Telegram bildirishnoma sozlamalari saqlandi."
+msgstr "Telegram notification settings saved."
 
 #: apps/accounts/telegram_views.py
 msgid "Sozlamalarni saqlab bo‘lmadi. Sahifani yangilab, qayta urinib ko‘ring."
@@ -1345,6 +1373,11 @@ msgstr ""
 " browser here. If someone else sent you this link, don't type anything."
 
 #: apps/accounts/telegram_views.py
+msgid "Kod mos kelmadi. Saytda «Telegram orqali kirish»ni qaytadan bosing."
+msgstr ""
+"The code didn't match. Press “Sign in with Telegram” on the site again."
+
+#: apps/accounts/telegram_views.py
 msgid ""
 "Bildirishnomalar to‘xtatildi. Qayta ulash uchun CodeArena profiliga kiring."
 msgstr ""
@@ -1353,6 +1386,70 @@ msgstr ""
 #: apps/accounts/throttle.py templates/registration/login.html
 msgid "Juda ko‘p urinish. Biroz kutib, qayta urinib ko‘ring."
 msgstr "Too many attempts. Wait a bit and try again."
+
+#: apps/accounts/tiers.py apps/problems/views.py
+msgid "Yangi"
+msgstr "New"
+
+#: apps/accounts/tiers.py
+msgid "Shogird"
+msgstr "Pupil"
+
+#: apps/accounts/tiers.py
+msgid "Mutaxassis"
+msgstr "Specialist"
+
+#: apps/accounts/tiers.py
+msgid "Bilimdon"
+msgstr "Scholar"
+
+#: apps/accounts/tiers.py
+msgid "Master nomzodi"
+msgstr "Candidate Master"
+
+#: apps/accounts/tiers.py
+msgid "Master"
+msgstr "Master"
+
+#: apps/accounts/tiers.py
+msgid "Grossmeyster"
+msgstr "Grandmaster"
+
+#: apps/accounts/tiers.py
+msgid "Afsonaviy"
+msgstr "Legendary Grandmaster"
+
+#: apps/accounts/tiers.py
+msgid "Chiziq"
+msgstr "Bar"
+
+#: apps/accounts/tiers.py
+msgid "Bir chevron"
+msgstr "One chevron"
+
+#: apps/accounts/tiers.py
+msgid "Ikki chevron"
+msgstr "Two chevrons"
+
+#: apps/accounts/tiers.py
+msgid "Uch chevron"
+msgstr "Three chevrons"
+
+#: apps/accounts/tiers.py
+msgid "Yulduzli chevron"
+msgstr "Starred chevron"
+
+#: apps/accounts/tiers.py
+msgid "Yulduzli planka"
+msgstr "Starred bar"
+
+#: apps/accounts/tiers.py
+msgid "Dafna"
+msgstr "Laurel"
+
+#: apps/accounts/tiers.py
+msgid "Toj"
+msgstr "Crown"
 
 #: apps/accounts/usernames.py
 msgid ""
@@ -1363,12 +1460,24 @@ msgstr ""
 "digits and _ (3–20 characters)."
 
 #: apps/accounts/views.py
+msgid "Parol almashtirildi."
+msgstr "Password changed."
+
+#: apps/accounts/views.py
+msgid "Email tasdiqlandi. Xush kelibsiz!"
+msgstr "Email confirmed. Welcome!"
+
+#: apps/accounts/views.py
 msgid "Hisobingiz o‘chirildi."
 msgstr "Your account has been deleted."
 
 #: apps/accounts/views.py
 msgid "Havola eskirgan yoki noto‘g‘ri. Yangi havola so‘rang."
 msgstr "The link has expired or is invalid. Request a new one."
+
+#: apps/accounts/views.py
+msgid "Rahmat! Halol ishlash — eng katta yutuq."
+msgstr "Thank you! Honest play is the greatest achievement."
 
 #: apps/accounts/views.py
 msgid "Parol noto‘g‘ri"
@@ -1383,8 +1492,8 @@ msgid "Havola hozirgina yuborildi. Bir daqiqadan keyin qayta urinib ko‘ring."
 msgstr "The link was just sent. Try again in a minute."
 
 #: apps/accounts/views.py
-msgid "Bu email allaqachon ro‘yxatdan o‘tgan."
-msgstr "This email is already registered."
+msgid "{email} manziliga tasdiqlash havolasi yuborildi."
+msgstr "A confirmation link was sent to {email}."
 
 #: apps/accounts/views.py
 msgid "Ro‘yxatdan o‘tishda xatolik yuz berdi. Qayta urinib ko‘ring."
@@ -1393,6 +1502,14 @@ msgstr "Something went wrong while signing up. Try again."
 #: apps/accounts/views.py
 msgid "Havola {user_email} manziliga qayta yuborildi."
 msgstr "The link was sent again to {user_email}."
+
+#: apps/classroom/duels.py
+msgid "Avval boshlagan duelingizni tugating."
+msgstr "Finish the duel you already started first."
+
+#: apps/classroom/duels.py
+msgid "Admin akkaunti duelda qatnasha olmaydi."
+msgstr "An admin account can't take part in duels."
 
 #: apps/classroom/duels.py
 msgid ""
@@ -1417,6 +1534,10 @@ msgstr "You can't challenge yourself."
 #: apps/classroom/duels.py
 msgid "{username} sizni duelga chaqirdi ({language})"
 msgstr "{username} challenged you to a duel ({language})"
+
+#: apps/classroom/duels.py
+msgid "Bu chaqiriq endi ochiq emas."
+msgstr "This challenge is no longer open."
 
 #: apps/classroom/duels.py
 msgid "Chaqiriq muddati o‘tgan."
@@ -1478,6 +1599,1474 @@ msgstr "Expired"
 msgid "Bekor qilingan"
 msgstr "Voided"
 
+#: apps/classroom/quiz_bank.py
+msgid "// butun bo‘lish: kasr qismi tashlanadi."
+msgstr "// is integer division: the fractional part is dropped."
+
+#: apps/classroom/quiz_bank.py
+msgid "% bo‘lishdagi qoldiq: 7 = 2·3 + 1."
+msgstr "% is the remainder of division: 7 = 2·3 + 1."
+
+#: apps/classroom/quiz_bank.py
+msgid "** daraja: 2³ = 8, keyin + 1."
+msgstr "** is the power: 2³ = 8, then + 1."
+
+#: apps/classroom/quiz_bank.py apps/classroom/quiz_bank.py
+msgid "Satrni songa ko‘paytirish uni takrorlaydi."
+msgstr "Multiplying a string by a number repeats it."
+
+#: apps/classroom/quiz_bank.py
+msgid "5 + 3 = 8, keyin 8 · 2 = 16."
+msgstr "5 + 3 = 8, then 8 · 2 = 16."
+
+#: apps/classroom/quiz_bank.py
+msgid "len satrdagi belgilar soni."
+msgstr "len is the number of characters in the string."
+
+#: apps/classroom/quiz_bank.py
+msgid "/ doim haqiqiy son beradi."
+msgstr "/ always gives a real number."
+
+#: apps/classroom/quiz_bank.py
+msgid "Ikki satr qo‘shilsa, yonma-yon yoziladi."
+msgstr "Adding two strings writes them side by side."
+
+#: apps/classroom/quiz_bank.py
+msgid "int(\"12\") satrni songa aylantiradi."
+msgstr "int(\"12\") turns the string into a number."
+
+#: apps/classroom/quiz_bank.py
+msgid "Toq sonning 2 ga bo‘lgandagi qoldig‘i 1."
+msgstr "An odd number leaves remainder 1 when divided by 2."
+
+#: apps/classroom/quiz_bank.py
+msgid "and: ikkala shart ham to‘g‘ri bo‘lishi kerak."
+msgstr "and: both conditions must be true."
+
+#: apps/classroom/quiz_bank.py
+msgid "s[0] birinchi, s[-1] oxirgi belgi."
+msgstr "s[0] is the first character, s[-1] the last."
+
+#: apps/classroom/quiz_bank.py
+msgid "range(4): 0, 1, 2, 3 — 4 kirmaydi."
+msgstr "range(4): 0, 1, 2, 3 — 4 is not included."
+
+#: apps/classroom/quiz_bank.py
+msgid "Birinchi shartdan keyin x = 5; 5 > 3, demak x = 10."
+msgstr "After the first condition x = 5; 5 > 3, so x = 10."
+
+#: apps/classroom/quiz_bank.py
+msgid "round(son, 1) — verguldan keyin bitta xona."
+msgstr "round(number, 1) — one digit after the decimal point."
+
+#: apps/classroom/quiz_bank.py
+msgid "9 − 3 = 6."
+msgstr "9 − 3 = 6."
+
+#: apps/classroom/quiz_bank.py
+msgid "\"5\" satr: ikki marta takrorlanadi."
+msgstr "\"5\" is a string: it is repeated twice."
+
+#: apps/classroom/quiz_bank.py
+msgid "15 = 3·4 + 3: qoldiq 3."
+msgstr "15 = 3·4 + 3: the remainder is 3."
+
+#: apps/classroom/quiz_bank.py
+msgid "Avval a = 5, keyin 5 · 5 = 25."
+msgstr "First a = 5, then 5 · 5 = 25."
+
+#: apps/classroom/quiz_bank.py
+msgid "+ satrlarni ulaydi; o‘rtadagi \" \" — bitta bo‘sh joy."
+msgstr "+ joins strings; the \" \" in the middle is a single space."
+
+#: apps/classroom/quiz_bank.py
+msgid "Nuqtali son — float (haqiqiy son)."
+msgstr "A number with a decimal point is a float (a real number)."
+
+#: apps/classroom/quiz_bank.py
+msgid "upper() hamma harfni katta qiladi."
+msgstr "upper() makes every letter a capital."
+
+#: apps/classroom/quiz_bank.py
+msgid "or: bittasi to‘g‘ri bo‘lsa yetadi; 8 > 5."
+msgstr "or: one true condition is enough; 8 > 5."
+
+#: apps/classroom/quiz_bank.py
+msgid "abs(-9) = 9, keyin + 1."
+msgstr "abs(-9) = 9, then + 1."
+
+#: apps/classroom/quiz_bank.py
+msgid "print vergul bilan ajratilgan qismlar orasiga bitta bo‘sh joy qo‘yadi."
+msgstr "print puts a single space between the parts separated by commas."
+
+#: apps/classroom/quiz_bank.py
+msgid "lower() hamma harfni kichik qiladi; teng chiqadi."
+msgstr "lower() makes every letter lowercase; they come out equal."
+
+#: apps/classroom/quiz_bank.py
+msgid "range(1, 4): 1, 2, 3 — 4 kirmaydi."
+msgstr "range(1, 4): 1, 2, 3 — 4 is not included."
+
+#: apps/classroom/quiz_bank.py
+msgid ""
+"float() butun sonni haqiqiy songa aylantiradi: nuqta va nol bilan chiqadi."
+msgstr ""
+"float() turns an integer into a real number: it prints with a point and a "
+"zero."
+
+#: apps/classroom/quiz_bank.py
+msgid "Avval ko‘paytirish: 2·3 = 6, keyin 10 − 6 = 4."
+msgstr "Multiplication first: 2·3 = 6, then 10 − 6 = 4."
+
+#: apps/classroom/quiz_bank.py
+msgid "1 + 2 + 3 + 4; range(1, 5) da 5 yo‘q."
+msgstr "1 + 2 + 3 + 4; range(1, 5) does not include 5."
+
+#: apps/classroom/quiz_bank.py
+msgid "a[1:4] — 1-, 2-, 3-indekslar; 4 kirmaydi."
+msgstr "a[1:4] — indexes 1, 2, 3; 4 is not included."
+
+#: apps/classroom/quiz_bank.py
+msgid "Saralangandan keyin oxirgisi eng kattasi."
+msgstr "After sorting, the last one is the largest."
+
+#: apps/classroom/quiz_bank.py
+msgid "split() so‘zlarga ajratadi, [1] — ikkinchisi."
+msgstr "split() breaks it into words, [1] is the second one."
+
+#: apps/classroom/quiz_bank.py
+msgid "4 + 7 + 1 + 9 = 21."
+msgstr "4 + 7 + 1 + 9 = 21."
+
+#: apps/classroom/quiz_bank.py
+msgid "[::-1] satrni teskari o‘qiydi."
+msgstr "[::-1] reads the string backwards."
+
+#: apps/classroom/quiz_bank.py
+msgid "5·5 = 25 < 30, 6·6 = 36 — sikl to‘xtaydi."
+msgstr "5·5 = 25 < 30, 6·6 = 36 — the loop stops."
+
+#: apps/classroom/quiz_bank.py
+msgid "f(2) = 5, f(5) = 11."
+msgstr "f(2) = 5, f(5) = 11."
+
+#: apps/classroom/quiz_bank.py
+msgid "1 + 4 + 9 = 14."
+msgstr "1 + 4 + 9 = 14."
+
+#: apps/classroom/quiz_bank.py
+msgid "join oraliqqa shu satrni qo‘yadi."
+msgstr "join puts this string between the items."
+
+#: apps/classroom/quiz_bank.py
+msgid "d[\"a\"] endi 5: 5 + 2."
+msgstr "d[\"a\"] is now 5: 5 + 2."
+
+#: apps/classroom/quiz_bank.py
+msgid "0, 3, 6, 9 — to‘rtta."
+msgstr "0, 3, 6, 9 — four of them."
+
+#: apps/classroom/quiz_bank.py
+msgid "b·an·an — ikki marta."
+msgstr "b·an·an — twice."
+
+#: apps/classroom/quiz_bank.py
+msgid "range(1, 6): 1·2·3·4·5 = 120."
+msgstr "range(1, 6): 1·2·3·4·5 = 120."
+
+#: apps/classroom/quiz_bank.py
+msgid "Qadam 2: 0-, 2-, 4-indekslar."
+msgstr "Step 2: indexes 0, 2, 4."
+
+#: apps/classroom/quiz_bank.py
+msgid "sorted harflar ro‘yxatini qaytaradi, birinchisi a."
+msgstr "sorted returns a list of letters, the first is a."
+
+#: apps/classroom/quiz_bank.py
+msgid "Kortej (tuple) o‘zgarmaydi: TypeError."
+msgstr "A tuple cannot be changed: TypeError."
+
+#: apps/classroom/quiz_bank.py
+msgid "a[-1] oxirgisi, a[-2] — undan oldingisi."
+msgstr "a[-1] is the last, a[-2] the one before it."
+
+#: apps/classroom/quiz_bank.py
+msgid "2//2 + 4//2 + 6//2 = 1 + 2 + 3."
+msgstr "2//2 + 4//2 + 6//2 = 1 + 2 + 3."
+
+#: apps/classroom/quiz_bank.py
+msgid "b berilmagan: standart qiymati 10."
+msgstr "b was not given: its default value is 10."
+
+#: apps/classroom/quiz_bank.py
+msgid "split(\",\") satrni vergul bo‘yicha ro‘yxatga ajratadi."
+msgstr "split(\",\") splits the string into a list at the commas."
+
+#: apps/classroom/quiz_bank.py
+msgid "Yangi kalit qo‘shildi: x va y."
+msgstr "A new key was added: x and y."
+
+#: apps/classroom/quiz_bank.py
+msgid "[::-1] ro‘yxatni teskari qiladi; uning birinchisi — oxirgi element."
+msgstr "[::-1] reverses the list; its first item is the last element."
+
+#: apps/classroom/quiz_bank.py
+msgid "max eng kattasini topadi."
+msgstr "max finds the largest."
+
+#: apps/classroom/quiz_bank.py
+msgid "0, 3, 6, 9, 12: 9 < 10 edi, 12 dan keyin sikl tugaydi."
+msgstr "0, 3, 6, 9, 12: 9 < 10 was true, and the loop ends after 12."
+
+#: apps/classroom/quiz_bank.py
+msgid "[1:3] — 1- va 2-belgi: a va l."
+msgstr "[1:3] — characters 1 and 2: a and l."
+
+#: apps/classroom/quiz_bank.py
+msgid "range(4): 0, 1, 2, 3; har biri ikkilanadi."
+msgstr "range(4): 0, 1, 2, 3; each one is doubled."
+
+#: apps/classroom/quiz_bank.py
+msgid "a[:] nusxa oladi: b ga qo‘shilgani a ga ta’sir qilmaydi."
+msgstr "a[:] makes a copy: what is added to b does not affect a."
+
+#: apps/classroom/quiz_bank.py
+msgid "7 toq, 8 juft; print ikki qiymatni bitta bo‘sh joy bilan chiqaradi."
+msgstr ""
+"7 is odd, 8 is even; print writes the two values separated by one space."
+
+#: apps/classroom/quiz_bank.py
+msgid "b = a nusxa emas: ikkalasi bitta ro‘yxat."
+msgstr "b = a is not a copy: both are the same list."
+
+#: apps/classroom/quiz_bank.py
+msgid ""
+"Standart qiymat [] bir marta yaratiladi va chaqiruvlar orasida saqlanadi."
+msgstr "The default value [] is created once and kept between calls."
+
+#: apps/classroom/quiz_bank.py
+msgid "Haqiqiy sonlar ikkilikda aniq yozilmaydi: 0.30000000000000004."
+msgstr "Real numbers are not exact in binary: 0.30000000000000004."
+
+#: apps/classroom/quiz_bank.py
+msgid "Fibonachchi: 0 1 1 2 3 5 8 13."
+msgstr "Fibonacci: 0 1 1 2 3 5 8 13."
+
+#: apps/classroom/quiz_bank.py
+msgid "Funksiya ichidagi x — boshqa, mahalliy o‘zgaruvchi."
+msgstr "The x inside the function is a different, local variable."
+
+#: apps/classroom/quiz_bank.py
+msgid "sort() ro‘yxatni joyida saralaydi va None qaytaradi."
+msgstr "sort() sorts the list in place and returns None."
+
+#: apps/classroom/quiz_bank.py
+msgid "i = 1: 1, 2; i = 2: 2, 4."
+msgstr "i = 1: 1, 2; i = 2: 2, 4."
+
+#: apps/classroom/quiz_bank.py
+msgid "To‘plamda takrorlar bo‘lmaydi."
+msgstr "A set has no duplicates."
+
+#: apps/classroom/quiz_bank.py
+msgid "// pastga yaxlitlaydi: −3.5 → −4."
+msgstr "// rounds down: −3.5 → −4."
+
+#: apps/classroom/quiz_bank.py
+msgid "Pythonda qoldiq bo‘luvchining ishorasida: −7 = −3·3 + 2."
+msgstr "In Python the remainder takes the sign of the divisor: −7 = −3·3 + 2."
+
+#: apps/classroom/quiz_bank.py
+msgid "Raqamlar yig‘indisi: oxirgi raqam + qolgan son; 1 + 2 + 3 + 4."
+msgstr ""
+"Sum of digits: the last digit + the rest of the number; 1 + 2 + 3 + 4."
+
+#: apps/classroom/quiz_bank.py
+msgid "* 2 bitta ichki ro‘yxatni ikki marta qo‘yadi."
+msgstr "* 2 puts the one inner list in twice."
+
+#: apps/classroom/quiz_bank.py
+msgid "l ikki marta uchraydi."
+msgstr "l appears twice."
+
+#: apps/classroom/quiz_bank.py
+msgid "True son sifatida 1."
+msgstr "True counts as 1."
+
+#: apps/classroom/quiz_bank.py
+msgid "x[:] — yangi nusxa, x o‘zgarmaydi."
+msgstr "x[:] is a new copy, x does not change."
+
+#: apps/classroom/quiz_bank.py apps/classroom/quiz_bank.py
+msgid "Ikki int bo‘linsa, kasr qismi tashlanadi."
+msgstr "When two ints are divided, the fractional part is dropped."
+
+#: apps/classroom/quiz_bank.py
+msgid "17 = 3·5 + 2."
+msgstr "17 = 3·5 + 2."
+
+#: apps/classroom/quiz_bank.py
+msgid "10 − 5/2 = 10 − 2."
+msgstr "10 − 5/2 = 10 − 2."
+
+#: apps/classroom/quiz_bank.py
+msgid "2.0 haqiqiy son: natija ham haqiqiy."
+msgstr "2.0 is a real number: the result is real too."
+
+#: apps/classroom/quiz_bank.py
+msgid "3 + 4 = 7, 7 · 2 = 14."
+msgstr "3 + 4 = 7, 7 · 2 = 14."
+
+#: apps/classroom/quiz_bank.py
+msgid "size() — belgilar soni."
+msgstr "size() is the number of characters."
+
+#: apps/classroom/quiz_bank.py
+msgid "Juft sonning 2 ga qoldig‘i 0."
+msgstr "An even number leaves remainder 0 when divided by 2."
+
+#: apps/classroom/quiz_bank.py
+msgid "bool cout da 0 yoki 1 bo‘lib chiqadi."
+msgstr "A bool prints as 0 or 1 in cout."
+
+#: apps/classroom/quiz_bank.py apps/classroom/quiz_bank.py
+msgid "1 + 2 + 3 + 4."
+msgstr "1 + 2 + 3 + 4."
+
+#: apps/classroom/quiz_bank.py
+msgid "char ham son: A dan keyin B."
+msgstr "A char is a number too: B comes after A."
+
+#: apps/classroom/quiz_bank.py
+msgid "3 ham kirishi uchun <=."
+msgstr "<= so that 3 is included as well."
+
+#: apps/classroom/quiz_bank.py
+msgid "a++ avval eski qiymatni beradi, keyin oshiradi."
+msgstr "a++ gives the old value first, then increases."
+
+#: apps/classroom/quiz_bank.py
+msgid "Avval ko‘paytirish: 2 + 12."
+msgstr "Multiplication first: 2 + 12."
+
+#: apps/classroom/quiz_bank.py
+msgid "a[1] = 8, a[3] = 16."
+msgstr "a[1] = 8, a[3] = 16."
+
+#: apps/classroom/quiz_bank.py
+msgid "reverse satrni teskari qiladi."
+msgstr "reverse reverses the string."
+
+#: apps/classroom/quiz_bank.py
+msgid "Saralangan: 1 4 5; birinchisi 1, oxirgisi 5."
+msgstr "Sorted: 1 4 5; the first is 1, the last is 5."
+
+#: apps/classroom/quiz_bank.py
+msgid "Raqamlar yig‘indisi: 4 + 3 + 2 + 1."
+msgstr "Sum of digits: 4 + 3 + 2 + 1."
+
+#: apps/classroom/quiz_bank.py
+msgid "r — x ning boshqa nomi (havola)."
+msgstr "r is another name (a reference) for x."
+
+#: apps/classroom/quiz_bank.py
+msgid "Oraliq begin() dan end() gacha."
+msgstr "The range runs from begin() to end()."
+
+#: apps/classroom/quiz_bank.py
+msgid "f(1) = 2, f(2) = 5."
+msgstr "f(1) = 2, f(2) = 5."
+
+#: apps/classroom/quiz_bank.py
+msgid "\"kodlash\" — 7 ta belgi."
+msgstr "\"kodlash\" — 7 characters."
+
+#: apps/classroom/quiz_bank.py
+msgid "0 + 1 + 2 = 3."
+msgstr "0 + 1 + 2 = 3."
+
+#: apps/classroom/quiz_bank.py
+msgid "'b' − 'a' = 1 (belgilar son sifatida ayriladi)."
+msgstr "'b' − 'a' = 1 (characters are subtracted as numbers)."
+
+#: apps/classroom/quiz_bank.py
+msgid "7 % 2 = 1, shart yolg‘on."
+msgstr "7 % 2 = 1, the condition is false."
+
+#: apps/classroom/quiz_bank.py
+msgid "swap ikki qiymatni almashtiradi."
+msgstr "swap exchanges the two values."
+
+#: apps/classroom/quiz_bank.py
+msgid "5 + 9."
+msgstr "5 + 9."
+
+#: apps/classroom/quiz_bank.py
+msgid "unsigned manfiy bo‘lmaydi: 0 − 1 eng katta qiymatga aylanadi."
+msgstr "unsigned is never negative: 0 − 1 wraps around to the largest value."
+
+#: apps/classroom/quiz_bank.py
+msgid "Qiymat bo‘yicha uzatildi: f nusxani o‘zgartiradi."
+msgstr "Passed by value: f changes a copy."
+
+#: apps/classroom/quiz_bank.py
+msgid "& — havola: f aynan a ni o‘zgartiradi."
+msgstr "& is a reference: f changes a itself."
+
+#: apps/classroom/quiz_bank.py
+msgid "Qolgan elementlar 0 bilan to‘ladi."
+msgstr "The remaining elements are filled with 0."
+
+#: apps/classroom/quiz_bank.py
+msgid "5 / 2 = 2 (int), 2 · 2.0 = 4; cout 4.0 ni 4 deb yozadi."
+msgstr "5 / 2 = 2 (int), 2 · 2.0 = 4; cout writes 4.0 as 4."
+
+#: apps/classroom/quiz_bank.py
+msgid "5 + 4 + 3 + 2 + 1."
+msgstr "5 + 4 + 3 + 2 + 1."
+
+#: apps/classroom/quiz_bank.py
+msgid "substr(boshi, uzunligi)."
+msgstr "substr(start, length)."
+
+#: apps/classroom/quiz_bank.py
+msgid "m[\"b\"] ham kalit yaratadi: 2 ta kalit, a = 2."
+msgstr "m[\"b\"] also creates the key: 2 keys, a = 2."
+
+#: apps/classroom/quiz_bank.py
+msgid "0, 3, 6, 9, 12 — 12 < 10 emas."
+msgstr "0, 3, 6, 9, 12 — 12 < 10 is false."
+
+#: apps/classroom/quiz_bank.py
+msgid "*p — p ko‘rsatgan joy, ya’ni n."
+msgstr "*p is the place p points to, that is n."
+
+#: apps/classroom/quiz_bank.py
+msgid "'a' + 2 = 'c'."
+msgstr "'a' + 2 = 'c'."
+
+#: apps/classroom/quiz_bank.py
+msgid "& bilan elementlarning o‘zi o‘zgaradi."
+msgstr "With & the elements themselves are changed."
+
+#: apps/classroom/quiz_bank.py apps/classroom/quiz_bank.py
+msgid "9 = 2·4 + 1."
+msgstr "9 = 2·4 + 1."
+
+#: apps/classroom/quiz_bank.py
+msgid "Chapdan o‘ngga: satr + 1 = \"Ab1\", keyin + 2."
+msgstr "Left to right: the string + 1 = \"Ab1\", then + 2."
+
+#: apps/classroom/quiz_bank.py
+msgid "Avval 1 + 2 = 3, keyin satr qo‘shiladi."
+msgstr "First 1 + 2 = 3, then the string is appended."
+
+#: apps/classroom/quiz_bank.py
+msgid "10 / 3 = 3 (int)."
+msgstr "10 / 3 = 3 (int)."
+
+#: apps/classroom/quiz_bank.py
+msgid "T-o-s-h-k-e-n-t."
+msgstr "T-o-s-h-k-e-n-t."
+
+#: apps/classroom/quiz_bank.py apps/classroom/quiz_bank.py
+msgid "Qoldiq 0 — bo‘linadi."
+msgstr "Remainder 0 — it divides evenly."
+
+#: apps/classroom/quiz_bank.py apps/classroom/quiz_bank.py
+msgid "&&: ikkalasi ham to‘g‘ri bo‘lishi kerak."
+msgstr "&&: both must be true."
+
+#: apps/classroom/quiz_bank.py
+msgid "1 + 2 + 3 + 4 + 5."
+msgstr "1 + 2 + 3 + 4 + 5."
+
+#: apps/classroom/quiz_bank.py
+msgid "7 / 2 avval int: 3, keyin 3.0."
+msgstr "7 / 2 is an int first: 3, then 3.0."
+
+#: apps/classroom/quiz_bank.py
+msgid "c += 1 char bo‘lib qoladi."
+msgstr "c += 1 stays a char."
+
+#: apps/classroom/quiz_bank.py
+msgid "Kamayib boradi."
+msgstr "It keeps decreasing."
+
+#: apps/classroom/quiz_bank.py
+msgid "11 − 4."
+msgstr "11 − 4."
+
+#: apps/classroom/quiz_bank.py
+msgid "Oxirgi element: length − 1."
+msgstr "The last element: length − 1."
+
+#: apps/classroom/quiz_bank.py
+msgid "Indeks 0 dan: d-a-s."
+msgstr "Indexes start at 0: d-a-s."
+
+#: apps/classroom/quiz_bank.py
+msgid "substring(1, 3) — 1- va 2-belgilar."
+msgstr "substring(1, 3) — characters 1 and 2."
+
+#: apps/classroom/quiz_bank.py
+msgid "5 + 4 + 3."
+msgstr "5 + 4 + 3."
+
+#: apps/classroom/quiz_bank.py
+msgid "Saralangan: 1 3 5 9."
+msgstr "Sorted: 1 3 5 9."
+
+#: apps/classroom/quiz_bank.py
+msgid "reverse() teskari qiladi."
+msgstr "reverse() reverses it."
+
+#: apps/classroom/quiz_bank.py
+msgid "Eng kichigi 2."
+msgstr "The smallest is 2."
+
+#: apps/classroom/quiz_bank.py apps/classroom/quiz_bank.py
+msgid "4 + 3 + 2 + 1."
+msgstr "4 + 3 + 2 + 1."
+
+#: apps/classroom/quiz_bank.py
+msgid "3 + 2."
+msgstr "3 + 2."
+
+#: apps/classroom/quiz_bank.py apps/classroom/quiz_bank.py
+msgid "7 toq."
+msgstr "7 is odd."
+
+#: apps/classroom/quiz_bank.py
+msgid "add(0, 1) — boshiga qo‘yadi."
+msgstr "add(0, 1) — puts it at the front."
+
+#: apps/classroom/quiz_bank.py
+msgid "parseInt satrni songa aylantiradi."
+msgstr "parseInt turns the string into a number."
+
+#: apps/classroom/quiz_bank.py
+msgid "split vergul bo‘yicha bo‘ladi: 3 ta bo‘lak."
+msgstr "split cuts at the commas: 3 pieces."
+
+#: apps/classroom/quiz_bank.py
+msgid "|| birinchisi to‘g‘ri bo‘lsa, ikkinchisini hisoblamaydi."
+msgstr "|| does not evaluate the second one if the first is true."
+
+#: apps/classroom/quiz_bank.py
+msgid "== obyektlarni solishtiradi; matn uchun equals."
+msgstr "== compares objects (references); use equals for text."
+
+#: apps/classroom/quiz_bank.py
+msgid "int to‘lib, eng kichik manfiy songa o‘tadi."
+msgstr "The int overflows and wraps around to the smallest negative number."
+
+#: apps/classroom/quiz_bank.py
+msgid "Massiv havola bo‘yicha: f o‘sha massivni o‘zgartiradi."
+msgstr "Arrays are passed by reference: f changes that same array."
+
+#: apps/classroom/quiz_bank.py
+msgid "5! = 120."
+msgstr "5! = 120."
+
+#: apps/classroom/quiz_bank.py
+msgid "Indekslar 0..2: chegaradan chiqish."
+msgstr "Indexes are 0..2: out of bounds."
+
+#: apps/classroom/quiz_bank.py
+msgid "5 / 2 = 2 (int), keyin 2 · 2.0."
+msgstr "5 / 2 = 2 (int), then 2 · 2.0."
+
+#: apps/classroom/quiz_bank.py
+msgid "char + int = int: 97 + 1."
+msgstr "char + int = int: 97 + 1."
+
+#: apps/classroom/quiz_bank.py apps/classroom/quiz_bank.py
+msgid "a uch marta."
+msgstr "a three times."
+
+#: apps/classroom/quiz_bank.py
+msgid "i++ 0 beradi (i = 1), ++i 2 beradi: 0 + 2."
+msgstr "i++ gives 0 (i = 1), ++i gives 2: 0 + 2."
+
+#: apps/classroom/quiz_bank.py
+msgid "Satrga son qo‘shib boriladi."
+msgstr "Numbers are appended to the string."
+
+#: apps/classroom/quiz_bank.py
+msgid "−128..127 oraliqdagi Integer lar keshdan olinadi: bitta obyekt."
+msgstr "Integers in the range −128..127 are taken from the cache: one object."
+
+#: apps/classroom/quiz_bank.py
+msgid "JavaScriptda butun bo‘lish yo‘q: 3.5."
+msgstr "JavaScript has no integer division: 3.5."
+
+#: apps/classroom/quiz_bank.py apps/classroom/quiz_bank.py
+msgid "Satr + son = satr."
+msgstr "String + number = string."
+
+#: apps/classroom/quiz_bank.py
+msgid "- satrni songa aylantiradi."
+msgstr "- turns the string into a number."
+
+#: apps/classroom/quiz_bank.py
+msgid "(5 + 2) · 3."
+msgstr "(5 + 2) · 3."
+
+#: apps/classroom/quiz_bank.py
+msgid "length — belgilar soni."
+msgstr "length is the number of characters."
+
+#: apps/classroom/quiz_bank.py
+msgid "10 = 2·4 + 2."
+msgstr "10 = 2·4 + 2."
+
+#: apps/classroom/quiz_bank.py
+msgid "floor pastga yaxlitlaydi."
+msgstr "floor rounds down."
+
+#: apps/classroom/quiz_bank.py
+msgid "Hamma sonlar number."
+msgstr "All numbers are number."
+
+#: apps/classroom/quiz_bank.py
+msgid "repeat satrni takrorlaydi."
+msgstr "repeat repeats the string."
+
+#: apps/classroom/quiz_bank.py
+msgid "0 dan 3 gacha."
+msgstr "From 0 to 3."
+
+#: apps/classroom/quiz_bank.py
+msgid "Oxirgi element."
+msgstr "The last element."
+
+#: apps/classroom/quiz_bank.py
+msgid "map har bir elementni o‘zgartiradi."
+msgstr "map changes every element."
+
+#: apps/classroom/quiz_bank.py
+msgid "5 va 8."
+msgstr "5 and 8."
+
+#: apps/classroom/quiz_bank.py
+msgid "slice(1, 4) — 1-, 2-, 3-belgilar."
+msgstr "slice(1, 4) — characters 1, 2, 3."
+
+#: apps/classroom/quiz_bank.py
+msgid "Uch bo‘lak."
+msgstr "Three pieces."
+
+#: apps/classroom/quiz_bank.py
+msgid "f(2) = 3, f(3) = 8."
+msgstr "f(2) = 3, f(3) = 8."
+
+#: apps/classroom/quiz_bank.py
+msgid "reduce elementlarni bittaga yig‘adi."
+msgstr "reduce combines the elements into one."
+
+#: apps/classroom/quiz_bank.py
+msgid "\"SALOM\" ning 1-belgisi."
+msgstr "The 1st character of \"SALOM\"."
+
+#: apps/classroom/quiz_bank.py
+msgid "a, b, c."
+msgstr "a, b, c."
+
+#: apps/classroom/quiz_bank.py
+msgid "Saralangan: 1 2 3."
+msgstr "Sorted: 1 2 3."
+
+#: apps/classroom/quiz_bank.py
+msgid "2 bor."
+msgstr "There are 2."
+
+#: apps/classroom/quiz_bank.py
+msgid "sort() standart holda satr sifatida saralaydi: \"10\" < \"9\"."
+msgstr "sort() sorts as strings by default: \"10\" < \"9\"."
+
+#: apps/classroom/quiz_bank.py
+msgid "0.1 + 0.2 = 0.30000000000000004."
+msgstr "0.1 + 0.2 = 0.30000000000000004."
+
+#: apps/classroom/quiz_bank.py
+msgid "== turni o‘zgartirib solishtiradi, === yo‘q."
+msgstr "== compares after converting the type, === does not."
+
+#: apps/classroom/quiz_bank.py
+msgid "b = a — bitta massiv."
+msgstr "b = a — one array."
+
+#: apps/classroom/quiz_bank.py
+msgid "[...a] — yangi nusxa."
+msgstr "[...a] is a new copy."
+
+#: apps/classroom/quiz_bank.py
+msgid "Fibonachchi: 0 1 1 2 3 5 8 13 21."
+msgstr "Fibonacci: 0 1 1 2 3 5 8 13 21."
+
+#: apps/classroom/quiz_bank.py
+msgid "Tilning eski xatosi: typeof null — \"object\"."
+msgstr "An old mistake in the language: typeof null is \"object\"."
+
+#: apps/classroom/quiz_bank.py
+msgid "* ikkalasini songa aylantiradi: 10 + 1."
+msgstr "* turns both into numbers: 10 + 1."
+
+#: apps/classroom/quiz_bank.py
+msgid "const qayta o‘zlashtirilmaydi: TypeError."
+msgstr "A const cannot be reassigned: TypeError."
+
+#: apps/classroom/quiz_bank.py
+msgid "Har bir harf boshiga qo‘yiladi."
+msgstr "Each letter is put at the front."
+
+#: apps/classroom/quiz_bank.py
+msgid "x % 2 toqlar uchun 1 (rost): 1 va 3."
+msgstr "x % 2 is 1 (true) for odd numbers: 1 and 3."
+
+#: apps/classroom/quiz_bank.py
+msgid "15 // 4 = 3, 15 % 4 = 3."
+msgstr "15 // 4 = 3, 15 % 4 = 3."
+
+#: apps/classroom/quiz_bank.py
+msgid "y = x o‘sha paytdagi qiymatni oladi."
+msgstr "y = x takes the value it has at that moment."
+
+#: apps/classroom/quiz_bank.py
+msgid "Indeks 0 dan: S-a."
+msgstr "Indexes start at 0: S-a."
+
+#: apps/classroom/quiz_bank.py
+msgid "Bo‘sh joylar ham belgi."
+msgstr "Spaces are characters too."
+
+#: apps/classroom/quiz_bank.py
+msgid "abs(-8) = 8."
+msgstr "abs(-8) = 8."
+
+#: apps/classroom/quiz_bank.py
+msgid "17 ni 5 ga bo‘lgandagi qoldiq 2."
+msgstr "17 divided by 5 leaves remainder 2."
+
+#: apps/classroom/quiz_bank.py
+msgid "Son sifatida teng."
+msgstr "Equal as numbers."
+
+#: apps/classroom/quiz_bank.py
+msgid "upper() yangi satr qaytaradi, s o‘zgarmaydi."
+msgstr "upper() returns a new string, s does not change."
+
+#: apps/classroom/quiz_bank.py
+msgid "Ikkala shart ham to‘g‘ri."
+msgstr "Both conditions are true."
+
+#: apps/classroom/quiz_bank.py
+msgid "int() kasr qismini tashlaydi, yaxlitlamaydi."
+msgstr "int() drops the fractional part, it does not round."
+
+#: apps/classroom/quiz_bank.py
+msgid "2 → 4 → 16."
+msgstr "2 → 4 → 16."
+
+#: apps/classroom/quiz_bank.py
+msgid "Satrlar alifbo bo‘yicha solishtiriladi."
+msgstr "Strings are compared alphabetically."
+
+#: apps/classroom/quiz_bank.py
+msgid "14 = 2·5 + 4: qoldiq 4."
+msgstr "14 = 2·5 + 4: the remainder is 4."
+
+#: apps/classroom/quiz_bank.py
+msgid "2 ** 4 = 2⁴ = 16."
+msgstr "2 ** 4 = 2⁴ = 16."
+
+#: apps/classroom/quiz_bank.py
+msgid "// butun bo‘lish: 18 // 4 = 4."
+msgstr "// is integer division: 18 // 4 = 4."
+
+#: apps/classroom/quiz_bank.py
+msgid "a va b qiymatlari o‘rni almashadi: a = 8 bo‘ladi."
+msgstr "The values of a and b swap places: a becomes 8."
+
+#: apps/classroom/quiz_bank.py
+msgid "capitalize() birinchi harfni katta, qolganlarini kichik qiladi."
+msgstr "capitalize() makes the first letter a capital and the rest lowercase."
+
+#: apps/classroom/quiz_bank.py
+msgid "0 ning mantiqiy qiymati False."
+msgstr "The truth value of 0 is False."
+
+#: apps/classroom/quiz_bank.py
+msgid "Bo‘sh bo‘lmagan satr har doim True."
+msgstr "A non-empty string is always True."
+
+#: apps/classroom/quiz_bank.py
+msgid "\"py\" qism-satr sifatida \"python\" ichida mavjud."
+msgstr "\"py\" exists as a substring inside \"python\"."
+
+#: apps/classroom/quiz_bank.py
+msgid "Satrda 6 ta belgi bor."
+msgstr "The string has 6 characters."
+
+#: apps/classroom/quiz_bank.py
+msgid "Indekslash 0 dan boshlanadi: c=0, o=1."
+msgstr "Indexing starts at 0: c=0, o=1."
+
+#: apps/classroom/quiz_bank.py
+msgid "int() kasr qismini shunchaki tashlab yuboradi."
+msgstr "int() simply drops the fractional part."
+
+#: apps/classroom/quiz_bank.py
+msgid "round(7.6) eng yaqin butun songa — 8 ga yaxlitlaydi."
+msgstr "round(7.6) rounds to the nearest integer — 8."
+
+#: apps/classroom/quiz_bank.py
+msgid "Ikkita satr qo‘shilsa ketma-ket ulanadi."
+msgstr "Two strings added are joined one after the other."
+
+#: apps/classroom/quiz_bank.py
+msgid "20 // 3 = 6."
+msgstr "20 // 3 = 6."
+
+#: apps/classroom/quiz_bank.py
+msgid "5 > 2 rost (True), not uni False ga aylantiradi."
+msgstr "5 > 2 is true (True), not turns it into False."
+
+#: apps/classroom/quiz_bank.py
+msgid "\"kitob\" so‘zi \"ob\" bilan tugaydi."
+msgstr "The word \"kitob\" ends with \"ob\"."
+
+#: apps/classroom/quiz_bank.py
+msgid "2 + 3 + 5 = 10."
+msgstr "2 + 3 + 5 = 10."
+
+#: apps/classroom/quiz_bank.py
+msgid "min() eng kichik qiymatni topadi."
+msgstr "min() finds the smallest value."
+
+#: apps/classroom/quiz_bank.py
+msgid "Kvadrat qavs [] — ro‘yxat (list)."
+msgstr "Square brackets [] make a list."
+
+#: apps/classroom/quiz_bank.py
+msgid "Kalit-qiymat ko‘rinishidagi qavs {} — lug‘at (dict)."
+msgstr "Braces {} with key-value pairs make a dictionary (dict)."
+
+#: apps/classroom/quiz_bank.py
+msgid "10 > 5 rost bo‘lgani uchun chop etiladi."
+msgstr "10 > 5 is true, so it is printed."
+
+#: apps/classroom/quiz_bank.py
+msgid "Ikki satr orasiga bo‘sh joy qo‘shib ulaydi."
+msgstr "Joins two strings with a space between them."
+
+#: apps/classroom/quiz_bank.py
+msgid "Qadam 2: toq sonlar 1, 3, 5, 7, 9 chiqadi."
+msgstr "Step 2: the odd numbers 1, 3, 5, 7, 9 are printed."
+
+#: apps/classroom/quiz_bank.py
+msgid "[0:5] 0-dan 4-indeksgacha bo‘lgan belgilarni oladi."
+msgstr "[0:5] takes the characters from index 0 to index 4."
+
+#: apps/classroom/quiz_bank.py
+msgid "or amalida kamida bittasi True bo‘lsa True chiqadi."
+msgstr "With or, the result is True if at least one is True."
+
+#: apps/classroom/quiz_bank.py
+msgid "Avval qavs: 2 + 4 = 6, keyin 3 * 6 = 18."
+msgstr "Parentheses first: 2 + 4 = 6, then 3 * 6 = 18."
+
+#: apps/classroom/quiz_bank.py
+msgid "Salbiy indeks -1 oxirgi belgini bildiradi."
+msgstr "The negative index -1 means the last character."
+
+#: apps/classroom/quiz_bank.py
+msgid "Bo‘sh ro‘yxatning uzunligi 0."
+msgstr "An empty list has length 0."
+
+#: apps/classroom/quiz_bank.py
+msgid "-2 — oxiridan ikkinchisi."
+msgstr "-2 — the second from the end."
+
+#: apps/classroom/quiz_bank.py
+msgid "10 dan 0 gacha (0 kirmaydi) 3 qadam bilan pastga."
+msgstr "From 10 down to 0 (0 not included) in steps of 3."
+
+#: apps/classroom/quiz_bank.py apps/classroom/quiz_bank.py
+msgid "1 + 2 + 3."
+msgstr "1 + 2 + 3."
+
+#: apps/classroom/quiz_bank.py
+msgid "sorted yangi ro‘yxat beradi: 8 − 3."
+msgstr "sorted gives a new list: 8 − 3."
+
+#: apps/classroom/quiz_bank.py
+msgid "lower() — kichik harflar."
+msgstr "lower() — lowercase letters."
+
+#: apps/classroom/quiz_bank.py
+msgid "3 · 2 = 6."
+msgstr "3 · 2 = 6."
+
+#: apps/classroom/quiz_bank.py
+msgid "Satr ham harflar ketma-ketligi."
+msgstr "A string is a sequence of letters too."
+
+#: apps/classroom/quiz_bank.py
+msgid "\"y\" yo‘q: get 0 qaytaradi."
+msgstr "\"y\" is missing: get returns 0."
+
+#: apps/classroom/quiz_bank.py
+msgid "insert(1, 9) — 1-indeksga qo‘yadi."
+msgstr "insert(1, 9) — puts it at index 1."
+
+#: apps/classroom/quiz_bank.py
+msgid "Shart yolg‘on: else qismi."
+msgstr "The condition is false: the else part."
+
+#: apps/classroom/quiz_bank.py
+msgid "Birinchi uchragan joyi, indeks 0 dan."
+msgstr "Its first occurrence, with indexes counted from 0."
+
+#: apps/classroom/quiz_bank.py
+msgid "Ro‘yxatni songa ko‘paytirish uni takrorlaydi."
+msgstr "Multiplying a list by a number repeats it."
+
+#: apps/classroom/quiz_bank.py
+msgid "pop() oxirgi elementni olib tashlaydi."
+msgstr "pop() removes the last element."
+
+#: apps/classroom/quiz_bank.py
+msgid "count(2) ro‘yxatda 2 soni necha marta qatnashganini sanaydi."
+msgstr "count(2) counts how many times 2 appears in the list."
+
+#: apps/classroom/quiz_bank.py
+msgid "0, 2, 4 — juft sonlar (6 kirmaydi)."
+msgstr "0, 2, 4 — the even numbers (6 is not included)."
+
+#: apps/classroom/quiz_bank.py
+msgid "split(\",\") verguldan ajratadi, [0] birinchi element: olma."
+msgstr "split(\",\") splits at the comma, [0] is the first element: olma."
+
+#: apps/classroom/quiz_bank.py
+msgid "\"ball\" kaliti yo‘q, get() standart qiymat 100 ni qaytaradi."
+msgstr "There is no \"ball\" key, so get() returns the default value 100."
+
+#: apps/classroom/quiz_bank.py
+msgid "sorted() elementlarni o‘sish tartibida saralaydi."
+msgstr "sorted() sorts the elements in ascending order."
+
+#: apps/classroom/quiz_bank.py
+msgid "list() satrni harflar ro‘yxatiga aylantiradi."
+msgstr "list() turns the string into a list of letters."
+
+#: apps/classroom/quiz_bank.py
+msgid "strip() chetdagi bo‘sh joylarni olib tashlaydi: \"salom\" uzunligi 5."
+msgstr "strip() removes the spaces at the edges: the length of \"salom\" is 5."
+
+#: apps/classroom/quiz_bank.py
+msgid "Ikkita ro‘yxat birlashib 5 ta elementli bo‘ladi."
+msgstr "The two lists combine into one with 5 elements."
+
+#: apps/classroom/quiz_bank.py
+msgid "4² + 3² = 16 + 9 = 25."
+msgstr "4² + 3² = 16 + 9 = 25."
+
+#: apps/classroom/quiz_bank.py
+msgid "To‘plam (set) takroriy elementlarni saqlamaydi: {1, 2, 3}."
+msgstr "A set does not keep duplicate elements: {1, 2, 3}."
+
+#: apps/classroom/quiz_bank.py
+msgid "1-indeksdan boshlab 2 qadam bilan: a[1]=2, a[3]=4."
+msgstr "Starting at index 1 with step 2: a[1]=2, a[3]=4."
+
+#: apps/classroom/quiz_bank.py
+msgid "1 -> 2 -> 4 -> 8. 8 < 8 yolg‘on, sikl to‘xtaydi."
+msgstr "1 -> 2 -> 4 -> 8. 8 < 8 is false, the loop stops."
+
+#: apps/classroom/quiz_bank.py
+msgid "any() ro‘yxatda kamida bitta rost (5) bo‘lsa True qaytaradi."
+msgstr "any() returns True if at least one item in the list is true (5)."
+
+#: apps/classroom/quiz_bank.py
+msgid "all() hammasi rost bo‘lishini talab qiladi; 0 yolg‘on (False)."
+msgstr "all() requires everything to be true; 0 is false (False)."
+
+#: apps/classroom/quiz_bank.py
+msgid "join() elementlarni \":\" orqali ulaydi."
+msgstr "join() joins the elements with \":\"."
+
+#: apps/classroom/quiz_bank.py
+msgid "index() elementning indeksini topadi: 20 soni 1-indeksda."
+msgstr "index() finds the index of the element: 20 is at index 1."
+
+#: apps/classroom/quiz_bank.py
+msgid "values() qiymatlarni oladi: 2 + 3 = 5."
+msgstr "values() gets the values: 2 + 3 = 5."
+
+#: apps/classroom/quiz_bank.py
+msgid "(1, 2) va (3,) kortejlari qo‘shilib 3 ta elementli bo‘ladi."
+msgstr "The tuples (1, 2) and (3,) combine into one with 3 elements."
+
+#: apps/classroom/quiz_bank.py
+msgid "replace() barcha 'a' harflarini 'o' ga almashtiradi."
+msgstr "replace() replaces all the 'a' letters with 'o'."
+
+#: apps/classroom/quiz_bank.py
+msgid "sort() ro‘yxatni joyida o‘sish bo‘yicha saralaydi."
+msgstr "sort() sorts the list in place in ascending order."
+
+#: apps/classroom/quiz_bank.py
+msgid "extend ro‘yxat elementlarini bittalab oxiriga qo‘shadi."
+msgstr "extend adds the elements of a list to the end one by one."
+
+#: apps/classroom/quiz_bank.py
+msgid "startswith boshlanishini tekshiradi."
+msgstr "startswith checks the beginning."
+
+#: apps/classroom/quiz_bank.py
+msgid "1, 2, 3 ning kvadratlari: 1, 4, 9."
+msgstr "The squares of 1, 2, 3: 1, 4, 9."
+
+#: apps/classroom/quiz_bank.py
+msgid "zip() ikki ketma-ketlik elementlarini juftlaydi."
+msgstr "zip() pairs up the elements of two sequences."
+
+#: apps/classroom/quiz_bank.py
+msgid "Har bir element 3 ga ko‘paytiriladi."
+msgstr "Each element is multiplied by 3."
+
+#: apps/classroom/quiz_bank.py
+msgid "pop(0) 0-indeksdagi 1 ni sug‘urib oladi."
+msgstr "pop(0) pulls out the 1 at index 0."
+
+#: apps/classroom/quiz_bank.py
+msgid "\"z\" kaliti lug‘atda yo‘q, natija False."
+msgstr "The key \"z\" is not in the dictionary, so the result is False."
+
+#: apps/classroom/quiz_bank.py
+msgid "Uchta argument; ro‘yxat bitta."
+msgstr "Three arguments; one list."
+
+#: apps/classroom/quiz_bank.py
+msgid "x — nusxa nomi, ro‘yxat o‘zgarmaydi."
+msgstr "x is a copy's name, the list does not change."
+
+#: apps/classroom/quiz_bank.py
+msgid "Modul bo‘yicha: 1, 2, 3."
+msgstr "Modulo: 1, 2, 3."
+
+#: apps/classroom/quiz_bank.py
+msgid "global — tashqaridagi x o‘zgaradi."
+msgstr "global — the outer x changes."
+
+#: apps/classroom/quiz_bank.py
+msgid "zip qisqasi bo‘yicha to‘xtaydi."
+msgstr "zip stops at the shorter one."
+
+#: apps/classroom/quiz_bank.py
+msgid "%d son, %s satr o‘rniga."
+msgstr "%d stands in for a number, %s for a string."
+
+#: apps/classroom/quiz_bank.py
+msgid "Kalit va qiymat almashtirildi."
+msgstr "The keys and values were swapped."
+
+#: apps/classroom/quiz_bank.py
+msgid "3 — rost qiymat."
+msgstr "3 is a true value."
+
+#: apps/classroom/quiz_bank.py
+msgid "2⁵ = 32."
+msgstr "2⁵ = 32."
+
+#: apps/classroom/quiz_bank.py
+msgid "9 + 1: bo‘linma va qoldiq sonni qayta tiklaydi."
+msgstr "9 + 1: the quotient and remainder rebuild the number."
+
+#: apps/classroom/quiz_bank.py
+msgid "Ikki vergul orasida bo‘sh satr ham bor."
+msgstr "There is an empty string between the two commas too."
+
+#: apps/classroom/quiz_bank.py
+msgid "* qolganlarini ro‘yxatga yig‘adi."
+msgstr "* gathers the rest into a list."
+
+#: apps/classroom/quiz_bank.py
+msgid "Avval ko‘paytirish: 10 − 6 + 1."
+msgstr "Multiplication first: 10 − 6 + 1."
+
+#: apps/classroom/quiz_bank.py
+msgid "C if dan tashqarida: doim chiqadi."
+msgstr "C is outside the if: it is always printed."
+
+#: apps/classroom/quiz_bank.py
+msgid "5 / 2 avval int: 2."
+msgstr "5 / 2 is an int first: 2."
+
+#: apps/classroom/quiz_bank.py
+msgid "i-- avval 5 ni beradi, keyin i = 4."
+msgstr "i-- gives 5 first, then i = 4."
+
+#: apps/classroom/quiz_bank.py
+msgid "Shart to‘g‘ri: 10 · 2."
+msgstr "The condition is true: 10 · 2."
+
+#: apps/classroom/quiz_bank.py
+msgid "1 + 3 + 5 = 9."
+msgstr "1 + 3 + 5 = 9."
+
+#: apps/classroom/quiz_bank.py
+msgid "+ satrlarni ulaydi."
+msgstr "+ joins strings."
+
+#: apps/classroom/quiz_bank.py
+msgid "3 + 1."
+msgstr "3 + 1."
+
+#: apps/classroom/quiz_bank.py
+msgid "Teng: cout bool ni 1 deb yozadi."
+msgstr "Equal: cout writes a bool as 1."
+
+#: apps/classroom/quiz_bank.py
+msgid "z — kichik harf."
+msgstr "z is a lowercase letter."
+
+#: apps/classroom/quiz_bank.py
+msgid "3 ta element, hammasi 7: 3 + 7."
+msgstr "3 elements, all 7: 3 + 7."
+
+#: apps/classroom/quiz_bank.py apps/classroom/quiz_bank.py
+msgid "Indeks 0 dan."
+msgstr "Indexes start at 0."
+
+#: apps/classroom/quiz_bank.py
+msgid "O‘sish tartibida."
+msgstr "In ascending order."
+
+#: apps/classroom/quiz_bank.py
+msgid "10, 5, 2, 1 — to‘rtta."
+msgstr "10, 5, 2, 1 — four of them."
+
+#: apps/classroom/quiz_bank.py
+msgid "string o‘zgaradi."
+msgstr "The string changes."
+
+#: apps/classroom/quiz_bank.py
+msgid "3 + 1 − 2."
+msgstr "3 + 1 − 2."
+
+#: apps/classroom/quiz_bank.py
+msgid "Butun bo‘lish: 17 / 5 = 3."
+msgstr "Integer division: 17 / 5 = 3."
+
+#: apps/classroom/quiz_bank.py
+msgid "1, 2, 2."
+msgstr "1, 2, 2."
+
+#: apps/classroom/quiz_bank.py
+msgid "{} — bir nechta sonning eng kattasi."
+msgstr "{} — the largest of several numbers."
+
+#: apps/classroom/quiz_bank.py
+msgid "10 → 6 → 2."
+msgstr "10 → 6 → 2."
+
+#: apps/classroom/quiz_bank.py
+msgid "2-indeksdan oxirigacha."
+msgstr "From index 2 to the end."
+
+#: apps/classroom/quiz_bank.py
+msgid "XOR bilan almashtirish."
+msgstr "Swapping with XOR."
+
+#: apps/classroom/quiz_bank.py
+msgid "7 & 3 = 3, 7 | 8 = 15."
+msgstr "7 & 3 = 3, 7 | 8 = 15."
+
+#: apps/classroom/quiz_bank.py
+msgid "1 ni 5 marta chapga surish: 2⁵."
+msgstr "Shifting 1 left by 5: 2⁵."
+
+#: apps/classroom/quiz_bank.py
+msgid "[&] — x havola bo‘yicha olinadi."
+msgstr "[&] — x is captured by reference."
+
+#: apps/classroom/quiz_bank.py
+msgid "b uch marta."
+msgstr "b three times."
+
+#: apps/classroom/quiz_bank.py
+msgid "set takrorlarsiz va saralangan: {1, 3, 5}."
+msgstr "A set is without duplicates and sorted: {1, 3, 5}."
+
+#: apps/classroom/quiz_bank.py
+msgid "**q — p ko‘rsatgan x."
+msgstr "**q — the x that p points to."
+
+#: apps/classroom/quiz_bank.py
+msgid "f(5) = 15 (b standart 10), f(1, 1) = 2."
+msgstr "f(5) = 15 (b defaults to 10), f(1, 1) = 2."
+
+#: apps/classroom/quiz_bank.py
+msgid "2⁴⁰ ≈ 1,1 · 10¹² — long long ga sig‘adi."
+msgstr "2⁴⁰ ≈ 1.1 · 10¹² — it fits in a long long."
+
+#: apps/classroom/quiz_bank.py
+msgid "Teskari iteratorlar: kamayish tartibi."
+msgstr "Reverse iterators: descending order."
+
+#: apps/classroom/quiz_bank.py
+msgid "Ichki x — boshqa o‘zgaruvchi, blokdan keyin yo‘qoladi."
+msgstr "The inner x is a different variable, gone after the block."
+
+#: apps/classroom/quiz_bank.py
+msgid "Avval bo‘lish: 10 − 2."
+msgstr "Division first: 10 − 2."
+
+#: apps/classroom/quiz_bank.py
+msgid "7 = 2·3 + 1."
+msgstr "7 = 2·3 + 1."
+
+#: apps/classroom/quiz_bank.py
+msgid "2 + 3."
+msgstr "2 + 3."
+
+#: apps/classroom/quiz_bank.py
+msgid "! — teskarisi."
+msgstr "! — the opposite."
+
+#: apps/classroom/quiz_bank.py
+msgid "B if dan tashqarida: doim chiqadi."
+msgstr "B is outside the if: it is always printed."
+
+#: apps/classroom/quiz_bank.py
+msgid "7.0 — double: bo‘lish ham kasrli."
+msgstr "7.0 is a double: the division is fractional too."
+
+#: apps/classroom/quiz_bank.py
+msgid "0 + 1 + 2 + 3."
+msgstr "0 + 1 + 2 + 3."
+
+#: apps/classroom/quiz_bank.py
+msgid "7 + 3."
+msgstr "7 + 3."
+
+#: apps/classroom/quiz_bank.py
+msgid "A ning kodi 65."
+msgstr "The code of A is 65."
+
+#: apps/classroom/quiz_bank.py
+msgid "2 + 3 = 5, keyin satrga ulanadi."
+msgstr "2 + 3 = 5, then it is appended to the string."
+
+#: apps/classroom/quiz_bank.py
+msgid "Juftlar: 2 + 4."
+msgstr "Pairs: 2 + 4."
+
+#: apps/classroom/quiz_bank.py
+msgid "J-a-v: indeks 2."
+msgstr "J-a-v: index 2."
+
+#: apps/classroom/quiz_bank.py
+msgid "Hamma - olib tashlanadi."
+msgstr "All the - are removed."
+
+#: apps/classroom/quiz_bank.py
+msgid "0 + 5 + 4."
+msgstr "0 + 5 + 4."
+
+#: apps/classroom/quiz_bank.py
+msgid "Avval kichik harflarga, keyin birinchisi."
+msgstr "Lowercase first, then the first one."
+
+#: apps/classroom/quiz_bank.py
+msgid "2⁵."
+msgstr "2⁵."
+
+#: apps/classroom/quiz_bank.py
+msgid "Matnni solishtirish — equals."
+msgstr "Comparing text — equals."
+
+#: apps/classroom/quiz_bank.py
+msgid "remove(1) — 1-indeksdagini o‘chiradi."
+msgstr "remove(1) — deletes the one at index 1."
+
+#: apps/classroom/quiz_bank.py
+msgid "3, 2, 1 ketma-ket ulanadi."
+msgstr "3, 2, 1 are joined one after another."
+
+#: apps/classroom/quiz_bank.py
+msgid "\"12\" — ikki belgi."
+msgstr "\"12\" — two characters."
+
+#: apps/classroom/quiz_bank.py apps/classroom/quiz_bank.py
+msgid "Eng kattasi."
+msgstr "The largest."
+
+#: apps/classroom/quiz_bank.py
+msgid "10 = 8 + 2."
+msgstr "10 = 8 + 2."
+
+#: apps/classroom/quiz_bank.py
+msgid "\"0,1,2,\" — 6 belgi."
+msgstr "\"0,1,2,\" — 6 characters."
+
+#: apps/classroom/quiz_bank.py
+msgid "long kattaroq: to‘lmaydi."
+msgstr "long is bigger: it does not overflow."
+
+#: apps/classroom/quiz_bank.py
+msgid "clone() — yangi massiv."
+msgstr "clone() — a new array."
+
+#: apps/classroom/quiz_bank.py
+msgid "null da metod chaqirib bo‘lmaydi."
+msgstr "A method can't be called on null."
+
+#: apps/classroom/quiz_bank.py
+msgid "10 / 3 = 3 (int), keyin 3 · 3.0."
+msgstr "10 / 3 = 3 (int), then 3 · 3.0."
+
+#: apps/classroom/quiz_bank.py
+msgid "c (99) − d (100)."
+msgstr "c (99) − d (100)."
+
+#: apps/classroom/quiz_bank.py
+msgid "16, 8, 4, 2, 1 — besh chaqiruv."
+msgstr "16, 8, 4, 2, 1 — five calls."
+
+#: apps/classroom/quiz_bank.py
+msgid ""
+"x += ... chap x ni oldin oladi: 5 + 5 · 2; x++ ning oshirishi ustidan "
+"yoziladi."
+msgstr ""
+"x += ... reads the left x first: 5 + 5 · 2; the increment of x++ is "
+"overwritten."
+
+#: apps/classroom/quiz_bank.py
+msgid "TreeMap kalitlarni saralab saqlaydi."
+msgstr "TreeMap keeps its keys sorted."
+
+#: apps/classroom/quiz_bank.py
+msgid "a → b → c."
+msgstr "a → b → c."
+
+#: apps/classroom/quiz_bank.py
+msgid "** — daraja."
+msgstr "** — the power."
+
+#: apps/classroom/quiz_bank.py
+msgid "\"5\" + 5 = \"55\", keyin − 5 = 50."
+msgstr "\"5\" + 5 = \"55\", then − 5 = 50."
+
+#: apps/classroom/quiz_bank.py
+msgid "8 − 2."
+msgstr "8 − 2."
+
+#: apps/classroom/quiz_bank.py
+msgid "(10 − 3) / 7."
+msgstr "(10 − 3) / 7."
+
+#: apps/classroom/quiz_bank.py
+msgid "=== turini ham solishtiradi."
+msgstr "=== compares the type too."
+
+#: apps/classroom/quiz_bank.py
+msgid "Katta harflar."
+msgstr "Capital letters."
+
+#: apps/classroom/quiz_bank.py
+msgid "5 + 4."
+msgstr "5 + 4."
+
+#: apps/classroom/quiz_bank.py
+msgid "7 > 5."
+msgstr "7 > 5."
+
+#: apps/classroom/quiz_bank.py
+msgid "Qo‘shtirnoqdagi — satr."
+msgstr "Inside quotes — a string."
+
+#: apps/classroom/quiz_bank.py
+msgid "1- va 2-indekslar."
+msgstr "Indexes 1 and 2."
+
+#: apps/classroom/quiz_bank.py
+msgid "Har birining ildizi."
+msgstr "The root of each."
+
+#: apps/classroom/quiz_bank.py
+msgid "Harflarga bo‘lib, teskari."
+msgstr "Split into letters, reversed."
+
+#: apps/classroom/quiz_bank.py
+msgid "const massivning ichi o‘zgaradi."
+msgstr "With const, the inside of the array can change."
+
+#: apps/classroom/quiz_bank.py
+msgid "Ikkinchi bo‘lak."
+msgstr "The second piece."
+
+#: apps/classroom/quiz_bank.py
+msgid "1 + 4 + 9."
+msgstr "1 + 4 + 9."
+
+#: apps/classroom/quiz_bank.py
+msgid "Hammasi musbat."
+msgstr "All are positive."
+
+#: apps/classroom/quiz_bank.py
+msgid "d-as-tur."
+msgstr "d-as-tur."
+
+#: apps/classroom/quiz_bank.py
+msgid "Massivlar satrga aylanib ulanadi: \"1,2\" + \"3\"."
+msgstr "Arrays become strings and are joined: \"1,2\" + \"3\"."
+
+#: apps/classroom/quiz_bank.py
+msgid "NaN — son turidagi qiymat."
+msgstr "NaN — a value of the number type."
+
+#: apps/classroom/quiz_bank.py
+msgid "let blok ichida o‘z o‘zgaruvchisi."
+msgstr "let is its own variable inside the block."
+
+#: apps/classroom/quiz_bank.py
+msgid "Satr harflarga yoyiladi."
+msgstr "The string is spread into letters."
+
+#: apps/classroom/quiz_bank.py
+msgid "6 + 9."
+msgstr "6 + 9."
+
+#: apps/classroom/quiz_bank.py
+msgid "?? faqat null/undefined da, || har qanday yolg‘onda o‘ngini oladi."
+msgstr ""
+"?? only reacts to null/undefined, while || takes the right side for any "
+"falsy value."
+
+#: apps/classroom/quiz_bank.py
+msgid "parseInt raqamlarni boshidan o‘qiydi."
+msgstr "parseInt reads digits from the start."
+
+#: apps/classroom/quiz_bank.py
+msgid "Hammasi bitta qatlamga."
+msgstr "All into a single level."
+
+#: apps/classroom/quiz_bank.py
+msgid "return dan keyin qator tugadi: nuqtali vergul o‘zi qo‘yiladi."
+msgstr "The line ends after return: a semicolon is inserted automatically."
+
+#: apps/classroom/quiz_bank.py
+msgid "a dan boshqasi."
+msgstr "All except a."
+
+#: apps/classroom/quiz_bank.py
+msgid "Solishtirish funksiyasi bilan son sifatida saralanadi."
+msgstr "With a comparison function it is sorted as numbers."
+
 #: apps/classroom/quiz_check.py
 msgid "javob variantlar orasida yo‘q"
 msgstr "the answer is not among the options"
@@ -1489,6 +3078,14 @@ msgstr "an output question needs ___"
 #: apps/classroom/quiz_check.py
 msgid "fill savolida bitta ___ bo‘lishi kerak"
 msgstr "a fill question needs exactly one ___"
+
+#: apps/classroom/views.py templates/accounts/_rating_chart.html
+msgid "Siz"
+msgstr "You"
+
+#: apps/classroom/views.py templates/classroom/duels.html
+msgid "Raqib"
+msgstr "Opponent"
 
 #: apps/contests/models.py apps/problems/templatetags/uzdates.py
 msgid "Yan"
@@ -1538,47 +3135,47 @@ msgstr "Nov"
 msgid "Dek"
 msgstr "Dec"
 
-#: apps/contests/models.py
+#: apps/contests/models.py apps/problems/daily.py
 msgid "Yanvar"
 msgstr "January"
 
-#: apps/contests/models.py
+#: apps/contests/models.py apps/problems/daily.py
 msgid "Fevral"
 msgstr "February"
 
-#: apps/contests/models.py
+#: apps/contests/models.py apps/problems/daily.py
 msgid "Mart"
 msgstr "March"
 
-#: apps/contests/models.py
+#: apps/contests/models.py apps/problems/daily.py
 msgid "Aprel"
 msgstr "April"
 
-#: apps/contests/models.py
+#: apps/contests/models.py apps/problems/daily.py
 msgid "Iyun"
 msgstr "June"
 
-#: apps/contests/models.py
+#: apps/contests/models.py apps/problems/daily.py
 msgid "Iyul"
 msgstr "July"
 
-#: apps/contests/models.py
+#: apps/contests/models.py apps/problems/daily.py
 msgid "Avgust"
 msgstr "August"
 
-#: apps/contests/models.py
+#: apps/contests/models.py apps/problems/daily.py
 msgid "Sentabr"
 msgstr "September"
 
-#: apps/contests/models.py
+#: apps/contests/models.py apps/problems/daily.py
 msgid "Oktabr"
 msgstr "October"
 
-#: apps/contests/models.py
+#: apps/contests/models.py apps/problems/daily.py
 msgid "Noyabr"
 msgstr "November"
 
-#: apps/contests/models.py
+#: apps/contests/models.py apps/problems/daily.py
 msgid "Dekabr"
 msgstr "December"
 
@@ -1760,12 +3357,40 @@ msgid "{weekday}, {day}-{month}"
 msgstr "{weekday}, {month} {day}"
 
 #: apps/integrity/evidence.py
+msgid "AI belgisi"
+msgstr "AI mark"
+
+#: apps/integrity/evidence.py
 msgid "Tracker o‘chiq"
 msgstr "Tracker off"
 
 #: apps/integrity/evidence.py
+msgid "Muharrirda yozilmagan"
+msgstr "Not written in the editor"
+
+#: apps/integrity/evidence.py
+msgid "Kod sakrashi"
+msgstr "Code jump"
+
+#: apps/integrity/evidence.py
+msgid "Umumiy qurilma"
+msgstr "Shared device"
+
+#: apps/integrity/evidence.py
+msgid "Ikki qurilma"
+msgstr "Two devices"
+
+#: apps/integrity/evidence.py
 msgid "O‘xshash kod"
 msgstr "Similar code"
+
+#: apps/integrity/evidence.py
+msgid "Bir qurilmadan: {names}"
+msgstr "From one device: {names}"
+
+#: apps/integrity/evidence.py
+msgid "{problem}: kodda «{names}»"
+msgstr "{problem}: «{names}» in the code"
 
 #: apps/integrity/evidence.py
 msgid "{labels_get_problem_id}: {len_bad} ta yuborish"
@@ -1783,7 +3408,7 @@ msgstr "Worked on {len_devices} devices at the same time"
 msgid "{label}: {other_user_username} bilan {pct}% o‘xshash"
 msgstr "{label}: {pct}% similar to {other_user_username}"
 
-#: apps/integrity/models.py templates/integrity/contest_report.html
+#: apps/integrity/models.py templates/contests/_standings_live.html
 msgid "Diskvalifikatsiya"
 msgstr "Disqualification"
 
@@ -1904,6 +3529,10 @@ msgid "kod bir zumda paydo bo‘ldi"
 msgstr "the code appeared in an instant"
 
 #: apps/integrity/practice.py
+msgid "qabul qilingan kod muharrirda yozilmagan"
+msgstr "the accepted code was not written in the editor"
+
+#: apps/integrity/practice.py
 msgid "{n} soniya"
 msgstr "{n} seconds"
 
@@ -1932,6 +3561,10 @@ msgstr ""
 "{fmt_ac_at_e_at_total_seconds} after coming back"
 
 #: apps/integrity/practice.py
+msgid "sahifa ochilgach {time} ichida yechildi"
+msgstr "solved within {time} of opening the page"
+
+#: apps/integrity/practice.py
 msgid "{grew} belgi birdaniga paydo bo‘lgan"
 msgstr "{grew} characters appeared at once"
 
@@ -1952,6 +3585,22 @@ msgid "Juda tez-tez. Bir daqiqadan keyin qayta urinib ko‘ring."
 msgstr "Too often. Try again in a minute."
 
 #: apps/integrity/views.py
+msgid "Xabaringiz adminlarga yuborildi. Rahmat."
+msgstr "Your message was sent to the admins. Thank you."
+
+#: apps/integrity/views.py
+msgid "Apellyatsiyangiz adminlarga yuborildi. Javob kutilmoqda."
+msgstr "Your appeal was sent to the admins. A reply is pending."
+
+#: apps/integrity/views.py
+msgid "Apellyatsiyangiz"
+msgstr "Your appeal"
+
+#: apps/integrity/views.py
+msgid "Shikoyatingiz"
+msgstr "Your report"
+
+#: apps/integrity/views.py
 msgid "O‘xshashlik tekshirildi: {join_labels}."
 msgstr "Similarity checked: {join_labels}."
 
@@ -1962,6 +3611,14 @@ msgstr "Confirmed — no points are given for this solution."
 #: apps/integrity/views.py
 msgid "Belgilandi: shubha yo‘q."
 msgstr "Marked: no suspicion."
+
+#: apps/integrity/views.py
+msgid "Qaror bekor qilindi."
+msgstr "The decision was undone."
+
+#: apps/integrity/views.py
+msgid "Bu musobaqada qatnashmagansiz."
+msgstr "You didn't take part in this contest."
 
 #: apps/integrity/views.py
 msgid ""
@@ -1979,7 +3636,15 @@ msgstr "{user_username}: all attempts were checked, no new similarity found."
 
 #: apps/integrity/views.py
 msgid "{what} ko‘rib chiqildi"
-msgstr "{what} reviewed"
+msgstr "{what} was reviewed"
+
+#: apps/learn/forms.py
+msgid "Nom kiriting."
+msgstr "Enter a name."
+
+#: apps/learn/forms.py
+msgid "Masalan: Keyinroq yechaman"
+msgstr "E.g. Solve it later"
 
 #: apps/learn/forms.py
 msgid "Ko‘pi bilan {max_lists} ta ro‘yxat."
@@ -2076,6 +3741,10 @@ msgstr ""
 "efficient algorithm is required"
 
 #: apps/moderation/ai.py
+msgid "Sonnet 5 (tavsiya etiladi)"
+msgstr "Sonnet 5 (recommended)"
+
+#: apps/moderation/ai.py
 msgid "Javob uzilib qoldi — qayta urinib ko'ring."
 msgstr "The response was cut off — try again."
 
@@ -2083,6 +3752,10 @@ msgstr "The response was cut off — try again."
 msgid "AI bu so'rovni bajarmadi — mavzu yoki talabni o'zgartirib ko'ring."
 msgstr ""
 "The AI did not carry out this request — change the topic or the requirement."
+
+#: apps/moderation/ai.py
+msgid "AI javobida matn topilmadi."
+msgstr "No text was found in the AI's reply."
 
 #: apps/moderation/ai.py
 msgid "Bitta masala tuz: {labels_level} — {level_briefs_level}."
@@ -2101,8 +3774,19 @@ msgid "1 dan {max_count} tagacha masala so'rang."
 msgstr "Ask for 1 to {max_count} problems."
 
 #: apps/moderation/ai.py
+msgid "AI javobi JSON emas: {e}"
+msgstr "The AI's reply is not JSON: {e}"
+
+#: apps/moderation/ai.py
 msgid "AI javobida {key} masalasi yo'q. Qayta urinib ko'ring."
 msgstr "The AI's reply has no problem {key}. Try again."
+
+#: apps/moderation/ai.py
+msgid ""
+"«{title}» uchun {n} ta test bor, kamida {min} ta kerak. Qayta urinib "
+"ko‘ring."
+msgstr ""
+"“{title}” has {n} tests, but at least {min} are needed. Please try again."
 
 #: apps/moderation/ai.py
 msgid "Bu {len_slots} ta masaladan iborat to'plamning {index_1}-masalasi"
@@ -2124,6 +3808,10 @@ msgstr "Authors"
 #: apps/moderation/forms.py apps/moderation/views.py
 msgid "Rasm hajmi 10 MB dan oshmasligi kerak."
 msgstr "The image must not exceed 10 MB."
+
+#: apps/moderation/forms.py
+msgid "ZIP ichida test juftligi topilmadi (masalan 01.in + 01.out)."
+msgstr "No test pairs were found in the ZIP (for example 01.in + 01.out)."
 
 #: apps/moderation/forms.py
 msgid "Yashirin ma‘lumotlar uchun kutilgan natija kerak."
@@ -2168,6 +3856,14 @@ msgid "bo‘sh — keyingisi"
 msgstr "blank = the next one"
 
 #: apps/moderation/forms.py
+msgid "masalan 10.0."
+msgstr "e.g. 10.0."
+
+#: apps/moderation/forms.py
+msgid "masalan Marathon #1"
+msgstr "e.g. Marathon #1"
+
+#: apps/moderation/forms.py
 msgid "login, login … (tanlovdan tashqari qatnashadi)"
 msgstr "login, login … (they take part out of competition)"
 
@@ -2176,8 +3872,20 @@ msgid "Bunday foydalanuvchi yo‘q: {names}"
 msgstr "No such user: {names}"
 
 #: apps/moderation/forms.py
+msgid "masalan: two-pointers"
+msgstr "e.g. two-pointers"
+
+#: apps/moderation/forms.py
+msgid "Masalan: bozordagi narxlar, Fibonachchi sonlari, 1 ≤ n ≤ 10⁵"
+msgstr "E.g. market prices, Fibonacci numbers, 1 ≤ n ≤ 10⁵"
+
+#: apps/moderation/forms.py
 msgid "Jami 1 dan {max_count} tagacha masala so‘rang."
 msgstr "Ask for 1 to {max_count} problems in total."
+
+#: apps/moderation/forms.py
+msgid "ZIP o‘qilmadi: {e}"
+msgstr "Could not read the ZIP: {e}"
 
 #: apps/moderation/forms.py
 msgid "Div. {n} musobaqalarda ishlatilgan — o‘chirib bo‘lmaydi."
@@ -2186,6 +3894,10 @@ msgstr "Div. {n} is used by contests and cannot be deleted."
 #: apps/moderation/forms.py
 msgid "Div. {n}: pastki chegara yuqorisidan kichik bo‘lishi kerak."
 msgstr "Div. {n}: the lower bound must be below the upper bound."
+
+#: apps/moderation/forms.py
+msgid "SQL xatosi: {exc}"
+msgstr "SQL error: {exc}"
 
 #: apps/moderation/rating_stats.py
 msgid "So‘nggi 7 kun"
@@ -2336,6 +4048,10 @@ msgid "Masalalar yopildi."
 msgstr "Problems closed."
 
 #: apps/moderation/views.py
+msgid "Duellar ochildi."
+msgstr "Duels are open."
+
+#: apps/moderation/views.py
 msgid "Faqat bugun yoki keyingi 365 kun uchun masala tanlash mumkin."
 msgstr "You can only pick a problem for today or the next 365 days."
 
@@ -2381,6 +4097,10 @@ msgid "Qaysi mavzuga birlashtirilishini tanlang."
 msgstr "Choose which topic to merge into."
 
 #: apps/moderation/views.py
+msgid "Kurs saqlandi."
+msgstr "Course saved."
+
+#: apps/moderation/views.py
 msgid "Divizionlar saqlandi."
 msgstr "Divisions saved."
 
@@ -2405,6 +4125,10 @@ msgid "Bu raundning masalalari ochilmagan."
 msgstr "This round's problems are not open."
 
 #: apps/moderation/views.py
+msgid "Reyting hisoblanmadi: musobaqa reytingli emas."
+msgstr "The rating was not calculated: the contest is not rated."
+
+#: apps/moderation/views.py
 msgid "Faqat tugagan duelni bekor qilish mumkin."
 msgstr "Only a finished duel can be voided."
 
@@ -2424,6 +4148,14 @@ msgstr "The date or the problem was chosen wrongly."
 msgid "Bu sana uchun masala boshqa so‘rovda tanlandi. Sahifani yangilang."
 msgstr ""
 "A problem for this date was chosen in another request. Refresh the page."
+
+#: apps/moderation/views.py
+msgid "{day} kuniga «{title}» tanlandi."
+msgstr "{title} was chosen for {day}."
+
+#: apps/moderation/views.py
+msgid "Fayl tanlanmadi."
+msgstr "No file was chosen."
 
 #: apps/moderation/views.py
 msgid "Faqat rasm fayllari (PNG, JPG, GIF, WebP) ruxsat etilgan."
@@ -2460,6 +4192,10 @@ msgid ""
 msgstr ""
 "The problem is in a round that has not ended: open it with “Open the "
 "problems” after the round."
+
+#: apps/moderation/views.py apps/moderation/views.py
+msgid "«{title}» o‘chirildi."
+msgstr "“{title}” was deleted."
 
 #: apps/moderation/views.py
 msgid "{len_ids} ta urinish qayta tekshirishga yuborildi."
@@ -2558,8 +4294,20 @@ msgid "{n} tasi o‘tkazib yuborildi: tasdiqlanmagan yoki tugamagan musobaqada."
 msgstr "{n} skipped: not approved or in a round that has not ended."
 
 #: apps/moderation/views.py
+msgid ""
+"{names}: reyting allaqachon hisoblangan — qayta tekshiruvdan keyin ham "
+"o‘zgarmaydi."
+msgstr ""
+"{names}: the rating has already been calculated — it will not change even "
+"after a recheck."
+
+#: apps/moderation/views.py
 msgid "«{t}»: kamida 2 ta test kerak, tasdiqlab bo‘lmaydi."
 msgstr "“{t}”: at least 2 tests are needed, it cannot be approved."
+
+#: apps/moderation/views.py
+msgid "«{name}» saqlandi."
+msgstr "“{name}” saved."
 
 #: apps/moderation/views.py
 msgid ""
@@ -2589,6 +4337,10 @@ msgstr ""
 "{n} similarity flags are unreviewed: review them first (or “Open anyway”)."
 
 #: apps/moderation/views.py
+msgid "Bu musobaqaning reytingi allaqachon hisoblangan."
+msgstr "This contest's rating has already been calculated."
+
+#: apps/moderation/views.py
 msgid ""
 "Qo‘lda yozilgan reyting keyingi to‘liq qayta hisobda (replay) o‘chib ketadi."
 msgstr ""
@@ -2614,6 +4366,14 @@ msgid ""
 msgstr ""
 "{len_drafts} problems were created — review and approve them in the Queue "
 "section."
+
+#: apps/moderation/views.py
+msgid ""
+"«{title}» musobaqada ishlatilgan yoki unga boshqalar urinish yuborgan — "
+"o‘chirib bo‘lmaydi, yashirib qo‘ying."
+msgstr ""
+"“{title}” was used in a contest or others have submitted attempts to it — it"
+" can't be deleted; hide it instead."
 
 #: apps/moderation/views.py
 msgid "mualliflar o‘zgardi"
@@ -2652,8 +4412,20 @@ msgid "Reyting hisoblanmoqda: bir necha soniyadan keyin sahifani yangilang."
 msgstr "The rating is being calculated: refresh the page in a few seconds."
 
 #: apps/moderation/views.py
+msgid "Reyting hisoblandi."
+msgstr "The rating was calculated."
+
+#: apps/moderation/views.py
 msgid "Mavzu topilmadi."
 msgstr "Topic not found."
+
+#: apps/moderation/views.py
+msgid ""
+"{names}: ochiq yoki boshqa musobaqada ishlatilgan — ishtirokchilar bu "
+"masalalarni oldindan bilishi mumkin."
+msgstr ""
+"{names}: open or used in another contest — participants may already know "
+"these problems."
 
 #: apps/moderation/views.py
 msgid "{labels}: kamida 2 ta test kerak."
@@ -2674,6 +4446,34 @@ msgstr ""
 #: apps/moderation/views.py
 msgid "Testlar o‘zgardi: {n} ta urinish qayta tekshirishga yuborildi."
 msgstr "The tests changed: {n} attempts were sent to be rejudged."
+
+#: apps/problems/daily.py apps/problems/templatetags/uzdates.py
+msgid "Du"
+msgstr "Mo"
+
+#: apps/problems/daily.py apps/problems/templatetags/uzdates.py
+msgid "Se"
+msgstr "Tu"
+
+#: apps/problems/daily.py apps/problems/templatetags/uzdates.py
+msgid "Ch"
+msgstr "We"
+
+#: apps/problems/daily.py apps/problems/templatetags/uzdates.py
+msgid "Pa"
+msgstr "Th"
+
+#: apps/problems/daily.py apps/problems/templatetags/uzdates.py
+msgid "Ju"
+msgstr "Fr"
+
+#: apps/problems/daily.py apps/problems/templatetags/uzdates.py
+msgid "Sh"
+msgstr "Sa"
+
+#: apps/problems/daily.py apps/problems/templatetags/uzdates.py
+msgid "Ya"
+msgstr "Su"
 
 #: apps/problems/models.py apps/problems/models.py
 msgid "Dasturlash"
@@ -2700,8 +4500,16 @@ msgid "Duelda g‘alaba qozoning"
 msgstr "Win a duel"
 
 #: apps/problems/quests.py
+msgid "1 ga 1 savollar duelida yuting"
+msgstr "Win a 1v1 quiz duel"
+
+#: apps/problems/quests.py
 msgid "Kurs nazariyasini o‘qing"
 msgstr "Read a course lesson"
+
+#: apps/problems/quests.py
+msgid "Kursda «Tushundim»ni bosing"
+msgstr "Press “Got it” in the course"
 
 #: apps/problems/templatetags/tagnames.py
 msgid "agregatsiya"
@@ -2771,7 +4579,7 @@ msgstr "divide and conquer"
 msgid "dinamik dasturlash"
 msgstr "dynamic programming"
 
-#: apps/problems/templatetags/tagnames.py
+#: apps/problems/templatetags/tagnames.py templates/problems/detail.html
 msgid "for sikli"
 msgstr "for loop"
 
@@ -2939,34 +4747,6 @@ msgstr "while loop"
 msgid "oyna funksiyalari"
 msgstr "window functions"
 
-#: apps/problems/templatetags/uzdates.py
-msgid "Du"
-msgstr "Mo"
-
-#: apps/problems/templatetags/uzdates.py
-msgid "Se"
-msgstr "Tu"
-
-#: apps/problems/templatetags/uzdates.py
-msgid "Ch"
-msgstr "We"
-
-#: apps/problems/templatetags/uzdates.py
-msgid "Pa"
-msgstr "Th"
-
-#: apps/problems/templatetags/uzdates.py
-msgid "Ju"
-msgstr "Fr"
-
-#: apps/problems/templatetags/uzdates.py
-msgid "Sh"
-msgstr "Sa"
-
-#: apps/problems/templatetags/uzdates.py
-msgid "Ya"
-msgstr "Su"
-
 #: apps/problems/templatetags/uzdates.py apps/problems/templatetags/uzdates.py
 msgid "hozirgina"
 msgstr "just now"
@@ -2986,6 +4766,18 @@ msgstr "{n} minutes ago"
 #: apps/problems/views.py
 msgid "Bu filtrda yechilmagan masala qolmadi."
 msgstr "No unsolved problems are left in this filter."
+
+#: apps/problems/views.py
+msgid "Musobaqa davomida yopiq"
+msgstr "Closed during the contest"
+
+#: apps/problems/views.py templates/accounts/top.html
+msgid "Yechilgan"
+msgstr "Solved"
+
+#: apps/problems/views.py
+msgid "Urinilgan"
+msgstr "Tried"
 
 #: apps/submissions/models.py
 msgid "To‘g‘ri"
@@ -3037,6 +4829,10 @@ msgid "Bu musobaqaga shu tarmoqdan yuborib bo‘lmaydi."
 msgstr "You can't submit to this contest from this network."
 
 #: apps/submissions/views.py
+msgid "Siz bu musobaqadan chetlatilgansiz."
+msgstr "You have been removed from this contest."
+
+#: apps/submissions/views.py
 msgid "Bu masala shu raundda bloklangan."
 msgstr "This problem is blocked in this round."
 
@@ -3051,6 +4847,10 @@ msgstr "Too often — try again in a minute"
 #: apps/submissions/views.py
 msgid "Masalada ma‘lumotlar bazasi yo‘q"
 msgstr "The problem has no database"
+
+#: apps/submissions/views.py
+msgid "Tizimga kirgansiz: sahifani yangilang."
+msgstr "You are signed in: refresh the page."
 
 #: apps/submissions/views.py
 msgid "Bu masalada sinash uchun ro‘yxatdan o‘ting."
@@ -3071,6 +4871,11 @@ msgstr "No sample test — enter your own input"
 #: apps/translations/models.py templates/_lang_switch.html
 msgid "O‘zbekcha"
 msgstr "O‘zbekcha"
+
+#: apps/translations/test_english_main.py
+#: apps/translations/test_english_main.py
+msgid "Yuborish"
+msgstr "Send"
 
 #: templates/403.html templates/403.html
 msgid "Ruxsat yo‘q"
@@ -3099,10 +4904,6 @@ msgid ""
 msgstr ""
 "The link is wrong or the page was deleted. The problem may be hidden or the "
 "contest may not have started yet."
-
-#: templates/500.html templates/base.html
-msgid "<!doctype html>"
-msgstr "<!doctype html>"
 
 #: templates/500.html
 msgid "Server xatosi — CodeArena"
@@ -3137,23 +4938,15 @@ msgstr "All read"
 msgid "Hozircha xabar yo‘q. Duel chaqiruvlari va nishonlar shu yerda chiqadi."
 msgstr "No messages yet. Duel challenges and badges appear here."
 
-#: templates/_lang_switch.html
-msgid "uz"
-msgstr "uz"
-
-#: templates/_lang_switch.html
+#: templates/_lang_switch.html templates/_lang_switch.html
 msgid "UZ"
 msgstr "UZ"
-
-#: templates/_lang_switch.html
-msgid "en"
-msgstr "en"
 
 #: templates/_lang_switch.html templates/_lang_switch.html
 msgid "English"
 msgstr "English"
 
-#: templates/_lang_switch.html
+#: templates/_lang_switch.html templates/_lang_switch.html
 msgid "EN"
 msgstr "EN"
 
@@ -3252,6 +5045,10 @@ msgstr "Duel"
 #: templates/_nav.html templates/_navbar.html
 msgid "Admin"
 msgstr "Admin"
+
+#: templates/_nav.html templates/_user_menu.html
+msgid "Ko‘rib chiqishni kutmoqda"
+msgstr "Waiting for review"
 
 #: templates/_nav.html templates/home/dashboard.html
 msgid "Barcha urinishlar"
@@ -3536,12 +5333,12 @@ msgid "Maktab, kollej yoki universitet nomi"
 msgstr "Name of a school, college or university"
 
 #: templates/accounts/_rank.html
+msgid "1-o‘rin"
+msgstr "1st place"
+
+#: templates/accounts/_rank.html
 msgid "%(rank)s-o‘rin"
 msgstr "rank %(rank)s"
-
-#: templates/accounts/_rating_chart.html templates/accounts/clubs.html
-msgid "Siz"
-msgstr "You"
 
 #: templates/accounts/_rating_chart.html
 msgid "median"
@@ -3550,6 +5347,10 @@ msgstr "median"
 #: templates/accounts/_rating_chart.html
 msgid "Hozircha hech kim yetmagan darajalar"
 msgstr "Not reached by anyone yet"
+
+#: templates/accounts/_rating_chart.html templates/accounts/rating.html
+msgid "Reyting taqsimoti"
+msgstr "Rating distribution"
 
 #: templates/accounts/_rating_chart.html templates/accounts/rating.html
 msgid "%(n)s kishi · median %(median)s"
@@ -4243,6 +6044,10 @@ msgid "Moderator"
 msgstr "Moderator"
 
 #: templates/accounts/profile.html
+msgid "Sizning o‘zaro duellaringiz"
+msgstr "Your head-to-head duels"
+
+#: templates/accounts/profile.html
 msgid "Kuzatilmoqda"
 msgstr "Following"
 
@@ -4536,7 +6341,7 @@ msgid ""
 "90 kunda bir marta o‘zgartirish mumkin. Profil havolangiz ham o‘zgaradi."
 msgstr "Can be changed once every 90 days. Your profile link changes too."
 
-#: templates/accounts/profile_edit.html templates/moderation/user_form.html
+#: templates/accounts/profile_edit.html templates/accounts/welcome.html
 msgid "Ism"
 msgstr "First name"
 
@@ -4835,10 +6640,6 @@ msgid ""
 "<b>Hali reyting yo‘q</b>Reytingli musobaqa tugagach, bu yerda paydo bo‘ladi."
 msgstr "<b>No rating yet</b>It will appear here after a rated contest ends."
 
-#: templates/accounts/rating.html templates/accounts/rating.html
-msgid "Reyting taqsimoti"
-msgstr "Rating distribution"
-
 #: templates/accounts/rating.html templates/classroom/duels.html
 msgid "Hammasi"
 msgstr "All"
@@ -4894,10 +6695,6 @@ msgstr "<b>%(t_count)s</b> people"
 #: templates/accounts/top.html templates/accounts/top.html
 msgid "Amaliyot ballari"
 msgstr "Practice points"
-
-#: templates/accounts/top.html templates/contests/detail.html
-msgid "Yechilgan"
-msgstr "Solved"
 
 #: templates/accounts/top.html templates/contests/_standings_live.html
 msgid "Ball"
@@ -5286,11 +7083,11 @@ msgstr "hour"
 msgid "daqiqa"
 msgstr "minute"
 
-#: templates/base.html
+#: templates/base.html templates/integrity/_tracker.html
 msgid "soniya"
 msgstr "second"
 
-#: templates/base.html templates/integrity/contest_report.html
+#: templates/base.html templates/integrity/_tracker.html
 msgid "daq"
 msgstr "min"
 
@@ -5446,7 +7243,7 @@ msgstr "(you)"
 msgid "ball"
 msgstr "points"
 
-#: templates/classroom/_duel_status.html
+#: templates/classroom/_duel_status.html templates/integrity/_tracker.html
 msgid "s"
 msgstr "s"
 
@@ -5622,6 +7419,10 @@ msgstr ""
 "What goes in place of <mark class=\"ca-quiz-blank\">___</mark> so that the "
 "code prints <code class=\"ca-quiz-want\">%(q_expect)s</code>?"
 
+#: templates/classroom/_quiz_code.html
+msgid "bo‘sh joy"
+msgstr "blank"
+
 #: templates/classroom/_quiz_given.html
 msgid "vaqt tugadi"
 msgstr "time is up"
@@ -5631,8 +7432,16 @@ msgid "ko‘rilmadi"
 msgstr "not seen"
 
 #: templates/classroom/_status.html
+msgid "Muddatida yechilgan"
+msgstr "Solved in time"
+
+#: templates/classroom/_status.html
 msgid "Yechildi,"
 msgstr "Solved,"
+
+#: templates/classroom/_status.html
+msgid "Muddatdan keyin yechilgan"
+msgstr "Solved after the deadline"
 
 #: templates/classroom/_status.html
 msgid "Kech yechildi"
@@ -5643,8 +7452,16 @@ msgid "kech"
 msgstr "late"
 
 #: templates/classroom/_status.html
+msgid "Yechilmagan"
+msgstr "Not solved"
+
+#: templates/classroom/_status.html
 msgid "Xato urinishlar:"
 msgstr "Wrong attempts:"
+
+#: templates/classroom/_status.html
+msgid "Urinmagan"
+msgstr "Not attempted"
 
 #: templates/classroom/_status.html
 msgid "Boshlanmagan"
@@ -5773,6 +7590,14 @@ msgstr ""
 "reviewed."
 
 #: templates/classroom/duel_play.html
+msgid "10 soniya qoldi"
+msgstr "10 seconds left"
+
+#: templates/classroom/duel_play.html
+msgid "5 soniya qoldi"
+msgstr "5 seconds left"
+
+#: templates/classroom/duel_play.html
 msgid "Duel · %(n)s/%(n_questions)s-savol"
 msgstr "Duel · question %(n)s/%(n_questions)s"
 
@@ -5851,10 +7676,6 @@ msgid ""
 msgstr ""
 "You answer the questions right now. If your friend accepts within 3 days, "
 "they get the same questions."
-
-#: templates/classroom/duels.html templates/classroom/duels.html
-msgid "Raqib"
-msgstr "Opponent"
 
 #: templates/classroom/duels.html
 msgid "Login bo‘yicha qidiring…"
@@ -6144,6 +7965,10 @@ msgid "Sabab: %(participation_disqualified_reason)s"
 msgstr "Reason: %(participation_disqualified_reason)s"
 
 #: templates/contests/_row.html
+msgid "Natija reytingga ta’sir qiladi"
+msgstr "The result affects your rating"
+
+#: templates/contests/_row.html
 msgid "Ro‘yxatdan o‘tgansiz"
 msgstr "You are signed up"
 
@@ -6209,6 +8034,10 @@ msgstr "Action"
 #: templates/contests/_standings_live.html
 msgid "Muallif: tanlovdan tashqari"
 msgstr "Author: out of competition"
+
+#: templates/contests/_standings_live.html templates/contests/detail.html
+msgid "Hali ball yo‘q"
+msgstr "No points yet"
 
 #: templates/contests/_standings_live.html
 msgid "Email tasdiqlanmagan: bu natija reytingga hisoblanmaydi"
@@ -6491,10 +8320,6 @@ msgstr "General question"
 msgid "Savol"
 msgstr "Question"
 
-#: templates/contests/clarifications.html templates/problems/detail.html
-msgid "Yuborish"
-msgstr "Send"
-
 #: templates/contests/clarifications.html
 msgid "Nimani so‘rash mumkin"
 msgstr "What you can ask"
@@ -6665,6 +8490,10 @@ msgstr "Your status"
 #: templates/contests/detail.html
 msgid "Qatnashgach ko‘rinadi"
 msgstr "Shown once you take part"
+
+#: templates/contests/detail.html
+msgid "Hozir yechsangiz, xatosiz"
+msgstr "If you solve it now, with no mistakes"
 
 #: templates/contests/detail.html
 msgid "Yechilgan:"
@@ -6999,8 +8828,16 @@ msgid "Natijalar jadvali"
 msgstr "Results table"
 
 #: templates/contests/list.html
+msgid "Natija reytingga ta’sir qilmaydi"
+msgstr "The result does not affect your rating"
+
+#: templates/contests/list.html
 msgid "qatnashgan"
 msgstr "took part"
+
+#: templates/contests/list.html
+msgid "Siz bu raundda qatnashmagansiz"
+msgstr "You didn't take part in this round"
 
 #: templates/contests/list.html
 msgid "Bu turdagi o‘tgan musobaqa yo‘q"
@@ -7400,6 +9237,10 @@ msgstr ""
 #: templates/home/dashboard.html
 msgid "Birinchi qadam"
 msgstr "First step"
+
+#: templates/home/dashboard.html
+msgid "Oxirgi reytingli musobaqada"
+msgstr "In the last rated contest"
 
 #: templates/home/dashboard.html
 msgid "Keyingi qadamlar"
@@ -7999,6 +9840,10 @@ msgid "keyin yuborilgan"
 msgstr "sent later"
 
 #: templates/integrity/contest_report.html
+msgid "Bitta ishtirokchining barcha urinishlari solishtirilganda topilgan"
+msgstr "Found by comparing all of one participant's attempts"
+
+#: templates/integrity/contest_report.html
 msgid "Chuqur tekshiruv"
 msgstr "Deep check"
 
@@ -8016,8 +9861,20 @@ msgid "Kodlarni yonma-yon ko‘rish"
 msgstr "View the codes side by side"
 
 #: templates/integrity/contest_report.html
+msgid ""
+"Musobaqa boshlanishidan oldin yuborilgan (amaliyot, oldingi musobaqa yoki "
+"muallif)"
+msgstr ""
+"Submitted before the contest started (practice, an earlier contest, or the "
+"author)"
+
+#: templates/integrity/contest_report.html
 msgid "Musobaqadan oldingi yechim"
 msgstr "A pre-contest solution"
+
+#: templates/integrity/contest_report.html
+msgid "Bu kod oldinroq yuborilgan — manba bo‘lishi mumkin"
+msgstr "This code was submitted earlier — it may be the source"
 
 #: templates/integrity/contest_report.html
 msgid "birinchi"
@@ -8026,6 +9883,10 @@ msgstr "first"
 #: templates/integrity/contest_report.html
 msgid "yozilishi"
 msgstr "how it was written"
+
+#: templates/integrity/contest_report.html
+msgid "Muharrirga qo‘yish urinishlari"
+msgstr "Attempts to paste into the editor"
 
 #: templates/integrity/contest_report.html
 msgid "Boshqa oynaga o‘tishlar"
@@ -8311,6 +10172,13 @@ msgid "Shubha yo‘q"
 msgstr "No suspicion"
 
 #: templates/integrity/practice_report.html
+msgid ""
+"Belgilar kuchli bo‘lgani uchun tizim ballni siz qaror qilguncha ushlab "
+"turibdi"
+msgstr ""
+"The flags are strong, so the system is holding the points until you decide"
+
+#: templates/integrity/practice_report.html
 msgid "Avtomatik: ball ushlab turilibdi"
 msgstr "Automatic: points are held"
 
@@ -8485,6 +10353,10 @@ msgid "Javob: %(r_outcome)s"
 msgstr "Reply: %(r_outcome)s"
 
 #: templates/learn/_plan_strip.html
+msgid "Kursdan yechilgan masalalar"
+msgstr "Problems solved from the course"
+
+#: templates/learn/_plan_strip.html
 msgid "<span class=\"sr-only\">Kurs: </span>%(nav_plan_title)s"
 msgstr "<span class=\"sr-only\">Course: </span>%(nav_plan_title)s"
 
@@ -8528,7 +10400,7 @@ msgstr ""
 msgid "Yangi ro‘yxat"
 msgstr "New list"
 
-#: templates/learn/_save_menu.html
+#: templates/learn/_save_menu.html templates/learn/_save_menu.html
 msgid "Keyinroq yechaman"
 msgstr "Solve later"
 
@@ -10028,7 +11900,7 @@ msgstr ""
 "The problems you submit are reviewed by the admins. Once approved, they "
 "appear on the site under your name."
 
-#: templates/moderation/plan_form.html
+#: templates/moderation/plan_form.html templates/moderation/plan_form.html
 msgid "Yangi kurs"
 msgstr "New course"
 
@@ -10328,10 +12200,6 @@ msgstr "rough, linear estimate"
 #: templates/moderation/rating_stats.html
 msgid "So‘nggi raundlar"
 msgstr "Recent rounds"
-
-#: templates/moderation/rating_stats.html templates/moderation/users.html
-msgid "Yangi"
-msgstr "New"
 
 #: templates/moderation/rating_stats.html
 msgid "Maydon o‘rtachasi"
@@ -11246,6 +13114,10 @@ msgstr "Daily problem, %(month_label)s"
 msgid "Bu masalaga hali urinish yubormagansiz."
 msgstr "You haven't submitted an attempt to this problem yet."
 
+#: templates/problems/_solved_card.html templates/problems/list.html
+msgid "Taraqqiyot"
+msgstr "Progress"
+
 #: templates/problems/_solved_ring.html
 msgid "Umumiy: yechuvchilarning necha foizidan oldindasiz"
 msgstr "Overall: the share of solvers you are ahead of"
@@ -11315,6 +13187,10 @@ msgid "Kursdagi oldingi masala"
 msgstr "Previous problem in the course"
 
 #: templates/problems/detail.html
+msgid "Kursdagi o‘rni"
+msgstr "Place in the course"
+
+#: templates/problems/detail.html
 msgid "Kursdagi keyingi masala"
 msgstr "Next problem in the course"
 
@@ -11379,12 +13255,45 @@ msgid "Boshlang‘ich ball: vaqt o‘tishi va noto‘g‘ri urinishlar bilan kam
 msgstr "Starting points: they decrease over time and with wrong attempts"
 
 #: templates/problems/detail.html
+msgid ""
+"Yechim qanday yozilgani shubhali ko‘rindi, shuning uchun ball admin ko‘rib "
+"chiqquncha ushlab turilibdi. O‘zingiz yozgan bo‘lsangiz, ball qaytariladi."
+msgstr ""
+"The way this solution was written looked suspicious, so the points are held "
+"until an admin reviews it. If you wrote it yourself, the points will be "
+"returned."
+
+#: templates/problems/detail.html
 msgid "Ball tekshiruvda"
 msgstr "Points under review"
 
 #: templates/problems/detail.html
+msgid ""
+"Admin bu yechimni ko‘chirilgan deb belgiladi, shuning uchun amaliyot baliga "
+"qo‘shilmadi. Savol bo‘lsa, adminga murojaat qiling."
+msgstr ""
+"An admin marked this solution as copied, so it was not added to your "
+"practice points. If you have questions, contact the admins."
+
+#: templates/problems/detail.html
 msgid "Ball berilmadi"
 msgstr "No points were given"
+
+#: templates/problems/detail.html
+msgid ""
+"Yechsangiz amaliyot balingizga qo‘shiladi. Ko‘p odam yechgan masala biroz "
+"arzonlashadi."
+msgstr ""
+"If you solve it, it is added to your practice points. A problem many people "
+"have solved gets a little cheaper."
+
+#: templates/problems/detail.html
+msgid "Vaqt chegarasi"
+msgstr "Time limit"
+
+#: templates/problems/detail.html
+msgid "Xotira chegarasi"
+msgstr "Memory limit"
 
 #: templates/problems/detail.html
 msgid "mavzu:"
@@ -11845,6 +13754,14 @@ msgid "So‘rovingizni shu yerda yozing."
 msgstr "Write your query here."
 
 #: templates/problems/detail.html
+msgid "bitta son"
+msgstr "one number"
+
+#: templates/problems/detail.html templates/problems/detail.html
+msgid "qatordagi sonlar"
+msgstr "numbers on a line"
+
+#: templates/problems/detail.html
 msgid "sonlar ro‘yxati"
 msgstr "list of numbers"
 
@@ -11856,9 +13773,37 @@ msgstr "fast input"
 msgid "EKUB"
 msgstr "GCD"
 
+#: templates/problems/detail.html templates/problems/detail.html
+msgid "binar qidiruv"
+msgstr "binary search"
+
+#: templates/problems/detail.html
+msgid "main funksiya"
+msgstr "main function"
+
+#: templates/problems/detail.html templates/problems/detail.html
+msgid "teskari for"
+msgstr "reverse for"
+
+#: templates/problems/detail.html
+msgid "tez kiritish"
+msgstr "fast input"
+
 #: templates/problems/detail.html
 msgid "vector o‘qish"
 msgstr "read a vector"
+
+#: templates/problems/detail.html templates/problems/detail.html
+msgid "keyingi son"
+msgstr "next number"
+
+#: templates/problems/detail.html templates/problems/detail.html
+msgid "chiqarish"
+msgstr "print"
+
+#: templates/problems/detail.html
+msgid "stdin qatorlari"
+msgstr "stdin lines"
 
 #: templates/problems/detail.html
 msgid "son o‘qish"
@@ -11877,8 +13822,8 @@ msgid "n ta son"
 msgstr "n numbers"
 
 #: templates/problems/detail.html
-msgid "chiqarish"
-msgstr "print"
+msgid "tez chiqarish"
+msgstr "fast output"
 
 #: templates/problems/detail.html
 msgid "o‘qish"
@@ -12301,6 +14246,14 @@ msgstr ""
 "class=\"sr-only\">New</span>"
 
 #: templates/problems/list.html
+msgid "SQL so‘rov masalasi"
+msgstr "SQL query problem"
+
+#: templates/problems/list.html
+msgid "Foiz 5 ta urinishdan keyin ko‘rsatiladi"
+msgstr "The percentage is shown after 5 attempts"
+
+#: templates/problems/list.html
 msgid ""
 "<b>Bu filtr bo‘yicha masala topilmadi</b>Boshqa mavzu yoki qiyinlikni "
 "tanlang yoki"
@@ -12335,6 +14288,10 @@ msgstr "For beginners"
 msgid "Masala qiyin tuyulsa, avval O‘rganish bo‘limidagi mavzulardan o‘ting."
 msgstr ""
 "If a problem feels hard, first go through the topics in the Learn section."
+
+#: templates/problems/list.html
+msgid "Yechdi"
+msgstr "Solved"
 
 #: templates/problems/list.html
 msgid ""
@@ -12455,6 +14412,10 @@ msgstr "Sign up"
 msgid "Foydalanuvchi nomi yoki email"
 msgstr "Username or email"
 
+#: templates/registration/login.html templates/registration/register.html
+msgid "Parol"
+msgstr "Password"
+
 #: templates/registration/password_change_form.html
 msgid "Joriy parolni, keyin yangisini ikki marta kiriting."
 msgstr "Enter the current password, then the new one twice."
@@ -12572,6 +14533,10 @@ msgstr "Send the link"
 #: templates/registration/password_reset_form.html
 msgid "Parolni esladingizmi?"
 msgstr "Remembered your password?"
+
+#: templates/registration/password_reset_subject.txt
+msgid "CodeArena — parolni tiklash"
+msgstr "CodeArena — reset your password"
 
 #: templates/registration/register.html
 msgid ""
@@ -12737,6 +14702,15 @@ msgstr "A hidden test: the input isn't shown."
 
 #: templates/submissions/_status.html
 msgid ""
+"Kompilyator izoh bermadi. Ko‘pincha til noto‘g‘ri tanlangan yoki qavs/ikki "
+"nuqta tushib qolgan bo‘ladi: kodni muharrirda ochib, tilni tekshiring."
+msgstr ""
+"The compiler gave no message. Most often the wrong language is selected or a"
+" bracket or colon is missing: open the code in the editor and check the "
+"language."
+
+#: templates/submissions/_status.html
+msgid ""
 "<b class=\"tabular ca7-cnt\" data-to=\"%(s_total)s\">%(s_total)s</b> / "
 "%(s_total)s test o‘tdi"
 msgstr ""
@@ -12812,6 +14786,10 @@ msgstr "Open in the editor"
 #: templates/submissions/detail.html templates/submissions/refused.html
 msgid "Masalaga qaytish"
 msgstr "Back to the problem"
+
+#: templates/submissions/detail.html
+msgid "Shu masaladagi boshqa urinishlar"
+msgstr "Other attempts at this problem"
 
 #: templates/submissions/detail.html
 msgid "Tezlik"

@@ -31,7 +31,7 @@ one problem here, and a row's handle or letter narrows the list to it.{% endcomm
 {# one participant's round problem by problem; a struck problem counts as untried, and only staff see that it was struck #}
 <section class="ca-box mb-4" aria-labelledby="who-title">
   <div class="ca-box-cap">
-    <h2 id="who-title">{% blocktrans with p_user_username=p.user.username %}<span translate="no">{{ p_user_username }}</span> — masalalar bo‘yicha{% endblocktrans %}{% if p.disqualified %} <span class="ca-tag ml-1 !text-bad" title="{{ p.disqualified_reason|default:'Diskvalifikatsiya' }}">{% trans "DQ" %}</span>{% endif %}</h2>
+    <h2 id="who-title">{% blocktrans with p_user_username=p.user.username %}<span translate="no">{{ p_user_username }}</span> — masalalar bo‘yicha{% endblocktrans %}{% if p.disqualified %} <span class="ca-tag ml-1 !text-bad" title="{{ p.disqualified_reason|default:_('Diskvalifikatsiya') }}">{% trans "DQ" %}</span>{% endif %}</h2>
     <a class="ca-box-tools ca-link" href="{% url 'integrity:contest_report' contest.pk %}">{% trans "Nazorat hisoboti »" %}</a>
   </div>
   <div class="ca-box-body">

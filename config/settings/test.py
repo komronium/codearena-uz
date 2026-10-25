@@ -6,7 +6,11 @@ EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
 
 # Most tests post submissions directly; the editor rule has its own tests (override_settings).
 PRACTICE_REQUIRE_EDITOR = False
-# the tests read the old Uzbek spelling of the source strings; one test turns the new one on
+# The site's main language is English, but most tests were written against the Uzbek source strings (and their old
+# spelling), so the suite runs as an Uzbek-first site: the plain path and "nothing chosen" are Uzbek, English is /en/.
+# apps/translations/test_english_main.py turns the production setup (English main, new Uzbek spelling) on.
+LANGUAGE_CODE = "uz"
+LANGUAGES = [("uz", "O‘zbekcha"), ("en", "English")]
 LOCALE_PATHS = [BASE_DIR / "locale"]
 RQ_ASYNC = False  # jobs run inline, so a test sees their result
 GUEST_CACHE_SECONDS = 0

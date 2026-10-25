@@ -35,7 +35,7 @@ own row marked.{% endcomment %}
     </div>
     {% if geo.countries %}<div class="ca7-trow">{% include "accounts/_geo_filters.html" %}{% if geo.active %}<a class="ca-link text-sm" href="{% querystring country=None city=None school=None page=None %}">{% trans "Tozalash" %}</a>{% endif %}</div>{% endif %}
   </div>
-  {% if q or tier_sel or geo.active %}<p class="ca7-found">{% if geo.country %}{% flag geo.country %} <b>{{ geo.country_name }}{% if geo.city %}, {{ geo.city }}{% endif %}{% if geo.school %}, {{ geo.school }}{% endif %}</b>{% endif %}{% if tier_sel %}<b class="ca-tier-ink" style="--tier: {% for t in tiers %}{% if t.name == tier_sel %}{{ t.color }}{% endif %}{% endfor %}">{{ tier_sel }}</b>{% endif %}{% if q %} «{{ q }}»{% endif %}{% blocktrans with users_paginator_count=users.paginator.count %}: {{ users_paginator_count }} ta ·{% endblocktrans %} <a class="ca-link" href="{% url 'rating' %}">{% trans "hammasi" %}</a></p>{% endif %}
+  {% if q or tier_sel or geo.active %}<p class="ca7-found">{% if geo.country %}{% flag geo.country %} <b>{{ geo.country_name }}{% if geo.city %}, {{ geo.city|city_label }}{% endif %}{% if geo.school %}, {{ geo.school|school_label }}{% endif %}</b>{% endif %}{% if tier_sel %}<b class="ca-tier-ink" style="--tier: {% for t in tiers %}{% if t.name == tier_sel %}{{ t.color }}{% endif %}{% endfor %}">{{ tier_sel }}</b>{% endif %}{% if q %} «{{ q }}»{% endif %}{% blocktrans with users_paginator_count=users.paginator.count %}: {{ users_paginator_count }} ta ·{% endblocktrans %} <a class="ca-link" href="{% url 'rating' %}">{% trans "hammasi" %}</a></p>{% endif %}
   {% if users %}
   <div class="overflow-x-auto ca7-board">
   <table class="ca-table ca-table-flat">

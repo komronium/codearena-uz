@@ -24,7 +24,7 @@ def unq(s: str) -> str:
 def template_ids(path: Path, text: str):
     for m in re.finditer(r"\{%\s*(?:trans|translate)\s+(\"((?:[^\"\\]|\\.)*)\"|'((?:[^'\\]|\\.)*)')", text):
         yield unq(m.group(2) if m.group(2) is not None else m.group(3)), "trans"
-    for m in re.finditer(r"[=\s(]_\((\"((?:[^\"\\]|\\.)*)\"|'((?:[^'\\]|\\.)*)')\)", text):
+    for m in re.finditer(r"[=\s(:]_\((\"((?:[^\"\\]|\\.)*)\"|'((?:[^'\\]|\\.)*)')\)", text):
         yield unq(m.group(2) if m.group(2) is not None else m.group(3)), "trans"
     for m in re.finditer(r"\{%\s*jt\s+(\"((?:[^\"\\]|\\.)*)\"|'((?:[^'\\]|\\.)*)')", text):
         yield unq(m.group(2) if m.group(2) is not None else m.group(3)), "plain"
@@ -45,6 +45,13 @@ def python_ids(path: Path, text: str):
             name = f.id if isinstance(f, ast.Name) else f.attr if isinstance(f, ast.Attribute) else ""
             if name in ("_t", "_tl", "gettext", "gettext_lazy"):
                 yield n.args[0].value, "plain"
+    if path.name == "quiz_bank.py":  # the explanations of the duel questions: out(code, answer, options, explain), fill(code, expect, answer, options, explain)
+        for n in ast.walk(tree):
+            if isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id in ("out", "fill"):
+                at = 3 if n.func.id == "out" else 4
+                val = next((k.value for k in n.keywords if k.arg == "explain"), n.args[at] if len(n.args) > at else None)
+                if isinstance(val, ast.Constant) and isinstance(val.value, str) and val.value.strip():
+                    yield val.value, "plain"
 
 
 def extract() -> "OrderedDict[str, list]":
@@ -53,13 +60,13 @@ def extract() -> "OrderedDict[str, list]":
     files = []
     for dirpath, dirnames, filenames in os.walk(ROOT):
         dirnames[:] = [d for d in dirnames if d not in SKIP and d not in (".git", "static", "media", "work", "locale", "__pycache__")]
-        files += [Path(dirpath) / f for f in filenames if f.endswith((".html", ".py"))]
+        files += [Path(dirpath) / f for f in filenames if f.endswith((".html", ".py", ".txt"))]
     for path in sorted(files):
         rel = str(path.relative_to(ROOT))
         if path.name == "tests.py" or "/migrations/" in rel or rel.startswith("tools/"):
             continue
         text = path.read_text(encoding="utf-8")
-        gen = template_ids(path, text) if path.suffix == ".html" else python_ids(path, text)
+        gen = template_ids(path, text) if path.suffix in (".html", ".txt") else python_ids(path, text)
         for msgid, kind in gen:
             if msgid.strip():
                 ids.setdefault(msgid, []).append(rel)
@@ -93,7 +100,7 @@ def build_uzbek(ids):
             forms.append(msgid)
         for mid in dict.fromkeys(forms):
             new = convert(mid)
-            if new != mid and mid not in seen:
+            if mid not in seen:  # every msgid, spelled or not: the fallback of a missing Uzbek entry is the English catalog
                 seen.add(mid)
                 po.append(polib.POEntry(msgid=mid, msgstr=new))
     import django

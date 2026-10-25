@@ -42,7 +42,7 @@
           <span class="text-xs font-semibold {% if r.review.confirmed %}text-bad{% else %}text-ok{% endif %}">{% if r.review.confirmed %}{% trans "Tasdiqlangan · ball yo‘q" %}{% else %}{% trans "Shubha yo‘q" %}{% endif %}</span>
           <button name="decision" value="undo" class="ca-btn ca-btn-ghost !px-2 !py-1 text-xs">{% trans "Bekor qilish" %}</button>
         {% else %}
-          {% if r.review %}<span class="w-full text-right text-xs font-semibold text-warn" title="Belgilar kuchli bo‘lgani uchun tizim ballni siz qaror qilguncha ushlab turibdi">{% trans "Avtomatik: ball ushlab turilibdi" %}</span>{% endif %}
+          {% if r.review %}<span class="w-full text-right text-xs font-semibold text-warn" title="{% trans 'Belgilar kuchli bo‘lgani uchun tizim ballni siz qaror qilguncha ushlab turibdi' %}">{% trans "Avtomatik: ball ushlab turilibdi" %}</span>{% endif %}
           <button name="decision" value="confirm" class="ca-btn ca-btn-ghost !px-2 !py-1 text-xs text-bad" title="{% trans 'Yechim talabaning o‘z ishi emas: amaliyot bali olib tashlanadi' %}">{% trans "Ko‘chirilgan" %}</button>
           <button name="decision" value="clear" class="ca-btn ca-btn-ghost !px-2 !py-1 text-xs" title="{% trans 'Kodni ko‘rdim, muammo yo‘q' %}{% if r.review %} {% trans '— ball qaytariladi' %}{% endif %}">{% trans "Shubha yo‘q" %}</button>
         {% endif %}

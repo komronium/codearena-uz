@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _tl
 
 from apps.accounts.models import User
-from apps.accounts.tiers import RATING_TIERS, TIER_UZ, rating_tier
+from apps.accounts.tiers import RATING_TIERS, rating_tier, tier_label
 from apps.classroom.models import Duel
 from apps.accounts.charts import rating_histogram
 from apps.contests import rating as rating_system
@@ -38,7 +38,7 @@ def _buckets(values: list[int], size: int = 100) -> list[dict]:
 def _tiers(ratings: list[int]) -> list[dict]:
     counts = Counter(rating_tier(r) for r in ratings)
     total = max(1, len(ratings))
-    return [{"name": name, "uz": TIER_UZ[name], "color": color, "n": counts.get(name, 0),
+    return [{"name": name, "uz": tier_label(name), "color": color, "n": counts.get(name, 0),
              "pct": round(100 * counts.get(name, 0) / total), "floor": floor, "ceiling": ceiling}
             for floor, ceiling, name, color in RATING_TIERS]
 
@@ -101,9 +101,9 @@ def contest_rating() -> dict:
         for floor, ceiling, name, _c in RATING_TIERS:
             if ceiling is not None and (floor is None or u["rating"] >= floor) and u["rating"] < ceiling:
                 if ceiling - u["rating"] <= NEAR_UP:
-                    near_up.append({**u, "need": ceiling - u["rating"], "to": TIER_UZ[RATING_TIERS[[t[2] for t in RATING_TIERS].index(name) + 1][2]]})
+                    near_up.append({**u, "need": ceiling - u["rating"], "to": tier_label(RATING_TIERS[[t[2] for t in RATING_TIERS].index(name) + 1][2])})
                 if floor is not None and u["rating"] - floor <= NEAR_DOWN:
-                    near_down.append({**u, "room": u["rating"] - floor, "tier": TIER_UZ[name]})
+                    near_down.append({**u, "room": u["rating"] - floor, "tier": tier_label(name)})
         days = (now - last_end[u["pk"]]).days if u["pk"] in last_end else None
         if days is not None and days >= FADING_FROM:
             fading.append({**u, "days": days, "left": rating_system.INACTIVE_DAYS - days})

@@ -2,6 +2,8 @@
 the progress to the next tier, and the daily-streak badges. Views, template tags and context
 processors all import from here."""
 
+from django.utils.translation import get_language, gettext_lazy as _tl
+
 # (floor, ceiling, name, color) — floor None = -inf, ceiling None = +inf. The freshman scale
 # (shown ratings start at 0, see apps.contests.rating) with Codeforces' tier names and colours.
 # Users.seen_tier stores these names: renaming one needs a data migration (accounts 0012).
@@ -16,8 +18,14 @@ RATING_TIERS = [
     (1900, None, "Legendary Grandmaster", "#FF0000"),
 ]
 # Uzbek gloss for the Codeforces names (the names themselves stay: users.seen_tier stores them).
-TIER_UZ = {"Newbie": "Yangi", "Pupil": "Shogird", "Specialist": "Mutaxassis", "Expert": "Bilimdon",
-           "Candidate Master": "Master nomzodi", "Master": "Master", "Grandmaster": "Grossmeyster", "Legendary Grandmaster": "Afsonaviy"}
+TIER_UZ = {"Newbie": _tl("Yangi"), "Pupil": _tl("Shogird"), "Specialist": _tl("Mutaxassis"), "Expert": _tl("Bilimdon"),
+           "Candidate Master": _tl("Master nomzodi"), "Master": _tl("Master"), "Grandmaster": _tl("Grossmeyster"),
+           "Legendary Grandmaster": _tl("Afsonaviy")}
+
+
+def tier_label(name: str) -> str:
+    """A tier as the page shows it: the Codeforces name, glossed in Uzbek on the Uzbek pages."""
+    return str(TIER_UZ.get(name, name)) if get_language() == "uz" else name
 TIER_ORDER = {name: i for i, (_floor, _ceiling, name, _color) in enumerate(RATING_TIERS)}
 # Legendary names are written like Codeforces' LGM: the first letter in ink (black on light), the rest red.
 LEGENDARY = RATING_TIERS[-1][0]
@@ -25,10 +33,10 @@ LEGENDARY = RATING_TIERS[-1][0]
 # Profile banner per tier: (CSS modifier, the insignia's name; one more mark each step up). Styles live in app.css
 # (.ca-banner-<slug> for the banner, .ca-art-<slug> for letter avatars).
 TIER_BANNERS = {
-    "Newbie": ("boshlovchi", "Chiziq"), "Pupil": ("shogird", "Bir chevron"),
-    "Specialist": ("mutaxassis", "Ikki chevron"), "Expert": ("bilimdon", "Uch chevron"),
-    "Candidate Master": ("master", "Yulduzli chevron"), "Master": ("ustoz", "Yulduzli planka"),
-    "Grandmaster": ("grandmaster", "Dafna"), "Legendary Grandmaster": ("afsonaviy", "Toj"),
+    "Newbie": ("boshlovchi", _tl("Chiziq")), "Pupil": ("shogird", _tl("Bir chevron")),
+    "Specialist": ("mutaxassis", _tl("Ikki chevron")), "Expert": ("bilimdon", _tl("Uch chevron")),
+    "Candidate Master": ("master", _tl("Yulduzli chevron")), "Master": ("ustoz", _tl("Yulduzli planka")),
+    "Grandmaster": ("grandmaster", _tl("Dafna")), "Legendary Grandmaster": ("afsonaviy", _tl("Toj")),
 }
 
 def _band(rating: int) -> tuple:

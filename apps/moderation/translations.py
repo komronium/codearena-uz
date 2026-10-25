@@ -13,9 +13,9 @@ from django.views.decorators.http import require_POST
 from apps.accounts.decorators import staff_required
 from apps.translations import jobs, service
 from apps.translations.models import LANGS
-from django.utils.translation import gettext as _t
+from django.utils.translation import gettext_lazy as _tl
 
-KIND_LABELS = {"problems": "Masalalar", "courses": "Kurslar", "contests": "Musobaqalar"}
+KIND_LABELS = {"problems": _tl("Masalalar"), "courses": _tl("Kurslar"), "contests": _tl("Musobaqalar")}
 
 
 def _kind(kind: str) -> str:

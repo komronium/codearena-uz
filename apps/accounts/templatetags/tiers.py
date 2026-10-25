@@ -1,6 +1,6 @@
 from django import template
 
-from apps.accounts.tiers import TIER_UZ, is_legendary, rating_tier, tier_banner, tier_color as _tier_color
+from apps.accounts.tiers import is_legendary, rating_tier, tier_banner, tier_color as _tier_color, tier_label
 
 register = template.Library()
 
@@ -29,5 +29,5 @@ def lg(rating: int) -> str:
 
 @register.filter
 def tier_uz(name: str) -> str:
-    """The Uzbek gloss of a tier name ("Candidate Master" -> "Master nomzodi")."""
-    return TIER_UZ.get(name, name)
+    """The tier name as the page shows it: "Candidate Master" stays so in English, is "Master nomzodi" in Uzbek."""
+    return tier_label(name)

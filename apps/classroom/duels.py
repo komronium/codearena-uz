@@ -42,8 +42,8 @@ WAIT_FOR = timedelta(days=3)  # for someone to join an open duel, or for a frien
 START_RATING = 1200
 OPEN = (Duel.Status.PENDING, Duel.Status.ACTIVE)
 LANGUAGES = DuelQuestion.Lang.choices
-BUSY = "Avval boshlagan duelingizni tugating."
-NO_ADMIN = "Admin akkaunti duelda qatnasha olmaydi."
+BUSY = _tl("Avval boshlagan duelingizni tugating.")
+NO_ADMIN = _tl("Admin akkaunti duelda qatnasha olmaydi.")
 
 
 def can_duel(user) -> bool:
@@ -266,7 +266,10 @@ def _winner(duel, now) -> int | None:
 def is_right(question, given: str) -> bool:
     if question.options:
         return given == question.answer
-    return norm(given) != "" and norm(given) in {norm(question.answer), *map(norm, question.accept)}
+    right = {norm(question.answer), *map(norm, question.accept)}
+    if question.answer == "Xato":  # the error answer is "Error" on the English pages
+        right.update(("Error", "error"))
+    return norm(given) != "" and norm(given) in right
 
 
 def current(duel, user, now=None):
@@ -461,7 +464,7 @@ def accept(duel, user) -> str:
         _lock(user)
         duel = Duel.objects.select_for_update().get(pk=duel.pk)
         if duel.opponent_id != user.pk or duel.status != Duel.Status.PENDING:
-            return "Bu chaqiriq endi ochiq emas."
+            return _t("Bu chaqiriq endi ochiq emas.")
         if timezone.now() - duel.created > WAIT_FOR:
             duel.status = Duel.Status.EXPIRED
             duel.save(update_fields=["status"])

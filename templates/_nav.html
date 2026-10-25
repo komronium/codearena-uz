@@ -40,7 +40,7 @@ grouped by what the student is doing. Profile, settings and sign-out live in the
 </a>
 <a href="{% url 'moderation:queue' %}" class="ca-sidebar-link {% if ns == 'moderation' and un == 'queue' %}is-active{% endif %}"{% if ns == 'moderation' and un == 'queue' %} aria-current="page"{% endif %}>
   <i data-lucide="inbox" class="lu" aria-hidden="true"></i>{% trans "Navbat" %}
-  {% if nav.staff.queue %}<span class="ca-chip ca-chip-score ml-auto tabular" title="Ko‘rib chiqishni kutmoqda">{{ nav.staff.queue }}</span>{% endif %}
+  {% if nav.staff.queue %}<span class="ca-chip ca-chip-score ml-auto tabular" title="{% trans 'Ko‘rib chiqishni kutmoqda' %}">{{ nav.staff.queue }}</span>{% endif %}
 </a>
 <a href="{% url 'moderation:daily_problem' %}" class="ca-sidebar-link {% if ns == 'moderation' and un in 'daily_problem,daily_problem_choose' %}is-active{% endif %}"{% if ns == 'moderation' and un in 'daily_problem,daily_problem_choose' %} aria-current="page"{% endif %}>
   <i data-lucide="calendar-check" class="lu" aria-hidden="true"></i>{% trans "Kun masalasi" %}

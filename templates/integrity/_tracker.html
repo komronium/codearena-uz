@@ -36,7 +36,7 @@ for staff replay.
         body: `contest_id=${contestId}${problemId ? `&problem_id=${problemId}` : ""}&kind=${kind}${extra}`,
       });
     }
-    const fmt = (ms) => { const s = Math.round(ms / 1000); return s < 60 ? `${s} soniya` : `${Math.floor(s / 60)} daq ${s % 60} s`; };
+    const fmt = (ms) => { const s = Math.round(ms / 1000); return s < 60 ? `${s} {% jt "soniya" %}` : `${Math.floor(s / 60)} {% jt "daq" %} ${s % 60} {% jt "s" %}`; };
     function showCounter(n) { document.querySelectorAll("[data-leaves]").forEach((el) => { el.textContent = n; el.closest("[data-leaves-wrap]")?.classList.toggle("!hidden", !n); }); }
 
     let away = false;

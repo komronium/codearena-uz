@@ -12,7 +12,7 @@ from django.utils.safestring import mark_safe
 from django.utils.text import Truncator
 from django.utils.translation import get_language, gettext, gettext_lazy as _tl
 
-from apps.accounts.language import PATH_CODES, localize, split_path
+from apps.accounts.language import localize, path_codes, split_path
 
 register = template.Library()
 
@@ -59,10 +59,8 @@ def page_suffix(context) -> str:
 
 
 def _untranslated(context) -> bool:
-    """An English page whose problem or course has no confirmed English text: the author's Uzbek under an English
-    address, which would only duplicate the Uzbek page in the index."""
-    if not getattr(context.get("request"), "path_language", ""):
-        return False
+    """A page whose problem or course has no confirmed text in the page's language: the author's other language under
+    this address, which would only duplicate the page that has it in the index."""
     return any(obj.pending() for obj in (context.get(name) for name in ("problem", "plan")) if hasattr(obj, "pending"))
 
 
@@ -79,13 +77,13 @@ def robots_meta(context) -> str:
 @register.simple_tag(takes_context=True)
 def language_links(context, robots="") -> str:
     """The page's address in every language, for the head: hreflang links (Google lists the right language to
-    each searcher; the Uzbek address is the x-default). Left out where the page itself stays out of the index."""
+    each searcher; the main language's address is the x-default). Left out where the page itself stays out of the index."""
     request = context["request"]
     if "noindex" in str(robots):
         return ""
     tail = f"?page={_plain_page(request)}" if _plain_page(request) else ""
     bare = split_path(request.path)[1]
-    links = [(lang, request.build_absolute_uri(localize(bare, lang)) + tail) for lang in [settings.LANGUAGE_CODE, *PATH_CODES]]
+    links = [(lang, request.build_absolute_uri(localize(bare, lang)) + tail) for lang in [settings.LANGUAGE_CODE, *path_codes()]]
     links.append(("x-default", links[0][1]))
     return format_html_join("\n  ", '<link rel="alternate" hreflang="{}" href="{}">', links)
 
@@ -145,7 +143,7 @@ def site_jsonld(context) -> str:
     request = context["request"]
     home = request.build_absolute_uri(reverse("home"))
     site = {"@context": "https://schema.org", "@type": "WebSite", "name": SITE_NAME,
-            "alternateName": ALTERNATE_NAMES, "url": home, "inLanguage": get_language() or "uz",
+            "alternateName": ALTERNATE_NAMES, "url": home, "inLanguage": get_language() or settings.LANGUAGE_CODE,
             "description": SITE_DESCRIPTION}
     org = {"@context": "https://schema.org", "@type": "Organization", "name": SITE_NAME, "url": home,
            "logo": request.build_absolute_uri(static("img/icon-512.png")), "description": SITE_DESCRIPTION}

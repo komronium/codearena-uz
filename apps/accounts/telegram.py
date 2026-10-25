@@ -262,7 +262,7 @@ def notify_duel_challenge(duel_id: int):
         duel = Duel.objects.select_related("challenger", "opponent").filter(pk=duel_id).first()
         if duel is None or duel.opponent_id is None:
             return
-        with translation.override(duel.opponent.language or "uz"):  # the message speaks the recipient's language
+        with translation.override(duel.opponent.language or settings.LANGUAGE_CODE):  # the message speaks the recipient's language
             text = ("<b>" + _t("⚔️ Sizni duelga chaqirishdi") + "</b>\n\n"
                     + _t("<b>{username}</b> — {language}: {n} ta savol, har biriga 20 soniya.").format(
                         username=html.escape(duel.challenger.username), language=duel.get_language_display(), n=len(duel.questions))
@@ -288,7 +288,7 @@ def notify_duel_result(duel_id: int):
             right[player.pk] = r.points if r else 0
         for me, them, delta in ((duel.challenger, duel.opponent, duel.challenger_delta),
                                 (duel.opponent, duel.challenger, duel.opponent_delta)):
-            with translation.override(me.language or "uz"):
+            with translation.override(me.language or settings.LANGUAGE_CODE):
                 head = (_t("🏆 G‘alaba!") if duel.winner_id == me.pk else _t("Durang") if duel.winner_id is None else _t("Mag‘lubiyat"))
                 text = (f"<b>{head}</b>\n\n"
                         + _t("{username} bilan duel: <b>{mine} : {theirs}</b>").format(
@@ -312,7 +312,7 @@ def notify_badges(user_id: int, levels: list[tuple[str, int]]):
         if not best:
             return
         from django.contrib.auth import get_user_model
-        lang = get_user_model().objects.filter(pk=user_id).values_list("language", flat=True).first() or "uz"
+        lang = get_user_model().objects.filter(pk=user_id).values_list("language", flat=True).first() or settings.LANGUAGE_CODE
         with translation.override(lang):
             lines = "\n".join(f"• <b>{titled(BY_KEY[f].name, t)}</b> — {str(BY_KEY[f].unit).format(n=BY_KEY[f].levels[t - 1])}"
                               for f, t in sorted(best.items(), key=lambda x: -x[1]))

@@ -8,6 +8,8 @@
   if (!root || !dataEl) return;
   const data = JSON.parse(dataEl.textContent);
   const OTHER = data.other;
+  const labels = data.labels || {};  // an English page shows the English spelling; the value stays the stored one
+  const label = (name) => labels[name] || name;
   const $ = (id) => document.getElementById(id);
   const country = $("id_country");
   const city = { select: $("id_location"), other: $("id_location_other") };
@@ -41,10 +43,10 @@
       let parent = box.select;
       if (heading) {
         parent = document.createElement("optgroup");
-        parent.label = heading;
+        parent.label = label(heading);
         box.select.append(parent);
       }
-      for (const name of list) parent.append(option(name, name));
+      for (const name of list) parent.append(option(name, label(name)));
     }
     box.select.append(option(OTHER, otherLabel));
     const other = value === OTHER || (!!value && !names.includes(value));

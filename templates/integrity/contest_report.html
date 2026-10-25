@@ -182,7 +182,7 @@ participants by risk, the similar code pairs, the fast solves and the journal.{%
           <p class="truncate font-semibold">{% if f.label %}<span class="text-accent">{{ f.label }}.</span> {% endif %}{{ f.problem.title }}</p>
           <p class="text-xs text-mute">{% blocktrans with f_sides_0_sub_language_name=f.sides.0.sub.language.name f_sides_0_n_hit=f.sides.0.n_hit f_sides_0_n_code=f.sides.0.n_code %}{{ f_sides_0_sub_language_name }} · {{ f_sides_0_n_hit }} / {{ f_sides_0_n_code }} qator mos ·{% endblocktrans %} {% if f.prior %}{% trans "musobaqadan oldingi yechim bilan" %}{% else %}{% trans "ikkinchi kod" %} {% if f.gap_min %}{% blocktrans with f_gap_min=f.gap_min %}{{ f_gap_min }} daqiqa{% endblocktrans %}{% else %}{% trans "1 daqiqadan kam" %}{% endif %} {% trans "keyin yuborilgan" %}{% endif %}</p>
         </div>
-        {% if f.deep %}<span class="ca-chip" title="Bitta ishtirokchining barcha urinishlari solishtirilganda topilgan">{% trans "Chuqur tekshiruv" %}</span>{% endif %}
+        {% if f.deep %}<span class="ca-chip" title="{% trans 'Bitta ishtirokchining barcha urinishlari solishtirilganda topilgan' %}">{% trans "Chuqur tekshiruv" %}</span>{% endif %}
         {% if f.reviewed %}<span class="ca-chip ca-chip-rated"><i data-lucide="check" class="lu mr-1" aria-hidden="true"></i>{% trans "Ko‘rildi" %}</span>{% else %}<span class="ca-chip ca-chip-score">{% trans "Ko‘rilmagan" %}</span>{% endif %}
       </header>
       <details class="ca-cmp border-t border-line"{% if not f.reviewed and forloop.counter <= 3 %} open{% endif %}>
@@ -193,13 +193,13 @@ participants by risk, the similar code pairs, the fast solves and the journal.{%
             <div class="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5">
               <div class="flex min-w-0 items-center gap-2">
                 {% include "accounts/_user.html" with u=side.user tier=False %}
-                {% if side.prior %}<span class="ca-chip ca-chip-score" title="Musobaqa boshlanishidan oldin yuborilgan (amaliyot, oldingi musobaqa yoki muallif)">{% trans "Musobaqadan oldingi yechim" %}</span>{% elif forloop.first %}<span class="ca-chip" title="Bu kod oldinroq yuborilgan — manba bo‘lishi mumkin">{% trans "birinchi" %}</span>{% endif %}
+                {% if side.prior %}<span class="ca-chip ca-chip-score" title="{% trans 'Musobaqa boshlanishidan oldin yuborilgan (amaliyot, oldingi musobaqa yoki muallif)' %}">{% trans "Musobaqadan oldingi yechim" %}</span>{% elif forloop.first %}<span class="ca-chip" title="{% trans 'Bu kod oldinroq yuborilgan — manba bo‘lishi mumkin' %}">{% trans "birinchi" %}</span>{% endif %}
               </div>
               <div class="flex items-center gap-3 text-xs text-mute">
                 <a class="ca-link tabular" href="{% url 'submissions:detail' side.sub.pk %}">#{{ side.sub.pk|stringformat:"06d" }}</a>
                 {% if not side.prior %}<a class="ca-link" href="{% url 'integrity:replay' contest.pk side.user.pk f.problem.pk %}"><i data-lucide="history" class="lu mr-0.5" aria-hidden="true"></i>{% trans "yozilishi" %}</a>{% endif %}
                 <span class="tabular">{% if side.prior %}{{ side.sub.created|date:"d.m.Y H:i" }}{% else %}{{ side.sub.created|date:"H:i:s" }}{% endif %}</span>
-                {% if side.paste %}<span class="font-semibold text-bad" title="Muharrirga qo‘yish urinishlari">{% blocktrans with side_paste=side.paste %}paste {{ side_paste }}{% endblocktrans %}</span>{% endif %}
+                {% if side.paste %}<span class="font-semibold text-bad" title="{% trans 'Muharrirga qo‘yish urinishlari' %}">{% blocktrans with side_paste=side.paste %}paste {{ side_paste }}{% endblocktrans %}</span>{% endif %}
                 {% if side.blur %}<span class="{% if side.blur > 5 %}font-semibold text-warn{% endif %}" title="{% trans 'Boshqa oynaga o‘tishlar' %}">{% blocktrans with side_blur=side.blur %}chiqish {{ side_blur }}{% endblocktrans %}</span>{% endif %}
               </div>
             </div>

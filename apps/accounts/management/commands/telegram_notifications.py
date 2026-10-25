@@ -34,7 +34,7 @@ def push(user_ids, preference: str, key: str, build) -> None:
 
     by_lang: dict = {}
     for uid, lang in User.objects.filter(pk__in=list(user_ids)).values_list("pk", "language"):
-        by_lang.setdefault(lang or "uz", []).append(uid)
+        by_lang.setdefault(lang or settings.LANGUAGE_CODE, []).append(uid)
     for lang, ids in by_lang.items():
         with translation.override(lang):
             text = build()

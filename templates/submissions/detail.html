@@ -33,7 +33,7 @@ is among the accepted ones and the next step.{% endcomment %}
   <section class="mt-9" aria-labelledby="code-title">
     <div class="ca7-sec-h"><h2 id="code-title">{% trans "Kod" %}</h2>
       <span class="ca7-r flex items-center gap-3 text-sm text-mute">
-        {% if prev_sub or next_sub %}<span class="ca7-hop" aria-label="Shu masaladagi boshqa urinishlar">
+        {% if prev_sub or next_sub %}<span class="ca7-hop" aria-label="{% trans 'Shu masaladagi boshqa urinishlar' %}">
           {% if prev_sub %}<a href="{% url 'submissions:detail' prev_sub.pk %}" title="{% blocktrans with prev_sub_pk=prev_sub.pk|stringformat:'06d' %}Oldingi urinish #{{ prev_sub_pk }}{% endblocktrans %}"><i data-lucide="chevron-left" class="lu" aria-hidden="true"></i>{% trans "Oldingi" %}</a>{% endif %}
           {% if next_sub %}<a href="{% url 'submissions:detail' next_sub.pk %}" title="{% blocktrans with next_sub_pk=next_sub.pk|stringformat:'06d' %}Keyingi urinish #{{ next_sub_pk }}{% endblocktrans %}">{% trans "Keyingi" %}<i data-lucide="chevron-right" class="lu" aria-hidden="true"></i></a>{% endif %}
         </span>{% endif %}

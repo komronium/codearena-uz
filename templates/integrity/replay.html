@@ -65,7 +65,7 @@
     const playBtn = document.getElementById("rp-play");
     const t0 = new Date(frames[0].t);
     const esc = (t) => t.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
-    const clock = (d) => d.toLocaleTimeString("uz", { hour12: false });
+    const clock = (d) => d.toLocaleTimeString(document.documentElement.lang || undefined, { hour12: false });
     function show(i) {
       range.value = i;
       const f = frames[i], before = new Set(i ? frames[i - 1].src.split("\n") : []);
