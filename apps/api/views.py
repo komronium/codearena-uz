@@ -14,13 +14,11 @@ from apps.contests.models import Contest, DivisionRange, Participation, division
 from apps.contests.rating import INACTIVE_DAYS
 from apps.contests.views import _standings
 from apps.problems.models import Problem
-from apps.translations.mixin import confirmed_text
 
 from . import serializers as s
 from .http import api, page_of, respond
 
 VERSION = "1"
-LANGS = ("uz", "en")
 
 
 def _contests():
@@ -31,11 +29,6 @@ def _contests():
 
 def _contest_or_404(pk):
     return get_object_or_404(_contests(), pk=pk)
-
-
-def _lang(request):
-    lang = request.GET.get("lang", "")
-    return lang if lang in LANGS else None
 
 
 @api
@@ -109,9 +102,7 @@ def _moment(text):
 @api
 def contest_detail(request, pk):
     contest = _contest_or_404(pk)
-    lang = _lang(request)
-    description = (confirmed_text(contest, "description_md", lang) if lang else None) or contest.description_md
-    return respond({"status": "ok", "contest": s.contest_detail(request, contest, description)})
+    return respond({"status": "ok", "contest": s.contest_detail(request, contest)})
 
 
 def _standings_view(contest):
@@ -199,14 +190,13 @@ def problem_list(request):
         qs = qs.filter(tags__name=tag)
     if q := request.GET.get("q", "").strip()[:100]:
         qs = qs.filter(title__icontains=q)
-    lang = _lang(request)
-    return respond(page_of(request, qs.order_by("id"), lambda p: s.problem_item(request, p, lang)))
+    return respond(page_of(request, qs.order_by("id"), lambda p: s.problem_item(request, p)))
 
 
 @api
 def problem_detail(request, slug):
     problem = get_object_or_404(_public_problems(), slug=slug)
-    return respond({"status": "ok", "problem": s.problem_detail(request, problem, _lang(request))})
+    return respond({"status": "ok", "problem": s.problem_detail(request, problem)})
 
 
 # ---- users ----------------------------------------------------------------------------------------------------

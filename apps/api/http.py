@@ -3,6 +3,7 @@ limit per address (the API is public and its standings are the costly part)."""
 import functools
 
 from django.http import Http404, JsonResponse
+from django.utils import translation
 from django.views.decorators.http import require_safe
 
 from apps.accounts import throttle
@@ -23,6 +24,11 @@ def error(status, message):
     return respond({"status": "error", "error": message}, status=status, cache_seconds=0)
 
 
+def language(request) -> str:
+    """Text comes back in English unless ?lang=uz asks for the Uzbek the site was written in."""
+    return "uz" if request.GET.get("lang") == "uz" else "en"
+
+
 def api(view):
     """A read-only (GET and HEAD), rate-limited JSON endpoint."""
     @require_safe
@@ -33,7 +39,8 @@ def api(view):
             response["Retry-After"] = str(RATE_WINDOW)
             return response
         try:
-            return view(request, *args, **kwargs)
+            with translation.override(language(request)):
+                return view(request, *args, **kwargs)
         except Http404:
             return error(404, "not found")
     return wrapped

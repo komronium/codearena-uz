@@ -4,9 +4,29 @@ import datetime as dt
 
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import get_language
 
 from apps.accounts.countries import COUNTRIES
 from apps.accounts.tiers import rating_tier, tier_color
+from apps.translations.mixin import confirmed_text
+
+from . import english
+
+
+def text(obj, name: str) -> str:
+    """A translatable field in the API's language: the confirmed translation, else the author's own text (which
+    translated() reports). The Translatable mixin only translates inside a template render, so a view asks here."""
+    value = getattr(obj, name)
+    lang = get_language()
+    if value and lang != obj.source_lang:
+        return confirmed_text(obj, name, lang) or value
+    return value
+
+
+def translated(obj, name: str) -> bool:
+    """Whether text(obj, name) is in the API's language (false: the author's text stands in for a missing translation)."""
+    return (not getattr(obj, name) or get_language() == obj.source_lang
+            or bool(confirmed_text(obj, name, get_language())))
 
 
 def iso(moment):
@@ -61,7 +81,7 @@ def contest_item(request, contest, n_participants=None) -> dict:
 def contest_problem_item(request, cp) -> dict:
     return {
         "label": cp.label,
-        "title": cp.problem.title,
+        "title": text(cp.problem, "title"),
         "slug": cp.problem.slug,
         "url": absolute(request, "problems:detail", cp.problem.slug),
         "points": cp.points,
@@ -70,16 +90,16 @@ def contest_problem_item(request, cp) -> dict:
     }
 
 
-def contest_detail(request, contest, description) -> dict:
+def contest_detail(request, contest) -> dict:
     data = contest_item(request, contest)
     problems = (list(contest.contest_problems.select_related("problem").order_by("order", "pk"))
                 if contest_problems_shown(contest) else [])
     data |= {
-        "description_md": description,
-        "language": contest.source_lang,
+        "description_md": text(contest, "description_md"),
+        "language": get_language() if translated(contest, "description_md") else contest.source_lang,
         "problems_hidden": not contest_problems_shown(contest),
         "problems": [contest_problem_item(request, cp) for cp in problems],
-        "badge": contest.badge or None,
+        "badge": text(contest, "badge") or None,
         "published": contest.published_at is not None,
         "calendar_url": absolute(request, "contests:calendar", contest.pk),
     }
@@ -121,6 +141,7 @@ def _cell(c) -> dict | None:
 
 
 def user_item(request, user, rank=None) -> dict:
+    lang = get_language()
     return {
         "username": user.username,
         "name": user.get_full_name() or None,
@@ -131,8 +152,8 @@ def user_item(request, user, rank=None) -> dict:
         "rank": rank,
         "country": user.country or None,
         "country_name": str(COUNTRIES.get(user.country, "")) or None,
-        "city": user.location or None,
-        "school": user.school or None,
+        "city": english.city(user.location, lang),
+        "school": english.school(user.school, lang),
         "club": user.club.name if user.club_id else None,
         "practice_points": user.practice_points,
         "duel_rating": user.duel_rating,
@@ -153,15 +174,10 @@ def rating_change_item(request, p) -> dict:
     }
 
 
-def problem_item(request, problem, lang=None) -> dict:
-    from apps.translations.mixin import confirmed_text
-
-    def text(name):
-        return (confirmed_text(problem, name, lang) if lang else None) or getattr(problem, name)
-
+def problem_item(request, problem) -> dict:
     return {
         "slug": problem.slug,
-        "title": text("title"),
+        "title": text(problem, "title"),
         "url": absolute(request, "problems:detail", problem.slug),
         "difficulty": problem.difficulty,
         "rating": problem.rating or None,
@@ -170,21 +186,16 @@ def problem_item(request, problem, lang=None) -> dict:
         "time_limit_ms": problem.tl_ms,
         "memory_limit_mb": problem.ml_mb,
         "tags": [t.name for t in problem.tags.all()],
-        "language": problem.source_lang,
+        "language": get_language() if translated(problem, "title") else problem.source_lang,
         "created": iso(problem.created),
         "updated": iso(problem.updated),
     }
 
 
-def problem_detail(request, problem, lang=None) -> dict:
-    from apps.translations.mixin import confirmed_text
-
-    def text(name):
-        return (confirmed_text(problem, name, lang) if lang else None) or getattr(problem, name)
-
-    return problem_item(request, problem, lang) | {
-        "statement_md": text("statement_md"),
-        "input_md": text("input_md"),
-        "output_md": text("output_md"),
+def problem_detail(request, problem) -> dict:
+    return problem_item(request, problem) | {
+        "statement_md": text(problem, "statement_md"),
+        "input_md": text(problem, "input_md"),
+        "output_md": text(problem, "output_md"),
         "samples": [{"input": t.input, "output": t.expected} for t in problem.samples],
     }

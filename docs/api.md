@@ -7,6 +7,10 @@ begun, and a marathon's (personal-clock round's) problems and board stay shut un
 - **Times** are ISO 8601 in UTC (`2026-10-22T07:53:24Z`). `duration_minutes` is whole minutes.
 - **Limits:** 120 requests a minute per address (`429` with `Retry-After`). Responses are cacheable for 30 s and
   open to any origin (CORS `*`).
+- **Language:** all text is English. Problem titles and statements, contest descriptions and badges, country names,
+  division labels and the usual cities and schools come back in English; `?lang=uz` asks for the Uzbek the site was
+  written in. `language` on a problem or contest says which language its text is actually in (`uz` only while a
+  translation is not confirmed yet). Names people typed themselves (usernames, full names) are returned as typed.
 - **Lists** page like samcoding.uz: `{"status":"ok","page":1,"pagesCount":3,"pageSize":50,"count":123,"data":[…]}`.
   `?page=` and `?page_size=` (max 200). A page past the last has empty `data`.
 - **Errors:** `{"status":"error","error":"not found"}` with the HTTP status.

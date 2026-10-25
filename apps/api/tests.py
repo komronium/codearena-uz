@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 import pytest
+from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
 from django.utils import timezone
 
@@ -184,3 +185,38 @@ def test_the_api_is_rate_limited_per_address(client, db):
 def test_meta_lists_tiers_and_divisions(client, db):
     body = client.get("/api/v1/meta/").json()
     assert body["tiers"][0]["name"] == "Newbie" and body["divisions"][0]["number"] == 1
+
+
+def _english(obj, **fields):
+    from apps.translations.models import ContentTranslation
+    for field, text in fields.items():
+        ContentTranslation.objects.create(content_type=ContentType.objects.get_for_model(obj), object_id=obj.pk, lang="en",
+                                          field=field, text=text, confirmed=True)
+
+
+def test_text_is_english_by_default_and_uzbek_on_request(client, teacher, problems):
+    open_one = Problem.objects.create(slug="open", title="Salom", statement_md="Matn", author=teacher, is_public=True)
+    _english(open_one, title="Hello", statement_md="Text")
+    shown = client.get("/api/v1/problems/open/").json()["problem"]
+    assert (shown["title"], shown["statement_md"], shown["language"]) == ("Hello", "Text", "en")
+    uz = client.get("/api/v1/problems/open/?lang=uz").json()["problem"]
+    assert (uz["title"], uz["statement_md"], uz["language"]) == ("Salom", "Matn", "uz")
+
+
+def test_a_problem_without_a_confirmed_translation_says_which_language_it_is_in(client, teacher):
+    Problem.objects.create(slug="open", title="Salom", statement_md="Matn", author=teacher, is_public=True)
+    shown = client.get("/api/v1/problems/open/").json()["problem"]
+    assert (shown["title"], shown["language"]) == ("Salom", "uz")
+
+
+def test_round_problem_names_are_english_in_the_contest_and_clist_boards(client, past, problems):
+    _english(problems[0], title="First")
+    assert client.get(f"/api/v1/contests/{past.pk}/").json()["contest"]["problems"][0]["title"] == "First"
+    assert client.get(f"/api/v1/contests/{past.pk}/clist-standings/").json()["problems"][0]["name"] == "First"
+
+
+def test_places_are_english(client, past):
+    User.objects.filter(username="ali").update(location="Toshkent", school="Osiyo xalqaro universiteti")
+    user = client.get("/api/v1/users/ali/").json()["user"]
+    assert (user["city"], user["school"], user["country_name"]) == ("Tashkent", "Asia International University", "Uzbekistan")
+    assert client.get("/api/v1/users/ali/?lang=uz").json()["user"]["city"] == "Toshkent"
