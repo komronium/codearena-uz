@@ -17,3 +17,6 @@ GUEST_CACHE_SECONDS = 0
 
 # The account gate has its own tests (override_settings); everyone else's test users go straight in.
 ACCOUNT_GATE = False
+
+# Hundreds of tests create users with a password; the site's 300k-round hasher costs about a tenth of a second each time.
+PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]

@@ -5,6 +5,7 @@ django-rq>=3.0
 mistune>=3
 pytest>=8
 pytest-django>=4.9
+pytest-xdist>=3.6  # python -m pytest -n 4 apps: each worker gets its own test database
 Pillow>=10
 bleach>=6
 gunicorn>=23
