@@ -58,7 +58,8 @@ def test_every_response_is_json_open_to_any_origin_and_cacheable(client, past):
     assert r["Content-Type"].startswith("application/json") and "max-age" in r["Cache-Control"]
 
 
-def test_only_get_is_allowed(client, past):
+def test_only_reads_are_allowed(client, past):
+    assert client.head("/api/v1/contests/").status_code == 200
     assert client.post("/api/v1/contests/").status_code == 405
 
 

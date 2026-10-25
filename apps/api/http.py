@@ -3,7 +3,7 @@ limit per address (the API is public and its standings are the costly part)."""
 import functools
 
 from django.http import Http404, JsonResponse
-from django.views.decorators.http import require_GET
+from django.views.decorators.http import require_safe
 
 from apps.accounts import throttle
 
@@ -24,8 +24,8 @@ def error(status, message):
 
 
 def api(view):
-    """A GET-only, rate-limited JSON endpoint."""
-    @require_GET
+    """A read-only (GET and HEAD), rate-limited JSON endpoint."""
+    @require_safe
     @functools.wraps(view)
     def wrapped(request, *args, **kwargs):
         if throttle.ip_blocked(request, "api", RATE_MAX, RATE_WINDOW):
