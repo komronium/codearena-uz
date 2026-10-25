@@ -103,6 +103,25 @@ the right.{% endcomment %}
       <li>{% trans "<b>O‘tib ketganini</b> virtual ishlab ko‘ring: musobaqa sahifasida." %}</li>
     </ol>
   </section>
+  {% if divisions %}
+  <section class="ca-box" aria-labelledby="div-title">
+    <div class="ca-box-cap ca-hd"><h2 id="div-title">{% trans "Divizionlar" %}</h2></div>
+    <div class="ca-box-body space-y-3 text-sm">
+      <p>{% trans "Har bir raund bitta divizion uchun o‘tadi, masalan «Div. 3». Divizion qaysi reytingdagilar reytingli qatnashishini belgilaydi." %}</p>
+      <table class="ca-table ca-table-flat">
+        <tbody>
+        {% for d in divisions %}<tr><td class="font-semibold">{% blocktrans with n=d.number %}Div. {{ n }}{% endblocktrans %}</td><td class="tabular text-right">{{ d.span }}</td></tr>{% endfor %}
+        </tbody>
+      </table>
+      <ul class="list-disc space-y-1 pl-5 text-mute">
+        <li>{% trans "Oraliqdagilar <b class=\"text-ink\">reytingli</b> qatnashadi: natijasi reytingni o‘zgartiradi." %}</li>
+        <li>{% trans "Oraliqdan tashqaridagilar ham qatnashadi, jadvalda <b class=\"text-ink\">tashqarida</b> belgisi bilan: reytingi o‘zgarmaydi." %}</li>
+        <li>{% trans "Marafon hamma uchun ochiq." %}</li>
+        <li>{% trans "Eski raundlar divizion joriy qilinmasdan oldin o‘tgan: ularda hamma reytingli edi, nomidagi divizion faqat mos kelganini ko‘rsatadi." %}</li>
+      </ul>
+    </div>
+  </section>
+  {% endif %}
 </aside>
 </div>
 {% endblock %}

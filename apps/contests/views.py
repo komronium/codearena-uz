@@ -21,7 +21,7 @@ from apps.submissions.solves import refresh_solves
 from apps.integrity import audit
 
 from . import rating, virtual
-from .models import Clarification, Contest, ContestProblem, Participation, VirtualParticipation, VoidedProblem
+from .models import Clarification, Contest, ContestProblem, DivisionRange, Participation, VirtualParticipation, VoidedProblem
 from .services import access_allowed
 from .standings import compute_standings, elapsed, problem_points
 from django.utils.translation import gettext as _t
@@ -87,6 +87,7 @@ def contest_list(request):
     return render(request, "contests/list.html", {"running": running, "upcoming": upcoming, "ended": ended,
                                                   "next_contest": next(iter([*running, *upcoming]), None),
                                                   "top_rated": top_rated, "me": me, "only_mine": only_mine, "show": show,
+                                                  "divisions": DivisionRange.objects.all(),
                                                   # your own row under the top ten, when you are not in it
                                                   "me_below": me and me["rated"] and me["place"] > len(top_rated)})
 
