@@ -1,6 +1,7 @@
 {
 " ({labels_level} darajasida {same_index_key_1}-si, jami {len_same} ta)": " ({same_index_key_1} of the {labels_level} level, {len_same} in total)",
 " · ishlatilgan": " · used",
+" — {n}-sahifa": " — page {n}",
 "% ida bor": "% of players",
 "%(activity_first)s – %(activity_last)s: <b class=\"tabular text-ink\">%(activity_total)s</b> ta urinish · faol kunlar <b class=\"tabular text-ink\">%(activity_active_days)s</b> · eng uzun ketma-ket faol kunlar <b class=\"tabular text-ink\">%(activity_max_streak)s</b>": "%(activity_first)s – %(activity_last)s: <b class=\"tabular text-ink\">%(activity_total)s</b> submissions · active days <b class=\"tabular text-ink\">%(activity_active_days)s</b> · longest streak of active days <b class=\"tabular text-ink\">%(activity_max_streak)s</b>",
 "%(b_level_name)s · %(b_earned_at)sda olingan": "%(b_level_name)s · earned on %(b_earned_at)s",
@@ -630,6 +631,7 @@
 "Bu qurilmada saqlanadi.": "Saved on this device.",
 "Bu raqib bilan ochiq duel bor.": "You already have an open duel with this opponent.",
 "Bu raqib bilan so‘nggi 24 soatda 20 ta duel o‘ynadingiz — keyinroq davom eting.": "You've played 20 duels with this opponent in the last 24 hours — continue later.",
+"Bu rasm emas yoki buzilgan.": "This is not a picture, or it is damaged.",
 "Bu raundning masalalari ochilmagan.": "This round's problems are not open.",
 "Bu sahifa faqat adminlar uchun. Siz tizimga kirgansiz, lekin hisobingizda bunga ruxsat yo‘q. Xato deb o‘ylasangiz, adminga yozing.": "This page is for admins only. You are signed in, but your account has no permission for it. If you think this is a mistake, write to an admin.",
 "Bu sana uchun masala boshqa so‘rovda tanlandi. Sahifani yangilang.": "A problem for this date was chosen in another request. Refresh the page.",
@@ -708,6 +710,7 @@
 "CodeArena nishonlari: har biri 5 bosqichli — bronza, kumush, oltin, platina, olmos. Har bosqich nimani talab qilishi va qanchalik kamyobligi.": "CodeArena badges: each has 5 levels — bronze, silver, gold, platinum, diamond. What each level asks for and how rare it is.",
 "CodeArena · o‘zbek tilida dasturlash": "CodeArena · programming in Uzbek",
 "CodeArena — dasturlashni musobaqada o‘rganing": "CodeArena — learn programming by competing",
+"CodeArena — o‘zbek tilida dasturlash masalalari, kurslar va musobaqalar": "CodeArena — programming problems, courses and contests in Uzbek and English",
 "CodeArena'da musobaqa reytingi, amaliyot balli, duel reytingi va nishonlar qanday hisoblanadi.": "How the contest rating, practice points, duel rating and badges are calculated on CodeArena.",
 "CodeArena'da musobaqa reytingi, rasmiy reyting, amaliyot balli, duel reytingi va nishonlar qanday hisoblanadi.": "How the contest rating, official rating, practice points, duel rating and badges are calculated on CodeArena.",
 "CodeArena'da to‘rt xil raqam bor. Ularning har biri o‘z ishi uchun va bir-biriga ta’sir qilmaydi.": "There are four kinds of numbers on CodeArena. Each is for its own purpose and they don't affect one another.",

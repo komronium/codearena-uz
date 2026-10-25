@@ -1,4 +1,5 @@
-{% extends "base.html" %}{% load numbers tiers seo %}
+{% extends "base.html" %}{% load numbers tiers seo critical %}
+{% block css %}{% critical_css "landing" %}{% endblock %}
 {% block head_title %}{% trans "CodeArena — dasturlashni musobaqada o‘rganing" %}{% endblock %}
 {# the site name and logo Google shows over the site's results #}
 {% block structured_data %}{% site_jsonld %}{% endblock %}

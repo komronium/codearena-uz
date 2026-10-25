@@ -11,6 +11,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.cache import cache_control
 
+from apps.accounts.language import PATH_CODES
 from apps.accounts.models import User
 from apps.accounts.tiers import next_tier as _next_tier
 from apps.classroom import duels
@@ -154,10 +155,11 @@ def home(request):
 
 # staff tools, personal pages, sign-in plumbing and htmx/JSON endpoints: nothing a search should land on;
 # and students' photos stay out of image search
-_NOT_FOR_CRAWLERS = ["/moderation/", "/integrity/", "/submissions/", "/classroom/", "/django-rq/",
+_NOT_FOR_CRAWLERS = ["/moderation/", "/integrity/", "/submissions/", "/classroom/",
                      "/accounts/profile/edit/", "/accounts/password-", "/accounts/reset/", "/accounts/verify/",
-                     "/accounts/logout/", "/problems/suggest/", "/learn/search/",
-                     "/media/avatars/", "/api/"]
+                     "/accounts/logout/", "/problems/suggest/", "/learn/search/", "/django-rq/", "/media/avatars/", "/api/"]
+# each of them under every language's prefix too
+_NOT_FOR_CRAWLERS = [f"{prefix}{path}" for prefix in ("", *(f"/{code}" for code in PATH_CODES)) for path in _NOT_FOR_CRAWLERS]
 # a list's search, sorting, own-progress filter and random pick: endless addresses for the one list
 # (its tag and level filters stay open; their canonical URL folds them into the list)
 _LIST_PARAMS = ["q", "sort", "dir", "status", "kind", "random"]

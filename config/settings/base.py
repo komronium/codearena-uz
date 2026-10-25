@@ -30,6 +30,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "apps.accounts.language.LanguagePathMiddleware",  # /en/... is the same page in English: the prefix leaves the path
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -134,7 +135,7 @@ LOCALE_PATHS = [BASE_DIR / "locale", BASE_DIR / "locale_uz"]
 FORMAT_MODULE_PATH = ["config.formats"]  # one decimal point in both languages: numbers also land in CSS and scripts
 TIME_ZONE = "Asia/Tashkent"
 USE_TZ = True
-STATIC_URL = "static/"
+STATIC_URL = "/static/"  # absolute: a relative one would take the script prefix of the first request (/en/) for good
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 MEDIA_URL = "/media/"

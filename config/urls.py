@@ -37,6 +37,7 @@ def _media(request, path):
     response = serve(request, path, document_root=settings.MEDIA_ROOT)
     response["Content-Security-Policy"] = "sandbox; default-src 'none'; img-src 'self'; style-src 'unsafe-inline'"
     response["X-Content-Type-Options"] = "nosniff"
+    response["Cache-Control"] = "public, max-age=604800"  # a changed file is a new name (an avatar or image upload never overwrites)
     return response
 
 

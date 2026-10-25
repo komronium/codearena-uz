@@ -2229,6 +2229,10 @@ msgstr ""
 "<b class=\"text-ink\">%(user_email)s</b> manziliga havola yubordik. Xatni "
 "oçib, havolani bosing. Spam papkasini ham tekşiring."
 
+msgid ""
+"CodeArena — o‘zbek tilida dasturlash masalalari, kurslar va musobaqalar"
+msgstr "CodeArena — özbek tilida dasturlaş masalalari, kurslar va musobaqalar"
+
 msgid "Asosiy tarkibga o‘tish"
 msgstr "Asosiy tarkibga ötiş"
 

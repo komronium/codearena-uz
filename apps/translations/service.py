@@ -18,6 +18,15 @@ _SYSTEM = (
 )
 
 
+def ready_ids(model, lang: str) -> set[int]:
+    """The pks of `model` whose main text readers get in `lang`: written in it, or translated and confirmed (what
+    Translatable.pending() asks of one object, for all of them). The sitemap offers only these in the other language."""
+    main = "statement_md" if "statement_md" in model.TRANSLATABLE else model.TRANSLATABLE[0]
+    ct = ContentType.objects.get_for_model(model)
+    done = ContentTranslation.objects.filter(content_type=ct, lang=lang, field=main, confirmed=True).exclude(text="")
+    return set(model.objects.filter(source_lang=lang).values_list("pk", flat=True)) | set(done.values_list("object_id", flat=True))
+
+
 def other(lang: str) -> str:
     return "en" if lang == "uz" else "uz"
 

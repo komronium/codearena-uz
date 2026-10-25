@@ -7,13 +7,17 @@
 /* Lato for words, JetBrains Mono for data (clocks, ranks, scores, counts) and code. Both are
    vendored by build.mjs; JetBrains Mono is the mono; Anthropic Mono is the editor's default; Lilex, Fira Code and Iosevka stay as editor options. */
 /* Lato 3 (SIL OFL 1.1, npm lato-font 3.0.0), subset: four real weights, 400/500/600/700, so medium and semibold are what the design says. */
-@font-face { font-family: "Lato"; font-style: normal; font-weight: 400; font-display: swap; unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; src: url("../fonts/lato3-400-latin-ext.woff2") format("woff2"); }
+@font-face { font-family: "Lato"; font-style: normal; font-weight: 400; font-display: swap; unicode-range: U+011E-011F,U+015E-015F; src: url("../fonts/lato3-400-uz.woff2") format("woff2"); }
+@font-face { font-family: "Lato"; font-style: normal; font-weight: 400; font-display: swap; unicode-range: U+0100-011D,U+0120-015D,U+0160-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; src: url("../fonts/lato3-400-latin-ext.woff2") format("woff2"); }
 @font-face { font-family: "Lato"; font-style: normal; font-weight: 400; font-display: swap; unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2190-2193,U+2212,U+2215,U+2248,U+2260,U+2264-2265,U+FEFF,U+FFFD; src: url("../fonts/lato3-400-latin.woff2") format("woff2"); }
-@font-face { font-family: "Lato"; font-style: normal; font-weight: 500; font-display: swap; unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; src: url("../fonts/lato3-500-latin-ext.woff2") format("woff2"); }
+@font-face { font-family: "Lato"; font-style: normal; font-weight: 500; font-display: swap; unicode-range: U+011E-011F,U+015E-015F; src: url("../fonts/lato3-500-uz.woff2") format("woff2"); }
+@font-face { font-family: "Lato"; font-style: normal; font-weight: 500; font-display: swap; unicode-range: U+0100-011D,U+0120-015D,U+0160-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; src: url("../fonts/lato3-500-latin-ext.woff2") format("woff2"); }
 @font-face { font-family: "Lato"; font-style: normal; font-weight: 500; font-display: swap; unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2190-2193,U+2212,U+2215,U+2248,U+2260,U+2264-2265,U+FEFF,U+FFFD; src: url("../fonts/lato3-500-latin.woff2") format("woff2"); }
-@font-face { font-family: "Lato"; font-style: normal; font-weight: 600; font-display: swap; unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; src: url("../fonts/lato3-600-latin-ext.woff2") format("woff2"); }
+@font-face { font-family: "Lato"; font-style: normal; font-weight: 600; font-display: swap; unicode-range: U+011E-011F,U+015E-015F; src: url("../fonts/lato3-600-uz.woff2") format("woff2"); }
+@font-face { font-family: "Lato"; font-style: normal; font-weight: 600; font-display: swap; unicode-range: U+0100-011D,U+0120-015D,U+0160-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; src: url("../fonts/lato3-600-latin-ext.woff2") format("woff2"); }
 @font-face { font-family: "Lato"; font-style: normal; font-weight: 600; font-display: swap; unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2190-2193,U+2212,U+2215,U+2248,U+2260,U+2264-2265,U+FEFF,U+FFFD; src: url("../fonts/lato3-600-latin.woff2") format("woff2"); }
-@font-face { font-family: "Lato"; font-style: normal; font-weight: 700; font-display: swap; unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; src: url("../fonts/lato3-700-latin-ext.woff2") format("woff2"); }
+@font-face { font-family: "Lato"; font-style: normal; font-weight: 700; font-display: swap; unicode-range: U+011E-011F,U+015E-015F; src: url("../fonts/lato3-700-uz.woff2") format("woff2"); }
+@font-face { font-family: "Lato"; font-style: normal; font-weight: 700; font-display: swap; unicode-range: U+0100-011D,U+0120-015D,U+0160-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; src: url("../fonts/lato3-700-latin-ext.woff2") format("woff2"); }
 @font-face { font-family: "Lato"; font-style: normal; font-weight: 700; font-display: swap; unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2190-2193,U+2212,U+2215,U+2248,U+2260,U+2264-2265,U+FEFF,U+FFFD; src: url("../fonts/lato3-700-latin.woff2") format("woff2"); }
 @font-face { font-family: "Anthropic Mono"; font-weight: 400; font-style: normal; font-display: swap; src: url("../fonts/AnthropicMono-Regular.woff2") format("woff2"); }
 @font-face { font-family: "Anthropic Mono"; font-weight: 400; font-style: italic; font-display: swap; src: url("../fonts/AnthropicMono-Italic.woff2") format("woff2"); }
@@ -2303,7 +2307,7 @@ td a[href^="/problems/"]:not([href="/problems/"]):not([href*="?"]), .ca-rows a[h
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ca-vd-re-bg: rgb(180 140 242 / .16); --ca-vd-re: #C9AEF7; } }
 :root[data-theme="dark"] { --ca-vd-re-bg: rgb(180 140 242 / .16); --ca-vd-re: #C9AEF7; }
 .ca-vd.is-re { color: var(--ca-vd-re); background: var(--ca-vd-re-bg); }
-.ca7-u { display: inline-flex; align-items: center; gap: .5rem; font-weight: 600; color: color-mix(in oklab, var(--tier) 80%, rgb(var(--ca-ink-rgb))); text-decoration: none; }
+.ca7-u { display: inline-flex; align-items: center; gap: .5rem; font-weight: 600; color: color-mix(in oklab, var(--tier) 58%, rgb(var(--ca-ink-rgb))); text-decoration: none; }
 .ca7-u:hover { text-decoration: underline; text-underline-offset: 3px; }
 .ca7-u i { display: grid; place-items: center; width: 1.5rem; height: 1.5rem; border-radius: 50%; font-style: normal; font-size: 0.8125rem; font-weight: 700;
   color: inherit; background: color-mix(in srgb, var(--tier) 12%, transparent); }
@@ -2824,15 +2828,15 @@ sparks fly once, then the words; a click outside or the button closes it */
 .ca7-ann:hover b { text-decoration: underline; text-underline-offset: 3px; }
 .ca-btn-lg, .ca-hud .ca-btn.ca-btn-lg { height: 2.85rem; padding: 0 1.4rem; font-size: 1rem; border-radius: 10px; }
 .ca7-hbtn.ca-btn-lg { height: 2.85rem; }
-.ca7-arena { position: relative; padding: 1.75rem 0 2.5rem; }
+.ca7-arena { position: relative; min-width: 0; padding: 1.75rem 0 2.5rem; }  /* a grid cell: the code scrolls inside its card instead of widening the page on a phone */
 .ca7-term { border-radius: 14px; overflow: hidden; color: #D7DEEF; background: #0E1630; box-shadow: 0 18px 40px rgb(5 10 30 / .4); }
-.ca7-term-h { display: flex; align-items: center; gap: .4rem; padding: .7rem 1rem; border-bottom: 1px solid rgb(255 255 255 / .08); font: .8125rem var(--ca-code); color: #A3AEC9; }
+.ca7-term-h { display: flex; align-items: center; gap: .4rem; padding: .7rem 1rem; border-bottom: 1px solid rgb(255 255 255 / .08); font: .8125rem/1.5 var(--ca-code); color: #A3AEC9; }
 .ca7-term-h i { width: .6rem; height: .6rem; border-radius: 50%; background: rgb(255 255 255 / .2); }
 .ca7-term-h span { margin-left: .5rem; }
 .ca7-term pre { padding: 1rem 1.1rem; overflow-x: auto; font: .9rem/1.85 var(--ca-code); }
 .ca7-term .ln { display: inline-block; width: 1.5rem; margin-right: .75rem; text-align: right; color: #5B6788; }
 .ca7-term .f { color: #7CC8FF; }
-.ca7-term-f { display: flex; align-items: center; gap: .8rem; padding: .75rem 1.1rem; border-top: 1px solid rgb(255 255 255 / .08); font: .84rem var(--ca-code); }
+.ca7-term-f { display: flex; align-items: center; gap: .8rem; padding: .75rem 1.1rem; border-top: 1px solid rgb(255 255 255 / .08); font: .84rem/1.5 var(--ca-code); }
 .ca7-term-f > span:first-child { display: inline-flex; align-items: center; gap: .35rem; font-weight: 600; color: #6EE0AE; }
 .ca7-term-f svg.lucide { width: .95rem; height: .95rem; }
 .ca7-float { position: absolute; display: inline-flex; align-items: center; gap: .45rem; padding: .55rem .9rem; border-radius: 10px; font-size: 0.875rem; font-weight: 600;

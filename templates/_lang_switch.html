@@ -2,6 +2,6 @@
 language, English the other; the cookie it sets wins, then the account's saved language.{% endcomment %}
 <form method="post" action="{% url 'set_language' %}" class="ca-lang">{% csrf_token %}
   <input type="hidden" name="next" value="{{ request.get_full_path }}">
-  {% if LANGUAGE_CODE == "en" %}<button type="submit" name="language" value="{% trans 'uz' %}" class="ca-lang-btn" lang="uz" title="{% trans 'O‘zbekcha' %}" aria-label="{% trans 'O‘zbekcha' %}"><i data-lucide="globe" class="lu" aria-hidden="true"></i>{% trans "UZ" %}</button>
-  {% else %}<button type="submit" name="language" value="{% trans 'en' %}" class="ca-lang-btn" lang="en" title="{% trans 'English' %}" aria-label="{% trans 'English' %}"><i data-lucide="globe" class="lu" aria-hidden="true"></i>{% trans "EN" %}</button>{% endif %}
+  {% if LANGUAGE_CODE == "en" %}<button type="submit" name="language" value="{% trans 'uz' %}" class="ca-lang-btn" lang="uz" title="{% trans 'O‘zbekcha' %}" aria-label="{% trans 'UZ' %} — {% trans 'O‘zbekcha' %}"><i data-lucide="globe" class="lu" aria-hidden="true"></i>{% trans "UZ" %}</button>
+  {% else %}<button type="submit" name="language" value="{% trans 'en' %}" class="ca-lang-btn" lang="en" title="{% trans 'English' %}" aria-label="{% trans 'EN' %} — {% trans 'English' %}"><i data-lucide="globe" class="lu" aria-hidden="true"></i>{% trans "EN" %}</button>{% endif %}
 </form>

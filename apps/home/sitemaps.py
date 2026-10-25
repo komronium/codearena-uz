@@ -1,45 +1,74 @@
 """sitemap.xml: the public pages a search engine should find, one sitemap per kind under an index. Staff
 tools, personal pages, profiles with nothing on them and the problems of a round that hasn't started stay
 out; robots.txt and the pages' own robots meta keep crawlers away from them too. lastmod is when the page
-last really changed: an edit, a round starting or ending, a profile's latest solve."""
+last really changed: an edit, a round starting or ending, a profile's latest solve. Each page is listed in both
+languages (/en/... for English) with hreflang links to the other; a problem or course whose text has no confirmed
+English yet is listed in Uzbek only, as its English page says noindex."""
+from django.conf import settings
 from django.contrib import sitemaps
 from django.db.models import Exists, OuterRef, Subquery
 from django.urls import reverse
-from django.utils import timezone
+from django.utils import timezone, translation
 
+from apps.accounts.language import localize
 from apps.accounts.models import User
 from apps.contests.models import Contest, Participation
 from apps.learn.models import StudyPlan
 from apps.problems.models import Problem
 from apps.submissions.models import UserProblemSolved
+from apps.translations.service import ready_ids
 
 
-class Sections(sitemaps.Sitemap):
+class Localized(sitemaps.Sitemap):
+    """A sitemap of pages that exist in every language: path() is the page's plain address, location() puts the
+    language of the entry in front of it. The pages of a model with translatable text list `translated` (the model)."""
+    i18n = True
+    alternates = True
+    x_default = True
+    translated = None  # the model whose English text readers must have, or None when every page has one
+
+    def location(self, item):
+        return localize(self.path(item), translation.get_language())
+
+    def get_languages_for_item(self, item):
+        if self.translated is None:
+            return self._languages()
+        if not hasattr(self, "_ready"):
+            self._ready = {lang: ready_ids(self.translated, lang) for lang in self._languages()}
+        # the source language's address always exists (it shows the author's text); the other needs a confirmed text
+        return [lang for lang in self._languages() if lang == settings.LANGUAGE_CODE or item.pk in self._ready[lang]]
+
+
+class Sections(Localized):
     def items(self):
         return ["home", "problems:list", "learn:hub", "contests:list", "rating", "top", "honor"]
 
-    def location(self, name):
+    def path(self, name):
         return reverse(name)
 
 
-class Problems(sitemaps.Sitemap):
+class Problems(Localized):
+    translated = Problem
+
     def items(self):
         # the problem list's own rule
         return (Problem.objects.filter(is_public=True).exclude(contests__start__gt=timezone.now())
                 .distinct().order_by("pk").only("slug", "updated"))
 
-    def location(self, problem):
+    def path(self, problem):
         return reverse("problems:detail", args=[problem.slug])
 
     def lastmod(self, problem):
         return problem.updated
 
 
-class Courses(sitemaps.Sitemap):
+class Courses(Localized):
+    translated = StudyPlan
+
     def items(self):
         return StudyPlan.objects.filter(is_public=True).order_by("order", "pk").only("slug", "updated")
 
-    def location(self, plan):
+    def path(self, plan):
         return reverse("learn:course", args=[plan.slug])
 
     def lastmod(self, plan):
@@ -50,11 +79,11 @@ def _public_contests():
     return Contest.objects.filter(is_draft=False).order_by("-start").only("pk", "start", "end", "updated")
 
 
-class Contests(sitemaps.Sitemap):
+class Contests(Localized):
     def items(self):
         return _public_contests()
 
-    def location(self, contest):
+    def path(self, contest):
         return reverse("contests:detail", args=[contest.pk])
 
     def lastmod(self, contest):
@@ -63,20 +92,20 @@ class Contests(sitemaps.Sitemap):
         return max(moment for moment in (contest.updated, contest.start, contest.end) if moment <= now)
 
 
-class Standings(sitemaps.Sitemap):
+class Standings(Localized):
     """A round's results, once it has begun: what people search for after a round."""
 
     def items(self):
         return _public_contests().filter(start__lte=timezone.now())
 
-    def location(self, contest):
+    def path(self, contest):
         return reverse("contests:standings", args=[contest.pk])
 
     def lastmod(self, contest):
         return contest.end if contest.end <= timezone.now() else None
 
 
-class Profiles(sitemaps.Sitemap):
+class Profiles(Localized):
     """Users with something to show: a public problem solved or a rated round. The rest say noindex
     themselves (accounts/profile.html), as do blocked users."""
 
@@ -88,7 +117,7 @@ class Profiles(sitemaps.Sitemap):
                           last_round=Subquery(rated.order_by("-contest__end").values("contest__end")[:1]))
                 .order_by("pk").only("username"))
 
-    def location(self, user):
+    def path(self, user):
         return reverse("profile", args=[user.username])
 
     def lastmod(self, user):

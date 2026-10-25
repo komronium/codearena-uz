@@ -6,6 +6,7 @@
 
 Only an address Google says it verified is used, so linking to an existing account by email is as safe as the mail
 link is. Staff accounts may sign in this way too (Google's own 2-step check protects them); Telegram still excludes them."""
+import io
 import json
 import re
 import secrets
@@ -16,13 +17,13 @@ import urllib.request
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login as auth_login
-from django.core.files.base import ContentFile
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 
 from . import throttle
+from .avatars import shrink
 from .models import User
 from django.utils.translation import gettext as _t
 from django.utils.translation import gettext as _t
@@ -71,7 +72,10 @@ def _give_avatar(user, picture_url: str) -> None:
         return
     data = _fetch_avatar(picture_url)
     if data:
-        user.avatar.save(f"google-{user.pk}.jpg", ContentFile(data), save=True)
+        try:
+            user.avatar.save(f"avatar-{user.pk}.webp", shrink(io.BytesIO(data), f"avatar-{user.pk}"), save=True)
+        except (OSError, ValueError):  # not a picture
+            pass
 
 
 def _redirect_uri(request) -> str:

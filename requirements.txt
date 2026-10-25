@@ -9,4 +9,5 @@ Pillow>=10
 bleach>=6
 gunicorn>=23
 whitenoise>=6.8
+Brotli>=1.1  # whitenoise writes .br files next to the .gz ones when it can import this
 sentry-sdk>=2

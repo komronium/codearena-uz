@@ -1675,6 +1675,10 @@ msgstr ""
 "Programming in Uzbek: solve problems, learn in topic-by-topic courses, "
 "compete in rated contests. Your code is tested on the server right away."
 
+#: apps/home/templatetags/seo.py
+msgid " — {n}-sahifa"
+msgstr " — page {n}"
+
 #: apps/home/views.py apps/problems/templatetags/uzdates.py
 msgid "Dushanba"
 msgstr "Monday"
@@ -4997,6 +5001,12 @@ msgstr ""
 #: templates/base.html
 msgid "— CodeArena"
 msgstr "— CodeArena"
+
+#: templates/base.html
+msgid ""
+"CodeArena — o‘zbek tilida dasturlash masalalari, kurslar va musobaqalar"
+msgstr ""
+"CodeArena — programming problems, courses and contests in Uzbek and English"
 
 #: templates/base.html
 msgid "Asosiy tarkibga o‘tish"

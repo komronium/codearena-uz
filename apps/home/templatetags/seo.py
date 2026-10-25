@@ -6,10 +6,13 @@ from django import template
 from django.conf import settings
 from django.core.serializers.json import DjangoJSONEncoder
 from django.templatetags.static import static
+from django.urls import reverse
 from django.utils.html import format_html, format_html_join, strip_tags
 from django.utils.safestring import mark_safe
 from django.utils.text import Truncator
-from django.utils.translation import gettext_lazy as _tl
+from django.utils.translation import get_language, gettext, gettext_lazy as _tl
+
+from apps.accounts.language import PATH_CODES, localize, split_path
 
 register = template.Library()
 
@@ -52,7 +55,15 @@ def canonical_url(context) -> str:
 def page_suffix(context) -> str:
     """" — 2-sahifa" in the title of a plain list's later pages, so they don't share the first page's."""
     page = _plain_page(context["request"])
-    return f" — {page}-sahifa" if page else ""
+    return gettext(" — {n}-sahifa").format(n=page) if page else ""
+
+
+def _untranslated(context) -> bool:
+    """An English page whose problem or course has no confirmed English text: the author's Uzbek under an English
+    address, which would only duplicate the Uzbek page in the index."""
+    if not getattr(context.get("request"), "path_language", ""):
+        return False
+    return any(obj.pending() for obj in (context.get(name) for name in ("problem", "plan")) if hasattr(obj, "pending"))
 
 
 @register.simple_tag(takes_context=True)
@@ -60,7 +71,32 @@ def robots_meta(context) -> str:
     """The default robots meta: staff and personal pages stay out of the index; elsewhere a result may
     show the page's picture large. A page that should stay out says so in its own {% block robots %}."""
     match = getattr(context.get("request"), "resolver_match", None)
-    return "noindex" if match and match.namespace in _PRIVATE_NAMESPACES else "max-image-preview:large"
+    if match and match.namespace in _PRIVATE_NAMESPACES or _untranslated(context):
+        return "noindex"
+    return "max-image-preview:large"
+
+
+@register.simple_tag(takes_context=True)
+def language_links(context, robots="") -> str:
+    """The page's address in every language, for the head: hreflang links (Google lists the right language to
+    each searcher; the Uzbek address is the x-default). Left out where the page itself stays out of the index."""
+    request = context["request"]
+    if "noindex" in str(robots):
+        return ""
+    tail = f"?page={_plain_page(request)}" if _plain_page(request) else ""
+    bare = split_path(request.path)[1]
+    links = [(lang, request.build_absolute_uri(localize(bare, lang)) + tail) for lang in [settings.LANGUAGE_CODE, *PATH_CODES]]
+    links.append(("x-default", links[0][1]))
+    return format_html_join("\n  ", '<link rel="alternate" hreflang="{}" href="{}">', links)
+
+
+@register.simple_tag
+def og_locales() -> str:
+    """og:locale for the page language and og:locale:alternate for the others."""
+    names = {"uz": "uz_UZ", "en": "en_US"}
+    current = get_language() or settings.LANGUAGE_CODE
+    return format_html_join("\n  ", '<meta property="{}" content="{}">',
+                            [("og:locale", names[current]), *(("og:locale:alternate", names[c]) for c in names if c != current)])
 
 
 @register.simple_tag
@@ -107,9 +143,10 @@ def _ld(data: dict) -> str:
 def site_jsonld(context) -> str:
     """The home page's WebSite (the site name Google shows over a result) and Organization (its logo)."""
     request = context["request"]
-    home = request.build_absolute_uri("/")
+    home = request.build_absolute_uri(reverse("home"))
     site = {"@context": "https://schema.org", "@type": "WebSite", "name": SITE_NAME,
-            "alternateName": ALTERNATE_NAMES, "url": home, "inLanguage": "uz", "description": SITE_DESCRIPTION}
+            "alternateName": ALTERNATE_NAMES, "url": home, "inLanguage": get_language() or "uz",
+            "description": SITE_DESCRIPTION}
     org = {"@context": "https://schema.org", "@type": "Organization", "name": SITE_NAME, "url": home,
            "logo": request.build_absolute_uri(static("img/icon-512.png")), "description": SITE_DESCRIPTION}
     if settings.SITE_SAME_AS:
@@ -123,7 +160,7 @@ def breadcrumbs_jsonld(context, *trail) -> str:
     results show in place of the bare address."""
     request = context["request"]
     return _ld({"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
-        {"@type": "ListItem", "position": n, "name": str(name), "item": request.build_absolute_uri(path)}
+        {"@type": "ListItem", "position": n, "name": gettext(str(name)), "item": request.build_absolute_uri(path)}
         for n, (name, path) in enumerate(zip(trail[::2], trail[1::2]), 1)]})
 
 

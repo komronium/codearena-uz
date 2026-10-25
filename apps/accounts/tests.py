@@ -1001,11 +1001,16 @@ def test_google_gives_a_new_account_its_picture_only_from_googles_own_host(clien
     from . import google
     settings.MEDIA_ROOT = tmp_path
     fetched = []
-    monkeypatch.setattr(google, "_fetch_avatar", lambda url: fetched.append(url) or b"\xff\xd8\xff fake jpeg")
+    from io import BytesIO
+    from PIL import Image
+    photo = BytesIO()
+    Image.new("RGB", (400, 300), "navy").save(photo, "JPEG")
+    monkeypatch.setattr(google, "_fetch_avatar", lambda url: fetched.append(url) or photo.getvalue())
     _google_callback(client, monkeypatch, {"sub": "g-9", "email": "pic@example.com", "email_verified": True,
                                            "picture": "https://lh3.googleusercontent.com/a/abc=s96-c"})
     u = User.objects.get(google_sub="g-9")
     assert u.avatar and fetched == ["https://lh3.googleusercontent.com/a/abc=s96-c"]
+    assert u.avatar.name.endswith(".webp") and Image.open(u.avatar).size == (256, 256)  # stored small and square
     monkeypatch.undo()
     assert google._fetch_avatar("https://evil.example/x.png") is None and google._fetch_avatar("http://lh3.googleusercontent.com/a") is None
 
@@ -1062,3 +1067,53 @@ def test_telegram_daily_messages_speak_each_recipients_language(settings, django
         call_command("telegram_notifications", verbosity=0)
     texts = {o.link.user.username: o.text for o in TelegramOutbox.objects.filter(preference="notify_daily_tip")}
     assert "Kunlik tavsiya" in texts["uzu"] and "Daily tip" in texts["enu"] and "Kunlik" not in texts["enu"]
+
+
+# ---- one address per language: /en/... is the same page in English ----
+
+def test_the_english_prefix_leaves_the_path_and_comes_back_in_every_address(client):
+    page = client.get("/en/problems/")
+    assert page.status_code == 200 and page["Content-Language"] == "en"
+    html = page.content.decode()
+    assert '<html lang="en"' in html and 'href="/en/contests/"' in html
+    assert '<link rel="canonical" href="http://testserver/en/problems/">' in html
+    for lang, href in (("uz", "http://testserver/problems/"), ("en", "http://testserver/en/problems/"), ("x-default", "http://testserver/problems/")):
+        assert f'<link rel="alternate" hreflang="{lang}" href="{href}">' in html
+    assert client.cookies["ca_lang"].value == "en"  # following the link is a choice: scripts and plain links stay English
+    assert client.get("/problems/", HTTP_ACCEPT="text/html").status_code == 302  # the plain address takes an English reader to /en/
+    assert client.get("/problems/", HTTP_ACCEPT="text/html")["Location"] == "/en/problems/"
+
+
+def test_a_visitor_without_a_cookie_stays_on_the_uzbek_address(client):
+    page = client.get("/problems/", HTTP_ACCEPT="text/html")
+    assert page.status_code == 200 and page["Content-Language"] == "uz"
+    assert client.get("/en").status_code == 301 and client.get("/en")["Location"] == "/en/"
+
+
+def test_the_language_switch_goes_to_the_same_page_in_the_other_language(client):
+    for lang, nxt, where in (("en", "/problems/?tag=math", "/en/problems/?tag=math"), ("uz", "/en/problems/?tag=math", "/problems/?tag=math")):
+        response = client.post("/i18n/language/", {"language": lang, "next": nxt})
+        assert response.status_code == 302 and response["Location"] == where
+
+
+def test_robots_keeps_the_english_copies_of_private_pages_out_too(client):
+    robots = client.get("/robots.txt").content.decode()
+    assert "Disallow: /moderation/" in robots and "Disallow: /en/moderation/" in robots and "Disallow: /en/api/" in robots
+
+
+@pytest.mark.django_db
+def test_the_sitemap_lists_each_page_in_both_languages_with_hreflang(client):
+    xml = client.get("/sitemap-sections.xml").content.decode()
+    assert "<loc>http://testserver/problems/</loc>" in xml and "<loc>http://testserver/en/problems/</loc>" in xml
+    assert 'hreflang="en" href="http://testserver/en/problems/"' in xml and 'hreflang="x-default" href="http://testserver/problems/"' in xml
+
+
+def test_an_avatar_is_stored_as_a_small_square_webp():
+    from io import BytesIO
+    from PIL import Image
+    from .avatars import is_small, shrink
+    photo = BytesIO()
+    Image.new("RGB", (1600, 900), "teal").save(photo, "PNG")
+    photo.seek(0)
+    small = shrink(photo, "avatar-7")
+    assert small.name == "avatar-7.webp" and Image.open(small).size == (256, 256) and is_small(small.name, small.size)

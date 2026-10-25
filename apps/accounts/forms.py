@@ -3,6 +3,7 @@ from django.contrib.auth import password_validation
 from django.contrib.auth.forms import BaseUserCreationForm, UserCreationForm
 from django.core.exceptions import ValidationError
 
+from .avatars import shrink
 from .countries import COUNTRY_CHOICES
 from .models import TelegramLink, User
 from .usernames import USERNAME_RULE, valid_username
@@ -167,6 +168,11 @@ class ProfileEditForm(_ProfileFields):
         avatar = self.cleaned_data.get("avatar")
         if avatar and hasattr(avatar, "size") and avatar.size > 2 * 1024 * 1024:
             raise forms.ValidationError(_t("Rasm 2 MB dan oshmasligi kerak."))
+        if avatar and hasattr(avatar, "size"):  # a new upload (not the stored file coming back unchanged)
+            try:
+                return shrink(avatar, f"avatar-{self.instance.pk}")
+            except (OSError, ValueError):
+                raise forms.ValidationError(_t("Bu rasm emas yoki buzilgan."))
         return avatar
 
     def clean_username(self):
