@@ -127,11 +127,13 @@ def home(request):
     if is_new:
         first_problem = (open_problems().filter(difficulty=Problem.Difficulty.BEGINNER).order_by("pk").first()
                          or open_problems().order_by("pk").first())
+    ranked = duels.ranked_left(user) if not user.is_superuser else (0, 0)
     return render(request, "home/dashboard.html", {
         "is_new": is_new, "first_problem": first_problem,
         "n_courses": StudyPlan.objects.filter(is_public=True, tags__isnull=False).distinct().count() if is_new else 0,  # the ones with problems, not the "soon" list
         "joined_any": Participation.objects.filter(user=user).exists() if is_new else False,
         "daily": daily,
+        "ranked_left": ranked[0], "ranked_allow": ranked[1], "ranked_per_solve": duels.RANKED_PER_SOLVE,
         "daily_done": bool(daily) and DailySolve.objects.filter(user=user, daily=daily).exists(),
         "streak": current, "best_streak": best, "freezes": state["freezes"], "quests": today_quests(user),
         "week": week_strip(user),
@@ -144,7 +146,7 @@ def home(request):
         "rating_card": _rating_card(user),
         "spark": _spark(user),
         # a newcomer's first steps show LeetCode's ring of solved problems per level (the problem list has it otherwise)
-        "ring": solved_ring(level_progress(user, open_problems()), user=user) if is_new else None,
+        "ring": solved_ring(level_progress(user, open_problems()), user=user),
         "next_picks": next_picks, "picks_reason": shared_reason(next_picks),
         "registered": set(Participation.objects.filter(user=user, contest__in=upcoming)
                           .values_list("contest_id", flat=True)),

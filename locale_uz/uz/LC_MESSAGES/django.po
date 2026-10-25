@@ -7235,17 +7235,41 @@ msgstr "Birinçi qadam"
 msgid "Oxirgi reytingli musobaqada"
 msgstr "Oxirgi reytingli musobaqada"
 
-msgid "Keyingi qadamlar"
-msgstr "Keyingi qadamlar"
+msgid "bugun hali hech kim yechmadi"
+msgstr "bugun hali heç kim yeçmadi"
+
+msgid "Ertaga yangi masala chiqadi."
+msgstr "Ertaga yangi masala çiqadi."
+
+msgid ", eng uzuni"
+msgstr ", eng uzuni"
+
+msgid "kun ketma-ket"
+msgstr "kun ketma-ket"
 
 msgid "reytingga ta’sir qilmaydi"
 msgstr "reytingga ta’sir qilmaydi"
+
+msgid "Yaqin orada musobaqa yo‘q."
+msgstr "Yaqin orada musobaqa yöq."
 
 msgid "O‘rganishda davom etish"
 msgstr "Örganişda davom etiş"
 
 msgid "Kurs bajarilishi"
 msgstr "Kurs bajarilişi"
+
+msgid "Hali kurs boshlanmagan."
+msgstr "Hali kurs boşlanmagan."
+
+msgid "Ochiq duel, raqib kutilmoqda"
+msgstr "Oçiq duel, raqib kutilmoqda"
+
+msgid "Siz uchun"
+msgstr "Siz uçun"
+
+msgid "Siz ko‘p yechadigan qiyinlikdagi, hali yechilmagan masalalar."
+msgstr "Siz köp yeçadigan qiyinlikdagi, hali yeçilmagan masalalar."
 
 msgid "So‘nggi urinishlar"
 msgstr "Sönggi urinişlar"
@@ -7258,25 +7282,6 @@ msgstr "Hali uriniş yöq"
 
 msgid "Birinchi masalani tanlang</a>: kodingiz darhol tekshiriladi."
 msgstr "Birinçi masalani tanlang</a>: kodingiz darhol tekşiriladi."
-
-msgid "Siz uchun"
-msgstr "Siz uçun"
-
-msgid "Siz ko‘p yechadigan qiyinlikdagi, hali yechilmagan masalalar."
-msgstr "Siz köp yeçadigan qiyinlikdagi, hali yeçilmagan masalalar."
-
-msgid "Ochiq duel, raqib kutilmoqda"
-msgstr "Oçiq duel, raqib kutilmoqda"
-
-msgid ""
-"7 ta savol, har biriga 20 soniya: raqib bilan 1 ga 1. Natija duel reytingiga"
-" ta’sir qiladi."
-msgstr ""
-"7 ta savol, har biriga 20 soniya: raqib bilan 1 ga 1. Natija duel reytingiga"
-" ta’sir qiladi."
-
-msgid "Keyingi musobaqa"
-msgstr "Keyingi musobaqa"
 
 msgid "Do‘stlarni taklif qiling"
 msgstr "Döstlarni taklif qiling"
@@ -7324,21 +7329,17 @@ msgstr ""
 msgid "%(live_n_problems)s ta masala. Hali qatnashmagansiz."
 msgstr "%(live_n_problems)s ta masala. Hali qatnaşmagansiz."
 
+msgid "bugun <b class=\"tabular text-ink\">%(ds_solvers)s</b> kishi yechdi"
+msgstr "bugun <b class=\"tabular text-ink\">%(ds_solvers)s</b> kişi yeçdi"
+
+msgid "Bugun yeching: Olov %(next)s kunga yetadi."
+msgstr "Bugun yeçing: Olov %(next)s kunga yetadi."
+
 msgid "%(learning_progress_done)s / %(learning_progress_total)s masala"
 msgstr "%(learning_progress_done)s / %(learning_progress_total)s masala"
 
 msgid "· keyingisi: %(learning_next_title)s"
 msgstr "· keyingisi: %(learning_next_title)s"
-
-msgid "%(s_exec_ms)s&nbsp;ms"
-msgstr "%(s_exec_ms)s&nbsp;ms"
-
-msgid ""
-"Eng kam yechgan mavzuingiz <b class=\"text-ink\">%(picks_reason)s</b>. Shu "
-"masalalar aynan shu mavzuni mashq qildiradi."
-msgstr ""
-"Eng kam yeçgan mavzuingiz <b class=\"text-ink\">%(picks_reason)s</b>. Şu "
-"masalalar aynan şu mavzuni maşq qildiradi."
 
 msgid "%(d_challenger_username)s vs %(d_opponent_username)s"
 msgstr "%(d_challenger_username)s vs %(d_opponent_username)s"
@@ -7349,6 +7350,16 @@ msgid ""
 msgstr ""
 "<b>%(d_challenger_username)s</b> <span class=\"text-mute\">sizni çaqirdi, "
 "%(d_get_language_display)s</span>"
+
+msgid ""
+"Eng kam yechgan mavzuingiz <b class=\"text-ink\">%(picks_reason)s</b>. Shu "
+"masalalar aynan shu mavzuni mashq qildiradi."
+msgstr ""
+"Eng kam yeçgan mavzuingiz <b class=\"text-ink\">%(picks_reason)s</b>. Şu "
+"masalalar aynan şu mavzuni maşq qildiradi."
+
+msgid "%(s_exec_ms)s&nbsp;ms"
+msgstr "%(s_exec_ms)s&nbsp;ms"
 
 msgid "CodeArena — dasturlashni musobaqada o‘rganing"
 msgstr "CodeArena — dasturlaşni musobaqada örganing"
@@ -10241,12 +10252,6 @@ msgstr "Urinişlari: %(u_username)s"
 msgid "Tahrirlash: %(u_username)s"
 msgstr "Tahrirlaş: %(u_username)s"
 
-msgid ", eng uzuni"
-msgstr ", eng uzuni"
-
-msgid "bugun hali hech kim yechmadi"
-msgstr "bugun hali heç kim yeçmadi"
-
 msgid "Bugun yechsangiz, Olov yonadi."
 msgstr "Bugun yeçsangiz, Olov yonadi."
 
@@ -10255,9 +10260,6 @@ msgstr "va boşqalar"
 
 msgid "<b>%(ds_streak)s</b> kun"
 msgstr "<b>%(ds_streak)s</b> kun"
-
-msgid "bugun <b class=\"tabular text-ink\">%(ds_solvers)s</b> kishi yechdi"
-msgstr "bugun <b class=\"tabular text-ink\">%(ds_solvers)s</b> kişi yeçdi"
 
 msgid "Bugun yechildi, Olov <b>%(ds_streak)s</b> kun."
 msgstr "Bugun yeçildi, Olov <b>%(ds_streak)s</b> kun."

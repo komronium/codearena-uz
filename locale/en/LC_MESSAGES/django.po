@@ -6588,7 +6588,7 @@ msgstr "Save settings"
 msgid "Bu qurilmada saqlanadi."
 msgstr "Saved on this device."
 
-#: templates/accounts/profile_edit.html templates/home/dashboard.html
+#: templates/accounts/profile_edit.html templates/moderation/problems.html
 msgid "Mavzu"
 msgstr "Theme"
 
@@ -7137,7 +7137,7 @@ msgstr "Nothing found. Try another word."
 msgid "o‘sish"
 msgstr "ascending"
 
-#: templates/base.html templates/moderation/rating_stats.html
+#: templates/base.html templates/home/dashboard.html
 msgid "kun"
 msgstr "day"
 
@@ -7882,7 +7882,7 @@ msgstr "%(open)s"
 msgid "%(history)s ta duel"
 msgstr "%(history)s duels"
 
-#: templates/classroom/duels.html
+#: templates/classroom/duels.html templates/home/dashboard.html
 msgid ""
 "Bugun reytingli duellar: <b>%(left)s</b> / %(allow)s. Yechilgan har bir "
 "masala %(n)s tasini qo‘shadi."
@@ -8585,7 +8585,7 @@ msgstr "To take part, press “Take part” beforehand."
 msgid "Harf"
 msgstr "Letter"
 
-#: templates/contests/detail.html templates/home/dashboard.html
+#: templates/contests/detail.html templates/learn/list.html
 msgid "Qiyinlik"
 msgstr "Difficulty"
 
@@ -9193,7 +9193,7 @@ msgstr ""
 msgid "Asoslarni o‘rganing"
 msgstr "Learn the basics"
 
-#: templates/home/_dash_new.html
+#: templates/home/_dash_new.html templates/home/dashboard.html
 msgid "Darslarni ko‘rish"
 msgstr "View the lessons"
 
@@ -9300,7 +9300,7 @@ msgstr ", the first is “%(learning_plan_title)s”"
 msgid "%(c_title)s, %(c_start)s. Reytingingiz musobaqada boshlanadi"
 msgstr "%(c_title)s, %(c_start)s. Your rating starts with a contest"
 
-#: templates/home/_hud_today.html templates/problems/detail.html
+#: templates/home/_hud_today.html templates/home/dashboard.html
 msgid "Bugungi masala"
 msgstr "Today's problem"
 
@@ -9324,7 +9324,7 @@ msgstr ""
 "%(c_title)s</a> <small class=\"tabular\">%(c_start)s · %(c_duration_label)s "
 "· %(c_n_participants)s participants</small>"
 
-#: templates/home/_quests.html
+#: templates/home/_quests.html templates/home/dashboard.html
 msgid "Kunlik maqsadlar"
 msgstr "Daily goals"
 
@@ -9378,13 +9378,29 @@ msgstr "First step"
 msgid "Oxirgi reytingli musobaqada"
 msgstr "In the last rated contest"
 
+#: templates/home/dashboard.html templates/problems/_daily_card.html
+msgid "bugun hali hech kim yechmadi"
+msgstr "nobody has solved it today yet"
+
 #: templates/home/dashboard.html
-msgid "Keyingi qadamlar"
-msgstr "Next steps"
+msgid "Ertaga yangi masala chiqadi."
+msgstr "A new problem comes tomorrow."
+
+#: templates/home/dashboard.html templates/problems/_daily_card.html
+msgid ", eng uzuni"
+msgstr ", longest"
+
+#: templates/home/dashboard.html
+msgid "kun ketma-ket"
+msgstr "days in a row"
 
 #: templates/home/dashboard.html
 msgid "reytingga ta’sir qilmaydi"
 msgstr "doesn't affect the rating"
+
+#: templates/home/dashboard.html
+msgid "Yaqin orada musobaqa yo‘q."
+msgstr "No contest is coming up."
 
 #: templates/home/dashboard.html
 msgid "O‘rganishda davom etish"
@@ -9393,6 +9409,22 @@ msgstr "Continue learning"
 #: templates/home/dashboard.html templates/learn/course.html
 msgid "Kurs bajarilishi"
 msgstr "Course progress"
+
+#: templates/home/dashboard.html
+msgid "Hali kurs boshlanmagan."
+msgstr "No course started yet."
+
+#: templates/home/dashboard.html
+msgid "Ochiq duel, raqib kutilmoqda"
+msgstr "An open duel, waiting for an opponent"
+
+#: templates/home/dashboard.html templates/problems/list.html
+msgid "Siz uchun"
+msgstr "For you"
+
+#: templates/home/dashboard.html
+msgid "Siz ko‘p yechadigan qiyinlikdagi, hali yechilmagan masalalar."
+msgstr "Unsolved problems at the difficulty you solve most."
 
 #: templates/home/dashboard.html
 msgid "So‘nggi urinishlar"
@@ -9409,30 +9441,6 @@ msgstr "No submissions yet"
 #: templates/home/dashboard.html
 msgid "Birinchi masalani tanlang</a>: kodingiz darhol tekshiriladi."
 msgstr "Pick the first problem</a>: your code is checked at once."
-
-#: templates/home/dashboard.html templates/problems/list.html
-msgid "Siz uchun"
-msgstr "For you"
-
-#: templates/home/dashboard.html
-msgid "Siz ko‘p yechadigan qiyinlikdagi, hali yechilmagan masalalar."
-msgstr "Unsolved problems at the difficulty you solve most."
-
-#: templates/home/dashboard.html
-msgid "Ochiq duel, raqib kutilmoqda"
-msgstr "An open duel, waiting for an opponent"
-
-#: templates/home/dashboard.html
-msgid ""
-"7 ta savol, har biriga 20 soniya: raqib bilan 1 ga 1. Natija duel reytingiga"
-" ta’sir qiladi."
-msgstr ""
-"7 questions, 20 seconds each: 1 vs 1 with an opponent. The result affects "
-"the duel rating."
-
-#: templates/home/dashboard.html
-msgid "Keyingi musobaqa"
-msgstr "Next contest"
 
 #: templates/home/dashboard.html
 msgid "Do‘stlarni taklif qiling"
@@ -9490,6 +9498,14 @@ msgstr ""
 msgid "%(live_n_problems)s ta masala. Hali qatnashmagansiz."
 msgstr "%(live_n_problems)s problems. You haven't taken part yet."
 
+#: templates/home/dashboard.html templates/problems/_daily_card.html
+msgid "bugun <b class=\"tabular text-ink\">%(ds_solvers)s</b> kishi yechdi"
+msgstr "<b class=\"tabular text-ink\">%(ds_solvers)s</b> people solved it today"
+
+#: templates/home/dashboard.html
+msgid "Bugun yeching: Olov %(next)s kunga yetadi."
+msgstr "Solve today to extend your streak to %(next)s."
+
 #: templates/home/dashboard.html
 msgid "%(learning_progress_done)s / %(learning_progress_total)s masala"
 msgstr "%(learning_progress_done)s / %(learning_progress_total)s problems"
@@ -9497,18 +9513,6 @@ msgstr "%(learning_progress_done)s / %(learning_progress_total)s problems"
 #: templates/home/dashboard.html
 msgid "· keyingisi: %(learning_next_title)s"
 msgstr "· next: %(learning_next_title)s"
-
-#: templates/home/dashboard.html templates/problems/_my_subs.html
-msgid "%(s_exec_ms)s&nbsp;ms"
-msgstr "%(s_exec_ms)s&nbsp;ms"
-
-#: templates/home/dashboard.html
-msgid ""
-"Eng kam yechgan mavzuingiz <b class=\"text-ink\">%(picks_reason)s</b>. Shu "
-"masalalar aynan shu mavzuni mashq qildiradi."
-msgstr ""
-"The topic you've solved the least is <b class=\"text-"
-"ink\">%(picks_reason)s</b>. These problems practice exactly that topic."
 
 #: templates/home/dashboard.html
 msgid "%(d_challenger_username)s vs %(d_opponent_username)s"
@@ -9521,6 +9525,18 @@ msgid ""
 msgstr ""
 "<b>%(d_challenger_username)s</b> <span class=\"text-mute\">challenged you, "
 "%(d_get_language_display)s</span>"
+
+#: templates/home/dashboard.html
+msgid ""
+"Eng kam yechgan mavzuingiz <b class=\"text-ink\">%(picks_reason)s</b>. Shu "
+"masalalar aynan shu mavzuni mashq qildiradi."
+msgstr ""
+"The topic you've solved the least is <b class=\"text-"
+"ink\">%(picks_reason)s</b>. These problems practice exactly that topic."
+
+#: templates/home/dashboard.html templates/problems/_my_subs.html
+msgid "%(s_exec_ms)s&nbsp;ms"
+msgstr "%(s_exec_ms)s&nbsp;ms"
 
 #: templates/home/landing.html
 msgid "CodeArena — dasturlashni musobaqada o‘rganing"
@@ -13225,14 +13241,6 @@ msgid "Tahrirlash: %(u_username)s"
 msgstr "Edit: %(u_username)s"
 
 #: templates/problems/_daily_card.html
-msgid ", eng uzuni"
-msgstr ", longest"
-
-#: templates/problems/_daily_card.html
-msgid "bugun hali hech kim yechmadi"
-msgstr "nobody has solved it today yet"
-
-#: templates/problems/_daily_card.html
 msgid "Bugun yechsangiz, Olov yonadi."
 msgstr "Solve today and your streak lights up."
 
@@ -13243,10 +13251,6 @@ msgstr "and others"
 #: templates/problems/_daily_card.html
 msgid "<b>%(ds_streak)s</b> kun"
 msgstr "<b>%(ds_streak)s</b> days"
-
-#: templates/problems/_daily_card.html
-msgid "bugun <b class=\"tabular text-ink\">%(ds_solvers)s</b> kishi yechdi"
-msgstr "<b class=\"tabular text-ink\">%(ds_solvers)s</b> people solved it today"
 
 #: templates/problems/_daily_card.html
 msgid "Bugun yechildi, Olov <b>%(ds_streak)s</b> kun."

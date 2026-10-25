@@ -33,7 +33,6 @@
         {% endif %}
       </div>
     </div>
-    {% if daily %}{% include "home/_hud_today.html" %}{% endif %}
     {% endif %}
   </div>
 </section>
@@ -42,7 +41,7 @@
 {% if is_new %}{% include "home/_dash_new.html" %}{% else %}
 {% if daily %}{% daily_stats daily user as ds %}{% endif %}
 <div class="ca7">
-<div class="ca7-col">
+<div class="ca7-col ca-hub">
   {% if live %}
   <section class="ca-live-strip ca-dashboard-live{% if live.contest.type == 'score' %} is-score{% elif live.contest.type == 'icpc' %} is-icpc{% endif %}" aria-labelledby="live-title">
     <span class="ca-tag ca-tag-live">{% trans "<span class=\"ca-live-dot\" aria-hidden=\"true\"></span>Jonli" %}</span>
@@ -55,39 +54,105 @@
   </section>
   {% endif %}
 
-  {% with c=upcoming.0 %}{% if c or learning %}
-  <section class="ca7-mis{% if c and learning %} is-two{% endif %}" aria-label="{% trans 'Keyingi qadamlar' %}">
-    {% if c %}
-    <div>
-      <span class="ca7-mis-ico" aria-hidden="true"><i data-lucide="trophy" class="lu"></i></span>
-      <div class="min-w-0 flex-1">
-        <small>{% trans "Kelgusi musobaqa" %}</small>
-        <a class="ca-link ca7-mis-t" href="{% url 'contests:detail' c.pk %}">{{ c.title }}</a>
-        <small>{{ c.start|ztime:"d.m, H:i" }} · {{ c.duration_label }} · {% if c.is_rated %}{% trans "reytingli" %}{% else %}{% trans "reytingga ta’sir qilmaydi" %}{% endif %}</small>
-        <div class="ca7-mis-f">
-          {% if c.pk in registered %}<span class="ca-tag"><i data-lucide="check" class="lu" aria-hidden="true"></i>{% trans "Ro‘yxatdasiz" %}</span>
-          {% elif not user.is_staff %}<form method="post" action="{% url 'contests:register' c.pk %}">{% csrf_token %}<button class="ca-btn ca-btn-soft">{% trans "Ro‘yxatdan o‘tish" %}</button></form>{% endif %}
-          <b class="tabular" data-countdown="{{ c.start|date:'c' }}" data-label="" data-suffix="1"></b>
-        </div>
+
+  {% if daily %}
+  <section class="ca-hub-card ca-hub-hero" aria-labelledby="today-title">
+    <div class="min-w-0">
+      <p class="ca-hub-kicker"><i data-lucide="calendar-check" class="lu" aria-hidden="true"></i>{% trans "Bugungi masala" %}</p>
+      <h2 id="today-title" class="ca-hub-title"><a href="{% url 'problems:detail' daily.problem.slug %}">{{ daily.problem.title }}</a></h2>
+      <p class="ca-hub-meta"><span class="ca-diff ca-diff-{{ daily.problem.difficulty }}">{{ daily.problem.get_difficulty_display }}</span>
+        <span>{% if ds.solvers %}{% blocktrans with ds_solvers=ds.solvers %}bugun <b class="tabular text-ink">{{ ds_solvers }}</b> kishi yechdi{% endblocktrans %}{% else %}{% trans "bugun hali hech kim yechmadi" %}{% endif %}</span></p>
+      <div class="ca-hub-cta">
+        {% if daily_done %}<span class="ca-hub-done"><i data-lucide="check" class="lu" aria-hidden="true"></i>{% trans "Yechildi" %}</span><span class="text-sm text-mute">{% trans "Ertaga yangi masala chiqadi." %}</span>
+        {% else %}<a class="ca-btn ca-btn-gold ca-hub-go" href="{% url 'problems:detail' daily.problem.slug %}"><i data-lucide="play" class="lu" aria-hidden="true"></i>{% trans "Yechish" %}</a>{% endif %}
       </div>
     </div>
-    {% endif %}
-    {% if learning %}
-    <div>
-      <span class="ca7-mis-ico is-learn" aria-hidden="true"><i data-lucide="book-open" class="lu"></i></span>
-      <div class="min-w-0 flex-1">
-        <small>{% trans "O‘rganishda davom etish" %}</small>
-        <a class="ca-link ca7-mis-t" href="{% url 'learn:course' learning.plan.slug %}">{{ learning.plan.title }}</a>
-        <span class="ca7-pg" role="progressbar" aria-valuenow="{{ learning.progress.pct }}" aria-valuemin="0" aria-valuemax="100" aria-label="{% trans 'Kurs bajarilishi' %}"><i style="width: {{ learning.progress.pct }}%"></i></span>
-        <small>{% blocktrans with learning_progress_done=learning.progress.done learning_progress_total=learning.progress.total %}{{ learning_progress_done }} / {{ learning_progress_total }} masala{% endblocktrans %}{% if learning.next %} {% blocktrans with learning_next_title=learning.next.title %}· keyingisi: {{ learning_next_title }}{% endblocktrans %}{% endif %}</small>
-        <div class="ca7-mis-f">
-          <a class="ca-btn ca-btn-soft" href="{% if learning.next %}{% url 'problems:detail' learning.next.slug %}?plan={{ learning.plan.slug|urlencode }}{% else %}{% url 'learn:course' learning.plan.slug %}{% endif %}">{% trans "Davom etish" %}</a>
-        </div>
-      </div>
+    <div class="ca-hub-streak" title="{% trans 'Olov' %}{% if best_streak %}{% trans ', eng uzuni' %} {{ best_streak }} {% trans 'kun' %}{% endif %}">
+      <p class="ca-hub-flame"><i data-lucide="flame" class="lu" aria-hidden="true"></i><b class="tabular">{{ streak }}</b></p>
+      <p class="ca-hub-flame-l">{% trans "kun ketma-ket" %}</p>
+      {% include "home/_week.html" %}
+      {% if ds.next_badge %}<p class="ca-hub-flame-n"><i data-lucide="{{ ds.next_badge.icon }}" class="lu" aria-hidden="true"></i> {% blocktrans with ds_next_badge_name=ds.next_badge.name ds_next_badge_left=ds.next_badge.left %}«{{ ds_next_badge_name }}» nishoniga yana <b>{{ ds_next_badge_left }}</b> kun ketma-ket yechish kerak.{% endblocktrans %}</p>{% endif %}
+      {% if not daily_done %}<p class="ca-hub-flame-n">{% blocktrans with next=streak|add:1 %}Bugun yeching: Olov {{ next }} kunga yetadi.{% endblocktrans %}</p>{% endif %}
     </div>
+    {% if quests.rows %}
+    <ul class="ca-hub-quests" aria-label="{% trans 'Kunlik maqsadlar' %}">
+      {% for q in quests.rows %}<li class="{% if q.done %}is-done{% endif %}">{% if q.done %}<span><i data-lucide="check" class="lu" aria-hidden="true"></i>{{ q.title }}</span>{% else %}<a href="{{ q.href }}"><i data-lucide="{{ q.icon }}" class="lu" aria-hidden="true"></i>{{ q.title }}</a>{% endif %}</li>{% endfor %}
+    </ul>
     {% endif %}
   </section>
-  {% endif %}{% endwith %}
+  {% endif %}
+
+  <div class="ca-hub-tiles">
+    {% with c=upcoming.0 %}
+    <section class="ca-hub-card ca-hub-tile" aria-labelledby="tile-contest">
+      <p class="ca-hub-kicker"><i data-lucide="trophy" class="lu" aria-hidden="true"></i><span id="tile-contest">{% trans "Kelgusi musobaqa" %}</span></p>
+      {% if c %}
+      <a class="ca-hub-tname" href="{% url 'contests:detail' c.pk %}">{{ c.title }}</a>
+      <p class="ca-hub-big tabular" data-countdown="{{ c.start|date:'c' }}" data-label="" data-suffix="1"></p>
+      <p class="ca-hub-sub tabular">{{ c.start|ztime:"d.m, H:i" }} · {{ c.duration_label }} · {% if c.is_rated %}{% trans "reytingli" %}{% else %}{% trans "reytingga ta’sir qilmaydi" %}{% endif %}</p>
+      <div class="ca-hub-foot">
+        {% if c.pk in registered %}<span class="ca-tag"><i data-lucide="check" class="lu" aria-hidden="true"></i>{% trans "Ro‘yxatdasiz" %}</span>
+        {% elif not user.is_staff %}<form method="post" action="{% url 'contests:register' c.pk %}">{% csrf_token %}<button class="ca-btn ca-btn-primary">{% trans "Ro‘yxatdan o‘tish" %}</button></form>{% endif %}
+      </div>
+      {% else %}<p class="ca-hub-sub">{% trans "Yaqin orada musobaqa yo‘q." %}</p>
+      <div class="ca-hub-foot"><a class="ca-btn ca-btn-soft" href="{% url 'contests:list' %}">{% trans "Musobaqalar" %}</a></div>{% endif %}
+    </section>
+    {% endwith %}
+
+    <section class="ca-hub-card ca-hub-tile" aria-labelledby="tile-learn">
+      <p class="ca-hub-kicker"><i data-lucide="book-open" class="lu" aria-hidden="true"></i><span id="tile-learn">{% trans "O‘rganishda davom etish" %}</span></p>
+      {% if learning %}
+      <a class="ca-hub-tname" href="{% url 'learn:course' learning.plan.slug %}">{{ learning.plan.title }}</a>
+      <p class="ca-hub-big tabular">{{ learning.progress.pct }}%</p>
+      <span class="ca7-pg" role="progressbar" aria-valuenow="{{ learning.progress.pct }}" aria-valuemin="0" aria-valuemax="100" aria-label="{% trans 'Kurs bajarilishi' %}"><i style="width: {{ learning.progress.pct }}%"></i></span>
+      <small class="ca-hub-sub">{% blocktrans with learning_progress_done=learning.progress.done learning_progress_total=learning.progress.total %}{{ learning_progress_done }} / {{ learning_progress_total }} masala{% endblocktrans %}{% if learning.next %} {% blocktrans with learning_next_title=learning.next.title %}· keyingisi: {{ learning_next_title }}{% endblocktrans %}{% endif %}</small>
+      <div class="ca-hub-foot">
+        <a class="ca-btn ca-btn-soft" href="{% if learning.next %}{% url 'problems:detail' learning.next.slug %}?plan={{ learning.plan.slug|urlencode }}{% else %}{% url 'learn:course' learning.plan.slug %}{% endif %}">{% trans "Davom etish" %}</a>
+      </div>
+      {% else %}<p class="ca-hub-sub">{% trans "Hali kurs boshlanmagan." %}</p>
+      <div class="ca-hub-foot"><a class="ca-btn ca-btn-soft" href="{% url 'learn:hub' %}">{% trans "Darslarni ko‘rish" %}</a></div>{% endif %}
+    </section>
+
+    {% if not user.is_superuser %}
+    <section class="ca-hub-card ca-hub-tile" aria-labelledby="duel-title">
+      <p class="ca-hub-kicker"><i data-lucide="swords" class="lu" aria-hidden="true"></i><span id="duel-title">{% trans "Duel" %}</span></p>
+      <p class="ca-hub-big tabular">{{ ranked_left }}<small> / {{ ranked_allow }}</small></p>
+      <span class="ca7-pg" aria-hidden="true"><i style="width: {% widthratio ranked_left ranked_allow 100 %}%"></i></span>
+      <p class="ca-hub-sub">{% blocktrans with left=ranked_left allow=ranked_allow n=ranked_per_solve %}Bugun reytingli duellar: <b>{{ left }}</b> / {{ allow }}. Yechilgan har bir masala {{ n }} tasini qo‘shadi.{% endblocktrans %}</p>
+      {% if active_duels or challenges %}
+      <ul class="ca-facts ca-hub-duels">
+        {% for d in active_duels %}
+        <li><a class="ca-link min-w-0 truncate" href="{% url 'classroom:duel' d.pk %}">{% if d.opponent %}{% blocktrans with d_challenger_username=d.challenger.username d_opponent_username=d.opponent.username %}{{ d_challenger_username }} vs {{ d_opponent_username }}{% endblocktrans %}{% else %}{% trans "Ochiq duel, raqib kutilmoqda" %}{% endif %}</a>
+          {% if d.my_end %}<a class="ca-btn ca-btn-gold ca-btn-xs shrink-0" href="{% url 'classroom:duel_play' d.pk %}">{% trans "Davom etish" %}</a>{% endif %}</li>
+        {% endfor %}
+        {% for d in challenges %}
+        <li class="flex-wrap">
+          <span>{% blocktrans with d_challenger_username=d.challenger.username d_get_language_display=d.get_language_display %}<b>{{ d_challenger_username }}</b> <span class="text-mute">sizni chaqirdi, {{ d_get_language_display }}</span>{% endblocktrans %}</span>
+          <span class="flex gap-1.5">
+            <form method="post" action="{% url 'classroom:duel_answer' d.pk %}">{% csrf_token %}<input type="hidden" name="accept" value="1"><button class="ca-btn ca-btn-primary ca-btn-xs">{% trans "Qabul qilish" %}</button></form>
+            <form method="post" action="{% url 'classroom:duel_answer' d.pk %}">{% csrf_token %}<button class="ca-btn ca-btn-ghost ca-btn-xs">{% trans "Rad etish" %}</button></form>
+          </span>
+        </li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+      <div class="ca-hub-foot"><a class="ca-btn ca-btn-soft" href="{% url 'classroom:duels' %}"><i data-lucide="swords" class="lu" aria-hidden="true"></i>{% trans "Raqib topish" %}</a></div>
+    </section>
+    {% endif %}
+  </div>
+
+  {% if next_picks %}
+  <section aria-labelledby="next-title">
+    <div class="ca7-sec-h"><h2 id="next-title">{% trans "Siz uchun" %}</h2><a class="ca-link" href="{% url 'problems:list' %}{% if picks_reason %}?tag={{ picks_reason|urlencode }}{% endif %}">{% trans "Masalalar" %}</a></div>
+    <p class="ca7-sec-sub">{% if picks_reason %}{% blocktrans with picks_reason=picks_reason|tag_uz %}Eng kam yechgan mavzuingiz <b class="text-ink">{{ picks_reason }}</b>. Shu masalalar aynan shu mavzuni mashq qildiradi.{% endblocktrans %}{% else %}{% trans "Siz ko‘p yechadigan qiyinlikdagi, hali yechilmagan masalalar." %}{% endif %}</p>
+    <ul class="ca-hub-picks">
+      {% for p, reason in next_picks %}
+      <li class="ca-hub-card"><a class="ca-hub-tname" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a>
+        <p class="ca-hub-sub"><span class="ca-diff ca-diff-{{ p.difficulty }}">{{ p.get_difficulty_display }}</span> {% for t in p.tags.all|slice:":2" %}{{ t.name|tag_uz }}{% if not forloop.last %}, {% endif %}{% endfor %}</p></li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
 
   <section aria-labelledby="recent-title">
     <div class="ca7-sec-h"><h2 id="recent-title">{% trans "So‘nggi urinishlar" %}</h2>{% if recent %}<a class="ca-link" href="{% url 'submissions:mine' %}?mine=1">{% trans "Barcha urinishlar" %}</a>{% endif %}</div>
@@ -112,62 +177,20 @@
     <p class="ca7-empty"><b>{% trans "Hali urinish yo‘q" %}</b><a class="ca-link" href="{% url 'problems:list' %}">{% trans "Birinchi masalani tanlang</a>: kodingiz darhol tekshiriladi." %}</p>
     {% endif %}
   </section>
-
-  {% if next_picks %}
-  <section aria-labelledby="next-title">
-    <div class="ca7-sec-h"><h2 id="next-title">{% trans "Siz uchun" %}</h2><a class="ca-link" href="{% url 'problems:list' %}{% if picks_reason %}?tag={{ picks_reason|urlencode }}{% endif %}">{% trans "Masalalar" %}</a></div>
-    <p class="ca7-sec-sub">{% if picks_reason %}{% blocktrans with picks_reason=picks_reason|tag_uz %}Eng kam yechgan mavzuingiz <b class="text-ink">{{ picks_reason }}</b>. Shu masalalar aynan shu mavzuni mashq qildiradi.{% endblocktrans %}{% else %}{% trans "Siz ko‘p yechadigan qiyinlikdagi, hali yechilmagan masalalar." %}{% endif %}</p>
-    <table class="ca-table ca-table-flat">
-      <thead><tr><th scope="col" class="w-16">#</th><th scope="col">{% trans "Masala" %}</th><th scope="col" class="hidden sm:table-cell">{% trans "Mavzu" %}</th><th scope="col" class="text-right">{% trans "Qiyinlik" %}</th></tr></thead>
-      <tbody>
-      {% for p, reason in next_picks %}
-      <tr>
-        <td class="ca-pid">{{ p.pk|stringformat:"04d" }}</td>
-        <td><a class="ca-link" href="{% url 'problems:detail' p.slug %}">{{ p.title }}</a></td>
-        <td class="hidden text-mute sm:table-cell">{% for t in p.tags.all|slice:":3" %}{{ t.name|tag_uz }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
-        <td class="text-right"><span class="ca-diff ca-diff-{{ p.difficulty }}">{{ p.get_difficulty_display }}</span></td>
-      </tr>
-      {% endfor %}
-      </tbody>
-    </table>
-  </section>
-  {% endif %}
 </div>
 
 <aside class="ca7-aside" aria-label="{% trans 'Qo‘shimcha' %}">
-  {% if active_duels or challenges %}
-  <section class="ca-box" aria-labelledby="duel-title">
-    <div class="ca-box-cap ca-hd"><h2 id="duel-title">{% trans "Duel" %}</h2><a class="ca-box-tools ca-link" href="{% url 'classroom:duels' %}">{% trans "Duellar" %}</a></div>
-      <ul class="ca-facts">
-        {% for d in active_duels %}
-        <li><a class="ca-link min-w-0 truncate" href="{% url 'classroom:duel' d.pk %}">{% if d.opponent %}{% blocktrans with d_challenger_username=d.challenger.username d_opponent_username=d.opponent.username %}{{ d_challenger_username }} vs {{ d_opponent_username }}{% endblocktrans %}{% else %}{% trans "Ochiq duel, raqib kutilmoqda" %}{% endif %}</a>
-          {% if d.my_end %}<a class="ca-btn ca-btn-gold ca-btn-xs shrink-0" href="{% url 'classroom:duel_play' d.pk %}">{% trans "Davom etish" %}</a>{% endif %}</li>
-        {% endfor %}
-        {% for d in challenges %}
-        <li class="flex-wrap">
-          <span>{% blocktrans with d_challenger_username=d.challenger.username d_get_language_display=d.get_language_display %}<b>{{ d_challenger_username }}</b> <span class="text-mute">sizni chaqirdi, {{ d_get_language_display }}</span>{% endblocktrans %}</span>
-          <span class="flex gap-1.5">
-            <form method="post" action="{% url 'classroom:duel_answer' d.pk %}">{% csrf_token %}<input type="hidden" name="accept" value="1"><button class="ca-btn ca-btn-primary ca-btn-xs">{% trans "Qabul qilish" %}</button></form>
-            <form method="post" action="{% url 'classroom:duel_answer' d.pk %}">{% csrf_token %}<button class="ca-btn ca-btn-ghost ca-btn-xs">{% trans "Rad etish" %}</button></form>
-          </span>
-        </li>
-        {% endfor %}
-      </ul>
-  </section>
-  {% elif not user.is_superuser %}
-  <section class="ca-box" aria-labelledby="duel-title">
-    <div class="ca-box-cap ca-hd"><h2 id="duel-title">{% trans "Duel" %}</h2><a class="ca-box-tools ca-link" href="{% url 'classroom:duels' %}">{% trans "Duellar" %}</a></div>
-    <div class="ca7-pad"><p>{% trans "7 ta savol, har biriga 20 soniya: raqib bilan 1 ga 1. Natija duel reytingiga ta’sir qiladi." %}</p>
-      <a class="ca-btn ca-btn-soft mt-3" href="{% url 'classroom:duels' %}"><i data-lucide="swords" class="lu" aria-hidden="true"></i>{% trans "Raqib topish" %}</a></div>
+  {% if spark %}
+  <section class="ca-box" aria-labelledby="spark-title">
+    <div class="ca-box-cap ca-hd"><h2 id="spark-title">{% trans "Reyting" %}</h2><a class="ca-box-tools ca-link" href="{% url 'rating' %}">{% trans "Reyting" %}</a></div>
+    <div class="ca7-pad">
+      <p class="ca-hub-rt"><b class="tabular ca-tier-ink" style="--tier: {{ user.rating|tier_color }}">{{ user.rating }}</b>{% if rating_card.delta is not None %}<span class="tabular {% if rating_card.delta >= 0 %}text-ok{% else %}text-bad{% endif %}">{{ rating_card.delta|signed }}</span>{% endif %}</p>
+      <svg class="ca-spark" viewBox="0 0 {{ spark.w }} {{ spark.h }}" role="img" aria-label="{% trans 'Reyting' %}"><polygon points="{{ spark.area }}" class="ca-spark-area"/><polyline points="{{ spark.line }}" class="ca-spark-line"/><circle cx="{{ spark.x }}" cy="{{ spark.y }}" r="3.5" class="ca-spark-dot"/></svg>
+      {% if rating_card.rank %}<p class="ca-hub-sub">{% trans "O‘rin" %}: <b class="tabular text-ink">{{ rating_card.rank }}</b> / {{ rating_card.total }}</p>{% endif %}
+    </div>
   </section>
   {% endif %}
-  {% with c=upcoming.0 %}{% if c %}
-  <section class="ca-box" aria-labelledby="next-contest-title">
-    <div class="ca-box-cap ca-hd"><h2 id="next-contest-title">{% trans "Keyingi musobaqa" %}</h2><a class="ca-box-tools ca-link" href="{% url 'contests:list' %}">{% trans "Hammasi" %}</a></div>
-    <div class="ca7-pad"><a class="ca-link font-medium" href="{% url 'contests:detail' c.pk %}">{{ c.title }}</a>
-      <p class="mt-1 text-sm text-mute">{{ c.start|ztime:"d.m, H:i" }} · {{ c.duration_label }}</p></div>
-  </section>
-  {% endif %}{% endwith %}
+  {% if ring %}{% url 'problems:list' as problems_url %}{% include "problems/_solved_card.html" with title=_("Yechilgan masalalar") more_url=problems_url %}{% endif %}
   {% if not user.is_superuser %}
   <section class="ca-box" aria-labelledby="invite-card-title">
     <div class="ca-box-cap ca-hd"><h2 id="invite-card-title">{% trans "Do‘stlarni taklif qiling" %}</h2></div>

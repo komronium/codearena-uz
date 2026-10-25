@@ -716,7 +716,7 @@ def test_problem_list_shows_the_daily_problem(client, catalog):
     DailySolve.objects.create(user=User.objects.create_user("vali", password="x"), daily=daily)
     body = client.get(reverse("home")).content.decode()  # the day's card with its calendar lives on the panel
     assert "bugun <b class=\"tabular text-ink\">1</b> kishi yechdi" in body and ">vali</a>" in body
-    assert "«Olov I» nishoniga yana" in body
+    assert "nishoniga yana" in body  # the next streak badge, whatever its level is called
 
 
 @pytest.mark.django_db
