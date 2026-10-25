@@ -82,12 +82,13 @@ and leaving from here counts like leaving the problem.{% endcomment %}
 <link rel="stylesheet" href="{% static 'vendor/highlight-github-dark.min.css' %}">
 <script src="{% static 'vendor/highlight.min.js' %}"></script>
 <script>
-  // language.code "node" -> hljs "javascript"; others match hljs names already
+  // language.code "node" -> hljs "javascript", "pypy" -> "python"; others match hljs names already
   const code = document.querySelector(".ca7-code-src code");
   document.querySelector("[data-copy-code]")?.addEventListener("click", async (e) => {
     try { await navigator.clipboard.writeText(code.textContent); e.currentTarget.classList.add("text-ok"); } catch {}
   });
   if (code.classList.contains("language-node")) code.className = "language-javascript";
+  if (code.classList.contains("language-pypy")) code.className = "language-python";
   hljs.highlightElement(code);
 </script>
 {% endblock %}

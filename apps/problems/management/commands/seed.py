@@ -10,6 +10,8 @@ class Command(BaseCommand):
     def handle(self, *args, **opts):
         Language.objects.update_or_create(code="python", defaults=dict(
             name="Python 3", docker_image="codearena-judge-python", run_cmd="python3 main.py", tl_multiplier=3.0))
+        Language.objects.update_or_create(code="pypy", defaults=dict(
+            name="PyPy 3", docker_image="codearena-judge-pypy", run_cmd="pypy3 main.py", tl_multiplier=2.0))
         Language.objects.update_or_create(code="cpp", defaults=dict(
             name="C++ (g++)", docker_image="codearena-judge-cpp",
             compile_cmd="g++ -O2 -o main main.cpp", run_cmd="./main", tl_multiplier=1.0))

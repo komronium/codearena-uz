@@ -9,7 +9,7 @@ import threading
 import time
 import uuid
 
-SOURCE_FILENAME = {"python": "main.py", "cpp": "main.cpp", "c": "main.c", "java": "Main.java", "node": "main.js",
+SOURCE_FILENAME = {"python": "main.py", "pypy": "main.py", "cpp": "main.cpp", "c": "main.c", "java": "Main.java", "node": "main.js",
                    "rust": "main.rs"}
 
 # Bytes of stdout one run may write over all of its tests together; judge.runner

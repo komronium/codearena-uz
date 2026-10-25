@@ -1,7 +1,7 @@
 // Builds CodeArena's static assets from the versions pinned in package.json. The outputs
 // are committed, so the Django image never needs Node:
 //   static/css/app.css         Tailwind (scans templates + apps) + src/app.css + @font-face
-//   static/fonts/*.woff2       Lilex, JetBrains Mono, Fira Code (SIL Open Font License), plus frontend/fonts/*.woff2 (Lato 3, Anthropic Mono); the
+//   static/fonts/*.woff2       Lilex, JetBrains Mono, Fira Code, Iosevka (SIL Open Font License), plus frontend/fonts/*.woff2 (Lato 3, Anthropic Mono); the
 //                              project's own .otf fonts there are not built and are left alone
 //   static/vendor/*            htmx, Lucide icons, highlight.js
 //   static/vendor/esm/*.js     one ES module per CodeMirror package; every bare import stays
@@ -52,6 +52,7 @@ const FONTS = [
   ["Lilex", ["@fontsource-variable/lilex/wght.css"]],
   ["JetBrains Mono", ["400", "400-italic", "500", "700"].map((w) => `@fontsource/jetbrains-mono/${w}.css`)],
   ["Fira Code", ["400", "500"].map((w) => `@fontsource/fira-code/${w}.css`)],
+  ["Iosevka", ["400", "500"].map((w) => `@fontsource/iosevka/${w}.css`)],
 ];
 const SUBSETS = ["latin", "latin-ext", "cyrillic", "cyrillic-ext"];
 
@@ -76,7 +77,7 @@ const VENDOR_FONTS = {
 const LICENSED = [
   "htmx.org", "lucide", "@highlightjs/cdn-assets", "katex", "easymde", "@fortawesome/fontawesome-free",
   "tailwindcss", "@fontsource-variable/lilex",
-  "@fontsource/jetbrains-mono", "@fontsource/fira-code", "@babel/runtime",
+  "@fontsource/jetbrains-mono", "@fontsource/fira-code", "@fontsource/iosevka", "@babel/runtime",
   ...ESM.filter((s) => !s.startsWith("@babel/")),
 ];
 

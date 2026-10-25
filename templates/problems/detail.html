@@ -286,7 +286,7 @@ the console (samples, your own input, the run's result) and the one gold "Yubori
           <div class="ca-prefs">
             <label class="ca-pref"><span>{% trans "Shrift" %}</span>
               <select data-pref="font" class="ca-pref-sel">
-                <option value="anthropic">{% trans "Anthropic Mono" %}</option><option value="jetbrains">{% trans "JetBrains Mono" %}</option><option value="lilex">{% trans "Lilex" %}</option><option value="fira">{% trans "Fira Code" %}</option><option value="system">{% trans "Tizim" %}</option>
+                <option value="anthropic">{% trans "Anthropic Mono" %}</option><option value="jetbrains">{% trans "JetBrains Mono" %}</option><option value="lilex">{% trans "Lilex" %}</option><option value="fira">{% trans "Fira Code" %}</option><option value="iosevka">{% trans "Iosevka" %}</option><option value="system">{% trans "Tizim" %}</option>
               </select></label>
             <label class="ca-pref"><span>{% trans "Mavzu" %}</span>
               <select data-pref="theme" class="ca-pref-sel">
@@ -473,6 +473,7 @@ resolves their bare imports so @codemirror/state loads once — two copies break
     jetbrains: '"JetBrains Mono", ui-monospace, monospace',
     lilex: '"Lilex", ui-monospace, monospace',
     fira: '"Fira Code", ui-monospace, monospace',
+    iosevka: '"Iosevka", ui-monospace, monospace',
     system: "ui-monospace, Menlo, Consolas, monospace",
   };
   let prefs = { theme: "auto", font: "anthropic", size: 14, tab: "4", wrap: false, vim: false, starter: true };
@@ -735,16 +736,18 @@ resolves their bare imports so @codemirror/state loads once — two copies break
   view.contentDOM.setAttribute("aria-label", "{% jt "Kod muharriri" %}");
   window.caCode = () => ({ source: view.state.doc.toString(), language: langSel.value });  // integrity snapshots
   source.hidden = true;  // CodeMirror loaded — plain textarea was only the no-JS fallback
+  const editorLang = () => (langSel.value === "pypy" ? "python" : langSel.value);  // PyPy runs Python: same grammar, starter and completions
   const setLang = async () => {
-    const load = LANG_LOADERS[langSel.value];
+    const lang = editorLang();
+    const load = LANG_LOADERS[lang];
     const ext = load ? await load() : [];
-    const snippets = EditorState.languageData.of(() => [{ autocomplete: completeFromList(SNIPPETS[langSel.value] || []) },
-                                                        ...(langSel.value === "sql" ? [] : [{ autocomplete: apiSource(langSel.value) }])]);
+    const snippets = EditorState.languageData.of(() => [{ autocomplete: completeFromList(SNIPPETS[lang] || []) },
+                                                        ...(lang === "sql" ? [] : [{ autocomplete: apiSource(lang) }])]);
     view.dispatch({ effects: langC.reconfigure([ext, snippets]) });
     try { localStorage.setItem(langKey, langSel.value); } catch {}
     const doc = view.state.doc.toString();
     if (prefs.starter && isStarter(doc)) {
-      const text = STARTERS[langSel.value] || "";
+      const text = STARTERS[lang] || "";
       if (text !== doc) view.dispatch({ changes: { from: 0, to: doc.length, insert: text } });
     }
   };

@@ -13,6 +13,7 @@ A_PLUS_B_SOURCE = {
             "Scanner s=new Scanner(System.in);long x=s.nextLong(),y=s.nextLong();System.out.println(x+y);}}\n",
     "node": "const l=require('fs').readFileSync(0,'utf8').trim().split(/\\s+/).map(Number);"
             "console.log(l[0]+l[1]);\n",
+    "pypy": "a, b = map(int, input().split())\nprint(a + b)\n",
 }
 
 
@@ -26,6 +27,7 @@ LANGS = {
     "cpp": Lang("cpp", "codearena-judge-cpp", "g++ -O2 -o main main.cpp", "./main", 1.0),
     "java": Lang("java", "codearena-judge-java", "javac Main.java", "java Main", 3.0),
     "node": Lang("node", "codearena-judge-node", "", "node main.js", 2.0),
+    "pypy": Lang("pypy", "codearena-judge-pypy", "", "pypy3 main.py", 2.0),
 }
 
 
@@ -41,7 +43,7 @@ def _src(lang_code: str, code: str) -> str:
     return d
 
 
-@pytest.mark.parametrize("lang_code", ["cpp", "java", "node"])
+@pytest.mark.parametrize("lang_code", ["cpp", "java", "node", "pypy"])
 def test_a_plus_b_ac(lang_code):
     lang = LANGS[lang_code]
     d = _src(lang_code, A_PLUS_B_SOURCE[lang_code])
@@ -57,10 +59,11 @@ FLOOD_SOURCE = {
     "java": "public class Main{public static void main(String[] a){String s=\"x\".repeat(65536);"
             "while(true) System.out.print(s);}}\n",
     "node": "const s='x'.repeat(65536); while(true) process.stdout.write(s);\n",
+    "pypy": "import sys\ns = 'x' * 65536\nwhile True:\n    sys.stdout.write(s)\n",
 }
 
 
-@pytest.mark.parametrize("lang_code", ["cpp", "java", "node"])
+@pytest.mark.parametrize("lang_code", ["cpp", "java", "node", "pypy"])
 def test_output_flood_is_ole(lang_code):
     # Only C++ dies of SIGXFSZ; Java and Node keep running with failed writes, so the
     # verdict has to come from the capped output size, not from how the program ended.

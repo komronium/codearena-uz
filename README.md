@@ -6,7 +6,7 @@ Competitive programming platform for students. Django + HTMX, Docker judge.
 
     python -m venv .venv && source .venv/bin/activate
     pip install -r requirements.txt
-    for l in python cpp c java node rust; do docker build -t codearena-judge-$l judge/images/$l; done
+    for l in python pypy cpp c java node rust; do docker build -t codearena-judge-$l judge/images/$l; done
     python manage.py migrate && python manage.py seed
     mkdir -p work
     # terminal 1
@@ -53,7 +53,7 @@ script or stylesheet.
 
     cp .env.example .env
     sudo mkdir -p /var/codearena/work && sudo chmod 777 /var/codearena/work
-    for l in python cpp c java node rust; do docker build -t codearena-judge-$l judge/images/$l; done
+    for l in python pypy cpp c java node rust; do docker build -t codearena-judge-$l judge/images/$l; done
     docker compose up --build
     docker compose exec web python manage.py migrate
     docker compose exec web python manage.py seed
@@ -70,7 +70,7 @@ inside compose: gunicorn + whitenoise (`web`), judge worker (`worker`),
     sudo install -m 0644 deploy/codearena.tmpfiles.conf /etc/tmpfiles.d/codearena.conf
     sudo systemd-tmpfiles --create /etc/tmpfiles.d/codearena.conf
     sudo mkdir -p /var/codearena/work && sudo chmod 777 /var/codearena/work
-    for l in python cpp c java node rust; do docker build -t codearena-judge-$l judge/images/$l; done
+    for l in python pypy cpp c java node rust; do docker build -t codearena-judge-$l judge/images/$l; done
     docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 
 Once, after the first deploy:
