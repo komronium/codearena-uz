@@ -941,8 +941,8 @@ resolves their bare imports so @codemirror/state loads once — two copies break
 {% include "integrity/_tracker.html" with problem_id=problem.pk %}
 <script>
   // Contest only: practice is for learning, so there the editor behaves like any editor.
-  // Here paste, drag-drop, cut/copy out of the editor and the context menu are blocked, and
-  // each attempt is reported to staff (integrity:event, needs Participation).
+  // Here paste from outside the editor and drag-drop are blocked, and each attempt is reported
+  // to staff (integrity:event, needs Participation); the editor's own copy, cut and paste work.
   (function () {
     const contestId = {{ contest.pk }};
     const editor = document.getElementById("editor");
@@ -964,22 +964,32 @@ resolves their bare imports so @codemirror/state loads once — two copies break
       });
     }
 
+    // Code you copied or cut in this editor may come back by paste (moving a block, undoing a cut);
+    // anything else on the clipboard is still refused and reported. Same rule as in practice.
+    const norm = (t) => String(t).replace(/\r\n/g, "\n");
+    let own = "", ownPasteAt = 0;
+    const keepOwn = (e) => { const t = e.clipboardData?.getData("text/plain") || String(window.getSelection() || ""); if (t) own = norm(t); };
+    editor.addEventListener("copy", keepOwn);  // after the editor has put its selection on the clipboard
+    editor.addEventListener("cut", keepOwn);
     editor.addEventListener("paste", (e) => {
+      const text = norm(e.clipboardData?.getData("text/plain") || "");
+      if (own && text === own) { ownPasteAt = Date.now(); return; }
       e.preventDefault(); e.stopPropagation();
       report("paste"); notify("{% jt "Musobaqada kod qo‘yish (paste) taqiqlangan — urinish qayd etildi." %}");
     }, true);
-    ["copy", "cut", "contextmenu"].forEach((evt) => editor.addEventListener(evt, (e) => e.preventDefault(), true));
+    const ownPaste = () => Date.now() - ownPasteAt < 1000;  // the size checks below must not count it
     // Drag-and-drop of selected text is just paste with extra steps: kill it page-wide.
     ["dragstart", "drop"].forEach((evt) => document.addEventListener(evt, (e) => {
       e.preventDefault(); e.stopPropagation();
       if (evt === "drop" && editor.contains(e.target)) { report("paste"); notify("{% jt "Matnni sudrab tashlash taqiqlangan — qayd etildi." %}"); }
     }, true));
-    window.addEventListener("ca-bulk-insert", () => { report("paste"); notify("{% jt "Katta hajmdagi matn kiritildi — qayd etildi." %}"); });
+    window.addEventListener("ca-bulk-insert", () => { if (ownPaste()) return; report("paste"); notify("{% jt "Katta hajmdagi matn kiritildi — qayd etildi." %}"); });
 
     // Sustained fast typing (many sub-threshold inserts in a row) can be the same paste,
     // done in chunks to dodge the single-insert size check above.
     let typedWindow = [], fastReportedAt = 0;
     window.addEventListener("ca-typed", (e) => {
+      if (ownPaste()) return;
       const now = Date.now();
       typedWindow.push([now, e.detail]);
       typedWindow = typedWindow.filter(([t]) => now - t < 3000);
@@ -990,14 +1000,18 @@ resolves their bare imports so @codemirror/state loads once — two copies break
       }
     });
 
-    // Statement: copying works, but the clipboard gets a traceable warning stamp and the event is logged.
+    // Statement: copying works (to translate it, to read it elsewhere), but the clipboard gets a traceable
+    // stamp and the event is logged. A short bit (a number, a name, a sample line) is left alone, and the
+    // visible notice comes once per page, not at every copy.
+    let copyNoticed = false;
     document.addEventListener("copy", (e) => {
       if (editor.contains(e.target)) return;
       const text = String(window.getSelection() || "");
-      if (!text.trim()) return;
+      if (text.trim().length < 60) return;
       e.clipboardData.setData("text/plain", text + "\n\n" + stamp);
       e.preventDefault();
-      report("copy"); notify("{% jt "Nusxa olindi. Matnga ogohlantiruvchi belgi qo‘shildi." %}");
+      report("copy");
+      if (!copyNoticed) { copyNoticed = true; notify("{% jt "Nusxa olindi. Matnga ogohlantiruvchi belgi qo‘shildi." %}"); }
     });
   })();
 </script>
